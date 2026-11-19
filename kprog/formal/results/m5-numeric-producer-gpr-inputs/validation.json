@@ -1,0 +1,166 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-gpr-inputs",
+  "proved": {
+    "world": "Arm64NumericProgram.ge, actual input symbol/fundef64 and matching source composite layout",
+    "initialization": "actual NumericMemory.initialMemory/program.initMem, frontier204",
+    "phases": {
+      "internal_prefix": 580,
+      "internal_RAW_setup": 9,
+      "GPR_provider_visits": 30,
+      "per_visit_internal_call_setup": 5,
+      "per_visit_internal_return_store_suffix": 9,
+      "generic_x30_zero_transitions": 10,
+      "x30_zero_composed_here": false
+    },
+    "start": "real initialized producer Callstate; declaration0 reached before its call via580+9, avoiding duplicate first call setup",
+    "final_stage": "actual registerDeclarationStage30, before the separate x30-zero branch",
+    "trace": "all30 actual provider traces in source order, flattened into real CC.Star; x0 retained despite later RAW overwrite",
+    "data": "all30 actual allocated word/tag bindings and derived full64 Vlong/scalar0 readbacks",
+    "caches": "both actual stack/return base words and validity bytes remain zero through source setup, framed providers and stores",
+    "ctx": "actual final temporary environment retains ctx after both per-return temp updates",
+    "memory": "FrameBelow204 from initial memory; actual allocation access/nextblock preserved by admitted provider ABI and source stores",
+    "provider": "ProviderAt actual world carries its Senv, trace, full supplied post-memory, local-read preservation/access/frontier/frame; native/runtime admission remains open",
+    "reuse": "existing declaration source metadata, store constructor and suffix induction, without copied C/ISA or source statement bodies",
+    "old_public_APIs": "register ready/returns/x30-zero, Provider and gpr_inputs_initialized retained as standalone projections",
+    "not_assumed": [
+      "post-memory equals pre-memory",
+      "provider traces empty",
+      "old and Numeric Senv equal",
+      "provider implementation/native ABI proved"
+    ],
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": [
+    {
+      "name": "focused1",
+      "exit": 0,
+      "log": "focused1.log",
+      "jobs": 172,
+      "note": "Generic declarations/zero branch/world-specific provider/sequence and old clients pass first attempt."
+    },
+    {
+      "name": "focused2",
+      "exit": 0,
+      "log": "focused2.log",
+      "jobs": 180,
+      "note": "Actual initialized30 composition, cold caches/context and global frame pass first attempt; new module6.6s."
+    }
+  ],
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 9,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.register_input_ready_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register_input_returns_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register30_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register_input_ready": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register_input_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register30_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerGprInputs.initialized_gpr_inputs": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 325,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_cpu": 18,
+    "publication_cpu": 16,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "source_changes_after_final_validation": false,
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean proof/refactor only; no C/runtime/tool changes",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_final_check_required": true
+  },
+  "remaining": [
+    "compose actual x30-zero10 and pointer-table186 prefix in Numeric world",
+    "4 flag and64 vector visits/world-specific providers",
+    "remaining producer/header/RAW/register Storage/caller transport and native/provider ABI admission",
+    "relative cache/materialization",
+    "native physical memory/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

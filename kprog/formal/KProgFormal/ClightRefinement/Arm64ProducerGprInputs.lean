@@ -12,29 +12,37 @@ def inputRegister (i : Fin 30) : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by dec
 /-- Framed outcomes of the actual kind-6 calls at visited memories. Each full
 returned word and supplied memory stays explicit; availability is an
 invocation-environment obligation, not an invented provider implementation. -/
-def Provider (m : CC.Mem) (values : Fin 31 → BitVec 64) : Prop :=
+def ProviderAt (world : CC.CGenv) (m : CC.Mem) (values : Fin 31 → BitVec 64) : Prop :=
   ∀ (i : Fin 30) (before : CC.Mem), before.access = (allocation m).2.access →
     ∃ trace supplied,
-      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
         [.Vint (6#32)] before trace (.Vlong (values (inputRegister i))) supplied ∧
       supplied.access = before.access ∧ supplied.nextblock = before.nextblock ∧
       FrameBelow m.nextblock before supplied ∧
       ∀ id ty block, (allocation m).1.get id = some (block, ty) →
         ∀ chunk ofs, CC.Mem.load chunk supplied block ofs = CC.Mem.load chunk before block ofs
 
+/-- Preserve the standalone environment parameterization. -/
+def Provider (m : CC.Mem) (values : Fin 31 → BitVec 64) : Prop :=
+  ProviderAt ge m values
+
 private theorem names_separate : ∀ selected (i j : Fin 30), i ≠ j →
     tableCellName selected (inputRegister i) ≠ (registerDeclaration (inputRegister j)).word ∧
     tableCellName selected (inputRegister i) ≠ (registerDeclaration (inputRegister j)).tag := by
   decide +kernel
 
-private theorem run_suffix (m : CC.Mem) (blocks : Bool → Fin 30 → CC.Block)
+private theorem run_suffix (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m : CC.Mem) (blocks : Bool → Fin 30 → CC.Block)
     (bindings : ∀ selected i, (allocation m).1.get (tableCellName selected (inputRegister i)) =
       some (blocks selected i, tableCellType selected))
-    (values : Fin 31 → BitVec 64) (provider : Provider m values) (count : Nat) :
+    (values : Fin 31 → BitVec 64) (provider : ProviderAt world m values) (count : Nat) :
     ∀ start : Fin 31, start.val + count = 30 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
     before.access = (allocation m).2.access →
     ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
-      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage start) k (allocation m).1 le before)
+      CC.Star (CC.Step2 world) (.State producer (registerDeclarationStage start) k (allocation m).1 le before)
         traces.flatten (.State producer (registerDeclarationStage 30) k (allocation m).1 finalLe after) ∧
       (∀ j : Fin 30, start.val ≤ j.val →
         CC.Mem.load .Mint64 after (blocks false j) 0 = some (.Vlong (values (inputRegister j))) ∧
@@ -67,7 +75,7 @@ private theorem run_suffix (m : CC.Mem) (blocks : Bool → Fin 30 → CC.Block)
       provider i before access
     obtain ⟨xb, tb, middle, wordBinding, tagBinding, headRun, headWord, headTag,
         headLocals, headFrame, headAccess, headNext⟩ :=
-      register_input_returns i m before supplied le k (values (inputRegister i)) trace call
+      register_input_returns_bound world layout binding i m before supplied le k (values (inputRegister i)) trace call
         (providerAccess.trans access)
     have wordBlock : xb = blocks false i :=
       congrArg Prod.fst (Option.some.inj (wordBinding.symm.trans (bindings false i)))
@@ -114,14 +122,18 @@ private theorem run_suffix (m : CC.Mem) (blocks : Bool → Fin 30 → CC.Block)
 /-- All30 real GPR visits, including x0, derive word/tag data from actual
 external outcomes. Both per-return temporary updates and30 ordered traces
 are retained, with earlier local and caller readbacks framed. -/
-theorem gpr_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
-    (values : Fin 31 → BitVec 64) (provider : Provider m values)
+theorem gpr_inputs_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (values : Fin 31 → BitVec 64) (provider : ProviderAt world m values)
     (access : before.access = (allocation m).2.access) :
     ∃ blocks : Bool → Fin 30 → CC.Block, ∃ after finalLe, ∃ traces : List CC.Trace,
       traces.length = 30 ∧
       (∀ selected i, (allocation m).1.get (tableCellName selected (inputRegister i)) =
         some (blocks selected i, tableCellType selected)) ∧
-      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage 0) k (allocation m).1 le before)
+      CC.Star (CC.Step2 world) (.State producer (registerDeclarationStage 0) k (allocation m).1 le before)
         traces.flatten (.State producer (registerDeclarationStage 30) k (allocation m).1 finalLe after) ∧
       (∀ i : Fin 30, CC.Mem.load .Mint64 after (blocks false i) 0 = some (.Vlong (values (inputRegister i))) ∧
         CC.Mem.load .Mint8unsigned after (blocks true i) 0 = some (.Vint 0)) ∧
@@ -144,9 +156,30 @@ theorem gpr_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
   have bindings : ∀ selected i, (allocation m).1.get (tableCellName selected (inputRegister i)) =
       some (blocks selected i, tableCellType selected) := fun selected i => Classical.choose_spec (storage selected i)
   obtain ⟨after, finalLe, traces, length, run, reads, _, locals, temps, frame, finalAccess, next⟩ :=
-    run_suffix m blocks bindings values provider 30 0 rfl before le k access
+    run_suffix world layout binding m blocks bindings values provider 30 0 rfl before le k access
   exact ⟨blocks, after, finalLe, traces, length, bindings, run, (fun i => reads i (Nat.zero_le _)),
     locals, temps, frame, finalAccess, next⟩
+
+theorem gpr_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (values : Fin 31 → BitVec 64) (provider : Provider m values)
+    (access : before.access = (allocation m).2.access) :
+    ∃ blocks : Bool → Fin 30 → CC.Block, ∃ after finalLe, ∃ traces : List CC.Trace,
+      traces.length = 30 ∧
+      (∀ selected i, (allocation m).1.get (tableCellName selected (inputRegister i)) =
+        some (blocks selected i, tableCellType selected)) ∧
+      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage 0) k (allocation m).1 le before)
+        traces.flatten (.State producer (registerDeclarationStage 30) k (allocation m).1 finalLe after) ∧
+      (∀ i : Fin 30, CC.Mem.load .Mint64 after (blocks false i) 0 = some (.Vlong (values (inputRegister i))) ∧
+        CC.Mem.load .Mint8unsigned after (blocks true i) 0 = some (.Vint 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        (∀ i : Fin 30, id ≠ (registerDeclaration (inputRegister i)).word ∧
+          id ≠ (registerDeclaration (inputRegister i)).tag) → ∀ chunk ofs,
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      (∀ id, (∀ i : Fin 30, id ≠ (registerDeclaration (inputRegister i)).inputTemp ∧
+          id ≠ (registerDeclaration (inputRegister i)).resultTemp) → finalLe.get id = le.get id) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  gpr_inputs_initialized_bound ge rfl producer_input_binding m before le k values provider access
 
 /-- All30 GPR visits compose with x30 zero, tables, four flags,64 vector
 visits and RAW setup. No initial GPR/tag/table/flag/vector contents are assumed;

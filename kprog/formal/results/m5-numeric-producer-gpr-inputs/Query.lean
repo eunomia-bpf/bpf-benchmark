@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerGprInputs
+open KProgFormal.ClightRefinement
+#check Arm64Producer.register_input_ready_bound
+#print axioms Arm64Producer.register_input_ready_bound
+#check Arm64Producer.register_input_returns_bound
+#print axioms Arm64Producer.register_input_returns_bound
+#check Arm64Producer.register30_initialized_bound
+#print axioms Arm64Producer.register30_initialized_bound
+#check Arm64Producer.register_input_ready
+#print axioms Arm64Producer.register_input_ready
+#check Arm64Producer.register_input_returns
+#print axioms Arm64Producer.register_input_returns
+#check Arm64Producer.register30_initialized
+#print axioms Arm64Producer.register30_initialized
+#check Arm64ProducerGprInputs.gpr_inputs_initialized_bound
+#print axioms Arm64ProducerGprInputs.gpr_inputs_initialized_bound
+#check Arm64ProducerGprInputs.gpr_inputs_initialized
+#print axioms Arm64ProducerGprInputs.gpr_inputs_initialized
+#check Arm64NumericProducerGprInputs.initialized_gpr_inputs
+#print axioms Arm64NumericProducerGprInputs.initialized_gpr_inputs

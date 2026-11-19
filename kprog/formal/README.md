@@ -110,6 +110,11 @@ resumes every admitted scalar outcome at that reached call memory, preserving
 its actual world, trace and supplied post-memory through both source stores.
 It derives x0/tag readbacks and retains the context temporary; globals frame
 from initialization only under the provider's own corresponding frame.
+The [Numeric GPR-input sequence](results/m5-numeric-producer-gpr-inputs/README.md)
+now executes all 30 actual visits from initialization, with ordered provider
+traces and derived word/tag cells. Both caches remain cold, `_ctx` survives,
+and the original 204-frontier global frame and allocation permissions remain.
+The separate x30-zero branch follows that reached state.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

@@ -13,12 +13,15 @@ def RegisterDeclaration.temps (d : RegisterDeclaration) (le : CC.TempEnv)
     (value : BitVec 64) : CC.TempEnv :=
   (le.set d.inputTemp (.Vlong value)).set d.resultTemp (.Vlong value)
 
-private theorem declaration_call_exec (d : RegisterDeclaration) (m memory : CC.Mem)
+private theorem declaration_call_exec (world : CC.CGenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (d : RegisterDeclaration) (m memory : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (different : CC.Integers.Int.eq d.index (30#32) = false) :
-    steps ge 5 (.State producer d.body k (allocation m).1 le memory) =
+    steps world 5 (.State producer d.body k (allocation m).1 le memory) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         (d.continuation m le k) memory) ∧
-    InternalPath ge 5 (.State producer d.body k (allocation m).1 le memory) := by
+    InternalPath world 5 (.State producer d.body k (allocation m).1 le memory) := by
   have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
     have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
     simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
@@ -27,8 +30,8 @@ private theorem declaration_call_exec (d : RegisterDeclaration) (m memory : CC.M
     simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_eq_false_iff_ne] using different
   simp +decide [steps, InternalPath, InternalState, RegisterDeclaration.body, RegisterDeclaration.continuation,
     CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof,
-    CC.typeconv, CC.removeAttributes, CC.tattr, unshadowed, producer_input_binding.1,
-    producer_input_binding.2, CC.Genv.findFunct, CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.eq,
+    CC.typeconv, CC.removeAttributes, CC.tattr, unshadowed, binding.1,
+    binding.2, CC.Genv.findFunct, CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.eq,
     CC.typeOfFundef, Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
     CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
     CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
@@ -38,9 +41,12 @@ private theorem declaration_call_exec (d : RegisterDeclaration) (m memory : CC.M
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.tuint, CC.tint, CC.tulong, CC.E0, CC.Eapp]
 
 /-- Every actual x0--x29 initializer reaches its real kind-6 call. -/
-theorem register_input_ready (i : Fin 30) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+theorem register_input_ready_bound (world : CC.CGenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 30) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
     let j : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by decide)⟩
-    InternalRun ge 5 (.State producer (registerDeclarationStage j) k (allocation m).1 le memory)
+    InternalRun world 5 (.State producer (registerDeclarationStage j) k (allocation m).1 le memory)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         ((registerDeclaration j).continuation m le k) memory) := by
   dsimp only
@@ -51,7 +57,7 @@ theorem register_input_ready (i : Fin 30) (m memory : CC.Mem) (le : CC.TempEnv) 
     change (i.val == 30) = false
     exact beq_eq_false_iff_ne.mpr (Nat.ne_of_lt i.isLt)
   rw [source.1]
-  have run := declaration_call_exec (registerDeclaration j) m memory le k different
+  have run := declaration_call_exec world binding (registerDeclaration j) m memory le k different
   exact internalRun_of_steps run.2 run.1
 
 private structure DeclarationStores (d : RegisterDeclaration) (m supplied : CC.Mem) (value : BitVec 64) where
@@ -100,11 +106,15 @@ private theorem declaration_stores (i : Fin 31) (m supplied : CC.Mem) (value : B
     exact (CC.Mem.load_store_other storeTag chunk block ofs (.inl (locals _ _ _ _ bound tag notTag))).trans
       (CC.Mem.load_store_other storeWord chunk block ofs (.inl (locals _ _ _ _ bound cell notWord)))
 
-private theorem declaration_return_exec (d : RegisterDeclaration) (m supplied : CC.Mem)
+private theorem declaration_return_exec (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m supplied : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (writes : DeclarationStores d m supplied value) :
-    steps ge 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) =
+    steps world 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) =
       some (CC.E0, .State producer d.rest k (allocation m).1 (d.temps le value) writes.after) ∧
-    InternalPath ge 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) := by
+    InternalPath world 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) := by
+  rcases world with ⟨functions, composites⟩
+  change composites = ge.genv_cenv at layout
+  subst composites
   simp [steps, InternalPath, InternalState, RegisterDeclaration.continuation, RegisterDeclaration.temps,
     RegisterDeclaration.setValue, RegisterDeclaration.storeValue, RegisterDeclaration.storeTag,
     CC.doStep, CC.setOpttemp, CC.PTree.gss, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
@@ -117,9 +127,13 @@ private theorem declaration_return_exec (d : RegisterDeclaration) (m supplied : 
 
 /-- An actual initializer follows each stated provider outcome through the
 real writeback. Preservation is relative to provider post-memory. -/
-theorem register_input_returns (i : Fin 30) (m before supplied : CC.Mem)
+theorem register_input_returns_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 30) (m before supplied : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
-    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
       [.Vint (6#32)] before trace (.Vlong value) supplied)
     (access : supplied.access = (allocation m).2.access) :
     let j : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by decide)⟩
@@ -127,7 +141,7 @@ theorem register_input_returns (i : Fin 30) (m before supplied : CC.Mem)
     ∃ xb tb after,
       (allocation m).1.get d.word = some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
       (allocation m).1.get d.tag = some (tb, CC.tuchar) ∧
-      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage j) k (allocation m).1 le before)
+      CC.Star (CC.Step2 world) (.State producer (registerDeclarationStage j) k (allocation m).1 le before)
         trace (.State producer d.rest k (allocation m).1 (d.temps le value) after) ∧
       CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong value) ∧
       CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
@@ -139,8 +153,8 @@ theorem register_input_returns (i : Fin 30) (m before supplied : CC.Mem)
   let j : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by decide)⟩
   let d := registerDeclaration j
   obtain ⟨writes⟩ := declaration_stores j m supplied value access
-  have suffix := declaration_return_exec d m supplied le k value writes
-  have call : CC.Star (CC.Step2 ge)
+  have suffix := declaration_return_exec world layout d m supplied le k value writes
+  have call : CC.Star (CC.Step2 world)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (d.continuation m le k) before)
       trace (.Returnstate (.Vlong value) (d.continuation m le k) supplied) :=
     .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
@@ -148,16 +162,20 @@ theorem register_input_returns (i : Fin 30) (m before supplied : CC.Mem)
   refine ⟨writes.wordBlock, writes.tagBlock, writes.after, writes.wordBinding, writes.tagBinding,
     ?_, writes.wordRead, writes.tagRead, writes.otherLocals, writes.frame, writes.access, writes.next⟩
   simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
-    star_trans (register_input_ready i m before le k).sound
+    star_trans (register_input_ready_bound world binding i m before le k).sound
       (star_trans call (internalRun_of_steps suffix.2 suffix.1).sound)
 
-private theorem declaration_zero_exec (d : RegisterDeclaration) (m before : CC.Mem)
+private theorem declaration_zero_exec (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m before : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (same : CC.Integers.Int.eq d.index (30#32) = true)
     (writes : DeclarationStores d m before (0#64)) :
-    steps ge 10 (.State producer d.body k (allocation m).1 le before) =
+    steps world 10 (.State producer d.body k (allocation m).1 le before) =
       some (CC.E0, .State producer d.rest k (allocation m).1
         (le.set d.resultTemp (.Vlong (0#64))) writes.after) ∧
-    InternalPath ge 10 (.State producer d.body k (allocation m).1 le before) := by
+    InternalPath world 10 (.State producer d.body k (allocation m).1 le before) := by
+  rcases world with ⟨functions, composites⟩
+  change composites = ge.genv_cenv at layout
+  subst composites
   have indexSame : d.index = (30#32) := by
     simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_iff_eq] using same
   simp +decide [steps, InternalPath, InternalState, RegisterDeclaration.body,
@@ -176,6 +194,57 @@ private theorem declaration_zero_exec (d : RegisterDeclaration) (m before : CC.M
 
 /-- x30's declaration uses no provider call and writes its actual zero word
 and scalar tag. Its later return-tag binding is a separate producer stage. -/
+theorem register30_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    let d := registerDeclaration 30
+    ∃ xb tb after,
+      (allocation m).1.get d.word = some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
+      (allocation m).1.get d.tag = some (tb, CC.tuchar) ∧
+      InternalRun world 10 (.State producer (registerDeclarationStage 30) k (allocation m).1 le before)
+        (.State producer d.rest k (allocation m).1 (le.set d.resultTemp (.Vlong (0#64))) after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong 0) ∧
+      CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ d.word → id ≠ d.tag →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  dsimp only
+  obtain ⟨writes⟩ := declaration_stores 30 m before (0#64) access
+  have exec := declaration_zero_exec world layout (registerDeclaration 30) m before le k
+    (by decide +kernel) writes
+  refine ⟨writes.wordBlock, writes.tagBlock, writes.after, writes.wordBinding, writes.tagBinding,
+    ?_, writes.wordRead, writes.tagRead, writes.otherLocals, writes.frame, writes.access, writes.next⟩
+  rw [(register_declarations_source 30).1]
+  exact internalRun_of_steps exec.2 exec.1
+
+theorem register_input_ready (i : Fin 30) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    let j : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by decide)⟩
+    InternalRun ge 5 (.State producer (registerDeclarationStage j) k (allocation m).1 le memory)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
+        ((registerDeclaration j).continuation m le k) memory) :=
+  register_input_ready_bound ge producer_input_binding i m memory le k
+
+theorem register_input_returns (i : Fin 30) (m before supplied : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (6#32)] before trace (.Vlong value) supplied)
+    (access : supplied.access = (allocation m).2.access) :
+    let j : Fin 31 := ⟨i.val, Nat.lt_trans i.isLt (by decide)⟩
+    let d := registerDeclaration j
+    ∃ xb tb after,
+      (allocation m).1.get d.word = some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
+      (allocation m).1.get d.tag = some (tb, CC.tuchar) ∧
+      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage j) k (allocation m).1 le before)
+        trace (.State producer d.rest k (allocation m).1 (d.temps le value) after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong value) ∧
+      CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ d.word → id ≠ d.tag →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+      FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock :=
+  register_input_returns_bound ge rfl producer_input_binding i m before supplied le k value trace provider access
+
 theorem register30_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     let d := registerDeclaration 30
@@ -189,15 +258,8 @@ theorem register30_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ d.word → id ≠ d.tag →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  dsimp only
-  obtain ⟨writes⟩ := declaration_stores 30 m before (0#64) access
-  have exec := declaration_zero_exec (registerDeclaration 30) m before le k
-    (by decide +kernel) writes
-  refine ⟨writes.wordBlock, writes.tagBlock, writes.after, writes.wordBinding, writes.tagBinding,
-    ?_, writes.wordRead, writes.tagRead, writes.otherLocals, writes.frame, writes.access, writes.next⟩
-  rw [(register_declarations_source 30).1]
-  exact internalRun_of_steps exec.2 exec.1
+      after.nextblock = before.nextblock :=
+  register30_initialized_bound ge rfl m before le k access
 
 /-- The shared declaration continuation is the one reached by the already
 proved complete producer prefix. Both caches remain cold at that boundary. -/
