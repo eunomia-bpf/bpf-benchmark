@@ -59,6 +59,20 @@ cases={
                        'mov QWORD PTR [rsp+rcx],0'],[]),
  'immediate_erases':(['sub rsp,0x40','mov QWORD PTR [rsp+0x8],rdi',
                       'mov QWORD PTR [rsp+0x8],0'],[1]),
+ 'signed_index8':(['sub rsp,0x40','mov eax,0xff','movsx rcx,al',
+                   'mov QWORD PTR [rsp+rcx+0x29],rdi'],[5]),
+ 'signed_index16':(['sub rsp,0x40','mov eax,0xffff','movsx rcx,ax',
+                    'mov QWORD PTR [rsp+rcx+0x29],rdi'],[5]),
+ 'signed_index32':(['sub rsp,0x40','mov eax,0xffffffff','movsxd rcx,eax',
+                    'mov QWORD PTR [rsp+rcx+0x29],rdi'],[5]),
+ 'negative_index':(['sub rsp,0x40','mov rcx,-1',
+                    'mov QWORD PTR [rsp+rcx+0x29],rdi'],[5]),
+ 'scaled_negative_index':(['sub rsp,0x40','mov rcx,-1',
+                           'mov QWORD PTR [rsp+rcx*8+0x30],rdi'],[5]),
+ 'wrapped_index':(['sub rsp,0x40','mov rcx,0x2000000000000000',
+                   'mov QWORD PTR [rsp+rcx*8+0x28],rdi'],[5]),
+ 'positive_signed_index':(['sub rsp,0x40','mov eax,0x7f','movsx rcx,al',
+                           'mov QWORD PTR [rsp+rcx-0x57],rdi'],[5]),
 }
 rows=[]
 b_sources={}
