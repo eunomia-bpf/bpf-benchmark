@@ -17,3 +17,5 @@ The direct-native fallback does not invoke this converter and remains intact.
 The coordinator investigates the remaining interpreter-folding issue; this
 subset addresses item (3) of its 2026-11-19T07:01 note. BTF, helper policy,
 program checks, packet lowering and stock bounds are not changed.
+
+PERF 2026-11-19T07:46:41Z: Actual native compiler build and verified-domain/ordinary-check regression pass. All25 retained BCC production compile APIs/proof links pass with C helpers enabled, as do the ARRAY and retained OTel regressions. Raw /workspaces/kprog-raw/perf/native-verified-paths-20261119/candidate-20261119T074633Z-229351. This is host post-verification code generation, not new stock acceptance, installed code or app performance.

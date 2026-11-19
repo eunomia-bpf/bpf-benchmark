@@ -1,0 +1,8 @@
+{
+  "mode": "verified",
+  "assumes": 2,
+  "traps": 0,
+  "ordinary_check_retained": true,
+  "result": "3072 verified-domain and ordinary-program-check executions passed\n",
+  "scope": "Host post-verification contract test. Invalid-domain native calls are not executed; no stock or app runtime result."
+}

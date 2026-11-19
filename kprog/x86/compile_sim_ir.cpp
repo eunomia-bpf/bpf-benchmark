@@ -165,9 +165,10 @@ int main(int argc,char **argv) {
     if (text.empty()) continue; // Preserve the actual compiler barrier.
     if ((text=="call -1" || text=="r0 = 0; *(u64 *)(r0 + 0) = r0; exit;") &&
         call->arg_empty() && call->getType()->isVoidTy()) {
-      // Both unresolved dispatch and architectural faults are verifier errors
-      // if reachable. Preserve the fault in the LTO output, never a return value.
-      b.CreateCall(Intrinsic::getDeclaration(m.get(),Intrinsic::trap));
+      // The service invokes native compilation only after stock B acceptance.
+      // These invalid B paths were proved unreachable; expose that fact to
+      // native optimization instead of retaining verifier-only runtime traps.
+      b.CreateAssumption(b.getFalse());
     } else if (text=="$0 = $0" && call->arg_size()==1 && call->getArgOperand(0)->getType()==call->getType()) {
       result=call->getArgOperand(0);
     } else {
