@@ -10,7 +10,7 @@ replay:
 	python3 kprog/results/b-pointer-difference-20261119/replay.py $(OUT) $(REQUEST)
 
 PROBE := /var/tmp/kprog-tmp/perf/b-pointer-difference/stock-probe
-FIXTURE := /workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/fixture/fixture.bpf.o
+FIXTURE := $(OUT)/../fixture/fixture.bpf.o
 .PHONY: stock-probe stock stock-guest
 stock-probe:
 	install -d $(dir $(PROBE))
@@ -25,6 +25,6 @@ stock:
 		--rodir $(OUT)/probe-inputs=$(dir $(PROBE)) \
 		--disable-monitor --cpus 2 --memory 2G --overlay-rwdir /tmp \
 		--append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/results/b-pointer-difference-20261119/Makefile stock-guest OUT=$(OUT)'
+		--exec 'make -f kprog/results/b-pointer-difference-20261119/Makefile stock-guest OUT=$(OUT) FIXTURE=$(FIXTURE)'
 stock-guest:
 	$(OUT)/probe-inputs/stock-probe $(FIXTURE) $(OUT)/verifier.log > $(OUT)/stock-result.json

@@ -13,6 +13,7 @@ exec 9>/workspaces/.agent-state/kprog-lanes/locks/image
 flock -s 9
 git rev-parse HEAD > "$out/source-commit"
 date -u +%FT%TZ > "$out/started"
+taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/b-pointer-difference-20261119/Makefile test OUT="$out/fixture" MODE=fixed
 taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/b-pointer-difference-20261119/Makefile stock-probe
 make -n -f kprog/results/b-pointer-difference-20261119/Makefile stock OUT="$out/stock" > "$out/dry-run.log"
 make -f kprog/results/b-pointer-difference-20261119/Makefile stock OUT="$out/stock"

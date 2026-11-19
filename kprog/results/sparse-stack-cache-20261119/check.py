@@ -64,9 +64,10 @@ observations={}
 for mode,words in {'full':range(8),'sparse':[1,5]}.items():
     definition='-DX86_SIM_STACK_VALUE_WORDS(M)='+' '.join(f'M({i})' for i in words)
     run(['clang-18','-O3','-fsanitize=undefined','-fno-sanitize-recover=all',
+         '-fno-sanitize-link-runtime',
          '-mno-red-zone','-I'+str(root/'vendor/libbpf/src'),
          '-I'+str(root/'vendor/libbpf/include/uapi'),definition,
-         root/'kprog/results/sparse-stack-cache-20261119/oracle.c','-o',build/'oracle'])
+         root/'kprog/results/sparse-stack-cache-20261119/oracle.c','-lubsan','-o',build/'oracle'])
     observations[mode]=json.loads(run([build/'oracle']))
 assert observations['full']==observations['sparse'],observations
 (out/'oracle-result.json').write_text(json.dumps(observations,indent=2)+'\n')

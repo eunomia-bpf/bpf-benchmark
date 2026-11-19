@@ -7,7 +7,7 @@ int guarded_difference(struct xdp_md *ctx)
 {
     char arena[16];
     void *volatile saved;
-    volatile unsigned char saved_tag;
+    volatile unsigned long saved_tag;
     if (ctx->rx_queue_index & 1) {
         saved = &arena[8];
         saved_tag = 4;
@@ -16,9 +16,9 @@ int guarded_difference(struct xdp_md *ctx)
         saved_tag = 0;
     }
     void *value = saved;
-    unsigned char tag = saved_tag;
+    unsigned long tag = saved_tag;
     asm volatile("" : "+r"(value));
-    unsigned long native_base = ctx->egress_ifindex;
+    unsigned long native_base = ctx->ingress_ifindex;
     unsigned long result = (unsigned long)value;
     if (tag == 4) {
         unsigned long delta = (unsigned long)value - (unsigned long)&arena[0] - sizeof(arena);
