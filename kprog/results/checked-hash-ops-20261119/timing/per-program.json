@@ -1,0 +1,510 @@
+{
+  "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_130756_687881/details/apps/bcc__set.json",
+  "phases": {
+    "baseline": [
+      {
+        "bytes_jited": 406,
+        "bytes_xlated": 656,
+        "id": 54,
+        "name": "sys_exit",
+        "run_cnt_delta": 3328476777,
+        "run_time_ns_delta": 278541329949,
+        "type": "tracepoint",
+        "ns_per_call": 83.68432427521786
+      },
+      {
+        "bytes_jited": 108,
+        "bytes_xlated": 168,
+        "id": 42,
+        "name": "sys_enter",
+        "run_cnt_delta": 3328476774,
+        "run_time_ns_delta": 266458242592,
+        "type": "tracepoint",
+        "ns_per_call": 80.0541090367242
+      },
+      {
+        "bytes_jited": 602,
+        "bytes_xlated": 792,
+        "id": 72,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 117171766,
+        "run_time_ns_delta": 143749825999,
+        "type": "tracepoint",
+        "ns_per_call": 1226.829900293557
+      },
+      {
+        "bytes_jited": 383,
+        "bytes_xlated": 616,
+        "id": 61,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 132695264,
+        "run_time_ns_delta": 42901458221,
+        "type": "kprobe",
+        "ns_per_call": 323.3081341998762
+      },
+      {
+        "bytes_jited": 935,
+        "bytes_xlated": 1632,
+        "id": 70,
+        "name": "sched_switch",
+        "run_cnt_delta": 214632452,
+        "run_time_ns_delta": 24411033529,
+        "type": "tracing",
+        "ns_per_call": 113.73412222397758
+      },
+      {
+        "bytes_jited": 121,
+        "bytes_xlated": 184,
+        "id": 52,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 107403453,
+        "run_time_ns_delta": 9633725208,
+        "type": "tracing",
+        "ns_per_call": 89.69660601135422
+      },
+      {
+        "bytes_jited": 143,
+        "bytes_xlated": 232,
+        "id": 48,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 132695265,
+        "run_time_ns_delta": 8741736967,
+        "type": "kprobe",
+        "ns_per_call": 65.87828862619928
+      },
+      {
+        "bytes_jited": 141,
+        "bytes_xlated": 240,
+        "id": 57,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 117171766,
+        "run_time_ns_delta": 7394451189,
+        "type": "tracepoint",
+        "ns_per_call": 63.107789883443424
+      },
+      {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 67,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 117172657,
+        "run_time_ns_delta": 4355209227,
+        "type": "tracing",
+        "ns_per_call": 37.169159926108016
+      },
+      {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 41,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 2207744,
+        "run_time_ns_delta": 184312057,
+        "type": "tracing",
+        "ns_per_call": 83.48434284047426
+      },
+      {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 51,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 2242449,
+        "run_time_ns_delta": 176618135,
+        "type": "tracing",
+        "ns_per_call": 78.76127171677037
+      },
+      {
+        "bytes_jited": 437,
+        "bytes_xlated": 712,
+        "id": 77,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 439,
+        "run_time_ns_delta": 1953039,
+        "type": "tracing",
+        "ns_per_call": 4448.835990888383
+      },
+      {
+        "bytes_jited": 440,
+        "bytes_xlated": 824,
+        "id": 75,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 415,
+        "run_time_ns_delta": 559966,
+        "type": "tracing",
+        "ns_per_call": 1349.3156626506025
+      },
+      {
+        "bytes_jited": 121,
+        "bytes_xlated": 184,
+        "id": 65,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 123,
+        "run_time_ns_delta": 37595,
+        "type": "tracing",
+        "ns_per_call": 305.650406504065
+      },
+      {
+        "bytes_jited": 121,
+        "bytes_xlated": 200,
+        "id": 62,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 132,
+        "run_time_ns_delta": 25918,
+        "type": "kprobe",
+        "ns_per_call": 196.34848484848484
+      },
+      {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 73,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 242,
+        "run_time_ns_delta": 17807,
+        "type": "tracing",
+        "ns_per_call": 73.58264462809917
+      },
+      {
+        "bytes_jited": 40,
+        "bytes_xlated": 48,
+        "id": 60,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 42,
+        "run_time_ns_delta": 3921,
+        "type": "tracing",
+        "ns_per_call": 93.35714285714286
+      },
+      {
+        "bytes_jited": 1501,
+        "bytes_xlated": 2240,
+        "id": 30,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 141,
+        "bytes_xlated": 240,
+        "id": 45,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 110,
+        "bytes_xlated": 184,
+        "id": 49,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 493,
+        "bytes_xlated": 752,
+        "id": 63,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 602,
+        "bytes_xlated": 792,
+        "id": 66,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 110,
+        "bytes_xlated": 184,
+        "id": 69,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 354,
+        "bytes_xlated": 648,
+        "id": 71,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 496,
+        "bytes_xlated": 752,
+        "id": 74,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      }
+    ],
+    "post_rejit": [
+      {
+        "bytes_jited": 314,
+        "bytes_xlated": 520,
+        "id": 224,
+        "name": "sys_exit",
+        "run_cnt_delta": 2988250947,
+        "run_time_ns_delta": 293110697655,
+        "type": "tracepoint",
+        "ns_per_call": 98.08771179316889
+      },
+      {
+        "bytes_jited": 79,
+        "bytes_xlated": 152,
+        "id": 172,
+        "name": "sys_enter",
+        "run_cnt_delta": 2988250936,
+        "run_time_ns_delta": 242203467975,
+        "type": "tracepoint",
+        "ns_per_call": 81.05191737987295
+      },
+      {
+        "bytes_jited": 968,
+        "bytes_xlated": 2440,
+        "id": 286,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 95424075,
+        "run_time_ns_delta": 132322427793,
+        "type": "tracepoint",
+        "ns_per_call": 1386.677605132667
+      },
+      {
+        "bytes_jited": 307,
+        "bytes_xlated": 688,
+        "id": 210,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 124164337,
+        "run_time_ns_delta": 42886153615,
+        "type": "kprobe",
+        "ns_per_call": 345.39832170166545
+      },
+      {
+        "bytes_jited": 815,
+        "bytes_xlated": 2120,
+        "id": 273,
+        "name": "sched_switch",
+        "run_cnt_delta": 135834972,
+        "run_time_ns_delta": 22294221554,
+        "type": "tracing",
+        "ns_per_call": 164.12725843533136
+      },
+      {
+        "bytes_jited": 120,
+        "bytes_xlated": 264,
+        "id": 148,
+        "name": "kprobe__cap_cap",
+        "run_cnt_delta": 124164336,
+        "run_time_ns_delta": 8750476022,
+        "type": "kprobe",
+        "ns_per_call": 70.4749552399652
+      },
+      {
+        "bytes_jited": 106,
+        "bytes_xlated": 224,
+        "id": 203,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 95424075,
+        "run_time_ns_delta": 6259363316,
+        "type": "tracepoint",
+        "ns_per_call": 65.59522128980554
+      },
+      {
+        "bytes_jited": 98,
+        "bytes_xlated": 272,
+        "id": 188,
+        "name": "sched_wakeup",
+        "run_cnt_delta": 67989245,
+        "run_time_ns_delta": 5695349407,
+        "type": "tracing",
+        "ns_per_call": 83.76838729419632
+      },
+      {
+        "bytes_jited": 35,
+        "bytes_xlated": 48,
+        "id": 279,
+        "name": "fentry_vfs_open",
+        "run_cnt_delta": 95424528,
+        "run_time_ns_delta": 3935003147,
+        "type": "tracing",
+        "ns_per_call": 41.236810173166376
+      },
+      {
+        "bytes_jited": 35,
+        "bytes_xlated": 48,
+        "id": 196,
+        "name": "fentry_vfs_writ",
+        "run_cnt_delta": 1937282,
+        "run_time_ns_delta": 157512025,
+        "type": "tracing",
+        "ns_per_call": 81.30567723232859
+      },
+      {
+        "bytes_jited": 34,
+        "bytes_xlated": 48,
+        "id": 133,
+        "name": "fentry_vfs_read",
+        "run_cnt_delta": 1807116,
+        "run_time_ns_delta": 155086046,
+        "type": "tracing",
+        "ns_per_call": 85.81964079782371
+      },
+      {
+        "bytes_jited": 493,
+        "bytes_xlated": 1128,
+        "id": 300,
+        "name": "block_rq_comple",
+        "run_cnt_delta": 447,
+        "run_time_ns_delta": 5208672,
+        "type": "tracing",
+        "ns_per_call": 11652.510067114094
+      },
+      {
+        "bytes_jited": 472,
+        "bytes_xlated": 912,
+        "id": 266,
+        "name": "block_rq_issue",
+        "run_cnt_delta": 423,
+        "run_time_ns_delta": 681275,
+        "type": "tracing",
+        "ns_per_call": 1610.5791962174942
+      },
+      {
+        "bytes_jited": 98,
+        "bytes_xlated": 272,
+        "id": 238,
+        "name": "sched_wakeup_ne",
+        "run_cnt_delta": 124,
+        "run_time_ns_delta": 46450,
+        "type": "tracing",
+        "ns_per_call": 374.5967741935484
+      },
+      {
+        "bytes_jited": 122,
+        "bytes_xlated": 240,
+        "id": 180,
+        "name": "blk_account_io_",
+        "run_cnt_delta": 167,
+        "run_time_ns_delta": 38576,
+        "type": "kprobe",
+        "ns_per_call": 230.99401197604791
+      },
+      {
+        "bytes_jited": 35,
+        "bytes_xlated": 48,
+        "id": 245,
+        "name": "fentry_vfs_fsyn",
+        "run_cnt_delta": 42,
+        "run_time_ns_delta": 4243,
+        "type": "tracing",
+        "ns_per_call": 101.02380952380952
+      },
+      {
+        "bytes_jited": 35,
+        "bytes_xlated": 48,
+        "id": 307,
+        "name": "fentry_vfs_crea",
+        "run_cnt_delta": 43,
+        "run_time_ns_delta": 2864,
+        "type": "tracing",
+        "ns_per_call": 66.6046511627907
+      },
+      {
+        "bytes_jited": 106,
+        "bytes_xlated": 224,
+        "id": 140,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 1652,
+        "bytes_xlated": 2840,
+        "id": 156,
+        "name": "inet_sock_set_s",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 90,
+        "bytes_xlated": 160,
+        "id": 164,
+        "name": "tcp_v4_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 567,
+        "bytes_xlated": 1088,
+        "id": 217,
+        "name": "tcp_v4_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 380,
+        "bytes_xlated": 720,
+        "id": 231,
+        "name": "block_rq_insert",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracing",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 968,
+        "bytes_xlated": 2440,
+        "id": 252,
+        "name": "tracepoint__sys",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 90,
+        "bytes_xlated": 160,
+        "id": 259,
+        "name": "tcp_v6_connect",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      },
+      {
+        "bytes_jited": 609,
+        "bytes_xlated": 1096,
+        "id": 293,
+        "name": "tcp_v6_connect_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe",
+        "ns_per_call": null
+      }
+    ]
+  },
+  "scope": "All per-program phase aggregates, including zero-call records. The raw data has no per-sample BPF-time split; no growth-over-time or body/helper/map attribution is inferred."
+}

@@ -1035,3 +1035,12 @@ emission. Initial candidate21/30 failure is retained and traced to Clang's
 explicit-before-tied input ordering. No new helper, mode or runtime check;
 true unspecified inputs remain unchanged. Component correctness only, with
 no corpus speed/installed-byte claim. See numeric-context-bridge-20261119.
+
+PERF 2026-11-19T13:47:20Z: Combined BCC cohort369379 completed0/appok,25/25/25/25
+checked, no fallback/failures and zero errors. Measured103.5 to112.8ns/call
+(0.918x), throughput0.843x with samples0.845/0.820/0.997; installed8,628
+native/7,965JITB. This is a regression in the retained data, not an isolated
+hash-op result; no cause is inferred from sample spread. Subsequent BCC LTO
+runs are functional per coordinator, with timing directed to larger-body
+apps. All raw/25-program counters stay; no new profile or validity gate.
+The NUMERIC repair0dfa23814 followed this cohort. See checked-hash-ops-20261119.

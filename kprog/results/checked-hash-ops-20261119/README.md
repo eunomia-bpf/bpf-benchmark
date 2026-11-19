@@ -79,3 +79,37 @@ not forced to an earlier run's 113. These are ordinary direct-native P
 functional checks, not six-app B generation/stock verification or official
 timing. The main checked BCC timing still waits for timing EX; its label
 in progress.log alone is not evidence that a guest or sample has started.
+
+PERF 2026-11-19T13:47:20Z: Combined batch369379 is terminal0 at13:35:49Z;
+run x86_kvm_corpus_20261119_130756_687881, sourcee3398e115. BCC app ok,
+25 programs/native/B-generated/B-stock, all checked, zero fallback/failures
+and zero workload errors. The three180s stats-on samples are complete.
+The coordinator now classifies BCC LTO runs as functional checks and sends
+subsequent LTO timing to larger-body apps; the measured data is retained.
+
+| Quantity | Current cohort | Previous freeze/LOCK cohort101802_025374 |
+| --- | --- | --- |
+| Per call, eBPF to native | 103.5 to112.8ns,0.918x | 103.8 to103.1ns,1.007x |
+| Median throughput ratio | 0.843x | 1.006x |
+| Per-sample throughput ratios | 0.845/0.820/0.997 | 1.015/0.995/1.006 |
+| Installed native/JIT bytes | 8,628/7,965 | 8,628/7,965 |
+
+Current rates are eBPF521024/524429/522211 and native440440/429942/520813
+operations/s. Per-call reader retains16/25 eBPF and15/25 native records
+under the existing analysis rule; per-program.json preserves all25 records
+in each phase, including zero calls. No count threshold gates the app.
+
+Phase aggregates identify sys_exit83.68 to98.09ns and sched_switch113.73
+to164.13ns, while sys_enter80.05 to81.05ns and sched_wakeup89.70 to83.77ns.
+These are whole-phase counters, not per-sample BPF timings or a body/helper/
+map split. The first two native workload samples are lower than the third;
+the data alone does not identify a time trend or its cause. No new profile
+was taken and no current helper fractions are inferred from an old profile.
+
+This cohort combines helper-context binding, hash-map callbacks and ALU32
+folding with all earlier C/LTO pieces. It does not show an isolated hash-op
+gain and does not meet the runtime targets. Equal byte counts do not prove
+equal code. The later NUMERIC repair0dfa23814 is outside this timed cohort.
+Raw service archives, timing log and all sample counters stay under the
+recorded batch path; timing/ holds committed coverage, ratios, installed
+bytes and per-program counters.
