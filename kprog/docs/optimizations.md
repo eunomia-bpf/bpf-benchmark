@@ -938,3 +938,11 @@ integration with all C/LTO pieces on; the functional1x10s run is not a new
 speed measurement. Latest official combined result remains1.007x per call
 and1.006x throughput before this fix. Runtime targets remain open. See
 results/released-alias-20261119/coverage.json and functional-installed.txt.
+
+PERF 2026-11-19T11:31:24Z: Phase-1 B constant ALU32 folding: exact constant
+i32 self moves now fold in the existing IR pass, exposing size/helper-ID
+dispatch facts. Four constants and live/clobber/wide preservation controls
+pass through the rebuilt sole tools and real BPF emission. Shared I and
+native conversion remain unchanged; no runtime improvement is claimed.
+The retained Tetragon frontend replay, stock acceptance and fresh app
+confirmation remain open. See results/constant-alu32-20261119.

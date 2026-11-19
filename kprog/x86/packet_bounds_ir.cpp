@@ -147,8 +147,14 @@ static unsigned fold_constant_identities(Module &module) {
     ConstantInt *constant=nullptr;
     if (auto *call=dyn_cast<CallInst>(instruction)) {
       auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
-      if (assembly && tied_identity(call,assembly) && !assembly->isAlignStack() &&
-          !assembly->canThrow())
+      // A constant ALU32 self move has the same i32 bits. Keep live-input
+      // moves: their physical zero extension preserves verifier bounds.
+      if (assembly && !assembly->isAlignStack() && !assembly->canThrow() &&
+          (tied_identity(call,assembly) ||
+           (assembly->getAsmString()=="$0 = $0" &&
+            assembly->getConstraintString()=="=w,0" && call->arg_size()==1 &&
+            call->getType()->isIntegerTy(32) &&
+            call->getArgOperand(0)->getType()==call->getType())))
         constant=dyn_cast<ConstantInt>(call->getArgOperand(0));
       if (constant) ++identities;
     } else if (isa<BinaryOperator,CastInst,CmpInst,SelectInst,PHINode>(instruction)) {
