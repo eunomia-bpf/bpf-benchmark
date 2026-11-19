@@ -1254,3 +1254,13 @@ operand, preserves arithmetic operands unchanged and anchors only pointer
 pairs. Fixture uses the same reassociation; three offset selection controls
 retain scalar/narrow/one-pointer exclusions. No P/native/flags/limits change.
 Prepared only; sole compiler rebuild and focused captured-frontend replay next.
+
+PERF 2026-11-19T19:35:18Z: Strengthened native return regression b03c650d3 now executes
+every RET in the fixture, including both alternative A returns and B with
+nested/entry caller contexts. Normal B emission and native13/22/22 pass0;
+all-returns-result.json preserves this receipt beside the earlier fixture.
+Katran offset-pair source syntax passes0, raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/syntax-20261119T193414Z;
+worker269752 is still an unstarted imageEX rebuild waiter while coordinator
+263766 uses the shared image. This is resource ordering, no correctness
+pass inferred. Tetragon267684 frontend83.366s/bounds3.175s pass; backend
+pending since19:31:03Z, all raw retained. No speed claim from compile times.

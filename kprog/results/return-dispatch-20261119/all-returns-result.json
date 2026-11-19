@@ -1,0 +1,67 @@
+{
+  "selection": [
+    {
+      "case": "nested_and_multiple_returns",
+      "dispatches": {
+        "x86_sim_ret_dispatch_23": [
+          2
+        ],
+        "x86_sim_ret_dispatch_41": [
+          6,
+          35
+        ]
+      }
+    },
+    {
+      "case": "unknown_last",
+      "dispatches": {
+        "x86_sim_ret_dispatch_26": []
+      }
+    },
+    {
+      "case": "unknown_first",
+      "dispatches": {
+        "x86_sim_ret_dispatch_26": [
+          2,
+          6
+        ],
+        "x86_sim_ret_dispatch_41": [
+          6
+        ]
+      }
+    },
+    {
+      "case": "tail_helper",
+      "dispatches": {
+        "x86_sim_ret_dispatch_20": [
+          2
+        ],
+        "x86_sim_ret_dispatch_41": [
+          6
+        ]
+      }
+    }
+  ],
+  "native_execution": [
+    {
+      "input": 0,
+      "expected": 13,
+      "observed": 13
+    },
+    {
+      "input": 1,
+      "expected": 22,
+      "observed": 22
+    },
+    {
+      "input": 4294967295,
+      "expected": 22,
+      "observed": 22
+    }
+  ],
+  "b_emitted": true,
+  "scope": "Generator finite return sets, normal B emission and native execution; no stock/app/timing claim.",
+  "raw": "/workspaces/kprog-raw/perf/return-dispatch-20261119/all-returns-20261119T193413Z",
+  "source_commit": "b03c650d3",
+  "finished": "2026-11-19T19:34:14Z"
+}

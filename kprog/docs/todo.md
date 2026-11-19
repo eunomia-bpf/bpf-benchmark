@@ -9,6 +9,15 @@
 ## 0. Lane 目标与待办
 
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
+  PERF 2026-11-19T19:35:18Z: coordinator Katran B4145 also hoists constant-offset
+  pointer pairs (left ptrtoint-240, right ptrtoint) ahead of tag4 at4149.
+  Captured frontend/bounds map MOV_STORE_REG native0x1261/source3119.
+  5033bed62 extends exact pair selection through constant ADD/SUB operands,
+  with scalar/one-pointer/narrow exclusions retained; syntax passes.
+  Worker269752 waits imageEX for the sole bounds compiler rebuild, then
+  focused16native/IR/ALU32 controls and captured Katran frontend-to-B replay.
+  No corrected Katran B/stock/performance result yet.
+
   Confirmation247989/7087690ee completed0:16native fixture cases, stock B
   acceptance and TEST_RUN retval1/default loopbackifindex1 pass. Retained30
   B now tests tag4 at27618 before subtraction27622;11sites anchored.
