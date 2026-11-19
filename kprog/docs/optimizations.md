@@ -1430,3 +1430,9 @@ results/cilium-table-liveness-20261119/memory-result.json; rawprefix-20261119T21
 Separately OMPf660709bb reportsfinal80dbc headlen233bounds/40requests,
 two stale predicatesleftunchanged, stillnotstockacceptance. Worker303179
 continuesimageEXqueue, allLTOon, benchmarksettingsunchanged.
+
+PERF 2026-11-19T21:29:29Z: 32a4c7907 derives Ciliumspill ABI facts from originalnative
+instructions, using provisional graph onlyfordispatch edges. Actualsame
+three readbacks/upper24dead results/no unresolvedprefixaliases persist;
+final memory-result.json/raworiginal-20261119T212852Z. Fivehelper memory
+boundaries remain explicit; productionguardunchanged/no B orstockgain.

@@ -1,8 +1,8 @@
 {
-  "recorded": "2026-11-19T21:27:36Z",
-  "source_commit": "bb45dea26",
-  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/prefix-20261119T212638Z",
-  "worker_pid": 314409,
+  "recorded": "2026-11-19T21:29:29Z",
+  "source_commit": "32a4c7907",
+  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/original-20261119T212852Z",
+  "worker_pid": 315898,
   "worker_terminal": true,
   "requests": [
     {
@@ -408,6 +408,6 @@
       "unresolved_prefix_aliases": []
     }
   ],
-  "scope": "Diagnostic ABI pointer inventory over provisional CFG; no dead-memory proof, lowering, B emission, stock acceptance, or runtime result.",
+  "scope": "Diagnostic ABI inventory of original instructions with provisional dispatch edges only; no dead-memory proof, lowering, B emission, stock acceptance, or runtime result.",
   "remaining": "Compiler must establish memory non-observation through private spills and helper effects before replacing original liveness rejection; no production lowering, B emission or stock result."
 }

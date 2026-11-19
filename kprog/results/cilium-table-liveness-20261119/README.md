@@ -41,3 +41,12 @@ Raw `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/prefix-20261119T2
 inventory remains at `memory-20261119T212500Z`, and the first readback version
 at `readback-20261119T212700Z`, both under the same persistent raw directory.
 Workers311804,312395,314409 are terminal; all raw data stays.
+
+PERF 2026-11-19T21:29:29Z: provenance refinement `32a4c7907` repeats the ABI inventory
+on the **original native instructions**, using the provisional graph only
+for the table's dispatch edges. The rejected replacement supplies no ABI
+instruction effects. Results agree: the same three spill offsets and first
+readbacks, all three upper-bit dead results, no unresolved prefix aliases,
+and the same helper pointer roots. Final raw `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/original-20261119T212852Z`, log `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/original-20261119T212852Z.log`;
+worker315898 is terminal. `memory-result.json` now records this stronger
+input provenance. The helper memory proof and production repair stay open.
