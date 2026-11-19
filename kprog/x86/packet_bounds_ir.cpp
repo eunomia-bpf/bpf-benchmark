@@ -286,6 +286,26 @@ static bool field(Value *value,Function &function,int64_t offset,bool kernel=fal
   if (matches && read) *read=cast<Instruction>(value);
   return matches;
 }
+// The TC context converter maps cb stores into sk_buff.cb. This exact
+// four-byte template cannot change data, len or data_len; other stores keep
+// their existing freshness barrier, including a word that crosses cb's end.
+static bool skb_cb_store(CallBase *call,InlineAsm *assembly) {
+  auto *function=call->getFunction();auto section=function->getSection();
+  if (section!="classifier" && section!="tc" && !section.starts_with("tc/") &&
+      !section.starts_with("cgroup_skb/")) return false;
+  if (call->arg_size()!=6 || !call->getType()->isIntegerTy(64) ||
+      assembly->getConstraintString()!="=&r,r,r,i,i,i,i,~{memory}" ||
+      assembly->getAsmString()!="$0 = $2\n*(u8 *)($1 + $3) = $0\n$0 >>= 8\n*(u8 *)($1 + $4) = $0\n$0 >>= 8\n*(u8 *)($1 + $5) = $0\n$0 >>= 8\n*(u8 *)($1 + $6) = $0" ||
+      origin(call->getArgOperand(0))!=function->getArg(0) ||
+      assembly->isAlignStack() || assembly->canThrow()) return false;
+  for (unsigned index=2;index<6;++index) {
+    auto *offset=dyn_cast<ConstantInt>(call->getArgOperand(index));
+    if (!offset || offset->getValue().getActiveBits()>64 ||
+        offset->getZExtValue()<offsetof(__sk_buff,cb) ||
+        offset->getZExtValue()>=offsetof(__sk_buff,cb)+sizeof(__sk_buff::cb)) return false;
+  }
+  return true;
+}
 // A fresh public packet span equals the captured head length only while no
 // intervening operation can mutate the skb. Walk every predecessor path back
 // to each field read, including loop backedges; private stores are irrelevant.
@@ -306,7 +326,7 @@ static bool current_headlen(Instruction *read,Instruction *compare) {
         if (call->onlyReadsMemory() || kernel_context_cast(call)) continue;
         if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand())) {
           auto text=assembly->getAsmString();
-          if (tied_identity(call,assembly) ||
+          if (tied_identity(call,assembly) || skb_cb_store(call,assembly) ||
               (text=="$0 = $0" && assembly->getConstraintString()=="=w,0") ||
               (assembly->getConstraintString()=="=r,r,i,~{memory}" &&
                (text=="$0 = *(u8 *)($1 + $2)" || text=="$0 = *(u16 *)($1 + $2)" ||

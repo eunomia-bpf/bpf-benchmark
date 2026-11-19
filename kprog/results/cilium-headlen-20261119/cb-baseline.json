@@ -1,0 +1,12 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/cb-before-20261119T2335Z",
+  "check_make_exit": 2,
+  "failure": "cb_store: packet data values remain distinct across exact public cb48..51 byte-store template",
+  "actual_request": 17,
+  "actual_verifier_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/archive-stock-20261119T232454Z-524242/17",
+  "actual_packet_error": "invalid access to packet, off=26 size=4, R7(id=0,off=26,r=0)",
+  "bounds_ir_headlen_read_and_cb_store_lines": [69, 73, 77, 79, 85],
+  "actual_compiler_stale_predicates": 1,
+  "kernel_store_conversion": "vendor/linux-framework/net/core/filter.c:9868; public cb maps into qdisc_skb_cb.data, disjoint from bpf_skb_data_end.data_end and sk_buff data/len/data_len",
+  "scope": "Focused installed-compiler regression and actual retained request mapping; candidate stock acceptance remains pending."
+}

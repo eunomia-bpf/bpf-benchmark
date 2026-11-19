@@ -1,5 +1,17 @@
 # Cilium head-length bounds
 
+The five remaining packet failures include a freshness false negative:
+request17 reads len112, writes public cb48..51 with the simulator's exact
+four-byte template, then reads data_len116. The compiler reports one stale
+predicate and leaves the34byte guard scalar; packet+26 subsequently rejects.
+The frozen context converter maps cb into qdisc_skb_cb.data, separate from
+the data/end/length fields. The focused installed-compiler regression fails
+at`cb_store`, as recorded in`cb-baseline.json`.
+The candidate recognizes only that exact context-rooted template with every
+written byte inside cb. Packet-field, cross-end, foreign-root and XDP forms
+retain their barrier. `cb_validate.sh` rebuilds the sole compiler and tests
+the controls plus the archived B/stock population. Native P remains unchanged.
+
 Detached stock replay524242 finished at2026-11-19T23:25:22Z, makeexit2:
 16/41 load, including request64. Five still reject packet reads (12,17,36,37,48).
 The other20 reach subsequent defects: two trusted-sk_buff+124 stores,
