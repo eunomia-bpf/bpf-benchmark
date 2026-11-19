@@ -14,3 +14,5 @@ volatility. No program check, B change, packet-bounds lowering or helper policy.
 The fixture exercises those scope boundaries with actual LLVM conversion and
 native execution. Baseline mode checks the current missed normalization. Source
 application/build waits for the running Tetragon job's image SH lease to end.
+
+Baseline actual compiler confirms five private volatile accesses, with two accesses preserved for each global/pointer/mixed/other-local/atomic control. All1344 host executions pass. Raw /workspaces/kprog-raw/perf/native-private-stack-20261119/baseline-20261119T070506Z. The forward patch is queued under image EX after the running B compilation; no production source is changed before that lease is available.
