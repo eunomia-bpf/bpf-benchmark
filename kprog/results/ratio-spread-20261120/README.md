@@ -72,25 +72,36 @@ The baseline arm is stable at 3809–3815 B and 3200–4000 ns throughout, so th
 post arm. Day by day the ratio is 0.07 (05-28/29), 1.0 (05-31, 06-04), 1.0 (09-26), 0.07–0.11 (11-07…11-13,
 11-15), 1.0 (11-14), 0.97 (11-16), 0.94 (11-17), 1.03–1.23 (11-18…11-20).
 
-So **the 15x case is a different compiled body, not a faster execution of the same one**: 7510 B and ~200 ns
-against 3815 B and ~3200 ns. The question worth answering is what produces the 7510-byte body, since it is
-10-18x faster and it last appeared on 11-15. (An earlier draft called 11-14 a regression; that was wrong —
+So the two families are different compiled bodies — 7510 B at ~200 ns against 3815 B at ~3200 ns — **but the
+faster one is broken** (see below), so its speed is not a target to reproduce. (An earlier draft called 11-14 a regression; that was wrong —
 11-14 is just the non-7510 family. An even earlier draft blamed a low-count second program; that program is
 real but it is not what moves this ratio.)
 
-The same B input produces all of it. In the run's own shim log the loaded program is byte-identical
-across the dates — `native_tracer_e`, `insn_cnt=1322`, tag `26449268576adffc`, `xlated_len=5904` for the
-original — while the compiled native body is **7510 B on 11-12 and 2729 B on 11-20**:
+The same B input produces both lengths, but size is a provenance marker, not the mechanism. In the runs' shim
+logs the loaded program is identical across the dates — `native_tracer_e`, `insn_cnt=1322`, tag
+`26449268576adffc`, original `xlated_len=5904` — while the compiled body is 7510 B on 11-12 and 2650–2729 B
+on 11-19/11-20:
 
 ```
 2026-11-12  jit-info native ... tag=26449268576adffc jited_len=7510 xlated_len=24
 2026-11-20  jit-info native ... tag=26449268576adffc jited_len=2729 xlated_len=24
 ```
 
-Both are the native image (the `xlated_len=24` stub), both replaced the same original. So the difference is
-purely what `native-link`/the LTO compiler emits, and today it emits a body that runs at 3700-4600 ns against
-the baseline's ~3200 — i.e. the current compiler is worse than the JIT for this program, where the 11-12
-compiler was 12x better. That, not a workload artifact, is what a per-app timing batch should chase.
+Both are native images (the `xlated_len=24` stub), both replaced the same original. But the 7510 B body is
+**not a correct fast implementation**: `equal-work-20261113/report.md` pairs a run carrying it and records the
+program-owned counters going **913,099,438 → 0 unwind attempts** and **840,462,900 → 0 frames**, with register
+errors 325,721 → 74,119,936 and empty stacks 22,331 → 65,351,909. It ran 12x faster because it stopped
+unwinding.
+
+So the fast family must not be restored as-is; it is a broken reference. What the record does establish is the
+opposite direction of the one I first drew: today's ~2700 B body runs at 3700–4600 ns against the baseline
+JIT's ~3200 ns, i.e. the current native body is *slower than the JIT it replaces* on this program while doing
+correct work. That gap — not the 7510 B shape — is the optimization target.
+
+(Perf's `perf-history-review-20261120` corrects three further points in earlier drafts of this file: the
+11-13 boundary is not firm, since that same day contains both 0.0717 and 0.9959; the 7510 B body's speed is
+explained by unequal work; and `measure.py`'s `(name,type)` key drops duplicate pairs, so the Tracee
+aggregate is sensitive to which records survive the collision.)
 
 Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
 `native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
