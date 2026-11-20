@@ -214,23 +214,6 @@ _SHIM_PROGRAM_STABLE_SECONDS = 2.0
 _LOADTIME_SHIM_PROGRAM_STABLE_SECONDS = 15.0
 
 
-_NATIVE_LOADER_ENABLING_VALUES = frozenset({"1", "true", "yes", "on"})
-
-
-def _native_load_progress_required() -> bool:
-    # The shim's bound-proof counters move only inside the native loader, and
-    # that loader is off unless BPFREJIT_SHIM_NATIVE_LOADER enables it. With
-    # BPFREJIT_SHIM_NATIVE_LOADER=post the loadtime phase runs the loader while
-    # the baseline app before it runs on eBPF alone, so the baseline has no
-    # bound-proof obligation and must not wait for a counter that cannot move.
-    if os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower() not in (
-        _NATIVE_LOADER_ENABLING_VALUES
-    ):
-        return False
-    raw = os.environ.get("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "")
-    return raw.strip().lower() in {"1", "true", "yes", "on"}
-
-
 def _shim_socket_for_pid(app_pid: int) -> Path:
     return _SHIM_SOCK_DIR / f"shim-{int(app_pid)}.sock"
 
@@ -332,16 +315,6 @@ def _list_app_shim_program_ids(app_pid: int) -> tuple[int, ...]:
     resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "list_progs"})
     if not bool(resp.get("ok")):
         raise RuntimeError(str(resp.get("error") or "list_progs failed"))
-    if _native_load_progress_required():
-        pending = resp.get("native_loads_inflight")
-        completed = resp.get("native_bound_completed")
-        if type(pending) is not int or type(completed) is not int or pending < 0 or completed < 0:
-            raise ValueError(
-                "verified native startup requires shim load-progress fields; "
-                "update the shim"
-            )
-        if pending or not completed:
-            return ()
     programs = resp.get("progs")
     if not isinstance(programs, Sequence) or isinstance(programs, (str, bytes, bytearray)):
         raise RuntimeError("list_progs returned invalid progs payload")
