@@ -25,8 +25,8 @@ No silent-trace or external-determinism premise is added.
 Focused linked checking passes 184 Lake jobs and nine public type/axiom queries
 at the original 200000-heartbeat and 512-depth caps, CPU 17, nice 0, one worker,
 and 32 GiB address space. Only standard logical axioms and the existing imported
-external/assembly relations appear. Whole proof-library confirmation is pending
-until the batch ends. Raw checks and debugging logs remain at
+external/assembly relations appear. Whole `lake build KProgFormal` confirmation passes all 288 Lake jobs,
+including the root, on CPUs 16–23, nice 19, one worker and 32 GiB address space. Raw checks and debugging logs remain at
 /workspaces/kprog-raw/formal/m5-pointer-writer.
 
 This covers ordinary destinations with raw Vlong payloads, including the STACK
