@@ -39,16 +39,14 @@ with the JIT-controlled medians:
 (11-20 covers 15 runs, whose median OTel per-call ratio is 1.08; the 4539 ns outlier above is one run. Use the
 median, not the row, as the figure for that day.)
 
-The native emitter was **faster than the JIT** on 11-17 with a 3542 B body, and it is 11 % slower on 11-19 /
-31 % slower on 11-20 with a 2729 B body for the same JIT. So on this program the deficit is not a fixed property of the design, and the 11-17
-shape is an existence proof that this program can be emitted natively faster than its JIT.
+The emitter was **faster than the JIT** on 11-17 with a 3542 B body (0.94, and 8 of 11 runs that day were at or
+below 1.00), and it is slower on 11-19 and 11-20 with a 2729 B body for the same JIT. So on this program the
+deficit is not a fixed property of the design, and the 11-17 shape is an existence proof that this program can be
+emitted natively faster than its JIT. That is the target to recover: 0.94, not merely 1.00.
 
-**Caveat that the same evidence exposes (OMP, checked after the table above).** The 11-20 post arm also leaves
-the app's three unwind programs on the JIT (`perf_unwind_nat` xlated 53880 B, `-hot` 32824, `-sto` 5296, all with
-`run_cnt_delta` 0), while the 11-17 arm replaced them with native bodies (xlated 24). Tail-called targets are
-charged to the caller (evaluation.md 5.6), so part of the 11-20 per-call figure is eBPF-speed unwinding, and this
-table compares two different native coverage configurations, not two emitter versions of one. The 0.94 and the
-1.31 are both true readings of their own runs and are not a like-for-like regression measurement.
-
-What survives cleanly is the within-11-20 comparison, where both arms have identical coverage: 0.950x on the
-180 s arm and 0.945x on the coordinator's run, against a JIT that is unchanged. That is the number to fix.
+**Checked, and it holds (OMP).** A `bytes_xlated` of 24 on the post side does not mean "kept on the JIT": the
+11-20 post shim log records `native-loader replaced prog=...` for **14 of 14** programs, unwind programs included,
+and 11-17 replaced 14 of 14 as well. `bytes_xlated` is the replaced program's own xlated size as the loader
+reports it (24 B for the entry, 5296 B for `perf_unwind_sto`), so the two dates do have the same coverage and the
+table above compares emitter versions after all. Within 11-20 the identical-coverage readings are 0.950x (180 s
+arm) and 0.945x (coordinator), consistent with the 1.31 of the 11-20 row's own run.
