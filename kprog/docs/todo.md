@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF HASH tail-word native optimization (709c1c486; 2026-11-20T05:26:17Z): subset1032kernel-hash/143388guarded lookup/restart1/589generic and112actual native API cases pass. Actual BCC key4 worker198→156B with one32bit key load, complete reachable sys_exit430→388B/sched_switch1590→1548B, roots unchanged. Results/helper-sharing-20261120/hash-tail-result.json/evidence.tar.gz. Next touched BCC app with all LTO; tools/P/B/image unchanged, no speed gain yet.
+- [ ] PERF HASH tail-word native optimization (709c1c486; 2026-11-20T05:26:17Z): subset1032kernel-hash/143388guarded lookup/restart1/589generic and112actual native API cases pass. Actual BCC key4 worker198→156B with one32bit key load, complete reachable sys_exit430→388B/sched_switch1590→1548B, roots unchanged. Results/helper-sharing-20261120/hash-tail-result.json/evidence.tar.gz. Own BCC PID678934 running, raw /workspaces/kprog-raw/perf/hash-tail-20261120/bcc-20261120T052633Z, all LTO on; tools/P/B/image unchanged, no speed gain yet.
 
 - [x] PERF touched BCC shared-helper check (2026-11-20T05:22:10Z): PID673631 exit0/appOK,25native installs/22checked/3direct,14 HASH static sites. eBPF129.332→native136.793ns/call (0.945x), regression retained; sys_exit80.847→98.026ns/call dominates added time, native full proof430B/root232B/HASH-key4 worker198B. Actual mixed stress-ng rates and raw workload table retained in lpm-c-lto-20261120/shared-bcc-result.json/evidence.tar.gz. All LTO on; tools/P/image unchanged. Next inspect native HASH tail word loads; no target achieved.
 
