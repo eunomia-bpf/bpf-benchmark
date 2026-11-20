@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF shared map-helper application measurement (307c28752; 2026-11-20T04:55:29Z): LPM/HASH/ARRAY/probe native API subset passes; same archived accepted OTel native_unwind/HotSpot complete reachable proof code24067→16150B/22677→16289B including workers. Results/helper-sharing-20261120/report.json/evidence.tar.gz. Next actual OTel app, all LTO on; no speed claim.
+- [x] PERF shared map-helper application measurement (307c28752; 2026-11-20T05:05:56Z): guest666886 exit0/appOK,14native/4checked/10direct,34LPM/14HASH/4ARRAY static sites and4/4no-red-zone flags. Actual full proof code unwind16150B/HotSpot16289B/PHP14053B/sched_free595B includes workers. eBPF4543.281→native4673.098ns/call (0.972x); no speed target met. All worker self-rates retained in lpm-c-lto-20261120/shared-app-result.json/evidence.tar.gz; earlier regressions stay. All LTO on; installed tools/P/image unchanged. Runtime improvement remains open.
 
 - [x] PERF cached native no-red-zone enforcement (91a703ada; 2026-11-20T04:29:31Z): final native compile uses existing O3 force-attribute=noredzone uniformly; actual cached LPM now allocates24byte frame,210→234B.18819LPM/112HASH API cases and helper compatibility pass. Results/native-redzone-20261120/report.json/evidence.tar.gz. B/tools unchanged; actual app timing remains open.
 
