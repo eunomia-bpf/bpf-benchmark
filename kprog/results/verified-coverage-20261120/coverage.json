@@ -1,0 +1,172 @@
+{
+ "date": "2026-11-20",
+ "taken_by": "OMP",
+ "base": "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds (478,096 B, built 2026-11-19T23:47Z, equals the HEAD build)",
+ "recipe": "make -C kprog/libnativeloader checked-corpus CHECKED_APP=<app> CHECKED_HOST_CPUS=<cpus>",
+ "apps": {
+  "cilium/agent": {
+   "capture": "/workspaces/kprog-raw/verified/omp-cilium-20261119/head-20261120T001825Z",
+   "requests": 12,
+   "programs": 4,
+   "installed": 12,
+   "fallback": 0,
+   "failed": 0,
+   "fallback_reasons": [],
+   "per_program": {
+    "34af4b3a": {
+     "checked-sim-c": 3
+    },
+    "8680a229": {
+     "checked-sim-c": 3
+    },
+    "874d0fb3": {
+     "checked-sim-c": 2
+    },
+    "9effc137": {
+     "checked-sim-c": 4
+    }
+   }
+  },
+  "otelcol-ebpf-profiler/profiling": {
+   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/otel",
+   "requests": 14,
+   "programs": 5,
+   "installed": 4,
+   "fallback": 10,
+   "failed": 0,
+   "fallback_reasons": [
+    [
+     "math between fp pointer and register with unbounded min value is not allowed",
+     5
+    ],
+    [
+     "R0 invalid mem access 'scalar'",
+     3
+    ],
+    [
+     "R1 invalid mem access 'scalar'",
+     1
+    ],
+    [
+     "R1 unbounded memory access, make sure to bounds check any such access",
+     1
+    ]
+   ],
+   "per_program": {
+    "20d3130f": {
+     "direct-native": 4,
+     "checked-sim-c": 4
+    },
+    "22f44141": {
+     "direct-native": 1
+    },
+    "27aebedf": {
+     "direct-native": 1
+    },
+    "526c5a5b": {
+     "direct-native": 3
+    },
+    "8f5f0ef7": {
+     "direct-native": 1
+    }
+   }
+  },
+  "bcc/set": {
+   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/bcc",
+   "requests": 25,
+   "programs": 15,
+   "installed": 22,
+   "fallback": 3,
+   "failed": 0,
+   "fallback_reasons": [
+    [
+     "R1 invalid mem access 'scalar'",
+     2
+    ],
+    [
+     "dereference of modified ctx ptr R2 off=30 disallowed",
+     1
+    ]
+   ],
+   "per_program": {
+    "054d330d": {
+     "checked-sim-c": 1
+    },
+    "1eae1f48": {
+     "checked-sim-c": 1
+    },
+    "244edf9e": {
+     "checked-sim-c": 2
+    },
+    "255721c8": {
+     "checked-sim-c": 1
+    },
+    "6ee20648": {
+     "checked-sim-c": 2
+    },
+    "71bd90fa": {
+     "checked-sim-c": 5
+    },
+    "988ff533": {
+     "direct-native": 1
+    },
+    "9b61fe05": {
+     "checked-sim-c": 2
+    },
+    "b013ceeb": {
+     "checked-sim-c": 2
+    },
+    "c1ffaf43": {
+     "checked-sim-c": 1
+    },
+    "c617f296": {
+     "direct-native": 2
+    },
+    "d1f80338": {
+     "checked-sim-c": 1
+    },
+    "ef86a392": {
+     "checked-sim-c": 1
+    },
+    "fbb59d77": {
+     "checked-sim-c": 2
+    },
+    "ffae3b45": {
+     "checked-sim-c": 1
+    }
+   }
+  },
+  "tetragon/observer": {
+   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon3 (in progress)",
+   "note": "two earlier attempts (tetragon/, tetragon2/) served 3 and 4 requests, all checked-sim-c installed, then the guest ended without writing service.tar.gz; those raw dirs are kept"
+  }
+ },
+ "classes": {
+  "packet_bounds": {
+   "apps": [
+    "cilium/agent"
+   ],
+   "status": "closed 2026-11-20, 4 commits (see cilium-packet-bounds-20261119)"
+  },
+  "fp_arithmetic_unbounded": {
+   "count_otel": 5,
+   "message": "math between fp pointer and register with unbounded min value",
+   "note": "stack pointer arithmetic with no lower bound; the verifier rejects the subtraction itself, not a read"
+  },
+  "scalar_mem_access": {
+   "count_otel": 4,
+   "count_bcc": 2,
+   "message": "R invalid mem access 'scalar'",
+   "note": "load/store through a register the verifier tracks as a plain scalar (map value not re-derived)"
+  },
+  "modified_ctx_ptr": {
+   "count_bcc": 1,
+   "message": "dereference of modified ctx ptr R2 off=30 disallowed",
+   "note": "ctx pointer advanced before dereference; verifier forbids this past offset 0 in some cases"
+  },
+  "probe_read_unbounded": {
+   "count_otel": 1,
+   "message": "R1 unbounded memory access, make sure to bounds check any such access"
+  }
+ }
+}
