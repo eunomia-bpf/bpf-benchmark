@@ -225,3 +225,4 @@ Checked on 2026-11-14 against "要不还是不要放宽, 除非 blovk 了" and "
 - 运营者 2026-11-20 约 08:50 UTC 在 eBPFOS 会话里说（eBPFOS 协调者转达，2026-11-20T08:54:51Z 记录；spark-manage 3af1ac0f）：“CORE 等待中? 禁止有 lane 在等待.”，接着“明确记住,所有的工作流都禁止有 lane 等等”
 - 收到于 09:10Z 前后（记录时间 2026-11-20T09:34:28Z），引用协调者“Existing GLM numbers: two Sparks with TP2 give 26–28 tok/s per stream; four Sparks with TP4 give 16–22 tok/s. Now all four run DeepSeek 4.1 Flash at about 67–77 tok/s per stream.”之后：“三个机器, fp4, 1m 上下文对吧??? 让 codex 去试试部署.”
 - 同一时段：“网关的 local large 后端可以切到别的模型”（Spark 部署记录在 spark-manage 12cf86cf，docs/configuration-decisions/2026-11-20-glm53-three-spark-1m-deploy.md）
+- 收到于 09:45Z 前后（记录时间 2026-11-20T09:41:17Z）：“确保 arm 和 x86 都要弄好, 不然就用 5/27 的数字??? 之前不是也复现了吗? 只要功能一致有些问题不太重要吗, 你可以叠加最小修复, 但不要大改. 如果 11/22 之前弄不好就还是 5/27 的”
