@@ -1,5 +1,5 @@
 import KProgFormal.ClightRefinement.Arm64Producer
-import KProgFormal.Clight.Arm64ProgramFixture
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings
 
 set_option Elab.async false
 
@@ -40,7 +40,7 @@ def localType : CC.Ty → CC.Ty
 def declaration (row : CC.Ident × CC.Ty) : CC.Ident × CC.Ty :=
   (localName row.1, localType row.2)
 
-def world : CC.CGenv := Arm64ProgramFixture.prog.globalenv
+def world : CC.CGenv := Arm64ProgramEntryLinked.ge
 
 def allocation (m : CC.Mem) : CC.Env × CC.Mem :=
   CC.doAllocVariables world.genv_cenv CC.emptyEnv m

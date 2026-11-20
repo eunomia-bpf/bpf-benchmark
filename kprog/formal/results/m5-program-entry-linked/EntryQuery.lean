@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryAllocation.allocation_corresponds
+#print axioms Arm64ProgramEntryAllocation.allocation_corresponds
+#check Arm64ProgramEntryCall.function_binding
+#print axioms Arm64ProgramEntryCall.function_binding
+#check Arm64ProgramEntryCall.input_binding
+#print axioms Arm64ProgramEntryCall.input_binding
+#check Arm64ProgramEntryTail.callback_binding
+#print axioms Arm64ProgramEntryTail.callback_binding
+#check Arm64ProgramEntryResources.reached_body
+#print axioms Arm64ProgramEntryResources.reached_body
+#check Arm64ProgramEntryInitialized.entry_initialized
+#print axioms Arm64ProgramEntryInitialized.entry_initialized
+#check Arm64ProgramEntryRegisterView.represents
+#print axioms Arm64ProgramEntryRegisterView.represents
+#check Arm64ProgramEntryRegisterView.entry_represents
+#print axioms Arm64ProgramEntryRegisterView.entry_represents

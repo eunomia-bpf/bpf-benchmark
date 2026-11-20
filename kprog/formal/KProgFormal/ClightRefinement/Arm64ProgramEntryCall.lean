@@ -132,15 +132,15 @@ def inputBlock : CC.Block := CC.Positive.ofNat 59
 theorem function_binding :
     CC.Genv.findSymbol world.genv_genv Arm64ProgramFixture._arm64_execute_compile = some functionBlock ∧
     CC.Genv.findFunctPtr world.genv_genv functionBlock =
-      some (.Internal Arm64ProgramFixture.f_arm64_execute_compile) := by
-  constructor <;> rfl
+      some (.Internal Arm64ProgramFixture.f_arm64_execute_compile) :=
+  Arm64ProgramEntryLinked.wrapper_binding
 
 /-- The external extraction boundary has its real production block and full
 imported signature. The old producer's hard-coded64 is not assumed. -/
 theorem input_binding :
     CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input = some inputBlock ∧
-    CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction := by
-  constructor <;> rfl
+    CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction :=
+  Arm64ProgramEntryLinked.input_binding
 
 theorem input_unshadowed (initial : CC.Mem) :
     (allocation initial).1.get Arm64Entry._native_lab_entry_input = none := by
@@ -148,6 +148,11 @@ theorem input_unshadowed (initial : CC.Mem) :
       CC.varNames Arm64ProgramFixture.f_arm64_execute_compile.fn_vars := by decide +kernel
   simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
     (allocation_valid initial) absent
+
+private theorem pointer_call (environment : CC.CGenv) (block : CC.Block) (callee : CC.FunDef)
+    (bound : CC.Genv.findFunctPtr environment.genv_genv block = some callee) :
+    CC.Genv.findFunct environment.genv_genv (.Vptr block 0) = some callee := by
+  exact bound
 
 /-- Global resolution and the actual one-step entry hold together. This
 reaches the function's real start; no pre-header statement is skipped. -/
@@ -160,7 +165,7 @@ theorem entry_at_symbol (initial : CC.Mem) (ctx : CC.Val) (k : CC.Cont) :
       (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramFixture.f_arm64_execute_compile.fn_body
         k (allocation initial).1 (initialTemps ctx) (allocation initial).2) := by
   refine ⟨function_binding.1, ?_, entry_internal initial ctx k⟩
-  change CC.Genv.findFunctPtr world.genv_genv functionBlock = _
-  exact function_binding.2
+  exact pointer_call world functionBlock (.Internal Arm64ProgramFixture.f_arm64_execute_compile)
+    function_binding.2
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryCall

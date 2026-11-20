@@ -16,8 +16,8 @@ def callbackFunction (store : Bool) : CC.FunDef :=
 /-- Both symbols and function bodies are those in the actual production world. -/
 theorem callback_binding (store : Bool) :
     CC.Genv.findSymbol world.genv_genv (payloadCallbackName store) = some (callbackBlock store) ∧
-    CC.Genv.findFunctPtr world.genv_genv (callbackBlock store) = some (callbackFunction store) := by
-  cases store <;> constructor <;> rfl
+    CC.Genv.findFunctPtr world.genv_genv (callbackBlock store) = some (callbackFunction store) :=
+  Arm64ProgramEntryLinked.callback_binding store
 
 /-- Callback pointers differ from those in the extracted producer world. -/
 theorem callback_blocks_differ : ∀ store,
@@ -106,7 +106,7 @@ private theorem tail_rhs_0 (initial before : CC.Mem) (temps : CC.TempEnv)
   rcases which with rfl | rfl | rfl | rfl
   all_goals run_tac normalize_rhs_goal
   all_goals simp +decide [sourceType, actualValue, actualInputValue, tailValue, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.accessMode, b0, b1, uload, sload, callback_name_fixed false, stack_layout.1, stack_layout.2.1, stack_layout.2.2, CC.tvolatile, CC.tattr, CC.tarray, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add, CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
-  all_goals rfl
+  all_goals run_tac Arm64ProgramEntryLinked.sourceEquality
 
 private theorem tail_rhs_1 (initial before : CC.Mem) (temps : CC.TempEnv)
     (sources : (i : Fin 9) → TailLocal initial i) (i : Fin 16)
@@ -120,7 +120,7 @@ private theorem tail_rhs_1 (initial before : CC.Mem) (temps : CC.TempEnv)
   rcases which with rfl | rfl | rfl | rfl
   all_goals run_tac normalize_rhs_goal
   all_goals simp +decide [sourceType, actualValue, actualInputValue, tailValue, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.accessMode, b2, ustore, sstore, callback_name_fixed true, CC.tvolatile, CC.tattr, CC.tarray, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add, CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
-  all_goals rfl
+  all_goals run_tac Arm64ProgramEntryLinked.sourceEquality
 
 private theorem tail_rhs_2 (initial before : CC.Mem) (temps : CC.TempEnv)
     (sources : (i : Fin 9) → TailLocal initial i) (i : Fin 16)
@@ -134,7 +134,7 @@ private theorem tail_rhs_2 (initial before : CC.Mem) (temps : CC.TempEnv)
   rcases which with rfl | rfl | rfl | rfl
   all_goals run_tac normalize_rhs_goal
   all_goals simp +decide [sourceType, actualValue, actualInputValue, tailValue, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.accessMode, b3, b4, CC.tvolatile, CC.tattr, CC.tarray, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add, CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
-  all_goals rfl
+  all_goals run_tac Arm64ProgramEntryLinked.sourceEquality
 
 private theorem tail_rhs_3 (initial before : CC.Mem) (temps : CC.TempEnv)
     (sources : (i : Fin 9) → TailLocal initial i) (i : Fin 16)
@@ -153,7 +153,7 @@ private theorem tail_rhs_3 (initial before : CC.Mem) (temps : CC.TempEnv)
   all_goals run_tac normalize_rhs_goal
   all_goals simp only [CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
     b5, b6, b7, b8, ite_true]
-  all_goals rfl
+  all_goals run_tac Arm64ProgramEntryLinked.sourceEquality
 
 /-- The actual RHS values use derived actual locals and actual callback
 blocks, preserving the distinct producer/production callback addresses. -/

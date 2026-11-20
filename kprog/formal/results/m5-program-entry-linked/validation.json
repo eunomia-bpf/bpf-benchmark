@@ -1,7 +1,7 @@
 {
   "step": "M5 actual fixture/generic-handler complete-unit link foundation",
-  "status": "foundation-pass-entry-world-pending",
-  "recorded_utc": "2026-11-20T02:03:11Z",
+  "status": "linked-entry-pass-full-pending",
+  "recorded_utc": "2026-11-20T02:20:51Z",
   "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-linked",
   "checks": {
     "link-probe1": {
@@ -108,11 +108,138 @@
       "workers": 1,
       "nice": 0,
       "address_space_bytes": 34359738368
+    },
+    "allocation1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation"
+      ],
+      "exit": 0,
+      "seconds": 13.825602293014526,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "jobs": 149
+    },
+    "entry1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView"
+      ],
+      "exit": 1,
+      "seconds": 179.9514229297638,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "tail1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryTail"
+      ],
+      "exit": 0,
+      "seconds": 96.68188524246216,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "jobs": 171
+    },
+    "entry2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView"
+      ],
+      "exit": 1,
+      "seconds": 39.02779245376587,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "call1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryCall"
+      ],
+      "exit": 1,
+      "seconds": 31.10478663444519,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "call2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryCall"
+      ],
+      "exit": 1,
+      "seconds": 26.123143196105957,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "call3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryCall"
+      ],
+      "exit": 0,
+      "seconds": 30.875712633132935,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "jobs": 174
+    },
+    "entry3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView"
+      ],
+      "exit": 0,
+      "seconds": 149.56201934814453,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "jobs": 197
+    },
+    "entry-query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-linked/EntryQuery.lean"
+      ],
+      "exit": 0,
+      "seconds": 3.2437565326690674,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
     }
   },
   "public_query_counts": {
-    "types": 12,
-    "axiom_reports": 12
+    "foundation_types": 12,
+    "foundation_axiom_reports": 12,
+    "linked_entry_types": 8,
+    "linked_entry_axiom_reports": 8,
+    "total_types": 20,
+    "total_axiom_reports": 20
   },
   "axiom_reports": {
     "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.linked_source": [
@@ -201,7 +328,8 @@
     "link-probe1": "removed an invalid namespace open; the merge metadata was already positive but the command exited1",
     "focused1": "indexed-row bound elaboration exceeded recursion depth; replaced singletons with bounded source slices and added Lean tactic import",
     "focused3": "deep meta rfl on linked globalenv exceeded recursion; direct kernel-checked source reflexivity used instead",
-    "focused4": "kernel timeout comparing input through two complete environments; isolated binding module and stated original external declaration directly"
+    "focused4": "kernel timeout comparing input through two complete environments; isolated binding module and stated original external declaration directly",
+    "entry-world": "Reuse proven binding facts, kernel-check tail reflexivity and use generic pointer_call; all theorem statements retained."
   },
   "limits": {
     "maxHeartbeats": 200000,
@@ -309,9 +437,13 @@
   "lean_source_sha256": {
     "kprog/formal/KProgFormal.lean": "e325666d584de6fb5f071e8d46c2c19b37c3b4701d6918e1da21f26eac214ccf",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean": "e2d9dd74aacaa60c5a89ef8ba126dde26d73d2c2c14c000eff363b5a36f391c7",
-    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinkedBindings.lean": "dd29473dd601b942fdb7e16e8217196b48a0867e77d5b961c5193d484485fedc"
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinkedBindings.lean": "dd29473dd601b942fdb7e16e8217196b48a0867e77d5b961c5193d484485fedc",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAllocation.lean": "f2c2d8154255f41fe52980b10b9110d0ff76a74e5dcb834a03121a4056eb9969",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCall.lean": "11f232d791a5e61c07ae59e1fbc19936562aa2cbe58f7ec56cdca6d2f947848c",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryTail.lean": "01d054b479ff89f271ea0d6ed207cfa7454cc49e03586e70db3ed46d56f248de",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterView.lean": "3837e06d6e4c4ccac6dbc4770828c77d1c5322eddae1fa993626cdfe19bad033"
   },
-  "entry_world": "still the bare Fixture world; single-route migration to linked ge is the next step",
+  "entry_world": "Arm64ProgramEntryAllocation.world now equals linked ge; one route, no mode switch",
   "scope": "formal modules/root import/receipts/own todo line; no C/runtime/compiler/kernel/image/base/benchmark/paper/design edits",
   "goal_closure": {
     "M5": "open",
@@ -320,5 +452,67 @@
     "last_full_Lake": "9053a09ce:358 jobs; no full run yet for current batch",
     "last_whole_make_check": "5236c0e9677f635526fdd515cde5195b2ba0810c",
     "final_full_checks": "fresh final Lake/make check and frozen-byte confirmation remain due after M5/M6"
+  },
+  "foundation_commit": "c387115f3f18f88045331c44de5de7a85b0552e9",
+  "entry_axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.allocation_corresponds": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.function_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.input_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.callback_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.reached_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.represents": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.entry_represents": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "entry_migration": {
+    "allocation": "149 jobs pass; original memory/env correspondence and local declaration/type mapping retained",
+    "tail": "171 jobs pass; original layouts and callback values retained, existing binding proof reused, final reflexivity checked directly by kernel",
+    "call": "174 jobs pass; wrapper/native input established bindings reused; generic zero-offset pointer-call lemma avoids concrete-environment meta expansion",
+    "entry": "197 jobs pass; original98 traces/92 typed readbacks/initialized values/storage/Freeable/caller/access/frontier and architectural Represents retained in linked world",
+    "failed_attempts": "entry1 tail meta-depth; entry2/call1 concrete pointer-call meta-depth; call2 over-specific Boolean simp. All retained; no proof-cap increase.",
+    "native_admission": "ProviderAt, ctx ValueRep and NativeBindings remain explicit; actual generic handler/native composition still open"
+  },
+  "full_confirmation": {
+    "status": "pending",
+    "planned_command": "run.py lake-build1 lake build",
+    "nice": 19
   }
 }

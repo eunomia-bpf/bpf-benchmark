@@ -21,9 +21,10 @@ normalization without increasing proof limits. Bounded source-row slices avoid
 unnecessary indexed-row bound elaboration. The complete link equality checks
 all rows, and wellformedness checks the imported composite construction.
 
-The new linked world must become the actual entry route in
-`Arm64ProgramEntryAllocation.world`. Its allocation/layout/native-input/callback
-facts and reached architectural register relation are then rechecked there.
+The actual entry route now uses this environment through
+`Arm64ProgramEntryAllocation.world`, with no old/new mode. Allocation, layouts,
+native-input/callback bindings and the reached architectural register relation
+have been rechecked in that linked world.
 ProviderAt, context ValueRep and native ABI bindings remain explicit. Genuine
 handler/native execution, native input/original-context/all-outcome admission,
 relative caches/physical memory/ranges/aliases/control, return correspondence
@@ -52,5 +53,13 @@ axiom. The original proof limits are unchanged. Earlier elaboration and kernel
 lookup failures remain in the raw logs. The light focused compiler was returned
 from nice19 to normal priority after its measured peak stayed below7GiB: the
 coordination condition applies nice19 to full builds and compiles above16GiB.
-Full builds retain nice19. The entry-world migration is still pending in this
-foundation receipt and will be recorded separately.
+Full builds retain nice19. The initial foundation receipt recorded entry-world migration as pending.
+The completed migration is recorded below and in validation.json.
+
+The linked-world allocation subset passed 149 jobs, tail171, call174 and the
+complete reached-body/register subset197. Eight additional public type/axiom
+queries passed. The same98 ordered traces,92 typed header readbacks and caller
+resources remain, with the native/provider/context contracts explicit. Existing
+wrapper/input/callback binding facts are reused. A generic zero-offset call
+lemma and direct kernel checks replace deep concrete-environment `rfl` steps;
+no statement, C body or proof cap was weakened. One full confirmation is pending.
