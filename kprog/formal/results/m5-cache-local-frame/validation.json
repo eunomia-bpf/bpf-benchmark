@@ -72,8 +72,39 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 204.26742434501648,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 285,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-warm-sp-reader/full.log",
+    "resource_policy": "Coordinator 2026-11-19T18:18:59Z host Lake CPU8-23 without timing lock"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-cache-local-frame",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "b759ef47eb12eaebf25661e4be6a054c25e0e559",
+  "batch_checkpoints": {
+    "m5-cache-local-frame": "b759ef47eb12eaebf25661e4be6a054c25e0e559",
+    "m5-warm-cache-resource": "09d8f37eea606f204ac6c595864e635985ea5f18",
+    "m5-warm-sp-reader": "9b759f0e105a5447ec8b136d8a7c89a2f9f471e8"
+  },
+  "root_artifact_modified_utc": "2026-11-20T08:15:03.522452+00:00"
 }

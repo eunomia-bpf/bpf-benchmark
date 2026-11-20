@@ -22,6 +22,7 @@ Focused actual-world check passes 220 jobs and four public type/axiom queries at
 original 200000-heartbeat/512-depth caps on CPU 17, nice 0, one worker and
 32 GiB address space. The initial finite failures were adjacent documentation
 comments and explicit64-bit literal normalization. Dependency rebuilds and all
-failed logs are retained. Whole proof-library confirmation follows this batch.
+failed logs are retained. Whole `lake build KProgFormal` proof-library/root confirmation passes 285
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
 Raw: `/workspaces/kprog-raw/formal/m5-warm-sp-reader`.
 M5/M6 remain open; completed ISA-family count is zero.

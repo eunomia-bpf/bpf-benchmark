@@ -22,5 +22,5 @@ Completed ISA-family count is zero; M5/M6 remain open.
 
 Focused checks pass: cold call 227 jobs, entry resources 236, all affected
 consumers 237 and nine public type/axiom queries at original caps on CPU 17,
-nice 0, one worker and 32 GiB address space. Whole proof-library confirmation
-follows this batch. Raw: `/workspaces/kprog-raw/formal/m5-warm-cache-resource`.
+nice 0, one worker and 32 GiB address space. Whole `lake build KProgFormal` proof-library/root confirmation passes 285
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space. Raw: `/workspaces/kprog-raw/formal/m5-warm-cache-resource`.
