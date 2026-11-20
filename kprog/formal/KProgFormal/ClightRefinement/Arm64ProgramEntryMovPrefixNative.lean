@@ -36,7 +36,7 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (noError : read_err s.machine = .None)
     (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
     (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding) :
-    ∃ entry : HeaderLocal initial, ∃ ready temps, ∃ traces : List CC.Trace,
+    ∃ entry : HeaderLocal initial, ∃ header : (j : Fin 12) → HeaderSourceLocal initial j, ∃ ready temps, ∃ traces : List CC.Trace,
       traces.length = 98 ∧
       CC.Star (CC.Step2 world)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
@@ -71,7 +71,9 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
       after.contents = secondWritten.contents ∧ after.nextblock = secondWritten.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world middle).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false ready.nextblock after (.Vptr entry.block 0) origins.stack := by
   have setupPc : read_pc (nativeSetup s origins fields).machine = read_pc s.machine :=
     Arm64ProgramEntryBodyView.native_other s origins fields .PC (by intro equal; cases equal)
       (by intro flag equal; cases equal)
@@ -89,18 +91,18 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     simpa only [fetch_inst, program] using keepFetched
   have checked := Arm64MovPairNative.steps (nativeSetup s origins fields) first keep (fields 0) (fields 1)
     imm column negate literal firstDecoded keepDecoded setupError setupFirst setupKeep
-  obtain ⟨entry, ready, temps, traces, length, entryRun, continuation⟩ :=
+  obtain ⟨entry, header, ready, temps, traces, length, entryRun, continuation⟩ :=
     Arm64ProgramEntryMovPrefix.entry_pair initial ctxBlock ctxOfs k addresses ctxWord context values provider
       flags flagProvider vectors vectorProvider origins s native fields old reads
-  refine ⟨entry, ready, temps, traces, length, entryRun, ?_⟩
+  refine ⟨entry, header, ready, temps, traces, length, entryRun, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, registers,
       frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩ :=
     continuation supplied trace origin outcome
   refine ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, ?_, ?_, ?_, ?_, ?_,
     frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩
+    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩
   · rw [checked.2]
     exact (Arm64Registers.cursor after (.Vptr entry.block 0) _
       (read_pc (nativeSetup s origins fields).machine + 8#64)).mpr registers

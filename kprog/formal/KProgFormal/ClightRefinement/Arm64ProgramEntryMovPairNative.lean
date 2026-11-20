@@ -71,17 +71,19 @@ theorem corresponds {initial before supplied : CC.Mem} {entry : HeaderLocal init
       after.contents = secondWritten.contents ∧ after.nextblock = secondWritten.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world middle).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, registers,
       frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩ :=
     Arm64ProgramEntryMovPair.execute storage header pointers access bound cold addresses origins s represented
       le k ctxBlock ctxOfs mark priority ctx old markRead priorityRead trace provider outcome
   have native := Arm64MovPairNative.steps s first keep mark priority imm column negate literal
     firstDecoded keepDecoded noError firstFetched keepFetched
   refine ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, ?_, ?_, ?_, ?_, ?_,
     frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩
+    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩
   · rw [native.2]
     exact (Arm64Registers.cursor after (.Vptr entry.block 0) _ (read_pc s.machine + 8#64)).mpr registers
   · rw [native.1]

@@ -60,9 +60,11 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
       after.contents = secondWritten.contents ∧ after.nextblock = secondWritten.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world middle).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
   obtain ⟨firstWritten, middle, middleStorage, word, tag, first, firstRegisters, firstFrame,
-      priorityLoaded, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased⟩ :=
+      priorityLoaded, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased, middlePointers, middleWarm⟩ :=
     Arm64ProgramEntryMovCall.execute storage header pointers access bound cold addresses origins s represented
       le k ctxBlock ctxOfs mark priority ctx old markRead priorityRead trace provider outcome
   have middleRegisters := (Arm64RegisterStorageFrontier.represents_iff middleStorage before.nextblock bound
@@ -72,16 +74,18 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
     exact Nat.le_trans bound (FrameBelow.allocVariables (Arm64MovImmediate.allocated_bound world before)
       before.nextblock (Nat.le_refl _)).1
   obtain ⟨secondWritten, after, finalStorage, finalWord, finalTag, second, secondRegisters, secondFrame,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, kept⟩ :=
     execute_keep middleStorage middleBound addresses origins
       (Arm64RegisterWrite.nativeUpdate s 1 (mark.setWidth 64) false) (mark.setWidth 64) priority word tag
       middleRegisters (priorityTemps (markTemps le mark) priority) k priorityLoaded
   have finalRegisters := (Arm64RegisterStorageFrontier.represents_iff finalStorage before.nextblock bound
     addresses origins _).mpr ((Arm64RegisterStorageFrontier.represents_iff finalStorage middle.nextblock middleBound
       addresses origins _).mp secondRegisters)
+  have finalPointers := kept.pointers header middlePointers
+  have finalWarm := kept.warm before.nextblock header bound middlePointers false origins.stack middleWarm
   refine ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
     firstFrame.trans secondFrame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased⟩
+    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩
   simpa only [CC.Eapp, CC.E0, List.append_nil] using star_trans first second.sound
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovPair

@@ -1,6 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64MovKeepLinkedCall
 import KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation
-import KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier
+import KProgFormal.ClightRefinement.Arm64CacheLocalFrame
 
 set_option Elab.async false
 
@@ -40,7 +40,8 @@ theorem call {initial before : CC.Mem} {entry : HeaderLocal initial}
       after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      Arm64CacheLocalFrame.Kept initial before after i := by
   obtain ⟨written, after, result, run, freed, freeFrame, contents, next, released⟩ :=
     call_scalar_word_returns_bound world Linked.bindings storage unused addresses i bits imm column narrow word tag
   obtain ⟨comparison, comparisonResult⟩ := Arm64RegisterWrite.write storage i (mergeWord bits imm column) narrow
@@ -68,8 +69,12 @@ theorem call {initial before : CC.Mem} {entry : HeaderLocal initial}
     fun block owned => (Arm64Nop.entry_frame world before) block (Nat.lt_of_lt_of_le owned initialBound)
   have freeCaller : FrameBelow initial.nextblock written after :=
     fun block owned => freeFrame block (Nat.lt_of_lt_of_le owned initialBound)
+  have allocationKept := Arm64CacheLocalFrame.of_frame before.nextblock i bound (Arm64Nop.entry_frame world before)
+  have writerKept : Arm64CacheLocalFrame.Kept initial (Arm64Nop.allocation world before).2 written i := result.local_load
+  have freeKept := Arm64CacheLocalFrame.of_frame before.nextblock i bound freeFrame
+  have kept := (allocationKept.trans writerKept).trans freeKept
   refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
-    (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released⟩
+    (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released, kept⟩
   simpa only [Continuation.state, Continuation.extend] using Continuation.run_extend k valid run
 
 end KProgFormal.ClightRefinement.Arm64MovKeep.LinkedWord

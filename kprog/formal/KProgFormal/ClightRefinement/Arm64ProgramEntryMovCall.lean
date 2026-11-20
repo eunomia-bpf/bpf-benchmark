@@ -269,8 +269,10 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
       after.contents = written.contents ∧ after.nextblock = (Arm64Nop.allocation world before).2.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
-  obtain ⟨written, after, finalStorage, word, tag, call, registers, frame, freed, freeFrame, contents, next, released⟩ :=
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
+  obtain ⟨written, after, finalStorage, word, tag, call, registers, frame, freed, freeFrame, contents, next, released, finalPointers, finalWarm⟩ :=
     Arm64MovImmediate.LinkedCall.entry_call storage header pointers access bound cold addresses origins s represented mark trace
       provider outcome (callCont initial le k mark) rfl
   have entered := enter entry le k before ctxBlock ctxOfs mark ctx markRead
@@ -280,7 +282,7 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
   have nextRead := (Arm64ProgramEntryBody.context_read_frame frame ctxBlock old ctxOfs 1).trans priorityRead
   have priorityLoad := priority_ready initial (markTemps le mark) k after ctxBlock ctxOfs priority nextCtx nextRead
   refine ⟨written, after, finalStorage, word, tag, ?_, registers, frame, CC.PTree.gss _ _ _,
-    freed, freeFrame, contents, next, released⟩
+    freed, freeFrame, contents, next, released, finalPointers, finalWarm⟩
   simpa only [CC.Eapp, CC.E0, List.nil_append, List.append_nil] using
     star_trans (star_trans entered.sound call) (returned.trans priorityLoad).sound
 
@@ -419,15 +421,16 @@ theorem execute_keep {initial before : CC.Mem} {entry : HeaderLocal initial}
       after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      Arm64CacheLocalFrame.Kept initial before after 1 := by
   obtain ⟨written, after, finalStorage, finalWord, finalTag, call, registers, frame, freed,
-      freeFrame, contents, next, released⟩ :=
+      freeFrame, contents, next, released, kept⟩ :=
     Arm64MovKeep.LinkedWord.call storage bound (keepOperands entry.block priority) addresses origins s
       1 bits (priority.setWidth 64) 1 false word tag represented (keepCont initial le k) rfl
   have entered := keep_enter entry le k before priority loaded
   have returned := keep_leave initial le k after
   refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, registers, frame, freed,
-    freeFrame, contents, next, released⟩
+    freeFrame, contents, next, released, kept⟩
   exact (entered.trans call).trans returned
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovCall

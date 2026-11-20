@@ -1,5 +1,5 @@
 import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead
-import KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier
+import KProgFormal.ClightRefinement.Arm64CacheLocalFrame
 
 set_option Elab.async false
 
@@ -46,7 +46,9 @@ theorem entry_call {initial before supplied : CC.Mem} {entry : HeaderLocal initi
       after.contents = written.contents ∧ after.nextblock = (Arm64Nop.allocation world before).2.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
   let allocated := (Arm64Nop.allocation world before).2
   let env := (Arm64Nop.allocation world before).1
   have halloc := Arm64MovImmediate.allocated_bound world before
@@ -116,8 +118,21 @@ theorem entry_call {initial before supplied : CC.Mem} {entry : HeaderLocal initi
     change CC.Mem.load .Mint8unsigned after ((cachedStorage.tables true).cellBlock 1) 0 = _
     exact (freeFrame.load .Mint8unsigned ((cachedStorage.tables true).cellBlock 1) 0
       (Nat.lt_of_lt_of_le (local_owned initial _ _ _ ((cachedStorage.tables true).cellBinding 1)) bound)).trans result.tag
+  have cachedPointers : ∀ j, CC.Mem.load CC.Mptr cached entry.block (8 * (j.val : Int)) =
+      some (.Vptr (header j).block 0) := by
+    intro j
+    exact (cacheFrame.local_load _ _ _ entry.binding (by decide +kernel) (by decide +kernel)
+      CC.Mptr _).trans (allocatedPointers j)
+  have writerKept : Arm64CacheLocalFrame.Kept initial cached written 1 := result.local_load
+  have freeKept := Arm64CacheLocalFrame.of_frame before.nextblock (1 : Fin 31) bound freeFrame
+  have kept := writerKept.trans freeKept
+  have cachedWarm : Arm64RegisterReads.WarmEntryCache false cached.nextblock cached (.Vptr entry.block 0) origins.stack := by
+    simpa only [cacheFrame.nextblock] using warm
+  have priorWarm := (Arm64CacheLocalFrame.warm_iff before.nextblock header bound cachedPointers false origins.stack).mpr cachedWarm
+  have finalWarm := kept.warm before.nextblock header bound cachedPointers false origins.stack priorWarm
+  have finalPointers := kept.pointers header cachedPointers
   refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
-    (allocateCaller.trans caller).trans freeCaller, freed, freeFrame, contents, freeNext.trans next, released⟩
+    (allocateCaller.trans caller).trans freeCaller, freed, freeFrame, contents, freeNext.trans next, released, finalPointers, finalWarm⟩
   have run : CC.Star (CC.Step2 world)
       (.Callstate (.Internal Arm64Nop.handler) (Dispatch.arguments (LinkedRead.entry_operands entry.block mark) false)
         .Kstop before) trace (.Returnstate .Vundef .Kstop after) := by

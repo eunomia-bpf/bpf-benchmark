@@ -63,7 +63,8 @@ theorem keep_corresponds {initial before : CC.Mem} {entry : HeaderLocal initial}
       after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      Arm64CacheLocalFrame.Kept initial before after 1 := by
   have observed : Arm64EntryMemory.gpr before.nextblock before (.Vptr entry.block 0) (1 : Fin 31).val =
       some (.Vlong bits, .Vint 0) := by
     rw [Arm64RegisterWrite.storage_gpr storage 1, word, tag]
@@ -73,10 +74,10 @@ theorem keep_corresponds {initial before : CC.Mem} {entry : HeaderLocal initial}
   have native := Arm64MovKeep.Native.reference_word_step s instruction 1 (priority.setWidth 64) 1 false
     (by decide) decoded noError fetched
   obtain ⟨written, after, finalStorage, finalWord, finalTag, run, registers, frame, freed,
-      freeFrame, contents, next, released⟩ :=
+      freeFrame, contents, next, released, kept⟩ :=
     execute_keep storage bound addresses origins s bits priority word tag represented le k loaded
   refine ⟨written, after, finalStorage, finalWord, finalTag, run, ?_, ?_, ?_, frame, freed,
-    freeFrame, contents, next, released⟩
+    freeFrame, contents, next, released, kept⟩
   · rw [native]
     exact (Arm64Registers.cursor after (.Vptr entry.block 0)
       (Arm64RegisterWrite.nativeUpdate s 1

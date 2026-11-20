@@ -1,0 +1,31 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefixNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPairNative
+
+open KProgFormal.ClightRefinement
+
+#check Arm64MovImmediate.LinkedCall.entry_call
+#print axioms Arm64MovImmediate.LinkedCall.entry_call
+
+#check Arm64MovKeep.LinkedWord.call
+#print axioms Arm64MovKeep.LinkedWord.call
+
+#check Arm64ProgramEntryMovCall.execute
+#print axioms Arm64ProgramEntryMovCall.execute
+
+#check Arm64ProgramEntryMovCall.execute_keep
+#print axioms Arm64ProgramEntryMovCall.execute_keep
+
+#check Arm64ProgramEntryMovCall.keep_corresponds
+#print axioms Arm64ProgramEntryMovCall.keep_corresponds
+
+#check Arm64ProgramEntryMovPair.execute
+#print axioms Arm64ProgramEntryMovPair.execute
+
+#check Arm64ProgramEntryMovPairNative.corresponds
+#print axioms Arm64ProgramEntryMovPairNative.corresponds
+
+#check Arm64ProgramEntryMovPrefix.entry_pair
+#print axioms Arm64ProgramEntryMovPrefix.entry_pair
+
+#check Arm64ProgramEntryMovPrefixNative.entry_corresponds
+#print axioms Arm64ProgramEntryMovPrefixNative.entry_corresponds
