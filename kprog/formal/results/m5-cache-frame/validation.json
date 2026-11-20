@@ -94,12 +94,13 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
+    "exit": 0,
+    "seconds": 105.66442608833313,
     "cpus_allowed": [
       16,
       17,
@@ -112,9 +113,13 @@
     ],
     "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 272,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-cache-frame",
   "initial_raw": "/workspaces/kprog-raw/formal/m5-sp-linked-cold/cache-frame1",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "0a84d23e2e53b392b41e5fd35315f1a8fc209005"
 }

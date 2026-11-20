@@ -8,6 +8,6 @@ The cache resource uses canonical allocation bindings and retained header pointe
 
 The existing flag pointer-walk lemma is made public and reused, as were the existing GPR/vector observers. No observer, ISA interpreter or runtime C body is duplicated. The native step/caller dispatch, original-input/physical-memory admission, all-outcome and final-return obligations remain open.
 
-Focused 220 jobs and 11 public type/axiom queries pass at the original 200000-heartbeat/512-recursion limits, CPU17, one worker and 32 GiB address space. Imported execution axioms remain explicit in validation.json. Raw logs retain the finite field-name normalization retry. Whole proof-library confirmation is pending.
+Focused 220 jobs and 11 public type/axiom queries pass at the original 200000-heartbeat/512-recursion limits, CPU17, one worker and 32 GiB address space. Imported execution axioms remain explicit in validation.json. Raw logs retain the finite field-name normalization retry. Whole KProgFormal proof-library/root confirmation passes 272 jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space. Executable/tool native builds are excluded.
 
 Next connect the actual MOV_IMM SRC32 callsite and suffix to this framed reader, preserving the actual returned-word temporaries and provider trace, then handle unrestricted mark/priority operands. M5/M6 and O1/O2/O4 recount remain open; completed ISA-family count is 0.
