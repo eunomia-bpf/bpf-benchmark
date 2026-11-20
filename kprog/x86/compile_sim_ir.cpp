@@ -18,15 +18,11 @@
 #include <cstdlib>
 #include <map>
 #include <set>
-#include "../../vendor/bpf/native-lpm.h"
 using namespace llvm;
 [[noreturn]] static void fail(const Twine &s) { errs()<<s<<'\n'; std::exit(1); }
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
 static cl::list<std::string> ArrayMaps("array-map");
-static cl::list<std::string> LpmMaps("lpm-map");
-static cl::opt<std::string> LpmLayout("lpm-layout");
-static cl::opt<std::string> HelperSource("helper-source");
 static cl::opt<std::string> HelperList("helper-list");
 #define HELPER_NAME(name) "bpf_" #name
 static const char *HelperNames[] = {__BPF_FUNC_MAPPER(HELPER_NAME)};
@@ -171,30 +167,16 @@ int main(int argc,char **argv) {
   }
   unsigned lowered=0;
   std::set<std::string> inlinedHelpers;
-  std::map<std::string,unsigned> lpmMaps;
-  std::set<unsigned> lpmShapes;
-  for (const auto &item:LpmMaps) {
-    auto parts=StringRef(item).rsplit(':'); unsigned size;
-    if (parts.first.empty() || parts.second.getAsInteger(10,size) || size<=4)
-      fail("LPM map requires name:key_size");
-    lpmMaps.emplace(parts.first.str(),size);
-  }
   for (auto *call:calls) {
     call->setTailCallKind(CallInst::TCK_None);
     if (auto *expr=dyn_cast<ConstantExpr>(call->getCalledOperand())) {
       auto *id=expr->getOpcode()==Instruction::IntToPtr?dyn_cast<ConstantInt>(expr->getOperand(0)):nullptr;
       if (!id || id->getZExtValue()>=std::size(HelperNames)) fail("unknown simulator helper target");
-      std::string localName;
       StringRef name = HelperNames[id->getZExtValue()];
       if (id->equalsInt(BPF_FUNC_map_lookup_elem))
         if (auto *map=dyn_cast<GlobalVariable>(call->getArgOperand(0)->stripPointerCasts())) {
           for (const auto &array:ArrayMaps)
             if (map->getName()==array) name="__kprog_array_lookup";
-          if (auto found=lpmMaps.find(map->getName().str());found!=lpmMaps.end()) {
-            lpmShapes.insert(found->second);
-            localName="__kprog_lpm_lookup_"+std::to_string(found->second);
-            name=localName;
-          }
         }
       if (id->equalsInt(BPF_FUNC_probe_read_user)) name="__kprog_probe_read_user";
       if (id->equalsInt(BPF_FUNC_probe_read_kernel)) name="__kprog_probe_read_kernel";
@@ -246,7 +228,6 @@ int main(int argc,char **argv) {
   errs()<<"native private stack accesses normalized="<<normalizePrivateStack(*m)<<'\n';
   errs()<<"native unspecified inputs frozen="<<freezeUnspecifiedInputs(*m)<<'\n';
   if (verifyModule(*m,&errs())) return 1;
-  if (!lpmShapes.empty() && HelperSource.empty()) fail("LPM C helpers need --helper-source");
   std::error_code ec; ToolOutputFile out(Output,ec,sys::fs::OF_None);
   if (ec) fail(ec.message());
   WriteBitcodeToFile(*m,out.os()); out.keep(); out.os().flush();
@@ -257,34 +238,6 @@ int main(int argc,char **argv) {
     for (const auto &name:inlinedHelpers) helpers.os()<<name<<'\n';
     helpers.keep(); helpers.os().flush();
     if (helpers.os().has_error()) fail("write native simulator helper list failed");
-  }
-  if (!HelperSource.empty()) {
-    ToolOutputFile source(HelperSource,ec,sys::fs::OF_Text);
-    if (ec) fail(ec.message());
-    if (!lpmShapes.empty()) {
-      SmallVector<StringRef,5> parts; StringRef(LpmLayout).split(parts,',');
-      if (parts.size()!=5) fail("LPM layout requires root,child,prefix,flags,data offsets");
-      SmallVector<unsigned,5> fields;
-      for (auto part:parts) {
-        unsigned value; if (part.getAsInteger(10,value)) fail("invalid LPM field offset");
-        fields.push_back(value);
-      }
-#define KPROG_STRINGIFY_BODY(...) #__VA_ARGS__
-#define KPROG_STRINGIFY(...) KPROG_STRINGIFY_BODY(__VA_ARGS__)
-      source.os()<<KPROG_STRINGIFY(__KPROG_LPM_CODE)<<'\n';
-#undef KPROG_STRINGIFY
-#undef KPROG_STRINGIFY_BODY
-      for (auto size:lpmShapes) {
-        const uint64_t bytes=size-4;
-        source.os()<<"__attribute__((always_inline)) void *__kprog_lpm_lookup_"<<size
-          <<"(void *map,const void *key) { return __kprog_lpm_lookup(map,key,"
-          <<bytes<<','<<bytes*8;
-        for (auto field:fields) source.os()<<','<<field;
-        source.os()<<"); }\n";
-      }
-    }
-    source.keep(); source.os().flush();
-    if (source.os().has_error()) fail("write native helper C source failed");
   }
   errs()<<"native simulator operations lowered="<<lowered<<'\n';
 }

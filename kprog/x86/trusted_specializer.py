@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "kprog"))
 from trusted_generation import context_kind, declarations, validate_native, native_map_label
 from kernel_function_abi import describe as kernel_functions
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
-from inline_array import lookup_source, lpm_layout
+from inline_array import lookup_source
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
     ROOT / "kprog/x86/micro-prog/generate_micro_sim_proofs.py")
@@ -198,19 +198,17 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
     arrays = [native_map_label(m['name']) for m in artifacts['maps']
               if m['map_type'] == 2 and m.get('value_offset') is None]
-    lpms = [f"{native_map_label(m['name'])}:{m['key_size']}" for m in artifacts['maps']
+    lpms = [(native_map_label(m['name']), m['key_size']) for m in artifacts['maps']
             if m['map_type'] == 11 and m.get('value_offset') is None]
     helper_list = directory/'checked-simulator.helpers.txt'
-    helper = directory/'checked-simulator.helpers.c'
-    run([compiler, ir, '-o', lowered, '--helper-list', helper_list, '--helper-source', helper,
-         *[arg for name in arrays for arg in ('--array-map', name)],
-         *[arg for name in lpms for arg in ('--lpm-map', name)],
-         *(['--lpm-layout', lpm_layout(artifacts['kernel_btf'])] if lpms else [])])
+    # This is the installed tool's C lookup hook. The emitted C body selects
+    # exact LPM identities alongside ARRAY; B itself retains helper 1.
+    run([compiler, ir, '-o', lowered, '--helper-list', helper_list,
+         *[arg for name in arrays + [name for name, _ in lpms] for arg in ('--array-map', name)]])
     helpers = helper_list.read_text().splitlines()
     if helpers:
-        text = helper.read_text()
-        if '__kprog_array_lookup' in helpers:
-            text += lookup_source(artifacts['kernel_btf'])
+        helper = directory/'checked-simulator.helpers.c'
+        text = lookup_source(artifacts['kernel_btf'], lpms) if '__kprog_array_lookup' in helpers else ''
         if any(name.startswith('__kprog_probe_read_') for name in helpers):
             text += '#include ' + json.dumps(str(ROOT/'kprog/x86/micro-prog/inline_probe.c')) + '\n'
         helper.write_text(text)

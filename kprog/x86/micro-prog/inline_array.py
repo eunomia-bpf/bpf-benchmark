@@ -1,5 +1,7 @@
 """C ARRAY helper for native LTO of the checked simulator frontend."""
 import ctypes as c
+import json
+from pathlib import Path
 from kernel_function_abi import KernelTypes, Type
 
 
@@ -20,7 +22,7 @@ def field_offset(types, identity, field):
     return None
 
 
-def lookup_source(kernel_btf):
+def lookup_source(kernel_btf, lpms=()):
     types = KernelTypes(kernel_btf)
 
     try:
@@ -35,8 +37,22 @@ def lookup_source(kernel_btf):
         types.close()
     # kernel/bpf/arraymap.c:array_map_lookup_elem. The map type is selected
     # at link time; no runtime type dispatch or extra helper check is added.
-    return '''__attribute__((always_inline))
+    preamble = ''
+    choices = ''
+    if lpms:
+        offsets = lpm_layout(kernel_btf)
+        preamble = '#include ' + json.dumps(str(Path(__file__).with_name('native_lpm.h'))) + '\n__KPROG_LPM_CODE\n'
+        for index, (name, key_size) in enumerate(lpms):
+            alias = f'__kprog_lpm_map_{index}'
+            preamble += f'extern unsigned char {alias}[] __asm__({json.dumps(name)});\n'
+            choices += (f'    if (map == {alias}) return __kprog_lpm_lookup(map,key,'
+                        f'{key_size-4},{(key_size-4)*8},{offsets});\n')
+    # __kprog_array_lookup is the installed compiler's native C lookup ABI.
+    # Exact named LPM operands select their C body before the ARRAY body;
+    # LLVM folds the matching global-pointer identity after inlining.
+    return preamble + '''__attribute__((always_inline))
 void *__kprog_array_lookup(void *map, const void *key) {
+''' + choices + '''
     unsigned index = *(const unsigned *)key;
     if (index >= *(const unsigned *)((const char *)map + %(limit)d))
         return (void *)0;

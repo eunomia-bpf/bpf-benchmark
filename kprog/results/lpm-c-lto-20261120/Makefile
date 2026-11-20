@@ -3,10 +3,7 @@ RAW ?= /workspaces/kprog-raw/perf/lpm-c-lto-20261120
 TMP := /var/tmp/kprog-tmp/perf/lpm-c-lto
 TOOL := $(ROOT)/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto
 
-.PHONY: compiler check
-compiler:
-	$(MAKE) -C $(ROOT)/vendor/bpf $(TOOL)
-
+.PHONY: check
 check:
 	install -d $(RAW) $(TMP)
 	$(CXX) -std=c++20 -O1 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
@@ -43,10 +40,7 @@ generation:
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/generation.py $(RAW)
 
 STOCK_PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock
-.PHONY: stock-probe stock stock-guest
-stock-probe:
-	$(MAKE) -f $(ROOT)/kprog/results/cilium-headlen-20261119/Makefile archive-probe
-
+.PHONY: stock stock-guest
 stock:
 	install -d $(RAW)/probe-inputs $(RAW)/generation-inputs
 	date -u +%FT%TZ > $(RAW)/started
@@ -63,21 +57,6 @@ stock:
 
 stock-guest:
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/stock.py $(RAW)
-
-SIM_BUILD := /var/tmp/kprog-tmp/verified/checked-tools
-SIM_COMPILER := /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
-.PHONY: sim-compiler
-sim-compiler:
-	install -d $(SIM_BUILD)
-	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi \
-		$(ROOT)/kprog/x86/compile_sim_ir.cpp -o $(SIM_BUILD)/compile-sim-ir \
-		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
-
-.PHONY: sim-publish
-sim-publish:
-	flock -x /workspaces/.agent-state/kprog-lanes/locks/image \
-		flock -x /workspaces/.agent-state/kprog-lanes/locks/build-c \
-		install -m 0755 $(SIM_BUILD)/compile-sim-ir $(SIM_COMPILER)
 
 .PHONY: post-b
 post-b:

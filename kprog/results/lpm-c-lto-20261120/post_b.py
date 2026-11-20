@@ -7,10 +7,13 @@ import sys
 
 root=Path('/workspaces/repository');raw,stock=map(Path,sys.argv[1:]);raw.mkdir(parents=True,exist_ok=True)
 tmp=Path('/var/tmp/kprog-tmp/perf/lpm-c-lto')
-tool=Path('/var/tmp/kprog-tmp/verified/checked-tools/compile-sim-ir')
+tool=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir')
 here=root/'kprog/results/lpm-c-lto-20261120'
 layout=json.loads((here/'report.json').read_text())['layout']
 offsets=','.join(str(layout[name+'_OFF']) for name in ['ROOT','CHILD','PREFIX','FLAGS','DATA'])
+sys.path[:0]=[str(root/'kprog'),str(root/'kprog/x86/micro-prog')]
+from inline_array import lookup_source
+kernel='/workspaces/.agent-state/kprog-ck/build-x86/vmlinux'
 
 def run(args,name):
     child=subprocess.run(list(map(str,args)),capture_output=True,text=True)
@@ -19,13 +22,14 @@ def run(args,name):
 
 run(['clang-18','-target','bpf','-O1','-emit-llvm','-c',here/'post_b_fixture.c','-o',tmp/'post-b-input.bc'],'fixture-frontend')
 rows=[]
-for name,extra,expected in [('known',['--lpm-map','map_a:16','--lpm-map','map_b:16','--lpm-layout',offsets],1),
+for name,extra,expected in [('known',['--array-map','map_a','--array-map','map_b'],1),
                             ('unknown',[],2)]:
     source=tmp/'post-b-helpers.c';helpers=tmp/'post-b-helpers.txt';lowered=tmp/'post-b-native.bc'
-    run([tool,tmp/'post-b-input.bc','-o',lowered,'--helper-list',helpers,'--helper-source',source,*extra],name+'-lower')
+    run([tool,tmp/'post-b-input.bc','-o',lowered,'--helper-list',helpers,*extra],name+'-lower')
     selected=helpers.read_text().splitlines()
-    assert selected==(['__kprog_lpm_lookup_16'] if name=='known' else []),selected
+    assert selected==(['__kprog_array_lookup'] if name=='known' else []),selected
     if selected:
+        source.write_text(lookup_source(kernel,[('map_a',16),('map_b',16)]))
         (raw/(name+'-helper.c')).write_text(source.read_text())
         run(['clang-18','-O3','-mgeneral-regs-only','-emit-llvm','-c',source,'-o',tmp/'post-b-helpers.bc'],name+'-helpers')
         run(['llvm-link-18',lowered,tmp/'post-b-helpers.bc','-o',tmp/'post-b-linked.bc'],name+'-link')
@@ -46,7 +50,7 @@ spec=importlib.util.spec_from_file_location('post_b_specializer',root/'kprog/x86
 module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
 native=module.compile_checked_simulator(artifact,root/'kprog/x86/native_lab/native_link/target/release/native-link',tool)
 helpers=(tmp/'generation/checked-simulator.helpers.txt').read_text().splitlines()
-assert '__kprog_lpm_lookup_16' in helpers,helpers
+assert '__kprog_array_lookup' in helpers,helpers
 exe=tmp/'post-b-production-execute'
 run(['gcc','-O3','-fsanitize=undefined','-fno-sanitize-recover=all',
      *['-D'+k+'='+str(v) for k,v in layout.items()],here/'post_b_driver.c',native['native_object'],'-o',exe],'production-driver')
