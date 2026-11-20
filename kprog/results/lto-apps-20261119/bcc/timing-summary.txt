@@ -1,2 +1,3 @@
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261120_090334_692077 ns/inv geomean eBPF->native 0.998x (15 retained pairs, call parity 1.01, 25/25 checked-native coverage)
 sys_exit 83.5->76.5 0.916x | sys_enter 79.1->77.5 0.980x | sched_wakeup 89.5->78.0 0.872x | sched_switch 111.0->133.1 1.200x | fentry_vfs_open 37.0->36.8 0.997x
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_093326_491851 ns/inv geomean eBPF->native 0.992x (15 retained pairs, call parity 1.00)
