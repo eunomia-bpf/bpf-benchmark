@@ -118,6 +118,11 @@ programs among them all have `run_cnt_delta = 0` (only `tracepoint__sch` fires, 
 2026-11-20 post arm: perf_unwind_nat/-hot/-php report 53880/32824/29288 bytes, cnt = 0
 ```
 
+Not a single-run reading: across the 39 runs whose post entry is in the small-body family (2650–3932 B,
+excluding 3815 B where the entry is the baseline body itself), the median ratio is **1.05** and **26 of 39**
+are slower than the baseline JIT. So on this program the current native image is, on average, 5 % *slower* than
+the JIT it replaces — while doing correct work, which is exactly what the broken family was not doing.
+
 So the fast family must not be restored as-is; it is a broken reference. What the record does establish is the
 opposite direction of the one I first drew: today's ~2700 B body runs at 3700–4600 ns against the baseline
 JIT's ~3200 ns, i.e. the current native body is *slower than the JIT it replaces* on this program while doing
