@@ -24,5 +24,6 @@ Completed ISA-family count is zero.
 
 Focused entry/native check passes 235 jobs and one public type/axiom query
 at original 200000-heartbeat/512-depth caps on CPU 17, nice 0, one worker and
-32 GiB address space. Whole proof-library confirmation follows this batch.
+32 GiB address space. Whole `lake build KProgFormal` proof-library/root confirmation passes 283
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
 Raw: `/workspaces/kprog-raw/formal/m5-entry-mov-prefix-native`. M5/M6 remain open.

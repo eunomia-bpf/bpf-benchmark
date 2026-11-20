@@ -23,6 +23,7 @@ there is no local ISA body, decoder, program or code-generation change.
 Focused native check passes 232 jobs and three public type/axiom queries at
 original 200000-heartbeat/512-depth caps on CPU 17, nice 0, one worker and
 32 GiB address space. The initial finite proof normalization failures are
-retained in raw. Whole proof-library confirmation follows this batch.
+retained in raw. Whole `lake build KProgFormal` proof-library/root confirmation passes 283
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
 Raw: `/workspaces/kprog-raw/formal/m5-mov-native-sequence`.
 M5/M6 remain open; completed ISA-family count is zero.

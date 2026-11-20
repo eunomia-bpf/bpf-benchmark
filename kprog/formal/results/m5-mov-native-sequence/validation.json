@@ -48,8 +48,39 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.0321507453918457,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 283,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-entry-mov-prefix-native/full.log",
+    "resource_policy": "Coordinator 2026-11-19T18:18:59Z host Lake CPU8-23 without timing lock"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-mov-native-sequence",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "871d2a22e2a85a07e7972731b69225c6c98eee50",
+  "batch_checkpoints": {
+    "m5-mov-native-sequence": "871d2a22e2a85a07e7972731b69225c6c98eee50",
+    "m5-entry-mov-pair-native": "7f221ac59e468e1b3e4372b7946eba009bb4d171",
+    "m5-entry-mov-prefix-native": "53d83e174d7f6cb11ab7abb4096cdbe7b6c756e3"
+  },
+  "root_artifact_modified_utc": "2026-11-20T07:37:42.230757+00:00"
 }
