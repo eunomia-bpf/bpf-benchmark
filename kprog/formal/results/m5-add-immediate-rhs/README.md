@@ -23,7 +23,8 @@ switch (statement17); its arithmetic and selected pointer write remain next.
 Focused checking passes 227 Lake jobs and five public type/axiom queries at
 original200000-heartbeat/512-depth caps, CPU17, nice0, one worker, 32GiB address
 space. Only standard logical axioms and inherited external/assembly relations
-appear. Whole proof-library confirmation follows at batch end. Raw diagnostics:
+appear. Whole `lake build KProgFormal` confirmation passes 290 jobs including the root,
+on CPUs16–23, nice19, one worker and 32GiB address space. Raw diagnostics:
 /workspaces/kprog-raw/formal/m5-add-operands.
 
 This is a source fragment proof with checked original-body provenance.

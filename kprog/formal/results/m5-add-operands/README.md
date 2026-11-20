@@ -23,7 +23,8 @@ register/sentinel path; it is not a claim that ADD_IMM calls that reader.
 
 Focused checking passes 226 Lake jobs and six public type/axiom queries at the
 original 200000-heartbeat/512-depth caps, CPU17, nice0, one worker, 32GiB address
-space. Whole proof-library confirmation follows at this batch end. Count.lean
+space. Whole `lake build KProgFormal` confirmation passes 290 jobs including the root,
+on CPUs16–23, nice19, one worker and 32GiB address space. Count.lean
 records exploratory execution counts; theorem statements/proofs independently
 check the exact paths. All failures and timings remain under
 /workspaces/kprog-raw/formal/m5-add-operands.
