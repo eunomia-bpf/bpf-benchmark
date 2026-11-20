@@ -1,0 +1,58 @@
+{
+  "entry_prefix": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefix"
+    ],
+    "exit": 0,
+    "seconds": 1.9960730075836182,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-mov-prefix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5951359272003174,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "entry_prefix_jobs": 230,
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView.entry_setup_represents": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefix.entry_pair": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-entry-mov-prefix",
+  "completed_isa_families": 0
+}

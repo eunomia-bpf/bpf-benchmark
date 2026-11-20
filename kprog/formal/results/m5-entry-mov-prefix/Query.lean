@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefix
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryBodyView.entry_setup_represents
+#print axioms Arm64ProgramEntryBodyView.entry_setup_represents
+
+#check Arm64ProgramEntryMovPrefix.entry_pair
+#print axioms Arm64ProgramEntryMovPrefix.entry_pair

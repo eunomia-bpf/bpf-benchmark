@@ -319,6 +319,7 @@ theorem entry_setup_represents (initial : CC.Mem) (ctxBlock : CC.Block)
         Arm64ProgramEntryResources.Resources initial after entry ∧
         Nonempty (Arm64ProgramEntryInitialized.Values initial before (.Vptr ctxBlock ctxOfs)
           values flags vectors) ∧
+        after.access = (Arm64Producer.allocation initial).2.access ∧
         before.nextblock = (Arm64ProgramEntryAllocation.allocation initial).2.nextblock := by
   obtain ⟨entry, cells, sources, localVector, before, temps, traces, length, run,
     index, ctx, pointers, vectorPointers, tailReads, data, registers, ⟨storage⟩,
@@ -330,7 +331,7 @@ theorem entry_setup_represents (initial : CC.Mem) (ctxBlock : CC.Block)
   obtain ⟨after, result, finalRegisters⟩ := setup_represents storage temps k ctxBlock ctxOfs fields
     ctx old frame reads sourceAccess addresses origins s registers
   refine ⟨entry, cells, sources, localVector, before, temps, after, traces, length,
-    ?_, ?_, ?_, ?_, storage, result, finalRegisters, ?_, data, next⟩
+    ?_, ?_, ?_, ?_, storage, result, finalRegisters, ?_, data, result.access.trans sourceAccess, next⟩
   · simpa only [CC.E0, CC.Eapp, List.append_nil] using star_trans run result.run.sound
   · intro i
     exact (result.local_load _ _ _ entry.binding header_other.1 header_other.2 CC.Mptr _).trans (pointers i)
