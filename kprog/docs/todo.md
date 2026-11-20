@@ -129,12 +129,16 @@
   question for the emitter. Capture size varies (12/14/64 from the same command), so compare per
   program. Still open and separate: request 64 NATIVE_LAB_TRUSTED_CHUNK arming EINVAL, 3 emitter
   relative-table refusals.
-  OMP 2026-11-20T00:18Z (commit bc0c5955f; dated 2026-11-20T02:25Z): state at 19d32566c - pass 334 predicates over the 41 inputs, store class
-  6/6, live capture 14/14, replay 41/41. One open item: the fall-through placement. Program 34af4b3a
-  rejects (off=30 size=4 r=0) because the bound is emitted on the comparison's true edge, which jumps to
-  the block the read is not on; re-emitting it inside the falling-through block is ACCEPT on the host.
-  It did not appear in a 3x180s production run (x86_kvm_corpus_20261119_234045_456298), whose 28
-  requests all installed through checked-sim-c with 0 direct-native and 0 failures.
+  OMP (written 00:00-00:29Z; dated 2026-11-20T00:29Z; commit 96baf36c4): Cilium packet-bounds class
+  CLOSED, no open item in this class. Pass 334 predicates over the 41 archived inputs; store class 6/6;
+  live capture 14/14; replay 41/41. Confirmation capture head-20261120T001825Z on the HEAD base is 12/12
+  with zero rejections, 34af4b3a included 3/3; production run x86_kvm_corpus_20261119_234045_456298 is
+  28/28 installed via checked-sim-c, 0 direct-native, 0 failed. Corrects the 00:18Z block above and the
+  "has nothing to lower" note at 23:37Z: the 23:06 base never lowered 34af4b3a's predicate (zero
+  packet_end reads in the emitted B), and 6b0204beb - freshness across exact TC control-buffer stores -
+  makes it lower. Not a fall-through placement problem; the earlier reading of LBB0_2 was wrong too
+  (insn 51 jumps past LBB0_2 to LBB0_4 at 115, where the read at 126 lives).
+  Still open and separate: request 64 NATIVE_LAB_TRUSTED_CHUNK arming EINVAL, 3 emitter refusals.
   across context-preserving intervals; original reads retain ordering effects.
   8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677
   queued22:28:23Z for canonical imageEX rebuild, then controls, stock fixtures,
