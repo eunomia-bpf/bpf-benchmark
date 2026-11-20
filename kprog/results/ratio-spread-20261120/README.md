@@ -95,7 +95,13 @@ runs where the §5 join retains ≥20 programs, Tracee has **37 runs**:
 - geomean over those 33 runs: **0.805**.
 
 That is the 20 % per-invocation target, reached on 24–25 retained programs per run, repeatedly, without any
-single run being quoted. Compare OTel (1–2 retained programs, sd 0.36) and Cilium (sd 0.23): Tracee is the
+single run being quoted. Per-program detail for one such run (11-20 03:31, 25 retained): 22 of 25 programs are
+faster, `trace_fd_install` 0.23 and `tracepoint__raw` 0.41 at 4×10^8 calls, `trace_vfs_read` 0.96 at 5×10^7 —
+the gain is spread over the program set, not carried by one outlier.
+
+Caveat with its size: across 71 Tracee runs the post arm executes a median 1.04× the baseline arm's calls
+(quartiles 0.96–1.25, 12 runs above 1.3×). Those 12 runs do more work in the post arm, so their per-call
+figures flatter the change; the median run is calibrated. Compare OTel (1–2 retained programs, sd 0.36) and Cilium (sd 0.23): Tracee is the
 only app whose *repeated* measurement clears the target. `tracee-november.json` holds each run's figure.
 
 ## A methodological trap found while measuring (affects quotes, not code)
