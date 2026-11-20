@@ -120,7 +120,7 @@
   that scalar equality. Verified on the host: same shape rejects r=0; re-emitting the bound on the path
   that falls through is ACCEPT. So: emit per path that reaches the read, not once per predicate. The
   admitted packet set is unchanged. Separate defects stay separate: 6 store requests, request 64 arming.
-  OMP 2026-11-20T01:25Z: closed. ff8f0e4b3 + 852c2bfe3 landed; PERF's edge-validate candidate from
+  OMP 2026-11-19T23:37Z (commit ed060dfc1; dated 2026-11-20T01:25Z): closed. ff8f0e4b3 + 852c2bfe3 landed; PERF's edge-validate candidate from
   7ca1aaec6 has the live capture at 14/14 install with no rejections and replay 41/41 over the archived
   packet-class inputs (predicates 201 -> 333); store class canonicalizes 6/6. My own capture on the
   rebuilt base (fixed-20261119T233010Z) installs every instance of the two programs that failed before
@@ -129,7 +129,7 @@
   question for the emitter. Capture size varies (12/14/64 from the same command), so compare per
   program. Still open and separate: request 64 NATIVE_LAB_TRUSTED_CHUNK arming EINVAL, 3 emitter
   relative-table refusals.
-  OMP 2026-11-20T02:25Z: state at 19d32566c - pass 334 predicates over the 41 inputs, store class
+  OMP 2026-11-20T00:18Z (commit bc0c5955f; dated 2026-11-20T02:25Z): state at 19d32566c - pass 334 predicates over the 41 inputs, store class
   6/6, live capture 14/14, replay 41/41. One open item: the fall-through placement. Program 34af4b3a
   rejects (off=30 size=4 r=0) because the bound is emitted on the comparison's true edge, which jumps to
   the block the read is not on; re-emitting it inside the falling-through block is ACCEPT on the host.

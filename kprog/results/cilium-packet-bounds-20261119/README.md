@@ -348,7 +348,7 @@ than from the unified SSA value (or unifying only after the `inttoptr`) yields t
 Both fixes were verified acceptable **as semantics** earlier; this is about which SSA value carries the
 verifier's packet id.
 
-## The remaining rejection is a fall-through recovery, proven on the host (omp 2026-11-20T00:20Z)
+## The remaining rejection is a fall-through recovery, proven on the host (omp 2026-11-19T22:51Z (commit 3d257f28b; dated 2026-11-20T00:20Z))
 
 PERF's todo note and my bytecode read agree on the site. In request 4's generated B (PERF's capsule), the
 `classifier` section has:
@@ -388,7 +388,7 @@ So the last gap is **per-path emission**: a bound proves a read only on the path
 scalar equality does not replace it. That is a statement about where to emit, not about what to prove, and
 it keeps the admitted set identical (`headlen >= K` still admits exactly the same packets).
 
-## PERF's `852c2bfe3` emits the missing per-path bound (omp 2026-11-20T00:35Z)
+## PERF's `852c2bfe3` emits the missing per-path bound (omp 2026-11-19T22:55Z (commit 7ca1aaec6; dated 2026-11-20T00:35Z))
 
 `852c2bfe3` ("Lower packet boundary equalities through dominating ranges") adds `ordered_boundary()`: at a
 dominating interval guard, `x == K` is emitted as the ordered `x <= K` / `x >= K` its edge already implies,
@@ -409,7 +409,7 @@ every path into each `+0x10` read — `128–133` bounds `data+0x12 <= data_end`
 That is exactly the shape verified `ACCEPT` on the host; it is per-path emission, which is what the
 mechanism needs, and it keeps the admitted packet set identical.
 
-### The store fix works on all six (omp 2026-11-20T00:55Z)
+### The store fix works on all six (omp 2026-11-19T23:12Z (commit 563c4acf0; dated 2026-11-20T00:55Z))
 
 `ff8f0e4b3`'s `canonical_tc_class_stores()` rewrites the physical u16 store at `cb+46` into a store through
 the public `__sk_buff.tc_classid` accessor. Run over each of the six store-class requests' own
@@ -420,7 +420,7 @@ That also means the two Cilium defect classes now both have their fix in the tre
 item is the packet-class end-to-end count: `852c2bfe3` emits the per-path bound (`333` predicates over the
 archived inputs, up from `201`), which is the shape verified `ACCEPT` on the host.
 
-## End to end: all 14 install, all 41 replay, no rejections left (omp 2026-11-20T01:05Z)
+## End to end: all 14 install, all 41 replay, no rejections left (omp 2026-11-19T23:13Z (commit c4b8fb2d1; dated 2026-11-20T01:05Z))
 
 PERF's `edge-validate.sh candidate` ran from `HEAD` = `7ca1aaec6` (which contains `852c2bfe3` plus my
 result commits) and finished `exit-code=0` at 23:11:02Z, rebuilding the compiler base first. Two independent
@@ -447,7 +447,7 @@ So the packet-bounds class is closed at both levels:
 Remaining known gaps, both separate defects and both unchanged by this: request 64's
 `NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`, and the emitter's three relative-table refusals.
 
-## Independent run from `c4b8fb2d1` after the fixes (omp 2026-11-20T01:25Z)
+## Independent run from `c4b8fb2d1` after the fixes (omp 2026-11-19T23:37Z (commit 2cf06f46e; dated 2026-11-20T01:25Z))
 
 Ran `checked-corpus` myself on the rebuilt base (`packet-bounds` 473,784 B built 23:06 from `852c2bfe3`;
 `fixed-20261119T233010Z`, exit 0). The capture is 12 requests: **9 install, 3 rejected**, composition
@@ -487,7 +487,7 @@ Capture size is not fixed: this guest catches 12 requests, the two baselines 64,
 the same `verified_corpus.py <app> 1 10 1`. So counts are only comparable program by program, which is what
 the table above does.
 
-## State at `19d32566c` (omp 2026-11-20T02:25Z)
+## State at `19d32566c` (omp 2026-11-20T00:17Z (commit 158caf6aa; dated 2026-11-20T02:25Z))
 
 Re-measured on the current tree after PERF's follow-on changes (`b1399d137` widens the freshness walk
 across private-input choices and `skb` cb stores; `fd30e6c92`, `21fcff02a` retain the diagnostics):

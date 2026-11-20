@@ -445,7 +445,7 @@ yet. The diagnosis is in `kprog/results/cilium-packet-bounds-20261119/README.md`
 is a new packet pointer, and 33 of the 41 programs reload `data` up to 38 times, so the emitted bound must
 sit on the load the read uses rather than on the one the matcher happened to match.
 
-### Cilium: the packet-bounds class is closed (omp 2026-11-20T01:30Z)
+### Cilium: the packet-bounds class is closed (omp 2026-11-19T23:38Z (commit 11e24a34e; dated 2026-11-20T01:30Z))
 
 The 41 `invalid access to packet` rejections fell to a chain of two compiler changes in
 `kprog/x86/packet_bounds_ir.cpp` (PERF's file, open under `freeze-open.tsv`):
