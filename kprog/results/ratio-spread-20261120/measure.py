@@ -10,17 +10,30 @@ APPS={'otel':'otelcol-ebpf-profiler__profiling','cilium':'cilium__agent','bcc':'
 def geomean(values):
     return math.exp(sum(math.log(v) for v in values)/len(values)) if values else None
 def program_ratios(app):
-    """§5.1/5.2: join phases by (name,type), require min run_cnt >= 100."""
+    """§5.1/5.2: join phases by (name,type), require min run_cnt >= 100.
+
+    A (name,type) key can occur more than once in a phase (Tracee does: 167
+    records, 108 distinct keys). Group both phases by key and pair the members
+    in a stable order rather than letting the dict keep only the last one.
+    """
     baseline=(app.get('baseline') or {}).get('bpf') or {}
     post=(app.get('post_rejit') or {}).get('bpf') or {}
-    by_key=lambda d:{(v.get('name'),v.get('type')):v for v in d.values()}
-    b,p=by_key(baseline),by_key(post)
+    def group(d):
+        out={}
+        for v in d.values():
+            out.setdefault((v.get('name'),v.get('type')),[]).append(v)
+        for members in out.values():
+            members.sort(key=lambda v:(v.get('run_cnt_delta') or 0,v.get('id') or 0))
+        return out
+    b,p=group(baseline),group(post)
     ratios=[]
-    for key,base in b.items():
-        if key not in p: continue
-        if min(base['run_cnt_delta'],p[key]['run_cnt_delta'])<100: continue
-        ratios.append((p[key]['run_time_ns_delta']/p[key]['run_cnt_delta'])/
-                      (base['run_time_ns_delta']/base['run_cnt_delta']))
+    for key,base_list in b.items():
+        post_list=p.get(key)
+        if not post_list: continue
+        for base,after in zip(base_list,post_list):
+            if min(base['run_cnt_delta'],after['run_cnt_delta'])<100: continue
+            ratios.append((after['run_time_ns_delta']/after['run_cnt_delta'])/
+                          (base['run_time_ns_delta']/base['run_cnt_delta']))
     return ratios
 def main():
     key=APPS[sys.argv[1] if len(sys.argv)>1 else 'otel']

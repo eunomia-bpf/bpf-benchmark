@@ -1,50 +1,50 @@
 {
  "otel": {
-  "runs": 126,
-  "median_retained": 1.0,
+  "runs": 127,
+  "median_retained": 1,
   "max_retained": 2,
-  "min": 1
+  "min_retained": 1,
+  "call_ratio_median": 1.001,
+  "calibrated_runs": 108
  },
  "cilium": {
-  "runs": 87,
-  "median_retained": 1,
-  "max_retained": 1,
-  "min": 1
+  "runs": 88,
+  "median_retained": 2.0,
+  "max_retained": 2,
+  "min_retained": 2,
+  "call_ratio_median": 2.732,
+  "calibrated_runs": 34
  },
  "bcc": {
-  "runs": 90,
-  "median_retained": 11.0,
-  "max_retained": 13,
-  "min": 9
+  "runs": 91,
+  "median_retained": 13,
+  "max_retained": 15,
+  "min_retained": 11,
+  "call_ratio_median": 1.006,
+  "calibrated_runs": 82
  },
  "tracee": {
   "runs": 75,
-  "median_retained": 24,
-  "max_retained": 25,
-  "min": 20
+  "median_retained": 40,
+  "max_retained": 42,
+  "min_retained": 33,
+  "call_ratio_median": 1.065,
+  "calibrated_runs": 41
  },
  "tetragon": {
-  "runs": 13,
-  "median_retained": 2,
-  "max_retained": 5,
-  "min": 1
+  "runs": 51,
+  "median_retained": 15,
+  "max_retained": 31,
+  "min_retained": 1,
+  "call_ratio_median": 1.053,
+  "calibrated_runs": 24
  },
  "katran": {
   "runs": 101,
   "median_retained": 1,
   "max_retained": 1,
-  "min": 1
- },
- "call_count_ratio": {
-  "tracee": {
-   "runs": 75,
-   "median": 1.065,
-   "calibrated": 41
-  },
-  "cilium": {
-   "runs": 87,
-   "median": 2.774,
-   "calibrated": 33
-  }
+  "min_retained": 1,
+  "call_ratio_median": 1.017,
+  "calibrated_runs": 92
  }
 }

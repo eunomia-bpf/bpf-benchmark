@@ -100,50 +100,49 @@ correct work. That gap — not the 7510 B shape — is the optimization target.
 
 (Perf's `perf-history-review-20261120` corrects three further points in earlier drafts of this file: the
 11-13 boundary is not firm, since that same day contains both 0.0717 and 0.9959; the 7510 B body's speed is
-explained by unequal work; and `measure.py`'s `(name,type)` key drops duplicate pairs, so the Tracee
-aggregate is sensitive to which records survive the collision.)
-
-Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
-`native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
-(10^2–10^3 dispatches) reading anything from 0.30 to 1.00. A program dispatched ~1,000 times carries its own
-sampling noise into the geomean of two, which is why the run figure swings; `native_tracer_entry` alone is
-consistently an order of magnitude faster. So the historical 0.43–1.11 spread is the *low-count* program
-moving, not the profiler's main program regressing.
+explained by unequal work; and `measure.py`'s `(name,type)` key dropped duplicate pairs. That last one was a
+real bug in this record and is fixed: both phases are now grouped by key and members are paired in count
+order, which reproduces the existing analyzer.)
 
 The §5 join keeps programs with `min(run_cnt_delta) >= 100` in both phases. That population, per run, decides
 how much averaging a run does:
 
 | app | runs measured | retained programs (median / max / min) |
 |---|---|---|
-| Tracee | 75 | **24 / 25 / 20** |
-| BCC | 90 | 11 / 13 / 9 |
-| Tetragon | 13 | 2 / 5 / 1 |
-| OTel | 126 | **1 / 2 / 1** |
-| Cilium | 87 | **1 / 1 / 1** |
+| Tracee | 75 | **40 / 42 / 33** |
+| Tetragon | 51 | 15 / 31 / 1 |
+| BCC | 91 | 13 / 15 / 11 |
+| Cilium | 88 | 2 / 2 / 2 |
+| OTel | 127 | **1 / 2 / 1** |
 | Katran | 101 | 1 / 1 / 1 |
 
+(These counts are from the corrected join. Before it, duplicate `(name,type)` members were collapsed and
+Tracee appeared to retain 24 and Tetragon 2; the true populations are larger.)
+
 For OTel, Cilium and Katran the "geomean" is a **single program's ratio** — a per-run standard deviation of
-0.2–0.5 is then expected and carries no information about the app. For Tracee it averages over 24 programs,
+0.2–0.5 is then expected and carries no information about the app. For Tracee it averages over 40 programs,
 which is why its repeated figures cluster (0.56–1.02 for 33 of 37 runs) while OTel's wander over a 5x range.
 Any comparison between apps must carry this column; `population.json` holds it.
 
 ## Tracee, measured on its own: the target is being met
 
-The table above pools all history. Restricting to runs from 2026-11-16 on (the current code), keeping only
-runs where the §5 join retains ≥20 programs, and **requiring the two arms to execute comparable work**
-(post/baseline call count within 0.90–1.15):
+The table above pools all history. Restricting to runs from 2026-11-16 on (current code) with the §5 join
+retaining ≥20 programs gives **37 runs**: median run geomean **0.834**, geomean **0.923**, and **33 of 37
+faster**. These reproduce the existing `analysis/corpus_analyze.py` result exactly (PERF,
+`perf-history-review-20261120`), which is the cross-check that matters.
 
-| subset | runs | median run geomean |
-|---|---|---|
-| all runs, ≥20 retained | 37 | 0.861 |
-| excluding four outliers (1.56, 5.1, 5.3, 6.4) | 33 | 0.836 (geomean 0.805) |
-| **call-count calibrated** | **18** | **0.91** |
-| not calibrated | 19 | 0.79 |
+Sub-setting on whether the two arms executed comparable work (post/baseline calls within 0.90–1.15) gives 18
+calibrated runs at median 0.863 and 19 unequal ones at 0.748. **This is an exploratory subgroup, not a
+calibration procedure**: under a duration-based workload a throughput change itself moves the call count, and
+equal totals can still hide different program mixes. Do not treat 0.90–1.15 as a validity gate, and do not
+drop the unequal runs.
 
-So the honest statement is: **Tracee is consistently faster — median 0.91 per call on the 18 calibrated runs,
-31 of 37 runs faster overall** — and the 20 % target is reached in the runs where the post arm also happened
-to execute more work. The calibrated median, 0.91, is the number to quote; 0.805 requires accepting the
-unequal-work runs.
+So the honest single sentence is: **Tracee is faster in 33 of 37 recent runs, median 0.834 per call** — about
+17 %, which is short of the 20 % target, on the runs where nothing is excluded.
+
+Two earlier drafts of this section were wrong and are corrected here: the first quoted geomean 0.805 over
+"33 non-outlier runs" after removing four outliers, and the second quoted 0.91 from the calibrated subgroup.
+The full-population median above is the number to quote.
 
 Caveat with its size: across 71 Tracee runs the post arm executes a median 1.04× the baseline arm's calls
 (quartiles 0.96–1.25, 12 runs above 1.3×). Those 12 runs do more work in the post arm, so their per-call
