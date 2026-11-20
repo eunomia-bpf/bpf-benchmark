@@ -61,3 +61,7 @@ branch-decode:
 .PHONY: archive
 archive:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/archive.py
+
+.PHONY: source-generation
+source-generation:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/source-generation.py $(OUT)
