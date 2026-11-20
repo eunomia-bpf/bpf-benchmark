@@ -1,5 +1,7 @@
 #include "../../libnativeloader/src/native_loader_lto.hpp"
 #include <iostream>
+#include <memory>
+#include <tuple>
 int main(int argc, char **argv)
 {
     if (argc != 2) return 1;
