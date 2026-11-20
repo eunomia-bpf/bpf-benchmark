@@ -1,0 +1,38 @@
+{
+  "before_source": "87cb3101f",
+  "source": "76c41e98a",
+  "runs": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/runtime-profile-20261120/inline-private-before-20261120T035007Z",
+      "make_exit": 0,
+      "execution": [
+        {
+          "tag_alias_partial_release_cases": 72
+        }
+      ],
+      "volatile_ir_accesses": 45
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/runtime-profile-20261120/inline-private-after-20261120T035116Z",
+      "make_exit": 0,
+      "execution": [
+        {
+          "tag_alias_partial_release_cases": 72
+        }
+      ],
+      "volatile_ir_accesses": 42
+    }
+  ],
+  "private_ir_delta": [
+    "-  store volatile i64 %298, ptr %447, align 8, !tbaa !40",
+    "+  store i64 %298, ptr %447, align 8, !tbaa !40",
+    "-  %1075 = load volatile i64, ptr %1074, align 8, !tbaa !40",
+    "-  %1603 = load volatile i64, ptr %1602, align 8, !tbaa !40"
+  ],
+  "scope": "Existing host UBSan alias/tag/partial/release execution and O1 IR through actual inline bindings. Remaining raw/context accesses retain volatility. No compiler build, B stock retry, application gain or formal completion claimed.",
+  "app_job": {
+    "pid": 639209,
+    "waits_for": 633047,
+    "raw": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/prefix-otel-20261120T033956Z"
+  }
+}

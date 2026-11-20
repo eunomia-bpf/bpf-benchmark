@@ -42,6 +42,10 @@ inline-private:
 	clang-18 -O1 -S -emit-llvm -I$(ROOT)/vendor/libbpf/src \
 		$(ROOT)/kprog/results/sparse-stack-cache-20261119/oracle.c -o $(OUT)/inline-private.ll
 
+.PHONY: inline-private-receipt
+inline-private-receipt:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/inline_private_receipt.py
+
 USER_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-user
 .PHONY: source-probes
 source-probes:
