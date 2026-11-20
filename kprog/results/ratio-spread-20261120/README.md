@@ -37,6 +37,25 @@ configuration:
 4. **No app's stable cluster reaches the 0.80 target yet.** Cilium's November clusters do (0.394, 0.439,
    0.472 on 11-10/11-16/11-17), which is the strongest positive evidence in the record.
 
+## Why some apps scatter and others do not: the retained population
+
+The §5 join keeps programs with `min(run_cnt_delta) >= 100` in both phases. That population, per run, decides
+how much averaging a run does:
+
+| app | runs measured | retained programs (median / max / min) |
+|---|---|---|
+| Tracee | 75 | **24 / 25 / 20** |
+| BCC | 90 | 11 / 13 / 9 |
+| Tetragon | 13 | 2 / 5 / 1 |
+| OTel | 126 | **1 / 2 / 1** |
+| Cilium | 87 | **1 / 1 / 1** |
+| Katran | 101 | 1 / 1 / 1 |
+
+For OTel, Cilium and Katran the "geomean" is a **single program's ratio** — a per-run standard deviation of
+0.2–0.5 is then expected and carries no information about the app. For Tracee it averages over 24 programs,
+which is why its repeated figures cluster (0.56–1.02 for 33 of 37 runs) while OTel's wander over a 5x range.
+Any comparison between apps must carry this column; `population.json` holds it.
+
 ## Tracee, measured on its own: the target is being met
 
 The table above pools all history. Restricting to runs from 2026-11-16 on (the current code) and keeping only

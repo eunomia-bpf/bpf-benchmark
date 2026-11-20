@@ -1,0 +1,38 @@
+{
+ "otel": {
+  "runs": 126,
+  "median_retained": 1.0,
+  "max_retained": 2,
+  "min": 1
+ },
+ "cilium": {
+  "runs": 87,
+  "median_retained": 1,
+  "max_retained": 1,
+  "min": 1
+ },
+ "bcc": {
+  "runs": 90,
+  "median_retained": 11.0,
+  "max_retained": 13,
+  "min": 9
+ },
+ "tracee": {
+  "runs": 75,
+  "median_retained": 24,
+  "max_retained": 25,
+  "min": 20
+ },
+ "tetragon": {
+  "runs": 13,
+  "median_retained": 2,
+  "max_retained": 5,
+  "min": 1
+ },
+ "katran": {
+  "runs": 101,
+  "median_retained": 1,
+  "max_retained": 1,
+  "min": 1
+ }
+}
