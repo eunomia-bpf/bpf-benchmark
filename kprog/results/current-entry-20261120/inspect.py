@@ -32,10 +32,24 @@ with tarfile.open(raw) as service:
                 assembly.write_text(result.stdout)
                 products.append(dict(member=name, path=str(target), sha256=sha256(data).hexdigest(),
                                      bytes=len(data), command=command, assembly=str(assembly)))
-            report = dict(capture=str(raw), request=record, symbol=symbol, products=products,
+            linked = []
+            for name in names:
+                if not (name.endswith(('.blob.bin', '.link-plan.json', '.map-patches.tsv', '.abi.tsv'))
+                        or name in ('request/generated/kernel-functions.json', 'request/kernel.facts.json',
+                                    'request/kernel.metadata.json', 'request/source-identities.json')):
+                    continue
+                data = capsule.extractfile(name).read()
+                target = out / Path(name).name
+                target.write_bytes(data)
+                linked.append(dict(member=name, path=str(target), sha256=sha256(data).hexdigest(), bytes=len(data)))
+                if name.endswith('.blob.bin'):
+                    result = subprocess.run(['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', str(target)],
+                                            capture_output=True, text=True, check=True)
+                    target.with_suffix('.asm').write_text(result.stdout)
+            report = dict(linked_products=linked, capture=str(raw), request=record, symbol=symbol, products=products,
                           scope='Retained capsule objects; P precedes direct-native context LTO and is not the installed image. No compilation, app execution or helper latency measurement.')
             (out/'report.json').write_text(json.dumps(report, indent=2)+'\n')
-            print(json.dumps(report, indent=2))
+            print(json.dumps(dict(symbol=symbol, request_id=record["request_id"], execution_path=record["execution_path"], object_count=len(products), linked_products=linked), indent=2))
             break
     else:
         raise ValueError('No native_tracer_entry request in capture')
