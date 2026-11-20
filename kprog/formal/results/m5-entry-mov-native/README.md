@@ -17,12 +17,14 @@ register relation at the original frontier and actual caller/free/release facts.
 
 This closes the full-word ordinary MOVK correspondence for the reached source
 segment. The preceding unrestricted MOV_IMM fetched instruction sequence,
-setup-prefix composition, physical ABI/provenance/provider validity, all outcomes
-and final return remain separate M5 work. Completed ISA-family count is zero.
+physical ABI/provenance/provider validity, all outcomes
+and final return remain separate M5 work. Actual wrapper/setup composition is
+recorded in m5-entry-mov-prefix. Completed ISA-family count is zero.
 
 Focused source check passes 229 jobs and two public type/axiom queries at the
 original 200000-heartbeat/512-depth caps on CPU 17, nice 0, one worker and
 32 GiB address space. The initial finite failure was a Fin literal projection
 normalization and redundant completed-goal tactics; it is retained in raw.
-Whole proof-library confirmation follows the batch.
+Whole `lake build KProgFormal` proof-library/root confirmation passes 280
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
 Raw: `/workspaces/kprog-raw/formal/m5-entry-mov-native`. M5/M6 remain open.

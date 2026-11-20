@@ -31,5 +31,6 @@ No ISA family is completed.
 Focused source check passes 230 jobs and two public type/axiom queries at the
 original 200000-heartbeat/512-depth caps on CPU 17, nice 0, one worker and
 32 GiB address space. The first finite attempt hit a reserved proof-local name;
-its log is retained. Whole proof-library confirmation follows this batch.
+its log is retained. Whole `lake build KProgFormal` proof-library/root confirmation passes 280
+jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
 Raw: `/workspaces/kprog-raw/formal/m5-entry-mov-prefix`. M5/M6 remain open.
