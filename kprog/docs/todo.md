@@ -2229,3 +2229,21 @@ fixture still is not the original hoist reproduction. These are B
 control-flow and host semantic results; stock acceptance remains to be
 measured. fixed-result.json records commands and raw paths, and
 fixed-tracee27-excerpt.txt contains the mapped disassembly.
+
+OMP 2026-11-20T07:47:57Z: ratio record corrected and extended (kprog/results/ratio-spread-20261120/).
+(1) PERF's review found a real bug in my measure.py: the (name,type) join let the dict keep only the last
+duplicate member (Tracee 053609: 167 records over 108 keys). Both phases now group by key and pair members in
+count order, which reproduces analysis/corpus_analyze.py exactly. Corrected figures: Tracee's 37 recent runs
+are median 0.834, geomean 0.923, 33/37 faster (my earlier 0.805 and 0.91 are superseded); retained
+populations are Tracee 40 (not 24) and Tetragon 15 (not 2).
+(2) OTel's native_tracer_e ratio splits by the post arm's body size, but size is provenance, not mechanism: a
+7510 B body runs 12x faster because it stops unwinding (equal-work-20261113: 913,099,438 -> 0 attempts), which
+the counters confirm (zero post entries with xlated>100; unwind programs present but cnt=0). Today's ~2700 B
+body runs at 3700-4600 ns against the baseline JIT's ~3200, so the current native body is slower than the JIT
+it replaces while doing correct work - that gap is the target, and the 7510 B shape must not be restored.
+(3) Current image, 11-20 runs, corrected join: Tracee 0.57-0.77 (low end on runs whose post arm did 1.65-1.71x
+the calls), Cilium 0.88-0.94, BCC 0.94-0.97, Katran 0.96-0.99, OTel 1.03-1.05, Tetragon 0.79/1.75. No app is
+far below 1.0 except Tracee.
+(4) Request 64's arming failure narrowed: the call order ACTIVATE -> CHUNK -> COMPLETE leaves only the
+"abandoned" or id-mismatch branches of native_lab_active_capsule, both module-side state the archive does not
+record; the errno is -ENOENT, not EINVAL as an earlier note said.
