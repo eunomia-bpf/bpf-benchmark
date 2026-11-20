@@ -47,8 +47,25 @@ subtraction at all and emit the equivalent range test:
 24 - d < 8   ⟺   16 < d < 25
 ```
 
-which keeps `d` a plain scalar and forms no `scalar - pointer`. This applies to the 13 fallbacks in the
-`verified-coverage-20261120` record that share this shape.
+which keeps `d` a plain scalar and forms no `scalar - pointer`.
+
+## Scope, from the capture's own journal (`otel-requests.jsonl`)
+
+OTel served 14 requests over 14 distinct programs and installed 4. Reading every request's
+`simulator-failure.json` rather than the aggregated reason counts:
+
+| request | program | outcome |
+|---|---|---|
+| 3, 4, 6, 12 | 33, 40, 53, 90 | installed (`checked-sim-c`) |
+| **7, 9, 10, 13, 14** | **60, 72, 78, 97, 103** | `math between fp pointer and register with unbounded min value` |
+| 1 | — | `R1 invalid mem access 'scalar'` |
+| 2, 5, 8 | — | `R0 invalid mem access 'scalar'` |
+| 11 | — | `R1 unbounded memory access` |
+
+So this shape accounts for **5 of OTel's 10 fallbacks, on 5 distinct programs**. Fixing the emitter would
+take OTel from 4/14 installed to at most 9/14, and from 4/14 programs to 9/14 programs. The remaining 5
+fallbacks (`invalid mem access 'scalar'` × 4, `unbounded memory access` × 1) are a different class and are
+not addressed here.
 
 Files: `otel_shape.o` (hand-assembled), `scalar_minus_pointer.bpf.c` (C form), `rewritten_bounds.bpf.c`
 (accepted alternative), `vlog.c` (static loader: `gcc -static -o vlog vlog.c`; `vlog <obj> classifier 3`,
