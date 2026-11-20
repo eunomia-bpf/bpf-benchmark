@@ -16,6 +16,7 @@ command = ['make', '-f', 'kprog/perf/one-image/Makefile', 'guest',
 with (out/'guest.log').open('w') as log:
     child = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, cwd=root)
 with (out/'guest.log').open() as log:
+    partial = ''
     while True:
         line = log.readline()
         if not line:
@@ -23,7 +24,12 @@ with (out/'guest.log').open() as log:
                 break
             time.sleep(0.2)
             continue
-        if not line.startswith('{'):
+        if not line.endswith('\n'):
+            partial += line
+            continue
+        line = partial + line
+        partial = ''
+        if not line.startswith('{"'):
             continue
         event = json.loads(line)
         if event.get('event') not in {'measurement_start', 'measurement_done'}:
