@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF touched BCC shared-helper check (2026-11-20T05:16:16Z): own PID 673631, raw /workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z, existing checked-corpus on CPUs 20-23 /4vCPU /32G /48GiB AS /nice19 /imageSH. All LTO and uniform helper/native flags on; installed tools/P/image unchanged. Native HASH source changes touch BCC too; retain actual coverage, helper engagement, full reachable code, per-program counters and complete stress-ng workload output with 51fbb0ec9 receipt. No runtime result yet.
+
 - [x] PERF touched Cilium shared-helper check (2026-11-20T05:13:57Z): PID 670115 exit0/appOK,12/12 checked-sim-c installs,3 LPM/3 HASH static sites. eBPF981.264→post858.726 ns/call (1.143x); forward406886→431568 pps/reverse406885→431555 pps. Hottest cil_from_container stays eBPF1093B in both arms; shim reports source/loaded constant mismatch at instruction32. No isolated helper/native speed claim. Results lpm-c-lto-20261120/shared-cilium-result.json/evidence.tar.gz retain mixed path and all counters. All LTO on; tools/P/image unchanged. Producer matching facts handed to coordinator; hard performance targets remain open.
 
 - [x] PERF shared map-helper application measurement (307c28752; 2026-11-20T05:05:56Z): guest666886 exit0/appOK,14native/4checked/10direct,34LPM/14HASH/4ARRAY static sites and4/4no-red-zone flags. Actual full proof code unwind16150B/HotSpot16289B/PHP14053B/sched_free595B includes workers. eBPF4543.281→native4673.098ns/call (0.972x); no speed target met. All worker self-rates retained in lpm-c-lto-20261120/shared-app-result.json/evidence.tar.gz; earlier regressions stay. All LTO on; installed tools/P/image unchanged. Runtime improvement remains open.
