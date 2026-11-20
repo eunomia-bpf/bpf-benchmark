@@ -127,6 +127,23 @@ for request in previous['requests']:
     # in the report. For a readback, ask the existing register-mask analysis
     # whether its retained upper bits have any later register/flag observation.
     following = {a.addr: b.addr for a, b in zip(all_insns, all_insns[1:])}
+
+    def successors(instruction):
+        pc = instruction.addr
+        if instruction.mnemonic == 'ret':
+            return ()
+        if pc in captured['table_targets']:
+            return captured['table_targets'][pc]
+        if instruction.mnemonic == 'jmp':
+            if not adapter.gen.has_direct_branch_target(instruction.operands[0]):
+                raise ValueError(f'unresolved indirect successor at {pc}')
+            return (instruction.reloc_target if instruction.reloc_target is not None
+                    else adapter.gen.branch_target(instruction.operands[0]),)
+        if instruction.mnemonic in adapter.gen.CC_AUX and instruction.mnemonic.startswith('j'):
+            return (following[pc], instruction.reloc_target if instruction.reloc_target is not None
+                    else adapter.gen.branch_target(instruction.operands[0]))
+        return (following.get(pc, exit_addr),)
+
     by_pc = {}
     for access in accesses:
         by_pc.setdefault(access['pc'], []).append(access)
@@ -161,23 +178,49 @@ for request in previous['requests']:
             continue
         if instruction.mnemonic == 'call':
             prefix_calls.append(dict(pc=pc, symbol=instruction.reloc_symbol))
-        if instruction.mnemonic == 'ret':
-            continue
-        if pc in captured['table_targets']:
-            children = captured['table_targets'][pc]
-        elif instruction.mnemonic == 'jmp':
-            if not adapter.gen.has_direct_branch_target(instruction.operands[0]):
-                frontiers.append(dict(pc=pc, instruction=instruction.raw,
-                                      scope='unresolved indirect successor'))
+        pending.extend(successors(instruction))
+
+    # Keep following the stored upper bits after their first readback. A dead
+    # register readback does not kill the cell, which can be read again on a
+    # later path. This inventory covers direct accesses only; helper effects,
+    # prior escapes and unresolved aliases remain separate obligations.
+    lifetimes = []
+    for cell in sorted(cells):
+        queue = deque([(following[store.addr], 0xffffff00)])
+        seen, readbacks, kills, reached = set(), {}, set(), set()
+        while queue:
+            pc, live = queue.popleft()
+            if not live or pc == exit_addr or (pc, live) in seen:
                 continue
-            children = (instruction.reloc_target if instruction.reloc_target is not None
-                        else adapter.gen.branch_target(instruction.operands[0]),)
-        elif instruction.mnemonic in adapter.gen.CC_AUX and instruction.mnemonic.startswith('j'):
-            children = (following[pc], instruction.reloc_target if instruction.reloc_target is not None
-                        else adapter.gen.branch_target(instruction.operands[0]))
-        else:
-            children = (following.get(pc, exit_addr),)
-        pending.extend(children)
+            seen.add((pc, live)); reached.add(pc)
+            instruction = original[pc]
+            for access in by_pc.get(pc, []):
+                mask = sum(255 << (8 * byte) for byte in range(width)
+                           if access['stack_offset'] <= cell + byte <
+                           access['stack_offset'] + access['bytes']) & live
+                if not mask:
+                    continue
+                if (instruction.mnemonic in {'mov', 'movabs'} and
+                        access['operand'] == instruction.operands[0]):
+                    live &= ~mask
+                    kills.add(pc)
+                    continue
+                destination = adapter.gen.reg_info(instruction.operands[0])
+                dead = None
+                if instruction.mnemonic == 'mov' and destination is not None:
+                    shift = 8 * (cell - access['stack_offset']) + destination[2]
+                    bits = mask << shift if shift >= 0 else mask >> -shift
+                    dead = private_results_dead(all_insns, [following[pc]],
+                        (destination[0],), 0, adapter.gen, exit_addr, targets,
+                        captured['table_targets'], initial=(bits, 0))
+                readbacks[pc, mask] = dict(pc=pc, instruction=instruction.raw,
+                    cell_mask=mask, upper_bits_dead_after_readback=dead)
+            queue.extend((child, live) for child in successors(instruction))
+        lifetimes.append(dict(stack_cell=cell, visited_instructions=len(reached),
+            direct_readbacks=list(readbacks.values()), overwrite_pcs=sorted(kills),
+            calls=[dict(pc=pc, symbol=original[pc].reloc_symbol)
+                   for pc in sorted(reached) if original[pc].mnemonic == 'call'],
+            unresolved_aliases=[access for access in unknown if access['pc'] in reached]))
     row = dict(request=request['request'], rejected_store=dict(pc=store.addr, instruction=store.raw),
                stack_cells=sorted(cells), bytes=width, stack_extent=extent,
                overlapping_accesses=accesses, calls_with_possible_stack_arguments=calls,
@@ -185,7 +228,8 @@ for request in previous['requests']:
                calls_before_first_direct_access=prefix_calls,
                unresolved_prefix_aliases=[access for access in unknown if access['pc'] in visited],
                prefix_stack_arguments=[call for call in calls if call['pc'] in visited],
-               whole_function_pointer_stores=pointer_stores)
+               whole_function_pointer_stores=pointer_stores,
+               direct_spill_lifetimes=lifetimes)
     rows.append(row)
     (out/'result.json').write_text(json.dumps(dict(requests=rows,
         source_capture=previous['raw'],
