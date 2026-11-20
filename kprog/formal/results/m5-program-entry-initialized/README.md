@@ -47,8 +47,17 @@ source hashes. This step changes only formal proofs, receipts and its todo line.
 Fresh final Lake/make check and frozen-byte confirmation remain due after M5/M6.
 
 Focused compilation passed 194 jobs and all five public type/axiom queries
-passed. The full Lake confirmation is running; this receipt records that
-pending status explicitly. A comment was clarified to distinguish the92 typed
-header readbacks from pointers: three tail fields hold scalar constants.
-This wording correction changes no proof statement or term. Final subset
-confirmation after the comment edit is queued behind the current full build.
+passed. The initial proof commit recorded the full Lake confirmation as running.
+The terminal result is recorded below and in validation.json. A comment was
+clarified to distinguish the 92 typed header readbacks from pointers: three
+tail fields hold scalar constants. This wording correction changes no proof
+statement or term. The final focused and public-query reruns confirm the edit.
+
+The final focused build passed 194 jobs, all five public type/axiom queries
+passed, and one full Lake build passed 357 jobs. Earlier syntax, dependent-table
+selection and definitional-conversion failures remain in the persistent logs.
+All checks start at nice 19 on CPU17 with one worker and 32 GiB address space;
+sampled Lake/Lean threads confirm that priority. Proof caps are unchanged.
+The four data/storage/reader proofs use standard Lean logic; actual execution
+also retains imported Clean external-function and assembly semantics. No new
+axiom was added.

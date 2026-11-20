@@ -1,7 +1,38 @@
 {
-  "step": "M5 actual entry to initialized production body",
-  "status": "focused-pass-full-running",
-  "recorded_utc": "2026-11-20T01:01:37Z",
+  "step": "M5 actual entry through initialized production body",
+  "status": "pass",
+  "recorded_utc": "2026-11-20T01:14:23Z",
+  "before_commit_head": "12a183b5751f8b706c30ddac1923228454276fb5",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-initialized",
+  "proof_commit": "988f0dbded398c3c8572b52f6a0902e40cdedede",
+  "comment_precision": {
+    "change": "comment/docs:92 typed header readbacks, not92 pointers; tail includes three Mint32 scalar constants",
+    "semantics_changed": false,
+    "during_full_build": true,
+    "post_full_subset_confirmation": "focused5 and query2 planned"
+  },
+  "execution": {
+    "entry": "Callstate actual f_arm64_execute_compile [ctx], original continuation and initial memory",
+    "endpoint": "State actual f_arm64_execute_compile Arm64ProgramEntrySource.body",
+    "ordered_provider_traces_retained": 98,
+    "joined_silent_header_loop_steps": 638,
+    "new_external_calls": 0,
+    "header_readbacks": {
+      "scalar": 12,
+      "vector": 64,
+      "typed_tail_fields": 16,
+      "tail_scalar_constants": 3,
+      "total": 92
+    },
+    "values": "31 word/tag pairs, x0 context pointer/tag1, x30 RETURN tag10 and zero payload, 62 table targets, 4 flags and LR0, 64 vector words, 24 stack-tag clears, signed SP0, context and ABI-base pointers, two zero cache words and validity bytes",
+    "derived_storage": "existing Arm64ProducerRegisterStorage.Storage, typed table/cell identities, SP0 and current write permissions in same reached memory",
+    "borrowed_readers": "all31 GPRs and both cold-cache base/validity pairs derived through actual pointer roots",
+    "temporaries": "actual context preserved, loop index32",
+    "preserved": "caller blocks, access map and actual allocation frontier",
+    "memory_identity": "prefix and suffix compose on one actual reached memory; no independently chosen header execution or assumed memory equality",
+    "provider_contract": "ProviderAt and ctx ValueRep remain explicit; native invocation/provider/original-context/all-outcome admission still open",
+    "complete_isa_families": 0
+  },
   "checks": {
     "focused1": {
       "command": [
@@ -25,7 +56,8 @@
       "seconds": 3.356367349624634,
       "cpu": 17,
       "workers": 1,
-      "address_space_bytes": 34359738368
+      "address_space_bytes": 34359738368,
+      "jobs": 194
     },
     "focused3": {
       "command": [
@@ -49,7 +81,21 @@
       "seconds": 3.955061674118042,
       "cpu": 17,
       "workers": 1,
-      "address_space_bytes": 34359738368
+      "address_space_bytes": 34359738368,
+      "jobs": 194
+    },
+    "focused5": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized"
+      ],
+      "exit": 0,
+      "seconds": 3.684619665145874,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 194
     },
     "query1": {
       "command": [
@@ -64,7 +110,46 @@
       "cpu": 17,
       "workers": 1,
       "address_space_bytes": 34359738368
+    },
+    "query2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-initialized/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.543260097503662,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 1539.107251405716,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 357
     }
+  },
+  "repaired_attempts": {
+    "focused1": "record literal indentation, dependent Bool table choice, equality parentheses and reserved prefix identifier repaired",
+    "focused3": "two table-root proofs changed from restricted simp to exact definitional conversion"
+  },
+  "preflight": {
+    "first_launch_exit": 1,
+    "first_launch_error": "taskset -c16 rejected: separate CPU argument required; no edits or build started",
+    "corrected_control_command": "taskset -c 16 python3 run.py ...",
+    "lean_cpu": 17,
+    "nice": 19,
+    "threads_checked": "ps -eLo showed all Lake threads on CPU17 at nice19",
+    "timing_lock": "host work unlocked under coordination 2026-11-19T18:18:59Z"
   },
   "public_query_counts": {
     "types": 5,
@@ -99,30 +184,37 @@
       "Quot.sound"
     ]
   },
-  "source_sha256": {
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "nice": 19,
+    "priority_inheritance": "set before Lake launch; all sampled Lake/Lean threads verified CPU17 nice 19",
+    "priority_thread_snapshot": "/workspaces/kprog-raw/formal/m5-program-entry-initialized/priority-threads.txt",
+    "timing_lock": "host work unlocked under coordination 2026-11-19T18:18:59Z"
+  },
+  "lean_source_sha256": {
     "kprog/formal/KProgFormal.lean": "18992338ad1a8b9bf54433c72cbceef9e0781dff7b56e14c600efd42266bbc5f",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryInitialized.lean": "2b43c9dc0ee036112547aa122bc6406db0c48ae9756b51af56fd5776045e0f9f"
   },
-  "full_confirmation": {
-    "status": "running",
-    "command": "lake build",
-    "raw_json": "/workspaces/kprog-raw/formal/m5-program-entry-initialized/lake-build1.json",
-    "lake_pid": 582254,
-    "wrapper_session": 55352,
-    "cpu": 17,
-    "nice": 19,
-    "workers": 1,
-    "address_space_bytes": 34359738368
+  "scope": {
+    "changed": "one formal composition/transport module, root import, receipts and own todo line",
+    "reuse": "actual RAW prefix, actual638 header/loop suffix, typed-local load frames, original borrowed register storage and GPR/header readers",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
   },
-  "comment_precision": {
-    "change": "comment/docs:92 typed header readbacks, not92 pointers; tail includes three Mint32 scalar constants",
-    "semantics_changed": false,
-    "during_full_build": true,
-    "post_full_subset_confirmation": "focused5 and query2 planned"
-  },
-  "scope": "formal module, root import, receipts and own todo line; no runtime/C/compiler/kernel/image/base/benchmark/paper/design changes",
-  "M5": "open",
-  "M6": "open, follows M5",
-  "completed_isa_families": 0,
-  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-initialized"
+  "goal_closure": {
+    "M5": "open: actual-body architectural register relation/native bindings, native/provider/original-context/all-outcome admission, signed32/uint32 return bridge, ordinary MOVK completeness, relative caches/physical memory/alias/origin/control and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed by this lane",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
 }
