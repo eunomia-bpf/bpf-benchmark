@@ -463,6 +463,11 @@ PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backe
 
 协调者 2026-11-19T22:05Z：上面的决定已实现（4abd03352）。吻合度比较 ELF 重定位和 CO-RE 重定位（读源对象的 .BTF.ext）以外的立即数和偏移；和任何条目都不完全吻合的程序留在 eBPF。主机上对六个应用的源对象核对：Tracee 34769、Tetragon 65789、BCC 90 个 CO-RE 位置；按 libbpf 改写重定位位置之后，1231 个入口函数全部完全吻合，改一个常量的情况 1213 个都能认出。下一步：计时轮转结束（约 00:50）后打镜像、跑六应用检查。预期 Cilium 按端点的程序留在 eBPF（shim 日志 "no manifest match"），其他五个应用的替换数保持 OTel 14、BCC 25、Tetragon 288、Tracee 169、Katran 1（Cilium 那次是 135）。
 
+**协调者 2026-11-20T02:58:21Z（8f6ff5891 的 stats 关结果；内核替 JIT 内联的 helper）**：
+1. stats 关（3 × 180 秒，six-app-names-20261119T231151Z/rotate）：Tracee 1.864x（1.891/1.864/1.886）、Cilium 1.013x、OTel 0.999x、Katran 0.988x（0.982/0.981/1.019）、BCC 0.968x、Tetragon 0.874x（0.631–1.73，分不出两臂）。stats 开改成每个应用 3 × 60 秒（运营者 2026-11-20：“还在计时?????”），放到下一个镜像。
+2. 运营者 2026-11-20：“不是说很多 inline 了吗? 包括 tailcall 啥的? map 是不是也直接调用更快的路径, 不是慢的? 挂载点啥的是不是也要处理?” 核对：尾调用、ARRAY 查找已在原生代码里内联，map 更新删除直接调这个 map 类型的函数；内核验证器替 JIT 内联、原生一侧还在调用的是 get_current_task(_btf)、get_smp_processor_id、jiffies64、get_func_*。02429959e：native-link 在非证明模式下把前三个换成同一条 load（gs:current_task、gs:cpu_number、jiffies_64，地址由加载器从 kallsyms 取），和内核给 JIT 的做法一样；证明模式保留调用，B 的生成照旧。perf 的 PMU profile（runtime-profile-20261120）还显示 OTel 原生一侧 ARRAY 查找 230→804、通用查找分发 168→430 个周期：OTel 的内层 map 查找在原生一侧没走快路径，这是下一项，协调者自己做。
+3. 已排队（six-app-inline-20261120T025748Z）：micro 之后打镜像、六应用检查、每个应用 3 × 60 秒 stats 开。
+
 **协调者 2026-11-20T00:22:30Z（审核 20261119T21Z 逐条核实后的决定）**：
 1. 发现 1 成立：perf 的多日大任务是第 1 项（缩短运行时间），今天它在做 B 一侧的覆盖（P-B-*），这类工作不改变直接原生的计时；协调者 19:27 的交接也把 Katran 的指针差交给了 perf。决定：P-B-*（Cilium headlen、Tetragon 栈缓存、Katran 指针差、常量 ALU32）归 omp（已验证路径本来是 omp 的第 4 项）；perf 回到第 1 项：在 8f6ff5891 镜像上对 OTel、BCC、Katran、Cilium 最热的程序做两臂 profile，把每次调用拆成程序体、各 helper、map，再按占比把 helper 写成 native-helpers.h 里的宏或 inline 函数（运营者 11-19：“helper 能用宏或者 function inline 都可以. 但是不要在链接器里面手写太多, 链接器要简单”）。19:27 那句的意思是“LTO 配置下 Katran 的计时要 B 通过才有内容”，直接原生的计时和 B 无关，每个应用照常在轮转里计。
 2. 发现 2 成立：05-29 的 OTel 1.849x 和 Katran 1.113x 工作量不同（OTel 没做栈展开、Katran 跳过 LRU 查找，kprog/results/trend-20261116）。每小时报告照列 05-29 的数并写明这一点，参照用功能正常时的最好数（运营者 11-18：“功能正常就可以”）。
