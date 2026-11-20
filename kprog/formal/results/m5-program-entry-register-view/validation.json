@@ -1,0 +1,101 @@
+{
+  "step": "M5 actual initialized-body architectural register relation",
+  "status": "focused-pass-full-running",
+  "recorded_utc": "2026-11-20T01:26:55Z",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-register-view",
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView"
+      ],
+      "exit": 0,
+      "seconds": 82.06259179115295,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-register-view/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.66560697555542,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    }
+  },
+  "public_query_counts": {
+    "types": 9,
+    "axiom_reports": 9
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64EntryAdmissibility.raw_values_represent": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64EntryAdmissibility.raw_native_registers": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.vector_offset": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.tag_width": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.flag_loads": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.sp_read": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.vector_reads": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.represents": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView.entry_represents": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "bd359f5963f1e7d2fb6e8f8e430296b1ad59e906c9945149a800597d3b35efaf",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64EntryAdmissibility.lean": "7ea7c6056ec4cea87561557ead15c56d1ebd8d6c6c869f93df982de143075694",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterView.lean": "3837e06d6e4c4ccac6dbc4770828c77d1c5322eddae1fa993626cdfe19bad033"
+  },
+  "full_confirmation": {
+    "status": "running",
+    "json": "/workspaces/kprog-raw/formal/m5-program-entry-register-view/lake-build1.json",
+    "session": 51714,
+    "cpu": 17,
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "explicit_contracts": "NativeBindings, ctx ValueRep, ProviderAt; native ABI/original-context/provider/all-outcome admission and complete MOVK refinement remain open",
+  "preserved": "same actual body memory,98 traces,92 typed readbacks,Values,Storage,Freeable ranges,context/index,caller frame,access/frontier",
+  "scope": "formal proofs, shared proof extraction, root import, receipts, own todo line; no C/runtime/compiler/kernel/base/image/benchmark/paper/design edits",
+  "M5": "open",
+  "M6": "open, follows M5",
+  "complete_isa_families": 0
+}

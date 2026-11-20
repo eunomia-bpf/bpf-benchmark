@@ -16,6 +16,35 @@ def rawValue (ctx : CC.Val) (inputs : Fin 31 → BitVec 64) (i : Fin 31) : CC.Va
 
 def rawTag (i : Fin 31) : BitVec 8 := if i = 0 then 1 else if i = 30 then 10 else 0
 
+/-- The RAW word view reuses the context pointer binding and scalar bits.
+No architectural relation is assumed to obtain these value representations. -/
+theorem raw_values_represent (addresses : Arm64Registers.PointerOrigins)
+    (ctx : CC.Val) (ctxWord : BitVec 64) (inputs : Fin 31 → BitVec 64)
+    (represented : Arm64Registers.ValueRep addresses ctx ctxWord) :
+    ∀ i, Arm64Registers.ValueRep addresses (rawValue ctx inputs i) (rawWord ctxWord inputs i) := by
+  intro i
+  by_cases zero : i = 0
+  · simpa [rawValue, rawWord, zero] using represented
+  · simp [rawValue, rawWord, zero, Arm64Registers.ValueRep]
+
+/-- Actual context/return/ordinary-register ABI bindings imply exactly the
+existing M3 materialization law for every RAW cell. -/
+theorem raw_native_registers (origins : Reference.Provenance.AArch64.Origins)
+    (ctxWord : BitVec 64) (inputs : Fin 31 → BitVec 64) (s : Reference.AArch64.State)
+    (nativeContext : Reference.AArch64.gpr s 0 = ctxWord)
+    (nativeReturn : Reference.AArch64.gpr s 30 = origins.returnAddress)
+    (nativeOther : ∀ i : Fin 31, i ≠ 0 → i ≠ 30 → Reference.AArch64.gpr s i = inputs i) :
+    ∀ i, Reference.AArch64.gpr s i =
+      Reference.Provenance.AArch64.materialize origins (rawWord ctxWord inputs i) (rawTag i) := by
+  intro i
+  by_cases zero : i = 0
+  · subst i
+    simpa [rawWord, rawTag, Reference.Provenance.AArch64.materialize] using nativeContext
+  · by_cases lr : i = 30
+    · subst i
+      simpa [rawWord, rawTag, Reference.Provenance.AArch64.materialize] using nativeReturn
+    · simpa [rawWord, rawTag, zero, lr, Reference.Provenance.AArch64.materialize] using nativeOther i zero lr
+
 /-- Compose the actual stack/SP/context stores with the header execution.
 Final SP, x0 data and x0/x30 tags are derived from C, not supplied as final
 readback premises. Input words, flags/vectors and same-invocation native
@@ -135,21 +164,8 @@ theorem raw_registers_initialized_with_storage
     have same : block = spBlock := congrArg Prod.fst (Option.some.inj (bound.symm.trans spBinding))
     subst block
     exact spRead
-  have valuesRep : ∀ i, Arm64Registers.ValueRep addresses (rawValue ctx inputs i) (rawWord ctxWord inputs i) := by
-    intro i
-    by_cases zero : i = 0
-    · simpa [rawValue, rawWord, zero] using represented
-    · simp [rawValue, rawWord, zero, Arm64Registers.ValueRep]
-  have native : ∀ i, Reference.AArch64.gpr s i =
-      Reference.Provenance.AArch64.materialize origins (rawWord ctxWord inputs i) (rawTag i) := by
-    intro i
-    by_cases zero : i = 0
-    · subst i
-      simpa [rawWord, rawTag, Reference.Provenance.AArch64.materialize] using nativeContext
-    · by_cases lr : i = 30
-      · subst i
-        simpa [rawWord, rawTag, Reference.Provenance.AArch64.materialize] using nativeReturn
-      · simpa [rawWord, rawTag, zero, lr, Reference.Provenance.AArch64.materialize] using nativeOther i zero lr
+  have valuesRep := raw_values_represent addresses ctx ctxWord inputs represented
+  have native := raw_native_registers origins ctxWord inputs s nativeContext nativeReturn nativeOther
   obtain ⟨entry, after, finalLe, headerRun, registers, storage, headerFrame, headerAccess, headerNext⟩ :=
     Arm64ProducerRegisterView.producer_registers_with_storage addresses origins (fun i => i)
       m middle le k s (rawValue ctx inputs) (rawWord ctxWord inputs) rawTag 0

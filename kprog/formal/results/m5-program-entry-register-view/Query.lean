@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView
+
+open KProgFormal.ClightRefinement
+
+#check Arm64EntryAdmissibility.raw_values_represent
+#print axioms Arm64EntryAdmissibility.raw_values_represent
+#check Arm64EntryAdmissibility.raw_native_registers
+#print axioms Arm64EntryAdmissibility.raw_native_registers
+#check Arm64ProgramEntryRegisterView.vector_offset
+#print axioms Arm64ProgramEntryRegisterView.vector_offset
+#check Arm64ProgramEntryRegisterView.tag_width
+#print axioms Arm64ProgramEntryRegisterView.tag_width
+#check Arm64ProgramEntryRegisterView.flag_loads
+#print axioms Arm64ProgramEntryRegisterView.flag_loads
+#check Arm64ProgramEntryRegisterView.sp_read
+#print axioms Arm64ProgramEntryRegisterView.sp_read
+#check Arm64ProgramEntryRegisterView.vector_reads
+#print axioms Arm64ProgramEntryRegisterView.vector_reads
+#check Arm64ProgramEntryRegisterView.represents
+#print axioms Arm64ProgramEntryRegisterView.represents
+#check Arm64ProgramEntryRegisterView.entry_represents
+#print axioms Arm64ProgramEntryRegisterView.entry_represents
