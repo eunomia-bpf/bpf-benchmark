@@ -33,8 +33,10 @@ call. Do not replace the external selector by an assumed silent result.
 Validation: shared 182 jobs, final linked subset 221 jobs, six public type/axiom
 queries and one closed source-binding query pass at original proof caps.
 Focused checks use CPU 17, nice 0, one worker and 32 GiB address space.
-The first linked check also rebuilt the MOV dependents. Full proof-library
-confirmation is pending. Existing logic and external-semantics axioms are
+The first linked check also rebuilt the MOV dependents. The whole
+`lake build KProgFormal` proof library/root passes 273 jobs on CPUs 16–23,
+nice 19, one worker and 32 GiB address space. Executable/tool builds are
+excluded under the current tool-build directive. Existing logic and external-semantics axioms are
 listed in validation.json; no new axiom is introduced. Raw logs are retained
 under `/workspaces/kprog-raw/formal/m5-mov-sp-suffix`. M5/M6 remain open and
 completed ISA-family count is zero.
