@@ -1,0 +1,2 @@
+coverage: 141 native of 142 requests (21 checked-sim-c, 120 direct-native), 1 failed; 141 native-loader replaced, 0 kept on eBPF
+per call: not quotable - post arm recorded 129 entries against the baseline's 287 and its hottest baseline program (generic_tracepo, 1.34e9 calls) has no post entry; total calls 2.30e9 vs 2.91e9 (0.79)
