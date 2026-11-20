@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF touched Cilium shared-helper check (2026-11-20T05:09:19Z): own PID 670115, raw /workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z, existing checked-corpus on CPUs 20-23 /4vCPU /32G /48GiB AS /nice19 /imageSH. All LTO and helper/native flags on; installed tools/P/image unchanged. Capture actual coverage, reachable code, per-program time/count and packet rates with d4af01ca8 app receipt; no runtime gain claimed.
+
 - [x] PERF shared map-helper application measurement (307c28752; 2026-11-20T05:05:56Z): guest666886 exit0/appOK,14native/4checked/10direct,34LPM/14HASH/4ARRAY static sites and4/4no-red-zone flags. Actual full proof code unwind16150B/HotSpot16289B/PHP14053B/sched_free595B includes workers. eBPF4543.281→native4673.098ns/call (0.972x); no speed target met. All worker self-rates retained in lpm-c-lto-20261120/shared-app-result.json/evidence.tar.gz; earlier regressions stay. All LTO on; installed tools/P/image unchanged. Runtime improvement remains open.
 
 - [x] PERF cached native no-red-zone enforcement (91a703ada; 2026-11-20T04:29:31Z): final native compile uses existing O3 force-attribute=noredzone uniformly; actual cached LPM now allocates24byte frame,210→234B.18819LPM/112HASH API cases and helper compatibility pass. Results/native-redzone-20261120/report.json/evidence.tar.gz. B/tools unchanged; actual app timing remains open.
