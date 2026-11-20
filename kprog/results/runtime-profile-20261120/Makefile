@@ -18,3 +18,13 @@ inspect:
 .PHONY: capture
 capture:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/capture.py $(OUT) $(APP)
+
+PRIVATE_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-private
+.PHONY: private
+private:
+	install -d $(PRIVATE_BUILD) $(OUT)
+	clang-18 -O3 -fsanitize=undefined -fno-sanitize-recover=all -I$(ROOT)/vendor/libbpf/src \
+		$(ROOT)/kprog/results/runtime-profile-20261120/private.c -o $(PRIVATE_BUILD)/private
+	$(PRIVATE_BUILD)/private
+	clang-18 -O1 -S -emit-llvm -I$(ROOT)/vendor/libbpf/src \
+		$(ROOT)/kprog/results/runtime-profile-20261120/private.c -o $(OUT)/private.ll
