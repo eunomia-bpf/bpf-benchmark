@@ -13,6 +13,8 @@ programs:
 
 run:
 	install -d $(OUT)
+	git -C $(ROOT) rev-parse HEAD > $(OUT)/source-commit
+	tar -C $(INPUTS) -czf $(OUT)/native-inputs.tar.gz .
 	date -u +%FT%TZ > $(OUT)/started
 	status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
 		taskset -c 16-17 prlimit --as=17179869184 -- vng \
