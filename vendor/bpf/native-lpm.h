@@ -40,7 +40,8 @@ __kprog_lpm_lookup(void *map, const void *key, unsigned long bytes, unsigned lon
         if (length==maximum) { found=node; break; } \
         if (!(*(const __kprog_lpm_u32 *)(node+flags)&1)) found=node; \
         unsigned bit=!!(((const unsigned char *)key)[4+length/8] & (1u<<(7-length%8))); \
-        node=*(unsigned char *const volatile *)(node+child+bit*sizeof(void *)); \
+        if (bit) node=*(unsigned char *const volatile *)(node+child+sizeof(void *)); \
+        else node=*(unsigned char *const volatile *)(node+child); \
     } \
     return found ? found+data+bytes : (void *)0; \
 }
