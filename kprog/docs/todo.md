@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF actual kernel probe contract check (092e14062; 2026-11-20T05:51:15Z): native program inputs compiled with uniform flags, existing installed service-client/loader/compiler only; own PID689280 raw /workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055034Z. Control then12kernel/user/string/zero-length/address-policy/error-zeroing cases, buffer guards; CPUs16-17/2vCPU/4G/16GiB AS/nice19/imageSH. No new tool build or app publication, all LTO on. Read actual client and service receipts before claiming native execution or behavior; source81f126f69 app publication remains separate.
+
 - [x] PERF consecutive C lookup-case grouping (2cfb5d9fb; 2026-11-20T05:47:03Z): HASH/LPM/API and560same-map aliases pass; full BCCsys_exit388→374B/sched_switch1548→1534B. Actual combined OTel683392 exit0/appOK,14native/4checked/10direct,34LPM/14HASH/4ARRAY sites, full unwind16063B/HotSpot16164B.4354.968→5470.280ns/call (0.796x), regression and mixed worker rates retained in lpm-c-lto-20261120/grouped-otel-result.json/evidence.tar.gz. All LTO on, tools/flags/P/B/image unchanged. Hard speed/throughput targets remain open; source kernel-probe actual behavior remains separate.
 
 - [x] PERF HASH tail-word native optimization (709c1c486; 2026-11-20T05:33:06Z): guarded/kernel-hash/native API checks pass; actual key4 worker198→156B, full sys_exit430→388B/sched_switch1590→1548B. BCC678934 exit0/appOK,25native/22checked/3direct,14HASH sites;133.095→127.837ns/call (1.041x), sys_exit84.013→75.578ns/call, stress-ng rates mixed. Results lpm-c-lto-20261120/tail-bcc-result.json/evidence.tar.gz; prior0.945x kept. All LTO on, tools/P/B/image unchanged; hard speed/throughput targets remain open.
