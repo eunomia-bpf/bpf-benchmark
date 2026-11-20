@@ -32,3 +32,14 @@ private:
 	$(PRIVATE_BUILD)/private
 	clang-18 -O1 -S -emit-llvm -I$(ROOT)/vendor/libbpf/src \
 		$(ROOT)/kprog/results/runtime-profile-20261120/private.c -o $(OUT)/private.ll
+
+USER_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-user
+.PHONY: source-probes
+source-probes:
+	install -d $(USER_BUILD) $(OUT)
+	clang-18 -O3 -g -mgeneral-regs-only -mno-red-zone -fomit-frame-pointer -fno-stack-protector \
+		-c $(ROOT)/kprog/results/runtime-profile-20261120/user.c -o $(USER_BUILD)/user.o
+	$(CC) -O3 -fsanitize=undefined -fno-sanitize-recover=all \
+		$(ROOT)/kprog/results/checked-probe-c-20261119/driver.c $(USER_BUILD)/user.o -o $(USER_BUILD)/execute
+	$(USER_BUILD)/execute
+	llvm-objdump-18 -dr $(USER_BUILD)/user.o > $(OUT)/user.asm
