@@ -34,6 +34,13 @@ static uint64_t observe(struct x86_sim_state *state, unsigned family,
     uint64_t imm=mode==0?(uint64_t)-24-(uintptr_t)state->rsp.ptr:0;
     if (family==0)
         return X86_SIM_L_READ_MEM_VALUE(src,aux,imm,width,0);
+    if (family>=2) {
+        /* A false CMOV still reads its memory operand and can fault. */
+        state->zf=family==2;
+        X86_SIM_L_EXEC_CMOV_MEM(X86_RAX,src,width,
+            aux | X86_REG_AUX_SRC_SHIFT(X86_CC_NE),imm);
+        return (uintptr_t)state->rax.ptr;
+    }
     X86_SIM_L_EXEC_MOV_LOAD(X86_OP_MOV_LOAD,X86_RAX,src,width,aux,imm);
     return (uintptr_t)state->rax.ptr;
 }
@@ -84,7 +91,7 @@ int main(void)
     void *page=mmap(NULL,(size_t)page_size,PROT_NONE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     assert(page!=MAP_FAILED);
     count=0;
-    for (unsigned family=0; family<2; ++family)
+    for (unsigned family=0; family<4; ++family)
     for (unsigned mode=1; mode<3; ++mode) {
         struct x86_sim_state state={0};
         state.abi_kind=X86_SIM_ABI_KIND_RAW;
