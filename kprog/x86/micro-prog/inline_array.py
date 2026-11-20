@@ -1,4 +1,4 @@
-"""C ARRAY helper for native LTO of the checked simulator frontend."""
+"""C lookup bodies for native LTO through the installed lookup-helper ABI."""
 import ctypes as c
 import json
 from pathlib import Path

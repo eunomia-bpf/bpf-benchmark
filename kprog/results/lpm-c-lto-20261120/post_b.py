@@ -10,7 +10,6 @@ tmp=Path('/var/tmp/kprog-tmp/perf/lpm-c-lto')
 tool=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir')
 here=root/'kprog/results/lpm-c-lto-20261120'
 layout=json.loads((here/'report.json').read_text())['layout']
-offsets=','.join(str(layout[name+'_OFF']) for name in ['ROOT','CHILD','PREFIX','FLAGS','DATA'])
 sys.path[:0]=[str(root/'kprog'),str(root/'kprog/x86/micro-prog')]
 from inline_array import lookup_source
 kernel='/workspaces/.agent-state/kprog-ck/build-x86/vmlinux'

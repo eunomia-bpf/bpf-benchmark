@@ -24,7 +24,7 @@ static void word(void *p,unsigned value) { memcpy(p,&value,4); }
 int main(void)
 {
     _Alignas(8) unsigned char node[48]={0};
-    const unsigned payload[3]={0x12345678,0x9abcdef0,0x87654321};
+    const unsigned payload[3]={0x5a5a5a5a,0x5a5a5a5a,0x5a5a5a5a};
     unsigned char key[12]; memcpy(key,payload,sizeof(key));
     assert(trusted_x86_x86_sim_xdp(NULL)==0);
     void *root=node; memcpy(map_a+ROOT_OFF,&root,sizeof(root));
