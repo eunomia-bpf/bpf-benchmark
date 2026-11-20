@@ -9,8 +9,8 @@ MK=$ROOT/kprog/results/lto-apps-20261119/Makefile
 for app in bcc/set tracee/monitor tetragon/observer; do
   name=${app%%/*}
   out=$ROOT/kprog/results/lto-apps-20261119/$name
-  if [ -f "$out/timing-summary.txt" ]; then
-    echo "$(date -u +%FT%TZ) skip $app (summary exists)"
+  if [ -f "$out/service.tar.gz" ]; then
+    echo "$(date -u +%FT%TZ) skip $app (service.tar.gz exists)"
     continue
   fi
   echo "$(date -u +%FT%TZ) start $app"
