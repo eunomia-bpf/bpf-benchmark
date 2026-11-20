@@ -39,6 +39,21 @@ configuration:
 
 ## Why some apps scatter and others do not: the retained population
 
+### Correction: `native_tracer_entry` regressed on 2026-11-14
+
+An earlier reading of these runs said the main program was consistently 0.07-0.11 and only the low-count
+program moved. That holds only up to 11-13. Splitting the same program by date:
+
+| window | runs | median ratio for `native_tracer_entry` |
+|---|---|---|
+| 2026-11-07 … 11-13 | 46 | **0.09** |
+| 2026-11-14 … 11-20 | 75 | **1.05** |
+
+A tenfold change across a date boundary with the population count unchanged is a **real regression**, not
+noise — and it lines up with the 11-14 image/compiler changes, well before PERF's 0.796 figure. The 0.796 that
+prompted this record is therefore a *symptom* of something that started on 11-14, and the fix is upstream of
+the OTel timing.
+
 Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
 `native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
 (10^2–10^3 dispatches) reading anything from 0.30 to 1.00. A program dispatched ~1,000 times carries its own
