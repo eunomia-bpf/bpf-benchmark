@@ -47,19 +47,23 @@ def lookup_source(kernel_btf, lpms=(), hashes=()):
     if lpms:
         offsets = lpm_layout(kernel_btf)
         preamble = '#include ' + json.dumps(str(Path(__file__).with_name('native_lpm.h'))) + '\n__KPROG_LPM_CODE\n'
+        for key_size in sorted({size for _, size in lpms}):
+            preamble += (f'static __attribute__((noinline)) void *__kprog_lpm_key_{key_size}(void *map,const void *key) {{ '
+                         f'return __kprog_lpm_lookup(map,key,{key_size-4},{(key_size-4)*8},{offsets}); }}\n')
         for index, (name, key_size) in enumerate(lpms):
             alias = f'__kprog_lpm_map_{index}'
             preamble += f'extern unsigned char {alias}[] __asm__({json.dumps(name)});\n'
-            choices += (f'    if (map == {alias}) return __kprog_lpm_lookup(map,key,'
-                        f'{key_size-4},{(key_size-4)*8},{offsets});\n')
+            choices += f'    if (map == {alias}) return __kprog_lpm_key_{key_size}(map,key);\n'
     if hashes:
         offsets = ','.join(str(value) for value in hash_layout(kernel_btf).values())
         preamble += '#include ' + json.dumps(str(Path(__file__).with_name('native_hash.h'))) + '\n__KPROG_HASH_CODE\n'
+        for key_size in sorted({size for _, size in hashes}):
+            preamble += (f'static __attribute__((noinline)) void *__kprog_hash_key_{key_size}(void *map,const void *key) {{ '
+                         f'return __kprog_hash_lookup(map,key,{key_size},{offsets}); }}\n')
         for index, (name, key_size) in enumerate(hashes):
             alias = f'__kprog_hash_map_{index}'
             preamble += f'extern unsigned char {alias}[] __asm__({json.dumps(name)});\n'
-            choices += (f'    if (map == {alias}) return __kprog_hash_lookup(map,key,'
-                        f'{key_size},{offsets});\n')
+            choices += f'    if (map == {alias}) return __kprog_hash_key_{key_size}(map,key);\n'
     # __kprog_array_lookup is the installed compiler's native C lookup ABI.
     # Exact named LPM/HASH operands select their C body before the ARRAY body;
     # LLVM folds the matching global-pointer identity after inlining.

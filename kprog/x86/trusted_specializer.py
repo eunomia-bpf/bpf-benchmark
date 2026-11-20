@@ -215,8 +215,10 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
             text += '#include ' + json.dumps(str(ROOT/'kprog/x86/micro-prog/inline_probe.c')) + '\n'
         helper.write_text(text)
         helper_ir = directory/'checked-simulator.helpers.bc'
-        run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-mgeneral-regs-only',
-             '-fno-stack-protector', '-emit-llvm', '-c', helper, '-o', helper_ir])
+        run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
+             '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
+             '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
+             '-fno-unwind-tables', '-emit-llvm', '-c', helper, '-o', helper_ir])
         linked = directory/'checked-simulator.linked.bc'
         run(['llvm-link-18', lowered, helper_ir, '-o', linked])
         lowered = linked
