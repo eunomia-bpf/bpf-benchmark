@@ -129,3 +129,20 @@ So for a `PTR_TO_STACK` operand **any** subtraction involving it is refused, in 
 This is why the `16 < d < 25` rewrite is the right shape: it never forms a subtraction with the stack
 pointer as an operand at all. Merely swapping operands does not help.
 
+
+## Re-confirmed on the guest kernel (OMP 2026-11-20T17:5xZ), and the fix shape passes
+
+Re-ran the decisive objects through the static verifier inside the guest (kernel 7.0.0-rc2+, `vlog_s`, rebuilt
+from `vlog.c`), after a first attempt segfaulted because the object paths were not in the guest's working
+directory:
+
+| shape | verdict |
+|---|---|
+| `stack_ptr - scalar` | REJECT errno=13, `R1 tried to subtract pointer from scalar` |
+| `scalar - stack_ptr` | REJECT errno=13, `R2 subtraction from stack pointer prohibited` |
+| bounded scalar operand | REJECT errno=13, `R1 tried to subtract pointer from scalar` |
+| `(u64)ctx > 0x18` / `(u64)ctx < 0x11` (i.e. `16 < d < 25`) | **ACCEPT** |
+
+So a `PTR_TO_STACK` operand cannot take part in a subtraction in either position, bounding the scalar does not
+help, and the shape that removes the subtraction entirely is accepted. That is the whole requirement for the
+5 OTel fp-arithmetic fallbacks: eliminate the subtraction rather than reorder or bound it.
