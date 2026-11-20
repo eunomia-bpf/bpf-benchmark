@@ -11,4 +11,4 @@ flock -x 9
 taskset -c 20-23 nice -n 19 prlimit --as=8589934592 -- \
     make -f kprog/results/lpm-c-lto-20261120/Makefile compiler
 taskset -c 20-23 nice -n 19 prlimit --as=8589934592 -- \
-    make -f kprog/results/lpm-c-lto-20261120/Makefile check compatibility syntax RAW="$out"
+    make -f kprog/results/lpm-c-lto-20261120/Makefile check compatibility syntax generation RAW="$out"

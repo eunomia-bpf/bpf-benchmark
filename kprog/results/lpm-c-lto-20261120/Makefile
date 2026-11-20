@@ -33,7 +33,7 @@ syntax:
 
 .PHONY: archive
 archive:
-	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/archive.py
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/archive.py $(RAW)
 
 .PHONY: generation
 generation:
