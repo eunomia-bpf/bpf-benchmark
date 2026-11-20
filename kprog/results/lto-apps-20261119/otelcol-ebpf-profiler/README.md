@@ -67,6 +67,7 @@ probe-read/ktime bodies with relocated calls to the real helpers.
 **Checked, and it holds (OMP).** A `bytes_xlated` of 24 on the post side does not mean "kept on the JIT": the
 11-20 post shim log records `native-loader replaced prog=...` for **14 of 14** programs, unwind programs included,
 and 11-17 replaced 14 of 14 as well. `bytes_xlated` is the replaced program's own xlated size as the loader
-reports it (24 B for the entry, 5296 B for `perf_unwind_sto`), so the two dates do have the same coverage and the
-table above compares emitter versions after all. Within 11-20 the identical-coverage readings are 0.950x (180 s
+reports it (24 B for the entry, 5296 B for `perf_unwind_sto`) and is not a replacement marker at all — across 154
+post arms it contradicts the log's count in 147 (`ratio-spread-20261120/README.md`). The two dates do have the same
+coverage, and the table above compares emitter versions. Within 11-20 the identical-coverage readings are 0.950x (180 s
 arm) and 0.945x (coordinator), consistent with the 1.31 of the 11-20 row's own run.
