@@ -52,7 +52,7 @@ with tarfile.open(raw/'service.tar.gz') as service:
                         if count: selected[kind][mapping['name']] = count
                 row['native_static_sites_by_map'] = selected
                 for kind, mappings in selected.items(): row[kind+'_static_sites'] = sum(mappings.values())
-                row['generic_lookup_static_sites'] = sum('call ptr @bpf_map_lookup_elem(' in line for line in ir.splitlines())
+                row['pre_helper_lto_generic_lookup_static_sites'] = sum('call ptr @bpf_map_lookup_elem(' in line for line in ir.splitlines())
             if 'request/generated/checked-simulator.native.o' in files:
                 elf = ELFFile(io.BytesIO(capsule.extractfile('request/generated/checked-simulator.native.o').read()))
                 symbol = next(s for s in elf.get_section_by_name('.symtab').iter_symbols()
@@ -106,7 +106,7 @@ result = dict(source_revision=args.revision, raw=str(raw), app_run=str(app_run),
     per_program_post_over_baseline_geomean=program_ratio, per_program_ratios=programs,
     pairing='analysis/corpus_analyze.py name-type, min run count 100, evaluation.md section 5',
     pooled_phase_ebpf_over_native_per_call=ratio,
-    scope='One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Primary metric uses evaluation section 5 per-program ratios; summed phase time/count is supplemental and depends on program mix. Tail target time is included in its caller. Static helper sites are not dynamic frequencies. Component throughput is separate.')
+    scope='One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Primary metric uses evaluation section 5 per-program ratios; summed phase time/count is supplemental and depends on program mix. Tail target time is included in its caller. Lookup-site counts use lowered IR before helper-C linking/O3; generic spellings there are not remaining machine-code helper calls. Static sites are not dynamic frequencies. Component throughput is separate.')
 (here/(args.name+'-result.json')).write_text(json.dumps(result, indent=2)+'\n')
 with tarfile.open(here/(args.name+'-evidence.tar.gz'), 'w:gz') as archive:
     archive.add(raw, arcname=raw.name)
