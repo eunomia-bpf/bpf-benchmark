@@ -478,9 +478,15 @@ LBB0_2 …                           ; the fall-through continues to
 121:  r1 = *(u32 *)(r8 + 30)       ; ← the read, on the path where the comparison was false
 ```
 
+*(Superseded — see "`34af4b3a`: fixed by `6b0204beb`" below. The bound is at 48-51 in both bases, and the
+read is **not** reached from `LBB0_2`: 51 jumps past it to `LBB0_4` at 115, where the read at 126 lives, and
+`LBB0_2` leaves through the call at 106 to `LBB0_12`. What actually differed was that the 23:06 base never
+lowered the predicate at all — zero `packet_end` reads in the emitted B — and `6b0204beb` made the freshness
+walk cross exact TC control-buffer stores, so it lowers there now.)*
+
 Verified minimally on the host: that shape rejects with `invalid access to packet, off=30 size=4,
 R8(id=0,off=30,r=0)` — the live run's exact text — and is `ACCEPT` once `data`/`data_end` are re-loaded and
-bounded inside the falling-through block. So the last item is the same per-path rule as the `+0x10` case with
+bounded inside the block. So the last item is the same per-path rule as the `+0x10` case with
 the branch taken the other way: the bound must be re-emitted on the path that reaches the read.
 
 Capture size is not fixed: this guest catches 12 requests, the two baselines 64, PERF's capture 14, all from
@@ -501,7 +507,28 @@ across private-input choices and `skb` cb stores; `fd30e6c92`, `21fcff02a` retai
 | my capture (`fixed-20261119T233010Z`) | 12 requests, 9 install; every instance of `9effc137`(4), `874d0fb3`(2), `8680a229`(3) |
 | 3 × 180 s production run (`x86_kvm_corpus_20261119_234045_456298`) | 28 requests, **28 installed via checked-sim-c, 0 direct-native, 0 failed** |
 
-The one open item is the fall-through placement, exactly as reproduced on the host for `34af4b3a`
-(`off=30 size=4, R8(r=0)`): the bound is emitted on the comparison's true edge, which jumps to the block the
-read is *not* on. Re-emitting it inside the falling-through block is `ACCEPT`. That program did not appear in
-the 3 × 180 s production run, which is why that run shows no fallback at all.
+### `34af4b3a`: fixed by `6b0204beb`, and the earlier explanation was wrong
+
+The residual was recorded as "the bound is emitted on the comparison's true edge while the read sits on the
+fall-through". Comparing the two generated Bs for the same program and the same request (`request_id` 1,
+`source_prog_id` 242, hash `34af4b3a`) shows that is not what happened:
+
+| | B from the 23:06 base (`852c2bfe3`) | B from the 23:47 base (`6b0204beb`+) |
+|---|---|---|
+| `packet_data` / `packet_end` reads in the IR | **0** | 2 |
+| `%packet_bound = add i64 %packet_data, 34` | **absent** | present |
+| `icmp ugt i64 %packet_bound, %packet_end` | **absent** | present |
+| host verifier | `R8 offset is outside of the packet` (`off=30 size=4`) | clean |
+
+So the difference is not *where* the bound was placed; on the 23:06 base the predicate was **never lowered at
+all**, and the read stayed an unguarded `*(u32 *)(r8 + 0x1e)`. `6b0204beb` makes the freshness walk treat an
+exact TC control-buffer store (`__sk_buff.cb`, offsets 48-55, matched by the six-operand asm template) as
+preserving `data`/`len`/`data_len`, so the walk reaches the read again and the predicate lowers. `b1399d137`
+widens the same walk to private-input choices; it is not the commit that fixed this program (the `6b0204beb`
+build already emits both probes).
+
+The "read on the fall-through" note came from reading `LBB0_2` as the block that reaches the read. It does not:
+instruction 51 (`if r2 <= r1 goto LBB0_4`) jumps *past* `LBB0_2` to 115, `LBB0_2` runs 52..105 and then reaches
+`LBB0_12` via the call at 106, and the read at 126 is inside `LBB0_4` (115-...), reached from 51 and from the
+`LBB0_13` continuation at 114. Both Bs have the bound at 48-51 in exactly the same shape, which is why the
+placement story could not explain a program that one base rejects and the other accepts.
