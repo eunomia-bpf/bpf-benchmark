@@ -12,7 +12,7 @@ private theorem cell_vector : ∀ tags (i : Fin 31),
     tableCellName tags i ≠ Arm64Entry.___a64_vectors := by decide +kernel
 
 /-- The flag reader follows the actual initialized producer pointer. -/
-private theorem storage_flag {m memory : CC.Mem} {entry : HeaderLocal m}
+theorem storage_flag {m memory : CC.Mem} {entry : HeaderLocal m}
     (storage : Storage m memory entry) (flag : Fin 4) :
     Arm64EntryMemory.borrowed memory.nextblock .Mint8unsigned memory (.Vptr entry.block 0)
       (headerField (flagIndex flag)) =
