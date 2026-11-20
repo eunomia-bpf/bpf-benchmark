@@ -66,8 +66,10 @@ between the phases exposes where they do not:
 | **Tracee** | 71 | 1.04 (quartiles 0.96–1.25) | 38 |
 | **Cilium** | 87 | **2.77** | 33 |
 
-Cilium's post arm executes **2.8x** the baseline arm's calls in the median run, and the inflation is not a
-property of short runs: three 180 s × 3-sample runs with 53/53 programs still read above 1.5x. Any Cilium
+Cilium's post arm executes **2.7x** the baseline arm's calls in the median run, and the inflation is not a
+property of short runs: three 180 s × 3-sample runs with 53/53 programs still read above 1.5x. It is a real
+workload difference rather than a reporting artifact — in the most inflated run (6.58x) the busiest program,
+`cil_from_container`, itself executed 5.59M → 18.1M times (3.2x), so that arm genuinely carried more traffic. Any Cilium
 per-call figure from a run with unequal counts is therefore suspect, and Cilium is the app where the
 calibration check matters most. `population.json` holds the counts.
 
