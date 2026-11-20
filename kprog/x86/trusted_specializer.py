@@ -229,6 +229,7 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         lowered = context_ir
     run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
          '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
+         '-mllvm', '-force-attribute=noredzone',
          '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
          '-fno-unwind-tables',
          '-c', lowered, '-o', native])
