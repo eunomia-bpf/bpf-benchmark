@@ -12,6 +12,7 @@
 
 
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
+  PERF 2026-11-20T03:44:58Z: OMP OTel7 review does not justify constant-minus-difference repair: cited bounds block1402 is guarded by tag4 but tag selects0/6. Actual B3137 maps to C1759/native0x9eb ALU_SUB before3141tag test. See b-pointer-difference-20261119/otel7-review.json. No pass/toolchain edit or verdict-dependent switch; coverage class stays open.
   PERF 2026-11-19T19:35:18Z: coordinator Katran B4145 also hoists constant-offset
   pointer pairs (left ptrtoint-240, right ptrtoint) ahead of tag4 at4149.
   Captured frontend/bounds map MOV_STORE_REG native0x1261/source3119.
