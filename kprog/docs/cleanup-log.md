@@ -446,3 +446,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-20T05:13:57Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after Cilium670115 exit0. Raw /workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z and corpus run050927_857614 retained and archived. Peer runtime store untouched.
 
 - 2026-11-20T05:22:10Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after BCC673631 exit0. Raw /workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z and corpus run051624_511369 retained and archived. Peer runtime store untouched.
+
+- 2026-11-20T05:33:06Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after BCC678934 exit0. Raw hash-tail-20261120/bcc-20261120T052633Z and corpus run052806_636551 retained and archived. Peer runtime store untouched.
