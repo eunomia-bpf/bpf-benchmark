@@ -61,3 +61,5 @@ combined publication must measure their actual app behavior and per-call
 effect. The 20%/50% targets remain open. LPM traversal and exact helper caller
 attribution remain the next runtime work; no hand-written linker helper or
 benchmark definition changed in this step.
+
+2026-11-20T01:50:48Z — Phase1 source-probe correction:94555f854 had99passing host controls and four links, then the actual P-to-B API exposed its external copy call as an ABI CFG target0x8e failure. Forward fix942a4062f keeps bpf_probe_read_user identity through B; existing checked-sim-c native emission inlines the C common wrapper. User8/compat B emission,99host controls and four links pass after the fix. probe-pipeline-result.json and probe-pipeline-evidence.tar.gz retain original and corrected inputs/outputs. Stock acceptance, installation and app speed follow the next combined image.

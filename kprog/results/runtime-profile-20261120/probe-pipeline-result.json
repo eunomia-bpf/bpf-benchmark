@@ -1,0 +1,31 @@
+{
+  "correction": "942a4062f",
+  "before": "/workspaces/kprog-raw/perf/runtime-profile-20261120/source-generation-20261120T014314Z",
+  "after": "/workspaces/kprog-raw/perf/runtime-profile-20261120/source-generation-20261120T014607Z",
+  "before_entries": [
+    {
+      "symbol": "user8",
+      "status": "failed",
+      "diagnostic": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/runtime-profile-20261120/source-generation.py\", line 16, in <module>\n    result=module.specialize((tmp/'user.o').read_bytes(),name,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 134, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1874, in render_program\n    stack_bytes = check_definedness(all_insns, targets, exit_addr,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 656, in check_definedness\n    push(child, target, State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants)))\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 109, in push\n    raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')\nValueError: ABI CFG target 0x8e is not an instruction\n"
+    },
+    {
+      "symbol": "compat",
+      "status": "generated",
+      "diagnostic": ""
+    }
+  ],
+  "after_entries": [
+    {
+      "symbol": "user8",
+      "status": "generated"
+    },
+    {
+      "symbol": "compat",
+      "status": "generated"
+    }
+  ],
+  "host_controls": 99,
+  "proof_and_kernel_links": 4,
+  "native_wrapper": "Existing after-B checked-sim-c C wrapper in compile_sim_ir.cpp/inline_probe.c",
+  "scope": "Source provider/ABI checks, real-symbol links and production P-to-B emission. Stock acceptance, combined image and application timing remain pending."
+}

@@ -70,3 +70,7 @@ source-generation:
 .PHONY: source-generation-archive
 source-generation-archive:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/source-generation-archive.py $(OUT)
+
+.PHONY: probe-pipeline-report
+probe-pipeline-report:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/probe-pipeline-report.py
