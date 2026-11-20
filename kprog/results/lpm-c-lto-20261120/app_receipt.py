@@ -20,6 +20,8 @@ args = parser.parse_args()
 raw, app_run = args.raw, args.run
 sys.path.insert(0, '/workspaces/repository/kprog')
 from trusted_generation import native_map_label
+sys.path.insert(0, '/workspaces/repository')
+from analysis.corpus_analyze import collect_per_program, geomean
 app = json.loads((app_run/'details/apps'/(args.app.replace('/', '__')+'.json')).read_text())
 rows = []
 with tarfile.open(raw/'service.tar.gz') as service:
@@ -96,10 +98,15 @@ for phase in ['baseline', 'post_rejit']:
                         workloads=app[phase]['workloads'])
 ratio = (phases['baseline']['ns_per_call']/phases['post_rejit']['ns_per_call']
          if all(phases[phase] and phases[phase]['ns_per_call'] for phase in phases) else None)
+programs = collect_per_program({'results': [app]}, 100, pair_by='name-type')
+program_ratio = geomean([row['ratio'] for row in programs]) if programs else None
 result = dict(source_revision=args.revision, raw=str(raw), app_run=str(app_run), app=args.app,
     app_status=app['status'], app_error=app['error'], requests=rows, phases=phases,
-    ebpf_over_native_per_call=ratio,
-    scope='One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Per-program counters are retained; summed time/count does not independently attribute tail calls. Static helper sites are not dynamic frequencies. Component throughput is reported separately.')
+    ebpf_over_native_per_call=1/program_ratio if program_ratio else None,
+    per_program_post_over_baseline_geomean=program_ratio, per_program_ratios=programs,
+    pairing='analysis/corpus_analyze.py name-type, min run count 100, evaluation.md section 5',
+    pooled_phase_ebpf_over_native_per_call=ratio,
+    scope='One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Primary metric uses evaluation section 5 per-program ratios; summed phase time/count is supplemental and depends on program mix. Tail target time is included in its caller. Static helper sites are not dynamic frequencies. Component throughput is separate.')
 (here/(args.name+'-result.json')).write_text(json.dumps(result, indent=2)+'\n')
 with tarfile.open(here/(args.name+'-evidence.tar.gz'), 'w:gz') as archive:
     archive.add(raw, arcname=raw.name)
