@@ -209,10 +209,10 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .module_btf_path = "/sys/kernel/btf/bpf_arm64_native_lab",
     .debugfs_dir = "/sys/kernel/debug/bpf_arm64_native_lab",
     .blob_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u",
-    .relocs_path_fmt = nullptr,
+    .relocs_path_fmt = "/sys/kernel/debug/bpf_arm64_native_lab/blob%u.relocs",
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
-    .chunk_bytes = 256,
+    .chunk_bytes = 128,
 };
 #else
 constexpr NativeLabTarget kNativeLabTarget = {

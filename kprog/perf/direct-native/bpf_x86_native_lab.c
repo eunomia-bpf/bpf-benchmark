@@ -48,6 +48,8 @@
 #ifdef CONFIG_ARM64
 #include <linux/unaligned.h>
 #define NATIVE_LAB_DIRECTORY "bpf_arm64_native_lab"
+/* The loader looks up the kfunc by the arm64 module's name. */
+#define bpf_x86_native_lab_emit bpf_arm64_native_lab_emit
 #else
 #define NATIVE_LAB_DIRECTORY "bpf_x86_native_lab"
 #endif
