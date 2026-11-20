@@ -15,8 +15,6 @@ namespace native_lto {
 
 inline constexpr const char *kernel_symbols[] = {
     "ktime_get_mono_fast_ns",
-    "current_task",
-    "cpu_number",
     "jiffies_64",
 };
 

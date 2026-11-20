@@ -52,23 +52,19 @@ unsigned long long (bpf_get_current_pid_tgid)(void) { \
            *(const int *)(task + (PID_OFFSET)); \
 }
 __KPROG_HELPER(unsigned long long, bpf_jiffies64, void);
-/* bpf_ktime_get_ns is ktime_get_mono_fast_ns, and the helpers the kernel
- * inlines for the JIT (do_misc_fixups) read one kernel variable; P does the
- * same here. Each body carries the helper's symbol, so every spelling an app
- * uses (libbpf's, BPF_FUNC's) inlines it; each kernel variable carries its
- * kernel name, which native-link binds from the boot kernel's kallsyms. A call
- * that stays out of line still reaches the kernel helper. */
+/* bpf_ktime_get_ns is ktime_get_mono_fast_ns and bpf_jiffies64 reads
+ * jiffies_64; P does the same here. Each body carries the helper's symbol, so
+ * every spelling an app uses (libbpf's, BPF_FUNC's) inlines it; each kernel
+ * symbol carries its kernel name, which native-link binds from the boot
+ * kernel's kallsyms. A call that stays out of line still reaches the kernel
+ * helper. get_current_task(_btf) and get_smp_processor_id stay named helper
+ * calls: as gs loads in P, Tracee's guest crashed (2026-11-20 check). */
 #if defined(__x86_64__)
 #define __KPROG_INLINE extern __inline __attribute__((gnu_inline, always_inline))
 extern unsigned long long ktime_get_mono_fast_ns(void);
 extern char jiffies_64[];
 __KPROG_INLINE unsigned long long __kprog_bpf_ktime_get_ns(void) { return ktime_get_mono_fast_ns(); }
 __KPROG_INLINE unsigned long long __kprog_bpf_jiffies64(void) { return *(const volatile unsigned long long *)jiffies_64; }
-extern char current_task[], cpu_number[];
-#define __KPROG_PER_CPU(type, var) (*(const volatile type __attribute__((address_space(256))) *)(unsigned long)(var))
-__KPROG_INLINE unsigned long long __kprog_bpf_get_current_task(void) { return __KPROG_PER_CPU(unsigned long long, current_task); }
-__KPROG_INLINE void *__kprog_bpf_get_current_task_btf(void) { return (void *)__KPROG_PER_CPU(unsigned long long, current_task); }
-__KPROG_INLINE unsigned int __kprog_bpf_get_smp_processor_id(void) { return __KPROG_PER_CPU(unsigned int, cpu_number); }
 #endif
 __KPROG_HELPER(unsigned long long, bpf_get_attach_cookie, void *);
 __KPROG_HELPER(unsigned long long, bpf_get_func_ip, void *);
