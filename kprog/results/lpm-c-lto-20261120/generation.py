@@ -32,7 +32,7 @@ try:
     (raw/'stock-entry-lto.json').write_text(json.dumps(dict(command=command,
         returncode=compiled.returncode,stdout=compiled.stdout,stderr=compiled.stderr),indent=2)+'\n')
     compiled.check_returncode()
-    result=module.specialize((tmp/'stock-entry.o').read_bytes(),'stock_entry',
+    result=module.specialize((tmp/'stock-entry.input.o').read_bytes(),'stock_entry',
         dict(prog_type=2,section='kprobe/lpm_fixture',maps=maps),generation,
         root/'kprog/x86/native_lab/native_link/target/release/native-link',
         kernel_btf='/workspaces/.agent-state/kprog-ck/build-x86/vmlinux',
@@ -40,10 +40,11 @@ try:
     row=dict(status='generated',artifact=result)
 except Exception:
     row=dict(status='failed',traceback=traceback.format_exc())
+generation.mkdir(parents=True,exist_ok=True)
 (raw/'generation.json').write_text(json.dumps(row,indent=2,default=str)+'\n')
 (generation/'fixture.json').write_text(json.dumps(row,indent=2,default=str)+'\n')
 with tarfile.open(raw/'generation-evidence.tar.gz','w:gz') as archive:
-    archive.add(tmp/'stock-entry.o',arcname='source-P.o')
+    archive.add(tmp/'stock-entry.input.o',arcname='source-P.o')
     archive.add(generation,arcname='generation')
 print(row['status'],flush=True)
 sys.exit(int(row['status']=='failed'))

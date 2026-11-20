@@ -4241,6 +4241,9 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &entry_symbols);
     }
     add_native_data_symbol_addrs(native_object_path, companion, &entry_symbols);
+    const char *bound = std::getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
+    const bool require_bound = bound && (std::strcmp(bound, "1") == 0 || std::strcmp(bound, "true") == 0 ||
+        std::strcmp(bound, "yes") == 0 || std::strcmp(bound, "on") == 0);
 #if defined(__x86_64__)
     std::ostringstream immutable;
     immutable << '{';
@@ -4259,6 +4262,10 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (companion.native_data_symbols.contains(name)) continue;
         const auto *meta = find_map_meta_by_native_symbol(companion, name);
         if (!meta) continue;
+        // Checked-sim-c expands LPM from the accepted B helper call in its
+        // existing native C stage. Direct native expands the same C body here.
+        if (require_bound && (meta->type == BPF_MAP_TYPE_LPM_TRIE ||
+                              meta->inner_type == BPF_MAP_TYPE_LPM_TRIE)) continue;
         if (map_separator) map_types << ',';
         write_json_string(map_types, name);
         map_types << ":{\"type\":" << meta->type << ",\"inner_type\":" << meta->inner_type
@@ -4302,9 +4309,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         return result;
     };
 
-    const char *bound = std::getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
-    if (bound && (std::strcmp(bound, "1") == 0 || std::strcmp(bound, "true") == 0 ||
-                  std::strcmp(bound, "yes") == 0 || std::strcmp(bound, "on") == 0)) {
+    if (require_bound) {
         for (const auto &name : companion.native_data_symbols)
             if (!companion.map_addr_ids.contains(name)) add_native_map_symbol_alias(companion, name);
         return with_common_timings(submit_trusted_native(options, prog_info, native_object_path, symbol_name, companion));

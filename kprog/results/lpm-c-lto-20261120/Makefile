@@ -63,3 +63,18 @@ stock:
 
 stock-guest:
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/stock.py $(RAW)
+
+SIM_BUILD := /var/tmp/kprog-tmp/verified/checked-tools
+SIM_COMPILER := /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
+.PHONY: sim-compiler
+sim-compiler:
+	install -d $(SIM_BUILD)
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi \
+		$(ROOT)/kprog/x86/compile_sim_ir.cpp -o $(SIM_BUILD)/compile-sim-ir \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+.PHONY: sim-publish
+sim-publish:
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image \
+		flock -x /workspaces/.agent-state/kprog-lanes/locks/build-c \
+		install -m 0755 $(SIM_BUILD)/compile-sim-ir $(SIM_COMPILER)

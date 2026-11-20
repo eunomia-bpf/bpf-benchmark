@@ -3,33 +3,34 @@ import ctypes as c
 from kernel_function_abi import KernelTypes, Type
 
 
+def field_offset(types, identity, field):
+    _, ty = types.base(identity)
+    members = (c.c_uint32 * (3 * (ty.info & 0xffff))).from_address(
+        c.addressof(ty) + c.sizeof(Type))
+    for i in range(ty.info & 0xffff):
+        name, child, bits = members[3*i:3*i+3]
+        name = types.lib.btf__name_by_offset(types.btf, name).decode()
+        bits = bits & 0xffffff if ty.info >> 31 else bits
+        if name == field:
+            return bits // 8
+        if not name:
+            nested = field_offset(types, child, field)
+            if nested is not None:
+                return bits // 8 + nested
+    return None
+
+
 def lookup_source(kernel_btf):
     types = KernelTypes(kernel_btf)
-
-    def offset(identity, field):
-        _, ty = types.base(identity)
-        members = (c.c_uint32 * (3 * (ty.info & 0xffff))).from_address(
-            c.addressof(ty) + c.sizeof(Type))
-        for i in range(ty.info & 0xffff):
-            name, child, bits = members[3*i:3*i+3]
-            name = types.lib.btf__name_by_offset(types.btf, name).decode()
-            bits = bits & 0xffffff if ty.info >> 31 else bits
-            if name == field:
-                return bits // 8
-            if not name:
-                nested = offset(child, field)
-                if nested is not None:
-                    return bits // 8 + nested
-        return None
 
     try:
         array = types.lib.btf__find_by_name_kind(types.btf, b'bpf_array', 4)
         map_type = types.lib.btf__find_by_name_kind(types.btf, b'bpf_map', 4)
-        base = offset(array, 'map')
-        fields = dict(limit=offset(map_type, 'max_entries'),
-                      stride=offset(array, 'elem_size') - base,
-                      mask=offset(array, 'index_mask') - base,
-                      values=offset(array, 'value') - base)
+        base = field_offset(types, array, 'map')
+        fields = dict(limit=field_offset(types, map_type, 'max_entries'),
+                      stride=field_offset(types, array, 'elem_size') - base,
+                      mask=field_offset(types, array, 'index_mask') - base,
+                      values=field_offset(types, array, 'value') - base)
     finally:
         types.close()
     # kernel/bpf/arraymap.c:array_map_lookup_elem. The map type is selected
@@ -44,3 +45,16 @@ void *__kprog_array_lookup(void *map, const void *key) {
     return (char *)map + %(values)d + (unsigned long)stride * (index & mask);
 }
 ''' % fields
+
+
+def lpm_layout(kernel_btf):
+    types = KernelTypes(kernel_btf)
+    try:
+        trie = types.lib.btf__find_by_name_kind(types.btf, b'lpm_trie', 4)
+        node = types.lib.btf__find_by_name_kind(types.btf, b'lpm_trie_node', 4)
+        base = field_offset(types, trie, 'map')
+        fields = [field_offset(types, trie, 'root') - base,
+                  *[field_offset(types, node, name) for name in ('child', 'prefixlen', 'flags', 'data')]]
+        return ','.join(str(value) for value in fields)
+    finally:
+        types.close()
