@@ -129,6 +129,12 @@
   question for the emitter. Capture size varies (12/14/64 from the same command), so compare per
   program. Still open and separate: request 64 NATIVE_LAB_TRUSTED_CHUNK arming EINVAL, 3 emitter
   relative-table refusals.
+  OMP 2026-11-20T02:25Z: state at 19d32566c - pass 334 predicates over the 41 inputs, store class
+  6/6, live capture 14/14, replay 41/41. One open item: the fall-through placement. Program 34af4b3a
+  rejects (off=30 size=4 r=0) because the bound is emitted on the comparison's true edge, which jumps to
+  the block the read is not on; re-emitting it inside the falling-through block is ACCEPT on the host.
+  It did not appear in a 3x180s production run (x86_kvm_corpus_20261119_234045_456298), whose 28
+  requests all installed through checked-sim-c with 0 direct-native and 0 failures.
   across context-preserving intervals; original reads retain ordering effects.
   8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677
   queued22:28:23Z for canonical imageEX rebuild, then controls, stock fixtures,
