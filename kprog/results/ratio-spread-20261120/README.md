@@ -78,6 +78,20 @@ against 3815 B and ~3200 ns. The question worth answering is what produces the 7
 11-14 is just the non-7510 family. An even earlier draft blamed a low-count second program; that program is
 real but it is not what moves this ratio.)
 
+The same B input produces all of it. In the run's own shim log the loaded program is byte-identical
+across the dates — `native_tracer_e`, `insn_cnt=1322`, tag `26449268576adffc`, `xlated_len=5904` for the
+original — while the compiled native body is **7510 B on 11-12 and 2729 B on 11-20**:
+
+```
+2026-11-12  jit-info native ... tag=26449268576adffc jited_len=7510 xlated_len=24
+2026-11-20  jit-info native ... tag=26449268576adffc jited_len=2729 xlated_len=24
+```
+
+Both are the native image (the `xlated_len=24` stub), both replaced the same original. So the difference is
+purely what `native-link`/the LTO compiler emits, and today it emits a body that runs at 3700-4600 ns against
+the baseline's ~3200 — i.e. the current compiler is worse than the JIT for this program, where the 11-12
+compiler was 12x better. That, not a workload artifact, is what a per-app timing batch should chase.
+
 Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
 `native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
 (10^2–10^3 dispatches) reading anything from 0.30 to 1.00. A program dispatched ~1,000 times carries its own
