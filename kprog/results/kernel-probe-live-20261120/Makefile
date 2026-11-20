@@ -32,3 +32,7 @@ guest:
 receipt:
 	cp $(OUT)/cases.json $(ROOT)/kprog/results/kernel-probe-live-20261120/$(NAME)-cases.json
 	tar -C $(dir $(OUT)) -czf $(ROOT)/kprog/results/kernel-probe-live-20261120/$(NAME)-evidence.tar.gz $(notdir $(OUT))
+
+.PHONY: summary
+summary:
+	python3 $(ROOT)/kprog/results/kernel-probe-live-20261120/summarize.py $(OUT)
