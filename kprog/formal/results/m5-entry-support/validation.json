@@ -167,8 +167,32 @@
     "mov_selector_definition": "Arm64Numeric.f_kprog_arm64_mov_path"
   },
   "whole_proof_library": {
-    "status": "pending"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 8.152459144592285,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 273,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-entry-support",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "476041810e65146c66da5e12c4b5e247f8a599f0",
+  "root_artifact_modified_utc": "2026-11-20T06:08:50.478725+00:00"
 }

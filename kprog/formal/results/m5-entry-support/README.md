@@ -34,8 +34,8 @@ Validation: source link/bindings 43 jobs, shared dispatch 180 jobs and actual
 entry 224 jobs pass. Thirteen public type/axiom queries and the previous
 suffix receipt's six public queries plus its updated closed binding query pass.
 Records are in validation.json. Focused checks use CPU 17, nice 0,
-one worker, 32 GiB address space and original proof caps. Whole proof-library
-confirmation follows the focused batch and excludes executable/tool builds
-under the current directive. Raw logs remain in
+one worker, 32 GiB address space and original proof caps. The whole `lake build KProgFormal` proof
+library/root passes 273 jobs on CPUs 16–23, nice 19, one worker and 32 GiB
+address space. Executable/tool builds are excluded under the current directive. Raw logs remain in
 `/workspaces/kprog-raw/formal/m5-entry-support`. M5 and M6 remain open;
 completed ISA-family count is zero.
