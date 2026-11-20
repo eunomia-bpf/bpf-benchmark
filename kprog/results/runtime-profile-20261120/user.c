@@ -8,3 +8,5 @@ long kernel8(void *dst, const void *src) { return __kprog_probe_read_kernel(dst,
 long kernel_dynamic(void *dst, unsigned long size, const void *src) {
     return __kprog_probe_read_kernel(dst,(unsigned)size,src);
 }
+extern long (bpf_probe_read)(void *, unsigned, const void *);
+long compat(void *dst, unsigned size, const void *src) { return (bpf_probe_read)(dst,size,src); }
