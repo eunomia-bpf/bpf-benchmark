@@ -1,0 +1,76 @@
+{
+  "fixture": [
+    {
+      "name": "known",
+      "selected": [
+        "__kprog_array_lookup"
+      ],
+      "execution": "112917 cases, 112917 generic calls"
+    },
+    {
+      "name": "unknown",
+      "selected": [],
+      "execution": "692913 cases, 1385826 generic calls"
+    }
+  ],
+  "stock": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/stock-20261120T022137Z",
+  "stock_verdict": {
+    "stock_loaded": true,
+    "errno": 0,
+    "instructions": 22
+  },
+  "production_helpers": [
+    "__kprog_array_lookup"
+  ],
+  "production_execution": "18819 actual simulator LPM cases",
+  "native": {
+    "native_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.o",
+    "simulator_program": "trusted_x86_x86_sim_xdp",
+    "simulator_source": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.c",
+    "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.i",
+    "context_kind": "raw",
+    "symbol": "trusted_x86_x86_sim_xdp",
+    "native_sha256": "f9ba263a4cfe2f0adbda0f464d36cd30f9cea3ceada8d4cacdd86d502eeb4ef8",
+    "maps": [
+      {
+        "name": "map_a",
+        "map_type": 11,
+        "key_size": 16,
+        "value_size": 8,
+        "max_entries": 64,
+        "map_flags": 1,
+        "value_offset": null
+      },
+      {
+        "name": "map_b",
+        "map_type": 11,
+        "key_size": 16,
+        "value_size": 8,
+        "max_entries": 64,
+        "map_flags": 1,
+        "value_offset": null
+      }
+    ],
+    "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "simulator_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "b5ddb4bc7a639767d9b216d9e7652f3ce2da5c254d0af50fd3eb0a703d19b554",
+      "ir_sha256": "dbb45b0696024f5a575f047564dcaf485696b1715c76cd8e2ded3a336fb29c20"
+    }
+  },
+  "scope": "Stock helper-call B acceptance, installed-tool native compiler API, host native C semantics and compatibility. OTel app validation is running separately; application speed remains pending.",
+  "helper_revision": "0ca3869fa",
+  "driver_revision": "215e6f7a5",
+  "native_raw": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/installed-abi-20261120T024230Z",
+  "compatibility_raw": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/compatibility-20261120T025007Z",
+  "array_cases": 1008,
+  "array_generic_controls": 2,
+  "probe_cases": 99,
+  "probe_proof_and_kernel_links": 8,
+  "compiler": "Existing installed compile-sim-ir, unchanged at Nov19 22:14; current ABI --array-map / __kprog_array_lookup",
+  "invocation": "Native C source and program builds only; new tool interface/build/publication deleted",
+  "native_entry_bytes": 321,
+  "proof_entry_bytes": 309
+}

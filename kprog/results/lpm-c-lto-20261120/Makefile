@@ -51,3 +51,7 @@ stock-guest:
 post-b:
 	install -d $(RAW)
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/post_b.py $(RAW) $(STOCK)
+
+.PHONY: native-receipt
+native-receipt:
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/native_receipt.py
