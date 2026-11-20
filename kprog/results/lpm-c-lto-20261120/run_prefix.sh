@@ -11,6 +11,12 @@ if [ "$mode" = host ]; then
         make -f kprog/results/lpm-c-lto-20261120/Makefile post-b RAW="$raw" \
         STOCK=/workspaces/kprog-raw/perf/lpm-c-lto-20261120/stock-20261120T022137Z || status=$?
 elif [ "$mode" = app ]; then
+    # The checked-corpus guest uses the one canonical Docker data disk.
+    # Preserve the already-running peer guest before reusing that disk.
+    peer=${3:-}
+    if [ -n "$peer" ]; then
+        while kill -0 "$peer" 2>/dev/null; do sleep 5; done
+    fi
     make -C kprog/libnativeloader checked-corpus CHECKED_OUTPUT="$raw" \
         CHECKED_HOST_CPUS=20-23 CHECKED_VM_CPUS=4 CHECKED_VM_MEMORY=32G \
         CHECKED_VM_ADDRESS_SPACE=51539607552 || status=$?
