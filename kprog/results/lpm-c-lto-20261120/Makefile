@@ -34,3 +34,8 @@ syntax:
 .PHONY: archive
 archive:
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/archive.py
+
+.PHONY: generation
+generation:
+	install -d $(RAW)
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/generation.py $(RAW)
