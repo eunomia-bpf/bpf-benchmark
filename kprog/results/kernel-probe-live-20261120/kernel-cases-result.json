@@ -1,0 +1,899 @@
+{
+  "program_source": "092e14062",
+  "source_commit": "94e798e05d109183a18cbfbb9f29e9c501f5246e",
+  "raw": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z",
+  "make_exit": 0,
+  "tools": {
+    "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client": "fb4dc0eb9d3b8a6763c9a619d1c18899d3a80a3ebd572b682674dece69819d6c",
+    "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader": "018fa2431068ea10d6b21f5b9ae47f23b9a8967f5b6e59ef1f69aff4459d2f9e",
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link": "36e3ee1063f7a4f891c22f83bc7abdb7e51ef05285f9cf4cdfe28baa0e19e8ec",
+    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir": "66adfac9f544a877cb0368fc0d59c49b092b4ec7a568edfab87e5d0bf6d9e8ed"
+  },
+  "cases": [
+    {
+      "name": "control",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/control.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/control/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/control/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/control.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 3,
+          "native_prog_id": 9,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/control/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 1,
+          "source_prog_id": 3,
+          "native_sha256": "56e71b865c8500ae843aa4f739476fd284a5a949eb8c991b26d19f2e1cafc48d",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:54:31.535666+00:00",
+          "prog_id": 9,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/control/state/session-fjadgc69/requests/1.success.tar.gz",
+          "finished": "2026-11-20T05:54:39.204003+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-stack",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-0.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-stack/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-stack/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-0.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 12,
+          "native_prog_id": 18,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-stack/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 2,
+          "source_prog_id": 12,
+          "native_sha256": "cbaa3f4f353dae70c2eb27f966cd7fd3e7daef9061d74a976cb2f8fd7f0f4d09",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:54:41.222262+00:00",
+          "prog_id": 18,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-stack/state/session-gf8jwt21/requests/2.success.tar.gz",
+          "finished": "2026-11-20T05:54:47.089069+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-null",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-1.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-null/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-null/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-1.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 21,
+          "native_prog_id": 27,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-null/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 3,
+          "source_prog_id": 21,
+          "native_sha256": "a0e420a67d4e8168a21e8e3b88ac450487293b66299c82ff2f6d358d2f799a88",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:54:48.856680+00:00",
+          "prog_id": 27,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-null/state/session-oqhe0yof/requests/3.success.tar.gz",
+          "finished": "2026-11-20T05:54:54.174015+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-user-address",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-2.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-user-address/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-user-address/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-2.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 30,
+          "native_prog_id": 36,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-user-address/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 4,
+          "source_prog_id": 30,
+          "native_sha256": "5d03eaca5ba61086171331fc8c1ce4a52dc38ded3dc65cd5ac6d1d985f5851c6",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:54:55.974930+00:00",
+          "prog_id": 36,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-user-address/state/session-vp6xhjmz/requests/4.success.tar.gz",
+          "finished": "2026-11-20T05:55:01.356289+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-fault",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-3.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-fault/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-fault/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-3.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 39,
+          "native_prog_id": 45,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-fault/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 5,
+          "source_prog_id": 39,
+          "native_sha256": "c51fb16e9c14dcc4cbb1a3c9aa3c6b0cd57ce3e8d0c3402ba2e42cab006e73bf",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:03.178730+00:00",
+          "prog_id": 45,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-fault/state/session-9tw4e51s/requests/5.success.tar.gz",
+          "finished": "2026-11-20T05:55:08.922763+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-zero-null",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-4.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-null/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-null/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-4.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 48,
+          "native_prog_id": 54,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-null/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 6,
+          "source_prog_id": 48,
+          "native_sha256": "10f45746dc3cc436b003d15e9722dcc84cc1a42fb37ed4018a82196b4142e681",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:10.639559+00:00",
+          "prog_id": 54,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-null/state/session-gsv2okto/requests/6.success.tar.gz",
+          "finished": "2026-11-20T05:55:16.343822+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-string-stack",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-5.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-stack/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-stack/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-5.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 57,
+          "native_prog_id": 63,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-stack/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 7,
+          "source_prog_id": 57,
+          "native_sha256": "3017924fc9fcc91e4e9e0daeeea4b06b5ed846bd79dc1ee5dcbb6356e8d0c385",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:18.078262+00:00",
+          "prog_id": 63,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-stack/state/session-o90_cfv7/requests/7.success.tar.gz",
+          "finished": "2026-11-20T05:55:23.626479+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-string-null",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-6.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-null/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-null/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-6.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 66,
+          "native_prog_id": 72,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-null/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 8,
+          "source_prog_id": 66,
+          "native_sha256": "11f54e88b3c423c848018dd12d5af085aef8de2248c1c080d259704f28c4ee07",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:25.376126+00:00",
+          "prog_id": 72,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-null/state/session-jxg2p6i9/requests/8.success.tar.gz",
+          "finished": "2026-11-20T05:55:30.642022+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-string-fault",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-7.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-fault/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-fault/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-7.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 75,
+          "native_prog_id": 81,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-fault/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 9,
+          "source_prog_id": 75,
+          "native_sha256": "922f1356322a13d6d5bb5c107880916a9bf77c30a59b761e1f840dfdea6f4257",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:32.347685+00:00",
+          "prog_id": 81,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-string-fault/state/session-swyagwjc/requests/9.success.tar.gz",
+          "finished": "2026-11-20T05:55:37.856267+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "kernel-zero-stack",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-8.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-stack/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-stack/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-8.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 84,
+          "native_prog_id": 90,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-stack/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 10,
+          "source_prog_id": 84,
+          "native_sha256": "a7e0893897954fb510b25a99a6675ab0fe533d42b843d665cb669e7aa126a78f",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:39.585952+00:00",
+          "prog_id": 90,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/kernel-zero-stack/state/session-881qbj7y/requests/10.success.tar.gz",
+          "finished": "2026-11-20T05:55:45.220057+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "compat-kernel-fault",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-9.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/compat-kernel-fault/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/compat-kernel-fault/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-9.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 93,
+          "native_prog_id": 99,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/compat-kernel-fault/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 11,
+          "source_prog_id": 93,
+          "native_sha256": "ff235c2ae70ccac2b7b92a905ca00415f3d5fd485bbf60d858e8a6a8e783e895",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:46.967690+00:00",
+          "prog_id": 99,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/compat-kernel-fault/state/session-umo_48am/requests/11.success.tar.gz",
+          "finished": "2026-11-20T05:55:52.518467+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "user-null",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-10.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-null/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-null/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-10.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 102,
+          "native_prog_id": 108,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-null/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 12,
+          "source_prog_id": 102,
+          "native_sha256": "1ec750b948590424ba729b9e0dae1c9ef6911eaa87dd7ef09cfe14609ecefac5",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:55:54.244320+00:00",
+          "prog_id": 108,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-null/state/session-8crxis7u/requests/12.success.tar.gz",
+          "finished": "2026-11-20T05:55:59.778686+00:00"
+        }
+      ],
+      "stderr": ""
+    },
+    {
+      "name": "user-zero-null",
+      "program": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-11.o",
+      "command": [
+        "/bin/python3",
+        "/workspaces/repository/kprog/trusted_service.py",
+        "--arch",
+        "1",
+        "--endpoint",
+        "/sys/kernel/debug/bpf_x86_native_lab/specializer",
+        "--module",
+        "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko",
+        "--state",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-zero-null/state",
+        "--results",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-zero-null/service.tar.gz",
+        "--native-link",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--loader",
+        "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+        "--execution-mode",
+        "checked-sim-c",
+        "--sim-native-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+        "--sim-context-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+        "--sim-public-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json",
+        "--sim-physical-layout",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json",
+        "--sim-bounds-compiler",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "--run",
+        "/workspaces/repository/kprog/libnativeloader/build/trusted-service-client",
+        "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/program-inputs/case-11.o"
+      ],
+      "returncode": 0,
+      "client_outputs": [
+        {
+          "ok": true,
+          "original_prog_id": 111,
+          "native_prog_id": 117,
+          "retval": 2,
+          "prebuilt_proof": false
+        },
+        {
+          "trusted_service_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-zero-null/service.tar.gz"
+        }
+      ],
+      "requests": [
+        {
+          "request_id": 13,
+          "source_prog_id": 111,
+          "native_sha256": "5accf2802954803f68883cc1c666a3d5839d1bdd292729d8a44d729fefab345e",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-20T05:56:01.655069+00:00",
+          "prog_id": 117,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/kernel-probe-live-20261120/guest-20261120T055425Z/user-zero-null/state/session-nvtv34cd/requests/13.success.tar.gz",
+          "finished": "2026-11-20T05:56:07.425164+00:00"
+        }
+      ],
+      "stderr": ""
+    }
+  ],
+  "scope": "One control and twelve native probe contract inputs. Existing client TEST_RUN retval2 means its native self-checks passed; service receipts separately record stock B acceptance and checked/direct installation. The original client source is a return2 control, not separately executed generated B. No app publication, paired stock/native behavior run, partial-copy-prefix fault, full memory-policy equivalence, formal proof or performance claim."
+}
