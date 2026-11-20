@@ -17,15 +17,8 @@ def run(args,name):
     child.check_returncode()
     return text
 
-# Read the actual sole kernel, so kernel member changes reach the test too.
-dump=run(['bpftool','btf','dump','file',kernel,'format','raw'],'btf')
-layout={}
-for struct,fields in [('lpm_trie',{'root':'ROOT','data_size':'SIZE','max_prefixlen':'MAX'}),
-                      ('lpm_trie_node',{'child':'CHILD','prefixlen':'PREFIX','flags':'FLAGS','data':'DATA'})]:
-    block=re.search(r"^\[\d+\] STRUCT '"+struct+r"'[^\n]*\n((?:\t[^\n]*\n)+)",dump,re.M)[1]
-    for field,name in fields.items():
-        bits=int(re.search(r"'"+field+r"'[^\n]*bits_offset=(\d+)",block)[1]); assert bits%8==0
-        layout[name+'_OFF']=bits//8
+# The Makefile reads the actual sole kernel through the existing libbpf.
+layout=json.loads((raw/'layout.json').read_text())
 rows=[]
 for name,types,lowered,extra,expected in [
     ('fixed',{'map_a':dict(type=11,inner_type=0,key_size=16),'map_b':dict(type=11,inner_type=0,key_size=16)},1,['-DFIXED_KEY'],0),
