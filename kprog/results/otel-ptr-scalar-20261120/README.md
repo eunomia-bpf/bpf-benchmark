@@ -41,6 +41,17 @@ errno 13. `unbounded_scalar.o` (a `bpf_ktime_get_ns()` return spilled and reload
 `math between fp pointer and register with unbounded min value`, errno 22 — the message and errno the real
 request shows. Host and guest agree on both.
 
+## Summary of the mechanism, in one place
+
+1. The program forms a pointer difference against a **stack slot address** (`%fp - 128`) — OTel's
+   `bpf_ringbuf_reserve` payload pointer case.
+2. `anchor_pointer_differences()` turns the difference into an opaque scalar, but the *next* step subtracts
+   that scalar from a constant, which re-enters the same 64-bit `ALU64|SUB|X` form with a pointer operand.
+3. `adjust_ptr_min_max_vals` refuses it: unbounded scalar → errno 22 (`unbounded min value`), bounded → errno
+   13 (`tried to subtract pointer from scalar`), and if the pointer is the destination → errno 13
+   (`subtraction from stack pointer prohibited`). Four variants, one form, all in
+   `kernel/bpf/verifier.c` 14931 / 14990 / 14999.
+
 ## What this means for the emitter
 
 `24 - d < 8` must not be formed as `constant - scalar` when `d` came from a pointer arithmetic chain that the
