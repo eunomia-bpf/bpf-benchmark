@@ -1,7 +1,8 @@
 use anyhow::{anyhow, bail, Result};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, BlockEncoderResult, Code, Decoder, DecoderOptions,
-    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess, OpKind, Register,
+    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, MemoryOperand, Mnemonic, OpAccess, OpKind,
+    Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
 use std::collections::{BTreeMap, HashMap, HashSet};
@@ -9,6 +10,29 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use crate::*;
 
 const MONO_FAST_HELPER_KEY: &str = "__native_x86_ktime_get_mono_fast_ns";
+const CURRENT_TASK_KEY: &str = "__native_x86_current_task";
+const CPU_NUMBER_KEY: &str = "__native_x86_cpu_number";
+const JIFFIES_64_KEY: &str = "__native_x86_jiffies_64";
+
+/// Helpers the kernel's verifier inlines for the JIT (do_misc_fixups) are one load of a per-CPU
+/// variable or a kernel global; the same load, bound to the boot kernel's address, replaces the call.
+fn x86_inline_load_helper(name: &str, helpers: &HashMap<String, u64>) -> Result<Option<Instruction>> {
+    let (key, code, dst, segment) = match name {
+        "bpf_get_current_task" | "bpf_get_current_task_btf" =>
+            (CURRENT_TASK_KEY, Code::Mov_r64_rm64, Register::RAX, Register::GS),
+        "bpf_get_smp_processor_id" => (CPU_NUMBER_KEY, Code::Mov_r32_rm32, Register::EAX, Register::GS),
+        "bpf_jiffies64" => (JIFFIES_64_KEY, Code::Mov_r64_rm64, Register::RAX, Register::None),
+        _ => return Ok(None),
+    };
+    let Some(&address) = helpers.get(key).filter(|address| **address != 0) else { return Ok(None) };
+    let displacement = address as i64;
+    if i32::try_from(displacement).is_err() {
+        bail!("{name}: kernel address {address:#x} is outside the sign-extended 32-bit range");
+    }
+    // 64-bit addressing with a sign-extended disp32 (displ_size 4 would add a 0x67 prefix).
+    let memory = MemoryOperand::new(Register::None, Register::None, 1, displacement, 8, false, segment);
+    Ok(Some(Instruction::with2(code, dst, memory)?))
+}
 
 fn show_lto_range(show: bool, piece: &str, range: (usize, usize)) {
     if show {
@@ -1420,6 +1444,14 @@ pub(super) fn rewrite_x86(
                                 resolved_helper_call_sites.insert(site_key);
                                 continue;
                             }
+                        }
+                    }
+
+                    if !proof_mode {
+                        if let Some(load) = x86_inline_load_helper(&name, helper_addrs)? {
+                            push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip, local_ip, load, None);
+                            resolved_helper_call_sites.insert(site_key);
+                            continue;
                         }
                     }
 
@@ -3909,6 +3941,25 @@ fn patch_x86_rel8(bytes: &mut [u8], disp_offset: usize, target: usize) -> Result
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn kernel_inlined_helpers_become_one_load() {
+        let helpers = HashMap::from([(CURRENT_TASK_KEY.to_string(), 0xffff_ffff_842b_0018u64),
+            (CPU_NUMBER_KEY.to_string(), 0xffff_ffff_842b_0034), (JIFFIES_64_KEY.to_string(), 0xffff_ffff_8300_9a00)]);
+        for (name, want) in [
+            ("bpf_get_current_task", vec![0x65, 0x48, 0x8b, 0x04, 0x25, 0x18, 0x00, 0x2b, 0x84]),
+            ("bpf_get_current_task_btf", vec![0x65, 0x48, 0x8b, 0x04, 0x25, 0x18, 0x00, 0x2b, 0x84]),
+            ("bpf_get_smp_processor_id", vec![0x65, 0x8b, 0x04, 0x25, 0x34, 0x00, 0x2b, 0x84]),
+            ("bpf_jiffies64", vec![0x48, 0x8b, 0x04, 0x25, 0x00, 0x9a, 0x00, 0x83]),
+        ] {
+            let load = x86_inline_load_helper(name, &helpers).unwrap().unwrap();
+            let mut encoder = iced_x86::Encoder::new(64);
+            encoder.encode(&load, 0).unwrap();
+            assert_eq!(encoder.take_buffer(), want, "{name}");
+        }
+        assert!(x86_inline_load_helper("bpf_get_current_task", &HashMap::new()).unwrap().is_none());
+        assert!(x86_inline_load_helper("bpf_ktime_get_ns", &helpers).unwrap().is_none());
+    }
+
     use super::*;
 
     #[test]

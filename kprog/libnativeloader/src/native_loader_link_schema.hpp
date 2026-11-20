@@ -86,6 +86,11 @@ NativeLinkArgs build_native_link_args(
             uint64_t mono_fast = kallsyms_lookup("ktime_get_mono_fast_ns");
             if (!mono_fast) fail("ktime_get_mono_fast_ns not in boot kernel kallsyms");
             add_name_addr(out.helpers, kX86MonoFastHelperKey, mono_fast);
+            // The per-CPU and global variables behind the helpers the kernel inlines for the JIT.
+            for (const auto &[key, symbol] : {std::pair{kX86CurrentTaskKey, "current_task"},
+                                              std::pair{kX86CpuNumberKey, "cpu_number"},
+                                              std::pair{kX86Jiffies64Key, "jiffies_64"}})
+                if (const uint64_t address = kallsyms_lookup(symbol)) add_name_addr(out.helpers, key, address);
         }
     }
 #elif defined(__aarch64__)
