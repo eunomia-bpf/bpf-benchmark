@@ -1,8 +1,10 @@
 {
-  "step": "M5 actual initialized-body architectural register relation",
-  "status": "focused-pass-full-running",
-  "recorded_utc": "2026-11-20T01:26:55Z",
+  "step": "M5 architectural register relation at actual initialized-body boundary",
+  "status": "pass",
+  "recorded_utc": "2026-11-20T01:32:32Z",
+  "before_commit_head": "cf5c94997a7ce2b8b3b21b0d60cacdc3ff2cbb11",
   "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-register-view",
+  "proof_commit": "cf5c94997a7ce2b8b3b21b0d60cacdc3ff2cbb11",
   "checks": {
     "focused1": {
       "command": [
@@ -14,7 +16,8 @@
       "seconds": 82.06259179115295,
       "cpu": 17,
       "workers": 1,
-      "address_space_bytes": 34359738368
+      "address_space_bytes": 34359738368,
+      "jobs": 195
     },
     "query1": {
       "command": [
@@ -29,6 +32,18 @@
       "cpu": 17,
       "workers": 1,
       "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 480.1521463394165,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 358
     }
   },
   "public_query_counts": {
@@ -78,24 +93,79 @@
       "Quot.sound"
     ]
   },
+  "derivation": {
+    "relation": "existing Arm64Registers.Represents at actual reached-memory nextblock with identity source-cell map",
+    "gpr": "all 31 rawValue/rawWord/rawTag bindings; actual32-bit tagWord equals widened byte rawTag",
+    "context": "the original explicit ctx ValueRep supplies the x0 pointer numeric binding",
+    "return_origin": "x30 payload0/tag10 materializes with the explicit same-invocation return origin",
+    "sp": "borrowed header read of signed SP0; explicit native SP equals stack origin",
+    "nzcv": "typed local flag-byte readbacks; explicit masked flagWord/native NZCV bindings",
+    "vectors": "all32 low/high pairs from the64 initialized input words; Fin64 index2*i+high matches16*i+8*high",
+    "same_execution": "actual Callstate f_arm64_execute_compile [ctx] reaches actual Arm64ProgramEntrySource.body",
+    "retained": "98 ordered provider traces,92 typed header readbacks, Values, register Storage, Freeable resources, context temp, loop index32, caller frame, access map and actual allocation frontier",
+    "not_assumed": "completed register relation, successful borrowed readers, memory equality or an independently chosen source-header execution",
+    "explicit_contracts": "ProviderAt, ctx ValueRep and NativeBindings; deriving them from native input ABI/original context remains open",
+    "scope_of_relation": "GPR/SP/vectors/NZCV only; no PC/full-native-memory refinement claim"
+  },
+  "actual_body_boundary": {
+    "observed_utc": "2026-11-20T01:32:24Z",
+    "standalone_module": "KProgFormal.Clight.Arm64Program",
+    "actual_fixture_module": "KProgFormal.Clight.Arm64ProgramFixture",
+    "standalone_generic_internal_present": true,
+    "actual_generic_internal_present": false,
+    "actual_generic_external_declaration_present": true,
+    "actual_wrapper_definitions": [
+      "f_arm64_execute_compile",
+      "f_arm64_helper_compile"
+    ],
+    "actual_function_type": "void(entry*, uint32, uint64, uint64, uint64, uint64, uint8, uint32, uint64)",
+    "external_declaration_line": 12503,
+    "implication": "Use the imported CC.Link.linkProgram to link the actual fixture export with the generic Program export, resolve the external declaration to its actual C Internal body, and prove the resulting binding/layouts. Transport the current entry proof to that linked world before composing actual handler/native execution.",
+    "corrected_inference": "The first read-only comparison stopped at a missing internal f_* definition. Absence of that definition does not imply an absent callee: the generic execute name is declared and called externally. The earlier inline-only/no-callee interpretation was corrected before publication.",
+    "remaining": "Native/provider/original-context/all-outcome admission and final return correspondence remain open; the fixture wrapper signed32 signature is not the borrowed one-pointer uint32 continuation.",
+    "actual_export_sha256": "306d527f6ca095b017dc1baed5d5cec409c81b85697870357df5f073fffb0c6a",
+    "generic_export_sha256": "1bb1de8bebf5b083bd8c375fa3b606c6dc95de43503ee5641afc2b2bcda555e0"
+  },
+  "shared_source_proofs": {
+    "lifted": "raw_values_represent and raw_native_registers from existing raw_registers_initialized_with_storage proof",
+    "callers": "existing source proof and actual-body represents proof both reuse the lifted helpers",
+    "old_source_theorem_signatures": "unchanged",
+    "no_new_interpreter_or_ISA_model": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "nice": 19,
+    "priority_inheritance": "set before Lake launch; sampled full-build Lake threads CPU17/nice19",
+    "priority_thread_snapshot": "/workspaces/kprog-raw/formal/m5-program-entry-register-view/priority-threads.txt",
+    "timing_lock": "host work unlocked under coordination2026-11-19T18:18:59Z"
+  },
   "lean_source_sha256": {
     "kprog/formal/KProgFormal.lean": "bd359f5963f1e7d2fb6e8f8e430296b1ad59e906c9945149a800597d3b35efaf",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64EntryAdmissibility.lean": "7ea7c6056ec4cea87561557ead15c56d1ebd8d6c6c869f93df982de143075694",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterView.lean": "3837e06d6e4c4ccac6dbc4770828c77d1c5322eddae1fa993626cdfe19bad033"
   },
-  "full_confirmation": {
-    "status": "running",
-    "json": "/workspaces/kprog-raw/formal/m5-program-entry-register-view/lake-build1.json",
-    "session": 51714,
-    "cpu": 17,
-    "nice": 19,
-    "workers": 1,
-    "address_space_bytes": 34359738368
+  "scope": {
+    "new_module_lines": 176,
+    "changed": "formal proof module/shared proof extraction/root import/receipts and own todo line",
+    "c_runtime_compiler_kernel_base_image_benchmark_paper_design_changes": false
   },
-  "explicit_contracts": "NativeBindings, ctx ValueRep, ProviderAt; native ABI/original-context/provider/all-outcome admission and complete MOVK refinement remain open",
-  "preserved": "same actual body memory,98 traces,92 typed readbacks,Values,Storage,Freeable ranges,context/index,caller frame,access/frontier",
-  "scope": "formal proofs, shared proof extraction, root import, receipts, own todo line; no C/runtime/compiler/kernel/base/image/benchmark/paper/design edits",
-  "M5": "open",
-  "M6": "open, follows M5",
-  "complete_isa_families": 0
+  "goal_closure": {
+    "M5": "open: Clean-link actual fixture external execute to generic Program body, prove resolved bindings/layouts and lift the entry world; native provider/input ABI/original-context/all-outcome admission, return correspondence, ordinary MOVK complete refinement, relative caches/physical memory/ranges/aliases/origins/control and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "complete_isa_families": 0,
+    "whole_make_check_this_step": "not repeated for this Lean-only step; fresh final Lake/make check after M5/M6 remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "last_full_Lake_before_step": "9151aed42b9b5677852f4beb2913d1a65b25855f:357 jobs",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source edited by this lane",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json:10 Arm64 baseline-identical and12 historical x86 differences"
+  }
 }

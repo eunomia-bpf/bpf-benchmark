@@ -1,0 +1,19 @@
+{
+  "observed_utc": "2026-11-20T01:32:24Z",
+  "standalone_module": "KProgFormal.Clight.Arm64Program",
+  "actual_fixture_module": "KProgFormal.Clight.Arm64ProgramFixture",
+  "standalone_generic_internal_present": true,
+  "actual_generic_internal_present": false,
+  "actual_generic_external_declaration_present": true,
+  "actual_wrapper_definitions": [
+    "f_arm64_execute_compile",
+    "f_arm64_helper_compile"
+  ],
+  "actual_function_type": "void(entry*, uint32, uint64, uint64, uint64, uint64, uint8, uint32, uint64)",
+  "external_declaration_line": 12503,
+  "implication": "Use the imported CC.Link.linkProgram to link the actual fixture export with the generic Program export, resolve the external declaration to its actual C Internal body, and prove the resulting binding/layouts. Transport the current entry proof to that linked world before composing actual handler/native execution.",
+  "corrected_inference": "The first read-only comparison stopped at a missing internal f_* definition. Absence of that definition does not imply an absent callee: the generic execute name is declared and called externally. The earlier inline-only/no-callee interpretation was corrected before publication.",
+  "remaining": "Native/provider/original-context/all-outcome admission and final return correspondence remain open; the fixture wrapper signed32 signature is not the borrowed one-pointer uint32 continuation.",
+  "actual_export_sha256": "306d527f6ca095b017dc1baed5d5cec409c81b85697870357df5f073fffb0c6a",
+  "generic_export_sha256": "1bb1de8bebf5b083bd8c375fa3b606c6dc95de43503ee5641afc2b2bcda555e0"
+}

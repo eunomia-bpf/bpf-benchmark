@@ -49,5 +49,20 @@ in this step. Fresh final Lake/make check and frozen-byte confirmation remain
 due after M5/M6.
 
 Focused compilation passed 195 jobs on the first attempt and all nine public
-type/axiom queries passed. The full Lake confirmation is running; the receipt
-records that pending status explicitly.
+type/axiom queries passed. The initial proof commit recorded the full
+confirmation as running; its terminal result is below and in validation.json.
+
+The next body boundary is recorded in `actual-body-boundary.json`. The standalone
+export contains the internal generic execute body. The actual fixture declares
+and calls that function externally with its real void/nine-argument signature.
+Use Clean's imported linker to combine the exports and prove the resolved body,
+lookup and layout facts. The current entry proof then needs transport into that
+linked world. A missing internal `f_*` definition must not be mistaken for an
+absent callee or an inline-only body; the initial inference was corrected.
+
+The focused build passed 195 jobs on its first attempt. All nine public type
+and axiom queries passed, and one full Lake build passed 358 jobs. Original
+proof limits and CPU17/nice 19/one worker/32 GiB address-space settings were used.
+The eight data/binding/reader facts use standard Lean logic; the actual-entry
+execution also retains imported Clean external-function and assembly semantics.
+No new axiom was added.
