@@ -218,7 +218,8 @@ for request in previous['requests']:
             queue.extend((child, live) for child in successors(instruction))
         lifetimes.append(dict(stack_cell=cell, visited_instructions=len(reached),
             direct_readbacks=list(readbacks.values()), overwrite_pcs=sorted(kills),
-            calls=[dict(pc=pc, symbol=original[pc].reloc_symbol)
+            calls=[dict(pc=pc, symbol=original[pc].reloc_symbol,
+                        stack_arguments=[call for call in calls if call['pc'] == pc])
                    for pc in sorted(reached) if original[pc].mnemonic == 'call'],
             unresolved_aliases=[access for access in unknown if access['pc'] in reached]))
     row = dict(request=request['request'], rejected_store=dict(pc=store.addr, instruction=store.raw),
