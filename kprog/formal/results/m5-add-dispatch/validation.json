@@ -1,0 +1,70 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateDispatch"
+    ],
+    "exit": 0,
+    "seconds": 21.371495485305786,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 228,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-dispatch/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.897348403930664,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 4,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.body_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.body_dispatch_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.Linked.width_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.Linked.body_dispatch": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "internal_transitions": 39,
+  "width_block": 97,
+  "whole_proof_library": {
+    "status": "pending end-of-batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-add-dispatch",
+  "completed_isa_families": 0
+}
