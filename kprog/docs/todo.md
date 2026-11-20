@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF static PERCPU_ARRAY C lookup (2026-11-20T06:09:14Z): actual OTel metrics/per_cpu_records type6 globals still generic. Existing constant-map hook now emits kernel-equivalent C bounds/mask/pptrs and calls existing bpf_this_cpu_ptr; no GS/linker/compiler changes, B unchanged. Validate host selection/CPU-offset/stride/guarded keys and actual native API/proof/kernel link, then combined OTel app. All LTO on; no speed claim. Coordinator owns dynamic inner ARRAY.
+- [ ] PERF static PERCPU_ARRAY C lookup (0a0f4bbfd; 2026-11-20T06:20:08Z):7776host bounds/mask/pptr-stride/unaligned-key/alias cases andtwo generic controls pass. Accepted OTel native API/proof re-emits: full unwind16063→18091B/HotSpot16164→18605B; growth reported, no speed claim. Results/percpu-array-c-20261120/report.json/evidence.tar.gz. Next actual OTel kernel linking/install/execution with all LTO. Existing tools/P/B/image unchanged; coordinator dynamic innerARRAY separate.
 
 - [x] PERF actual kernel probe contract check (092e14062; 2026-11-20T06:00:45Z): PID692178 exit0, control+12probe cases all13stock B accepted/13checked-sim-c installs/13actual native TEST_RUN retval2, no direct fallbacks. Return errors, full buffer zeroing, zero-size policy, valid kernel bytes/strings, user null and guards pass. Results/kernel-probe-live-20261120/kernel-cases-result.json/evidence.tar.gz retain all tools/input hashes, client IDs and service receipts. Source81f126f69 app P publication, partial-copy-prefix kernel faults, full formal equivalence and performance remain separate. Setup689280/690855 failures kept; all LTO on, tools/P/image unchanged.
 

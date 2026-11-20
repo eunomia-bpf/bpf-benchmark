@@ -1,0 +1,692 @@
+{
+  "source": "0a0f4bbfd",
+  "raw": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/subset-20261120T061211Z",
+  "host": {
+    "layout": {
+      "LIMIT": 68,
+      "MASK": 292,
+      "STRIDE": 288,
+      "PPTRS": 304
+    },
+    "execution": "7776 per-CPU ARRAY/alias/boundary/unaligned-key cases, two generic calls",
+    "scope": "Actual installed lookup ABI and native C key/bounds/mask/pptr/alias behavior. CPU translation uses a host stub; kernel helper behavior and app performance require live execution."
+  },
+  "replay": {
+    "capture": "/workspaces/kprog-raw/perf/lookup-grouping-20261120/otel-20261120T053716Z/service.tar.gz",
+    "rows": [
+      {
+        "request_id": 4,
+        "symbol": "perf_unwind_hotspot",
+        "before": {
+          "native": {
+            "entry_bytes": 15247,
+            "executable_bytes": 15986,
+            "functions": [
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 173
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 15247
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 84
+              },
+              {
+                "name": "__kprog_probe_read_user",
+                "bytes": 51
+              },
+              {
+                "name": "__kprog_probe_read_kernel",
+                "bytes": 51
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 15255,
+            "executable_bytes": 16164,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 15255
+              },
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 169
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 171
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 163
+              },
+              {
+                "name": "__native_link_local_memset_zero_512",
+                "bytes": 406
+              }
+            ]
+          }
+        },
+        "after": {
+          "native": {
+            "entry_bytes": 17681,
+            "executable_bytes": 18452,
+            "functions": [
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 173
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 17681
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 128
+              },
+              {
+                "name": "__kprog_probe_read_user",
+                "bytes": 51
+              },
+              {
+                "name": "__kprog_probe_read_kernel",
+                "bytes": 51
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 17696,
+            "executable_bytes": 18605,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 17696
+              },
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 169
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 171
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 163
+              },
+              {
+                "name": "__native_link_local_memset_zero_512",
+                "bytes": 406
+              }
+            ]
+          }
+        },
+        "native": {
+          "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/4/checked-simulator.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/4/checked-simulator.proof.o",
+          "simulator_object": "/workspaces/kprog-raw/perf/lookup-grouping-20261120/otel-20261120T053716Z/state/session-g7ln_6_8/requests/request-3kspxpej/generated/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.c",
+          "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.i",
+          "context_kind": "raw",
+          "symbol": "trusted_x86_x86_sim_xdp",
+          "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+          "maps": [
+            {
+              "name": "pid_page_to_mapping_info",
+              "value_offset": null,
+              "max_entries": 1048576,
+              "key_size": 16,
+              "value_size": 16,
+              "map_type": 11,
+              "map_flags": 1
+            },
+            {
+              "name": "interpreter_offsets",
+              "value_offset": null,
+              "max_entries": 32,
+              "key_size": 8,
+              "value_size": 40,
+              "map_type": 1,
+              "map_flags": 0
+            },
+            {
+              "name": "perf_progs",
+              "value_offset": null,
+              "max_entries": 10,
+              "key_size": 4,
+              "value_size": 4,
+              "map_type": 3,
+              "map_flags": 0
+            },
+            {
+              "name": "metrics",
+              "value_offset": null,
+              "max_entries": 99,
+              "key_size": 4,
+              "value_size": 8,
+              "map_type": 6,
+              "map_flags": 0
+            },
+            {
+              "name": "hotspot_procs",
+              "value_offset": null,
+              "max_entries": 256,
+              "key_size": 4,
+              "value_size": 40,
+              "map_type": 1,
+              "map_flags": 0
+            },
+            {
+              "name": "per_cpu_records",
+              "value_offset": null,
+              "max_entries": 1,
+              "key_size": 4,
+              "value_size": 5000,
+              "map_type": 6,
+              "map_flags": 0
+            }
+          ],
+          "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+          "simulator_frontend": {
+            "path": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.bounds-input.bc",
+            "source_sha256": "49279ec8c43c07741bd3c57f9d376e91de94ae63d86b4dde70ca60792eb1ef44",
+            "ir_sha256": "746c0dac49bfa45d044687cb6e7dc39ebf0c21bb5913d460a732a941f991b8d0"
+          }
+        },
+        "native_emission_seconds": 1.7343126820051111,
+        "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+      },
+      {
+        "request_id": 3,
+        "symbol": "perf_unwind_native",
+        "before": {
+          "native": {
+            "entry_bytes": 15345,
+            "executable_bytes": 16212,
+            "functions": [
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_16",
+                "bytes": 295
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 15345
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 84
+              },
+              {
+                "name": "__kprog_probe_read_user",
+                "bytes": 51
+              },
+              {
+                "name": "__kprog_probe_read_kernel",
+                "bytes": 51
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 15361,
+            "executable_bytes": 16063,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 15361
+              },
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 169
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 171
+              },
+              {
+                "name": "__kprog_hash_key_16",
+                "bytes": 278
+              },
+              {
+                "name": "__native_link_local_memset_zero_144",
+                "bytes": 84
+              }
+            ]
+          }
+        },
+        "after": {
+          "native": {
+            "entry_bytes": 17382,
+            "executable_bytes": 18281,
+            "functions": [
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 173
+              },
+              {
+                "name": "__kprog_hash_key_16",
+                "bytes": 295
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 17382
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 128
+              },
+              {
+                "name": "__kprog_probe_read_user",
+                "bytes": 51
+              },
+              {
+                "name": "__kprog_probe_read_kernel",
+                "bytes": 51
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 17389,
+            "executable_bytes": 18091,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 17389
+              },
+              {
+                "name": "__kprog_lpm_key_16",
+                "bytes": 169
+              },
+              {
+                "name": "__kprog_hash_key_8",
+                "bytes": 171
+              },
+              {
+                "name": "__kprog_hash_key_16",
+                "bytes": 278
+              },
+              {
+                "name": "__native_link_local_memset_zero_144",
+                "bytes": 84
+              }
+            ]
+          }
+        },
+        "native": {
+          "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/3/checked-simulator.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/3/checked-simulator.proof.o",
+          "simulator_object": "/workspaces/kprog-raw/perf/lookup-grouping-20261120/otel-20261120T053716Z/state/session-g7ln_6_8/requests/request-naroy37f/generated/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.c",
+          "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.i",
+          "context_kind": "raw",
+          "symbol": "trusted_x86_x86_sim_xdp",
+          "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+          "maps": [
+            {
+              "name": "exe_id_to_22_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 4194304,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_23_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 8388608,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_21_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 2097152,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_20_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 1048576,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_19_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 524288,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_17_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 131072,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_15_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 32768,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_12_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 4096,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_14_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 16384,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_11_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 2048,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_9_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 512,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_8_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 256,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_13_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 8192,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_10_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 1024,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "unwind_info_array",
+              "value_offset": null,
+              "max_entries": 16384,
+              "key_size": 4,
+              "value_size": 12,
+              "map_type": 2,
+              "map_flags": 0
+            },
+            {
+              "name": "interpreter_offsets",
+              "value_offset": null,
+              "max_entries": 32,
+              "key_size": 8,
+              "value_size": 40,
+              "map_type": 1,
+              "map_flags": 0
+            },
+            {
+              "name": "pid_page_to_mapping_info",
+              "value_offset": null,
+              "max_entries": 1048576,
+              "key_size": 16,
+              "value_size": 16,
+              "map_type": 11,
+              "map_flags": 1
+            },
+            {
+              "name": "metrics",
+              "value_offset": null,
+              "max_entries": 99,
+              "key_size": 4,
+              "value_size": 8,
+              "map_type": 6,
+              "map_flags": 0
+            },
+            {
+              "name": "stack_delta_page_to_info",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 16,
+              "value_size": 8,
+              "map_type": 1,
+              "map_flags": 0
+            },
+            {
+              "name": "perf_progs",
+              "value_offset": null,
+              "max_entries": 10,
+              "key_size": 4,
+              "value_size": 4,
+              "map_type": 3,
+              "map_flags": 0
+            },
+            {
+              "name": "per_cpu_records",
+              "value_offset": null,
+              "max_entries": 1,
+              "key_size": 4,
+              "value_size": 5000,
+              "map_type": 6,
+              "map_flags": 0
+            },
+            {
+              "name": "exe_id_to_18_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 262144,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            },
+            {
+              "name": "exe_id_to_16_stack_deltas",
+              "value_offset": null,
+              "max_entries": 65536,
+              "key_size": 8,
+              "value_size": 4,
+              "map_type": 13,
+              "map_flags": 0,
+              "inner_map": {
+                "max_entries": 65536,
+                "key_size": 4,
+                "value_size": 4,
+                "map_type": 2,
+                "map_flags": 0
+              }
+            }
+          ],
+          "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+          "simulator_frontend": {
+            "path": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.bounds-input.bc",
+            "source_sha256": "70fba6decada3a5ed3c2de4fb1d31b4c6b32cc8d7633ff3bc5c176cbc06ec539",
+            "ir_sha256": "f4c4613380a460b298f4973766ae18b0f33188ca54969e15a70cb86918987a2e"
+          }
+        },
+        "native_emission_seconds": 1.8080219669791404,
+        "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+      }
+    ],
+    "failed": []
+  },
+  "scope": "Static type6 native C lookup through unchanged installed ABI. Host CPU translation is a stub, not a kernel-helper execution test. Actual accepted OTel frontends re-emit through native API/proof stage; full reachable bytes include workers. B unchanged; native code grows. Kernel linking/execution, application behavior and performance remain to be measured with all LTO enabled."
+}
