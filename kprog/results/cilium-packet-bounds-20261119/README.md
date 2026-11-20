@@ -486,3 +486,22 @@ the branch taken the other way: the bound must be re-emitted on the path that re
 Capture size is not fixed: this guest catches 12 requests, the two baselines 64, PERF's capture 14, all from
 the same `verified_corpus.py <app> 1 10 1`. So counts are only comparable program by program, which is what
 the table above does.
+
+## State at `19d32566c` (omp 2026-11-20T02:25Z)
+
+Re-measured on the current tree after PERF's follow-on changes (`b1399d137` widens the freshness walk
+across private-input choices and `skb` cb stores; `fd30e6c92`, `21fcff02a` retain the diagnostics):
+
+| check | result |
+|---|---|
+| pass over the 41 archived packet-class inputs | 334 predicates, no request returning to 0 except the same 11 as before |
+| store-class inputs canonicalized | 6 / 6 |
+| live capture from `7ca1aaec6` | 14 / 14 install, 0 rejections |
+| replay over those 41 | 41 / 41 `status=0` |
+| my capture (`fixed-20261119T233010Z`) | 12 requests, 9 install; every instance of `9effc137`(4), `874d0fb3`(2), `8680a229`(3) |
+| 3 × 180 s production run (`x86_kvm_corpus_20261119_234045_456298`) | 28 requests, **28 installed via checked-sim-c, 0 direct-native, 0 failed** |
+
+The one open item is the fall-through placement, exactly as reproduced on the host for `34af4b3a`
+(`off=30 size=4, R8(r=0)`): the bound is emitted on the comparison's true edge, which jumps to the block the
+read is *not* on. Re-emitting it inside the falling-through block is `ACCEPT`. That program did not appear in
+the 3 × 180 s production run, which is why that run shows no fallback at all.
