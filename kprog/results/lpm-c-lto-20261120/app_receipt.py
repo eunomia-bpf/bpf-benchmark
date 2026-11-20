@@ -84,14 +84,16 @@ for phase in ['baseline', 'post_rejit']:
     count = sum(p['run_cnt_delta'] for p in counters.values())
     elapsed = sum(p['run_time_ns_delta'] for p in counters.values())
     components = []
-    for component in app[phase]['workloads'][0]['components']:
+    for component in [component for workload in app[phase]['workloads']
+                      for component in (workload['components'] if 'components' in workload else [workload])]:
         matches = re.findall(r'ops=(\d+) elapsed_s=([\d.]+)', component['stderr'])
         components.append(dict(name=component['workload_name'], returncode=component['returncode'],
             self_counters=[dict(ops=int(ops), elapsed_s=float(seconds),
                 ops_per_second=int(ops)/float(seconds)) for ops, seconds in matches],
             pktgen_pps=[int(value) for value in re.findall(r'\b(\d+)pps\b', component['stdout'])]))
     phases[phase] = dict(run_cnt=count, run_time_ns=elapsed, ns_per_call=elapsed/count if count else None,
-                        programs=counters, workload_components=components)
+                        programs=counters, workload_components=components,
+                        workloads=app[phase]['workloads'])
 ratio = (phases['baseline']['ns_per_call']/phases['post_rejit']['ns_per_call']
          if all(phases[phase] and phases[phase]['ns_per_call'] for phase in phases) else None)
 result = dict(source_revision=args.revision, raw=str(raw), app_run=str(app_run), app=args.app,
