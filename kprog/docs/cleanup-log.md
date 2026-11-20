@@ -450,3 +450,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-20T05:33:06Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after BCC678934 exit0. Raw hash-tail-20261120/bcc-20261120T052633Z and corpus run052806_636551 retained and archived. Peer runtime store untouched.
 
 - 2026-11-20T05:47:03Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after OTel683392 exit0. Raw lookup-grouping-20261120/otel-20261120T053716Z and corpus run053900_560909 retained and archived. Peer runtime store untouched.
+
+- 2026-11-20T06:53:57Z PERF: existing checked-corpus completion removed rebuildable /var/tmp/kprog-tmp/perf/runtime-profile/bpf-benchmark-docker.img after OTel729327 exit0. Raw percpu-array-c-20261120/otel-20261120T062059Z and corpus run062233_615179 retained and archived. Image tar was read only; no peer data removed.

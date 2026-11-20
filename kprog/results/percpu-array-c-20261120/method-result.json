@@ -1,0 +1,479 @@
+{
+  "method": "Existing analysis/corpus_analyze.py collect_per_program, name-type, min run count 100; evaluation.md section 5. No applied-only filter.",
+  "scope": "Analysis correction only. Original receipts/counters stay unchanged. Pooled phase time/count depends on program mix and is supplemental. Threshold affects analysis, never queue admission. Single short diagnostics do not isolate source changes; caller time includes tail targets.",
+  "runs": [
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/app-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_025243_099920",
+      "programs": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "prog_id": 102,
+          "name": "native_tracer_e",
+          "type": "perf_event",
+          "min_runs": 4138179,
+          "b_avg_ns": 1033.5188992549622,
+          "p_avg_ns": 4875.6759045032395,
+          "ratio": 4.717548859549633
+        }
+      ],
+      "retained": 1,
+      "post_over_baseline_geomean": 4.717548859549634,
+      "ebpf_over_native": 0.21197448712708533,
+      "pooled_phase_ebpf_over_native": 0.21197819730703923
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/combined-app-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_043350_463308",
+      "programs": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "prog_id": 102,
+          "name": "native_tracer_e",
+          "type": "perf_event",
+          "min_runs": 4565360,
+          "b_avg_ns": 4192.7863566071455,
+          "p_avg_ns": 5264.947592437528,
+          "ratio": 1.2557156851411788
+        }
+      ],
+      "retained": 1,
+      "post_over_baseline_geomean": 1.2557156851411788,
+      "ebpf_over_native": 0.7963586119317854,
+      "pooled_phase_ebpf_over_native": 0.7963576122546061
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/shared-app-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_045814_633081",
+      "programs": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "prog_id": 102,
+          "name": "native_tracer_e",
+          "type": "perf_event",
+          "min_runs": 4407735,
+          "b_avg_ns": 4543.287464068759,
+          "p_avg_ns": 4673.1117617098125,
+          "ratio": 1.0285749688233
+        }
+      ],
+      "retained": 1,
+      "post_over_baseline_geomean": 1.0285749688233,
+      "ebpf_over_native": 0.9722188759308522,
+      "pooled_phase_ebpf_over_native": 0.9722204014680507
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/shared-cilium-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_050927_857614",
+      "programs": [
+        {
+          "app": "cilium/agent",
+          "prog_id": 294,
+          "name": "cil_from_contai",
+          "type": "sched_cls",
+          "min_runs": 4056947,
+          "b_avg_ns": 971.1349689803687,
+          "p_avg_ns": 854.9347692539322,
+          "ratio": 0.880345983371972
+        },
+        {
+          "app": "cilium/agent",
+          "prog_id": 266,
+          "name": "cil_from_contai",
+          "type": "sched_cls",
+          "min_runs": 4056946,
+          "b_avg_ns": 991.3929628346051,
+          "p_avg_ns": 862.5203520766388,
+          "ratio": 0.8700085479833427
+        }
+      ],
+      "retained": 2,
+      "post_over_baseline_geomean": 0.8751620025551939,
+      "ebpf_over_native": 1.1426455868517131,
+      "pooled_phase_ebpf_over_native": 1.1426972965631839
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/shared-bcc-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_051624_511369",
+      "programs": [
+        {
+          "app": "bcc/set",
+          "prog_id": 291,
+          "name": "block_rq_comple",
+          "type": "tracing",
+          "min_runs": 101,
+          "b_avg_ns": 6376.455445544554,
+          "p_avg_ns": 5681.64705882353,
+          "ratio": 0.8910353263416103
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 284,
+          "name": "fentry_vfs_open",
+          "type": "tracing",
+          "min_runs": 907128,
+          "b_avg_ns": 37.221692250024766,
+          "p_avg_ns": 37.13733563510331,
+          "ratio": 0.9977336706145756
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 141,
+          "name": "fentry_vfs_read",
+          "type": "tracing",
+          "min_runs": 21232,
+          "b_avg_ns": 40.59815367906598,
+          "p_avg_ns": 44.996655990957045,
+          "ratio": 1.1083424223343217
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 202,
+          "name": "fentry_vfs_writ",
+          "type": "tracing",
+          "min_runs": 21458,
+          "b_avg_ns": 40.029422190712516,
+          "p_avg_ns": 41.026982943424365,
+          "ratio": 1.0249206882867097
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 216,
+          "name": "kprobe__cap_cap",
+          "type": "kprobe",
+          "min_runs": 1412438,
+          "b_avg_ns": 104.83441184675009,
+          "p_avg_ns": 425.55241299527864,
+          "ratio": 4.059281732961532
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 163,
+          "name": "kprobe__cap_cap",
+          "type": "kprobe",
+          "min_runs": 1412435,
+          "b_avg_ns": 457.044554262674,
+          "p_avg_ns": 100.36090673358002,
+          "ratio": 0.21958670286639123
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 271,
+          "name": "sched_switch",
+          "type": "tracing",
+          "min_runs": 2434337,
+          "b_avg_ns": 247.99412706735902,
+          "p_avg_ns": 288.43419789453964,
+          "ratio": 1.1630686633808731
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 179,
+          "name": "sched_wakeup",
+          "type": "tracing",
+          "min_runs": 1222732,
+          "b_avg_ns": 129.58068118010294,
+          "p_avg_ns": 134.92942116506316,
+          "ratio": 1.041277294857912
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 187,
+          "name": "sys_enter",
+          "type": "tracepoint",
+          "min_runs": 34146703,
+          "b_avg_ns": 119.57777827042335,
+          "p_avg_ns": 119.38819027202827,
+          "ratio": 0.9984145214843653
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 236,
+          "name": "sys_exit",
+          "type": "tracepoint",
+          "min_runs": 34146706,
+          "b_avg_ns": 80.8467694951308,
+          "p_avg_ns": 98.02570937851031,
+          "ratio": 1.2124876478139817
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 277,
+          "name": "tracepoint__sys",
+          "type": "tracepoint",
+          "min_runs": 906970,
+          "b_avg_ns": 1533.0814012879396,
+          "p_avg_ns": 1544.3240107170027,
+          "ratio": 1.0073333414779009
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 195,
+          "name": "tracepoint__sys",
+          "type": "tracepoint",
+          "min_runs": 906970,
+          "b_avg_ns": 115.55478850334244,
+          "p_avg_ns": 133.85411755625876,
+          "ratio": 1.158360629532778
+        }
+      ],
+      "retained": 12,
+      "post_over_baseline_geomean": 1.036634114281223,
+      "ebpf_over_native": 0.9646605163996322,
+      "pooled_phase_ebpf_over_native": 0.9454594430535028
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/tail-bcc-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_052806_636551",
+      "programs": [
+        {
+          "app": "bcc/set",
+          "prog_id": 291,
+          "name": "block_rq_comple",
+          "type": "tracing",
+          "min_runs": 101,
+          "b_avg_ns": 7358.133333333333,
+          "p_avg_ns": 6814.564356435643,
+          "ratio": 0.9261267834825377
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 277,
+          "name": "fentry_vfs_open",
+          "type": "tracing",
+          "min_runs": 911511,
+          "b_avg_ns": 37.40127107626787,
+          "p_avg_ns": 37.81357872461512,
+          "ratio": 1.0110238940143634
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 133,
+          "name": "fentry_vfs_read",
+          "type": "tracing",
+          "min_runs": 22966,
+          "b_avg_ns": 39.477117698127245,
+          "p_avg_ns": 42.6632848558739,
+          "ratio": 1.0807092144393764
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 195,
+          "name": "fentry_vfs_writ",
+          "type": "tracing",
+          "min_runs": 23371,
+          "b_avg_ns": 38.35854845968171,
+          "p_avg_ns": 40.31517692867229,
+          "ratio": 1.051008928845344
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 209,
+          "name": "kprobe__cap_cap",
+          "type": "kprobe",
+          "min_runs": 1526389,
+          "b_avg_ns": 102.76929734163441,
+          "p_avg_ns": 445.28362981554267,
+          "ratio": 4.332846884564104
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 148,
+          "name": "kprobe__cap_cap",
+          "type": "kprobe",
+          "min_runs": 1526386,
+          "b_avg_ns": 495.602491112995,
+          "p_avg_ns": 101.18648245463065,
+          "ratio": 0.20416863165354956
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 271,
+          "name": "sched_switch",
+          "type": "tracing",
+          "min_runs": 2526288,
+          "b_avg_ns": 271.55152171924976,
+          "p_avg_ns": 263.52019920135785,
+          "ratio": 0.9704243140784338
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 187,
+          "name": "sched_wakeup",
+          "type": "tracing",
+          "min_runs": 1270081,
+          "b_avg_ns": 126.90444085079376,
+          "p_avg_ns": 125.37799400195736,
+          "ratio": 0.987971682956067
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 172,
+          "name": "sys_enter",
+          "type": "tracepoint",
+          "min_runs": 32807191,
+          "b_avg_ns": 118.92076221947804,
+          "p_avg_ns": 119.35166990230954,
+          "ratio": 1.0036234857125808
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 229,
+          "name": "sys_exit",
+          "type": "tracepoint",
+          "min_runs": 32807195,
+          "b_avg_ns": 84.01250999971195,
+          "p_avg_ns": 75.57761110659052,
+          "ratio": 0.8995994894909062
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 284,
+          "name": "tracepoint__sys",
+          "type": "tracepoint",
+          "min_runs": 910912,
+          "b_avg_ns": 1604.708427378276,
+          "p_avg_ns": 1598.990731350933,
+          "ratio": 0.9964369252820063
+        },
+        {
+          "app": "bcc/set",
+          "prog_id": 202,
+          "name": "tracepoint__sys",
+          "type": "tracepoint",
+          "min_runs": 910912,
+          "b_avg_ns": 104.4112724390501,
+          "p_avg_ns": 108.39660876487073,
+          "ratio": 1.0381695982887966
+        }
+      ],
+      "retained": 12,
+      "post_over_baseline_geomean": 0.9858166498264952,
+      "ebpf_over_native": 1.0143874118742071,
+      "pooled_phase_ebpf_over_native": 1.0411342857923063
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/grouped-otel-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_053900_560909",
+      "programs": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "prog_id": 102,
+          "name": "native_tracer_e",
+          "type": "perf_event",
+          "min_runs": 4761446,
+          "b_avg_ns": 4354.972407331722,
+          "p_avg_ns": 5470.296294653827,
+          "ratio": 1.256103548542449
+        }
+      ],
+      "retained": 1,
+      "post_over_baseline_geomean": 1.256103548542449,
+      "ebpf_over_native": 0.7961127099436786,
+      "pooled_phase_ebpf_over_native": 0.7961143564317114
+    },
+    {
+      "receipt": "/workspaces/repository/kprog/results/lpm-c-lto-20261120/percpu-otel-result.json",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_062233_615179",
+      "programs": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "prog_id": 105,
+          "name": "native_tracer_e",
+          "type": "perf_event",
+          "min_runs": 4553766,
+          "b_avg_ns": 4065.330929388994,
+          "p_avg_ns": 5061.414033252506,
+          "ratio": 1.245018947083164
+        }
+      ],
+      "retained": 1,
+      "post_over_baseline_geomean": 1.245018947083164,
+      "ebpf_over_native": 0.8032006278641819,
+      "pooled_phase_ebpf_over_native": 0.8032001565573003
+    }
+  ],
+  "submitted_P_hash_comparison": [
+    {
+      "symbol": "read_task_struct",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_unwind_stop",
+      "previous": "27aebedf60c8118cff46e0f2d0c7634dcfdb061d0c7d7f9ec36d7a1701e76b89",
+      "current": "5187a1ec48f296d4ad277fc79c2c623528443baf6e9ba3fc3a56b3c25e955341"
+    },
+    {
+      "symbol": "perf_unwind_native",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_unwind_hotspot",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_unwind_perl",
+      "previous": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "current": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae"
+    },
+    {
+      "symbol": "perf_unwind_php",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_unwind_python",
+      "previous": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "current": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae"
+    },
+    {
+      "symbol": "perf_unwind_ruby",
+      "previous": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "current": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae"
+    },
+    {
+      "symbol": "perf_unwind_v8",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_unwind_dotnet",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "perf_go_labels",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "tracepoint__sched_process_free",
+      "previous": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "current": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e"
+    },
+    {
+      "symbol": "native_tracer_entry",
+      "previous": "8f5f0ef7f30bd2911def92a7b6c60a08b1c4921c4250683ab8418be6d87de127",
+      "current": "bce436bd651b996ad6302ad151d816e8e2479dad505be578b80e8afad7e0ef32"
+    },
+    {
+      "symbol": "custom__generic",
+      "previous": "22f44141b87d813ed85f5f46d79adb69142859e2dd55d92e01ecee77ffefcaf9",
+      "current": "d9e2c518e1d2825523a025b5547ee2976791896f3ec223032ecfa9935fc81b19"
+    }
+  ],
+  "available_image_tar": {
+    "path": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+    "bytes": 808632832,
+    "mtime_unix": 1795156954.450284,
+    "config": "blobs/sha256/64b7d7e5272c0466ef543b073638e88af84931d7de7f7090df10f4ee5028dd12",
+    "created": "2026-11-20T06:42:06.022617691Z",
+    "labels": {
+      "org.opencontainers.image.version": "24.04"
+    },
+    "scope": "Available image inspected after the run; creation/mtime precede launch. Not a captured guest image-ID field. Submitted P hashes independently show changed inputs; no exact source revision inferred from labels."
+  }
+}

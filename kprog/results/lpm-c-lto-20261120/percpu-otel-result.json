@@ -1,0 +1,1724 @@
+{
+  "source_revision": "0a0f4bbfd",
+  "raw": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z",
+  "app_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_062233_615179",
+  "app": "otelcol-ebpf-profiler/profiling",
+  "app_status": "ok",
+  "app_error": "",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "prog_id": 27,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "read_task_struct",
+      "native_static_sites_by_map": {
+        "array": {
+          "system_analysis": 1
+        },
+        "lpm": {},
+        "hash": {},
+        "percpu_array": {}
+      },
+      "array_static_sites": 1,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "percpu_array_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 318,
+      "proof_executable_bytes": 326,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 326
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-99n38m_o/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-99n38m_o/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-99n38m_o/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-99n38m_o/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 28,
+      "prog_id": 34,
+      "native_sha256": "5187a1ec48f296d4ad277fc79c2c623528443baf6e9ba3fc3a56b3c25e955341",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_stop",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {
+          "apm_int_procs": 1,
+          "go_labels_procs": 1
+        },
+        "percpu_array": {
+          "metrics": 12,
+          "per_cpu_records": 2
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 2,
+      "percpu_array_static_sites": 14,
+      "generic_lookup_static_sites": 1,
+      "native_entry_bytes": 2345,
+      "proof_executable_bytes": 2676,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 2349,
+        "__kprog_hash_key_4": 156,
+        "__kprog_hash_key_8": 171
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-_3mfs8e0/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-_3mfs8e0/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-_3mfs8e0/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-_3mfs8e0/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 35,
+      "prog_id": 41,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_native",
+      "native_static_sites_by_map": {
+        "array": {
+          "unwind_info_array": 4
+        },
+        "lpm": {
+          "pid_page_to_mapping_info": 4
+        },
+        "hash": {
+          "interpreter_offsets": 4,
+          "stack_delta_page_to_info": 4
+        },
+        "percpu_array": {
+          "metrics": 20,
+          "per_cpu_records": 2
+        }
+      },
+      "array_static_sites": 4,
+      "lpm_static_sites": 4,
+      "hash_static_sites": 8,
+      "percpu_array_static_sites": 22,
+      "generic_lookup_static_sites": 72,
+      "native_entry_bytes": 17382,
+      "proof_executable_bytes": 18091,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 17389,
+        "__kprog_lpm_key_16": 169,
+        "__kprog_hash_key_8": 171,
+        "__kprog_hash_key_16": 278,
+        "__native_link_local_memset_zero_144": 84
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-i76j69y8/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-i76j69y8/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-i76j69y8/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-i76j69y8/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 42,
+      "prog_id": 48,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_hotspot",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 28
+        },
+        "hash": {
+          "interpreter_offsets": 4,
+          "hotspot_procs": 1
+        },
+        "percpu_array": {
+          "metrics": 24,
+          "per_cpu_records": 2
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 28,
+      "hash_static_sites": 5,
+      "percpu_array_static_sites": 26,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 17681,
+      "proof_executable_bytes": 18605,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 17696,
+        "__kprog_lpm_key_16": 169,
+        "__kprog_hash_key_8": 171,
+        "__kprog_hash_key_4": 163,
+        "__native_link_local_memset_zero_512": 406
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-0xkg8foz/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-0xkg8foz/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-0xkg8foz/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-0xkg8foz/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 49,
+      "prog_id": 55,
+      "native_sha256": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_perl",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {
+          "perl_procs": 1
+        },
+        "percpu_array": {
+          "metrics": 45,
+          "per_cpu_records": 2
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 1,
+      "percpu_array_static_sites": 47,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 16559,
+      "proof_executable_bytes": 16726,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 16563,
+        "__kprog_hash_key_4": 163
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-plm6p7ee/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-plm6p7ee/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-plm6p7ee/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-plm6p7ee/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 56,
+      "prog_id": 62,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_php",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 1
+        },
+        "hash": {
+          "php_procs": 1
+        },
+        "percpu_array": {
+          "metrics": 24,
+          "per_cpu_records": 2
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 1,
+      "percpu_array_static_sites": 26,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 15271,
+      "proof_executable_bytes": 15611,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 15279,
+        "__kprog_lpm_key_16": 169,
+        "__kprog_hash_key_4": 163
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-ez9wo787/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-ez9wo787/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-ez9wo787/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-ez9wo787/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 63,
+      "prog_id": 68,
+      "native_sha256": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_python",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "3446: (67) r1 <<= 32                  ; R1=0",
+        "3447: (77) r1 >>= 32                  ; R1=0",
+        "3448: (54) w1 &= 255                  ; R1=0",
+        "3449: (79) r9 = *(u64 *)(r10 -224)    ; R9=scalar(id=105) R10=fp0 fp-224=scalar(id=105)",
+        "3450: (56) if w1 != 0x4 goto pc+7     ; R1=0",
+        "3458: (bf) r2 = r10                   ; R2=fp0 R10=fp0",
+        "3459: (07) r2 += -152                 ; R2=fp-152",
+        "3460: (79) r1 = *(u64 *)(r10 -176)    ; R1=scalar(id=106) R10=fp0 fp-176=scalar(id=106)",
+        "3461: (1f) r1 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 2252 insns (limit 1000000) max_states_per_insn 1 total_states 177 peak_states 177 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 69,
+      "prog_id": 74,
+      "native_sha256": "a9b905f581eb770a7139ca57d8752af7eba6eaf27c6b409669666662498d67ae",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_ruby",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "767: (54) w3 &= 255                   ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "768: (bc) w3 = w3                     ; R3=scalar(id=21,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "769: (bf) r2 = r1                     ; R1=scalar(id=22) R2=scalar(id=22)",
+        "770: (1f) r2 -= r4                    ; R2=scalar() R4=scalar()",
+        "771: (18) r4 = 0x100000000            ; R4=0x100000000",
+        "773: (ad) if r2 < r4 goto pc+4        ; R2=scalar(umin=0x100000000) R4=0x100000000",
+        "774: (56) if w3 != 0x0 goto pc+7      ; R3=0",
+        "775: (b7) r0 = 0                      ; R0=0",
+        "776: (7b) *(u64 *)(r0 +0) = r0",
+        "R0 invalid mem access 'scalar'",
+        "processed 293 insns (limit 1000000) max_states_per_insn 0 total_states 19 peak_states 19 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 75,
+      "prog_id": 80,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_v8",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "4551: (bc) w2 = w1                    ; R1=0 R2=0",
+        "4552: (04) w2 += -1                   ; R2=0xffffffff",
+        "4553: (a6) if w2 < 0x4 goto pc+2      ; R2=0xffffffff",
+        "4554: (b4) w0 = 0                     ; R0=0",
+        "4555: (56) if w1 != 0x6 goto pc+2     ; R1=0",
+        "4558: (bf) r2 = r10                   ; R2=fp0 R10=fp0",
+        "4559: (07) r2 += -152                 ; R2=fp-152",
+        "4560: (79) r1 = *(u64 *)(r10 -184)    ; R1=scalar(id=660) R10=fp0 fp-184=scalar(id=660)",
+        "4561: (1f) r1 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 8381 insns (limit 1000000) max_states_per_insn 3 total_states 685 peak_states 685 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 81,
+      "prog_id": 86,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_dotnet",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "1573: (04) w4 += -1                   ; R4=0xffffffff",
+        "1574: (a6) if w4 < 0x4 goto pc+2      ; R4=0xffffffff",
+        "1575: (b4) w6 = 0                     ; R6=0",
+        "1576: (56) if w3 != 0x6 goto pc+2     ; R3=0",
+        "1579: (77) r8 >>= 56                  ; R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "1580: (bf) r3 = r10                   ; R3=fp0 R10=fp0",
+        "1581: (07) r3 += -120                 ; R3=fp-120",
+        "1582: (79) r7 = *(u64 *)(r10 -144)    ; R7=scalar(id=47) R10=fp0 fp-144=scalar(id=47)",
+        "1583: (1f) r7 -= r3",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 634 insns (limit 1000000) max_states_per_insn 0 total_states 37 peak_states 37 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 87,
+      "prog_id": 92,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_go_labels",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "282: (b4) w2 = 15                     ; R2=15",
+        "283: (26) if w1 > 0xe goto pc+2       ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "284: (bc) w1 = w1                     ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "285: (bc) w2 = w1                     ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf)) R2=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "286: (67) r5 <<= 6                    ; R5=scalar(smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "287: (79) r1 = *(u64 *)(r10 -216)     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=60) R10=fp0 fp-216=map_value(map=per_cpu_records,ks=4,vs=5000,off=60)",
+        "288: (7b) *(u64 *)(r10 -184) = r5     ; R5=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0)) R10=fp0 fp-184=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "289: (0f) r1 += r5                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=60,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0)) R5=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "290: (85) call bpf_probe_read_user#112",
+        "R1 unbounded memory access, make sure to bounds check any such access",
+        "processed 341 insns (limit 1000000) max_states_per_insn 1 total_states 25 peak_states 25 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 93,
+      "prog_id": 99,
+      "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__sched_process_free",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 1
+        },
+        "hash": {},
+        "percpu_array": {
+          "metrics": 3
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 0,
+      "percpu_array_static_sites": 3,
+      "generic_lookup_static_sites": 2,
+      "native_entry_bytes": 557,
+      "proof_executable_bytes": 730,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 561,
+        "__kprog_lpm_key_16": 169
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-e_pftzfu/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-e_pftzfu/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-e_pftzfu/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-e_pftzfu/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 100,
+      "prog_id": 105,
+      "native_sha256": "bce436bd651b996ad6302ad151d816e8e2479dad505be578b80e8afad7e0ef32",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "native_tracer_entry",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "96: (05) goto pc+57",
+        "154: (7b) *(u64 *)(r10 -312) = r9     ; R9=scalar(id=13,umin=0x100000000) R10=fp0 fp-312=scalar(id=13,umin=0x100000000)",
+        "155: (77) r9 >>= 32                   ; R9=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "156: (7b) *(u64 *)(r10 -320) = r9     ; R9=scalar(id=14,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-320=scalar(id=14,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "157: (7b) *(u64 *)(r10 -256) = r1     ; R1=278 R10=fp0 fp-256=278",
+        "158: (bf) r1 = r10                    ; R1=fp0 R10=fp0",
+        "159: (07) r1 += -256                  ; R1=fp-256",
+        "160: (79) r2 = *(u64 *)(r10 -264)     ; R2=scalar(id=15) R10=fp0 fp-264=scalar(id=15)",
+        "161: (1f) r2 -= r1",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 100 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 106,
+      "prog_id": 111,
+      "native_sha256": "d9e2c518e1d2825523a025b5547ee2976791896f3ec223032ecfa9935fc81b19",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "custom__generic",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "127: (07) r2 += 3952                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952)",
+        "128: (7b) *(u64 *)(r2 +0) = r8        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952) R8=0",
+        "129: (bf) r2 = r5                     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)",
+        "130: (07) r2 += 3960                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960)",
+        "131: (7b) *(u64 *)(r2 +0) = r8        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960) R8=0",
+        "132: (bf) r2 = r10                    ; R2=fp0 R10=fp0",
+        "133: (07) r2 += -256                  ; R2=fp-256",
+        "134: (79) r0 = *(u64 *)(r10 -264)     ; R0=scalar(id=19) R10=fp0 fp-264=scalar(id=19)",
+        "135: (1f) r0 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 128 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    }
+  ],
+  "phases": {
+    "baseline": {
+      "run_cnt": 4553798,
+      "run_time_ns": 18512673190,
+      "ns_per_call": 4065.325952095372,
+      "programs": {
+        "10": {
+          "bytes_jited": 14983,
+          "bytes_xlated": 24736,
+          "id": 10,
+          "name": "perf_unwind_php",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "11": {
+          "bytes_jited": 19605,
+          "bytes_xlated": 33208,
+          "id": 11,
+          "name": "perf_unwind_pyt",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "12": {
+          "bytes_jited": 17840,
+          "bytes_xlated": 30280,
+          "id": 12,
+          "name": "perf_unwind_rub",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "13": {
+          "bytes_jited": 20215,
+          "bytes_xlated": 33448,
+          "id": 13,
+          "name": "perf_unwind_v8",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "14": {
+          "bytes_jited": 22797,
+          "bytes_xlated": 37440,
+          "id": 14,
+          "name": "perf_unwind_dot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "15": {
+          "bytes_jited": 1572,
+          "bytes_xlated": 2504,
+          "id": 15,
+          "name": "perf_go_labels",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "16": {
+          "bytes_jited": 792,
+          "bytes_xlated": 1320,
+          "id": 16,
+          "name": "tracepoint__sch",
+          "run_cnt_delta": 32,
+          "run_time_ns_delta": 107425,
+          "type": "tracepoint"
+        },
+        "17": {
+          "bytes_jited": 3815,
+          "bytes_xlated": 5904,
+          "id": 17,
+          "name": "native_tracer_e",
+          "run_cnt_delta": 4553766,
+          "run_time_ns_delta": 18512565765,
+          "type": "perf_event"
+        },
+        "18": {
+          "bytes_jited": 3679,
+          "bytes_xlated": 5712,
+          "id": 18,
+          "name": "custom__generic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "6": {
+          "bytes_jited": 3650,
+          "bytes_xlated": 6144,
+          "id": 6,
+          "name": "perf_unwind_sto",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "7": {
+          "bytes_jited": 21868,
+          "bytes_xlated": 37024,
+          "id": 7,
+          "name": "perf_unwind_nat",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "8": {
+          "bytes_jited": 18424,
+          "bytes_xlated": 28080,
+          "id": 8,
+          "name": "perf_unwind_hot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "9": {
+          "bytes_jited": 18264,
+          "bytes_xlated": 29640,
+          "id": 9,
+          "name": "perf_unwind_per",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "otel_python3_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 3501977,
+              "elapsed_s": 10.000081,
+              "ops_per_second": 350194.8634216063
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_python3_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 3389998,
+              "elapsed_s": 10.000579,
+              "ops_per_second": 338980.1730479805
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_ruby_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 24034835,
+              "elapsed_s": 10.000055,
+              "ops_per_second": 2403470.280913455
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_ruby_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 24431632,
+              "elapsed_s": 10.000041,
+              "ops_per_second": 2443153.1830719495
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_nodejs_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 10882390,
+              "elapsed_s": 10.000451,
+              "ops_per_second": 1088189.9226344891
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_nodejs_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 10786730,
+              "elapsed_s": 10.004183,
+              "ops_per_second": 1078221.9797458723
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_perl_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 4997504,
+              "elapsed_s": 10.001217,
+              "ops_per_second": 499689.5877771675
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_perl_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 5787518,
+              "elapsed_s": 10.005799,
+              "ops_per_second": 578416.3763433585
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_php_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 31335561,
+              "elapsed_s": 10.000006,
+              "ops_per_second": 3133554.219867468
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_php_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 33165424,
+              "elapsed_s": 10.018466,
+              "ops_per_second": 3310429.3611417157
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_stress_ng_cpu",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": []
+        }
+      ],
+      "workloads": [
+        {
+          "components": [
+            {
+              "command": [
+                "/usr/bin/python3",
+                "-u",
+                "-c",
+                "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "python3",
+                "loop": "integer_lcg",
+                "tool": "python3",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 10.578927061000002,
+              "returncode": 0,
+              "stderr": "python3 int_loop ops=3501977 elapsed_s=10.000081 worker=0 sink=1158691758",
+              "stdout": "",
+              "workload_name": "otel_python3_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/python3",
+                "-u",
+                "-c",
+                "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "python3",
+                "loop": "integer_lcg",
+                "tool": "python3",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 10.581433939999997,
+              "returncode": 0,
+              "stderr": "python3 int_loop ops=3389998 elapsed_s=10.000579 worker=1 sink=935458164",
+              "stdout": "",
+              "workload_name": "otel_python3_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/ruby",
+                "-e",
+                "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "ruby",
+                "loop": "integer_lcg",
+                "tool": "ruby",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 12.448736526999994,
+              "returncode": 0,
+              "stderr": "ruby int_loop ops=24034835 elapsed_s=10.000055 worker=0 sink=1960858820",
+              "stdout": "",
+              "workload_name": "otel_ruby_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/ruby",
+                "-e",
+                "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "ruby",
+                "loop": "integer_lcg",
+                "tool": "ruby",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.171697284999993,
+              "returncode": 0,
+              "stderr": "ruby int_loop ops=24431632 elapsed_s=10.000041 worker=1 sink=3766710706",
+              "stdout": "",
+              "workload_name": "otel_ruby_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/nodejs",
+                "-e",
+                "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "nodejs",
+                "loop": "integer_lcg",
+                "tool": "nodejs",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.176847449999997,
+              "returncode": 0,
+              "stderr": "nodejs int_loop ops=10882390 elapsed_s=10.000451 worker=0 sink=898252800",
+              "stdout": "",
+              "workload_name": "otel_nodejs_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/nodejs",
+                "-e",
+                "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "nodejs",
+                "loop": "integer_lcg",
+                "tool": "nodejs",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.178187702000002,
+              "returncode": 0,
+              "stderr": "nodejs int_loop ops=10786730 elapsed_s=10.004183 worker=1 sink=3861130240",
+              "stdout": "",
+              "workload_name": "otel_nodejs_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/perl",
+                "-e",
+                "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "perl",
+                "loop": "integer_lcg",
+                "tool": "perl",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.178567074,
+              "returncode": 0,
+              "stderr": "perl int_loop ops=4997504 elapsed_s=10.001217 worker=0 sink=480150145",
+              "stdout": "",
+              "workload_name": "otel_perl_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/perl",
+                "-e",
+                "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "perl",
+                "loop": "integer_lcg",
+                "tool": "perl",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.181685129000002,
+              "returncode": 0,
+              "stderr": "perl int_loop ops=5787518 elapsed_s=10.005799 worker=1 sink=1627755364",
+              "stdout": "",
+              "workload_name": "otel_perl_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/php",
+                "-r",
+                "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "php",
+                "loop": "integer_lcg",
+                "tool": "php",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.183857203000002,
+              "returncode": 0,
+              "stderr": "php int_loop ops=31335561 elapsed_s=10.000006 worker=0 sink=1554464254",
+              "stdout": "",
+              "workload_name": "otel_php_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/php",
+                "-r",
+                "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "php",
+                "loop": "integer_lcg",
+                "tool": "php",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 13.187684973000003,
+              "returncode": 0,
+              "stderr": "php int_loop ops=33165424 elapsed_s=10.018466 worker=1 sink=1792568274",
+              "stdout": "",
+              "workload_name": "otel_php_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--cpu",
+                "1",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/b1d6cd6e"
+              ],
+              "config": {
+                "stressors": [
+                  "cpu"
+                ],
+                "tool": "stress-ng"
+              },
+              "duration_s": 13.190684624,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "stress-ng: info:  [1975] setting to a 10 secs run per stressor\nstress-ng: info:  [1975] dispatching hogs: 1 cpu\nstress-ng: info:  [1975] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [1975] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [1975]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [1975] cpu                2364     10.00      2.89      0.00       236.33         817.92\nstress-ng: info:  [1975] skipped: 0\nstress-ng: info:  [1975] passed: 1: cpu (1)\nstress-ng: info:  [1975] failed: 0\nstress-ng: info:  [1975] metrics untrustworthy: 0\nstress-ng: info:  [1975] successful run completed in 10.02 secs",
+              "workload_name": "otel_stress_ng_cpu"
+            }
+          ],
+          "workload_name": "otel_mixed_workload"
+        }
+      ]
+    },
+    "post_rejit": {
+      "run_cnt": 5058950,
+      "run_time_ns": 25605424199,
+      "ns_per_call": 5061.410806392631,
+      "programs": {
+        "105": {
+          "bytes_jited": 2650,
+          "bytes_xlated": 24,
+          "id": 105,
+          "name": "native_tracer_e",
+          "run_cnt_delta": 5058927,
+          "run_time_ns_delta": 25605324111,
+          "type": "perf_event"
+        },
+        "111": {
+          "bytes_jited": 2215,
+          "bytes_xlated": 24,
+          "id": 111,
+          "name": "custom__generic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "34": {
+          "bytes_jited": 2908,
+          "bytes_xlated": 5296,
+          "id": 34,
+          "name": "perf_unwind_sto",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "41": {
+          "bytes_jited": 19409,
+          "bytes_xlated": 53880,
+          "id": 41,
+          "name": "perf_unwind_nat",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "48": {
+          "bytes_jited": 19041,
+          "bytes_xlated": 32824,
+          "id": 48,
+          "name": "perf_unwind_hot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "55": {
+          "bytes_jited": 17193,
+          "bytes_xlated": 30920,
+          "id": 55,
+          "name": "perf_unwind_per",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "62": {
+          "bytes_jited": 16060,
+          "bytes_xlated": 29288,
+          "id": 62,
+          "name": "perf_unwind_php",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "68": {
+          "bytes_jited": 8373,
+          "bytes_xlated": 24,
+          "id": 68,
+          "name": "perf_unwind_pyt",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "74": {
+          "bytes_jited": 15246,
+          "bytes_xlated": 24,
+          "id": 74,
+          "name": "perf_unwind_rub",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "80": {
+          "bytes_jited": 11945,
+          "bytes_xlated": 24,
+          "id": 80,
+          "name": "perf_unwind_v8",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "86": {
+          "bytes_jited": 17980,
+          "bytes_xlated": 24,
+          "id": 86,
+          "name": "perf_unwind_dot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "92": {
+          "bytes_jited": 1032,
+          "bytes_xlated": 16,
+          "id": 92,
+          "name": "perf_go_labels",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "99": {
+          "bytes_jited": 830,
+          "bytes_xlated": 1168,
+          "id": 99,
+          "name": "tracepoint__sch",
+          "run_cnt_delta": 23,
+          "run_time_ns_delta": 100088,
+          "type": "tracepoint"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "otel_python3_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 2918058,
+              "elapsed_s": 10.000086,
+              "ops_per_second": 291803.2904917018
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_python3_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 2734919,
+              "elapsed_s": 10.005152,
+              "ops_per_second": 273351.06952897867
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_ruby_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 20656728,
+              "elapsed_s": 10.000041,
+              "ops_per_second": 2065664.330776244
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_ruby_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 20165484,
+              "elapsed_s": 10.000046,
+              "ops_per_second": 2016539.1239200302
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_nodejs_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 21073636,
+              "elapsed_s": 10.000298,
+              "ops_per_second": 2107300.8024360873
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_nodejs_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 18357368,
+              "elapsed_s": 10.000431,
+              "ops_per_second": 1835657.6831538558
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_perl_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 4971707,
+              "elapsed_s": 10.000002,
+              "ops_per_second": 497170.6005658799
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_perl_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 5992197,
+              "elapsed_s": 10.031848,
+              "ops_per_second": 597317.3636602149
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_php_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 29402194,
+              "elapsed_s": 10.000005,
+              "ops_per_second": 2940217.929891035
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_php_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 28724917,
+              "elapsed_s": 10.000002,
+              "ops_per_second": 2872491.1255017747
+            }
+          ],
+          "pktgen_pps": []
+        },
+        {
+          "name": "otel_stress_ng_cpu",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": []
+        }
+      ],
+      "workloads": [
+        {
+          "components": [
+            {
+              "command": [
+                "/usr/bin/python3",
+                "-u",
+                "-c",
+                "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "python3",
+                "loop": "integer_lcg",
+                "tool": "python3",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 10.61372164300002,
+              "returncode": 0,
+              "stderr": "python3 int_loop ops=2918058 elapsed_s=10.000086 worker=0 sink=1773097279",
+              "stdout": "",
+              "workload_name": "otel_python3_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/python3",
+                "-u",
+                "-c",
+                "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "python3",
+                "loop": "integer_lcg",
+                "tool": "python3",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 10.620294704000003,
+              "returncode": 0,
+              "stderr": "python3 int_loop ops=2734919 elapsed_s=10.005152 worker=1 sink=3775856581",
+              "stdout": "",
+              "workload_name": "otel_python3_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/ruby",
+                "-e",
+                "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "ruby",
+                "loop": "integer_lcg",
+                "tool": "ruby",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 12.647691701999975,
+              "returncode": 0,
+              "stderr": "ruby int_loop ops=20656728 elapsed_s=10.000041 worker=0 sink=345756521",
+              "stdout": "",
+              "workload_name": "otel_ruby_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/ruby",
+                "-e",
+                "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "ruby",
+                "loop": "integer_lcg",
+                "tool": "ruby",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 12.65565015499999,
+              "returncode": 0,
+              "stderr": "ruby int_loop ops=20165484 elapsed_s=10.000046 worker=1 sink=2362016326",
+              "stdout": "",
+              "workload_name": "otel_ruby_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/nodejs",
+                "-e",
+                "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "nodejs",
+                "loop": "integer_lcg",
+                "tool": "nodejs",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.82159537199999,
+              "returncode": 0,
+              "stderr": "nodejs int_loop ops=21073636 elapsed_s=10.000298 worker=0 sink=3147829824",
+              "stdout": "",
+              "workload_name": "otel_nodejs_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/nodejs",
+                "-e",
+                "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "nodejs",
+                "loop": "integer_lcg",
+                "tool": "nodejs",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.83183786699999,
+              "returncode": 0,
+              "stderr": "nodejs int_loop ops=18357368 elapsed_s=10.000431 worker=1 sink=942518272",
+              "stdout": "",
+              "workload_name": "otel_nodejs_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/perl",
+                "-e",
+                "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "perl",
+                "loop": "integer_lcg",
+                "tool": "perl",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.834597458000019,
+              "returncode": 0,
+              "stderr": "perl int_loop ops=4971707 elapsed_s=10.000002 worker=0 sink=4184522812",
+              "stdout": "",
+              "workload_name": "otel_perl_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/perl",
+                "-e",
+                "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "perl",
+                "loop": "integer_lcg",
+                "tool": "perl",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.834828743000003,
+              "returncode": 0,
+              "stderr": "perl int_loop ops=5992197 elapsed_s=10.031848 worker=1 sink=315451503",
+              "stdout": "",
+              "workload_name": "otel_perl_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/php",
+                "-r",
+                "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                "10",
+                "0"
+              ],
+              "config": {
+                "language": "php",
+                "loop": "integer_lcg",
+                "tool": "php",
+                "worker_index": 0,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.839150397000026,
+              "returncode": 0,
+              "stderr": "php int_loop ops=29402194 elapsed_s=10.000005 worker=0 sink=2219284887",
+              "stdout": "",
+              "workload_name": "otel_php_int_loop_0"
+            },
+            {
+              "command": [
+                "/usr/bin/php",
+                "-r",
+                "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+                "10",
+                "1"
+              ],
+              "config": {
+                "language": "php",
+                "loop": "integer_lcg",
+                "tool": "php",
+                "worker_index": 1,
+                "workers_per_language": 2
+              },
+              "duration_s": 15.839818423999986,
+              "returncode": 0,
+              "stderr": "php int_loop ops=28724917 elapsed_s=10.000002 worker=1 sink=1841118655",
+              "stdout": "",
+              "workload_name": "otel_php_int_loop_1"
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--cpu",
+                "1",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/b1d6cd6e"
+              ],
+              "config": {
+                "stressors": [
+                  "cpu"
+                ],
+                "tool": "stress-ng"
+              },
+              "duration_s": 15.840596853000022,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "stress-ng: info:  [2405] setting to a 10 secs run per stressor\nstress-ng: info:  [2405] dispatching hogs: 1 cpu\nstress-ng: info:  [2405] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [2405] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [2405]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [2405] cpu                2444     10.01      3.25      0.01       244.07         750.35\nstress-ng: info:  [2405] skipped: 0\nstress-ng: info:  [2405] passed: 1: cpu (1)\nstress-ng: info:  [2405] failed: 0\nstress-ng: info:  [2405] metrics untrustworthy: 0\nstress-ng: info:  [2405] successful run completed in 10.04 secs",
+              "workload_name": "otel_stress_ng_cpu"
+            }
+          ],
+          "workload_name": "otel_mixed_workload"
+        }
+      ]
+    }
+  },
+  "ebpf_over_native_per_call": 0.8032006278641819,
+  "per_program_post_over_baseline_geomean": 1.245018947083164,
+  "per_program_ratios": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "prog_id": 105,
+      "name": "native_tracer_e",
+      "type": "perf_event",
+      "min_runs": 4553766,
+      "b_avg_ns": 4065.330929388994,
+      "p_avg_ns": 5061.414033252506,
+      "ratio": 1.245018947083164
+    }
+  ],
+  "pairing": "analysis/corpus_analyze.py name-type, min run count 100, evaluation.md section 5",
+  "pooled_phase_ebpf_over_native_per_call": 0.8032001565573003,
+  "scope": "One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Primary metric uses evaluation section 5 per-program ratios; summed phase time/count is supplemental and depends on program mix. Tail target time is included in its caller. Static helper sites are not dynamic frequencies. Component throughput is separate."
+}
