@@ -39,25 +39,26 @@ configuration:
 
 ## Why some apps scatter and others do not: the retained population
 
-### What `native_tracer_entry` actually does, day by day
+### `native_tracer_e` (the truncated name): two families, not a trend
 
-Per-day median ratio for that program, from the full record (`measure.py` reproduces the pipeline):
+Kernel program names are truncated to 15 characters, so OTel's `native_tracer_entry` appears as
+`native_tracer_e` (the exit program is distinct in practice; no phase holds two `native_tracer_*` programs).
+Grouped by the **post** arm's JITed size, the program has exactly two behaviours:
 
-| period | median | note |
+| post JITed size | post ns/call | ratio |
 |---|---|---|
-| 2026-05-03 … 05-23 | 0.96 – 1.16 | **~1.00**, ordinary scatter |
-| 2026-05-28 … 05-29 | 0.07 | short window, 14x faster |
-| 2026-05-31 … 06-05 | 0.97 – 1.12 | back to ~1.00 |
-| 2026-06-21 … 06-22 | 0.11 | short window, 9x faster |
-| 2026-06-27 … 10-01 | 0.99 – 1.09 | ~1.00 |
-| 2026-11-06 | 1.01 | ~1.00 |
-| 2026-11-07 … 11-13 | 0.08 – 0.12 | short window, 12x faster |
-| **2026-11-14 … 11-20** | **1.01 – 1.08** | **back to ~1.00** |
+| 7508–7773 B | 137–276 ns | **0.04–0.11x** |
+| 2729–4603 B | 3010–4606 ns | 0.94–1.23x |
 
-So the program's **normal value is 1.00**, and the 0.07–0.12 readings are three short windows
-(05-28/29, 06-21/22, 11-07…11-13) rather than the norm. An earlier draft of this file called 11-14 a
-regression; that was wrong — 11-14 returned to the value May and June had. The interesting question is the
-opposite one: what made the program 10x faster in those three windows, and why did it stop.
+The baseline arm is stable at 3809–3815 B and 3200–4000 ns throughout, so the difference is entirely in the
+post arm. Day by day the ratio is 0.07 (05-28/29), 1.0 (05-31, 06-04), 1.0 (09-26), 0.07–0.11 (11-07…11-13,
+11-15), 1.0 (11-14), 0.97 (11-16), 0.94 (11-17), 1.03–1.23 (11-18…11-20).
+
+So **the 15x case is a different compiled body, not a faster execution of the same one**: 7510 B and ~200 ns
+against 3815 B and ~3200 ns. The question worth answering is what produces the 7510-byte body, since it is
+10-18x faster and it last appeared on 11-15. (An earlier draft called 11-14 a regression; that was wrong —
+11-14 is just the non-7510 family. An even earlier draft blamed a low-count second program; that program is
+real but it is not what moves this ratio.)
 
 Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
 `native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
