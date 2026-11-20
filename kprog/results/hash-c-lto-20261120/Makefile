@@ -7,6 +7,7 @@ BUILD := /var/tmp/kprog-tmp/perf/hash-c-lto
 PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock
 .PHONY: generation stock stock-guest native
 generation:
+	install -d $(BUILD) $(OUT)
 	python3 $(ROOT)/kprog/results/hash-c-lto-20261120/production.py $(OUT) generation
 stock:
 	install -d $(OUT)/probe-inputs $(OUT)/generation-inputs
