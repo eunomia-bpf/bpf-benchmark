@@ -78,3 +78,8 @@ sim-publish:
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/image \
 		flock -x /workspaces/.agent-state/kprog-lanes/locks/build-c \
 		install -m 0755 $(SIM_BUILD)/compile-sim-ir $(SIM_COMPILER)
+
+.PHONY: post-b
+post-b:
+	install -d $(RAW)
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/post_b.py $(RAW) $(STOCK)
