@@ -23,3 +23,20 @@ locks/timing after the coordinator's six-app read loop released it.
   ratio above is the accepted-B subset, not the whole app.
 
 Raw: /workspaces/kprog-raw/omp/lto-otel-20261120T0811Z (service archive with the verifier logs).
+## The 5 % is a regression, not a constant (OMP 2026-11-20)
+
+The baseline JIT for `native_tracer_e` is the same program on every date (3815 B, `insn_cnt` 1322, tag
+`26449268576adffc`), so its ns/inv is the control. Grouping the surveys of `ratio-spread-20261120` by date,
+with the JIT-controlled medians:
+
+| date | JIT body B | JIT ns/inv | native body B | native ns/inv | ratio |
+|---|---|---|---|---|---|
+| 11-17 | 3815 | 3208 | 3542 | 3010 | **0.94** |
+| 11-18 | 3815 | 3231 | 3567 | 3322 | 1.03 |
+| 11-19 | 3815 | 3345 | 2729 | 3704 | 1.11 |
+| 11-20 | 3815 | 3455 | 2729 | 4539 | 1.31 |
+
+The native emitter was **faster than the JIT** on 11-17 with a 3542 B body, and it is 31 % slower on 11-20 with a
+2729 B body for the same JIT and the same work. So the deficit is a regression introduced while the emitted body
+was shrinking, not a fixed property of the design, and the 11-17 shape is an existence proof that this program
+can be emitted natively faster than its JIT. That is the more useful target: get back to 0.94, not merely to 1.0.
