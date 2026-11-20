@@ -1,0 +1,55 @@
+{
+  "native_steps": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovPairNative"
+    ],
+    "exit": 0,
+    "seconds": 1.8737759590148926,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-mov-native-sequence/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6782619953155518,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "native_steps_jobs": 232,
+  "public_query_count": 3,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64MovPairNative.update_cursor": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovPairNative.cursor_cursor": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovPairNative.steps": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-native-sequence",
+  "completed_isa_families": 0
+}
