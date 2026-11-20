@@ -23,9 +23,12 @@ __kprog_hash_bytes(const unsigned char *key,unsigned size,unsigned seed) { \
         c-=b; c^=__kprog_hash_rol(b,4); b+=a; \
         key+=12; size-=12; \
     } \
-    for (unsigned i=0;i<size && i<4;++i) a+=(unsigned)key[i]<<(8*i); \
-    for (unsigned i=4;i<size && i<8;++i) b+=(unsigned)key[i]<<(8*(i-4)); \
-    for (unsigned i=8;i<size;++i) c+=(unsigned)key[i]<<(8*(i-8)); \
+    if (size>=4) a+=*(const __kprog_hash_u32 *)key; \
+    else for (unsigned i=0;i<size;++i) a+=(unsigned)key[i]<<(8*i); \
+    if (size>=8) b+=*(const __kprog_hash_u32 *)(key+4); \
+    else for (unsigned i=4;i<size;++i) b+=(unsigned)key[i]<<(8*(i-4)); \
+    if (size==12) c+=*(const __kprog_hash_u32 *)(key+8); \
+    else for (unsigned i=8;i<size;++i) c+=(unsigned)key[i]<<(8*(i-8)); \
     if (size) { \
         c^=b; c-=__kprog_hash_rol(b,14); \
         a^=c; a-=__kprog_hash_rol(c,11); \

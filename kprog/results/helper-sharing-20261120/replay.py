@@ -4,6 +4,7 @@ Only generated inputs are restored to their one canonical output directory;
 the repository, headers and compiler tools remain the existing checkout.
 """
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import argparse
 import importlib.util
 import io
 import json
@@ -16,9 +17,14 @@ import time
 import traceback
 from elftools.elf.elffile import ELFFile
 
-root=Path('/workspaces/repository');out=Path(sys.argv[1]);out.mkdir(parents=True,exist_ok=True)
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('out',type=Path)
+parser.add_argument('--capture',type=Path,default=Path('/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/service.tar.gz'))
+parser.add_argument('--requests',type=int,nargs='+',default=[3,4])
+args=parser.parse_args()
+root=Path('/workspaces/repository');out=args.out;out.mkdir(parents=True,exist_ok=True)
 build=Path('/var/tmp/kprog-tmp/perf/helper-sharing')
-capture=Path('/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/service.tar.gz')
+capture=args.capture
 os.environ['CLANG']=str(root/'kprog/stock-path/bin/clang')
 sys.path[:0]=[str(root/'kprog'),str(root/'kprog/x86/micro-prog')]
 spec=importlib.util.spec_from_file_location('sharing_native',root/'kprog/x86/trusted_specializer.py')
@@ -32,7 +38,7 @@ def sizes(data,symbol):
 jobs=[]
 with tarfile.open(capture) as service:
     records=[json.loads(line) for line in service.extractfile('service/requests/requests.jsonl')]
-    for identity in [3,4]:
+    for identity in args.requests:
         record=next(row for row in records if row['request_id']==identity)
         assert record['b_stock_passed'] and record['execution_path']=='checked-sim-c',record
         with tarfile.open(fileobj=io.BytesIO(service.extractfile('service/requests/'+Path(record['artifact_archive']).name).read())) as capsule:
