@@ -1,7 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, BlockEncoderResult, Code, Decoder, DecoderOptions,
-    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, MemoryOperand, Mnemonic, OpAccess, OpKind,
+    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess, OpKind,
     Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};

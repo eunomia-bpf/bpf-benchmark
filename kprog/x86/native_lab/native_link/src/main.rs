@@ -926,20 +926,6 @@ fn a64_patch_cbz_cbnz(insn: u32, word_index: usize, target_index: usize) -> Resu
     Ok((insn & !(0x7ffff << 5)) | (((disp as u32) & 0x7ffff) << 5))
 }
 
-fn a64_cbz64(rt: u32) -> Result<u32> {
-    if rt >= 32 {
-        bail!("arm64 CBZ register out of range: x{rt}");
-    }
-    Ok(0xb400_0000 | rt)
-}
-
-fn a64_cbnz64(rt: u32) -> Result<u32> {
-    if rt >= 32 {
-        bail!("arm64 CBNZ register out of range: x{rt}");
-    }
-    Ok(0xb500_0000 | rt)
-}
-
 fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
     if rd >= 32 {
         bail!("arm64 ADR target register out of range: x{rd}");
@@ -1038,30 +1024,6 @@ fn a64_blr(reg: u32) -> Result<u32> {
     Ok(0xd63f_0000 | (reg << 5))
 }
 
-fn a64_add_imm64(rd: u32, rn: u32, imm: u32) -> Result<u32> {
-    if rd >= 32 || rn >= 32 {
-        bail!("arm64 ADD imm register out of range: x{rd}, x{rn}");
-    }
-    let (imm12, shift) = if imm <= 0xfff {
-        (imm, 0)
-    } else if imm & 0xfff == 0 && (imm >> 12) <= 0xfff {
-        (imm >> 12, 1)
-    } else {
-        bail!("arm64 ADD imm out of range: {imm}");
-    };
-    Ok(0x9100_0000 | (shift << 22) | (imm12 << 10) | (rn << 5) | rd)
-}
-
-fn a64_add_shift64(rd: u32, rn: u32, rm: u32, shift: u32) -> Result<u32> {
-    if rd >= 32 || rn >= 32 || rm >= 32 {
-        bail!("arm64 ADD shifted register out of range: x{rd}, x{rn}, x{rm}");
-    }
-    if shift > 63 {
-        bail!("arm64 ADD shifted amount out of range: {shift}");
-    }
-    Ok(0x8b00_0000 | (rm << 16) | (shift << 10) | (rn << 5) | rd)
-}
-
 fn a64_ldr_u32(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
     if rt >= 32 || rn >= 32 {
         bail!("arm64 LDR w register out of range: w{rt}, x{rn}");
@@ -1077,64 +1039,6 @@ fn a64_mrs_sp_el0(rt: u32) -> Result<u32> {
         bail!("arm64 MRS SP_EL0 target register out of range: x{rt}");
     }
     Ok(0xd538_4100 | rt)
-}
-
-fn a64_ldr_u64(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
-    if rt >= 32 || rn >= 32 {
-        bail!("arm64 LDR x register out of range: x{rt}, x{rn}");
-    }
-    if byte_off % 8 != 0 || byte_off / 8 > 0xfff {
-        bail!("arm64 LDR x unsigned offset out of range: {byte_off}");
-    }
-    Ok(0xf940_0000 | ((byte_off / 8) << 10) | (rn << 5) | rt)
-}
-
-fn a64_str_u8(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
-    if rt >= 32 || rn >= 32 {
-        bail!("arm64 STR b register out of range: w{rt}, x{rn}");
-    }
-    if byte_off > 0xfff {
-        bail!("arm64 STR b unsigned offset out of range: {byte_off}");
-    }
-    Ok(0x3900_0000 | (byte_off << 10) | (rn << 5) | rt)
-}
-
-fn a64_ldr_u8(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
-    if rt >= 32 || rn >= 32 {
-        bail!("arm64 LDR b register out of range: w{rt}, x{rn}");
-    }
-    if byte_off > 0xfff {
-        bail!("arm64 LDR b unsigned offset out of range: {byte_off}");
-    }
-    Ok(0x3940_0000 | (byte_off << 10) | (rn << 5) | rt)
-}
-
-fn a64_cmp_imm64(rn: u32, imm: u32) -> Result<u32> {
-    if rn >= 32 {
-        bail!("arm64 CMP imm register out of range: x{rn}");
-    }
-    let (imm12, shift) = if imm <= 0xfff {
-        (imm, 0)
-    } else if imm & 0xfff == 0 && (imm >> 12) <= 0xfff {
-        (imm >> 12, 1)
-    } else {
-        bail!("arm64 CMP imm out of range: {imm}");
-    };
-    Ok(0xf100_001f | (shift << 22) | (imm12 << 10) | (rn << 5))
-}
-
-fn a64_cmp_reg64(rn: u32, rm: u32) -> Result<u32> {
-    if rn >= 32 || rm >= 32 {
-        bail!("arm64 CMP reg register out of range: x{rn}, x{rm}");
-    }
-    Ok(0xeb00_001f | (rm << 16) | (rn << 5))
-}
-
-fn a64_madd64(rd: u32, rn: u32, rm: u32, ra: u32) -> Result<u32> {
-    if rd >= 32 || rn >= 32 || rm >= 32 || ra >= 32 {
-        bail!("arm64 MADD register out of range: x{rd}, x{rn}, x{rm}, x{ra}");
-    }
-    Ok(0x9b00_0000 | (rm << 16) | (ra << 10) | (rn << 5) | rd)
 }
 
 fn a64_movz(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
@@ -1235,106 +1139,6 @@ fn build_arm64_get_smp_processor_id_inline(
         a64_mrs_sp_el0(X16)?,
         a64_ldr_u32(X0, X16, cpu_offset)?,
     ]))
-}
-
-fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
-    const X0: u32 = 0;
-    const X1: u32 = 1;
-    const X8: u32 = 8;
-    const X9: u32 = 9;
-    const X10: u32 = 10;
-    const A64_MOV_X0_XZR: u32 = 0xaa1f_03e0;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
-
-    if spec.max_entries == 0 {
-        bail!("arm64 array lookup max_entries must be non-zero");
-    }
-    if spec.elem_size == 0 {
-        bail!("arm64 array lookup elem_size must be non-zero");
-    }
-
-    let mut words = Vec::new();
-    words.push(a64_add_imm64(X8, X0, spec.value_offset)?);
-    words.push(a64_ldr_u32(X9, X1, 0)?);
-    if let Ok(cmp) = a64_cmp_imm64(X9, spec.max_entries) {
-        words.push(cmp);
-    } else {
-        words.extend(arm64_mov_imm64_sequence(X10, u64::from(spec.max_entries))?);
-        words.push(a64_cmp_reg64(X9, X10)?);
-    }
-
-    let null_branch = words.len();
-    words.push(0);
-    if spec.elem_size.is_power_of_two() {
-        let shift = spec.elem_size.trailing_zeros();
-        words.push(a64_add_shift64(X0, X8, X9, shift)?);
-    } else {
-        words.extend(arm64_mov_imm64_sequence(X10, u64::from(spec.elem_size))?);
-        words.push(a64_madd64(X0, X9, X10, X8)?);
-    }
-
-    if matches!(spec.kind, LookupKind::PerCpuArray) {
-        words.push(a64_ldr_u64(X0, X0, 0)?);
-        words.push(A64_MRS_X10_TPIDR_EL1);
-        words.push(a64_add_shift64(X0, X0, X10, 0)?);
-    }
-
-    let done_branch = words.len();
-    words.push(0);
-    let null_target = words.len();
-    words.push(A64_MOV_X0_XZR);
-    let done_target = words.len();
-
-    words[null_branch] = a64_patch_b_cond(0x5400_0002, null_branch, null_target)?;
-    words[done_branch] = a64_patch_b(done_branch, done_target)?;
-    Ok(words)
-}
-
-fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
-    const X0: u32 = 0;
-    const X8: u32 = 8;
-    const X10: u32 = 10;
-    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
-
-    if matches!(
-        spec.kind,
-        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray
-    ) {
-        return Ok(Vec::new());
-    }
-
-    let mut words = Vec::new();
-    let null_branch = words.len();
-    words.push(a64_cbz64(X0)?);
-    match spec.kind {
-        LookupKind::Hash => {
-            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-        }
-        LookupKind::HashOfMaps => {
-            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-            words.push(a64_ldr_u64(X0, X0, 0)?);
-        }
-        LookupKind::LruHash => {
-            words.push(a64_ldr_u8(X8, X0, spec.value_offset)?);
-            let skip_store = words.len();
-            words.push(a64_cbnz64(X8)?);
-            words.extend(arm64_mov_imm64_sequence(X8, 1)?);
-            words.push(a64_str_u8(X8, X0, spec.value_offset)?);
-            let after_store = words.len();
-            words[skip_store] = a64_patch_cbz_cbnz(words[skip_store], skip_store, after_store)?;
-            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-        }
-        LookupKind::PerCpuHash => {
-            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
-            words.push(a64_ldr_u64(X0, X0, 0)?);
-            words.push(A64_MRS_X10_TPIDR_EL1);
-            words.push(a64_add_shift64(X0, X0, X10, 0)?);
-        }
-        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray => {}
-    }
-    let done = words.len();
-    words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, done)?;
-    Ok(words)
 }
 
 fn append_u32(blob: &mut Vec<u8>, word: u32) {
@@ -1704,28 +1508,13 @@ fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
     }
 }
 
-fn arm64_select_map_call_site(
-    sites_len: usize,
-    ordinal: usize,
-    map_name: Option<&String>,
-    seen_by_map: &mut HashMap<String, usize>,
-) -> Option<usize> {
-    if ordinal < sites_len {
-        if let Some(name) = map_name {
-            seen_by_map.entry(name.clone()).or_insert(ordinal);
-        }
-        return Some(ordinal);
-    }
-    map_name.and_then(|name| seen_by_map.get(name).copied())
-}
-
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    lookup_sites: &[LookupSiteSpec],
+    _lookup_sites: &[LookupSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
@@ -1736,12 +1525,10 @@ fn rewrite_arm64(
     let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
-    let mut lookup_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
-    let mut lookup_site_by_map: HashMap<String, usize> = HashMap::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -1853,71 +1640,17 @@ fn rewrite_arm64(
                                 continue;
                             }
                         }
-                        let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
-                        let mut helper_addr_from_site = false;
-                        let mut lookup_postprocess = None;
-                        if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
-                            let ordinal = lookup_call_counter;
-                            let map_name = reg_map_names[0].as_ref();
-                            let site_index = arm64_select_map_call_site(
-                                lookup_sites.len(),
-                                ordinal,
-                                map_name,
-                                &mut lookup_site_by_map,
-                            )
-                            .ok_or_else(|| {
-                                anyhow!(
-                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing link-plan lookup_sites metadata",
-                                    sym.name
-                                )
-                            })?;
-                            let spec = &lookup_sites[site_index];
-                            lookup_call_counter += 1;
-                            match spec.kind {
-                                LookupKind::Array | LookupKind::PerCpuArray => {
-                                    for word in build_arm64_array_lookup(spec)? {
-                                        append_u32(&mut blob, word);
-                                    }
-                                    arm64_call_clobber_map_regs(&mut reg_map_names);
-                                    continue;
-                                }
-                                LookupKind::Call
-                                | LookupKind::Lpm12
-                                | LookupKind::Hash
-                                | LookupKind::LruHash
-                                | LookupKind::PerCpuHash
-                                | LookupKind::HashOfMaps => {
-                                    helper_addr = Some(resolve_lookup_site_target(
-                                        spec,
-                                        &format!("arm64 lookup-site {ordinal} ({:?})", spec.kind),
-                                    )?);
-                                    helper_addr_from_site = true;
-                                    lookup_postprocess = Some(spec.clone());
-                                }
-                            }
-                        }
-                        let helper_addr = if helper_addr_from_site {
-                            helper_addr.ok_or_else(|| {
-                                anyhow!(
-                                    "arm64 CALL26 in {} at byte offset {off:#x} has empty site target for {}",
-                                    sym.name,
-                                    reloc.target_name
-                                )
-                            })?
-                        } else {
-                            resolve_helper_target(
-                                &reloc.target_name,
-                                helper_addrs,
-                                &format!("arm64 helper call {}", reloc.target_name),
-                            )?
-                        };
+                        // Map lookups call the kernel helper, which dispatches on the map's ops: arm64 has
+                        // no native provenance for the map in x0, and matching link-plan sites by call order
+                        // gave Tetragon a wrong array shape (2026-11-20 QEMU check, oops in
+                        // event_wake_up_new_task).
+                        let helper_addr = resolve_helper_target(
+                            &reloc.target_name,
+                            helper_addrs,
+                            &format!("arm64 helper call {}", reloc.target_name),
+                        )?;
                         for word in arm64_helper_call_sequence(helper_addr)? {
                             append_u32(&mut blob, word);
-                        }
-                        if let Some(spec) = lookup_postprocess {
-                            for word in build_arm64_lookup_call_postprocess(&spec)? {
-                                append_u32(&mut blob, word);
-                            }
                         }
                         arm64_call_clobber_map_regs(&mut reg_map_names);
                         continue;
