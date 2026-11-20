@@ -1,0 +1,13 @@
+# Actual setup storage and register transport
+
+`Arm64ProgramEntryBodyView.entry_setup_represents` starts at the actual linked fixture call, retains all 98 provider traces and appends the 27 silent SP/NZCV setup transitions to reach the original first MOV_IMM statement. The context fields come from original caller-memory loads at the imported offsets 8/32/68; they are independent of provider outputs. The theorem derives the post-setup register relation and actual freeable/cache resources.
+
+The setup result is bound to the same previously allocated SP and flag locals by lookup uniqueness. Its derived `Result.storage` preserves the original tables, cells, SP/flag/vector pointer bindings and writable permissions, replacing SP's readback by -32. All GPR and vector observations, including failed/undefined reads, are preserved at the original reader frontier. The signed SP and masked flag reads follow their real borrowed pointers.
+
+`nativeSetup` uses LNSym's public SP and PState writes to bind the resulting native input view. Native GPRs, vectors, other register observations, memory, program, access/event inputs and extra flag bits are preserved. It does not assert execution of a native setup instruction. Native/context ABI, physical memory/provenance admission, actual handler instructions and final return remain separate obligations.
+
+The existing vector pointer-walk lemma is made public and reused; its implementation is unchanged. The whole-entry composition uses the existing actual/canonical allocation correspondence explicitly rather than normalizing the large allocators or asserting equal composite environments. The one-bit cast proof uses the upstream BitVec mask/append identities. Original proof caps are retained.
+
+Focused 202 jobs and 16 public type/axiom queries pass on CPU17, one worker and 32 GiB address space. Imported execution axioms remain visible in validation.json; no new axiom is introduced. The raw record retains unsuccessful parser/normalization attempts. Whole proof-library confirmation is pending.
+
+Next admit the actual first MOV_IMM with SRC=SP32 and unrestricted u32 mark, followed by MOVK with unrestricted u32 priority. The first call's real poststate must feed the second. M5/M6, other families and O1/O2/O4 recount remain open; completed ISA-family count is 0.

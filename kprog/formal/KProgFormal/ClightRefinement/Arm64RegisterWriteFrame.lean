@@ -59,7 +59,7 @@ theorem Result.flags {m before after : CC.Mem} {entry : HeaderLocal m}
 
 /-- Reuse the exported-layout vector addresses and initialized pointer slots.
 The final raw loads retain failures and undefined values. -/
-private theorem storage_vector {m memory : CC.Mem} {entry : HeaderLocal m}
+theorem storage_vector {m memory : CC.Mem} {entry : HeaderLocal m}
     (storage : Storage m memory entry) (j : Fin 32) :
     Arm64EntryMemory.vector memory.nextblock memory (.Vptr entry.block 0) j =
       (do let lo ← CC.Mem.load .Mint64 memory storage.vectors.block
