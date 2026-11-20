@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF touched BCC shared-helper check (2026-11-20T05:16:16Z): own PID 673631, raw /workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z, existing checked-corpus on CPUs 20-23 /4vCPU /32G /48GiB AS /nice19 /imageSH. All LTO and uniform helper/native flags on; installed tools/P/image unchanged. Native HASH source changes touch BCC too; retain actual coverage, helper engagement, full reachable code, per-program counters and complete stress-ng workload output with 51fbb0ec9 receipt. No runtime result yet.
+- [x] PERF touched BCC shared-helper check (2026-11-20T05:22:10Z): PID673631 exit0/appOK,25native installs/22checked/3direct,14 HASH static sites. eBPF129.332→native136.793ns/call (0.945x), regression retained; sys_exit80.848→98.025ns/call dominates added time, native full proof430B/root232B/HASH-key4 worker198B. Actual mixed stress-ng rates and raw workload table retained in lpm-c-lto-20261120/shared-bcc-result.json/evidence.tar.gz. All LTO on; tools/P/image unchanged. Next inspect native HASH tail word loads; no target achieved.
 
 - [x] PERF touched Cilium shared-helper check (2026-11-20T05:13:57Z): PID 670115 exit0/appOK,12/12 checked-sim-c installs,3 LPM/3 HASH static sites. eBPF981.264→post858.726 ns/call (1.143x); forward406886→431568 pps/reverse406885→431555 pps. Hottest cil_from_container stays eBPF1093B in both arms; shim reports source/loaded constant mismatch at instruction32. No isolated helper/native speed claim. Results lpm-c-lto-20261120/shared-cilium-result.json/evidence.tar.gz retain mixed path and all counters. All LTO on; tools/P/image unchanged. Producer matching facts handed to coordinator; hard performance targets remain open.
 
