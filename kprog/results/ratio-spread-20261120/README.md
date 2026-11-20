@@ -48,6 +48,10 @@ configuration:
 | OTel | 1.03, 1.04, 1.05 | 1 | — |
 | Tetragon | 0.79, 1.75 | 15 | — |
 
+Cross-checked against four independent runs the coordinator took later the same day (its own six-app read
+loop, not part of this record's selection): BCC 0.964 at call ratio 1.01, Cilium 1.023 at 0.98, Tetragon
+1.312 at 0.54 (its post arm did half the calls, so not comparable). The first two agree with the table.
+
 Read with both populations in mind: Tracee's 0.57–0.59 come from the runs whose post arm executed 1.65–1.71x
 the calls, so its honest current figure is nearer the 0.77 of the calibrated run; Cilium and Katran retain
 one program, so their rows are single measurements. What the table does show unambiguously is that **no app
