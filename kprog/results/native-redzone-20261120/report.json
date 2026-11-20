@@ -1,0 +1,186 @@
+{
+  "correction": "91a703ada",
+  "raw": "/workspaces/kprog-raw/perf/native-redzone-20261120/candidate-20261120T042712Z",
+  "before": {
+    "stage": "before",
+    "native_entry_bytes": 210,
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-unwind-tables",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.linked.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.native.o"
+    ],
+    "source_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "b5ddb4bc7a639767d9b216d9e7652f3ce2da5c254d0af50fd3eb0a703d19b554",
+      "ir_sha256": "dbb45b0696024f5a575f047564dcaf485696b1715c76cd8e2ded3a336fb29c20"
+    },
+    "scope": "Actual compiler API emitted native component stack code; no application/interrupt execution or speed claim"
+  },
+  "after": {
+    "stage": "after",
+    "native_entry_bytes": 234,
+    "command": [
+      "/usr/lib/llvm-18/bin/clang",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mllvm",
+      "-force-attribute=noredzone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-unwind-tables",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.linked.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.native.o"
+    ],
+    "source_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+      "source_sha256": "b5ddb4bc7a639767d9b216d9e7652f3ce2da5c254d0af50fd3eb0a703d19b554",
+      "ir_sha256": "dbb45b0696024f5a575f047564dcaf485696b1715c76cd8e2ded3a336fb29c20"
+    },
+    "scope": "Actual compiler API emitted native component stack code; no application/interrupt execution or speed claim",
+    "emitted_function_attributes": [
+      "attributes #0 = { noredzone nounwind \"frame-pointer\"=\"none\" \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" }",
+      "attributes #1 = { mustprogress nocallback nofree noredzone nosync nounwind speculatable willreturn memory(none) }",
+      "attributes #2 = { mustprogress nocallback nofree noredzone nosync nounwind willreturn memory(argmem: readwrite) }",
+      "attributes #3 = { alwaysinline nofree norecurse noredzone nounwind uwtable \"min-legal-vector-width\"=\"0\" \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"x86-64\" \"target-features\"=\"+cmov,+cx8,+fxsr,-3dnow,-3dnowa,-aes,-avx,-avx10.1-256,-avx10.1-512,-avx2,-avx512bf16,-avx512bitalg,-avx512bw,-avx512cd,-avx512dq,-avx512er,-avx512f,-avx512fp16,-avx512ifma,-avx512pf,-avx512vbmi,-avx512vbmi2,-avx512vl,-avx512vnni,-avx512vp2intersect,-avx512vpopcntdq,-avxifma,-avxneconvert,-avxvnni,-avxvnniint16,-avxvnniint8,-f16c,-fma,-fma4,-gfni,-kl,-mmx,-pclmul,-sha,-sha512,-sm3,-sm4,-sse,-sse2,-sse3,-sse4.1,-sse4.2,-sse4a,-ssse3,-vaes,-vpclmulqdq,-widekl,-x87,-xop\" \"tune-cpu\"=\"generic\" }",
+      "attributes #4 = { nounwind }"
+    ]
+  },
+  "same_cached_frontend": true,
+  "make_exit": 0,
+  "lpm": {
+    "fixture": [
+      {
+        "name": "known",
+        "selected": [
+          "__kprog_array_lookup"
+        ],
+        "execution": "112917 cases, 112917 generic calls"
+      },
+      {
+        "name": "unknown",
+        "selected": [],
+        "execution": "692913 cases, 1385826 generic calls"
+      }
+    ],
+    "stock": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/stock-20261120T022137Z",
+    "stock_verdict": {
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 22
+    },
+    "production_helpers": [
+      "__kprog_array_lookup"
+    ],
+    "production_execution": "18819 actual simulator LPM cases",
+    "native": {
+      "native_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.native.o",
+      "native_proof_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/checked-simulator.proof.o",
+      "simulator_object": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.o",
+      "simulator_program": "trusted_x86_x86_sim_xdp",
+      "simulator_source": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.c",
+      "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.i",
+      "context_kind": "raw",
+      "symbol": "trusted_x86_x86_sim_xdp",
+      "native_sha256": "f9ba263a4cfe2f0adbda0f464d36cd30f9cea3ceada8d4cacdd86d502eeb4ef8",
+      "maps": [
+        {
+          "name": "map_a",
+          "map_type": 11,
+          "key_size": 16,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 1,
+          "value_offset": null
+        },
+        {
+          "name": "map_b",
+          "map_type": 11,
+          "key_size": 16,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 1,
+          "value_offset": null
+        }
+      ],
+      "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "simulator_frontend": {
+        "path": "/var/tmp/kprog-tmp/perf/lpm-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+        "source_sha256": "b5ddb4bc7a639767d9b216d9e7652f3ce2da5c254d0af50fd3eb0a703d19b554",
+        "ir_sha256": "dbb45b0696024f5a575f047564dcaf485696b1715c76cd8e2ded3a336fb29c20"
+      }
+    },
+    "scope": "Stock acceptance then actual native compiler API and host C-provider semantics; application installation and timing remain pending."
+  },
+  "hash": {
+    "native": {
+      "native_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/checked-simulator.native.o",
+      "native_proof_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/checked-simulator.proof.o",
+      "simulator_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.o",
+      "simulator_program": "trusted_x86_x86_sim_xdp",
+      "simulator_source": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.c",
+      "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.i",
+      "context_kind": "raw",
+      "symbol": "trusted_x86_x86_sim_xdp",
+      "native_sha256": "8bebd668e8316f6402c413e56e32bd9d9f2a2158b4670e68ff47ee51942774c0",
+      "maps": [
+        {
+          "name": "map_a",
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "simulator_frontend": {
+        "path": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+        "source_sha256": "bd74fe3b9bf4ff6d216f55ee0a95fbe4135807aca091960441e18e9e152a6d47",
+        "ir_sha256": "b5a452020cf7252edfdb4a4d152cde2b4113364058d019fec54522d82ff141ee"
+      }
+    },
+    "layout": {
+      "buckets": 448,
+      "count": 824,
+      "seed": 832,
+      "stride": 16,
+      "head": 0,
+      "hash_node": 0,
+      "next": 0,
+      "hash_offset": 40,
+      "key_offset": 48
+    },
+    "execution": "112 actual compiler-API hash cases",
+    "scope": "Actual stock accepted B then installed native compiler API/host execution; no app/performance claim"
+  },
+  "array_cases": 1008,
+  "array_generic_controls": 2,
+  "probe_cases": 99,
+  "probe_proof_and_kernel_links": 8,
+  "emitted_code": "LPM entry changes rsp-24/rsp-16 unallocated stores to sub rsp,24 with stores at rsp/rsp+8 and matching epilogues",
+  "policy": "Existing Clang O3 -mllvm -force-attribute=noredzone, uniform for all checked native program/helper functions, including cached BPF frontend IR",
+  "scope": "Native program compile option and emitted ABI, host semantics/compatibility. No compiler/tool source/binary change, extra optimizer stage, B rewrite, application speed or asynchronous interrupt experiment.",
+  "proof_entry_bytes": 229
+}
