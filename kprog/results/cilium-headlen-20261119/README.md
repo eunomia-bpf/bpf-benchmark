@@ -1,5 +1,15 @@
 # Cilium head-length bounds
 
+OMP's follow-on correction, received 2026-11-20T01:09:51Z: the earliest fix
+for `34af4b3a` is `6b0204beb`, which lets the freshness walk cross exact TC
+control-buffer stores at offsets 48-55 using the six-operand asm template.
+That build already emits the two packet-end reads and the 34-byte bound;
+`b1399d137` later broadens the walk. A placement change did not fix this
+program. The old false-edge account is superseded. The class remains closed
+in `44058cb03`; confirmation `head-20261120T001825Z` installs all 12 requests,
+including all three instances of this program. No new run accompanies this
+attribution correction.
+
 The live confirmation finished2026-11-19T23:54:12Z, makeexit0:
 `corpus/results/x86_kvm_corpus_20261119_235149_569391` reports appok.
 All12 captured requests have stock verification phase/status0 receipts and

@@ -320,3 +320,43 @@ Your task is item 1 of the multi-day list: native code faster per call (operator
 Image 8f6ff5891 check, per call native/eBPF: OTel 0.930x, BCC 1.012x, Cilium 1.034x, Katran 1.089x, Tetragon 1.241x, Tracee 2.096x.
 Next: profile the hottest program of OTel, BCC, Katran and Cilium in both arms in one guest run, split each call into program body, each helper and map work, then write the largest helper costs as macros or inline functions in vendor/bpf/native-helpers.h (operator 11-19: "helper 能用宏或者 function inline 都可以. 但是不要在链接器里面手写太多, 链接器要简单"). Also check which volatile accesses on the sim side faithful(I,P) needs; remove the rest.
 The coordinator's timing holds CPUs 0-7 until about 05:30; run your guests on CPUs 16-23, heavy builds under nice 19. Notices: three short lines with spaces (what changed, the number, next).
+
+## OMP attribution correction, received 2026-11-20T01:09:51Z (verbatim)
+
+## OMP 2026-11-20T00:32Z — your own follow-on commit closed the last Cilium residual; one correction to my earlier message
+
+`34af4b3a` is fixed, and by `6b0204beb`, not by a placement change. Evidence, same program and same request
+(`request_id` 1, `source_prog_id` 242) from two captures:
+
+| | B emitted by the 23:06 base (`852c2bfe3`) | B emitted at HEAD (`6b0204beb`+) |
+|---|---|---|
+| `packet_end` reads in the emitted IR | **0** | 2 |
+| `%packet_bound = add i64 %packet_data, 34` | absent | present |
+| `icmp ugt` against `packet_end` | absent | present |
+| host verifier | `R8 offset is outside of the packet` (`off=30 size=4`) | clean |
+
+So on the 23:06 base the predicate was **never lowered** for this body; the read stayed an unguarded
+`*(u32 *)(r8 + 0x1e)`. `skb_cb_store()` (exact TC control-buffer stores, offsets 48-55, six-operand asm
+template) is what lets the freshness walk cross those stores and reach the read. I verified `6b0204beb`'s own
+build already emits both probes, so `b1399d137` widened the same walk but is not what fixed this program.
+
+Correction to what I sent you earlier (my 01:55Z note): my "the read sits on the fall-through of `w2 < 0x22`"
+story was wrong. In both Bs the bound is at 48-51 and instruction 51 (`if r2 <= r1 goto LBB0_4`) jumps *past*
+`LBB0_2` to 115; `LBB0_2` runs 52..105 and leaves through the call at 106 to `LBB0_12`; the read at 126 is in
+`LBB0_4`, reached from 51 and from the `LBB0_13` continuation at 114. The placement never differed, which is
+why it could not explain one base rejecting and the other accepting.
+
+Measured after your commits, on the current tree:
+
+- pass over the 41 archived packet-class inputs: 334 predicates, same 11 lowering nothing (their capsules hold
+  bodies with no head-length comparison — not a regression)
+- store class: 6/6 canonicalized
+- live capture (`7ca1aaec6`): 14/14 install, 0 rejections; replay 41/41
+- my confirmation capture `head-20261120T001825Z`: 12/12 install, zero rejections, `34af4b3a` 3/3
+- production run `x86_kvm_corpus_20261119_234045_456298`: 28/28 installed via checked-sim-c, 0 direct-native
+
+Nothing is requested of you for this class; it is closed in todo.md (commit 44058cb03). If your own reading
+of the entry sets contradicts the table above, say so and I will re-derive it. Two separate defects stay open
+and are not yours unless you want them: request 64's `NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`
+(`kprog/libnativeloader/src/native_loader.cpp:4126-4127`), and the 3 emitter relative-table refusals at
+`stage == 'generation'`.
