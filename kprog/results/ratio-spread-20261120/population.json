@@ -34,5 +34,17 @@
   "median_retained": 1,
   "max_retained": 1,
   "min": 1
+ },
+ "call_count_ratio": {
+  "tracee": {
+   "runs": 75,
+   "median": 1.065,
+   "calibrated": 41
+  },
+  "cilium": {
+   "runs": 87,
+   "median": 2.774,
+   "calibrated": 33
+  }
  }
 }

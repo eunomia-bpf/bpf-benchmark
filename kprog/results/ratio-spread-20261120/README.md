@@ -37,6 +37,24 @@ configuration:
 4. **No app's stable cluster reaches the 0.80 target yet.** Cilium's November clusters do (0.394, 0.439,
    0.472 on 11-10/11-16/11-17), which is the strongest positive evidence in the record.
 
+## The two arms must execute comparable work
+
+A per-call ratio is only meaningful when both arms execute the same workload. Comparing `sum(run_cnt_delta)`
+between the phases exposes where they do not:
+
+| app | runs | post/baseline call count (median) | runs within 0.90–1.15 |
+|---|---|---|---|
+| BCC | 91 | 1.01 | 82 |
+| Katran | 101 | 1.02 | 92 |
+| OTel | 127 | 1.00 | 108 |
+| **Tracee** | 71 | 1.04 (quartiles 0.96–1.25) | 38 |
+| **Cilium** | 87 | **2.77** | 33 |
+
+Cilium's post arm executes **2.8x** the baseline arm's calls in the median run, and the inflation is not a
+property of short runs: three 180 s × 3-sample runs with 53/53 programs still read above 1.5x. Any Cilium
+per-call figure from a run with unequal counts is therefore suspect, and Cilium is the app where the
+calibration check matters most. `population.json` holds the counts.
+
 ## Why some apps scatter and others do not: the retained population
 
 ### `native_tracer_e` (the truncated name): two families, not a trend
