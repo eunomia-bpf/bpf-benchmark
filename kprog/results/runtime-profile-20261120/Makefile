@@ -65,3 +65,7 @@ archive:
 .PHONY: source-generation
 source-generation:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/source-generation.py $(OUT)
+
+.PHONY: source-generation-archive
+source-generation-archive:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/source-generation-archive.py $(OUT)
