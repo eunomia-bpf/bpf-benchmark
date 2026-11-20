@@ -8,6 +8,19 @@ namespace KProgFormal.ClightRefinement.Arm64MovKeep
 open Arm64NumericProgram
 open Arm64MovImmediate
 
+theorem scalar_word_temp_data (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block)
+    (i : Fin 31) (imm : BitVec 64) (column : Fin 4) (narrow : Bool) :
+    let le := Dispatch.Keep.temps
+      (Dispatch.Keep.initialTemps (operandsWord unused entry (BitVec.ofNat 64 i.val) imm column) narrow) narrow
+    le.get Arm64Program._entry = some (.Vptr entry 0) ∧
+    le.get Arm64Program._dst = some (.Vlong (BitVec.ofNat 64 i.val)) ∧
+    le.get Arm64Program._imm = some (.Vlong imm) ∧
+    le.get Arm64Program._aux = some (.Vint (aux column)) ∧
+    le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow) := by
+  cases narrow <;> simp +decide only [Dispatch.Keep.temps, Dispatch.Keep.initialTemps,
+    operandsWord, Arm64Nop.resultEnv, Dispatch.flags, Arm64Width.result, Arm64Width.argument,
+    Arm64RegisterWrite.width, CC.PTree.gss, CC.PTree.gso]
+
 theorem scalar_temp_data (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block)
     (i : Fin 31) (imm : BitVec 16) (column : Fin 4) (narrow : Bool) :
     let le := Dispatch.Keep.temps
@@ -16,10 +29,8 @@ theorem scalar_temp_data (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block)
     le.get Arm64Program._dst = some (.Vlong (BitVec.ofNat 64 i.val)) ∧
     le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)) ∧
     le.get Arm64Program._aux = some (.Vint (aux column)) ∧
-    le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow) := by
-  cases narrow <;> simp +decide only [Dispatch.Keep.temps, Dispatch.Keep.initialTemps,
-    operands, Arm64Nop.resultEnv, Dispatch.flags, Arm64Width.result, Arm64Width.argument,
-    Arm64RegisterWrite.width, CC.PTree.gss, CC.PTree.gso]
+    le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow) :=
+  scalar_word_temp_data unused entry i (imm.setWidth 64) column narrow
 
 /-- The actual function bindings and the layout facts used by a scalar call.
 No equality of complete global or composite environments is required. -/
@@ -48,6 +59,69 @@ def numeric_bindings : CallBindings ge where
 
 /-- Execute the entire actual ordinary scalar MOVK call, deriving the read
 from its actual pre-call word/tag loads and deriving both stores from rights. -/
+theorem call_scalar_word_returns_bound (world : CC.CGenv) (binding : CallBindings world)
+    {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m before entry)
+    (unused : Arm64Nop.IgnoredArguments) (addresses : Arm64Registers.PointerOrigins)
+    (i : Fin 31) (bits : BitVec 64) (imm : BitVec 64) (column : Fin 4) (narrow : Bool)
+    (word : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock i) 0 = some (.Vlong bits))
+    (tag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock i) 0 = some (.Vint 0)) :
+    ∃ written after,
+      Arm64RegisterWrite.Result (storage.frame (Arm64Nop.entry_frame world before))
+        i (mergeWord bits imm column) narrow written ∧
+      InternalRun world 203
+        (.Callstate (.Internal Arm64Nop.handler)
+          (Dispatch.Keep.arguments (operandsWord unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow) .Kstop before)
+        (.Returnstate .Vundef .Kstop after) ∧
+      CC.Mem.freeList written (CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1) = some after ∧
+      FrameBelow before.nextblock written after ∧
+      after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
+      (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
+        ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+  let carried := storage.frame (Arm64Nop.entry_frame world before)
+  let le := Dispatch.Keep.temps
+    (Dispatch.Keep.initialTemps (operandsWord unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow) narrow
+  have allocatedWord : CC.Mem.load .Mint64 (Arm64Nop.allocation world before).2
+      ((carried.tables false).cellBlock i) 0 = some (.Vlong bits) :=
+    ((Arm64Nop.entry_frame world before).load .Mint64 _ 0
+      (Arm64ProducerEntryView.load_live .Mint64 before _ 0 _ word)).trans word
+  have allocatedTag : CC.Mem.load .Mint8unsigned (Arm64Nop.allocation world before).2
+      ((carried.tables true).cellBlock i) 0 = some (.Vint 0) :=
+    ((Arm64Nop.entry_frame world before).load .Mint8unsigned _ 0
+      (Arm64ProducerEntryView.load_live .Mint8unsigned before _ 0 _ tag)).trans tag
+  have inputs := scalar_word_temp_data unused entry.block i imm column narrow
+  have names := Arm64MovImmediate.unshadowed_bound world before
+  have branch := scalar_writer_call_word_bound world binding.readerBlock binding.writerBlock
+    binding.reader binding.writer binding.readerLayout carried addresses (Arm64Nop.allocation world before).1 le
+    i bits imm column narrow names.1 names.2 inputs.1 inputs.2.1 inputs.2.2.1
+    inputs.2.2.2.1 inputs.2.2.2.2 allocatedWord allocatedTag
+  obtain ⟨written, result⟩ := Arm64RegisterWrite.write carried i (mergeWord bits imm column) narrow
+  obtain ⟨middle, wordStore, tagStore⟩ := result.stores
+  have write := Arm64RegisterWrite.execute_stores_layout world binding.writerLayout
+    (.Kcall none Arm64Nop.handler (Arm64Nop.allocation world before).1
+      (writerTempsWord le bits imm column) Dispatch.continuation) rfl
+    m (Arm64Nop.allocation world before).2 middle written entry carried i
+      (mergeWord bits imm column) narrow wordStore tagStore
+  have finish := Suffix.after_writer_bound world (Arm64Nop.allocation world before).1
+    (writerTempsWord le bits imm column) written
+  have owned : ∀ id v, (Arm64Nop.allocation world before).1.get id = some v →
+      CC.Mem.rangePerm written v.1 0 (CC.sizeof world.genv_cenv v.2) .Cur .Freeable = true := by
+    intro id v binding
+    have live := ((allocated_local_storage (Arm64MovImmediate.allocated_bound world before)).1 id v binding).2.2
+    exact (CC.Mem.rangePerm_congr (m1 := written) (m2 := (Arm64Nop.allocation world before).2)
+      (fun offset => by simp only [CC.Mem.perm, result.access])).trans live
+  obtain ⟨after, freed, frame, contents, next, released⟩ :=
+    deallocate_live_locals (Arm64MovImmediate.allocated_bound world before) owned
+  have dispatch := (Dispatch.Keep.call_dispatch_bound world binding.widthBlock binding.width before
+    (operandsWord unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow).1
+  have leave : InternalRun world 1
+      (.State Arm64Nop.handler .Sskip .Kstop (Arm64Nop.allocation world before).1
+        (writerTempsWord le bits imm column) written) (.Returnstate .Vundef .Kstop after) :=
+    .step trivial (.skip_call _ _ _ _ _ _ rfl freed) (.refl _)
+  exact ⟨written, after, result, (((dispatch.trans branch).trans write).trans finish).trans leave,
+    freed, frame, contents, next, released⟩
+
 theorem call_scalar_returns_bound (world : CC.CGenv) (binding : CallBindings world)
     {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     (storage : Arm64ProducerRegisterStorage.Storage m before entry)
@@ -67,49 +141,9 @@ theorem call_scalar_returns_bound (world : CC.CGenv) (binding : CallBindings wor
       after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
-          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
-  let carried := storage.frame (Arm64Nop.entry_frame world before)
-  let le := Dispatch.Keep.temps
-    (Dispatch.Keep.initialTemps (operands unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow) narrow
-  have allocatedWord : CC.Mem.load .Mint64 (Arm64Nop.allocation world before).2
-      ((carried.tables false).cellBlock i) 0 = some (.Vlong bits) :=
-    ((Arm64Nop.entry_frame world before).load .Mint64 _ 0
-      (Arm64ProducerEntryView.load_live .Mint64 before _ 0 _ word)).trans word
-  have allocatedTag : CC.Mem.load .Mint8unsigned (Arm64Nop.allocation world before).2
-      ((carried.tables true).cellBlock i) 0 = some (.Vint 0) :=
-    ((Arm64Nop.entry_frame world before).load .Mint8unsigned _ 0
-      (Arm64ProducerEntryView.load_live .Mint8unsigned before _ 0 _ tag)).trans tag
-  have inputs := scalar_temp_data unused entry.block i imm column narrow
-  have names := Arm64MovImmediate.unshadowed_bound world before
-  have branch := scalar_writer_call_bound world binding.readerBlock binding.writerBlock
-    binding.reader binding.writer binding.readerLayout carried addresses (Arm64Nop.allocation world before).1 le
-    i bits imm column narrow names.1 names.2 inputs.1 inputs.2.1 inputs.2.2.1
-    inputs.2.2.2.1 inputs.2.2.2.2 allocatedWord allocatedTag
-  obtain ⟨written, result⟩ := Arm64RegisterWrite.write carried i (merge bits imm column) narrow
-  obtain ⟨middle, wordStore, tagStore⟩ := result.stores
-  have write := Arm64RegisterWrite.execute_stores_layout world binding.writerLayout
-    (.Kcall none Arm64Nop.handler (Arm64Nop.allocation world before).1
-      (writerTemps le bits imm column) Dispatch.continuation) rfl
-    m (Arm64Nop.allocation world before).2 middle written entry carried i
-      (merge bits imm column) narrow wordStore tagStore
-  have finish := Suffix.after_writer_bound world (Arm64Nop.allocation world before).1
-    (writerTemps le bits imm column) written
-  have owned : ∀ id v, (Arm64Nop.allocation world before).1.get id = some v →
-      CC.Mem.rangePerm written v.1 0 (CC.sizeof world.genv_cenv v.2) .Cur .Freeable = true := by
-    intro id v binding
-    have live := ((allocated_local_storage (Arm64MovImmediate.allocated_bound world before)).1 id v binding).2.2
-    exact (CC.Mem.rangePerm_congr (m1 := written) (m2 := (Arm64Nop.allocation world before).2)
-      (fun offset => by simp only [CC.Mem.perm, result.access])).trans live
-  obtain ⟨after, freed, frame, contents, next, released⟩ :=
-    deallocate_live_locals (Arm64MovImmediate.allocated_bound world before) owned
-  have dispatch := (Dispatch.Keep.call_dispatch_bound world binding.widthBlock binding.width before
-    (operands unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow).1
-  have leave : InternalRun world 1
-      (.State Arm64Nop.handler .Sskip .Kstop (Arm64Nop.allocation world before).1
-        (writerTemps le bits imm column) written) (.Returnstate .Vundef .Kstop after) :=
-    .step trivial (.skip_call _ _ _ _ _ _ rfl freed) (.refl _)
-  exact ⟨written, after, result, (((dispatch.trans branch).trans write).trans finish).trans leave,
-    freed, frame, contents, next, released⟩
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) :=
+  call_scalar_word_returns_bound world binding storage unused addresses i bits (imm.setWidth 64) column narrow word tag
+
 theorem call_scalar_returns {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     (storage : Arm64ProducerRegisterStorage.Storage m before entry)
     (unused : Arm64Nop.IgnoredArguments) (addresses : Arm64Registers.PointerOrigins)

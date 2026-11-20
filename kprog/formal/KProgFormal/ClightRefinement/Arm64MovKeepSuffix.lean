@@ -48,17 +48,39 @@ def readCont : CC.Cont := .Kseq dstSet (.Kseq tail
 
 def aux (column : Fin 4) : BitVec 32 := BitVec.ofNat 32 (16 * column.val * 65536)
 def mask (column : Fin 4) : BitVec 64 := (65535#64) <<< (16 * column.val)
-def merge (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) : BitVec 64 :=
-  (old &&& ~~~(mask column)) ||| (((imm.setWidth 64) <<< (16 * column.val)) &&& mask column)
+def mergeWord (old : BitVec 64) (imm : BitVec 64) (column : Fin 4) : BitVec 64 :=
+  (old &&& ~~~(mask column)) ||| ((imm <<< (16 * column.val)) &&& mask column)
 
-def writerTemps (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) : CC.TempEnv :=
+def writerTempsWord (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 64) (column : Fin 4) : CC.TempEnv :=
   ((((((le.set Arm64Program._t'6 (.Vlong old)).set
     Arm64Program.___kprog_a64_movk_dst (.Vlong old)).set
-    Arm64Program.___kprog_a64_movk_imm (.Vlong (imm.setWidth 64))).set
+    Arm64Program.___kprog_a64_movk_imm (.Vlong imm)).set
     Arm64Program.___kprog_a64_movk_shift (.Vlong (BitVec.ofNat 64 (16 * column.val)))).set
     Arm64Program.___kprog_a64_movk_mask (.Vlong (mask column))).set
-    Arm64Program.___kprog_a64_movk_result (.Vlong (merge old imm column))).set
-    Arm64Program.___a64_l_value__1 (.Vlong (merge old imm column))
+    Arm64Program.___kprog_a64_movk_result (.Vlong (mergeWord old imm column))).set
+    Arm64Program.___a64_l_value__1 (.Vlong (mergeWord old imm column))
+
+/-- The original immediate16 interfaces instantiate the full-word path. -/
+def merge (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) : BitVec 64 :=
+  mergeWord old (imm.setWidth 64) column
+
+def writerTemps (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) : CC.TempEnv :=
+  writerTempsWord le old (imm.setWidth 64) column
+
+/-- Only the selected halfword contributes to the result; the actual caller
+parameter and compiler immediate temporary remain full-width values. -/
+theorem mergeWord_low16 (old imm : BitVec 64) (column : Fin 4) :
+    mergeWord old imm column = merge old (imm.setWidth 16) column := by
+  have low : imm &&& ((BitVec.allOnes 16).setWidth 64) = (imm.setWidth 16).setWidth 64 := by
+    rw [BitVec.and_setWidth_allOnes 48 16, BitVec.setWidth_eq_append (v := 16) (w := 64) (by decide)]
+    rfl
+  change (old &&& ~~~((BitVec.allOnes 16).setWidth 64 <<< (16 * column.val))) |||
+      ((imm <<< (16 * column.val)) &&& ((BitVec.allOnes 16).setWidth 64 <<< (16 * column.val))) =
+    (old &&& ~~~((BitVec.allOnes 16).setWidth 64 <<< (16 * column.val))) |||
+      ((((imm.setWidth 16).setWidth 64) <<< (16 * column.val)) &&&
+        ((BitVec.allOnes 16).setWidth 64 <<< (16 * column.val)))
+  rw [← BitVec.shiftLeft_and_distrib, low, ← BitVec.shiftLeft_and_distrib,
+    ← BitVec.setWidth_and, BitVec.and_allOnes]
 
 private theorem reader_type : CC.typeOfFundef (.Internal Arm64Program.f_kprog_arm64_program_read) =
     .Tfunction [CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr), CC.tulong]
@@ -120,6 +142,10 @@ theorem merge_eq_partInstall (old : BitVec 64) (imm : BitVec 16) (column : Fin 4
       (((imm.setWidth 64) <<< (16 * column.val)) &&&
         ((BitVec.allOnes 16).setWidth 64 <<< (16 * column.val))) = _
   rw [← BitVec.shiftLeft_and_distrib, ← BitVec.setWidth_and, BitVec.and_allOnes]
+
+def operandsWord (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block) (reg imm : BitVec 64)
+    (column : Fin 4) : Arm64Nop.IgnoredArguments :=
+  ⟨.Vptr entry 0, .Vlong reg, unused.src, unused.src2, unused.src3, .Vint (aux column), .Vlong imm⟩
 
 /-- Source operands from the live MOVK encoder; the unused SRC values retain
 arbitrary incoming values, since this branch reads DST only. -/
@@ -204,37 +230,37 @@ private theorem left_type : CC.typeof leftExpr = CC.tulong := rfl
 private theorem right_type : CC.typeof rightExpr = CC.tulong := rfl
 
 private theorem eval_merge (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
-    (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
+    (old : BitVec 64) (imm : BitVec 64) (column : Fin 4)
     (hdst : le.get Arm64Program.___kprog_a64_movk_dst = some (.Vlong old))
-    (himm : le.get Arm64Program.___kprog_a64_movk_imm = some (.Vlong (imm.setWidth 64)))
+    (himm : le.get Arm64Program.___kprog_a64_movk_imm = some (.Vlong imm))
     (hshift : le.get Arm64Program.___kprog_a64_movk_shift = some (.Vlong (BitVec.ofNat 64 (16*column.val))))
     (hmask : le.get Arm64Program.___kprog_a64_movk_mask = some (.Vlong (mask column))) :
-    CC.doEvalExpr world e le m resultExpr = some (.Vlong (merge old imm column)) := by
+    CC.doEvalExpr world e le m resultExpr = some (.Vlong (mergeWord old imm column)) := by
   have left : CC.doEvalExpr world e le m leftExpr = some (.Vlong (old &&& ~~~mask column)) := by
     simp only [leftExpr, CC.doEvalExpr, hdst, hmask, CC.typeof, long_not, long_and]
   have right : CC.doEvalExpr world e le m rightExpr =
-      some (.Vlong (((imm.setWidth 64) <<< (16*column.val)) &&& mask column)) := by
+      some (.Vlong ((imm <<< (16*column.val)) &&& mask column)) := by
     simp only [rightExpr, CC.doEvalExpr, himm, hshift, hmask, CC.typeof, long_shift, long_and]
-  simp only [result_source, CC.doEvalExpr, left, right, left_type, right_type, long_or, merge]
+  simp only [result_source, CC.doEvalExpr, left, right, left_type, right_type, long_or, mergeWord]
 
-private def readyTemps (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) : CC.TempEnv :=
+private def readyTemps (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 64) (column : Fin 4) : CC.TempEnv :=
   (((((le.set Arm64Program._t'6 (.Vlong old)).set
     Arm64Program.___kprog_a64_movk_dst (.Vlong old)).set
-    Arm64Program.___kprog_a64_movk_imm (.Vlong (imm.setWidth 64))).set
+    Arm64Program.___kprog_a64_movk_imm (.Vlong imm)).set
     Arm64Program.___kprog_a64_movk_shift (.Vlong (BitVec.ofNat 64 (16 * column.val)))).set
     Arm64Program.___kprog_a64_movk_mask (.Vlong (mask column)))
 
 private theorem ready_step (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
-    (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (k : CC.Cont) :
+    (old : BitVec 64) (imm : BitVec 64) (column : Fin 4) (k : CC.Cont) :
     CC.doStep world (.State Arm64Nop.handler (.Sset Arm64Program.___kprog_a64_movk_result resultExpr)
       k e (readyTemps le old imm column) m) =
       some (CC.E0, .State Arm64Nop.handler .Sskip k e
         ((readyTemps le old imm column).set Arm64Program.___kprog_a64_movk_result
-          (.Vlong (merge old imm column))) m) := by
+          (.Vlong (mergeWord old imm column))) m) := by
   have hdst : (readyTemps le old imm column).get Arm64Program.___kprog_a64_movk_dst = some (.Vlong old) := by
     rw [readyTemps, CC.PTree.gso _ _ _ _ (by decide +kernel),
       CC.PTree.gso _ _ _ _ (by decide +kernel), CC.PTree.gso _ _ _ _ (by decide +kernel), CC.PTree.gss]
-  have himm : (readyTemps le old imm column).get Arm64Program.___kprog_a64_movk_imm = some (.Vlong (imm.setWidth 64)) := by
+  have himm : (readyTemps le old imm column).get Arm64Program.___kprog_a64_movk_imm = some (.Vlong imm) := by
     rw [readyTemps, CC.PTree.gso _ _ _ _ (by decide +kernel),
       CC.PTree.gso _ _ _ _ (by decide +kernel), CC.PTree.gss]
   have hshift : (readyTemps le old imm column).get Arm64Program.___kprog_a64_movk_shift =
@@ -247,14 +273,14 @@ private theorem ready_step (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m 
 set_option hygiene false in
 /-- The source merge begins at the actual reader's returned value and memory;
 no read result or post-memory is supplied by this control/bit-operation lemma. -/
-theorem after_read_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
-    (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
-    (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
+theorem after_read_word_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (old : BitVec 64) (imm : BitVec 64) (column : Fin 4)
+    (himm : le.get Arm64Program._imm = some (.Vlong imm))
     (haux : le.get Arm64Program._aux = some (.Vint (aux column))) :
     InternalRun world 26
       (.Returnstate (.Vlong old)
         (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
-      (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) := by
+      (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTempsWord le old imm column) m) := by
   rcases column with ⟨column, bound⟩
   have columns : column = 0 ∨ column = 1 ∨ column = 2 ∨ column = 3 := by omega
   rcases columns with rfl | rfl | rfl | rfl
@@ -262,7 +288,7 @@ theorem after_read_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : 
     run_tac do
       let reduce ← `(tactic|
         simp +decide only [CC.doStep, CC.setOpttemp, readCont, body,
-          dstSet, tail, writerTemps, aux, mask, merge,
+          dstSet, tail, writerTempsWord, aux, mask, mergeWord,
           Arm64Program.s_kprog_arm64_program_execute_4, Arm64Program.s_kprog_arm64_program_execute_5,
           CC.PTree.gss, CC.PTree.gso, himm, haux, CC.doEvalExpr, CC.typeof,
           CC.seqOfLabeledStatement, CC.selectSwitch, CC.selectSwitchCase, CC.Cop.semSwitchArg,
@@ -289,6 +315,16 @@ theorem after_read_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : 
           Lean.Elab.Tactic.evalTactic reduce
       Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
 
+theorem after_read_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
+    (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
+    (haux : le.get Arm64Program._aux = some (.Vint (aux column))) :
+    InternalRun world 26
+      (.Returnstate (.Vlong old)
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
+      (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) :=
+  after_read_word_bound world e le m old (imm.setWidth 64) column himm haux
+
 theorem after_read (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
     (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
@@ -310,23 +346,23 @@ private theorem writer_step (world : CC.CGenv) (writerBlock : CC.Block)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
       CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
     (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
-    (entry : CC.Block) (reg : BitVec 64) (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
+    (entry : CC.Block) (reg : BitVec 64) (old : BitVec 64) (imm : BitVec 64) (column : Fin 4) (narrow : Bool)
     (unshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
     (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
     (hdst : le.get Arm64Program._dst = some (.Vlong reg))
     (hwidth : le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow)) :
-    CC.doStep world (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) =
+    CC.doStep world (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTempsWord le old imm column) m) =
       some (CC.E0, .Callstate (.Internal Arm64RegisterWrite.procedure)
-        [.Vptr entry 0, .Vlong reg, .Vlong (merge old imm column), Arm64RegisterWrite.width narrow]
-        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) := by
-  have entryTemp : (writerTemps le old imm column).get Arm64Program._entry = some (.Vptr entry 0) := by
-    simp +decide only [writerTemps, CC.PTree.gss, CC.PTree.gso, hentry]
-  have dstTemp : (writerTemps le old imm column).get Arm64Program._dst = some (.Vlong reg) := by
-    simp +decide only [writerTemps, CC.PTree.gss, CC.PTree.gso, hdst]
-  have widthTemp : (writerTemps le old imm column).get Arm64Program.___a64_l_width =
+        [.Vptr entry 0, .Vlong reg, .Vlong (mergeWord old imm column), Arm64RegisterWrite.width narrow]
+        (.Kcall none Arm64Nop.handler e (writerTempsWord le old imm column) Dispatch.continuation) m) := by
+  have entryTemp : (writerTempsWord le old imm column).get Arm64Program._entry = some (.Vptr entry 0) := by
+    simp +decide only [writerTempsWord, CC.PTree.gss, CC.PTree.gso, hentry]
+  have dstTemp : (writerTempsWord le old imm column).get Arm64Program._dst = some (.Vlong reg) := by
+    simp +decide only [writerTempsWord, CC.PTree.gss, CC.PTree.gso, hdst]
+  have widthTemp : (writerTempsWord le old imm column).get Arm64Program.___a64_l_width =
       some (Arm64RegisterWrite.width narrow) := by
-    simp +decide only [writerTemps, CC.PTree.gss, CC.PTree.gso, hwidth]
-  have valueTemp : (writerTemps le old imm column).get Arm64Program.___a64_l_value__1 = some (.Vlong (merge old imm column)) :=
+    simp +decide only [writerTempsWord, CC.PTree.gss, CC.PTree.gso, hwidth]
+  have valueTemp : (writerTempsWord le old imm column).get Arm64Program.___a64_l_value__1 = some (.Vlong (mergeWord old imm column)) :=
     CC.PTree.gss _ _ _
   cases narrow <;>
     simp only [CC.doStep, writeCall, Arm64RegisterWrite.arguments, Arm64RegisterWrite.width,
@@ -342,6 +378,27 @@ private theorem writer_step (world : CC.CGenv) (writerBlock : CC.Block)
 
 /-- The real writer call follows the 26-transition merge. Its start state
 is the actual reader return, so a reader's post-memory remains explicit. -/
+theorem writer_call_word_bound (world : CC.CGenv) (writerBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (entry : CC.Block) (reg old : BitVec 64) (imm : BitVec 64) (column : Fin 4) (narrow : Bool)
+    (unshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
+    (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
+    (hdst : le.get Arm64Program._dst = some (.Vlong reg))
+    (himm : le.get Arm64Program._imm = some (.Vlong imm))
+    (haux : le.get Arm64Program._aux = some (.Vint (aux column)))
+    (hwidth : le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow)) :
+    InternalRun world 27
+      (.Returnstate (.Vlong old)
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
+      (.Callstate (.Internal Arm64RegisterWrite.procedure)
+        [.Vptr entry 0, .Vlong reg, .Vlong (mergeWord old imm column), Arm64RegisterWrite.width narrow]
+        (.Kcall none Arm64Nop.handler e (writerTempsWord le old imm column) Dispatch.continuation) m) := by
+  exact (after_read_word_bound world e le m old imm column himm haux).trans
+    (.step trivial (CC.doStep_sound _ _ _ _
+      (writer_step world writerBlock binding e le m entry reg old imm column narrow unshadowed hentry hdst hwidth)) (.refl _))
+
 theorem writer_call_bound (world : CC.CGenv) (writerBlock : CC.Block)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
       CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
@@ -358,10 +415,9 @@ theorem writer_call_bound (world : CC.CGenv) (writerBlock : CC.Block)
         (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
       (.Callstate (.Internal Arm64RegisterWrite.procedure)
         [.Vptr entry 0, .Vlong reg, .Vlong (merge old imm column), Arm64RegisterWrite.width narrow]
-        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) := by
-  exact (after_read_bound world e le m old imm column himm haux).trans
-    (.step trivial (CC.doStep_sound _ _ _ _
-      (writer_step world writerBlock binding e le m entry reg old imm column narrow unshadowed hentry hdst hwidth)) (.refl _))
+        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) :=
+  writer_call_word_bound world writerBlock binding e le m entry reg old (imm.setWidth 64) column narrow
+    unshadowed hentry hdst himm haux hwidth
 
 theorem writer_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (entry : CC.Block) (reg old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)

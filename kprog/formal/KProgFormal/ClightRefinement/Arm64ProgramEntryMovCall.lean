@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedCall
 import KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView
+import KProgFormal.ClightRefinement.Arm64MovKeepWordCall
 
 set_option Elab.async false
 
@@ -282,5 +283,151 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
     freed, freeFrame, contents, next, released⟩
   simpa only [CC.Eapp, CC.E0, List.nil_append, List.append_nil] using
     star_trans (star_trans entered.sound call) (returned.trans priorityLoad).sound
+
+
+private def keepRawArgs : List CC.Expr := by
+  run_tac do
+    let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf (← Lean.Elab.Term.elabTerm (← `(nextCall)) none))
+    unless actual.isAppOfArity ``CC.Stmt.Scall 3 do throwError "actual MOVK call changed"
+    Lean.Elab.Tactic.closeMainGoal `actual_movk_arguments actual.getAppArgs[2]!
+
+private def keepAux : CC.Expr := by
+  run_tac do
+    let mut tail ← Lean.Elab.Term.elabTerm (← `(keepRawArgs)) none
+    for _ in [:7] do
+      let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf tail)
+      unless actual.isAppOfArity ``List.cons 3 do throwError "actual MOVK arguments changed"
+      tail := actual.getAppArgs[2]!
+    let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf tail)
+    unless actual.isAppOfArity ``List.cons 3 do throwError "actual MOVK AUX changed"
+    Lean.Elab.Tactic.closeMainGoal `actual_movk_aux actual.getAppArgs[1]!
+
+private def keepArgs : List CC.Expr := by
+  run_tac do
+    let mut tail ← Lean.Elab.Term.elabTerm (← `(keepRawArgs)) none
+    let mut preceding : Array Lean.Expr := #[]
+    for _ in [:7] do
+      let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf tail)
+      unless actual.isAppOfArity ``List.cons 3 do throwError "actual MOVK arguments changed"
+      preceding := preceding.push actual
+      tail := actual.getAppArgs[2]!
+    let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf tail)
+    unless actual.isAppOfArity ``List.cons 3 do throwError "actual MOVK AUX changed"
+    let mut result := Lean.mkAppN actual.getAppFn (actual.getAppArgs.set! 1 (Lean.mkConst ``keepAux))
+    for prior in preceding.reverse do
+      result := Lean.mkAppN prior.getAppFn (prior.getAppArgs.set! 2 result)
+    Lean.Elab.Tactic.closeMainGoal `actual_movk_cached_arguments result
+
+/-- The original source packs shift 16 into AUX's third byte. -/
+theorem keep_aux_eval (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) :
+    CC.doEvalExpr world e le memory keepAux = some (.Vint (Arm64MovKeep.aux 1)) := by
+  rfl
+
+private theorem keep_source : nextCall = .Scall none target keepArgs := rfl
+
+def keepOperands (entry : CC.Block) (priority : BitVec 32) : Arm64Nop.IgnoredArguments :=
+  ⟨.Vptr entry 0, .Vlong 1, .Vlong 255, .Vlong 255, .Vlong 255,
+    .Vint (Arm64MovKeep.aux 1), .Vlong (priority.setWidth 64)⟩
+
+def keepCont (initial : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+  .Kcall none Arm64ProgramFixture.f_arm64_execute_compile
+    (Arm64ProgramEntryAllocation.allocation initial).1 le (.Kseq afterKeep k)
+
+private theorem keep_args_eval {initial : CC.Mem} (entry : HeaderLocal initial)
+    (le : CC.TempEnv) (memory : CC.Mem) (priority : BitVec 32)
+    (loaded : le.get Arm64ProgramFixture._t'167 = some (.Vint priority)) :
+    CC.doEvalExprlist world (Arm64ProgramEntryAllocation.allocation initial).1 le memory
+      keepArgs parameterTypes =
+      some (Arm64MovImmediate.Dispatch.Keep.arguments (keepOperands entry.block priority) false) := by
+  have header := entry_binding entry
+  simp only [keepArgs, parameterTypes, CC.doEvalExprlist, keep_aux_eval, CC.doEvalExpr, CC.doEvalLvalue,
+    CC.lvalOfVar, header, CC.typeof, loaded, CC.Cop.semCast, CC.Cop.classifyCast,
+    CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+    CC.Integers.Int.signed, CC.Integers.MI.signed, CC.Integers.Int64.repr,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Ptrofs.zero, CC.Integers.MI.zero, BitVec.ofInt_natCast, BitVec.ofNat_toNat,
+    CC.tptr, CC.tvoid, CC.tuint, CC.tint, CC.tulong, CC.tuchar, CC.Archi.ptr64,
+    Arm64MovImmediate.Dispatch.Keep.arguments, keepOperands,
+    Arm64MovImmediate.Dispatch.flags, Arm64Width.argument, Bool.false_eq_true, ite_false, ite_true]
+  rfl
+
+/-- Enter the actual MOVK call with all nine source arguments, including the
+unrestricted uint32 priority cast to the actual uint64 parameter. -/
+theorem keep_enter {initial : CC.Mem} (entry : HeaderLocal initial)
+    (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (priority : BitVec 32)
+    (loaded : le.get Arm64ProgramFixture._t'167 = some (.Vint priority)) :
+    InternalRun world 1
+      (.State Arm64ProgramFixture.f_arm64_execute_compile nextCall (.Kseq afterKeep k)
+        (Arm64ProgramEntryAllocation.allocation initial).1 le memory)
+      (.Callstate (.Internal Arm64Nop.handler)
+        (Arm64MovImmediate.Dispatch.Keep.arguments (keepOperands entry.block priority) false)
+        (keepCont initial le k) memory) := by
+  have binding : CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 72) =
+      some (.Internal Arm64Nop.handler) := Arm64ProgramEntryLinked.execute_binding.2
+  have zero : CC.Integers.Ptrofs.eq (0 : CC.Integers.Ptrofs) CC.Integers.Ptrofs.zero = true := rfl
+  have funct : CC.Genv.findFunct world.genv_genv (.Vptr (CC.Positive.ofNat 72) 0) =
+      some (.Internal Arm64Nop.handler) := by
+    simp only [CC.Genv.findFunct, zero, ite_true, binding]
+  have step : CC.doStep world
+      (.State Arm64ProgramFixture.f_arm64_execute_compile nextCall (.Kseq afterKeep k)
+        (Arm64ProgramEntryAllocation.allocation initial).1 le memory) =
+      some (CC.E0, .Callstate (.Internal Arm64Nop.handler)
+        (Arm64MovImmediate.Dispatch.Keep.arguments (keepOperands entry.block priority) false)
+        (keepCont initial le k) memory) := by
+    simp only [keep_source, CC.doStep, classify_target, target_eval, keep_args_eval entry le memory priority loaded,
+      funct, handler_type, ite_true, keepCont]
+  exact .step trivial (CC.doStep_sound _ _ _ _ step) (.refl _)
+
+/-- The real void-call continuation resumes the original source after MOVK. -/
+theorem keep_leave (initial : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) :
+    InternalRun world 2 (.Returnstate .Vundef (keepCont initial le k) memory)
+      (.State Arm64ProgramFixture.f_arm64_execute_compile afterKeep k
+        (Arm64ProgramEntryAllocation.allocation initial).1 le memory) :=
+  .step trivial (CC.doStep_sound _ _ _ _ rfl)
+    (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.refl _))
+
+
+/-- Execute the actual fixture MOVK call through its source successor. Its
+full priority parameter is preserved during the call; masking happens only
+inside the actual C merge. The real free preserves the scalar readbacks,
+register relation and original caller frame. -/
+theorem execute_keep {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (s : Reference.AArch64.State) (bits : BitVec 64) (priority : BitVec 32)
+    (word : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 1) 0 = some (.Vlong bits))
+    (tag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 1) 0 = some (.Vint 0))
+    (represented : Arm64Registers.Represents addresses origins (fun r => r.val)
+      before.nextblock before (.Vptr entry.block 0) s)
+    (le : CC.TempEnv) (k : CC.Cont)
+    (loaded : le.get Arm64ProgramFixture._t'167 = some (.Vint priority)) :
+    ∃ written after, ∃ finalStorage : Storage initial after entry,
+      CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 1) 0 =
+        some (.Vlong (Arm64MovKeep.mergeWord bits (priority.setWidth 64) 1)) ∧
+      CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 1) 0 = some (.Vint 0) ∧
+      InternalRun world 206
+        (.State Arm64ProgramFixture.f_arm64_execute_compile nextCall (.Kseq afterKeep k)
+          (Arm64ProgramEntryAllocation.allocation initial).1 le before)
+        (.State Arm64ProgramFixture.f_arm64_execute_compile afterKeep k
+          (Arm64ProgramEntryAllocation.allocation initial).1 le after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val) before.nextblock after (.Vptr entry.block 0)
+        (Arm64RegisterWrite.nativeUpdate s 1 (Arm64MovKeep.mergeWord bits (priority.setWidth 64) 1) false) ∧
+      FrameBelow initial.nextblock before after ∧
+      CC.Mem.freeList written (CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1) = some after ∧
+      FrameBelow before.nextblock written after ∧
+      after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
+      (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
+        ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+  obtain ⟨written, after, finalStorage, finalWord, finalTag, call, registers, frame, freed,
+      freeFrame, contents, next, released⟩ :=
+    Arm64MovKeep.LinkedWord.call storage bound (keepOperands entry.block priority) addresses origins s
+      1 bits (priority.setWidth 64) 1 false word tag represented (keepCont initial le k) rfl
+  have entered := keep_enter entry le k before priority loaded
+  have returned := keep_leave initial le k after
+  refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, registers, frame, freed,
+    freeFrame, contents, next, released⟩
+  exact (entered.trans call).trans returned
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovCall
