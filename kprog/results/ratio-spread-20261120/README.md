@@ -39,6 +39,13 @@ configuration:
 
 ## Why some apps scatter and others do not: the retained population
 
+Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
+`native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
+(10^2–10^3 dispatches) reading anything from 0.30 to 1.00. A program dispatched ~1,000 times carries its own
+sampling noise into the geomean of two, which is why the run figure swings; `native_tracer_entry` alone is
+consistently an order of magnitude faster. So the historical 0.43–1.11 spread is the *low-count* program
+moving, not the profiler's main program regressing.
+
 The §5 join keeps programs with `min(run_cnt_delta) >= 100` in both phases. That population, per run, decides
 how much averaging a run does:
 
