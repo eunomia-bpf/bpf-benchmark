@@ -7,25 +7,28 @@ typedef unsigned long long __kprog_lpm_u64 __attribute__((aligned(1),may_alias))
 typedef unsigned int __kprog_lpm_u32 __attribute__((aligned(1),may_alias)); \
 typedef unsigned short __kprog_lpm_u16 __attribute__((aligned(1),may_alias)); \
 static __attribute__((always_inline)) inline int \
-__kprog_lpm_prefix_equal(const unsigned char *node, const unsigned char *key, unsigned bits) { \
+__kprog_lpm_prefix_equal(const unsigned char *node, const unsigned char *key, unsigned long bytes, unsigned bits) { \
+    if (!bits) return 1; \
     unsigned long i=0; \
-    if (bits>=64) { \
-        if (*(const __kprog_lpm_u64 *)node != *(const __kprog_lpm_u64 *)key) return 0; \
+    if (bytes>=8) { \
+        __kprog_lpm_u64 different=*(const __kprog_lpm_u64 *)node ^ *(const __kprog_lpm_u64 *)key; \
+        if (bits<=64) return !(__builtin_bswap64(different)>>(64-bits)); \
+        if (different) return 0; \
         bits-=64; i=8; \
     } \
-    while (bits>=32) { \
-        if (*(const __kprog_lpm_u32 *)(node+i) != *(const __kprog_lpm_u32 *)(key+i)) return 0; \
+    while (bytes-i>=4) { \
+        __kprog_lpm_u32 different=*(const __kprog_lpm_u32 *)(node+i) ^ *(const __kprog_lpm_u32 *)(key+i); \
+        if (bits<=32) return !(__builtin_bswap32(different)>>(32-bits)); \
+        if (different) return 0; \
         bits-=32; i+=4; \
     } \
-    if (bits>=16) { \
-        if (*(const __kprog_lpm_u16 *)(node+i) != *(const __kprog_lpm_u16 *)(key+i)) return 0; \
+    if (bytes-i>=2) { \
+        unsigned different=__builtin_bswap16(*(const __kprog_lpm_u16 *)(node+i) ^ *(const __kprog_lpm_u16 *)(key+i)); \
+        if (bits<=16) return !(different>>(16-bits)); \
+        if (different) return 0; \
         bits-=16; i+=2; \
     } \
-    if (bits>=8) { \
-        if (node[i]!=key[i]) return 0; \
-        bits-=8; ++i; \
-    } \
-    return !bits || !((node[i]^key[i])>>(8-bits)); \
+    return !((node[i]^key[i])>>(8-bits)); \
 } \
 static __attribute__((always_inline)) inline void * \
 __kprog_lpm_lookup(void *map, const void *key, unsigned long bytes, unsigned long maximum, \
@@ -36,7 +39,7 @@ __kprog_lpm_lookup(void *map, const void *key, unsigned long bytes, unsigned lon
     unsigned char *found=(void *)0; \
     while (node) { \
         unsigned length=*(const __kprog_lpm_u32 *)(node+prefix); \
-        if (length>key_prefix || !__kprog_lpm_prefix_equal(node+data,(const unsigned char *)key+4,length)) break; \
+        if (length>key_prefix || !__kprog_lpm_prefix_equal(node+data,(const unsigned char *)key+4,bytes,length)) break; \
         if (length==maximum) { found=node; break; } \
         if (!(*(const __kprog_lpm_u32 *)(node+flags)&1)) found=node; \
         unsigned bit=!!(((const unsigned char *)key)[4+length/8] & (1u<<(7-length%8))); \
