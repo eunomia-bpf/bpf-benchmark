@@ -443,6 +443,12 @@ int main(int argc, char **argv) {
   // The object carries every program of P; only the selected entry's closure belongs to this output.
   for (auto &Other : *M)
     if (&Other != F && !Other.isDeclaration()) Other.setLinkage(GlobalValue::InternalLinkage);
+  // A .maps definition is the descriptor the user loader reads from the BPF object; native-link binds the
+  // symbol to the live map. Its initializer (a program array's function pointers) only keeps every
+  // program of P alive.
+  for (auto &G : M->globals())
+    if (G.hasSection() && G.getSection() == ".maps" && G.hasInitializer())
+      G.setInitializer(Constant::getNullValue(G.getValueType()));
   InitializeNativeTarget(); InitializeNativeTargetAsmPrinter(); InitializeNativeTargetAsmParser();
   std::string TargetError;
   auto *Target = TargetRegistry::lookupTarget(M->getTargetTriple(), TargetError);
