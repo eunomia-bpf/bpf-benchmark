@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF shared map-helper application measurement (307c28752; 2026-11-20T04:55:29Z): LPM/HASH/ARRAY/probe native API subset passes; same archived accepted OTel native_unwind/HotSpot complete reachable proof code24067→16150B/22677→16289B including workers. Results/helper-sharing-20261120/report.json/evidence.tar.gz. Next actual OTel app, all LTO on; no speed claim.
+
 - [x] PERF cached native no-red-zone enforcement (91a703ada; 2026-11-20T04:29:31Z): final native compile uses existing O3 force-attribute=noredzone uniformly; actual cached LPM now allocates24byte frame,210→234B.18819LPM/112HASH API cases and helper compatibility pass. Results/native-redzone-20261120/report.json/evidence.tar.gz. B/tools unchanged; actual app timing remains open.
 
 - [x] PERF native plain HASH application measurement (59763bf01; 2026-11-20T04:18:18Z): C helper host1032hash/143388lookup/restart1, stock18instructions and actual native compiler API112cases pass; ARRAY/LPM/probe subset passes with all LTO. Results/hash-c-lto-20261120/report.json/evidence.tar.gz. Installed tools unchanged. OTel658868 completed0/appOK:14native/4checked/10direct,34LPM/14HASH/4ARRAY sites,4/4no-red-zone.4192.783→5264.950ns/call (0.796x), regression retained. combined-app-result/evidence in lpm-c-lto-20261120. Earlier queued639209 superseded before guest start; raw retained. Performance improvement remains open.
