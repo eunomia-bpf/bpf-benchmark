@@ -44,6 +44,13 @@
 #include "kinsn_common.h"
 #include "native_lab_trusted_wire.h"
 #include <linux/ptrace.h>
+/* The same source builds bpf_arm64_native_lab.ko on arm64 (Kbuild). */
+#ifdef CONFIG_ARM64
+#include <linux/unaligned.h>
+#define NATIVE_LAB_DIRECTORY "bpf_arm64_native_lab"
+#else
+#define NATIVE_LAB_DIRECTORY "bpf_x86_native_lab"
+#endif
 
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
 #define NATIVE_LAB_MAX_RELOCS		32
@@ -336,11 +343,35 @@ static int emit_native_lab_x86(u8 *image, u32 *off, bool emit, u64 payload,
  * relocation offsets moved by the chunk's start; the last write before
  * BPF_PROG_LOAD leaves the whole image armed.
  */
+#ifdef CONFIG_ARM64
+/* arm64 load sites, encoded as kprog/stock-path/module/kprog_stock.c site_fixup does. */
+static u32 native_lab_arm64_site_fixup(const struct native_lab_load_site *site, const u8 *bytes)
+{
+	u32 word = get_unaligned_le32(bytes + site->offset);
+	u32 reg = site->destination < 31 ? site->destination : 31;
+	u32 fixup = BPF_NATIVE_ARM64_LOAD | (reg << 27);
+	u32 second = 31;
+	bool pair = false;
+
+	if ((word & 0x3e400000U) == 0x28400000U ||
+	    (word & 0x3fe00000U) == 0x08600000U) {
+		second = (word >> 10) & 31;
+		pair = true;
+	} else if ((word & 0xbfa07c00U) == 0x08207c00U) {
+		second = (reg + 1) & 31;
+		pair = true;
+	}
+	if (pair)
+		fixup |= BPF_NATIVE_ARM64_PAIR | (second << 16);
+	return fixup;
+}
+#endif
 static int native_lab_arm_chunks(void)
 {
 	struct bpf_native_image *image;
 	struct bpf_native_reloc *relocs = NULL;
 	struct bpf_native_site *sites = NULL;
+#ifndef CONFIG_ARM64
 	static const u16 registers[] = {
 		offsetof(struct pt_regs, ax), offsetof(struct pt_regs, cx),
 		offsetof(struct pt_regs, dx), offsetof(struct pt_regs, bx),
@@ -351,6 +382,7 @@ static int native_lab_arm_chunks(void)
 		offsetof(struct pt_regs, r12), offsetof(struct pt_regs, r13),
 		offsetof(struct pt_regs, r14), offsetof(struct pt_regs, r15),
 	};
+#endif
 	size_t ns = 0, si = 0;
 	size_t len = 0, nr = 0, off = 0, k = 0;
 	u8 *bytes;
@@ -386,10 +418,15 @@ static int native_lab_arm_chunks(void)
 		}
 		for (j = 0; j < blobs[i].load_site_count; j++, si++) {
 			const struct native_lab_load_site *site = &blobs[i].load_sites[j];
+#ifdef CONFIG_ARM64
+			sites[si].offset = off + site->offset;
+			sites[si].fixup = native_lab_arm64_site_fixup(site, bytes + off);
+#else
 			u32 reg = site->destination < ARRAY_SIZE(registers) ? registers[site->destination] : 1;
 
 			sites[si].offset = off + site->offset;
 			sites[si].fixup = site->insn_len | (reg << 8);
+#endif
 		}
 		off += blobs[i].len;
 	}
@@ -895,7 +932,7 @@ static int __init bpf_x86_native_lab_init(void)
 {
 	int err;
 
-	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
+	debugfs_root = debugfs_create_dir(NATIVE_LAB_DIRECTORY, NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
 

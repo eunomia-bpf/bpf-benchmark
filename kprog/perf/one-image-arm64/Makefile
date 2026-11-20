@@ -3,7 +3,7 @@
 # 2026-05-29 arm64 runtime image recipe (runner/mk/build.mk arm64-runner-runtime-image-tar) built on the
 # one kernel line in the one base. The recipe's host-kinsn-arm64 step builds the kinsn modules, which
 # need the kinsn kernel; on this line its output directory holds the stock-line native lab module from
-# kprog/stock-path/module instead.
+# kprog/perf/direct-native instead, built for arm64 (the module the shim uploads blob<N> chunks to).
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 ROOT := /workspaces/repository
@@ -25,7 +25,7 @@ kernel:
 
 module: kernel
 	rm -rf $(KINSN_OUT) && install -d $(KINSN_OUT)
-	$(MAKE) -C $(ROOT)/kprog/stock-path/module KDIR=$(KDIR) MO=$(KINSN_OUT) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+	$(MAKE) -C $(KDIR) M=$(ROOT)/kprog/perf/direct-native MO=$(KINSN_OUT) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
 
 # Same two programs as kprog/perf/one-image's negative target, cross-built for arm64; the corpus never
 # runs them.

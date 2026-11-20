@@ -1,3 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
+ifeq ($(SRCARCH),arm64)
+obj-m += bpf_arm64_native_lab.o
+bpf_arm64_native_lab-y := bpf_x86_native_lab.o
+else
 obj-m += bpf_x86_native_lab.o
+endif
 ccflags-y += -I$(src)/../../../kinsn/module/include
