@@ -4,9 +4,11 @@ import hashlib
 import json
 import statistics
 import sys
+import statistics
 from pathlib import Path
 import json
 import sys
+import statistics
 from hashlib import sha256
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -30,6 +32,7 @@ def describe(rows):
     values = [row["ratio"] for row in rows]
     return {"count": len(rows), "median": statistics.median(values) if values else None,
             "geomean": geomean(values) if values else None,
+            "median": statistics.median(values) if values else None,
             "faster": sum(v < 1 for v in values)}
 
 
