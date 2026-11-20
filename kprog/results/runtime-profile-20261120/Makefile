@@ -33,6 +33,15 @@ private:
 	clang-18 -O1 -S -emit-llvm -I$(ROOT)/vendor/libbpf/src \
 		$(ROOT)/kprog/results/runtime-profile-20261120/private.c -o $(OUT)/private.ll
 
+.PHONY: inline-private
+inline-private:
+	install -d $(PRIVATE_BUILD) $(OUT)
+	$(CC) -O3 -fsanitize=undefined -fno-sanitize-recover=all -I$(ROOT)/vendor/libbpf/src \
+		$(ROOT)/kprog/results/sparse-stack-cache-20261119/oracle.c -o $(PRIVATE_BUILD)/inline-private
+	$(PRIVATE_BUILD)/inline-private
+	clang-18 -O1 -S -emit-llvm -I$(ROOT)/vendor/libbpf/src \
+		$(ROOT)/kprog/results/sparse-stack-cache-20261119/oracle.c -o $(OUT)/inline-private.ll
+
 USER_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-user
 .PHONY: source-probes
 source-probes:
