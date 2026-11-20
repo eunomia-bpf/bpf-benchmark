@@ -9,7 +9,7 @@ build=Path('/var/tmp/kprog-tmp/perf/runtime-profile-user')
 symbols={}
 for line in Path('/workspaces/.agent-state/kprog-ck/build-x86/System.map').read_text().splitlines():
     address,kind,name=line.split();symbols[name]=int(address,16)
-names=['copy_from_user_nofault','memset']
+names=['bpf_probe_read_user','copy_from_user_nofault','memset']
 plan=out/'source-link-plan.json'
 plan.write_text(json.dumps(dict(version=1,helpers=[dict(name=n,addr=symbols[n]) for n in names]),indent=2)+'\n')
 commands=[]

@@ -25,8 +25,7 @@ __KPROG_HELPER(long, bpf_map_delete_elem, void *, const void *);
 __KPROG_HELPER(long, bpf_map_push_elem, void *, const void *, unsigned long long);
 __KPROG_HELPER(long, bpf_map_pop_elem, void *, void *);
 __KPROG_HELPER(long, bpf_probe_read_str, void *, unsigned int, const void *);
-extern long __kprog_copy_from_user_nofault(void *, const void *, unsigned long)
-    __asm__("copy_from_user_nofault");
+__KPROG_HELPER(long, bpf_probe_read_user, void *, unsigned int, const void *);
 __KPROG_HELPER(long, bpf_probe_read_user_str, void *, unsigned int, const void *);
 __KPROG_HELPER(long, bpf_probe_write_user, void *, const void *, unsigned int);
 __KPROG_HELPER(long, bpf_copy_from_user, void *, unsigned int, const void *);
@@ -101,15 +100,6 @@ typedef unsigned short __attribute__((may_alias, aligned(1))) __kprog_u16;
 #define __KPROG_LOAD(type, p) ({ type __v = *(const volatile type *)(p); asm volatile("" : "+r"(__v)); __v; })
 #define __KPROG_KERNEL_ADDRESS(p) ((long)(unsigned long)(p) < 0)
 #define __KPROG_ERANGE 34
-/* bpf_probe_read_user_common, kernel/trace/bpf_trace.c. The kernel copy
- * retains access_ok, nmi_uaccess_okay, pagefault state, SMAP and recovery. */
-static __always_inline long __kprog_read_user(void *dst, unsigned int size, const void *src)
-{
-    int ret = __kprog_copy_from_user_nofault(dst, src, size);
-    if (ret < 0)
-        __builtin_memset(dst, 0, size);
-    return ret;
-}
 static __always_inline long __kprog_read_kernel(void *dst, unsigned int size, const void *src)
 {
     char *d = dst;
@@ -153,7 +143,7 @@ static __always_inline long __kprog_read_kernel_str(void *dst, unsigned int size
 static __always_inline long __kprog_probe_read(void *dst, unsigned int size, const void *src)
 {
     return __KPROG_KERNEL_ADDRESS(src) ? __kprog_read_kernel(dst, size, src)
-                                       : __kprog_read_user(dst, size, src);
+                                       : __KPROG_CALL(bpf_probe_read_user, dst, size, src);
 }
 static __always_inline long __kprog_probe_read_str(void *dst, unsigned int size, const void *src)
 {
@@ -180,7 +170,7 @@ static __always_inline long __kprog_probe_read_str(void *dst, unsigned int size,
 #undef bpf_probe_read_str
 #define bpf_probe_read_str(...) __kprog_probe_read_str(__VA_ARGS__)
 #undef bpf_probe_read_user
-#define bpf_probe_read_user(...) __kprog_read_user(__VA_ARGS__)
+#define bpf_probe_read_user(...) __KPROG_CALL(bpf_probe_read_user, __VA_ARGS__)
 #undef bpf_probe_read_user_str
 #define bpf_probe_read_user_str(...) __KPROG_CALL(bpf_probe_read_user_str, __VA_ARGS__)
 #undef bpf_probe_write_user
