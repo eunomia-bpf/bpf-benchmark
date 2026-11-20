@@ -50,7 +50,9 @@ configuration:
 
 Cross-checked against four independent runs the coordinator took later the same day (its own six-app read
 loop, not part of this record's selection): BCC 0.964 at call ratio 1.01, Cilium 1.023 at 0.98, Tetragon
-1.312 at 0.54 (its post arm did half the calls, so not comparable). The first two agree with the table.
+1.312 at 0.54 (its post arm did half the calls, so not comparable), Tracee 0.433 at **2.01**. The first two
+agree with the table, and Tracee is the clean demonstration of the caveat above: its best-looking figure of the
+day comes from the run where the post arm executed twice the work.
 
 Read with both populations in mind: Tracee's 0.57–0.59 come from the runs whose post arm executed 1.65–1.71x
 the calls, so its honest current figure is nearer the 0.77 of the calibrated run; Cilium and Katran retain
