@@ -18,6 +18,8 @@
 #define __KPROG_NATIVE_HELPERS 1
 #include "native-lpm.h"
 __KPROG_LPM_CODE
+#include "../../kprog/x86/micro-prog/native_hash.h"
+__KPROG_HASH_CODE
 #define __KPROG_CALL(name, ...) __kprog_##name(__VA_ARGS__)
 __KPROG_HELPER(void *, bpf_map_lookup_elem, void *, const void *);
 __KPROG_HELPER(long, bpf_map_update_elem, void *, const void *, const void *, unsigned long long);
