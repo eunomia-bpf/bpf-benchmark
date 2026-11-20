@@ -38,6 +38,8 @@ archive:
 .PHONY: generation
 generation:
 	install -d $(RAW)
+	clang-18 -O3 -march=native -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
+		-fno-stack-protector -fomit-frame-pointer -c $(ROOT)/kprog/results/lpm-c-lto-20261120/stock_entry.c -o $(TMP)/stock-entry.input.o
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/generation.py $(RAW)
 
 STOCK_PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock

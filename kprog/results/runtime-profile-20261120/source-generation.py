@@ -1,6 +1,7 @@
 """Check that source probe inlining reaches the existing P-to-B pipeline."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
@@ -8,6 +9,7 @@ import tarfile
 import traceback
 
 root=Path('/workspaces/repository')
+os.environ['CLANG']=str(root/'kprog/stock-path/bin/clang')
 raw=Path(sys.argv[1]); raw.mkdir(parents=True,exist_ok=True)
 tmp=Path('/var/tmp/kprog-tmp/perf/runtime-profile-user')
 spec=importlib.util.spec_from_file_location('source_probe_specializer',root/'kprog/x86/trusted_specializer.py')
