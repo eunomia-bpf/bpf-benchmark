@@ -2,7 +2,7 @@ ROOT := /workspaces/repository
 PERF_BUILD := /workspaces/.agent-state/kprog-ck/perf
 JOBS ?= 4
 
-.PHONY: dependencies perf
+.PHONY: dependencies perf inspect
 dependencies:
 	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-dev libdw-dev libunwind-dev
 
@@ -11,3 +11,6 @@ perf:
 	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(PERF_BUILD)/ JOBS=$(JOBS) \
 		NO_LIBTRACEEVENT=1 NO_LIBPYTHON=1 NO_LIBPERL=1 NO_LIBBABELTRACE=1 \
 		NO_LIBBPF=1 NO_LIBPFM4=1 WERROR=0 PYTHON=/usr/bin/python3
+
+inspect:
+	$(PERF_BUILD)/perf version --build-options
