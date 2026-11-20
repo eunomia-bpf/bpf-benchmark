@@ -5,6 +5,17 @@ import json
 import statistics
 import sys
 from pathlib import Path
+import json
+import sys
+from hashlib import sha256
+
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT))
+from analysis.corpus_analyze import collect_per_program, geomean
+
+
+def digest(path):
+    return sha256(path.read_bytes()).hexdigest()
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
