@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 root=Path('/workspaces/repository');base=Path('/workspaces/.agent-state/kprog-ck')
-out=Path(sys.argv[1]);inputs=Path('/var/tmp/kprog-tmp/perf/kernel-probe-live')
+out=Path(sys.argv[1]);inputs=out/'program-inputs'
 client=root/'kprog/libnativeloader/build/trusted-service-client'
 loader=base/'verified-loader/trusted-native-loader'
 linker=root/'kprog/x86/native_lab/native_link/target/release/native-link'

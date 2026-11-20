@@ -12,14 +12,14 @@ programs:
 	done
 
 run:
-	install -d $(OUT)
+	install -d $(OUT) $(OUT)/program-inputs
 	git -C $(ROOT) rev-parse HEAD > $(OUT)/source-commit
 	tar -C $(INPUTS) -czf $(OUT)/native-inputs.tar.gz .
 	date -u +%FT%TZ > $(OUT)/started
 	status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
 		taskset -c 16-17 prlimit --as=17179869184 -- vng \
 		--run $(BASE)/build-x86/arch/x86/boot/bzImage \
-		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUT) --rodir $(INPUTS) \
+		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUT) --rodir $(OUT)/program-inputs=$(INPUTS) \
 		--overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G \
 		--append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -f kprog/results/kernel-probe-live-20261120/Makefile guest OUT=$(OUT)' || status=$$?; \
