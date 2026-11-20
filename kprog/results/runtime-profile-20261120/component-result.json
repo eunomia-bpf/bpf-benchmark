@@ -1,0 +1,22 @@
+{
+  "raw": {
+    "volatile_before": "/workspaces/kprog-raw/perf/runtime-profile-20261120/private-gcc-before-20261120T003842Z",
+    "volatile_after": "/workspaces/kprog-raw/perf/runtime-profile-20261120/volatile-after-20261120T003933Z",
+    "copy": "/workspaces/kprog-raw/perf/runtime-profile-20261120/user-source-fixed-20261120T004942Z",
+    "link": "/workspaces/kprog-raw/perf/runtime-profile-20261120/source-links-fixed-20261120T005500Z",
+    "baseline_recovery_failure": "/workspaces/kprog-raw/perf/runtime-profile-20261120/volatile-before-20261120T003528Z",
+    "branch_probe": "/workspaces/kprog-raw/perf/runtime-profile-20261120/branches-20261120T005341Z"
+  },
+  "private_cases": 1368,
+  "private_volatile_ir_before": 24,
+  "private_volatile_ir_after": 0,
+  "released_address_observations": 48,
+  "ordinary_read_controls": 8,
+  "physical_fault_controls": 8,
+  "source_copy_cases": 96,
+  "source_u32_lengths": 2,
+  "source_compat_control": 1,
+  "proof_and_kernel_links": 4,
+  "baseline_recovery_make_exit": 2,
+  "scope": "Host UBSan/value/physical-fault checks and real-kernel-address linking, not kernel execution or speed. Baseline recovery_host aborted before changes. LBR probe captured host userspace branches on guest-root samples; no guest caller attribution is inferred."
+}
