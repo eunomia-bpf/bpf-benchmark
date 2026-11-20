@@ -1,0 +1,14 @@
+{
+  "mode": "before",
+  "layout": {
+    "TYPE": 56,
+    "OPS": 32,
+    "LOOKUP": 96,
+    "LIMIT": 68,
+    "STRIDE": 288,
+    "MASK": 292,
+    "VALUES": 304
+  },
+  "execution": "16018 cases; ARRAY callbacks 9600, other callbacks 18, generic helper calls 9618\n",
+  "scope": "Actual installed BPF-to-native lowering plus C/host map-op providers, not live kernel callback or app performance."
+}

@@ -1,0 +1,15 @@
+{
+  "mode": "after",
+  "layout": {
+    "TYPE": 56,
+    "OPS": 32,
+    "LOOKUP": 96,
+    "LIMIT": 68,
+    "STRIDE": 288,
+    "MASK": 292,
+    "VALUES": 304
+  },
+  "execution": "16018 cases; ARRAY callbacks 0, other callbacks 18, generic helper calls 0\n",
+  "scope": "Host imported-native semantics and callback dispatch; no kernel/app timing claim",
+  "dynamic_proof_linked": true
+}
