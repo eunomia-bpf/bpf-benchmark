@@ -1,0 +1,324 @@
+{
+  "step": "M5 actual fixture/generic-handler complete-unit link foundation",
+  "status": "foundation-pass-entry-world-pending",
+  "recorded_utc": "2026-11-20T02:03:11Z",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-linked",
+  "checks": {
+    "link-probe1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-linked/LinkProbe.lean"
+      ],
+      "exit": 1,
+      "seconds": 10.501293897628784,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "link-probe2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-linked/LinkProbe.lean"
+      ],
+      "exit": 0,
+      "seconds": 13.017373085021973,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked"
+      ],
+      "exit": 1,
+      "seconds": 9.115645408630371,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked"
+      ],
+      "exit": 0,
+      "seconds": 51.12656855583191,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 41
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked"
+      ],
+      "exit": 1,
+      "seconds": 100.40563893318176,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked"
+      ],
+      "exit": 1,
+      "seconds": 309.46315002441406,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused5": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings"
+      ],
+      "exit": 0,
+      "seconds": 394.4256067276001,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 42
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-linked/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 3.19482421875,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    }
+  },
+  "public_query_counts": {
+    "types": 12,
+    "axiom_reports": 12
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.linked_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.linked_wellformed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.definition_count": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.composite_count": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.original_names": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.global_frontier": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.fixture_composites_preserved": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.execute_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.execute_signature": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.callback_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.wrapper_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.input_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "link": {
+    "imported_function": "CC.Link.linkProgram",
+    "left": "Arm64ProgramFixture.prog",
+    "right": "Arm64Program.prog",
+    "global_definitions": 197,
+    "composites": 14,
+    "source_row_groups": 26,
+    "original_fixture_names": 90,
+    "execute_block": 72,
+    "input_block": 59,
+    "payload_blocks": [
+      60,
+      61
+    ],
+    "wrapper_block": 88,
+    "global_symbol_frontier": 198,
+    "initial_memory_frontier": "not derived by this step",
+    "proof": "complete kernel-checked link equality; original row references, no synthesized program bodies",
+    "layout": "every original fixture composite retains its complete computed layout",
+    "signature": "execute void/nine arguments, distinct from signed32 context wrapper and uint32 borrowed continuation"
+  },
+  "repaired_attempts": {
+    "link-probe1": "removed an invalid namespace open; the merge metadata was already positive but the command exited1",
+    "focused1": "indexed-row bound elaboration exceeded recursion depth; replaced singletons with bounded source slices and added Lean tactic import",
+    "focused3": "deep meta rfl on linked globalenv exceeded recursion; direct kernel-checked source reflexivity used instead",
+    "focused4": "kernel timeout comparing input through two complete environments; isolated binding module and stated original external declaration directly"
+  },
+  "limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "workers": 1,
+    "cpu": 17,
+    "address_space_bytes": 34359738368,
+    "proof_limits_unchanged": true
+  },
+  "priority": {
+    "launch": "nice19",
+    "focused5_adjustment": {
+      "utc": "2026-11-20T01:58:44Z",
+      "root": 604057,
+      "reason": "Focused proof compilation measured VmPeak6796352kB/VmHWM2533436kB; coordinator00:22:55 nice19 condition covers full Lake and compiles above16GiB, not this focused subset. Keep CPU17/one worker/original proof and32GiBAS limits. Full builds remain nice19.",
+      "sample_before": {
+        "vm_peak_kb": 6796352,
+        "rss_hwm_kb": 2533436
+      },
+      "changes": [
+        {
+          "pid": 604057,
+          "tid": 604057,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604058,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604059,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604061,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604119,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604120,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604146,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604057,
+          "tid": 604155,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604154,
+          "tid": 604154,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604154,
+          "tid": 604156,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604154,
+          "tid": 604157,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604154,
+          "tid": 604158,
+          "old_nice": 19,
+          "new_nice": 0
+        },
+        {
+          "pid": 604154,
+          "tid": 604159,
+          "old_nice": 19,
+          "new_nice": 0
+        }
+      ]
+    },
+    "query1": "nice0 focused subset",
+    "full_build_policy": "nice19 on16-23, under coordinator00:22:55; focused checks below16GiB do not require nice19"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "e325666d584de6fb5f071e8d46c2c19b37c3b4701d6918e1da21f26eac214ccf",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean": "e2d9dd74aacaa60c5a89ef8ba126dde26d73d2c2c14c000eff363b5a36f391c7",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinkedBindings.lean": "dd29473dd601b942fdb7e16e8217196b48a0867e77d5b961c5193d484485fedc"
+  },
+  "entry_world": "still the bare Fixture world; single-route migration to linked ge is the next step",
+  "scope": "formal modules/root import/receipts/own todo line; no C/runtime/compiler/kernel/image/base/benchmark/paper/design edits",
+  "goal_closure": {
+    "M5": "open",
+    "M6": "open, follows M5",
+    "complete_isa_families": 0,
+    "last_full_Lake": "9053a09ce:358 jobs; no full run yet for current batch",
+    "last_whole_make_check": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "final_full_checks": "fresh final Lake/make check and frozen-byte confirmation remain due after M5/M6"
+  }
+}

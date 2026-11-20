@@ -98,3 +98,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs
 import KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup
 import KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized
 import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings

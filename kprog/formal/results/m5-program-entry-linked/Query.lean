@@ -1,0 +1,28 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryLinked.linked_source
+#print axioms Arm64ProgramEntryLinked.linked_source
+#check Arm64ProgramEntryLinked.linked_wellformed
+#print axioms Arm64ProgramEntryLinked.linked_wellformed
+#check Arm64ProgramEntryLinked.definition_count
+#print axioms Arm64ProgramEntryLinked.definition_count
+#check Arm64ProgramEntryLinked.composite_count
+#print axioms Arm64ProgramEntryLinked.composite_count
+#check Arm64ProgramEntryLinked.original_names
+#print axioms Arm64ProgramEntryLinked.original_names
+#check Arm64ProgramEntryLinked.global_frontier
+#print axioms Arm64ProgramEntryLinked.global_frontier
+#check Arm64ProgramEntryLinked.fixture_composites_preserved
+#print axioms Arm64ProgramEntryLinked.fixture_composites_preserved
+#check Arm64ProgramEntryLinked.execute_binding
+#print axioms Arm64ProgramEntryLinked.execute_binding
+#check Arm64ProgramEntryLinked.execute_signature
+#print axioms Arm64ProgramEntryLinked.execute_signature
+#check Arm64ProgramEntryLinked.callback_binding
+#print axioms Arm64ProgramEntryLinked.callback_binding
+#check Arm64ProgramEntryLinked.wrapper_binding
+#print axioms Arm64ProgramEntryLinked.wrapper_binding
+#check Arm64ProgramEntryLinked.input_binding
+#print axioms Arm64ProgramEntryLinked.input_binding
