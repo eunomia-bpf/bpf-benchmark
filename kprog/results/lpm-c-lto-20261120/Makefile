@@ -39,3 +39,24 @@ archive:
 generation:
 	install -d $(RAW)
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/generation.py $(RAW)
+
+STOCK_PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock
+.PHONY: stock-probe stock stock-guest
+stock-probe:
+	$(MAKE) -f $(ROOT)/kprog/results/cilium-headlen-20261119/Makefile archive-probe
+
+stock:
+	install -d $(RAW)/probe-inputs
+	date -u +%FT%TZ > $(RAW)/started
+	status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
+		taskset -c 20-21 nice -n 19 prlimit --as=8589934592 -- vng \
+		--run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(RAW) \
+		--rodir $(RAW)/probe-inputs=$(dir $(STOCK_PROBE)) \
+		--disable-monitor --cpus 2 --memory 2G --overlay-rwdir /tmp \
+		--append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -f kprog/results/lpm-c-lto-20261120/Makefile stock-guest RAW=$(RAW)' || status=$$?; \
+		printf '%s\n' "$$status" > $(RAW)/exit-code; date -u +%FT%TZ > $(RAW)/finished; exit $$status
+
+stock-guest:
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/stock.py $(RAW)
