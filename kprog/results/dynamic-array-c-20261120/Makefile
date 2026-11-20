@@ -20,4 +20,5 @@ run-replay:
 	date -u +%FT%TZ > $(OUT)/started
 	status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 \
 		nice -n 19 prlimit --as=17179869184 -- $(MAKE) -f $(ROOT)/kprog/results/dynamic-array-c-20261120/Makefile replay OUT=$(OUT) || status=$$?; \
+		tar -czf $(OUT)/native-products.tar.gz -C /var/tmp/kprog-tmp/perf/helper-sharing 3 4 || exit $$?; \
 		printf '%s\n' "$$status" > $(OUT)/exit-code; date -u +%FT%TZ > $(OUT)/finished; exit $$status
