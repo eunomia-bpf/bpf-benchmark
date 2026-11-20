@@ -31,8 +31,6 @@
 
 - Cilium 源码里的原生 helper 分支（`__native_bpf_helper`，53 个，按编号绑定）：并入 core-compat.h 的同一套写法，Cilium 源码回到上游形态。
 - 链接器里追踪 helper 编号的代码（x86_helper_provenance.rs、finite helper call）：所有应用改成符号调用之后删掉。
-- native-link 把入口函数的 RET 改写成跳到代码末尾：查清用途后删掉，入口直接 ret。
-- sim 原生一侧的地址屏障（compile_sim_ir.cpp memoryAsm 的 stable()）、读内核指针前的地址范围检查、私有栈带来的多余 mov：原生一侧按 P 的正常代码生成。
 
 ## 统一 helper 时踩到的坑（2026-11-19 六应用检查发现，已修，3e99eaa1e）
 
@@ -41,3 +39,10 @@
 - 内联读取的源地址被常量折叠（空指针加偏移）会成为绝对内存操作数，链接器拒绝（Tracee 2 个失败）。读取开头用空 asm 让源地址留在寄存器里。
 - 每次改 helper 写法之后，在提交前扫描所有应用的对象：32 位 GOT 读取、绝对操作数（Intel 语法的 `ds:0x`）、间接调用、和 helper 同名的本地数据符号，四项都要为 0。
 - 内联读取丢掉了 helper 自己的地址规则（copy_from_kernel_nofault 不读内核半区以下的地址，空指针或用户指针直接清零、返回 -ERANGE，不缺页）：Tracee 里空指针很常见（写管道、socket 时 vfs_write 的 pos 是 NULL），每次都真的缺页、靠 load site 恢复。Tracee 原生每次调用从 425 ns 变成 9273 ns，吞吐 0.047x（17:33 之后的三次运行）；12:46 那次还是按编号调 helper，原生和 eBPF 持平。内联读保留 helper 自己的这条规则：源地址不在内核半区就清零目标、返回 -ERANGE，每次读多两条指令（test、jns）。换 helper 写法之后，除了上面四项扫描，还要看每个应用的每次调用耗时，不能只看有没有失败。
+
+## 保留并写明原因的（协调者 2026-11-20T00:22:30Z，审核 21Z）
+
+- 入口函数的 RET 改写成跳到 JIT 框架末尾：原生代码嵌在 JIT 程序框架里，框架末尾恢复寄存器和尾调用计数；拿掉要改冻结的内核和可信模块，换下来的只是一条 jmp。
+- 常量空指针基址留在寄存器里（compile_sim_ir.cpp memoryAsm 的 stable()、native-helpers.h 源地址的空 asm）：否则后端把它折成绝对内存操作数，native-link 处理不了。
+- 内联读的地址规则（源地址不在内核半区就清零、返回 -ERANGE）：这是 helper 自己的规则；去掉以后 Tracee 每次调用慢 20 倍（见上表）。
+- sim 一侧剩下的 volatile 访存：perf 核对 faithful(I,P) 是否用到，用不到的拆掉。
