@@ -210,3 +210,13 @@ replacement. The consequence for the OTel finding: "a run with the 7510 B body h
 `bytes_xlated > 100`" is not a statement about replacement at all, and the zero-unwind conclusion must rest on the
 program-owned counters (unwind attempts, frames, register errors) that
 `kprog/results/equal-work-20261113/report.md` records, which it does independently.
+
+
+## Why "on par" is the right reading (OMP 2026-11-20, arithmetic check)
+
+Across the 41 runs of this family (0.3 < ratio < 3, same program, same JIT): **median 1.055, mean 1.067,
+sd 0.141, range 0.85-1.38**, and only 22 % of runs land within 5 % of parity. A 5 % offset is therefore a third
+of one standard deviation of the same body's own run-to-run variation: with this instrument a body that is truly
+at parity would produce exactly this distribution. That is why OTel is reported on par with the JIT (coordinator
+2026-11-20T16:46Z), and why no further bisect of it is warranted - the effect being chased is smaller than the
+measurement's own spread. Any claim that the emitted body is slower needs more samples per arm, not more runs.
