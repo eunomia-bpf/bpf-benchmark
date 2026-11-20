@@ -1,0 +1,143 @@
+{
+  "linked_products": [
+    {
+      "member": "request/generated/kernel-functions.json",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/kernel-functions.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "bytes": 3
+    },
+    {
+      "member": "request/generated/kernel-link/269b716acc788684.abi.tsv",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.abi.tsv",
+      "sha256": "bfec418424848f28845debd44970a0471dc50d6e2da1b79ef6276b21d0629e0c",
+      "bytes": 1806
+    },
+    {
+      "member": "request/generated/kernel-link/269b716acc788684.blob.bin",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.blob.bin",
+      "sha256": "aa09e0d9298cfac7c380d2ad4545dbe6cfae0d2b118697f20d16435a15838661",
+      "bytes": 2618
+    },
+    {
+      "member": "request/generated/kernel-link/269b716acc788684.map-patches.tsv",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.map-patches.tsv",
+      "sha256": "fe437066f34a3a515d0c32743bd66252a266dd6cea7718c3794986b5f705b730",
+      "bytes": 458
+    },
+    {
+      "member": "request/generated/kernel-link/269b716acc788684.tmp.2328.link-plan.json",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.tmp.2328.link-plan.json",
+      "sha256": "6f55435300feb0edfc6e49aa4e806c34e320b1918d9fd59e6289dae227e97ab3",
+      "bytes": 9823
+    },
+    {
+      "member": "request/kernel.facts.json",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/kernel.facts.json",
+      "sha256": "c4f87240566e199146ec591fc78a575ebc5875dee108f6ff437ec41e6653c39c",
+      "bytes": 1689
+    },
+    {
+      "member": "request/kernel.metadata.json",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/kernel.metadata.json",
+      "sha256": "08afb47a8c77704ff36b2e35a017c7696071db108398b9537b20e8063b9ed6e4",
+      "bytes": 1586
+    },
+    {
+      "member": "request/source-identities.json",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/source-identities.json",
+      "sha256": "2fb9373afbc54764aa86fc72ec0e58ff310e6c8a56a3998d3e667334b210d365",
+      "bytes": 2784
+    }
+  ],
+  "capture": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/service.tar.gz",
+  "request": {
+    "request_id": 13,
+    "source_prog_id": 100,
+    "native_sha256": "bce436bd651b996ad6302ad151d816e8e2479dad505be578b80e8afad7e0ef32",
+    "execution_mode": "checked-sim-c",
+    "started": "2026-11-20T06:27:32.592210+00:00",
+    "prog_id": 105,
+    "phase": "load-direct",
+    "status": 0,
+    "execution_path": "direct-native",
+    "b_generated": true,
+    "b_stock_passed": false,
+    "simulator_failure": {
+      "stage": "verification",
+      "error": "Command '['/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/loader-inputs/trusted-native-loader', 'verify', '4', '13', '100', '/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-sia10k1t/generated/request.native.o', 'native_tracer_entry', '/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-sia10k1t/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-sia10k1t/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'report_events', '273', 'null', 'inhibit_events', '280', 'null', 'pid_events', '282', 'null', 'interpreter_offsets', '264', 'null', 'reported_pids', '258', 'null', 'pid_page_to_mapping_info', '241', 'null', 'kernel_stackmap', '242', 'null', 'metrics', '250', 'null', 'perf_progs', '255', 'null', 'per_cpu_records', '259', 'null']' returned non-zero exit status 2.",
+      "returncode": 2,
+      "stderr": "trusted-native-loader: service simulator verification failed before native compilation: Invalid argument\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (18) r8 = 0xffff8ab6cd791f30       ; R8=map_value(map=kprog_unspec,ks=4,vs=8)\n3: (79) r1 = *(u64 *)(r8 +0)          ; R1=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n4: (79) r7 = *(u64 *)(r8 +0)          ; R7=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n5: (79) r2 = *(u64 *)(r8 +0)          ; R2=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n6: (79) r3 = *(u64 *)(r8 +0)          ; R3=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n7: (79) r4 = *(u64 *)(r8 +0)          ; R4=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n8: (79) r5 = *(u64 *)(r8 +0)          ; R5=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n9: (7b) *(u64 *)(r10 -16) = r5        ; R5=scalar(id=1) R10=fp0 fp-16=scalar(id=1)\n10: (7b) *(u64 *)(r10 -24) = r4       ; R4=scalar(id=2) R10=fp0 fp-24=scalar(id=2)\n11: (7b) *(u64 *)(r10 -32) = r3       ; R3=scalar(id=3) R10=fp0 fp-32=scalar(id=3)\n12: (7b) *(u64 *)(r10 -40) = r2       ; R2=scalar(id=4) R10=fp0 fp-40=scalar(id=4)\n13: (7b) *(u64 *)(r10 -48) = r1       ; R1=scalar(id=5) R10=fp0 fp-48=scalar(id=5)\n14: (7b) *(u64 *)(r10 -8) = r7        ; R7=scalar(id=6) R10=fp0 fp-8=scalar(id=6)\n15: (79) r1 = *(u64 *)(r8 +0)         ; R1=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n16: (7b) *(u64 *)(r10 -264) = r1      ; R1=scalar(id=7) R10=fp0 fp-264=scalar(id=7)\n17: (85) call bpf_get_current_pid_tgid#14     ; R0=scalar()\n18: (bf) r9 = r0                      ; R0=scalar(id=8) R9=scalar(id=8)\n19: (79) r1 = *(u64 *)(r8 +0)         ; R1=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n20: (7b) *(u64 *)(r10 -256) = r1      ; R1=scalar(id=9) R10=fp0 fp-256=scalar(id=9)\n21: (85) call bpf_ktime_get_ns#5      ; R0=scalar()\n22: (7b) *(u64 *)(r10 -288) = r0      ; R0=scalar(id=10) R10=fp0 fp-288=scalar(id=10)\n23: (79) r1 = *(u64 *)(r8 +0)         ; R1=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n24: (7b) *(u64 *)(r10 -256) = r1      ; R1=scalar(id=11) R10=fp0 fp-256=scalar(id=11)\n25: (62) *(u32 *)(r10 -216) = 0       ; R10=fp0 fp-216=????0\n26: (bf) r2 = r10                     ; R2=fp0 R10=fp0\n27: (07) r2 += -216                   ; R2=fp-216\n28: (18) r1 = 0xffff8ab6c12b4200      ; R1=map_ptr(map=per_cpu_records,ks=4,vs=5000)\n30: (7b) *(u64 *)(r10 -280) = r2      ; R2=fp-216 R10=fp0 fp-280=fp-216\n31: (85) call bpf_map_lookup_elem#1   ; R0=map_value(map=per_cpu_records,ks=4,vs=5000)\n32: (79) r1 = *(u64 *)(r8 +0)         ; R1=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8)\n33: (7b) *(u64 *)(r10 -256) = r1      ; R1=scalar(id=12) R10=fp0 fp-256=scalar(id=12)\n34: (18) r1 = 0x100000000             ; R1=0x100000000\n36: (ad) if r9 < r1 goto pc+60        ; R1=0x100000000 R9=scalar(umin=0x100000000)\n37: (b4) w4 = -1                      ; R4=0xffffffff\n38: (15) if r0 == 0x0 goto pc+930     ; R0=map_value(map=per_cpu_records,ks=4,vs=5000)\n39: (7b) *(u64 *)(r10 -296) = r6      ; R6=ctx() R10=fp0 fp-296=ctx()\n40: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n41: (07) r2 += 3840                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3840)\n42: (b7) r1 = 0                       ; R1=0\n43: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3840)\n44: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n45: (07) r2 += 3888                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3888)\n46: (73) *(u8 *)(r2 +0) = r1          ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3888)\n47: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n48: (07) r2 += 3792                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3792)\n49: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3792)\n50: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n51: (07) r2 += 3800                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3800)\n52: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3800)\n53: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n54: (07) r2 += 3808                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3808)\n55: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3808)\n56: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n57: (07) r2 += 3880                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3880)\n58: (18) r4 = 0xffffffff              ; R4=0xffffffff\n60: (7b) *(u64 *)(r2 +0) = r4         ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3880) R4=0xffffffff\n61: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n62: (07) r2 += 4992                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=4992)\n63: (63) *(u32 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=4992)\n64: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n65: (07) r2 += 4996                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=4996)\n66: (b7) r3 = 256                     ; R3=256\n67: (6b) *(u16 *)(r2 +0) = r3         ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=4996) R3=256\n68: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n69: (07) r2 += 3896                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3896)\n70: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3896)\n71: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n72: (07) r2 += 3904                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3904)\n73: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3904)\n74: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n75: (07) r2 += 3928                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3928)\n76: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3928)\n77: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n78: (07) r2 += 3936                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3936)\n79: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3936)\n80: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n81: (07) r2 += 3944                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3944)\n82: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3944)\n83: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n84: (07) r2 += 3952                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952)\n85: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952)\n86: (bf) r2 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)\n87: (07) r2 += 3960                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960)\n88: (7b) *(u64 *)(r2 +0) = r1         ; R1=0 R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960)\n89: (bf) r1 = r0                      ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R1=map_value(map=per_cpu_records,ks=4,vs=5000)\n90: (07) r1 += 700                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=700)\n91: (18) r2 = 0xffffffff              ; R2=0xffffffff\n93: (7b) *(u64 *)(r10 -304) = r2      ; R2=0xffffffff R10=fp0 fp-304=0xffffffff\n94: (7b) *(u64 *)(r1 +0) = r4         ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=700) R4=0xffffffff\n95: (b7) r1 = 278                     ; R1=278\n96: (05) goto pc+57\n154: (7b) *(u64 *)(r10 -312) = r9     ; R9=scalar(id=13,umin=0x100000000) R10=fp0 fp-312=scalar(id=13,umin=0x100000000)\n155: (77) r9 >>= 32                   ; R9=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n156: (7b) *(u64 *)(r10 -320) = r9     ; R9=scalar(id=14,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-320=scalar(id=14,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n157: (7b) *(u64 *)(r10 -256) = r1     ; R1=278 R10=fp0 fp-256=278\n158: (bf) r1 = r10                    ; R1=fp0 R10=fp0\n159: (07) r1 += -256                  ; R1=fp-256\n160: (79) r2 = *(u64 *)(r10 -264)     ; R2=scalar(id=15) R10=fp0 fp-264=scalar(id=15)\n161: (1f) r2 -= r1\nmath between fp pointer and register with unbounded min value is not allowed\nprocessed 100 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0\n\n"
+    },
+    "artifact_archive": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/13.success.tar.gz",
+    "finished": "2026-11-20T06:27:39.562651+00:00"
+  },
+  "symbol": "native_tracer_entry",
+  "products": [
+    {
+      "member": "request/generated/kernel-link/269b716acc788684.proof.o",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.proof.o",
+      "sha256": "45f88d6b9ce43aa31864cbfa6f93ad43b68a41bdb5e454e156a1ddfb4f9e2232",
+      "bytes": 69296,
+      "command": [
+        "llvm-objdump-18",
+        "-dr",
+        "--disassemble-symbols=native_tracer_entry",
+        "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.proof.o"
+      ],
+      "assembly": "/workspaces/kprog-raw/perf/current-entry-20261120/269b716acc788684.proof.asm"
+    },
+    {
+      "member": "request/generated/request.native.o",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/request.native.o",
+      "sha256": "bce436bd651b996ad6302ad151d816e8e2479dad505be578b80e8afad7e0ef32",
+      "bytes": 1044088,
+      "command": [
+        "llvm-objdump-18",
+        "-dr",
+        "--disassemble-symbols=native_tracer_entry",
+        "/workspaces/kprog-raw/perf/current-entry-20261120/request.native.o"
+      ],
+      "assembly": "/workspaces/kprog-raw/perf/current-entry-20261120/request.native.asm"
+    },
+    {
+      "member": "request/generated/trusted_x86.bpf.o",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.bpf.o",
+      "sha256": "4c020285180e16d1402de673e1da63288611dfc94ecc47131db298aa7a3d4b4f",
+      "bytes": 98832,
+      "command": [
+        "llvm-objdump-18",
+        "-dr",
+        "--disassemble-symbols=native_tracer_entry",
+        "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.bpf.o"
+      ],
+      "assembly": "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.bpf.asm"
+    },
+    {
+      "member": "request/generated/trusted_x86.proof.o",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.proof.o",
+      "sha256": "45f88d6b9ce43aa31864cbfa6f93ad43b68a41bdb5e454e156a1ddfb4f9e2232",
+      "bytes": 69296,
+      "command": [
+        "llvm-objdump-18",
+        "-dr",
+        "--disassemble-symbols=native_tracer_entry",
+        "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.proof.o"
+      ],
+      "assembly": "/workspaces/kprog-raw/perf/current-entry-20261120/trusted_x86.proof.asm"
+    },
+    {
+      "member": "request/kernel.native.o",
+      "path": "/workspaces/kprog-raw/perf/current-entry-20261120/kernel.native.o",
+      "sha256": "bce436bd651b996ad6302ad151d816e8e2479dad505be578b80e8afad7e0ef32",
+      "bytes": 1044088,
+      "command": [
+        "llvm-objdump-18",
+        "-dr",
+        "--disassemble-symbols=native_tracer_entry",
+        "/workspaces/kprog-raw/perf/current-entry-20261120/kernel.native.o"
+      ],
+      "assembly": "/workspaces/kprog-raw/perf/current-entry-20261120/kernel.native.asm"
+    }
+  ],
+  "scope": "Retained capsule objects; P precedes direct-native context LTO and is not the installed image. No compilation, app execution or helper latency measurement."
+}

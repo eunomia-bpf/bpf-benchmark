@@ -163,3 +163,7 @@ The 7510B marker is program48 in equal-work-20261113/raw-otel/post_rejit-0013/pr
 ### PERF 2026-11-20T07:45:55Z: native stub tag is not P identity
 
 The07:40log inference is disproved by one captured inventory: ten native programs26/28/30/32/34/36/38/40/42/48 all share26449268576adffc despite different functions and7928..41433B bodies (entry7510B). Native stub tag/24Bxlatedlength/name/fd do not hold P bytes/IR/flags/maps/context constant. Added exact inventory references to perf-history-review-20261120/README.md. OMP08e01b7bd already corrects the broken-reference claim; b38644534 fixes pairing. No compiler/toolbuild, nativebodyrestore or new timing.
+
+### PERF 2026-11-20T08:02:40Z: inspect the current OTel entry, not the historical broken body
+
+results/current-entry-20261120 retains actual0622capture request13/direct-native P/proof/link2618Bblob, plan, ABI, map patches, hashes and assembly (JITreported2650B). Current blob loads ctx->regs before SS; stackid plan delta0x41da0 matches sole-kernel bpf_get_stackid_pe, so no helper-context binding fix indicated. Per-CPU lookup already31B GS bodies (max1/max99); shared668Bzero worker is an actual body-cost candidate, not yet timed. Tail-target run_cnt0 is documented section5.6 accounting and xlated24 native stubs are representation, neither a zero-unwind signature. Historical39smallbody median1.05 is not one current-image average or correctness proof. No tools/programs rebuilt, guests or policy changes.
