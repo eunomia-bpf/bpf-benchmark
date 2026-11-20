@@ -1,52 +1,55 @@
-# OTel's 13 fallbacks: `scalar - pointer` is a verifier EACCES, not an unbounded-min problem (OMP 2026-11-20T06:33Z)
+# OTel's fallbacks: `scalar -= pointer`, two verifier messages, one cause (OMP 2026-11-20T06:45Z)
 
-Corrects the earlier reading of OTel request 7 (`526c5a5b`), which was attributed to
-`check_reg_sane_offset`'s `smin == S64_MIN` test. That test is not what fires. The kernel rejects the
-instruction outright:
+Request 7 (`526c5a5b`) of the OTel capture fails verification at insn 3137 with
 
 ```
-R2 tried to subtract pointer from scalar
+math between fp pointer and register with unbounded min value is not allowed
 ```
 
-**Where**: `vendor/linux-framework/kernel/bpf/verifier.c:14990-14995`, `adjust_scalar_min_max_vals`, case
-`BPF_SUB`:
+I first read that as `check_reg_sane_offset`'s `smin == S64_MIN` test, then "corrected" it to
+`R%d tried to subtract pointer from scalar`. Both are right; they are **two branches of one illegal form**,
+`ALU64 SUB` with a scalar destination and a pointer source. Which message appears depends only on whether the
+scalar still has a bound:
 
-```c
-case BPF_SUB:
-    if (dst_reg == off_reg) {
-        /* scalar -= pointer.  Creates an unknown scalar */
-        verbose(env, "R%d tried to subtract pointer from scalar\n", dst);
-        return -EACCES;
-    }
+| scalar on the left | message | errno |
+|---|---|---|
+| bounded (`r1 = 24`) | `R1 tried to subtract pointer from scalar` (verifier.c:14990) | 13 |
+| unbounded (`r1` reloaded from a spill of `ctx`) | `math between fp pointer and register with unbounded min value` (verifier.c:14503) | 13 |
+
+Mechanism: `adjust_scalar_min_max_vals` sends any pointer operand to `adjust_ptr_min_max_vals`, which runs
+`check_reg_sane_offset` on **both** the offset register and the pointer at line 14931. An unbounded scalar
+fails there first; a bounded one passes it and is then rejected by the `BPF_SUB` branch at 14990. Either way
+the program is refused; the exact text is cosmetic.
+
+## Reproduced by hand, minimal
+
+`otel_shape.o` holds exactly the eight instructions OTel emits at 3134–3137, hand-assembled so nothing else
+can be responsible:
+
+```
+r1 = 24; *(u64*)(fp-152) = r1;      # scalar, bounded
+r2 = fp; r2 += -128;
+r1 = *(u64*)(fp-152);                # reload (OTel's is from a map: unbounded)
+r1 -= r2                             # scalar -= fp pointer
 ```
 
-`-EACCES` = 13, which is what every OTel rejection carries. Nothing about bounds, `S64_MIN`, or
-`anchor_pointer_differences()` is involved: the LLVM IR `%2030 = sub i64 24, %2027` becomes exactly
-`rX = 24; rX -= rY` where `rY` still holds a pointer, and the verifier refuses the form itself.
+Bounded reload → `R1 tried to subtract pointer from scalar`. The same object with the spill replaced by a
+reload of `ctx` (unbounded) → `math between fp pointer and register with unbounded min value`, i.e. the
+message the real request shows. Both on the host; the guest kernel 7.0.0-rc2+ rejects both the same way.
 
-## Reproduced on the guest kernel, not just the host
+## What this means for the emitter
 
-The guest kernel is 7.0.0-rc2+ (the image's own `bzImage`); the host is 7.3.0, so a host-only result would
-not have settled it. Both reject, both with errno 13:
+`24 - d < 8` must not be formed as `constant - scalar` when `d` came from a pointer arithmetic chain that the
+anchoring pass turned back into a scalar (`pointer_difference`); the natural fix is to stop creating the
+subtraction at all and emit the equivalent range test:
 
-| program | form | host 7.3 | guest 7.0-rc2+ |
-|---|---|---|---|
-| `scalar_minus_pointer.bpf.c` | `u64 r = 24 - (u64)ctx;` | REJECT 13 | **REJECT 13** (`R2 tried to subtract pointer from scalar`) |
-| `rewritten_bounds.bpf.c` | `ctx > 0x18 → 2; ctx < 0x11 → 3;` | ACCEPT | **ACCEPT** |
-| control: `u64 c = 24; c - (u64)ctx` in 32-bit (`w0 -= w1`) | 32-bit ALU | ACCEPT | ACCEPT |
+```
+24 - d < 8   ⟺   16 < d < 25
+```
 
-Note the last row: the **32-bit** form passes. The verifier's `dst_reg == off_reg` branch is reached only for
-the 64-bit `ALU64|SUB|X` when the destination is the scalar; a 32-bit `w0 -= w1` over the same values is
-accepted. So the trigger is precise: `ALU64 SUB` with the scalar as destination and a pointer as source.
+which keeps `d` a plain scalar and forms no `scalar - pointer`. This applies to the 13 fallbacks in the
+`verified-coverage-20261120` record that share this shape.
 
-## What a fix looks like (for whoever owns the emitter)
-
-`24 - d < 8` is equivalent to `16 < d < 25`, which is `d > 16 && d < 25`; `d` stays a plain scalar and no
-`scalar - pointer` is formed. `rewritten_bounds.bpf.c` shows the accepted shape. Alternatively keep the
-subtraction but put the **pointer** on the left and the scalar on the right (`d = p - q` is legal; only
-`scalar - pointer` is banned) and then compare `(d - 17) < 8` with `d >= 17`, which keeps `d` scalar
-throughout.
-
-Files: `scalar_minus_pointer.bpf.c`, `rewritten_bounds.bpf.c`, `vlog.c` (the static loader used; build
-`gcc -static -o vlog vlog.c`, run `vlog <obj> classifier 3`, exit 0 = ACCEPT, 1 = REJECT with the verifier
-log).
+Files: `otel_shape.o` (hand-assembled), `scalar_minus_pointer.bpf.c` (C form), `rewritten_bounds.bpf.c`
+(accepted alternative), `vlog.c` (static loader: `gcc -static -o vlog vlog.c`; `vlog <obj> classifier 3`,
+exit 0 = ACCEPT, 1 = REJECT, prints the verifier log).
