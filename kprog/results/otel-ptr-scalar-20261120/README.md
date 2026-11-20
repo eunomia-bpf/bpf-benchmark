@@ -47,7 +47,10 @@ request shows. Host and guest agree on both.
    `bpf_ringbuf_reserve` payload pointer case.
 2. `anchor_pointer_differences()` turns the difference into an opaque scalar, but the *next* step subtracts
    that scalar from a constant, which re-enters the same 64-bit `ALU64|SUB|X` form with a pointer operand.
-3. `adjust_ptr_min_max_vals` refuses it: unbounded scalar → errno 22 (`unbounded min value`), bounded → errno
+3. Concretely, in request 7's IR the subtracted pointer is `%13 = alloca %union.x86_sim_stack_mem` — the
+   simulator's own frame — and **52 of the 55** `constant - scalar` sites in that module have a scalar chain
+   reaching it (`trace.py` counts them).
+4. `adjust_ptr_min_max_vals` refuses it: unbounded scalar → errno 22 (`unbounded min value`), bounded → errno
    13 (`tried to subtract pointer from scalar`), and if the pointer is the destination → errno 13
    (`subtraction from stack pointer prohibited`). Four variants, one form, all in
    `kernel/bpf/verifier.c` 14931 / 14990 / 14999.
