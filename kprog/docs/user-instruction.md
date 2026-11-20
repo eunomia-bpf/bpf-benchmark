@@ -312,3 +312,11 @@ requests1/9/12 verify and install3/3. See
 `../results/cilium-headlen-20261119/live-freshness-coverage.json` and its source
 archive. The quoted diagnosis is retained as received, not adopted as a rule or
 as evidence of a remaining current failure.
+
+## Runtime profiling and volatile cleanup handoff, received 2026-11-20T00:39:11Z (verbatim)
+
+Coordinator 2026-11-20T00:22:55Z (todo section 0, block "审核 20261119T21Z 逐条核实后的决定"):
+Your task is item 1 of the multi-day list: native code faster per call (operator: "必须继续优化到至少 20%"; "native 快 50%"). The P-B items (Cilium headlen, Tetragon caches, Katran pointer difference, constant ALU32) now belong to omp.
+Image 8f6ff5891 check, per call native/eBPF: OTel 0.930x, BCC 1.012x, Cilium 1.034x, Katran 1.089x, Tetragon 1.241x, Tracee 2.096x.
+Next: profile the hottest program of OTel, BCC, Katran and Cilium in both arms in one guest run, split each call into program body, each helper and map work, then write the largest helper costs as macros or inline functions in vendor/bpf/native-helpers.h (operator 11-19: "helper 能用宏或者 function inline 都可以. 但是不要在链接器里面手写太多, 链接器要简单"). Also check which volatile accesses on the sim side faithful(I,P) needs; remove the rest.
+The coordinator's timing holds CPUs 0-7 until about 05:30; run your guests on CPUs 16-23, heavy builds under nice 19. Notices: three short lines with spaces (what changed, the number, next).
