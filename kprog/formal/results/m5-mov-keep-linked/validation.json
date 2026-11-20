@@ -1,0 +1,169 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal.lean": "8d04b902d10e26e35ff93d0587f50cfa74b477441f297ab862abd91feeb38deb",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateSuffix.lean": "9be714a449b60e243ff88d42a7a5b604f73aafb37313c41dfd23f459e54b0296",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepRead.lean": "1dc690869c42c04cb2856c9e3e2a7c4866077bcd7e9b4dfa70b76e219c07118e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepSuffix.lean": "7946bf57b590aa36c1097655097b28cee47af3927d37e74e1661be7a492532ad",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepLinked.lean": "094a3c71f43ed776241e95ffb13c1d58d76a401f77fd9acdee49b5e31764756a",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWrite.lean": "f9f025032d2eadc0fe60e37efa05cec156a20d42d1b1290638368cf1a0c06a7e"
+  },
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovKeepLinked"
+    ],
+    "exit": 0,
+    "seconds": 259.9377462863922,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_queries": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-mov-keep-linked/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.613097906112671,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "query_count": 17,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterWrite.program_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores_layout": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_zr_layout": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.read_scalar_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.scalar_writer_call_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.read_call_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.after_read_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.writer_call_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.after_writer_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.reader_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.writer_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.reader_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.writer_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.read_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.write_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.branch_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.branch_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_caps": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending",
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "nice": 19,
+    "cpu": 17,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-keep-linked",
+  "completed_isa_families": 0
+}

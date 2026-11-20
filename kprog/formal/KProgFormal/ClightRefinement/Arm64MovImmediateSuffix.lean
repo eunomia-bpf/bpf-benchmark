@@ -194,8 +194,8 @@ theorem writer_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
   exact writer_call_register e le m entry (BitVec.ofNat 64 i.val) value narrow
     readUnshadowed writeUnshadowed hentry hsrc hdst hop himm hwidth
 
-theorem after_writer (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    InternalRun ge 3
+theorem after_writer_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
+    InternalRun world 3
       (.Returnstate .Vundef (.Kcall none Arm64Nop.handler e le Dispatch.continuation) m)
       (.State Arm64Nop.handler .Sskip .Kstop e le m) := by
   run_tac do
@@ -205,6 +205,12 @@ theorem after_writer (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
       Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
       Lean.Elab.Tactic.evalTactic (← `(tactic| rfl))
     Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+theorem after_writer (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
+    InternalRun ge 3
+      (.Returnstate .Vundef (.Kcall none Arm64Nop.handler e le Dispatch.continuation) m)
+      (.State Arm64Nop.handler .Sskip .Kstop e le m) :=
+  after_writer_bound ge e le m
 
 /-- Execute the scalar branch's actual read, selection, writer call and return
 to its caller's end statement. The real generic local frame is still live. -/

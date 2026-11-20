@@ -65,6 +65,32 @@ private theorem reader_type : CC.typeOfFundef (.Internal Arm64Program.f_kprog_ar
       CC.tulong CC.cc_default := rfl
 
 /-- The actual MOVK expression calls the combined reader on DST, not SRC. -/
+theorem read_call_bound (world : CC.CGenv) (readerBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some readerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv readerBlock = some (.Internal Arm64Program.f_kprog_arm64_program_read))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (entry : CC.Block)
+    (reg : BitVec 64) (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
+    (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
+    (hdst : le.get Arm64Program._dst = some (.Vlong reg)) :
+    InternalRun world 5 (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr entry 0, .Vlong reg]
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m) := by
+  have execution : steps world 5
+      (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m) =
+      some (CC.E0, .Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr entry 0, .Vlong reg]
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m) ∧
+      InternalPath world 5 (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m) := by
+    simp [branch_source, body, readCall, readCont, dstSet, tail, steps, InternalPath, InternalState,
+      CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.typeof, CC.Cop.classifyFun,
+      CC.lvalOfVar, unshadowed, binding.1, CC.doDerefLoc,
+      CC.accessMode, CC.Genv.findFunct, binding.2, hentry, hdst,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.tptr, CC.tulong, CC.tvoid,
+      reader_type, CC.E0, CC.Eapp, CC.Integers.MI.zero,
+      CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero, CC.Integers.MI.eq]
+  exact internalRun_of_steps execution.2 execution.1
+
 theorem read_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (entry : CC.Block)
     (reg : BitVec 64) (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
     (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
@@ -72,21 +98,8 @@ theorem read_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (entry : CC.Block)
     InternalRun ge 5 (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m)
       (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
         [.Vptr entry 0, .Vlong reg]
-        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m) := by
-  have execution : steps ge 5
-      (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m) =
-      some (CC.E0, .Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
-        [.Vptr entry 0, .Vlong reg]
-        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m) ∧
-      InternalPath ge 5 (.State Arm64Nop.handler Dispatch.Keep.branch Dispatch.continuation e le m) := by
-    simp [branch_source, body, readCall, readCont, dstSet, tail, steps, InternalPath, InternalState,
-      CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.typeof, CC.Cop.classifyFun,
-      CC.lvalOfVar, unshadowed, reader_binding.1, CC.doDerefLoc,
-      CC.accessMode, CC.Genv.findFunct, reader_binding.2, hentry, hdst,
-      CC.Cop.semCast, CC.Cop.classifyCast, CC.tptr, CC.tulong, CC.tvoid,
-      reader_type, CC.E0, CC.Eapp, CC.Integers.MI.zero,
-      CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero, CC.Integers.MI.eq]
-  exact internalRun_of_steps execution.2 execution.1
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m) :=
+  read_call_bound ge (CC.Positive.ofNat 76) reader_binding e le m entry reg unshadowed hentry hdst
 
 /-- The real zero-register read returns zero without touching any memory. -/
 theorem read_zr (world : CC.CGenv) (entry : CC.Val) (m : CC.Mem) (k : CC.Cont) :
@@ -148,16 +161,16 @@ theorem call_read (before : CC.Mem) (unused : Arm64Nop.IgnoredArguments)
   have dispatch := Dispatch.Keep.call_dispatch before (operands unused entry reg imm column) narrow
   exact ⟨dispatch.1.trans (read_call _ _ _ entry reg unshadowed temps.1 temps.2), dispatch.2⟩
 
-private theorem long_and (m : CC.Mem) (a b : BitVec 64) :
-    CC.Cop.semBinaryOperation ge.genv_cenv .Oand (.Vlong a) CC.tulong (.Vlong b) CC.tulong m =
+private theorem long_and (cenv : CC.CompositeEnv) (m : CC.Mem) (a b : BitVec 64) :
+    CC.Cop.semBinaryOperation cenv .Oand (.Vlong a) CC.tulong (.Vlong b) CC.tulong m =
       some (.Vlong (a &&& b)) := rfl
-private theorem long_or (m : CC.Mem) (a b : BitVec 64) :
-    CC.Cop.semBinaryOperation ge.genv_cenv .Oor (.Vlong a) CC.tulong (.Vlong b) CC.tulong m =
+private theorem long_or (cenv : CC.CompositeEnv) (m : CC.Mem) (a b : BitVec 64) :
+    CC.Cop.semBinaryOperation cenv .Oor (.Vlong a) CC.tulong (.Vlong b) CC.tulong m =
       some (.Vlong (a ||| b)) := rfl
 private theorem long_not (m : CC.Mem) (a : BitVec 64) :
     CC.Cop.semUnaryOperation .Onotint (.Vlong a) CC.tulong m = some (.Vlong (~~~a)) := rfl
-private theorem long_shift (m : CC.Mem) (a : BitVec 64) (c : Fin 4) :
-    CC.Cop.semBinaryOperation ge.genv_cenv .Oshl (.Vlong a) CC.tulong
+private theorem long_shift (cenv : CC.CompositeEnv) (m : CC.Mem) (a : BitVec 64) (c : Fin 4) :
+    CC.Cop.semBinaryOperation cenv .Oshl (.Vlong a) CC.tulong
       (.Vlong (BitVec.ofNat 64 (16*c.val))) CC.tulong m =
       some (.Vlong (a <<< (16*c.val))) := by
   rcases c with ⟨c, bound⟩
@@ -190,16 +203,16 @@ private theorem result_source : resultExpr = .Ebinop .Oor leftExpr rightExpr CC.
 private theorem left_type : CC.typeof leftExpr = CC.tulong := rfl
 private theorem right_type : CC.typeof rightExpr = CC.tulong := rfl
 
-private theorem eval_merge (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+private theorem eval_merge (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
     (hdst : le.get Arm64Program.___kprog_a64_movk_dst = some (.Vlong old))
     (himm : le.get Arm64Program.___kprog_a64_movk_imm = some (.Vlong (imm.setWidth 64)))
     (hshift : le.get Arm64Program.___kprog_a64_movk_shift = some (.Vlong (BitVec.ofNat 64 (16*column.val))))
     (hmask : le.get Arm64Program.___kprog_a64_movk_mask = some (.Vlong (mask column))) :
-    CC.doEvalExpr ge e le m resultExpr = some (.Vlong (merge old imm column)) := by
-  have left : CC.doEvalExpr ge e le m leftExpr = some (.Vlong (old &&& ~~~mask column)) := by
+    CC.doEvalExpr world e le m resultExpr = some (.Vlong (merge old imm column)) := by
+  have left : CC.doEvalExpr world e le m leftExpr = some (.Vlong (old &&& ~~~mask column)) := by
     simp only [leftExpr, CC.doEvalExpr, hdst, hmask, CC.typeof, long_not, long_and]
-  have right : CC.doEvalExpr ge e le m rightExpr =
+  have right : CC.doEvalExpr world e le m rightExpr =
       some (.Vlong (((imm.setWidth 64) <<< (16*column.val)) &&& mask column)) := by
     simp only [rightExpr, CC.doEvalExpr, himm, hshift, hmask, CC.typeof, long_shift, long_and]
   simp only [result_source, CC.doEvalExpr, left, right, left_type, right_type, long_or, merge]
@@ -211,9 +224,9 @@ private def readyTemps (le : CC.TempEnv) (old : BitVec 64) (imm : BitVec 16) (co
     Arm64Program.___kprog_a64_movk_shift (.Vlong (BitVec.ofNat 64 (16 * column.val)))).set
     Arm64Program.___kprog_a64_movk_mask (.Vlong (mask column)))
 
-private theorem ready_step (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+private theorem ready_step (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (k : CC.Cont) :
-    CC.doStep ge (.State Arm64Nop.handler (.Sset Arm64Program.___kprog_a64_movk_result resultExpr)
+    CC.doStep world (.State Arm64Nop.handler (.Sset Arm64Program.___kprog_a64_movk_result resultExpr)
       k e (readyTemps le old imm column) m) =
       some (CC.E0, .State Arm64Nop.handler .Sskip k e
         ((readyTemps le old imm column).set Arm64Program.___kprog_a64_movk_result
@@ -229,16 +242,16 @@ private theorem ready_step (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     rw [readyTemps, CC.PTree.gso _ _ _ _ (by decide +kernel), CC.PTree.gss]
   have hmask : (readyTemps le old imm column).get Arm64Program.___kprog_a64_movk_mask = some (.Vlong (mask column)) :=
     CC.PTree.gss _ _ _
-  simp only [CC.doStep, eval_merge e _ m old imm column hdst himm hshift hmask]
+  simp only [CC.doStep, eval_merge world e _ m old imm column hdst himm hshift hmask]
 
 set_option hygiene false in
 /-- The source merge begins at the actual reader's returned value and memory;
 no read result or post-memory is supplied by this control/bit-operation lemma. -/
-theorem after_read (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+theorem after_read_bound (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
     (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
     (haux : le.get Arm64Program._aux = some (.Vint (aux column))) :
-    InternalRun ge 26
+    InternalRun world 26
       (.Returnstate (.Vlong old)
         (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
       (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) := by
@@ -271,27 +284,38 @@ theorem after_read (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
         Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
         Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
         if count == 20 then
-          Lean.Elab.Tactic.evalTactic (← `(tactic| exact ready_step e le m old imm ⟨_, bound⟩ _))
+          Lean.Elab.Tactic.evalTactic (← `(tactic| exact ready_step world e le m old imm ⟨_, bound⟩ _))
         else
           Lean.Elab.Tactic.evalTactic reduce
       Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
 
+theorem after_read (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (old : BitVec 64) (imm : BitVec 16) (column : Fin 4)
+    (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
+    (haux : le.get Arm64Program._aux = some (.Vint (aux column))) :
+    InternalRun ge 26
+      (.Returnstate (.Vlong old)
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
+      (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) :=
+  after_read_bound ge e le m old imm column himm haux
+
 private theorem writer_type : CC.typeOfFundef (.Internal Arm64RegisterWrite.procedure) =
     .Tfunction [CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr), CC.tulong,
       CC.tulong, CC.tuchar] CC.tvoid CC.cc_default := rfl
-private theorem writer_function : CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 79) =
-    some (.Internal Arm64RegisterWrite.procedure) := writer_binding.2
 private theorem pointer_zero :
     CC.Integers.Ptrofs.eq CC.Integers.Ptrofs.zero CC.Integers.Ptrofs.zero = true := rfl
 private theorem byte_size : ¬ (8 : Nat) ≥ 32 := by decide
 
-private theorem writer_step (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+private theorem writer_step (world : CC.CGenv) (writerBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (entry : CC.Block) (reg : BitVec 64) (old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
     (unshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
     (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
     (hdst : le.get Arm64Program._dst = some (.Vlong reg))
     (hwidth : le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow)) :
-    CC.doStep ge (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) =
+    CC.doStep world (.State Arm64Nop.handler writeCall Dispatch.continuation e (writerTemps le old imm column) m) =
       some (CC.E0, .Callstate (.Internal Arm64RegisterWrite.procedure)
         [.Vptr entry 0, .Vlong reg, .Vlong (merge old imm column), Arm64RegisterWrite.width narrow]
         (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) := by
@@ -307,8 +331,8 @@ private theorem writer_step (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
   cases narrow <;>
     simp only [CC.doStep, writeCall, Arm64RegisterWrite.arguments, Arm64RegisterWrite.width,
       CC.typeof, CC.Cop.classifyFun, CC.doEvalExpr, CC.doEvalExprlist,
-      CC.lvalOfVar, unshadowed, writer_binding.1, CC.doDerefLoc, CC.accessMode,
-      CC.Genv.findFunct, writer_function, writer_type, entryTemp, dstTemp, widthTemp, valueTemp,
+      CC.lvalOfVar, unshadowed, binding.1, CC.doDerefLoc, CC.accessMode,
+      CC.Genv.findFunct, binding.2, writer_type, entryTemp, dstTemp, widthTemp, valueTemp,
       byte_size, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Archi.ptr64,
       CC.tptr, CC.tulong, CC.tuchar, CC.tvoid,
       CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
@@ -318,6 +342,27 @@ private theorem writer_step (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
 
 /-- The real writer call follows the 26-transition merge. Its start state
 is the actual reader return, so a reader's post-memory remains explicit. -/
+theorem writer_call_bound (world : CC.CGenv) (writerBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (entry : CC.Block) (reg old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
+    (unshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
+    (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
+    (hdst : le.get Arm64Program._dst = some (.Vlong reg))
+    (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
+    (haux : le.get Arm64Program._aux = some (.Vint (aux column)))
+    (hwidth : le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow)) :
+    InternalRun world 27
+      (.Returnstate (.Vlong old)
+        (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
+      (.Callstate (.Internal Arm64RegisterWrite.procedure)
+        [.Vptr entry 0, .Vlong reg, .Vlong (merge old imm column), Arm64RegisterWrite.width narrow]
+        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) := by
+  exact (after_read_bound world e le m old imm column himm haux).trans
+    (.step trivial (CC.doStep_sound _ _ _ _
+      (writer_step world writerBlock binding e le m entry reg old imm column narrow unshadowed hentry hdst hwidth)) (.refl _))
+
 theorem writer_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
     (entry : CC.Block) (reg old : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
     (unshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
@@ -331,10 +376,9 @@ theorem writer_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
         (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) m)
       (.Callstate (.Internal Arm64RegisterWrite.procedure)
         [.Vptr entry 0, .Vlong reg, .Vlong (merge old imm column), Arm64RegisterWrite.width narrow]
-        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) := by
-  exact (after_read e le m old imm column himm haux).trans
-    (.step trivial (CC.doStep_sound _ _ _ _
-      (writer_step e le m entry reg old imm column narrow unshadowed hentry hdst hwidth)) (.refl _))
+        (.Kcall none Arm64Nop.handler e (writerTemps le old imm column) Dispatch.continuation) m) :=
+  writer_call_bound ge (CC.Positive.ofNat 79) writer_binding e le m entry reg old imm column narrow
+    unshadowed hentry hdst himm haux hwidth
 
 /-- Concrete actual DST31 read, merge and writer edge. The reader executes
 all 55 transitions and its zero result is derived, with unchanged memory. -/

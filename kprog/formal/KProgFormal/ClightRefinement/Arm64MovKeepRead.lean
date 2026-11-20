@@ -28,6 +28,24 @@ theorem read_nonrelative (addresses : Arm64Registers.PointerOrigins)
 
 /-- Derive the scalar read from the actual producer cell loads. A tag or a
 ValueRep witness alone is not used to claim the word is a Vlong. -/
+theorem read_scalar_bound (world : CC.CGenv) (layout : Arm64RegisterReads.GprLayout world)
+    {m memory : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m memory entry)
+    (addresses : Arm64Registers.PointerOrigins) (i : Fin 31) (bits : BitVec 64) (k : CC.Cont)
+    (word : CC.Mem.load .Mint64 memory ((storage.tables false).cellBlock i) 0 = some (.Vlong bits))
+    (tag : CC.Mem.load .Mint8unsigned memory ((storage.tables true).cellBlock i) 0 = some (.Vint 0)) :
+    InternalRun world 73
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr entry.block 0, .Vlong (BitVec.ofNat 64 i.val)] k memory)
+      (.Returnstate (.Vlong bits) (CC.callCont k) memory) := by
+  have observed : Arm64EntryMemory.gpr memory.nextblock memory (.Vptr entry.block 0) i.val =
+      some (.Vlong bits, .Vint ((0#8).setWidth 32)) := by
+    rw [Arm64RegisterWrite.storage_gpr storage i, word, tag]
+    rfl
+  exact Arm64RegisterReads.gpr_read_nonrelative_bound world layout addresses memory.nextblock entry.block 0 i memory k
+    (.Vlong bits) bits 0 observed rfl (by decide) (by decide)
+
+/-- The previous Numeric-world API is an instance of the layout-bound reader. -/
 theorem read_scalar {m memory : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     (storage : Arm64ProducerRegisterStorage.Storage m memory entry)
     (addresses : Arm64Registers.PointerOrigins) (i : Fin 31) (bits : BitVec 64) (k : CC.Cont)
@@ -36,13 +54,8 @@ theorem read_scalar {m memory : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     InternalRun Arm64NumericProgram.ge 73
       (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
         [.Vptr entry.block 0, .Vlong (BitVec.ofNat 64 i.val)] k memory)
-      (.Returnstate (.Vlong bits) (CC.callCont k) memory) := by
-  have observed : Arm64EntryMemory.gpr memory.nextblock memory (.Vptr entry.block 0) i.val =
-      some (.Vlong bits, .Vint ((0#8).setWidth 32)) := by
-    rw [Arm64RegisterWrite.storage_gpr storage i, word, tag]
-    rfl
-  exact read_nonrelative addresses memory.nextblock entry.block 0 i memory k
-    (.Vlong bits) bits 0 observed rfl (by decide) (by decide)
+      (.Returnstate (.Vlong bits) (CC.callCont k) memory) :=
+  read_scalar_bound Arm64NumericProgram.ge reader_layout storage addresses i bits k word tag
 
 /-- A real scalar writer's successful word/tag stores discharge the next
 reader's scalar admission at its reached memory, with the same storage. -/
@@ -99,6 +112,39 @@ theorem read_scalar_corresponds {m memory : CC.Mem} {entry : Arm64Producer.Heade
 
 /-- Ordinary MOVK reaches the actual writer in 105 transitions from its
 branch, including the genuine scalar DST read and unchanged read memory. -/
+theorem scalar_writer_call_bound (world : CC.CGenv) (readerBlock writerBlock : CC.Block)
+    (readerBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some readerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv readerBlock = some (.Internal Arm64Program.f_kprog_arm64_program_read))
+    (writerBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_write = some writerBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv writerBlock = some (.Internal Arm64RegisterWrite.procedure))
+    (layout : Arm64RegisterReads.GprLayout world)
+    {m memory : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m memory entry)
+    (addresses : Arm64Registers.PointerOrigins) (e : CC.Env) (le : CC.TempEnv)
+    (i : Fin 31) (bits : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
+    (readerUnshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
+    (writerUnshadowed : e.get Arm64Program._kprog_arm64_program_write = none)
+    (hentry : le.get Arm64Program._entry = some (.Vptr entry.block 0))
+    (hdst : le.get Arm64Program._dst = some (.Vlong (BitVec.ofNat 64 i.val)))
+    (himm : le.get Arm64Program._imm = some (.Vlong (imm.setWidth 64)))
+    (haux : le.get Arm64Program._aux = some (.Vint (aux column)))
+    (hwidth : le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow))
+    (word : CC.Mem.load .Mint64 memory ((storage.tables false).cellBlock i) 0 = some (.Vlong bits))
+    (tag : CC.Mem.load .Mint8unsigned memory ((storage.tables true).cellBlock i) 0 = some (.Vint 0)) :
+    InternalRun world 105
+      (.State Arm64Nop.handler Arm64MovImmediate.Dispatch.Keep.branch
+        Arm64MovImmediate.Dispatch.continuation e le memory)
+      (.Callstate (.Internal Arm64RegisterWrite.procedure)
+        [.Vptr entry.block 0, .Vlong (BitVec.ofNat 64 i.val), .Vlong (merge bits imm column), Arm64RegisterWrite.width narrow]
+        (.Kcall none Arm64Nop.handler e (writerTemps le bits imm column)
+          Arm64MovImmediate.Dispatch.continuation) memory) := by
+  have enter := read_call_bound world readerBlock readerBinding e le memory entry.block (BitVec.ofNat 64 i.val) readerUnshadowed hentry hdst
+  have read := read_scalar_bound world layout storage addresses i bits
+    (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) word tag
+  have finish := writer_call_bound world writerBlock writerBinding e le memory entry.block (BitVec.ofNat 64 i.val) bits imm column narrow
+    writerUnshadowed hentry hdst himm haux hwidth
+  simpa only [CC.callCont] using (enter.trans read).trans finish
+
 theorem scalar_writer_call {m memory : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     (storage : Arm64ProducerRegisterStorage.Storage m memory entry)
     (addresses : Arm64Registers.PointerOrigins) (e : CC.Env) (le : CC.TempEnv)
@@ -118,12 +164,10 @@ theorem scalar_writer_call {m memory : CC.Mem} {entry : Arm64Producer.HeaderLoca
       (.Callstate (.Internal Arm64RegisterWrite.procedure)
         [.Vptr entry.block 0, .Vlong (BitVec.ofNat 64 i.val), .Vlong (merge bits imm column), Arm64RegisterWrite.width narrow]
         (.Kcall none Arm64Nop.handler e (writerTemps le bits imm column)
-          Arm64MovImmediate.Dispatch.continuation) memory) := by
-  have enter := read_call e le memory entry.block (BitVec.ofNat 64 i.val) readerUnshadowed hentry hdst
-  have read := read_scalar storage addresses i bits
-    (.Kcall (some Arm64Program._t'6) Arm64Nop.handler e le readCont) word tag
-  have finish := writer_call e le memory entry.block (BitVec.ofNat 64 i.val) bits imm column narrow
-    writerUnshadowed hentry hdst himm haux hwidth
-  simpa only [CC.callCont] using (enter.trans read).trans finish
+          Arm64MovImmediate.Dispatch.continuation) memory) :=
+  scalar_writer_call_bound Arm64NumericProgram.ge (CC.Positive.ofNat 76) (CC.Positive.ofNat 79)
+    Arm64MovImmediate.reader_binding Arm64MovImmediate.writer_binding reader_layout
+    storage addresses e le i bits imm column narrow readerUnshadowed writerUnshadowed
+    hentry hdst himm haux hwidth word tag
 
 end KProgFormal.ClightRefinement.Arm64MovKeep
