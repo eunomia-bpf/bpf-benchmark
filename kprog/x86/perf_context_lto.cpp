@@ -14,6 +14,7 @@
 #include "llvm/TargetParser/Host.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Program.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include "llvm/Support/TargetSelect.h"
@@ -80,13 +81,17 @@ static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Typ
     Out.close();
     if (!Out) return native_bpf::failure("write LPM helper source: " + Source);
   }
-  const std::vector<std::string> Args = {"clang-18", "-O3", "-march=native", "-mgeneral-regs-only",
+  auto Compiler = sys::findProgramByName("clang-18");
+  if (!Compiler) return errorCodeToError(Compiler.getError());
+  const std::vector<std::string> Args = {*Compiler, "-O3", "-march=native", "-mgeneral-regs-only",
       "-mno-red-zone", "-fPIC", "-fomit-frame-pointer", "-fno-stack-protector",
       "-fno-asynchronous-unwind-tables", "-fno-unwind-tables", "-S", "-emit-llvm", Source, "-o", IR};
   const int Status = native_loader_detail::run_subprocess(Args, Log);
   if (Status) {
+    const auto Saved = errno;
     auto Diagnostics = MemoryBuffer::getFile(Log);
-    return native_bpf::failure("LPM C compiler failed: " +
+    return native_bpf::failure("LPM C compiler failed (status " + std::to_string(Status) +
+        ", errno " + std::to_string(Saved) + "): " +
         (Diagnostics ? (*Diagnostics)->getBuffer().str() : Diagnostics.getError().message()));
   }
   SMDiagnostic Diagnostic;

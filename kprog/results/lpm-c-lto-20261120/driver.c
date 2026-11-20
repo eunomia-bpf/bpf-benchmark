@@ -66,7 +66,7 @@ static void shape(unsigned size, unsigned char *key)
     long page=sysconf(_SC_PAGESIZE);
     unsigned char *arena=mmap(NULL,page*2,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     assert(arena!=MAP_FAILED && !mprotect(arena+page,page,PROT_NONE));
-    unsigned char *node=arena+page-DATA_OFF-bytes;
+    unsigned char *node=arena+page-((DATA_OFF+bytes+7)&~7UL);
     memset(node,0,DATA_OFF+bytes); memset(node+DATA_OFF,0x5a,bytes);
     pointer(map_a+ROOT_OFF,NULL); word(key,maximum); memcpy(key+4,node+DATA_OFF,bytes); check(key);
     pointer(map_a+ROOT_OFF,node);
