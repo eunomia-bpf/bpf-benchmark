@@ -86,18 +86,21 @@ Any comparison between apps must carry this column; `population.json` holds it.
 
 ## Tracee, measured on its own: the target is being met
 
-The table above pools all history. Restricting to runs from 2026-11-16 on (the current code) and keeping only
-runs where the §5 join retains ≥20 programs, Tracee has **37 runs**:
+The table above pools all history. Restricting to runs from 2026-11-16 on (the current code), keeping only
+runs where the §5 join retains ≥20 programs, and **requiring the two arms to execute comparable work**
+(post/baseline call count within 0.90–1.15):
 
-- **31 of 37 faster** than baseline;
-- median run geomean **0.861**, and **0.836** over the 33 runs that are not extreme outliers
-  (four runs at 1.56 and 5.1–6.4 are single-day excursions);
-- geomean over those 33 runs: **0.805**.
+| subset | runs | median run geomean |
+|---|---|---|
+| all runs, ≥20 retained | 37 | 0.861 |
+| excluding four outliers (1.56, 5.1, 5.3, 6.4) | 33 | 0.836 (geomean 0.805) |
+| **call-count calibrated** | **18** | **0.91** |
+| not calibrated | 19 | 0.79 |
 
-That is the 20 % per-invocation target, reached on 24–25 retained programs per run, repeatedly, without any
-single run being quoted. Per-program detail for one such run (11-20 03:31, 25 retained): 22 of 25 programs are
-faster, `trace_fd_install` 0.23 and `tracepoint__raw` 0.41 at 4×10^8 calls, `trace_vfs_read` 0.96 at 5×10^7 —
-the gain is spread over the program set, not carried by one outlier.
+So the honest statement is: **Tracee is consistently faster — median 0.91 per call on the 18 calibrated runs,
+31 of 37 runs faster overall** — and the 20 % target is reached in the runs where the post arm also happened
+to execute more work. The calibrated median, 0.91, is the number to quote; 0.805 requires accepting the
+unequal-work runs.
 
 Caveat with its size: across 71 Tracee runs the post arm executes a median 1.04× the baseline arm's calls
 (quartiles 0.96–1.25, 12 runs above 1.3×). Those 12 runs do more work in the post arm, so their per-call
