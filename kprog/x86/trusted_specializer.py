@@ -16,6 +16,7 @@ from trusted_generation import context_kind, declarations, validate_native, nati
 from kernel_function_abi import describe as kernel_functions
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
 from inline_array import lookup_source, dynamic_lookup_source
+from inline_scalar import pid_source
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
     ROOT / "kprog/x86/micro-prog/generate_micro_sim_proofs.py")
@@ -179,6 +180,7 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
             log.write(json.dumps(dict(command=[str(x) for x in command], returncode=result.returncode,
                                       stdout=result.stdout, stderr=result.stderr))+'\n')
         result.check_returncode()
+        return result.stdout
 
     clang = os.environ.get('CLANG') or shutil.which('clang')
     if not clang:
@@ -210,6 +212,9 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     run([compiler, ir, '-o', lowered, '--helper-list', helper_list,
          *[arg for name in arrays + percpu_arrays + [name for name, _ in lpms + hashes] for arg in ('--array-map', name)]])
     helpers = helper_list.read_text().splitlines()
+    undefined = set(run(['llvm-nm-18', '-u', '-j', lowered]).splitlines())
+    helper_sources = []
+    helper_irs = []
     if helpers or artifacts['maps']:
         helper = directory/'checked-simulator.helpers.c'
         text = lookup_source(artifacts['kernel_btf'], lpms, hashes, percpu_arrays) if artifacts['maps'] or '__kprog_array_lookup' in helpers else ''
@@ -218,13 +223,21 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         if any(name.startswith('__kprog_probe_read_') for name in helpers):
             text += '#include ' + json.dumps(str(ROOT/'kprog/x86/micro-prog/inline_probe.c')) + '\n'
         helper.write_text(text)
-        helper_ir = directory/'checked-simulator.helpers.bc'
+        helper_sources.append(helper)
+    if 'bpf_get_current_pid_tgid' in undefined:
+        pid_helper = directory/'checked-simulator.pid.c'
+        pid_helper.write_text(pid_source(artifacts['kernel_btf']))
+        helper_sources.append(pid_helper)
+    for helper in helper_sources:
+        helper_ir = helper.with_suffix('.bc')
         run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
              '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
              '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
              '-fno-unwind-tables', '-emit-llvm', '-c', helper, '-o', helper_ir])
+        helper_irs.append(helper_ir)
+    if helper_irs:
         linked = directory/'checked-simulator.linked.bc'
-        run(['llvm-link-18', lowered, helper_ir, '-o', linked])
+        run(['llvm-link-18', lowered, *helper_irs, '-o', linked])
         lowered = linked
     if artifacts['context_kind'] != 'raw':
         if not context_compiler or not public_layout or not physical_layout:
