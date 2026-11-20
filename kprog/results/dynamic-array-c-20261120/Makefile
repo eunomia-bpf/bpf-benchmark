@@ -9,3 +9,15 @@ replay:
 receipt:
 	cp $(OUT)/report.json $(ROOT)/kprog/results/dynamic-array-c-20261120/$(MODE)-result.json
 	tar -czf $(ROOT)/kprog/results/dynamic-array-c-20261120/$(MODE)-evidence.tar.gz -C $(dir $(OUT)) $(notdir $(OUT))
+
+.PHONY: compatibility run-replay
+compatibility:
+	install -d $(OUT)/array $(OUT)/percpu
+	$(MAKE) -f $(ROOT)/kprog/results/checked-array-c-20261119/Makefile test OUT=$(OUT)/array
+	$(MAKE) -f $(ROOT)/kprog/results/percpu-array-c-20261120/Makefile check OUT=$(OUT)/percpu
+run-replay:
+	install -d $(OUT)
+	date -u +%FT%TZ > $(OUT)/started
+	status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 \
+		nice -n 19 prlimit --as=17179869184 -- $(MAKE) -f $(ROOT)/kprog/results/dynamic-array-c-20261120/Makefile replay OUT=$(OUT) || status=$$?; \
+		printf '%s\n' "$$status" > $(OUT)/exit-code; date -u +%FT%TZ > $(OUT)/finished; exit $$status
