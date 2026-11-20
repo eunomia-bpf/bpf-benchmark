@@ -25,6 +25,6 @@ run-replay:
 
 .PHONY: api-receipt
 api-receipt:
-	for identity in 3 4; do llvm-objdump-18 -dr --disassemble-symbols=trusted_x86_x86_sim_xdp /var/tmp/kprog-tmp/perf/helper-sharing/$$identity/checked-simulator.native.o > $(OUT)/request-$$identity-native.asm; done
+	for identity in 3 4; do llvm-objdump-18 -dr --disassemble-symbols=trusted_x86_x86_sim_xdp /var/tmp/kprog-tmp/perf/helper-sharing/$$identity/checked-simulator.native.o > $(OUT)/request-$$identity-native.asm || exit $$?; done
 	cp $(OUT)/replay-result.json $(ROOT)/kprog/results/dynamic-array-c-20261120/api-result.json
 	tar -czf $(ROOT)/kprog/results/dynamic-array-c-20261120/api-evidence.tar.gz -C $(dir $(OUT)) $(notdir $(OUT))

@@ -1,0 +1,685 @@
+{
+  "capture": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/service.tar.gz",
+  "rows": [
+    {
+      "request_id": 4,
+      "symbol": "perf_unwind_hotspot",
+      "before": {
+        "native": {
+          "entry_bytes": 17681,
+          "executable_bytes": 18452,
+          "functions": [
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_4",
+              "bytes": 173
+            },
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17681
+            },
+            {
+              "name": "__kprog_array_lookup",
+              "bytes": 128
+            },
+            {
+              "name": "__kprog_probe_read_user",
+              "bytes": 51
+            },
+            {
+              "name": "__kprog_probe_read_kernel",
+              "bytes": 51
+            }
+          ]
+        },
+        "proof": {
+          "entry_bytes": 17696,
+          "executable_bytes": 18605,
+          "functions": [
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17696
+            },
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 169
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 171
+            },
+            {
+              "name": "__kprog_hash_key_4",
+              "bytes": 163
+            },
+            {
+              "name": "__native_link_local_memset_zero_512",
+              "bytes": 406
+            }
+          ]
+        }
+      },
+      "after": {
+        "native": {
+          "entry_bytes": 17681,
+          "executable_bytes": 18516,
+          "functions": [
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_4",
+              "bytes": 173
+            },
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17681
+            },
+            {
+              "name": "__kprog_array_lookup",
+              "bytes": 128
+            },
+            {
+              "name": "bpf_map_lookup_elem",
+              "bytes": 52
+            },
+            {
+              "name": "__kprog_probe_read_user",
+              "bytes": 51
+            },
+            {
+              "name": "__kprog_probe_read_kernel",
+              "bytes": 51
+            }
+          ]
+        },
+        "proof": {
+          "entry_bytes": 17696,
+          "executable_bytes": 18605,
+          "functions": [
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17696
+            },
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 169
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 171
+            },
+            {
+              "name": "__kprog_hash_key_4",
+              "bytes": 163
+            },
+            {
+              "name": "__native_link_local_memset_zero_512",
+              "bytes": 406
+            }
+          ]
+        }
+      },
+      "native": {
+        "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/4/checked-simulator.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/4/checked-simulator.proof.o",
+        "simulator_object": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-0xkg8foz/generated/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.c",
+        "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.i",
+        "context_kind": "raw",
+        "symbol": "trusted_x86_x86_sim_xdp",
+        "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+        "maps": [
+          {
+            "name": "pid_page_to_mapping_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_type": 11,
+            "map_flags": 1,
+            "max_entries": 1048576,
+            "value_size": 16
+          },
+          {
+            "name": "interpreter_offsets",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 1,
+            "map_flags": 0,
+            "max_entries": 32,
+            "value_size": 40
+          },
+          {
+            "name": "perf_progs",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 3,
+            "map_flags": 0,
+            "max_entries": 10,
+            "value_size": 4
+          },
+          {
+            "name": "metrics",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 6,
+            "map_flags": 0,
+            "max_entries": 99,
+            "value_size": 8
+          },
+          {
+            "name": "hotspot_procs",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 1,
+            "map_flags": 0,
+            "max_entries": 256,
+            "value_size": 40
+          },
+          {
+            "name": "per_cpu_records",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 6,
+            "map_flags": 0,
+            "max_entries": 1,
+            "value_size": 5000
+          }
+        ],
+        "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "simulator_frontend": {
+          "path": "/var/tmp/kprog-tmp/perf/helper-sharing/4/trusted_x86.bpf.bounds-input.bc",
+          "source_sha256": "eff07bdb1a22b24adca1f221a281f85f61a6c062549b0d30dc666e8cad790066",
+          "ir_sha256": "d14474d8d5f396044a8a3d1c6dee993acfe20130c0953690ec3cfa4686846ce7"
+        }
+      },
+      "native_emission_seconds": 1.781526145990938,
+      "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+    },
+    {
+      "request_id": 3,
+      "symbol": "perf_unwind_native",
+      "before": {
+        "native": {
+          "entry_bytes": 17382,
+          "executable_bytes": 18281,
+          "functions": [
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_16",
+              "bytes": 295
+            },
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17382
+            },
+            {
+              "name": "__kprog_array_lookup",
+              "bytes": 128
+            },
+            {
+              "name": "__kprog_probe_read_user",
+              "bytes": 51
+            },
+            {
+              "name": "__kprog_probe_read_kernel",
+              "bytes": 51
+            }
+          ]
+        },
+        "proof": {
+          "entry_bytes": 17389,
+          "executable_bytes": 18091,
+          "functions": [
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 17389
+            },
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 169
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 171
+            },
+            {
+              "name": "__kprog_hash_key_16",
+              "bytes": 278
+            },
+            {
+              "name": "__native_link_local_memset_zero_144",
+              "bytes": 84
+            }
+          ]
+        }
+      },
+      "after": {
+        "native": {
+          "entry_bytes": 20776,
+          "executable_bytes": 21739,
+          "functions": [
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 173
+            },
+            {
+              "name": "__kprog_hash_key_16",
+              "bytes": 295
+            },
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 20776
+            },
+            {
+              "name": "__kprog_array_lookup",
+              "bytes": 128
+            },
+            {
+              "name": "bpf_map_lookup_elem",
+              "bytes": 52
+            },
+            {
+              "name": "__kprog_probe_read_user",
+              "bytes": 51
+            },
+            {
+              "name": "__kprog_probe_read_kernel",
+              "bytes": 51
+            }
+          ]
+        },
+        "proof": {
+          "entry_bytes": 20784,
+          "executable_bytes": 21486,
+          "functions": [
+            {
+              "name": "trusted_x86_x86_sim_xdp",
+              "bytes": 20784
+            },
+            {
+              "name": "__kprog_lpm_key_16",
+              "bytes": 169
+            },
+            {
+              "name": "__kprog_hash_key_8",
+              "bytes": 171
+            },
+            {
+              "name": "__kprog_hash_key_16",
+              "bytes": 278
+            },
+            {
+              "name": "__native_link_local_memset_zero_144",
+              "bytes": 84
+            }
+          ]
+        }
+      },
+      "native": {
+        "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/3/checked-simulator.native.o",
+        "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/3/checked-simulator.proof.o",
+        "simulator_object": "/workspaces/kprog-raw/perf/percpu-array-c-20261120/otel-20261120T062059Z/state/session-1nhnv4ew/requests/request-i76j69y8/generated/trusted_x86.bpf.o",
+        "simulator_program": "trusted_x86_x86_sim_xdp",
+        "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.c",
+        "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.i",
+        "context_kind": "raw",
+        "symbol": "trusted_x86_x86_sim_xdp",
+        "native_sha256": "7e85b7dd29708b57c12cdf0affbfcc2df584a9d8afd8d8daa6c0aefd6ab4e01e",
+        "maps": [
+          {
+            "name": "exe_id_to_22_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 4194304,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_23_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 8388608,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_21_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 2097152,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_20_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 1048576,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_19_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 524288,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_17_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 131072,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_15_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 32768,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_12_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 4096,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_14_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 16384,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_11_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 2048,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_9_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 512,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_8_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 256,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_13_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 8192,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_10_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 1024,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "unwind_info_array",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 2,
+            "map_flags": 0,
+            "max_entries": 16384,
+            "value_size": 12
+          },
+          {
+            "name": "interpreter_offsets",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 1,
+            "map_flags": 0,
+            "max_entries": 32,
+            "value_size": 40
+          },
+          {
+            "name": "pid_page_to_mapping_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_type": 11,
+            "map_flags": 1,
+            "max_entries": 1048576,
+            "value_size": 16
+          },
+          {
+            "name": "metrics",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 6,
+            "map_flags": 0,
+            "max_entries": 99,
+            "value_size": 8
+          },
+          {
+            "name": "stack_delta_page_to_info",
+            "value_offset": null,
+            "key_size": 16,
+            "map_type": 1,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 8
+          },
+          {
+            "name": "perf_progs",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 3,
+            "map_flags": 0,
+            "max_entries": 10,
+            "value_size": 4
+          },
+          {
+            "name": "per_cpu_records",
+            "value_offset": null,
+            "key_size": 4,
+            "map_type": 6,
+            "map_flags": 0,
+            "max_entries": 1,
+            "value_size": 5000
+          },
+          {
+            "name": "exe_id_to_18_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 262144,
+              "value_size": 4
+            }
+          },
+          {
+            "name": "exe_id_to_16_stack_deltas",
+            "value_offset": null,
+            "key_size": 8,
+            "map_type": 13,
+            "map_flags": 0,
+            "max_entries": 65536,
+            "value_size": 4,
+            "inner_map": {
+              "key_size": 4,
+              "map_type": 2,
+              "map_flags": 0,
+              "max_entries": 65536,
+              "value_size": 4
+            }
+          }
+        ],
+        "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "simulator_frontend": {
+          "path": "/var/tmp/kprog-tmp/perf/helper-sharing/3/trusted_x86.bpf.bounds-input.bc",
+          "source_sha256": "7a7f2dbfb5246a00f45536c4af86641830b81ae768b76ad4b8f73f7b701f38cb",
+          "ir_sha256": "d52f4d3e33c6db02ffa6bd76327345ea32a5789e5b6a4b9d9df293237616c6fe"
+        }
+      },
+      "native_emission_seconds": 2.029459848010447,
+      "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+    }
+  ],
+  "failed": []
+}
