@@ -55,12 +55,20 @@ with tarfile.open(raw/'service.tar.gz') as service:
                 symbol = next(s for s in elf.get_section_by_name('.symtab').iter_symbols()
                               if s.name == artifact['simulator_program'])
                 row['native_entry_bytes'] = symbol['st_size']
+            if 'request/generated/checked-simulator.proof.o' in files:
+                elf = ELFFile(io.BytesIO(capsule.extractfile('request/generated/checked-simulator.proof.o').read()))
+                row['proof_executable_bytes'] = sum(s['sh_size'] for s in elf.iter_sections() if s['sh_flags'] & 4)
+                row['proof_functions'] = {s.name: s['st_size'] for s in elf.get_section_by_name('.symtab').iter_symbols()
+                                          if s['st_info']['type'] == 'STT_FUNC'}
             if 'request/generated/native-commands.jsonl' in files:
                 commands = [json.loads(line) for line in capsule.extractfile('request/generated/native-commands.jsonl')]
                 emitted = [item['command'] for item in commands if '-c' in item['command'] and
                            item['command'][-1].endswith('checked-simulator.native.o')]
                 row['native_compile_flags'] = emitted[-1] if emitted else None
                 row['native_no_red_zone_option'] = bool(emitted and '-force-attribute=noredzone' in emitted[-1])
+                helper = [item['command'] for item in commands if '-emit-llvm' in item['command'] and
+                          item['command'][-1].endswith('checked-simulator.helpers.bc')]
+                row['helper_compile_flags'] = helper[-1] if helper else None
             if 'request/simulator-failure.json' in files:
                 failure = json.load(capsule.extractfile('request/simulator-failure.json'))
                 row['failure_stage'] = failure['stage']
