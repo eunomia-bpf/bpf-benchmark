@@ -147,12 +147,13 @@
     "internal_post_provider_suffix": 28
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
+    "exit": 0,
+    "seconds": 106.01703810691833,
     "cpus_allowed": [
       16,
       17,
@@ -165,7 +166,10 @@
     ],
     "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 271,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-sp-linked-cold",
   "initial_raw": "/workspaces/kprog-raw/formal/m5-program-entry-body-view",
@@ -173,5 +177,6 @@
     "sp-bound1",
     "sp-linked1"
   ],
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "2fa9abc819df8b4a1a0ae4e483b5416aadeacfa5"
 }

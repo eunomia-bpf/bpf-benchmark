@@ -8,6 +8,6 @@ The reader executes 35 internal transitions to materialization and 22 to the ext
 
 Post-provider borrowed storage and native-origin/ABI admission remain explicit. Complete native register/caller preservation through those stores and the real first MOV_IMM callsite remain the next composition step. This reader result does not close a native instruction family or discharge unrestricted mark/priority, all-outcome or final-return obligations.
 
-Shared 143 jobs, linked 219 jobs and 15 public type/axiom queries pass at the original proof limits on CPU17, one worker and 32 GiB address space. Imported execution axioms are listed in validation.json. Raw logs retain the closed-index normalization retries; explicitly rewriting the reader frontier and using the original typed field mapping avoids a larger proof cap. Whole proof-library confirmation is pending.
+Shared 143 jobs, linked 219 jobs and 15 public type/axiom queries pass at the original proof limits on CPU17, one worker and 32 GiB address space. Imported execution axioms are listed in validation.json. Raw logs retain the closed-index normalization retries; explicitly rewriting the reader frontier and using the original typed field mapping avoids a larger proof cap. Whole KProgFormal proof-library/root confirmation passes 271 jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space. Executable/tool native builds are excluded.
 
 M5/M6 and O1/O2/O4 recount remain open; completed ISA-family count is 0.
