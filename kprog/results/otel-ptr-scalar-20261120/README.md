@@ -146,3 +146,22 @@ directory:
 So a `PTR_TO_STACK` operand cannot take part in a subtraction in either position, bounding the scalar does not
 help, and the shape that removes the subtraction entirely is accepted. That is the whole requirement for the
 5 OTel fp-arithmetic fallbacks: eliminate the subtraction rather than reorder or bound it.
+
+### What the fix must emit, and what was verified (OMP 2026-11-20)
+
+The rejected form at IR level is `%d = sub i64 %s, %p` (scalar minus pointer-derived integer) compared with a
+small constant, i.e. `(s - p) < K`. Rewriting it to `s < p + K` removes the pointer operand from the
+subtraction, and the object built from that C form was **rejected only by the second class**
+(`R2 invalid mem access 'scalar'`, the pointer-derived scalar that the other four OTel fallbacks already have),
+never by the subtraction itself — the `math between fp pointer` and `tried to subtract pointer from scalar`
+messages do not appear for it.
+
+So the elimination is verified as far as it can be without the OTel module in hand:
+
+- `PTR_TO_STACK` in *any* subtraction position → REJECT (three shapes, guest kernel).
+- The subtraction removed entirely (`16 < d < 25`, two pointer comparisons) → **ACCEPT**.
+- The general `(s - p) < K` → `s < p + K` rewrite survives the subtraction checks on the guest; a full ACCEPT for
+  OTel's site additionally needs the scalar-memory-access class fixed, which is a separate fix.
+
+An earlier attempt to isolate the rewrite with a hand-built map object was inconclusive (the object carried no
+map record, so the verifier reported `R1 type=scalar expected=map_ptr`); the C-form test above is the evidence.
