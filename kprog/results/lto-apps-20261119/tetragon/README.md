@@ -7,7 +7,12 @@ x86_kvm_corpus_20261120_143937_810796, recipe kprog/results/lto-apps-20261119/Ma
 - Coverage: 142 requests, **141 native installed** (21 checked-sim-c, 120 direct-native), 1 failed. The post
   shim log records `native-loader replaced` 141 times and zero `kept on eBPF`. Against the stale-loader arm's
   46 of 134, this is the whole difference: the loader was the only cause.
-- The stale base: `/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader` had been built
+- **Not the whole cause (OMP 2026-11-20T16:5xZ, coordinator 16:46Z):** the real defect is 0e4f2da6f, which
+  made `get_current_task(_btf)` and `get_smp_processor_id` gs loads in native-helpers.h; the direct-native path
+also crashed Tracee's guest with it. Fixed forward in 3b5fa4b40 (named helper calls again). This run predates
+that fix and ran on the pre-3b5fa4b40 image, so its 141 of 142 is the loader-staleness fix alone; the arm is
+re-run on the new image.
+- The stale base (also real, one layer of the same failure): `/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader` had been built
   11-19 11:59, before 02429959e (11-20 02:57) taught the link schema to bind `current_task`, `cpu_number` and
   `jiffies_64`. `strings` on it showed only `ktime_get_mono_fast_ns`. The guest ran a current native-link
   against that plan, so every object with a `current_task` GOT relocation failed. Fixed in place, same base.
