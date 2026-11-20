@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF consecutive C lookup-case grouping (2cfb5d9fb; 2026-11-20T05:37:03Z): HASH1032hash/143388lookup/restart1/589generic/560same-map alias and112native API; LPM805830controls/18819native API pass. Actual full BCC sys_exit388→374B/sched_switch1548→1534B, redundant compare/select gone; full OTel unwind16063B/HotSpot16164B includes word-load+grouping. Results/helper-sharing-20261120/grouping-result.json/evidence.tar.gz. Next combined OTel app, all LTO; installed tools/P/B/image unchanged, no runtime gain yet.
+- [ ] PERF consecutive C lookup-case grouping (2cfb5d9fb; 2026-11-20T05:37:03Z): HASH1032hash/143388lookup/restart1/589generic/560same-map alias and112native API; LPM805830controls/18819native API pass. Actual full BCC sys_exit388→374B/sched_switch1548→1534B, redundant compare/select gone; full OTel unwind16063B/HotSpot16164B includes word-load+grouping. Results/helper-sharing-20261120/grouping-result.json/evidence.tar.gz. Own OTel PID683392 running, raw /workspaces/kprog-raw/perf/lookup-grouping-20261120/otel-20261120T053716Z, all LTO; installed tools/P/B/image unchanged, no runtime gain yet (2026-11-20T05:38:43Z).
 
 - [x] PERF HASH tail-word native optimization (709c1c486; 2026-11-20T05:33:06Z): guarded/kernel-hash/native API checks pass; actual key4 worker198→156B, full sys_exit430→388B/sched_switch1590→1548B. BCC678934 exit0/appOK,25native/22checked/3direct,14HASH sites;133.095→127.837ns/call (1.041x), sys_exit84.013→75.578ns/call, stress-ng rates mixed. Results lpm-c-lto-20261120/tail-bcc-result.json/evidence.tar.gz; prior0.945x kept. All LTO on, tools/P/B/image unchanged; hard speed/throughput targets remain open.
 
