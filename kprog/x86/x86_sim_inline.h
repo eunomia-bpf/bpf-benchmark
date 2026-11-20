@@ -14,7 +14,7 @@
 struct x86_sim_inline_value { __u8 *tag; void **pointer; };
 struct x86_sim_inline_bindings {
     struct x86_sim_gpr_cell *cells;
-    volatile union x86_sim_stack_mem *stack;
+    union x86_sim_stack_mem *stack;
     struct x86_sim_inline_value values[KPROG_X86_STACK_WORDS(X86_SIM_STACK_BYTES)];
     __u64 *native_stack_base;
     __u8 *cf;
