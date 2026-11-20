@@ -119,3 +119,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefixNative
 import KProgFormal.ClightRefinement.Arm64CacheLocalFrame
 import KProgFormal.ClightRefinement.Arm64ProgramEntryWarmRead
 import KProgFormal.ClightRefinement.Arm64PointerWriteLinked
+import KProgFormal.ClightRefinement.Arm64AddOperandReads
