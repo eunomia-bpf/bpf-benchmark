@@ -2,7 +2,10 @@ ROOT := /workspaces/repository
 PERF_BUILD := /workspaces/.agent-state/kprog-ck/perf
 JOBS ?= 4
 
-.PHONY: perf
+.PHONY: dependencies perf
+dependencies:
+	DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3-dev libdw-dev libunwind-dev
+
 perf:
 	install -d $(PERF_BUILD)
 	$(MAKE) -C $(ROOT)/vendor/linux-framework/tools/perf O=$(PERF_BUILD)/ -j$(JOBS) \
