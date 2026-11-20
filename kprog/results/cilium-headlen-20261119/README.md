@@ -268,6 +268,15 @@ The archive does not distinguish those branches, so it does not establish a
 missing image file. The binding failure remains open independently of packet
 verification. `request64.json` records the original errors and source trace.
 No loader/module/kernel change was made.
+omp 2026-11-20: three facts narrow those branches. The call order is `ACTIVATE` (native_loader.cpp:3991) →
+`CHUNK` (4126) → `COMPLETE` (4139), so for the arming ioctl to find no active job, the slot must have been
+cleared between `ACTIVATE` and `CHUNK`; only two sites clear it, `native_lab_trusted_complete`
+(native_lab_trusted.h:338, after this ioctl) and service teardown (533, which sets `-ENOTCONN`). What remains
+inside `native_lab_active_capsule` (:350-361) is `abandoned` or a mismatched `id`, and both live in module
+state rather than the capsule, so the archive cannot separate them — which is why this needs a module-side
+trace, not a better reading of the capture. Separately, `EINVAL` is not a possible return from
+`native_lab_store_chunk`: an earlier note in this workspace said EINVAL and that was wrong, the errno in the
+log is `-ENOENT`.
 
 OMP reports2lowerings/3emitted bounds for request64 in addition to233lowerings
 across the earlier40. Canonical41-request B/stock acceptance still awaits the
