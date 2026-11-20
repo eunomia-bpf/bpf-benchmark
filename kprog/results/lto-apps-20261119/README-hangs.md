@@ -1,27 +1,26 @@
-# Two arms hang after a `list_progs` round-trip (OMP 2026-11-20)
+# The two "hangs" were the measurement window, not a stall (OMP 2026-11-20, corrected)
 
-Two arms on the 3b5fa4b40 image stalled the same way: Tetragon at 19:14Z (5 replacements) and Tracee at 20:40Z
-(29 replacements). Both baseline arms finished normally; both post arms stopped growing their shim log within one
-line of `socket: cmd=list_progs len=22`, and the guest stayed at ~100 % of CPUs 0-7 for 70-90 minutes. Neither
-logged `kept on eBPF`, `failed`, or a panic.
+Withdrawal of an earlier reading in this file. Two arms (Tetragon 19:14Z, Tracee 20:40Z) appeared to stall after
+`socket: cmd=measure_start`, and this file had listed image, loader, shim and CPU affinity as excluded causes.
 
-Evidence against the obvious candidates:
+The 540 s is the workload. Guest-timestamped `socket: cmd=` lines from two arms:
 
-- **Not the image code.** The coordinator's check of the same image replaced all six apps' programs (Tetragon
-  288/288 with 33 `list_progs`, Tracee 169/169 with 77). `docker run bpf-benchmark/kprog:current strings
-  /usr/local/lib/bpfrejit/libnative_loader.so` shows no `current_task`, i.e. the image carries 3b5fa4b40's
-  library.
-- **Not the base `trusted-native-loader`.** It was rebuilt at 19:14Z from HEAD (post-3b5fa4b40) and shows 0
-  `current_task` strings; its md5 equals `kprog/libnativeloader/build/trusted-native-loader`.
-- **Not the shim**, which is a frozen path and the same binary the healthy check ran.
-- **Not CPU contention from the arm64 work**: the coordinator's arm64 QEMU guests are pinned to CPUs 8-23, these
-  arms to 0-7.
+| arm | `measure_start` | `measure_finish` | gap |
+|---|---|---|---|
+| OTel, x86_kvm_corpus_20261120_081247_049639 (quoted as healthy) | 1255.94 | 1798.52 | **542.6 s** |
+| Tetragon, x86_kvm_corpus_20261120_222740_505433 (called hung) | 308.82 | 849.02 | 542.6 s |
 
-The base's `libnative_loader.so` is still the 11-19 11:59 build (its strings lack `current_task` and
-`jiffies_64`, which the HEAD build has), but the guest is told to load the image's
-`/usr/local/lib/bpfrejit/libnative_loader.so`, so it plays no part unless a path uses it.
+3 x 180 s = 540 s. So `emit_measure_finish` arrives exactly when the three samples end, and the shim log is
+silent in between because that is the measurement window. A 30 s probe of the same app and image confirms the
+recipe (`measure_start` 169.78 -> `measure_finish` 199.85, run completed):
+x86_kvm_corpus_20261120_224639_547587.
 
-So the hang is a blocking read in the supervisor/service round-trip that a fast healthy run does not hit. Both hangs
-are kept: `/workspaces/kprog-raw/omp/lto-tetragon-hang-20261120T1916Z` and
-`/workspaces/kprog-raw/omp/lto-tracee-hang-20261120T2041Z`. Tracee's arm is re-queued after Tetragon's retry; if
-the retry hangs at the same line the next step is a service-side stack, not another re-run.
+Why an arm takes so long: Tetragon's own load takes ~600 s of guest time, so with two arms of 3 x 180 s a leg is
+25-35 minutes wall. Nothing was hung; my arms were inside their window when I looked, and the three rc=2 legs in
+the coordinator's rotation were my kills.
+
+Superseded: the shim-side mechanisms considered earlier in this file (a kernel-id scan, `query_prog_info` cost, a
+single-threaded server) - none of them is the explanation, and none is a defect.
+
+What still stands: the stale base loader and 0e4f2da6f's gs loads both cost coverage, both are fixed
+(02429959e/3b5fa4b40 plus the rebuilt loader), and the arms need re-running - at ~30 minutes each, not as hangs.
