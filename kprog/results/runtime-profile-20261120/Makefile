@@ -46,6 +46,10 @@ inline-private:
 inline-private-receipt:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/inline_private_receipt.py
 
+.PHONY: kernel-probe-receipt
+kernel-probe-receipt:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/kernel-source-report.py
+
 USER_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-user
 .PHONY: source-probes
 source-probes:
