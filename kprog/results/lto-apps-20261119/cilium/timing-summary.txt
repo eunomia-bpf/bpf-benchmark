@@ -1,0 +1,3 @@
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_234045_456298 throughput 1.000x (SKIP_REJIT=norejit, both arms eBPF) pps eBPF 616593 native 633105
+ns/inv eBPF 637.8 (717821061 calls) native 720.5 (676692384 calls) ratio 0.885  [single run, per-inv sd across 78 Cilium runs = 31%, so this is not distinguishable]
+coverage: 28 requests, 28 checked-sim-c installed, 0 direct-native, 0 failed, 4 programs
