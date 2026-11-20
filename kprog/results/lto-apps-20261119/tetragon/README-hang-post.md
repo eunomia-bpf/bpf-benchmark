@@ -13,4 +13,6 @@ Run x86_kvm_corpus_20261120_191627_291842, `APP=tetragon/observer`, 3 x 180 s pe
   10-13 while the guest idled, which is the host's own work, not a boundary crossed by the guest.
 
 The guest was stopped (SIGTERM, then SIGKILL on the QEMU process to release CPUs 0-7 before Tracee's arm started),
-and the arm is re-run. Raw post log: `/tmp/tg-hang-post.log` (557 lines, ending at the `list_progs` line).
+and the arm is re-run. Raw: /workspaces/kprog-raw/omp/lto-tetragon-hang-20261120T1916Z (run log, the 557-line post shim log ending at
+the `list_progs` line, and `state.tar.gz` with the hung session's capsules). The 200 MB `state/` directory is not
+committed - it is preserved in that archive instead, since one of its generated MIR files alone is 150 MB.
