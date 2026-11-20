@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] PERF dynamic ordinary ARRAY after-B C (2026-11-20T08:11:55Z): shared ARRAY C body, actual kernel map callback for other types, existing installed compiler interface. 16018 host cases pass; ARRAY callbacks9600→0, other18preserved, dynamic native proof link passes. No tools/flags/direct-P change, all LTO on. Actual accepted OTel API replay/app checks and performance remain open; record results/dynamic-array-c-20261120.
+- [ ] PERF dynamic ordinary ARRAY after-B C (2026-11-20T08:11:55Z): shared ARRAY C body, actual kernel map callback for other types, existing installed compiler interface. 16018 host cases pass; ARRAY callbacks9600→0, other18preserved, dynamic native proof link passes. No tools/flags/direct-P change, all LTO on. Source442a7e8bc/componentde43de199; accepted OTel API replay823305 started08:15 on16-19/nice19/16GiB AS/imageSH, raw dynamic-array-c-20261120/otel-api-20261120T081501Z. App checks and performance remain open; record results/dynamic-array-c-20261120.
 
 - [x] PERF static PERCPU_ARRAY C lookup (0a0f4bbfd; 2026-11-20T06:53:57Z):7776host controls and actual OTel API/proof pass. App729327 exit0/appOK,14native/7checked/7direct,138per-CPU static sites. Full code unwind18091B/HotSpot18605B grows. Evaluation§5 caller post/base1.245019 (speedup0.803201),1retained caller; target unmet, worker rates mixed. New image61d3c7ec created06:03 and all14submittedP hashes changed versuspreviouscapture, so no isolated type6 gain/coverage claim. Results lpm-c-lto-20261120/percpu-otel-result.json/evidence.tar.gz and percpu-array-c-20261120/method-result.json. All LTO, installed tools/flags unchanged; actual kernel linking/installation succeeds.
 
