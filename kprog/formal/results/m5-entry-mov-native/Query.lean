@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovNative
+
+open KProgFormal.ClightRefinement
+
+#check Arm64MovKeep.Native.reference_word_step
+#print axioms Arm64MovKeep.Native.reference_word_step
+
+#check Arm64ProgramEntryMovCall.keep_corresponds
+#print axioms Arm64ProgramEntryMovCall.keep_corresponds

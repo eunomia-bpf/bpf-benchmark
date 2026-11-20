@@ -1,0 +1,56 @@
+{
+  "source_native": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMovNative"
+    ],
+    "exit": 0,
+    "seconds": 1.7266366481781006,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-mov-native/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5213828086853027,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "source_native_jobs": 229,
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Native.reference_word_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMovCall.keep_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-entry-mov-native",
+  "completed_isa_families": 0
+}
