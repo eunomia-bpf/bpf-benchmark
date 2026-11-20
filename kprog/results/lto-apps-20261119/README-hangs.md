@@ -24,3 +24,18 @@ single-threaded server) - none of them is the explanation, and none is a defect.
 
 What still stands: the stale base loader and 0e4f2da6f's gs loads both cost coverage, both are fixed
 (02429959e/3b5fa4b40 plus the rebuilt loader), and the arms need re-running - at ~30 minutes each, not as hangs.
+
+
+## What the re-runs must satisfy to give a per-call number
+
+Two arms of the same app on the 3b5fa4b40 image, counted from the app detail records:
+
+| run | baseline loaded | post loaded | calls post/base |
+|---|---|---|---|
+| Tracee 10:01 (pre-fix, 140 failures) | 167 | 167 | 0.97 |
+| Tracee 18:43 (3b5fa4b40 check) | 167 | 167 | 1.46 |
+| Tetragon 11:51 (pre-fix) | 287 | 123 | 0.53 |
+
+Both arms load the same program set on the fixed image, so a per-call ratio from a fixed-image arm is a
+program-for-program comparison; on the pre-fix Tetragon arm it was not (123 vs 287), which is why that one quotes
+no ratio.
