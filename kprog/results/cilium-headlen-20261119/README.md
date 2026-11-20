@@ -1,5 +1,26 @@
 # Cilium head-length bounds
 
+The live confirmation finished2026-11-19T23:54:12Z, makeexit0:
+`corpus/results/x86_kvm_corpus_20261119_235149_569391` reports appok.
+All12 captured requests have stock verification phase/status0 receipts and
+checked-sim-c installs. Program34af4b3a contributes requests1/9/12, all3
+accepted. The other nine instances also verify and install. Read
+`live-freshness-coverage.json` and `live-freshness-service.tar.gz` for the
+actual journal and capsules; the functional workload remains1x10seconds.
+Performance and historical41 detached verification retain separate receipts.
+
+The current archived replay's full CFG also resolves the reported false-edge
+interpretation: PC51's `if r2 <= r1` targets PC115 (`LBB0_4`), and the packet
+read atPC126 uses bounded r8+30 inside that target. The intervening context
+data read atPC117 retains its ordering effect and supplies r1; the access
+continues using r8. The fall-through error block ends atPC114 with a jump to
+PC227, after its metrics update. Bounds IR branches to block120 on the
+combined scalar/pointer success and to block33 on failure. Re-emitting a
+check inside the error path is unnecessary for these accepted artifacts.
+`omp-new-replay-20261119T234918Z/stock/1/b-disassembly.txt` and `bounds.ll`
+retain the instructions and CFG. The predicate correction is incorporated;
+the present3/3 stock and3/3 live results resolve this program's reported gap.
+
 Compiler repair `b1399d137` passes16 positive/eight exclusion selectors and
 15 freshness cases. Worker539157 finished at2026-11-19T23:47:22Z:
 all41 archived B objects emit, and detached stock acceptance rises16→19.

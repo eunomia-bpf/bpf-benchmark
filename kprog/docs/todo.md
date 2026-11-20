@@ -66,8 +66,10 @@
   they canhide laterdefects. IndependentOMP newprogram34af4b3a requests1/9/10
   alsoemit/stockload3/3 onsolekernel; originalheadlenpredicate ispresent.
   freshness-result.json andtwostock-evidencearchives retainreceipts.
-  FreshliveCilium540836 started23:50:04Z CPU18-19, rawlive-freshness-
-  20261119T235004Z; livebinding/execution remainsseparate.64armingcapsule
+  FreshliveCilium540836 completed0 at23:54:12Z, run235149_569391:
+  12/12stockverify-status0 and12checked-sim-c installs.34af4b3a requests1/9/12
+  pass3/3. CurrentB51 jumps115, read126 isinside itsboundedtarget;
+  errorpath114 jumps227. rawlive-freshness-20261119T235004Z.64armingcapsule
   saysENOENT; relative-table3 refusals remainopen. Benchmarksettings unchanged.
   PERF 2026-11-19T23:39:07Z: CBcandidate529337 terminal2. All16positive/
   8exclusion/10freshness controls and41Bemit pass. Detachedstock16/41;

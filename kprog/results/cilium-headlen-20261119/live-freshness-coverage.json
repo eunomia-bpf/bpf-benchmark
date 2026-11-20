@@ -1,0 +1,253 @@
+{
+  "source_archive": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/live-freshness-20261119T235004Z/service.tar.gz",
+  "journal": "service/requests/requests.jsonl",
+  "counts": {
+    "stock_passed": 12
+  },
+  "execution_paths": {
+    "checked-sim-c": 12
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "category": "stock_passed",
+      "source_prog_id": 188,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/1.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 1,
+        "prog_id": 195,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 2,
+      "category": "stock_passed",
+      "source_prog_id": 192,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/2.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 2,
+        "prog_id": 209,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 3,
+      "category": "stock_passed",
+      "source_prog_id": 206,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/3.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 3,
+        "prog_id": 219,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 4,
+      "category": "stock_passed",
+      "source_prog_id": 216,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/4.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 4,
+        "prog_id": 230,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 5,
+      "category": "stock_passed",
+      "source_prog_id": 227,
+      "native_sha256": "874d0fb331e104477fb66ac24f37c190f5b08afe87185e7d0991ca60fb8790a3",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/5.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 5,
+        "prog_id": 247,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 6,
+      "category": "stock_passed",
+      "source_prog_id": 244,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/6.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 6,
+        "prog_id": 260,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 7,
+      "category": "stock_passed",
+      "source_prog_id": 257,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/7.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 7,
+        "prog_id": 267,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 8,
+      "category": "stock_passed",
+      "source_prog_id": 264,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/8.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 8,
+        "prog_id": 274,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 9,
+      "category": "stock_passed",
+      "source_prog_id": 271,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/9.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 9,
+        "prog_id": 288,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 10,
+      "category": "stock_passed",
+      "source_prog_id": 294,
+      "native_sha256": "874d0fb331e104477fb66ac24f37c190f5b08afe87185e7d0991ca60fb8790a3",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/10.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 10,
+        "prog_id": 297,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 11,
+      "category": "stock_passed",
+      "source_prog_id": 301,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/11.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 11,
+        "prog_id": 304,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 12,
+      "category": "stock_passed",
+      "source_prog_id": 310,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "capsule": "service/requests/12.success.tar.gz",
+      "capsule_b_generated": true,
+      "failure_stage": null,
+      "verification_record": {
+        "request_id": 12,
+        "prog_id": 313,
+        "phase": "verify",
+        "status": 0
+      }
+    }
+  ],
+  "scope": "Actual archive journal, inner capsule failures and stock-verification receipts; execution is recorded by the named source run."
+}

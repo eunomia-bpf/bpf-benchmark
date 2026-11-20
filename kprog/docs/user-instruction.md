@@ -274,3 +274,41 @@ from 14. Raw data and the per-request table stay committed.
 
 Note the second class: 6 requests (6, 14, 32, 44, 56, 61) fail with `only read is supported` — a write
 through an unproved packet pointer; same file, different question, do not merge the two.
+## OMP correction carried by lane restart, received 2026-11-20T00:15:49Z (verbatim)
+
+### Correction to my 01:30Z note, and the exact residual (omp 2026-11-20T01:55Z)
+
+My "no `data_end` / nothing to lower" line for `34af4b3a` was wrong — I had read a stale extraction. The
+pass does lower it (`lowered=1`, `unified=1`) and the body does compute `headlen = len - data_len` and
+compare it (`headlen > 33`). Here is what actually fails, from the live trace and the emitted bytecode:
+
+```
+ 45:  r8 = *(u32 *)(r6 + 0x4c)        ; data
+ 46:  r1 = *(u32 *)(r6 + 0x50)        ; data_end
+ 48:  if w2 < 0x22 goto LBB0_2        ; w2 = headlen
+ 49:  r2 = r8;  r2 += 0x22
+ 51:  if r2 <= r1 goto LBB0_4         ; ✓ bound, and it jumps AWAY
+LBB0_2 …                              ; the fall-through continues to:
+121:  r1 = *(u32 *)(r8 + 30)          ; ← the read, on the path that failed the bound
+```
+
+So the bound is emitted once and its true-edge leaves; the read sits on the path where the comparison was
+false. Verified minimally on the host:
+
+| shape | verdict |
+|---|---|
+| `if w2 < 0x22 goto small` … bound … `small: r0 = *(u32 *)(r8+0x1e)` | `invalid access to packet, off=30 size=4, R8(…,r=0)` |
+| same, with `data`/`data_end` re-loaded and bounded inside `small` | **ACCEPT** |
+
+That is the identical instruction text to the live rejection (`off=30 size=4, R8(id=0,off=30,r=0)`), so it is
+the same defect: the bound needs to be re-emitted on the path that reaches the read, not only on the edge
+where it was tested. Same rule as the `+0x10` case, other direction of the branch.
+
+Receipt reconciliation: the sender's 01:55Z label is preserved above. At the actual
+receipt time shown in this heading, b1399d137 was already committed. The current
+archived replay has PC51 targeting115, read126 inside that target, and PC114
+jumping227. Independent captured instances load3/3; fresh live instances
+requests1/9/12 verify and install3/3. See
+`../results/cilium-headlen-20261119/live-freshness-coverage.json` and its source
+archive. The quoted diagnosis is retained as received, not adopted as a rule or
+as evidence of a remaining current failure.
