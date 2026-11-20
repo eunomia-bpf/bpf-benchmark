@@ -23,7 +23,9 @@
 #include "bpf_function_bodies.hpp"
 #include "runtime_bpf_callee.hpp"
 #include "../../vendor/bpf/native-lpm.h"
+#include "../../vendor/bpf/native-read-kernel.h"
 #include <memory>
+#include <sstream>
 #include <functional>
 using namespace llvm;
 
@@ -35,6 +37,7 @@ static cl::opt<unsigned> ProgType("prog-type", cl::init(BPF_PROG_TYPE_PERF_EVENT
 static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 static cl::opt<std::string> ImmutableGlobals("immutable-globals");
 static cl::opt<std::string> MapTypes("map-types");
+static cl::opt<bool> InlineKernelReads("inline-kernel-reads");
 
 // -O3, the level vendor/bpf/Makefile compiles P at, so P and its load-time LTO follow one policy.
 static const OptimizationLevel NativeOptLevel = OptimizationLevel::O3;
@@ -50,12 +53,13 @@ struct NativeMapType {
 
 #define KPROG_STRINGIFY_BODY(...) #__VA_ARGS__
 #define KPROG_STRINGIFY(...) KPROG_STRINGIFY_BODY(__VA_ARGS__)
+static Error importC(Module &M, Function &Entry, const std::string &Prefix, const std::string &Code);
+
 // Keep the map algorithm in the same C source as native-helpers.h. Only the
 // boot layout and actual loaded map shape are supplied by load-time LTO.
 static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Types,
                                             uint64_t KeySize, unsigned Index) {
   const auto Prefix = Output + ".lpm." + std::to_string(Index);
-  const auto Source = Prefix + ".c", IR = Prefix + ".ll", Log = Prefix + ".log";
   const auto Name = "__native_link_typed_lpm_lookup_" + std::to_string(Index);
   const auto Base = native_lto::offset(Types, "lpm_trie", "map");
   auto Field = [&](const char *Name, bool Word = false) {
@@ -69,17 +73,30 @@ static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Typ
   };
   const auto Bytes = KeySize > 4 ? std::to_string(KeySize - 4) : Size("data_size");
   const auto Maximum = KeySize > 4 ? std::to_string((KeySize - 4) * 8) : Size("max_prefixlen");
-  {
-    std::ofstream Out(Source, std::ios::trunc);
-    Out << KPROG_STRINGIFY(__KPROG_LPM_CODE) << '\n'
+  std::ostringstream Code;
+  Code << KPROG_STRINGIFY(__KPROG_LPM_CODE) << '\n'
         << "void *" << Name << "(void *map,const void *key) { return __kprog_lpm_lookup(map,key,"
         << Bytes << ',' << Maximum << ',' << Field("root") << ','
         << native_lto::offset(Types, "lpm_trie_node", "child") << ','
         << native_lto::offset(Types, "lpm_trie_node", "prefixlen", true) << ','
         << native_lto::offset(Types, "lpm_trie_node", "flags", true) << ','
         << native_lto::offset(Types, "lpm_trie_node", "data") << "); }\n";
+  if (auto E = importC(M, Entry, Prefix, Code.str())) return std::move(E);
+  auto *Lookup = M.getFunction(Name);
+  if (!Lookup) return native_bpf::failure("LPM helper entry is missing");
+  Lookup->setLinkage(GlobalValue::InternalLinkage);
+  Lookup->setDSOLocal(true);
+  return Lookup;
+}
+
+// Compile helper C with P's flags and link it into M, always inlined.
+static Error importC(Module &M, Function &Entry, const std::string &Prefix, const std::string &Code) {
+  const auto Source = Prefix + ".c", IR = Prefix + ".ll", Log = Prefix + ".log";
+  {
+    std::ofstream Out(Source, std::ios::trunc);
+    Out << Code;
     Out.close();
-    if (!Out) return native_bpf::failure("write LPM helper source: " + Source);
+    if (!Out) return native_bpf::failure("write helper source: " + Source);
   }
   auto Compiler = sys::findProgramByName("clang-18");
   if (!Compiler) return errorCodeToError(Compiler.getError());
@@ -90,7 +107,7 @@ static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Typ
   if (Status) {
     const auto Saved = errno;
     auto Diagnostics = MemoryBuffer::getFile(Log);
-    return native_bpf::failure("LPM C compiler failed (status " + std::to_string(Status) +
+    return native_bpf::failure("helper C compiler failed (status " + std::to_string(Status) +
         ", errno " + std::to_string(Saved) + "): " +
         (Diagnostics ? (*Diagnostics)->getBuffer().str() : Diagnostics.getError().message()));
   }
@@ -99,7 +116,7 @@ static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Typ
   if (!Imported) {
     std::string Message;
     raw_string_ostream Stream(Message);
-    Diagnostic.print("LPM helper IR", Stream);
+    Diagnostic.print("helper IR", Stream);
     return native_bpf::failure(Stream.str());
   }
   Imported->setTargetTriple(M.getTargetTriple());
@@ -113,12 +130,31 @@ static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Typ
     F.addFnAttr(Attribute::AlwaysInline);
   }
   if (Linker::linkModules(M, std::move(Imported)))
-    return native_bpf::failure("link LPM helper IR");
-  auto *Lookup = M.getFunction(Name);
-  if (!Lookup) return native_bpf::failure("LPM helper entry is missing");
-  Lookup->setLinkage(GlobalValue::InternalLinkage);
-  Lookup->setDSOLocal(true);
-  return Lookup;
+    return native_bpf::failure("link helper IR");
+  return Error::success();
+}
+
+// Direct native reads kernel memory with plain loads (operator 2026-11-19: "读内核内存要调用
+// bpf_probe_read...不能也直接内联和解引用???"). P keeps the helper calls, so B and the checked path keep
+// the helper's exact results; this load-time LTO of direct native gives the calls the load bodies.
+static Expected<unsigned> inlineKernelReads(Module &M, Function &Entry) {
+  SmallVector<std::pair<CallBase *, const char *>, 64> Calls;
+  for (auto &F : M) for (auto &I : instructions(F)) if (auto *Call = dyn_cast<CallBase>(&I))
+    if (auto *Callee = Call->getCalledFunction()) {
+      if (Callee->getName() == "bpf_probe_read_kernel") Calls.push_back({Call, "__kprog_direct_read_kernel"});
+      if (Callee->getName() == "bpf_probe_read_kernel_str") Calls.push_back({Call, "__kprog_direct_read_kernel_str"});
+    }
+  if (Calls.empty()) return 0;
+  if (auto E = importC(M, Entry, Output + ".read-kernel", KPROG_STRINGIFY(__KPROG_READ_KERNEL_CODE) "\n"))
+    return std::move(E);
+  for (auto &[Call, Name] : Calls) {
+    auto *Body = M.getFunction(Name);
+    if (!Body) return native_bpf::failure(std::string("kernel read body is missing: ") + Name);
+    Body->setLinkage(GlobalValue::InternalLinkage);
+    Body->setDSOLocal(true);
+    Call->setCalledFunction(Body);
+  }
+  return Calls.size();
 }
 #undef KPROG_STRINGIFY
 #undef KPROG_STRINGIFY_BODY
@@ -404,6 +440,9 @@ int main(int argc, char **argv) {
   // its ABI and body alive through both module optimization pipelines.
   F->setLinkage(GlobalValue::ExternalLinkage);
   F->setDSOLocal(true);
+  // The object carries every program of P; only the selected entry's closure belongs to this output.
+  for (auto &Other : *M)
+    if (&Other != F && !Other.isDeclaration()) Other.setLinkage(GlobalValue::InternalLinkage);
   InitializeNativeTarget(); InitializeNativeTargetAsmPrinter(); InitializeNativeTargetAsmParser();
   std::string TargetError;
   auto *Target = TargetRegistry::lookupTarget(M->getTargetTriple(), TargetError);
@@ -475,6 +514,11 @@ int main(int argc, char **argv) {
     if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }
     if (!MapTypes.empty()) errs() << "typed ARRAY lookups lowered: " << *Arrays << '\n';
     if (!MapTypes.empty()) errs() << "typed LPM lookups lowered: " << LpmCount << '\n';
+    if (InlineKernelReads) {
+      auto Reads = inlineKernelReads(*M, *F);
+      if (!Reads) { errs() << toString(Reads.takeError()) << '\n'; return 1; }
+      errs() << "kernel reads inlined: " << *Reads << '\n';
+    }
     if (verifyModule(*M, &errs())) return 1;
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);

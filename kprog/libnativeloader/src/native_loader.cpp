@@ -4282,11 +4282,19 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     map_types << '}';
     const auto function_bodies = native_source_function_bodies(
         native_object_path, options.source_bpf_path, prog_info, source_insns);
+    // Direct native reads kernel memory with plain loads in its load-time LTO; the checked path
+    // keeps the helpers (its after-B stage carries their exact results).
+    const bool kernel_reads = !require_bound && std::any_of(source_insns.begin(), source_insns.end(),
+        [](const bpf_insn &insn) {
+            return insn.code == (BPF_JMP | BPF_CALL) && insn.src_reg == 0 &&
+                (insn.imm == BPF_FUNC_probe_read_kernel || insn.imm == BPF_FUNC_probe_read_kernel_str ||
+                 insn.imm == BPF_FUNC_probe_read || insn.imm == BPF_FUNC_probe_read_str);
+        });
     const auto optimized = native_context_lto_object(native_object_path, symbol_name, prog_info.type,
         "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
         kNativeLinkCacheDir, function_bodies,
         companion.immutable_globals.empty() ? std::string{} : immutable.str(),
-        typed_lookups ? map_types.str() : std::string{});
+        typed_lookups ? map_types.str() : std::string{}, kernel_reads);
     if (optimized != native_object_path) {
         native_object_path = optimized;
         entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
