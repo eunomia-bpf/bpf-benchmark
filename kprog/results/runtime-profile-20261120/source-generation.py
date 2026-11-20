@@ -20,7 +20,7 @@ if generation.exists():
         archive.add(generation,arcname='generation')
     shutil.rmtree(generation)
 rows=[]
-for name in ['user8','compat']:
+for name in ['user8','compat','kernel8','kernel_dynamic','kernel_str8','kernel_str_dynamic']:
     try:
         result=module.specialize((tmp/'user.o').read_bytes(),name,
             dict(prog_type=2,section='kprobe/source_probe',maps=[]),tmp/'generation'/name,

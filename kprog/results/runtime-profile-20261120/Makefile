@@ -53,7 +53,7 @@ source-probes:
 	clang-18 -O3 -g -mgeneral-regs-only -mno-red-zone -fomit-frame-pointer -fno-stack-protector \
 		-c $(ROOT)/kprog/results/runtime-profile-20261120/user.c -o $(USER_BUILD)/user.o
 	$(CC) -O3 -fsanitize=undefined -fno-sanitize-recover=all \
-		$(ROOT)/kprog/results/checked-probe-c-20261119/driver.c \
+		$(ROOT)/kprog/results/runtime-profile-20261120/source-driver.c \
 		$(ROOT)/kprog/results/runtime-profile-20261120/source-provider.c $(USER_BUILD)/user.o -o $(USER_BUILD)/execute
 	$(USER_BUILD)/execute
 	llvm-objdump-18 -dr $(USER_BUILD)/user.o > $(OUT)/user.asm
