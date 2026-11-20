@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedCall
+
+open KProgFormal.ClightRefinement
+
+#check Arm64MovImmediate.LinkedCall.entry_call
+#print axioms Arm64MovImmediate.LinkedCall.entry_call

@@ -1,0 +1,52 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateLinkedCall"
+    ],
+    "exit": 0,
+    "seconds": 1.984846830368042,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 226,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-mov-first-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8887217044830322,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 1,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedCall.entry_call": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending end-of-batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-first-call",
+  "frontier_source_checkpoint": "fbe0c8c70b33ca2d26b6dbed349366c88e703fcf",
+  "completed_isa_families": 0
+}
