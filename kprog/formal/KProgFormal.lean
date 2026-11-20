@@ -105,3 +105,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryBody
 import KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView
 import KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCacheFrame
+import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead

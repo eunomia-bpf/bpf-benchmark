@@ -1,0 +1,114 @@
+{
+  "shared": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateSuffix"
+    ],
+    "exit": 0,
+    "seconds": 4.737346649169922,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "shared_jobs": 182,
+  "linked": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead"
+    ],
+    "exit": 0,
+    "seconds": 2.065049886703491,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "linked_jobs": 221,
+  "initial_linked_dependency_build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead"
+    ],
+    "exit": 0,
+    "seconds": 136.1475510597229,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-mov-sp-suffix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 19.204857110977173,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 6,
+  "closed_source_queries": 1,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.read_call_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.after_read_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call_register": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_write": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRead.scalar_write": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-sp-suffix",
+  "completed_isa_families": 0
+}
