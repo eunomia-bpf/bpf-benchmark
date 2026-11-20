@@ -7,3 +7,10 @@ fails a stage runs direct native (recorded fallback), so the app runs native as 
 how many requests went through checked-sim-c. Recipe: Makefile here (native-cohort-timing-20261119 with the app as a
 parameter), 3 x 180 s per arm, stats on. run.sh starts after perf's numeric repair and committed request-time inputs.
 Raw: /workspaces/kprog-raw/coordinator/lto-apps-20261119.
+
+## OMP arms (2026-11-20)
+
+`otelcol-ebpf-profiler/`, and the bcc/tracee/tetragon arms queued by
+`queue-omp.sh` (one lock-hold per arm, so the coordinator's runs interleave), use the same Makefile and recipe.
+The service archive stays only in the raw directory; the committed directory holds README, coverage.json and
+timing-summary.txt, as the coordinator's arms do.
