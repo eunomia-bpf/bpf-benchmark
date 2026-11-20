@@ -1,0 +1,79 @@
+{
+  "cache_local_frame": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CacheLocalFrame"
+    ],
+    "exit": 0,
+    "seconds": 6.269083499908447,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cache-local-frame/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2369275093078613,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "cache_local_frame_jobs": 177,
+  "public_query_count": 7,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.trans": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.of_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.pointers": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.borrowed_load": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.borrowed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.warm": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.warm_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-cache-local-frame",
+  "completed_isa_families": 0
+}

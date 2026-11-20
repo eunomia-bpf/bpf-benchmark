@@ -116,3 +116,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefix
 import KProgFormal.ClightRefinement.Arm64MovPairNative
 import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPairNative
 import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefixNative
+import KProgFormal.ClightRefinement.Arm64CacheLocalFrame
