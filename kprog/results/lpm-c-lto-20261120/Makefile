@@ -55,3 +55,7 @@ post-b:
 .PHONY: native-receipt
 native-receipt:
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/native_receipt.py
+
+.PHONY: app-receipt
+app-receipt:
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/app_receipt.py

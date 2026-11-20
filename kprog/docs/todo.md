@@ -8,6 +8,9 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF runtime helper follow-up 2026-11-20T03:36:17Z: OTel installed-tool LPM functional run appOK/14native (4checked/10direct),34static LPM sites;1033.533→4875.659ns/call, regression. Raw/result/evidence in results/lpm-c-lto-20261120/app-result.json. Keep all LTO on and existing tools unchanged; optimize native C then measure. Stock coverage defects stay with OMP; performance targets remain open.
+
+
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
   PERF 2026-11-19T19:35:18Z: coordinator Katran B4145 also hoists constant-offset
   pointer pairs (left ptrtoint-240, right ptrtoint) ahead of tag4 at4149.
