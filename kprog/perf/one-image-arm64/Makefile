@@ -55,7 +55,8 @@ BPFREJIT_CORPUS_BPF_STATS ?= 0
 NATIVE_MANIFEST ?= /opt/bpf-benchmark/native-bpf/arm64/$(APP_DIR)/manifest.json
 SKIP_REJIT_MODE ?= norejit
 NATIVE_LOADER_MODE ?= post
-VM_CPUS ?= 2
+# Four vCPUs: Katran's pktgen workload drives kpktgend_0..3.
+VM_CPUS ?= 4
 VM_MEM ?= 2G
 RUN_TOKEN := $(shell od -An -N4 -tx1 /dev/urandom | tr -d " \n")
 QROOT := $(ROOT)/.cache/qemu-arm64-root
@@ -64,7 +65,12 @@ LOGS ?= /workspaces/kprog-raw/one-image-arm64-runs
 corpus:
 	$(MAKE) -C $(ROOT) arm64-qemu-root PLATFORM=qemu ARCH=arm64 $(OVERRIDES)
 	install -d $(QROOT)/home/yunwei37/workspace && ln -sfn $(ROOT) $(QROOT)/home/yunwei37/workspace/bpf-benchmark
-	printf '%s\n' '#!/bin/sh' 'set -eu' 'insmod /artifacts/kinsn/bpf_arm64_native_lab.ko' \
+	# As runner/scripts/bpfrejit-install does on an x86 host: the image keeps the kernel modules under
+	# /artifacts/lib/modules (veth, bridge and pktgen are modules on arm64), and a Docker-exported root
+	# has no localhost entry in /etc/hosts.
+	ln -sfn /artifacts/lib/modules $(QROOT)/lib/modules
+	printf '127.0.0.1 localhost\n::1 localhost ip6-localhost ip6-loopback\n' > $(QROOT)/etc/hosts
+	printf '%s\n' '#!/bin/sh' 'set -eu' 'depmod' 'insmod /artifacts/kinsn/bpf_arm64_native_lab.ko' \
 	  'echo $(if $(filter 0,$(BPFREJIT_CORPUS_BPF_STATS)),0,1) > /proc/sys/kernel/bpf_stats_enabled' \
 	  'unset BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF' \
 	  "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root PATH=/usr/lib/llvm-18/bin:\$$PATH TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:arm64 RUNTIME_IMAGE_TAR=$(IMAGE_TAR) RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon RUN_TOKEN=$(RUN_TOKEN) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) BPFREJIT_SHIM_NATIVE_LOADER=$(NATIVE_LOADER_MODE) BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE)" \
