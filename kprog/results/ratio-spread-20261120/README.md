@@ -220,3 +220,15 @@ of one standard deviation of the same body's own run-to-run variation: with this
 at parity would produce exactly this distribution. That is why OTel is reported on par with the JIT (coordinator
 2026-11-20T16:46Z), and why no further bisect of it is warranted - the effect being chased is smaller than the
 measurement's own spread. Any claim that the emitted body is slower needs more samples per arm, not more runs.
+
+
+### Update with the newest runs (OMP 2026-11-20T22:5xZ)
+
+Adding the arms taken after 2026-11-20T12:00Z (16 runs of the same family, same program, same JIT): median
+**1.077**, mean 1.115, sd **0.087**, 11 of 16 within 10 % of parity. So the offset has settled at ~8 % with a
+tighter spread than the 41-run set (sd 0.141), which is about one standard deviation of its own variation.
+
+That still reads as parity for this instrument, and it is what the coordinator's 2026-11-20T16:46Z decision
+reports. It is worth stating plainly, though, that the newer, tighter runs put the median on the "slightly above"
+side of 1.00 rather than straddling it, so if the number ever needs to support a claim that OTel's native body is
+faster than the JIT, that claim needs more samples per arm - not more runs of this kind.
