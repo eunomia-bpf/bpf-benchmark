@@ -1,4 +1,10 @@
-# Tetragon in the main-configuration recipe (2026-11-20 11:51 UTC, source e10ec26c4)
+# Tetragon arm with the stale base loader (2026-11-20 11:51 UTC, source e10ec26c4) — superseded
+
+**Root cause (OMP 2026-11-20T14:37Z): the base's verified-loader (built 11-19 11:59) predates 02429959e
+(11-20 02:57), which taught the link schema to bind `current_task`/`cpu_number`/`jiffies_64`. `strings` on the
+base binary showed only `ktime_get_mono_fast_ns`. The guest ran a current native-link against that stale plan,
+so every object referencing `current_task` failed. The loader was rebuilt from HEAD and the base replaced in
+place; the arm is re-run and this file kept as the record of the failure.**
 
 Run x86_kvm_corpus_20261120_121231_178650, recipe kprog/results/lto-apps-20261119/Makefile
 (APP=tetragon/observer, 3 x 180 s per arm, stats on), omp's arm under `flock -x` on locks/timing.
