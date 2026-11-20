@@ -1,0 +1,177 @@
+{
+  "shared_reader": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads"
+    ],
+    "exit": 0,
+    "seconds": 47.15982174873352,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "shared_reader_jobs": 143,
+  "focused_linked": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead"
+    ],
+    "exit": 0,
+    "seconds": 6.7108306884765625,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_linked_jobs": 219,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-sp-linked-cold/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.3189585208892822,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 15,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.program_stack_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_prefix_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_prefix": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.stack_read_cold_prefix_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.stack_read_cold_prefix": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.stack_materialize_cold_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.stack_materialize_cold": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_cold_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_cold": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead.stack_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead.input_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead.cold_cache_reads": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead.read_cold": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead.setup_read_cold": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovKeep.Linked.reader_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_options": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "new_module_Elab.async": false,
+    "shared_module_options": "unchanged"
+  },
+  "execution_phases": {
+    "internal_sp_prefix": 35,
+    "internal_cold_prefix": 22,
+    "external_provider_calls": 1,
+    "internal_post_provider_suffix": 28
+  },
+  "whole_proof_library": {
+    "status": "pending",
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-sp-linked-cold",
+  "initial_raw": "/workspaces/kprog-raw/formal/m5-program-entry-body-view",
+  "initial_logs": [
+    "sp-bound1",
+    "sp-linked1"
+  ],
+  "completed_isa_families": 0
+}

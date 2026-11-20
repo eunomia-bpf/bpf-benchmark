@@ -706,6 +706,17 @@ private theorem cache_offsets (returns : Bool) :
       entryComposite.co_members = .OK ((if returns then 24 else 16), .Full) := by
   cases returns <;> decide +kernel
 
+/-- Only the header lookups used by the STACK reader and its cold cache.
+Other composites and global definitions remain unconstrained. -/
+structure StackLayout (world : CC.CGenv) : Prop where
+  entry : world.genv_cenv.get Arm64Program._kprog_arm64_entry = some entryComposite
+  sp : CC.fieldOffset world.genv_cenv Arm64Program._sp entryComposite.co_members = .OK (40, .Full)
+  valid : CC.fieldOffset world.genv_cenv Arm64Program._sp_valid entryComposite.co_members = .OK (48, .Full)
+  base : CC.fieldOffset world.genv_cenv Arm64Program._sp_base entryComposite.co_members = .OK (16, .Full)
+
+theorem program_stack_layout : StackLayout ge :=
+  ⟨layouts.1, sp_offset, (cache_offsets false).1, (cache_offsets false).2⟩
+
 private theorem borrowed_loads {frontier : CC.Block} {chunk : CC.Chunk} {m : CC.Mem}
     {entry value : CC.Val} {name : CC.Ident}
     (read : Arm64EntryMemory.borrowed frontier chunk m entry name = some value) :
@@ -964,21 +975,21 @@ private def spReadTemps (entry pointer : CC.Val) (offset : BitVec 64) : CC.TempE
 
 /-- The actual combined SP reader reaches the same materializer with its
 borrowed signed-long offset and constant STACK tag. No GPR tables are read. -/
-theorem sp_read_prefix (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
+theorem sp_read_prefix_bound (world : CC.CGenv) (layout : StackLayout world) (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
     (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64)
     (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
       (CC.Integers.Ptrofs.repr 40))) = some (.Vptr sb so))
     (cell : CC.Mem.loadv .Mint64 m (.Vptr sb so) = some (.Vlong offset)) :
-    steps ge 35 (.Callstate (.Internal readHandler) [.Vptr b ofs, .Vlong (32#64)] k m) =
+    steps world 35 (.Callstate (.Internal readHandler) [.Vptr b ofs, .Vlong (32#64)] k m) =
       some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
         (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset) m) ∧
-    InternalPath ge 35 (.Callstate (.Internal readHandler)
+    InternalPath world 35 (.Callstate (.Internal readHandler)
       [.Vptr b ofs, .Vlong (32#64)] k m) := by
   simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
-  simp +decide [steps, InternalPath, InternalState, step_read, readParts, readCont,
+  simp +decide [steps, InternalPath, InternalState, step_read_bound, readParts, readCont,
     step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
     readTemps, spReadTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc,
-    CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, sp_offset,
+    CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode, layout.entry, layout.sp,
     CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
     CC.Cop.classifyBinarith, CC.Cop.binarithType,
     CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
@@ -991,6 +1002,18 @@ theorem sp_read_prefix (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
     CC.Integers.Int64.unsigned, CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
     CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
     CC.emptyEnv, CC.E0, CC.Eapp, header, cell]
+
+theorem sp_read_prefix (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64)
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 40))) = some (.Vptr sb so))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr sb so) = some (.Vlong offset)) :
+    steps ge 35 (.Callstate (.Internal readHandler) [.Vptr b ofs, .Vlong (32#64)] k m) =
+      some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
+        (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset) m) ∧
+    InternalPath ge 35 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (32#64)] k m) :=
+  sp_read_prefix_bound ge program_stack_layout b sb ofs so m k offset header cell
 
 /-- SP materialization reads the actual offset and selected warm STACK cache,
 returning their wrapped sum while preserving the complete memory. -/
@@ -1144,6 +1167,40 @@ private def returnInputContinuation (le : CC.TempEnv) (value : BitVec 64)
 
 /-- The cold STACK branch reaches the actual native-input external boundary.
 It retains the exact pending stores and both enclosing loops. -/
+theorem stack_read_cold_prefix_bound (world : CC.CGenv) (layout : StackLayout world) (inputBlock : CC.Block)
+    (input : CC.Genv.findSymbol world.genv_genv Arm64Program._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction) (b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv) (value : BitVec 64)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (4#32)))
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (cold : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (0#32))) :
+    steps world 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
+        (stackInputContinuation le value (.Vptr vb vo) k) m) ∧
+    InternalPath world 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
+    CC.doStep, Arm64Program.s_kprog_arm64_program_read_0,
+    CC.doEvalExpr, CC.doEvalLvalue, CC.doEvalExprlist, CC.lvalOfField, CC.lvalOfVar,
+    CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
+    layout.entry, layout.valid, CC.Cop.semUnaryOperation, CC.Cop.semNotbool,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+    CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool,
+    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
+    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
+    input.1, input.2, CC.Genv.findFunct, CC.typeOfFundef,
+    Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
+    CC.PTree.gso, CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
+    CC.emptyEnv, CC.E0, CC.Eapp, entryRead, valueRead, tagRead, header, cold,
+    stackInputContinuation, stackColdTemps, stackColdParts]
+
 theorem stack_read_cold_prefix (b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
     (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv) (value : BitVec 64)
     (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
@@ -1155,28 +1212,8 @@ theorem stack_read_cold_prefix (b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
     steps ge 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
         (stackInputContinuation le value (.Vptr vb vo) k) m) ∧
-    InternalPath ge 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
-  have offsets := cache_offsets false
-  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
-  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
-  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
-    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
-    CC.doStep, Arm64Program.s_kprog_arm64_program_read_0,
-    CC.doEvalExpr, CC.doEvalLvalue, CC.doEvalExprlist, CC.lvalOfField, CC.lvalOfVar,
-    CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
-    layouts.1, offsets.1, CC.Cop.semUnaryOperation, CC.Cop.semNotbool,
-    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
-    CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
-    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool,
-    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
-    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
-    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
-    CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
-    program_input_binding.1, program_input_binding.2, CC.Genv.findFunct, CC.typeOfFundef,
-    Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
-    CC.PTree.gso, CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
-    CC.emptyEnv, CC.E0, CC.Eapp, entryRead, valueRead, tagRead, header, cold,
-    stackInputContinuation, stackColdTemps, stackColdParts]
+    InternalPath ge 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) :=
+  stack_read_cold_prefix_bound ge program_stack_layout (CC.Positive.ofNat 64) program_input_binding b vb ofs vo m k le value entryRead valueRead tagRead header cold
 
 private theorem field_store_distinct (frontier b wb : CC.Block) (ofs : CC.Integers.Ptrofs)
     (name : CC.Ident) (delta : CC.Z) (chunk : CC.Chunk) (wo : CC.Z)
@@ -1264,7 +1301,7 @@ theorem entry_cache_stores (returns : Bool) (frontier b vb bb : CC.Block) (ofs v
   · exact borrowed_of_load frontier vb vo .Mint8unsigned after _ _ _ validAfterHeader validOwned validRead
   · exact borrowed_of_load frontier bb bo .Mint64 after _ _ _ baseAfterHeader baseOwned baseRead
 
-private theorem stack_read_cold_suffix (b vb bb : CC.Block) (ofs vo bo : CC.Integers.Ptrofs)
+private theorem stack_read_cold_suffix_bound (world : CC.CGenv) (layout : StackLayout world) (b vb bb : CC.Block) (ofs vo bo : CC.Integers.Ptrofs)
     (supplied middle after : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (value base : BitVec 64) (oldValid : CC.Val)
     (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
@@ -1277,18 +1314,16 @@ private theorem stack_read_cold_suffix (b vb bb : CC.Block) (ofs vo bo : CC.Inte
     (storeBase : CC.Mem.storev .Mint64 supplied (.Vptr bb bo) (.Vlong base) = some middle)
     (storeValid : CC.Mem.storev .Mint8unsigned middle (.Vptr vb vo) (.Vint (1#32)) = some after)
     (readBase : CC.Mem.loadv .Mint64 after (.Vptr bb bo) = some (.Vlong base)) :
-    steps ge 28 (.Returnstate (.Vlong base) (stackInputContinuation le value oldValid k) supplied) =
+    steps world 28 (.Returnstate (.Vlong base) (stackInputContinuation le value oldValid k) supplied) =
       some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) after) ∧
-    InternalPath ge 28
+    InternalPath world 28
       (.Returnstate (.Vlong base) (stackInputContinuation le value oldValid k) supplied) := by
   have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
-  have offsets := cache_offsets false
-  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
   simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at baseHeader validHeader baseHeaderAfter
   simp +decide [steps, InternalPath, InternalState, CC.doStep, read_return_type,
     stackInputContinuation, stackColdTemps, stackColdParts, readParts, readCont,
     CC.setOpttemp, CC.PTree.gso, CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc,
-    CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode, layouts.1, offsets.1, offsets.2,
+    CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode, layout.entry, layout.valid, layout.base,
     CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
     CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
     CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
@@ -1329,6 +1364,59 @@ structure BorrowedCacheStorage (returns : Bool) (frontier b : CC.Block)
 constructs both stores from writable storage, and preserves its trace and
 post-memory except for those stores. Establishing the storage/native-origin
 binding from the real producer remains a separate obligation. -/
+theorem stack_materialize_cold_bound (world : CC.CGenv) (layout : StackLayout world) (inputBlock : CC.Block)
+    (input : CC.Genv.findSymbol world.genv_genv Arm64Program._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction) (frontier b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
+    (before supplied : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (trace : CC.Trace)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (4#32)))
+    (header : CC.Mem.loadv CC.Mptr before (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (cold : CC.Mem.loadv .Mint8unsigned before (.Vptr vb vo) = some (.Vint (0#32)))
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (1#32)] before trace (.Vlong base) supplied)
+    (storage : BorrowedCacheStorage false frontier b ofs supplied) :
+    ∃ middle after,
+      CC.Star (CC.Step2 world)
+        (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le before) trace
+        (.Returnstate (.Vlong (value + base)) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (.Vptr storage.baseBlock storage.baseOffset)
+        (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
+        (.Vint (1#32)) = some after ∧
+      WarmEntryCache false frontier after (.Vptr b ofs) base ∧
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
+  obtain ⟨middle, after, storeBase, storeValid, warm, validHeader, baseHeader,
+      permissions, allocations⟩ := entry_cache_stores false frontier b storage.validBlock
+    storage.baseBlock ofs storage.validOffset storage.baseOffset supplied base
+    storage.validHeader storage.baseHeader storage.validOwned storage.baseOwned storage.entryValid
+    storage.entryBase storage.separate storage.baseWritable storage.validWritable
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  have beforeCall := stack_read_cold_prefix_bound world layout inputBlock input b vb ofs vo before k le value
+    entryRead valueRead tagRead header cold
+  have readBack := (borrowed_loads warm.choose_spec.2.2)
+  obtain ⟨block, offset, baseHeader', baseRead⟩ := readBack
+  rw [baseHeader] at baseHeader'
+  cases baseHeader'
+  have suffix := stack_read_cold_suffix_bound world layout b storage.validBlock storage.baseBlock ofs
+    storage.validOffset storage.baseOffset supplied middle after k le value base (.Vptr vb vo)
+    entryRead (field_load frontier b ofs supplied _ 16 _ offsets.2 storage.baseHeader)
+    (field_load frontier b ofs middle _ 48 _ offsets.1 validHeader)
+    (field_load frontier b ofs after _ 16 _ offsets.2 baseHeader) storeBase storeValid baseRead
+  have call : CC.Star (CC.Step2 world)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
+        (stackInputContinuation le value (.Vptr vb vo) k) before)
+      trace (.Returnstate (.Vlong base) (stackInputContinuation le value (.Vptr vb vo) k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.Eapp, CC.E0])
+  refine ⟨middle, after, ?_, storeBase, storeValid, warm, permissions, allocations⟩
+  simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+    star_trans (star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound call)
+      (internalRun_of_steps suffix.2 suffix.1).sound
+
 theorem stack_materialize_cold (frontier b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
     (before supplied : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (value base : BitVec 64) (trace : CC.Trace)
@@ -1350,35 +1438,8 @@ theorem stack_materialize_cold (frontier b vb : CC.Block) (ofs vo : CC.Integers.
       CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
         (.Vint (1#32)) = some after ∧
       WarmEntryCache false frontier after (.Vptr b ofs) base ∧
-      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
-  obtain ⟨middle, after, storeBase, storeValid, warm, validHeader, baseHeader,
-      permissions, allocations⟩ := entry_cache_stores false frontier b storage.validBlock
-    storage.baseBlock ofs storage.validOffset storage.baseOffset supplied base
-    storage.validHeader storage.baseHeader storage.validOwned storage.baseOwned storage.entryValid
-    storage.entryBase storage.separate storage.baseWritable storage.validWritable
-  have offsets := cache_offsets false
-  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
-  have beforeCall := stack_read_cold_prefix b vb ofs vo before k le value
-    entryRead valueRead tagRead header cold
-  have readBack := (borrowed_loads warm.choose_spec.2.2)
-  obtain ⟨block, offset, baseHeader', baseRead⟩ := readBack
-  rw [baseHeader] at baseHeader'
-  cases baseHeader'
-  have suffix := stack_read_cold_suffix b storage.validBlock storage.baseBlock ofs
-    storage.validOffset storage.baseOffset supplied middle after k le value base (.Vptr vb vo)
-    entryRead (field_load frontier b ofs supplied _ 16 _ offsets.2 storage.baseHeader)
-    (field_load frontier b ofs middle _ 48 _ offsets.1 validHeader)
-    (field_load frontier b ofs after _ 16 _ offsets.2 baseHeader) storeBase storeValid baseRead
-  have call : CC.Star (CC.Step2 ge)
-      (.Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
-        (stackInputContinuation le value (.Vptr vb vo) k) before)
-      trace (.Returnstate (.Vlong base) (stackInputContinuation le value (.Vptr vb vo) k) supplied) :=
-    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
-      (by simp [CC.Eapp, CC.E0])
-  refine ⟨middle, after, ?_, storeBase, storeValid, warm, permissions, allocations⟩
-  simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
-    star_trans (star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound call)
-      (internalRun_of_steps suffix.2 suffix.1).sound
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock :=
+  stack_materialize_cold_bound ge program_stack_layout (CC.Positive.ofNat 64) program_input_binding frontier b vb ofs vo before supplied k le value base trace entryRead valueRead tagRead header cold provider storage
 
 /-- The complete actual GPR reader's cold STACK path, for every actual
 provider outcome admitted by the imported external relation. The only memory
@@ -1434,6 +1495,50 @@ theorem gpr_read_stack_cold (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (
 
 /-- The complete actual SP reader follows the same cold STACK provider and
 cache stores. Its offset is read before the provider, not from its post-memory. -/
+theorem sp_read_cold_bound (world : CC.CGenv) (layout : StackLayout world) (inputBlock : CC.Block)
+    (input : CC.Genv.findSymbol world.genv_genv Arm64Program._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction) (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (before supplied : CC.Mem) (k : CC.Cont) (offset base : BitVec 64) (trace : CC.Trace)
+    (observed : Arm64EntryMemory.borrowed frontier .Mint64 before (.Vptr b ofs)
+      Arm64Program._sp = some (.Vlong offset))
+    (cold : Arm64EntryMemory.borrowed frontier .Mint8unsigned before (.Vptr b ofs)
+      Arm64Program._sp_valid = some (.Vint (0#32)))
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (1#32)] before trace (.Vlong base) supplied)
+    (storage : BorrowedCacheStorage false frontier b ofs supplied) :
+    ∃ middle after,
+      CC.Star (CC.Step2 world)
+        (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+          [.Vptr b ofs, .Vlong (32#64)] k before) trace
+        (.Returnstate (.Vlong (offset + base)) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (.Vptr storage.baseBlock storage.baseOffset)
+        (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
+        (.Vint (1#32)) = some after ∧
+      WarmEntryCache false frontier after (.Vptr b ofs) base ∧
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
+  obtain ⟨sb, so, header, cell⟩ := borrowed_loads observed
+  have beforeCall := sp_read_prefix_bound world layout b sb ofs so before k offset
+    (field_load frontier b ofs before _ 40 _ sp_offset header) cell
+  have entryRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [spReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_value = some (.Vlong offset) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  have tagRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  obtain ⟨validBlock, validOffset, validHeader, validRead⟩ := borrowed_loads cold
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  obtain ⟨middle, after, run, facts⟩ := stack_materialize_cold_bound world layout inputBlock input frontier b validBlock ofs validOffset
+    before supplied k _ offset base trace entryRead valueRead tagRead
+    (field_load frontier b ofs before _ 48 _ offsets.1 validHeader) validRead provider storage
+  refine ⟨middle, after, ?_, facts⟩
+  simpa only [readHandler, CC.E0, CC.Eapp, List.nil_append] using
+    star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound run
+
 theorem sp_read_cold (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
     (before supplied : CC.Mem) (k : CC.Cont) (offset base : BitVec 64) (trace : CC.Trace)
     (observed : Arm64EntryMemory.borrowed frontier .Mint64 before (.Vptr b ofs)
@@ -1453,28 +1558,8 @@ theorem sp_read_cold (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
       CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
         (.Vint (1#32)) = some after ∧
       WarmEntryCache false frontier after (.Vptr b ofs) base ∧
-      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
-  obtain ⟨sb, so, header, cell⟩ := borrowed_loads observed
-  have beforeCall := sp_read_prefix b sb ofs so before k offset
-    (field_load frontier b ofs before _ 40 _ sp_offset header) cell
-  have entryRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
-      Arm64Program._entry = some (.Vptr b ofs) := by
-    simp +decide [spReadTemps, readTemps, CC.PTree.gso]
-  have valueRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
-      Arm64Program.___a64_read_value = some (.Vlong offset) := by
-    simp +decide [spReadTemps, CC.PTree.gso]
-  have tagRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
-      Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
-    simp +decide [spReadTemps, CC.PTree.gso]
-  obtain ⟨validBlock, validOffset, validHeader, validRead⟩ := borrowed_loads cold
-  have offsets := cache_offsets false
-  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
-  obtain ⟨middle, after, run, facts⟩ := stack_materialize_cold frontier b validBlock ofs validOffset
-    before supplied k _ offset base trace entryRead valueRead tagRead
-    (field_load frontier b ofs before _ 48 _ offsets.1 validHeader) validRead provider storage
-  refine ⟨middle, after, ?_, facts⟩
-  simpa only [readHandler, CC.E0, CC.Eapp, List.nil_append] using
-    star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound run
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock :=
+  sp_read_cold_bound ge program_stack_layout (CC.Positive.ofNat 64) program_input_binding frontier b ofs before supplied k offset base trace observed cold provider storage
 
 /-- The cold RETURN branch reaches the actual native-input external boundary.
 It retains the exact pending stores and both enclosing loops. -/

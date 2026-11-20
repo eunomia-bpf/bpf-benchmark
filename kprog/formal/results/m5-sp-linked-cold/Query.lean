@@ -1,0 +1,48 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryColdRead
+
+open KProgFormal.ClightRefinement
+
+#check Arm64RegisterReads.program_stack_layout
+#print axioms Arm64RegisterReads.program_stack_layout
+
+#check Arm64RegisterReads.sp_read_prefix_bound
+#print axioms Arm64RegisterReads.sp_read_prefix_bound
+
+#check Arm64RegisterReads.sp_read_prefix
+#print axioms Arm64RegisterReads.sp_read_prefix
+
+#check Arm64RegisterReads.stack_read_cold_prefix_bound
+#print axioms Arm64RegisterReads.stack_read_cold_prefix_bound
+
+#check Arm64RegisterReads.stack_read_cold_prefix
+#print axioms Arm64RegisterReads.stack_read_cold_prefix
+
+#check Arm64RegisterReads.stack_materialize_cold_bound
+#print axioms Arm64RegisterReads.stack_materialize_cold_bound
+
+#check Arm64RegisterReads.stack_materialize_cold
+#print axioms Arm64RegisterReads.stack_materialize_cold
+
+#check Arm64RegisterReads.sp_read_cold_bound
+#print axioms Arm64RegisterReads.sp_read_cold_bound
+
+#check Arm64RegisterReads.sp_read_cold
+#print axioms Arm64RegisterReads.sp_read_cold
+
+#check Arm64ProgramEntryColdRead.stack_layout
+#print axioms Arm64ProgramEntryColdRead.stack_layout
+
+#check Arm64ProgramEntryColdRead.input_binding
+#print axioms Arm64ProgramEntryColdRead.input_binding
+
+#check Arm64ProgramEntryColdRead.cold_cache_reads
+#print axioms Arm64ProgramEntryColdRead.cold_cache_reads
+
+#check Arm64ProgramEntryColdRead.read_cold
+#print axioms Arm64ProgramEntryColdRead.read_cold
+
+#check Arm64ProgramEntryColdRead.setup_read_cold
+#print axioms Arm64ProgramEntryColdRead.setup_read_cold
+
+#check Arm64MovKeep.Linked.reader_binding
+#print axioms Arm64MovKeep.Linked.reader_binding
