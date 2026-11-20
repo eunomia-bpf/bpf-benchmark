@@ -9,31 +9,6 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::*;
 
-const MONO_FAST_HELPER_KEY: &str = "__native_x86_ktime_get_mono_fast_ns";
-const CURRENT_TASK_KEY: &str = "__native_x86_current_task";
-const CPU_NUMBER_KEY: &str = "__native_x86_cpu_number";
-const JIFFIES_64_KEY: &str = "__native_x86_jiffies_64";
-
-/// Helpers the kernel's verifier inlines for the JIT (do_misc_fixups) are one load of a per-CPU
-/// variable or a kernel global; the same load, bound to the boot kernel's address, replaces the call.
-fn x86_inline_load_helper(name: &str, helpers: &HashMap<String, u64>) -> Result<Option<Instruction>> {
-    let (key, code, dst, segment) = match name {
-        "bpf_get_current_task" | "bpf_get_current_task_btf" =>
-            (CURRENT_TASK_KEY, Code::Mov_r64_rm64, Register::RAX, Register::GS),
-        "bpf_get_smp_processor_id" => (CPU_NUMBER_KEY, Code::Mov_r32_rm32, Register::EAX, Register::GS),
-        "bpf_jiffies64" => (JIFFIES_64_KEY, Code::Mov_r64_rm64, Register::RAX, Register::None),
-        _ => return Ok(None),
-    };
-    let Some(&address) = helpers.get(key).filter(|address| **address != 0) else { return Ok(None) };
-    let displacement = address as i64;
-    if i32::try_from(displacement).is_err() {
-        bail!("{name}: kernel address {address:#x} is outside the sign-extended 32-bit range");
-    }
-    // 64-bit addressing with a sign-extended disp32 (displ_size 4 would add a 0x67 prefix).
-    let memory = MemoryOperand::new(Register::None, Register::None, 1, displacement, 8, false, segment);
-    Ok(Some(Instruction::with2(code, dst, memory)?))
-}
-
 fn show_lto_range(show: bool, piece: &str, range: (usize, usize)) {
     if show {
         eprintln!("native-link-lto-range {}", serde_json::json!({
@@ -41,18 +16,6 @@ fn show_lto_range(show: bool, piece: &str, range: (usize, usize)) {
             "bytes": range.1 - range.0,
         }));
     }
-}
-
-fn runtime_call_target(name: &str, helpers: &HashMap<String, u64>, context: &str) -> Result<u64> {
-    if name == "bpf_ktime_get_ns" {
-        // The one kernel's helper body returns this same NMI-safe monotonic
-        // implementation. Change call linkage only, never observable IDs or
-        // materialized helper addresses used by the original native program.
-        require_call_target(resolve_helper_target(name, helpers, context)?, context)?;
-        let target = resolve_helper_target(MONO_FAST_HELPER_KEY, helpers, context)?;
-        return require_call_target(target, "x86 monotonic fast clock");
-    }
-    resolve_helper_target(name, helpers, context)
 }
 
 fn map_op_target(ops: &[MapOps], map: Option<&String>, helper: &str) -> Option<u64> {
@@ -1114,7 +1077,7 @@ pub(super) fn rewrite_x86(
                 } else if !proof_mode {
                     let target_addr = match map_op_target(map_ops, proven_maps.get(&local_ip), &tail.symbol) {
                         Some(target) => target,
-                        None => runtime_call_target(&tail.symbol, helper_addrs,
+                        None => resolve_helper_target(&tail.symbol, helper_addrs,
                             &format!("x86 helper tail branch {}", tail.symbol))?,
                     };
                     Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
@@ -1447,14 +1410,6 @@ pub(super) fn rewrite_x86(
                         }
                     }
 
-                    if !proof_mode {
-                        if let Some(load) = x86_inline_load_helper(&name, helper_addrs)? {
-                            push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip, local_ip, load, None);
-                            resolved_helper_call_sites.insert(site_key);
-                            continue;
-                        }
-                    }
-
                     // Use the actual native RDI provenance, never source call order.
                     if let Some(target) = map_op_target(map_ops, proven_maps.get(&local_ip), &name) {
                         push_x86_helper_call_reloc(&mut local, &mut kinds,
@@ -1463,7 +1418,7 @@ pub(super) fn rewrite_x86(
                         continue;
                     }
 
-                    let helper_addr = runtime_call_target(
+                    let helper_addr = resolve_helper_target(
                         &name,
                         helper_addrs,
                         &format!("x86 helper call {name}"),
@@ -3941,25 +3896,6 @@ fn patch_x86_rel8(bytes: &mut [u8], disp_offset: usize, target: usize) -> Result
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn kernel_inlined_helpers_become_one_load() {
-        let helpers = HashMap::from([(CURRENT_TASK_KEY.to_string(), 0xffff_ffff_842b_0018u64),
-            (CPU_NUMBER_KEY.to_string(), 0xffff_ffff_842b_0034), (JIFFIES_64_KEY.to_string(), 0xffff_ffff_8300_9a00)]);
-        for (name, want) in [
-            ("bpf_get_current_task", vec![0x65, 0x48, 0x8b, 0x04, 0x25, 0x18, 0x00, 0x2b, 0x84]),
-            ("bpf_get_current_task_btf", vec![0x65, 0x48, 0x8b, 0x04, 0x25, 0x18, 0x00, 0x2b, 0x84]),
-            ("bpf_get_smp_processor_id", vec![0x65, 0x8b, 0x04, 0x25, 0x34, 0x00, 0x2b, 0x84]),
-            ("bpf_jiffies64", vec![0x48, 0x8b, 0x04, 0x25, 0x00, 0x9a, 0x00, 0x83]),
-        ] {
-            let load = x86_inline_load_helper(name, &helpers).unwrap().unwrap();
-            let mut encoder = iced_x86::Encoder::new(64);
-            encoder.encode(&load, 0).unwrap();
-            assert_eq!(encoder.take_buffer(), want, "{name}");
-        }
-        assert!(x86_inline_load_helper("bpf_get_current_task", &HashMap::new()).unwrap().is_none());
-        assert!(x86_inline_load_helper("bpf_ktime_get_ns", &helpers).unwrap().is_none());
-    }
-
     use super::*;
 
     #[test]
@@ -4015,70 +3951,6 @@ mod tests {
             let relocations = |result: &RewriteResult| result.relocs.iter()
                 .map(|r| (r.offset, r.kind, r.target)).collect::<Vec<_>>();
             assert_eq!(relocations(&normal), relocations(&shown));
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn clock_calls_bind_fast_target_without_changing_observed_helper_identity() -> Result<()> {
-        // Cover ELF PLT/GOT calls, a hoisted GOT pointer and
-        // a sibling tail jump. Address/ID observations must keep their value.
-        for form in [4, 9, 41, 42, 100, 102] {
-            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
-            let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
-            let (mut bytes, relocation, observed) = match form {
-                4 => (vec![0xe8,0,0,0,0,0xc3], Some((1,4)), None),
-                102 => (vec![0xe9,0,0,0,0], Some((1,4)), None),
-                100 => (vec![0x48,0x8b,0x05,0,0,0,0,0x48,0x89,0x07,0xff,0xd0,0xc3], Some((3,9)), Some(0x1234u64)),
-                r => (vec![0xff,0x15,0,0,0,0,0xc3], Some((2,r)), None),
-            };
-            object.append_section_data(text, &bytes, 1);
-            object.add_symbol(WriteSymbol { name:b"entry".to_vec(), value:0, size:bytes.len() as u64,
-                kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
-                section:WriteSymbolSection::Section(text), flags:SymbolFlags::None });
-            if let Some((offset,r_type)) = relocation {
-                let symbol = object.add_symbol(WriteSymbol { name:b"bpf_ktime_get_ns".to_vec(), value:0, size:0,
-                    kind:SymbolKind::Text, scope:SymbolScope::Linkage, weak:false,
-                    section:WriteSymbolSection::Undefined, flags:SymbolFlags::None });
-                object.add_relocation(text, WriteRelocation { offset, symbol, addend:-4,
-                    flags:RelocationFlags::Elf { r_type } })?;
-            }
-            bytes = object.write()?;
-            let elf = object::File::parse(bytes.as_slice())?;
-            let entry = find_symbol_by_name(&elf, "entry")?;
-            let helpers = HashMap::from([("bpf_ktime_get_ns".into(),0x1234),
-                (MONO_FAST_HELPER_KEY.into(),0x5678)]);
-            let rewrite = |facts: &HashMap<String,u64>| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
-                &HashMap::new(),&[],false,true,false);
-            let missing = HashMap::from([("bpf_ktime_get_ns".into(),0x1234)]);
-            assert!(rewrite(&missing).is_err(),
-                "missing clock fact cannot silently use the old wrapper");
-            let mut zero = helpers.clone();zero.insert(MONO_FAST_HELPER_KEY.into(),0);
-            assert!(rewrite(&zero).is_err());
-            let mut unavailable = helpers.clone();unavailable.insert("bpf_ktime_get_ns".into(),0);
-            assert!(rewrite(&unavailable).is_err(),"fast linkage must preserve original helper availability");
-            unavailable.remove("bpf_ktime_get_ns");
-            assert!(rewrite(&unavailable).is_err());
-            let result = rewrite(&helpers)?;
-            assert_eq!(result.relocs.len(),1,"form={form}");
-            assert_eq!(result.relocs[0].target,0x5678,"form={form}");
-            #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
-            {
-                let mut code = result.blob;
-                code.push(0xc3); // BPF's native-image return epilogue.
-                let fast = code.len();code.extend_from_slice(&[0xb8,99,0,0,0,0xc3]);
-                for relocation in result.relocs {
-                    let at=relocation.offset as usize;
-                    assert!(matches!(code[at],0xe8|0xe9));
-                    let displacement=i32::try_from(fast as i64-at as i64-5)?;
-                    code[at+1..at+5].copy_from_slice(&displacement.to_le_bytes());
-                }
-                let mut identity=[0u8;8];
-                assert_eq!(memory::call_blob(&code,identity.as_mut_ptr(),0,0) as usize,99,"form={form}");
-                if let Some(expected) = observed {
-                    assert_eq!(u64::from_ne_bytes(identity),expected,"helper identity form={form}");
-                }
-            }
         }
         Ok(())
     }

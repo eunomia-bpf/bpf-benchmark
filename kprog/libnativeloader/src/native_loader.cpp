@@ -386,10 +386,6 @@ constexpr const char *kTypedHelperSymbols[] = {
 };
 
 constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
-constexpr const char *kX86MonoFastHelperKey = "__native_x86_ktime_get_mono_fast_ns";
-constexpr const char *kX86CurrentTaskKey = "__native_x86_current_task";
-constexpr const char *kX86CpuNumberKey = "__native_x86_cpu_number";
-constexpr const char *kX86Jiffies64Key = "__native_x86_jiffies_64";
 constexpr const char *kX86BpfMapMaxEntriesOffsetKey =
     "__native_x86_bpf_map_max_entries_offset";
 constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_offset";

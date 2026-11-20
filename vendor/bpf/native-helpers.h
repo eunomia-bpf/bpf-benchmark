@@ -41,16 +41,25 @@ __KPROG_HELPER(long, bpf_get_current_comm, void *, unsigned int);
 __KPROG_HELPER(unsigned long long, bpf_get_current_cgroup_id, void);
 __KPROG_HELPER(unsigned long long, bpf_get_current_task, void);
 __KPROG_HELPER(void *, bpf_get_current_task_btf, void);
-/* Instantiate after B verification with the boot kernel's task field offsets.
- * P keeps its named helper call; this is the kernel helper's C body for LTO. */
-#define __KPROG_PID_TGID_CODE(PID_OFFSET, TGID_OFFSET) \
-__attribute__((always_inline)) \
-unsigned long long (bpf_get_current_pid_tgid)(void) { \
-    const char *task = (const char *)(unsigned long)__KPROG_CALL(bpf_get_current_task); \
-    if (!task) return (unsigned long long)-22; \
-    return (unsigned long long)*(const int *)(task + (TGID_OFFSET)) << 32 | \
-           *(const int *)(task + (PID_OFFSET)); \
-}
+__KPROG_HELPER(unsigned long long, bpf_jiffies64, void);
+/* bpf_ktime_get_ns is ktime_get_mono_fast_ns, and the helpers the kernel
+ * inlines for the JIT (do_misc_fixups) read one kernel variable; P does the
+ * same here. Each body carries the helper's symbol, so every spelling an app
+ * uses (libbpf's, BPF_FUNC's) inlines it; each kernel variable carries its
+ * kernel name, which native-link binds from the boot kernel's kallsyms. A call
+ * that stays out of line still reaches the kernel helper. */
+#if defined(__x86_64__)
+#define __KPROG_INLINE extern __inline __attribute__((gnu_inline, always_inline))
+extern unsigned long long ktime_get_mono_fast_ns(void);
+extern char jiffies_64[];
+__KPROG_INLINE unsigned long long __kprog_bpf_ktime_get_ns(void) { return ktime_get_mono_fast_ns(); }
+__KPROG_INLINE unsigned long long __kprog_bpf_jiffies64(void) { return *(const volatile unsigned long long *)jiffies_64; }
+extern char current_task[], cpu_number[];
+#define __KPROG_PER_CPU(type, var) (*(const volatile type __attribute__((address_space(256))) *)(unsigned long)(var))
+__KPROG_INLINE unsigned long long __kprog_bpf_get_current_task(void) { return __KPROG_PER_CPU(unsigned long long, current_task); }
+__KPROG_INLINE void *__kprog_bpf_get_current_task_btf(void) { return (void *)__KPROG_PER_CPU(unsigned long long, current_task); }
+__KPROG_INLINE unsigned int __kprog_bpf_get_smp_processor_id(void) { return __KPROG_PER_CPU(unsigned int, cpu_number); }
+#endif
 __KPROG_HELPER(unsigned long long, bpf_get_attach_cookie, void *);
 __KPROG_HELPER(unsigned long long, bpf_get_func_ip, void *);
 __KPROG_HELPER(long, bpf_get_func_arg, void *, unsigned int, unsigned long long *);
@@ -209,6 +218,8 @@ static __always_inline long __kprog_probe_read_str(void *dst, unsigned int size,
 #define bpf_get_current_task() __kprog_bpf_get_current_task()
 #undef bpf_get_current_task_btf
 #define bpf_get_current_task_btf() __kprog_bpf_get_current_task_btf()
+#undef bpf_jiffies64
+#define bpf_jiffies64() __kprog_bpf_jiffies64()
 #undef bpf_get_attach_cookie
 #define bpf_get_attach_cookie(...) __KPROG_CALL(bpf_get_attach_cookie, __VA_ARGS__)
 #undef bpf_get_func_ip

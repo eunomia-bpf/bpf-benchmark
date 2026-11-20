@@ -15,8 +15,9 @@ namespace native_lto {
 
 inline constexpr const char *kernel_symbols[] = {
     "ktime_get_mono_fast_ns",
-    "copy_from_user_nofault",
-    "copy_from_kernel_nofault",
+    "current_task",
+    "cpu_number",
+    "jiffies_64",
 };
 
 inline const btf_type *type(const btf *types, uint32_t id)
