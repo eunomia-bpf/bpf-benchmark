@@ -489,6 +489,14 @@ PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backe
 
 协调者 2026-11-19T22:05Z：上面的决定已实现（4abd03352）。吻合度比较 ELF 重定位和 CO-RE 重定位（读源对象的 .BTF.ext）以外的立即数和偏移；和任何条目都不完全吻合的程序留在 eBPF。主机上对六个应用的源对象核对：Tracee 34769、Tetragon 65789、BCC 90 个 CO-RE 位置；按 libbpf 改写重定位位置之后，1231 个入口函数全部完全吻合，改一个常量的情况 1213 个都能认出。下一步：计时轮转结束（约 00:50）后打镜像、跑六应用检查。预期 Cilium 按端点的程序留在 eBPF（shim 日志 "no manifest match"），其他五个应用的替换数保持 OTel 14、BCC 25、Tetragon 288、Tracee 169、Katran 1（Cilium 那次是 135）。
 
+**协调者 2026-11-20T06:40:46Z（审核 20261120T03Z 逐条核实后的决定）**：
+1. 第 1 条成立：Tetragon 两臂装上的程序不一样（233023_830887 基线 287、原生 192；8c99f9e21 的检查 287 对 202），generic_tracepoint 原生一侧运行少 6 倍、每次调用 562 → 1593 ns。Tetragon 的数（2.009x、1.241x、1.145x、0.874x、0.985x）不计，直到两臂装上同一组程序；报告并排写两臂装上/运行的程序数（取自 result.json）。协调者下一项：原生阶段装得少的原因（原生 LTO 和链接缓存在 guest 的 /tmp，每次启动重编，原生装载更慢）和 generic_tracepoint 慢 2.8 倍。
+2. 第 2 条部分成立：审核之后 8f6ff5891 的 stats 开 3 × 60 秒六个应用和 make micro 都已跑完（713020f76：每次调用几何平均 1.14x，程序体 1.461x）。决定（运营者 11-20：“还在计时?????”；11-13 的先批量再确认）：每个镜像只跑检查和每个应用 3 × 60 秒 stats 开；stats 关 3 × 180 秒的全量轮转只在冻结前跑一次。
+3. 第 3 条成立：顺序是 Tetragon（程序组一致、generic_tracepoint）、OTel native_tracer_entry（慢 7%）、Katran 的 ktime。
+4. 第 4 条成立，已处理：user-instruction.md 里 149 行协调者、lane、omp 的交接原样移到 kprog/docs/handoffs.md（95fc3a4cf），已通知各 lane。
+5. 第 5 条成立：11-19 15:46 以来代码净变化约为零。基线（2026-11-20T06:40:46Z）：native-link 9349 行、加载器 6553 行、x86 生成器 11670 行、vendor/bpf 头文件 858 行；每小时报告写净变化。量完上面三项后，协调者删 native-link、加载器、生成器里用不到的代码。
+原话对照：第 1 处由第 2 条的决定处理。第 2 处：内核读里那两条地址检查是 helper 自己的规则，去掉后 Tracee 慢 20 倍（实测），保留；sim 一侧的 stable() 让基址留在寄存器里，native-link 才能链接，保留；原因都在 anti-patterns.md。代码减少按第 5 条做。第 3 处已处理（第 4 条）。第 4 处：工具构建已停，构建产物已删，现在没有构建进程。
+
 **协调者 2026-11-20T06:36:45Z（镜像 8c99f9e21 的检查：Tracee 掉回 1.17x，原因和修法）**：六应用检查（six-app-inline-20261120T025748Z，各一次 10 秒，stats 开）每次调用 / 吞吐：Cilium 1.141x / 1.053x、Tracee 1.167x / 1.047x、BCC 1.031x / 1.009x、Katran 1.014x / 1.027x、Tetragon 0.985x / 1.360x、OTel 0.948x / 1.050x，0 个加载错误。Cilium 的每次调用从 1.03–1.06x 升到 1.14x（jiffies64 变成一条 load）。Tracee 从 2.10x 掉到 1.17x：perf 的 81f126f69（04:00）把内核读改回 P 里的 helper 调用，为了 B 的精确结果，直接原生于是每次读都调 helper。修法（ac047e92a）：P 保留 helper 调用；直接原生的加载期 LTO（perf_context_lto）把 bpf_probe_read_kernel(_str) 换成 vendor/bpf/native-read-kernel.h 里的直接 load（helper 自己的地址规则），LTO 输出只留所选入口的闭包（Tracee 一次从 65 秒降到 0.3 秒）。已排队（six-app-reads-lto-20261120T063600Z）：镜像、六应用检查、每个应用 3 × 60 秒 stats 开。
 
 **协调者 2026-11-20T02:58:21Z（8f6ff5891 的 stats 关结果；内核替 JIT 内联的 helper）**：
