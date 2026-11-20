@@ -56,16 +56,25 @@ for phase in ('baseline','post_rejit'):
     guest=json.loads((out/(phase+'.start.clock.json')).read_text())
     host=json.loads((out/'host.start.clock.json').read_text())
     shift=clock_shift(guest,host)
-    boundaries=[];begin=None
+    boundaries=[];begins={}
     for line in (run/'details/shim-logs'/(app_name+'.'+phase+'.log')).read_text().splitlines():
-        match=re.match(r'\[([0-9.]+) .*?socket: cmd=measure_(start|finish)\b',line)
+        match=re.match(r'\[([0-9.]+) pid=(\d+) .*?socket: cmd=measure_(start|finish)\b',line)
         if not match: continue
         stamp=round(float(match[1])*10**9)+shift
-        if match[2]=='start': begin=stamp
+        pid=match[2]
+        if match[3]=='start':
+            if pid in begins: raise ValueError('nested measurement start')
+            begins[pid]=stamp
         else:
-            if begin is None: raise ValueError('measurement finish without start')
-            boundaries.append((begin,stamp));begin=None
-    if begin is not None or not boundaries: raise ValueError('incomplete measurement windows')
+            boundaries.append((begins.pop(pid),stamp))
+    if begins or not boundaries: raise ValueError('incomplete measurement windows')
+    # BCC's eight tool processes measure concurrently. Their union is one
+    # application window; summing overlapping windows would count samples twice.
+    merged=[]
+    for start,end in sorted(boundaries):
+        if merged and start<=merged[-1][1]: merged[-1]=(merged[-1][0],max(end,merged[-1][1]))
+        else: merged.append((start,end))
+    boundaries=merged
     roots=Counter();modes=Counter()
     for stamp,mode,ip,period in samples:
         if not any(a<=stamp<=b for a,b in boundaries): continue
@@ -93,7 +102,8 @@ for phase in ('baseline','post_rejit'):
                 ip=start+byte-offset
                 if not start<=ip<end: continue
                 i=bisect.bisect_right(line_ips,ip)-1
-                if i>=0: row['source_cycles'][str(lines[i]['file'])+':'+str(lines[i]['line'])]+=cycles
+                if i>=0 and start<=line_ips[i]<end:
+                    row['source_cycles'][str(lines[i]['file'])+':'+str(lines[i]['line'])]+=cycles
         row['offset_cycles']=sorted(row['offset_cycles'].items())
         row['source_cycles']=dict(row['source_cycles'].most_common())
         counters=measured.get(str(p['id']))
