@@ -86,3 +86,32 @@ not addressed here.
 Files: `otel_shape.o` (hand-assembled), `scalar_minus_pointer.bpf.c` (C form), `rewritten_bounds.bpf.c`
 (accepted alternative), `vlog.c` (static loader: `gcc -static -o vlog vlog.c`; `vlog <obj> classifier 3`,
 exit 0 = ACCEPT, 1 = REJECT, prints the verifier log).
+
+## The constraint that decides the fix: the stack pointer may not be subtracted from at all
+
+Testing operand order shows the ban is wider than "scalar on the left". With the pointer as the
+**destination** — the legal direction for every other pointer type — the stack register still fails:
+
+```
+2: (bf) r2 = r10        ; R2 = fp0
+3: (07) r2 += -128      ; R2 = fp-128
+4: (1f) r2 -= r1        ; ptr -= scalar
+→ R2 subtraction from stack pointer prohibited   (errno 13, guest 7.0.0-rc2+ and host)
+```
+
+`vendor/linux-framework/kernel/bpf/verifier.c:14999-15003`, `adjust_ptr_min_max_vals`, case `BPF_SUB`:
+`if (ptr_reg->type == PTR_TO_STACK) → "subtraction from stack pointer prohibited"`. The comment says the
+reason is that JITs may not handle it.
+
+So for a `PTR_TO_STACK` operand **any** subtraction involving it is refused, in either operand position:
+
+| object | form | result |
+|---|---|---|
+| `stack_ptr_minus_scalar.o` | `fp_ptr -= scalar` | REJECT 13, `subtraction from stack pointer` |
+| `scalar_minus_stack_ptr.o` | `scalar -= fp_ptr` | REJECT 13, `tried to subtract pointer from scalar` |
+| `bounded_scalar.o` | `24 -= fp_ptr` | REJECT 13, same |
+| `unbounded_scalar.o` | `helper_scalar -= fp_ptr` | REJECT 22, `unbounded min value` |
+
+This is why the `16 < d < 25` rewrite is the right shape: it never forms a subtraction with the stack
+pointer as an operand at all. Merely swapping operands does not help.
+
