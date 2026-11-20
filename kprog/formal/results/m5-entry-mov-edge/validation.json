@@ -96,8 +96,32 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 2.9415464401245117,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 276,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-entry-mov-edge",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "c40ddaf34792c22340375db57cbcb784119be829",
+  "root_artifact_modified_utc": "2026-11-20T06:47:39.290830+00:00"
 }

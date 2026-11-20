@@ -34,7 +34,9 @@ No native MOVZ correspondence for arbitrary uint32 mark is claimed.
 
 Validation: readbacks 226 jobs, final source edge 227 jobs and seven public
 type/axiom queries pass at original caps on CPU 17, nice 0, one worker and
-32 GiB address space. Whole proof-library confirmation follows this batch.
+32 GiB address space. The whole `lake build KProgFormal` proof library/root
+passes 276 jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space.
+Executable/tool builds are excluded under the current directive.
 Initial finite failures and the recursion-limit attempts are retained in raw
 logs; proof decomposition and restricted rewrites resolved them without raising
 limits. Inherited logic/external-semantics axioms are recorded in validation.json.
