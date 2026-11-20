@@ -1,0 +1,1807 @@
+{
+  "source_revision": "307c28752",
+  "raw": "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z",
+  "app_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_050927_857614",
+  "app": "cilium/agent",
+  "app_status": "ok",
+  "app_error": "",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 239,
+      "prog_id": 253,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "cil_host_policy",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 10,
+      "proof_executable_bytes": 14,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 14
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-yvliz9ir/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-yvliz9ir/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 247,
+      "prog_id": 264,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "cil_lxc_policy_egress",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 10,
+      "proof_executable_bytes": 14,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 14
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-i_uypu03/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-i_uypu03/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 258,
+      "prog_id": 273,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_handle_ipv4_from_host",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "cilium_ipcache_v2": 1
+        },
+        "hash": {
+          "cilium_lxc": 1
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 1,
+      "generic_lookup_static_sites": 2,
+      "native_entry_bytes": 1141,
+      "proof_executable_bytes": 1726,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 1145,
+        "__kprog_lpm_key_24": 256,
+        "__kprog_hash_key_20": 325
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-zvdz4qm7/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-zvdz4qm7/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-zvdz4qm7/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-zvdz4qm7/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 267,
+      "prog_id": 288,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_no_service_ipv4",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 1,
+      "native_entry_bytes": 2687,
+      "proof_executable_bytes": 2691,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 2691
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-mgsr1gwz/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-mgsr1gwz/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 282,
+      "prog_id": 304,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "cil_host_policy",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 10,
+      "proof_executable_bytes": 14,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 14
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-5uat4nii/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-5uat4nii/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 298,
+      "prog_id": 313,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "cil_lxc_policy_egress",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 10,
+      "proof_executable_bytes": 14,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 14
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-se7yxuuj/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-se7yxuuj/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 307,
+      "prog_id": 320,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_handle_ipv4_from_host",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "cilium_ipcache_v2": 1
+        },
+        "hash": {
+          "cilium_lxc": 1
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 1,
+      "generic_lookup_static_sites": 2,
+      "native_entry_bytes": 1141,
+      "proof_executable_bytes": 1726,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 1145,
+        "__kprog_lpm_key_24": 256,
+        "__kprog_hash_key_20": 325
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-infalaop/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-infalaop/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-infalaop/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-infalaop/generated/checked-simulator.helpers.bc"
+      ]
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 314,
+      "prog_id": 327,
+      "native_sha256": "9effc1376ba7a10a018f8178e775aef9fab88f5472462b15c9981717dfa9c99d",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_no_service_ipv4",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 1,
+      "native_entry_bytes": 2687,
+      "proof_executable_bytes": 2691,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 2691
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-_3l4zzk8/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-_3l4zzk8/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 321,
+      "prog_id": 339,
+      "native_sha256": "874d0fb331e104477fb66ac24f37c190f5b08afe87185e7d0991ca60fb8790a3",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_no_service_ipv4",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 1,
+      "native_entry_bytes": 2687,
+      "proof_executable_bytes": 2691,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 2691
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-7mn15h6a/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-7mn15h6a/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 342,
+      "prog_id": 348,
+      "native_sha256": "8680a229f52442d76f9097ca24649366c78c7f87efeff1ecd2f6b1e940c74419",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "cil_host_policy",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 0,
+      "native_entry_bytes": 10,
+      "proof_executable_bytes": 14,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 14
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nuho58lj/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nuho58lj/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 351,
+      "prog_id": 357,
+      "native_sha256": "874d0fb331e104477fb66ac24f37c190f5b08afe87185e7d0991ca60fb8790a3",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_no_service_ipv4",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {},
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 0,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 1,
+      "native_entry_bytes": 2687,
+      "proof_executable_bytes": 2691,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 2691
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-ecmq8a87/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-ecmq8a87/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": null
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 365,
+      "prog_id": 371,
+      "native_sha256": "34af4b3a214345a3e19ce7d87df4361f5e909d61eb605a8fc91f1ee9e7cfb1ca",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tail_handle_ipv4_from_host",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "cilium_ipcache_v2": 1
+        },
+        "hash": {
+          "cilium_lxc": 1
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 1,
+      "generic_lookup_static_sites": 2,
+      "native_entry_bytes": 1141,
+      "proof_executable_bytes": 1726,
+      "proof_functions": {
+        "trusted_x86_x86_sim_xdp": 1145,
+        "__kprog_lpm_key_24": 256,
+        "__kprog_hash_key_20": 325
+      },
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nndros7r/generated/checked-simulator.context.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nndros7r/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true,
+      "helper_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nndros7r/generated/checked-simulator.helpers.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/helper-sharing-20261120/cilium-20261120T050759Z/state/session-8bg51mcc/requests/request-nndros7r/generated/checked-simulator.helpers.bc"
+      ]
+    }
+  ],
+  "phases": {
+    "baseline": {
+      "run_cnt": 8113896,
+      "run_time_ns": 7961875912,
+      "ns_per_call": 981.2642301552793,
+      "programs": {
+        "102": {
+          "bytes_jited": 12985,
+          "bytes_xlated": 21632,
+          "id": 102,
+          "name": "tail_handle_sna",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "103": {
+          "bytes_jited": 1268,
+          "bytes_xlated": 2112,
+          "id": 103,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "104": {
+          "bytes_jited": 2796,
+          "bytes_xlated": 4952,
+          "id": 104,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "105": {
+          "bytes_jited": 8246,
+          "bytes_xlated": 14312,
+          "id": 105,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "106": {
+          "bytes_jited": 409,
+          "bytes_xlated": 752,
+          "id": 106,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "108": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 108,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "109": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 109,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 2742,
+          "type": "sched_cls"
+        },
+        "110": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 110,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 1490,
+          "type": "sched_cls"
+        },
+        "125": {
+          "bytes_jited": 513,
+          "bytes_xlated": 880,
+          "id": 125,
+          "name": "cil_xdp_entry",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 866,
+          "type": "xdp"
+        },
+        "126": {
+          "bytes_jited": 5379,
+          "bytes_xlated": 9592,
+          "id": 126,
+          "name": "tail_ipv4_ct_eg",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "127": {
+          "bytes_jited": 409,
+          "bytes_xlated": 752,
+          "id": 127,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "128": {
+          "bytes_jited": 5764,
+          "bytes_xlated": 10104,
+          "id": 128,
+          "name": "cil_lxc_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "129": {
+          "bytes_jited": 5584,
+          "bytes_xlated": 9904,
+          "id": 129,
+          "name": "tail_ipv4_polic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "130": {
+          "bytes_jited": 1268,
+          "bytes_xlated": 2112,
+          "id": 130,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "132": {
+          "bytes_jited": 5379,
+          "bytes_xlated": 9592,
+          "id": 132,
+          "name": "tail_ipv4_ct_eg",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "133": {
+          "bytes_jited": 863,
+          "bytes_xlated": 1512,
+          "id": 133,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "134": {
+          "bytes_jited": 20,
+          "bytes_xlated": 16,
+          "id": 134,
+          "name": "cil_host_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "135": {
+          "bytes_jited": 931,
+          "bytes_xlated": 1616,
+          "id": 135,
+          "name": "tail_handle_arp",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "136": {
+          "bytes_jited": 6404,
+          "bytes_xlated": 11104,
+          "id": 136,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "137": {
+          "bytes_jited": 5214,
+          "bytes_xlated": 9224,
+          "id": 137,
+          "name": "tail_ipv4_ct_in",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "138": {
+          "bytes_jited": 931,
+          "bytes_xlated": 1616,
+          "id": 138,
+          "name": "tail_handle_arp",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "139": {
+          "bytes_jited": 6404,
+          "bytes_xlated": 11104,
+          "id": 139,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "140": {
+          "bytes_jited": 5806,
+          "bytes_xlated": 10368,
+          "id": 140,
+          "name": "tail_ipv4_to_en",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "141": {
+          "bytes_jited": 12958,
+          "bytes_xlated": 21584,
+          "id": 141,
+          "name": "tail_handle_sna",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "142": {
+          "bytes_jited": 3626,
+          "bytes_xlated": 6368,
+          "id": 142,
+          "name": "tail_nodeport_r",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "143": {
+          "bytes_jited": 5806,
+          "bytes_xlated": 10368,
+          "id": 143,
+          "name": "tail_ipv4_to_en",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "144": {
+          "bytes_jited": 2778,
+          "bytes_xlated": 4920,
+          "id": 144,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "145": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 145,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "147": {
+          "bytes_jited": 386,
+          "bytes_xlated": 696,
+          "id": 147,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "149": {
+          "bytes_jited": 3949,
+          "bytes_xlated": 7040,
+          "id": 149,
+          "name": "cil_from_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "150": {
+          "bytes_jited": 3626,
+          "bytes_xlated": 6368,
+          "id": 150,
+          "name": "tail_nodeport_r",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "152": {
+          "bytes_jited": 2778,
+          "bytes_xlated": 4920,
+          "id": 152,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "153": {
+          "bytes_jited": 5214,
+          "bytes_xlated": 9224,
+          "id": 153,
+          "name": "tail_ipv4_ct_in",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "155": {
+          "bytes_jited": 8258,
+          "bytes_xlated": 14392,
+          "id": 155,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "156": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 156,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "157": {
+          "bytes_jited": 6220,
+          "bytes_xlated": 10984,
+          "id": 157,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "158": {
+          "bytes_jited": 6220,
+          "bytes_xlated": 10984,
+          "id": 158,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "159": {
+          "bytes_jited": 5584,
+          "bytes_xlated": 9904,
+          "id": 159,
+          "name": "tail_ipv4_polic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "160": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 160,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "161": {
+          "bytes_jited": 386,
+          "bytes_xlated": 696,
+          "id": 161,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "162": {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 162,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 4056946,
+          "run_time_ns_delta": 4022027715,
+          "type": "sched_cls"
+        },
+        "163": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 163,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "164": {
+          "bytes_jited": 20,
+          "bytes_xlated": 16,
+          "id": 164,
+          "name": "cil_lxc_policy_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "165": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 165,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "166": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 166,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "167": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 167,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "168": {
+          "bytes_jited": 386,
+          "bytes_xlated": 696,
+          "id": 168,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "169": {
+          "bytes_jited": 409,
+          "bytes_xlated": 752,
+          "id": 169,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "170": {
+          "bytes_jited": 3949,
+          "bytes_xlated": 7040,
+          "id": 170,
+          "name": "cil_from_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "171": {
+          "bytes_jited": 5214,
+          "bytes_xlated": 9224,
+          "id": 171,
+          "name": "tail_ipv4_ct_in",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "172": {
+          "bytes_jited": 863,
+          "bytes_xlated": 1512,
+          "id": 172,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "173": {
+          "bytes_jited": 5764,
+          "bytes_xlated": 10104,
+          "id": 173,
+          "name": "cil_lxc_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "174": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 174,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "175": {
+          "bytes_jited": 5584,
+          "bytes_xlated": 9904,
+          "id": 175,
+          "name": "tail_ipv4_polic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "176": {
+          "bytes_jited": 1268,
+          "bytes_xlated": 2112,
+          "id": 176,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "177": {
+          "bytes_jited": 5806,
+          "bytes_xlated": 10368,
+          "id": 177,
+          "name": "tail_ipv4_to_en",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "178": {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 178,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 4056947,
+          "run_time_ns_delta": 3939843099,
+          "type": "sched_cls"
+        },
+        "179": {
+          "bytes_jited": 931,
+          "bytes_xlated": 1616,
+          "id": 179,
+          "name": "tail_handle_arp",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "180": {
+          "bytes_jited": 12985,
+          "bytes_xlated": 21632,
+          "id": 180,
+          "name": "tail_handle_sna",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "181": {
+          "bytes_jited": 3626,
+          "bytes_xlated": 6368,
+          "id": 181,
+          "name": "tail_nodeport_r",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "182": {
+          "bytes_jited": 6404,
+          "bytes_xlated": 11104,
+          "id": 182,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "183": {
+          "bytes_jited": 2778,
+          "bytes_xlated": 4920,
+          "id": 183,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "184": {
+          "bytes_jited": 8246,
+          "bytes_xlated": 14312,
+          "id": 184,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "185": {
+          "bytes_jited": 20,
+          "bytes_xlated": 16,
+          "id": 185,
+          "name": "cil_host_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "186": {
+          "bytes_jited": 2796,
+          "bytes_xlated": 4952,
+          "id": 186,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "187": {
+          "bytes_jited": 6220,
+          "bytes_xlated": 10984,
+          "id": 187,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "189": {
+          "bytes_jited": 20,
+          "bytes_xlated": 16,
+          "id": 189,
+          "name": "cil_lxc_policy_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "190": {
+          "bytes_jited": 5379,
+          "bytes_xlated": 9592,
+          "id": 190,
+          "name": "tail_ipv4_ct_eg",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "191": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 191,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "192": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 192,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "193": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 193,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "194": {
+          "bytes_jited": 8246,
+          "bytes_xlated": 14312,
+          "id": 194,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "195": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 195,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "99": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 99,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "cilium_endpoint_pktgen_forward",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": [
+            406886
+          ]
+        },
+        {
+          "name": "cilium_endpoint_pktgen_reverse",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": [
+            406885
+          ]
+        }
+      ]
+    },
+    "post_rejit": {
+      "run_cnt": 8605061,
+      "run_time_ns": 7389392259,
+      "ns_per_call": 858.7263075764367,
+      "programs": {
+        "236": {
+          "bytes_jited": 513,
+          "bytes_xlated": 880,
+          "id": 236,
+          "name": "cil_xdp_entry",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "xdp"
+        },
+        "237": {
+          "bytes_jited": 8258,
+          "bytes_xlated": 14392,
+          "id": 237,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "238": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 238,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "240": {
+          "bytes_jited": 6220,
+          "bytes_xlated": 10984,
+          "id": 240,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "241": {
+          "bytes_jited": 5379,
+          "bytes_xlated": 9592,
+          "id": 241,
+          "name": "tail_ipv4_ct_eg",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "243": {
+          "bytes_jited": 5806,
+          "bytes_xlated": 10368,
+          "id": 243,
+          "name": "tail_ipv4_to_en",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "244": {
+          "bytes_jited": 6404,
+          "bytes_xlated": 11104,
+          "id": 244,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "245": {
+          "bytes_jited": 5584,
+          "bytes_xlated": 9904,
+          "id": 245,
+          "name": "tail_ipv4_polic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "246": {
+          "bytes_jited": 386,
+          "bytes_xlated": 696,
+          "id": 246,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "253": {
+          "bytes_jited": 27,
+          "bytes_xlated": 24,
+          "id": 253,
+          "name": "cil_host_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "254": {
+          "bytes_jited": 409,
+          "bytes_xlated": 752,
+          "id": 254,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "255": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 255,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "256": {
+          "bytes_jited": 12958,
+          "bytes_xlated": 21584,
+          "id": 256,
+          "name": "tail_handle_sna",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "257": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 257,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "264": {
+          "bytes_jited": 27,
+          "bytes_xlated": 24,
+          "id": 264,
+          "name": "cil_lxc_policy_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "265": {
+          "bytes_jited": 5214,
+          "bytes_xlated": 9224,
+          "id": 265,
+          "name": "tail_ipv4_ct_in",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "266": {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 266,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 4301109,
+          "run_time_ns_delta": 3709794049,
+          "type": "sched_cls"
+        },
+        "273": {
+          "bytes_jited": 1970,
+          "bytes_xlated": 3088,
+          "id": 273,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "274": {
+          "bytes_jited": 863,
+          "bytes_xlated": 1512,
+          "id": 274,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "275": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 275,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "276": {
+          "bytes_jited": 3949,
+          "bytes_xlated": 7040,
+          "id": 276,
+          "name": "cil_from_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "277": {
+          "bytes_jited": 3390,
+          "bytes_xlated": 5936,
+          "id": 277,
+          "name": "cil_from_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "278": {
+          "bytes_jited": 12985,
+          "bytes_xlated": 21632,
+          "id": 278,
+          "name": "tail_handle_sna",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "279": {
+          "bytes_jited": 3949,
+          "bytes_xlated": 7040,
+          "id": 279,
+          "name": "cil_from_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "280": {
+          "bytes_jited": 8246,
+          "bytes_xlated": 14312,
+          "id": 280,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "281": {
+          "bytes_jited": 5226,
+          "bytes_xlated": 8912,
+          "id": 281,
+          "name": "cil_to_netdev",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "288": {
+          "bytes_jited": 2819,
+          "bytes_xlated": 9656,
+          "id": 288,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "289": {
+          "bytes_jited": 3626,
+          "bytes_xlated": 6368,
+          "id": 289,
+          "name": "tail_nodeport_r",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "290": {
+          "bytes_jited": 931,
+          "bytes_xlated": 1616,
+          "id": 290,
+          "name": "tail_handle_arp",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "291": {
+          "bytes_jited": 5764,
+          "bytes_xlated": 10104,
+          "id": 291,
+          "name": "cil_lxc_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "292": {
+          "bytes_jited": 5584,
+          "bytes_xlated": 9904,
+          "id": 292,
+          "name": "tail_ipv4_polic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "293": {
+          "bytes_jited": 931,
+          "bytes_xlated": 1616,
+          "id": 293,
+          "name": "tail_handle_arp",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "294": {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 294,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 4303952,
+          "run_time_ns_delta": 3679598210,
+          "type": "sched_cls"
+        },
+        "296": {
+          "bytes_jited": 3626,
+          "bytes_xlated": 6368,
+          "id": 296,
+          "name": "tail_nodeport_r",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "297": {
+          "bytes_jited": 5806,
+          "bytes_xlated": 10368,
+          "id": 297,
+          "name": "tail_ipv4_to_en",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "304": {
+          "bytes_jited": 27,
+          "bytes_xlated": 24,
+          "id": 304,
+          "name": "cil_host_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "305": {
+          "bytes_jited": 409,
+          "bytes_xlated": 752,
+          "id": 305,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "306": {
+          "bytes_jited": 8885,
+          "bytes_xlated": 15112,
+          "id": 306,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "313": {
+          "bytes_jited": 27,
+          "bytes_xlated": 24,
+          "id": 313,
+          "name": "cil_lxc_policy_",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "320": {
+          "bytes_jited": 1970,
+          "bytes_xlated": 3088,
+          "id": 320,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "327": {
+          "bytes_jited": 2819,
+          "bytes_xlated": 9656,
+          "id": 327,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "328": {
+          "bytes_jited": 6404,
+          "bytes_xlated": 11104,
+          "id": 328,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "329": {
+          "bytes_jited": 5214,
+          "bytes_xlated": 9224,
+          "id": 329,
+          "name": "tail_ipv4_ct_in",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "330": {
+          "bytes_jited": 6220,
+          "bytes_xlated": 10984,
+          "id": 330,
+          "name": "tail_handle_ipv",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "331": {
+          "bytes_jited": 5379,
+          "bytes_xlated": 9592,
+          "id": 331,
+          "name": "tail_ipv4_ct_eg",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "332": {
+          "bytes_jited": 5764,
+          "bytes_xlated": 10104,
+          "id": 332,
+          "name": "cil_lxc_policy",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "333": {
+          "bytes_jited": 386,
+          "bytes_xlated": 696,
+          "id": 333,
+          "name": "tail_drop_notif",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "339": {
+          "bytes_jited": 2819,
+          "bytes_xlated": 9656,
+          "id": 339,
+          "name": "tail_no_service",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        "340": {
+          "bytes_jited": 6570,
+          "bytes_xlated": 11024,
+          "id": 340,
+          "name": "tail_nodeport_n",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "cilium_endpoint_pktgen_forward",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": [
+            431568
+          ]
+        },
+        {
+          "name": "cilium_endpoint_pktgen_reverse",
+          "returncode": 0,
+          "self_counters": [],
+          "pktgen_pps": [
+            431555
+          ]
+        }
+      ]
+    }
+  },
+  "ebpf_over_native_per_call": 1.1426972965631839,
+  "scope": "One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Per-program counters are retained; summed time/count does not independently attribute tail calls. Static helper sites are not dynamic frequencies. Component throughput is reported separately."
+}
