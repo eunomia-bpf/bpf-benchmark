@@ -15,7 +15,7 @@ byte-identical to a build of `19d32566c`. Every run exited 0.
 | `cilium/agent` | 12 | 4 | **12** | 0 |
 | `otelcol-ebpf-profiler/profiling` | 14 | 5 | 4 | **10** |
 | `bcc/set` | 25 | 15 | 22 | **3** |
-| `tetragon/observer` | — | — | see below | — |
+| `tetragon/observer` | 95 (3 attempts) | 15 | **95** | 0 |
 | `tracee/monitor` | — | — | not yet captured | — |
 | `katran` | — | — | not yet captured | — |
 
@@ -59,9 +59,17 @@ Not verified: whether anchoring that second form is sufficient to accept, and wh
 all for programs that already install. That belongs to whoever owns `kprog/x86/packet_bounds_ir.cpp` (PERF), and
 is written to its resume message rather than edited here.
 
-## Tetragon and the two failures before it
+## Tetragon: 95 requests, 95 installed, no guest finished
 
-Two Tetragon attempts (`tetragon/`, `tetragon2/`) each served 3 and 4 requests, all `checked-sim-c`, then the
-guest ended without writing `service.tar.gz`; both raw directories are kept. A third attempt
-(`tetragon3/`, 32 GiB guest) was still running when this file was written. Tracee and Katran are not captured
-yet.
+No Tetragon guest ever wrote `service.tar.gz` (three attempts: `tetragon/`, `tetragon2/`, `tetragon3/`, all raw
+directories kept). The service log in each is still complete for what it served, and reading
+`state/session-*/service.log` gives: attempt 1 **86 requests / 15 distinct programs**, attempt 2 4/3, attempt 3
+5/4 — **95 requests, all `checked-sim-c`, zero fallbacks**. Attempt 1 is the useful one; it is also the reason
+this table says "95" and not a per-run number: one attempt reached 15 programs, which is more than any other
+app's whole capture here.
+
+The attempts stalled rather than crashed: attempt 3 sat at 0% CPU for 49 minutes after its 5th request. I killed
+two *orphaned* guests from attempts 1 and 2 that were still holding 48 GiB and 32 GiB of host memory with their
+parent shells gone — worth knowing, since three concurrent Tetragon guests is what made the host thrash.
+
+Tracee and Katran are not captured yet.

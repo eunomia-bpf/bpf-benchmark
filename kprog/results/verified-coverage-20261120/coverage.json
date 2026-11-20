@@ -137,8 +137,35 @@
    }
   },
   "tetragon/observer": {
-   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon3 (in progress)",
-   "note": "two earlier attempts (tetragon/, tetragon2/) served 3 and 4 requests, all checked-sim-c installed, then the guest ended without writing service.tar.gz; those raw dirs are kept"
+   "attempts": [
+    {
+     "attempt": "attempt 1",
+     "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon",
+     "served": 86,
+     "installed": 86,
+     "programs": 15,
+     "raw_complete": false
+    },
+    {
+     "attempt": "attempt 2",
+     "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon2",
+     "served": 4,
+     "installed": 4,
+     "programs": 3,
+     "raw_complete": false
+    },
+    {
+     "attempt": "attempt 3",
+     "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon3",
+     "served": 5,
+     "installed": 5,
+     "programs": 4,
+     "raw_complete": false
+    }
+   ],
+   "served_total": 95,
+   "installed_total": 95,
+   "note": "No guest ever wrote service.tar.gz, so the counts come from state/session-*/service.log in the kept raw dirs. Every request any attempt served installed via checked-sim-c; zero fallbacks. Attempt 1 reached 15 distinct programs, so this is a lower bound on Tetragon coverage, not a total."
   }
  },
  "classes": {
