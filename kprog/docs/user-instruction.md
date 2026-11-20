@@ -220,3 +220,5 @@ Checked on 2026-11-14 against "要不还是不要放宽, 除非 blovk 了" and "
 - 同一时段，引用尾调用、读时钟 / get_current_task / get_smp_processor_id / jiffies64、读内核内存、push / pop 四条之后：“这些不是就是一个简单的头文件操作吗? arm 的咋样了?”
 - 同一时段：“arm 的去我们能用来跑 bpftime ci 那个机器测试?”
 - 收到于 08:44Z（记录时间 2026-11-20T08:44:42Z），在协调者回答“头文件操作、代码量、ARM”之后：“你直接删掉, arm 也要做; 我们之前是不是讨论过 3 个 spark 来推理 glm 5.3 flash? 性能?”
+
+- 2026-11-20（FORMAL 于 2026-11-20T08:52:20.048674+00:00 从本 Workspace 的 AGENTS.md 更新收到；所引原始场景为 eBPFOS 的 lane 状态报告）：操作员：“CORE 等待中? 禁止有 lane 在等待.” 随后：“明确记住,所有的工作流都禁止有 lane 等等”。
