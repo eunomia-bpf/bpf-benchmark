@@ -36,7 +36,19 @@ with the JIT-controlled medians:
 | 11-19 | 3815 | 3345 | 2729 | 3704 | 1.11 |
 | 11-20 | 3815 | 3455 | 2729 | 4539 | 1.31 |
 
-The native emitter was **faster than the JIT** on 11-17 with a 3542 B body, and it is 31 % slower on 11-20 with a
-2729 B body for the same JIT and the same work. So the deficit is a regression introduced while the emitted body
-was shrinking, not a fixed property of the design, and the 11-17 shape is an existence proof that this program
-can be emitted natively faster than its JIT. That is the more useful target: get back to 0.94, not merely to 1.0.
+(11-20 covers 15 runs, whose median OTel per-call ratio is 1.08; the 4539 ns outlier above is one run. Use the
+median, not the row, as the figure for that day.)
+
+The native emitter was **faster than the JIT** on 11-17 with a 3542 B body, and it is 11 % slower on 11-19 /
+31 % slower on 11-20 with a 2729 B body for the same JIT. So on this program the deficit is not a fixed property of the design, and the 11-17
+shape is an existence proof that this program can be emitted natively faster than its JIT.
+
+**Caveat that the same evidence exposes (OMP, checked after the table above).** The 11-20 post arm also leaves
+the app's three unwind programs on the JIT (`perf_unwind_nat` xlated 53880 B, `-hot` 32824, `-sto` 5296, all with
+`run_cnt_delta` 0), while the 11-17 arm replaced them with native bodies (xlated 24). Tail-called targets are
+charged to the caller (evaluation.md 5.6), so part of the 11-20 per-call figure is eBPF-speed unwinding, and this
+table compares two different native coverage configurations, not two emitter versions of one. The 0.94 and the
+1.31 are both true readings of their own runs and are not a like-for-like regression measurement.
+
+What survives cleanly is the within-11-20 comparison, where both arms have identical coverage: 0.950x on the
+180 s arm and 0.945x on the coordinator's run, against a JIT that is unchanged. That is the number to fix.
