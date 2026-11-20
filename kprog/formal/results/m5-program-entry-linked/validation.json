@@ -1,7 +1,7 @@
 {
   "step": "M5 actual fixture/generic-handler complete-unit link foundation",
-  "status": "linked-entry-pass-full-pending",
-  "recorded_utc": "2026-11-20T02:20:51Z",
+  "status": "pass",
+  "recorded_utc": "2026-11-20T02:31:44Z",
   "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-linked",
   "checks": {
     "link-probe1": {
@@ -231,6 +231,18 @@
       "workers": 1,
       "nice": 0,
       "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 594.5153353214264,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 360
     }
   },
   "public_query_counts": {
@@ -449,7 +461,7 @@
     "M5": "open",
     "M6": "open, follows M5",
     "complete_isa_families": 0,
-    "last_full_Lake": "9053a09ce:358 jobs; no full run yet for current batch",
+    "last_full_Lake": "current batch:360 jobs pass",
     "last_whole_make_check": "5236c0e9677f635526fdd515cde5195b2ba0810c",
     "final_full_checks": "fresh final Lake/make check and frozen-byte confirmation remain due after M5/M6"
   },
@@ -511,8 +523,14 @@
     "native_admission": "ProviderAt, ctx ValueRep and NativeBindings remain explicit; actual generic handler/native composition still open"
   },
   "full_confirmation": {
-    "status": "pending",
-    "planned_command": "run.py lake-build1 lake build",
-    "nice": 19
-  }
+    "status": "pass",
+    "jobs": 360,
+    "seconds": 594.5153353214264,
+    "cpu": 17,
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "snapshot": "/workspaces/kprog-raw/formal/m5-program-entry-linked/full-priority-threads.txt"
+  },
+  "entry_migration_commit": "e7cc334daf5c326f010ffcac9d0207e02d4f9ac9"
 }

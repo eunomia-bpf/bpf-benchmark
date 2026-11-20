@@ -36,8 +36,8 @@ From `kprog/formal`, using original proof limits:
 ```
 ulimit -v 33554432
 export LEAN_NUM_THREADS=1
-taskset -c 17 nice -n 19 lake build KProgFormal.ClightRefinement.Arm64ProgramEntryLinked
-taskset -c 17 nice -n 19 lake env lean -j1 results/m5-program-entry-linked/Query.lean
+taskset -c 17 nice -n 0 lake build KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings
+taskset -c 17 nice -n 0 lake env lean -j1 results/m5-program-entry-linked/Query.lean
 ```
 
 `LinkProbe.lean` records small computed metadata of the imported merge. Those
@@ -51,15 +51,18 @@ The complete foundation/bindings subset passed 42 jobs and all 12 public
 type/axiom queries passed. All facts use standard Lean logic, with no new
 axiom. The original proof limits are unchanged. Earlier elaboration and kernel
 lookup failures remain in the raw logs. The light focused compiler was returned
-from nice19 to normal priority after its measured peak stayed below7GiB: the
-coordination condition applies nice19 to full builds and compiles above16GiB.
-Full builds retain nice19. The initial foundation receipt recorded entry-world migration as pending.
+from nice19 to normal priority after its VmPeak snapshot was below 7 GiB: the
+coordination condition applies nice19 to full builds and compiles above 16 GiB.
+Full builds retain nice19. The initial foundation receipt recorded entry-world
+migration as pending.
 The completed migration is recorded below and in validation.json.
 
-The linked-world allocation subset passed 149 jobs, tail171, call174 and the
-complete reached-body/register subset197. Eight additional public type/axiom
-queries passed. The same98 ordered traces,92 typed header readbacks and caller
+The linked-world allocation subset passed 149 jobs, tail 171, call 174 and the
+complete reached-body/register subset 197. Eight additional public type/axiom
+queries passed. The same 98 ordered traces, 92 typed header readbacks and caller
 resources remain, with the native/provider/context contracts explicit. Existing
 wrapper/input/callback binding facts are reused. A generic zero-offset call
 lemma and direct kernel checks replace deep concrete-environment `rfl` steps;
-no statement, C body or proof cap was weakened. One full confirmation is pending.
+no statement, C body or proof cap was weakened. One full Lake confirmation
+passed 360 jobs at nice19 on CPU17, with one worker and 32 GiB address space. The final make check and frozen-byte confirmation
+remain due after M5/M6.
