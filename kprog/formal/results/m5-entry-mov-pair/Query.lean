@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPair
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryMovPair.execute
+#print axioms Arm64ProgramEntryMovPair.execute
