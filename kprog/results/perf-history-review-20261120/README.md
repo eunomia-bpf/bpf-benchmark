@@ -1,0 +1,19 @@
+# Historical per-call claims reviewed (2026-11-20T07:19:27Z)
+
+`make -f kprog/results/perf-history-review-20261120/Makefile review` reads existing counters through `analysis/corpus_analyze.py`, with evaluation section5 name/type pairing, min100 and no applied-only filter. No benchmark, image, toolchain, workload, raw run or paper changed. `report.json` retains every selected record, input hashes, counts, sample strata and run identifiers. Earlier analysis scripts/import wiring are f9cd73fad/49680966f/ff8bd7179; no binary was built.
+
+## OTel: a date split mixes correct and incorrect work
+
+The proposed aggregate split reproduces: 46 earlier runs have median post/base0.0864672; 76 later runs have median1.0467967 (one newly available run beyond the cited75). But it does not localize an introduced performance defect. The same November13 already contains native_tracer_e ratios0.071754 at `x86_kvm_corpus_20261113_011757_432921` and0.995897 at `x86_kvm_corpus_20261113_033039_387780`. Thus November14 is not the first observed boundary.
+
+The first run is independently discussed in [the equal-work investigation](../equal-work-20261113/report.md): paired windows had913099438->0 unwind attempts and840462900->0 frames, with native register errors and empty stacks increasing. Its fast native path skipped unwinding. Another actual paired capture had708823203->0 attempts and652697726->0 frames. Physical perf-event context was read as the public embedded register structure. These are program-owned counter observations and source/disassembly evidence, not a deduction from timing noise.
+
+Relevant history: equal-work report9285e96c1 at November13 02:49Z; context lowering e0939263e at02:56Z; selectable native candidate ce863428d at02:58Z; physical context read effects00c863247 at02:58Z. The later03:30run follows these commits and already reads near1. This ordering and the independently proven unequal work explain why the historical0.09 population is not a correct-work speed baseline. They do not prove which exact image/input every one of the46runs used, or that every remaining current cost is explained by context correction. Do not restore the broken context path or attribute the aggregate median shift to a November14 compiler regression. Current correct-work performance optimization remains open. Also see [normal-loader context LTO evidence](../perf_20261113/perf-context-lto/README.md).
+
+## Tracee: keep all runs and preserve duplicate identities
+
+For all37run IDs in OMP's `tracee-november.json`, the existing analyzer gives median post/base0.834477, geomean0.923047 and33/37faster. All four alleged outliers stay included. The37runs span multiple dates/configurations; none of these aggregate figures is a current-image causal estimate or a freeze confirmation.
+
+OMP's measure.py constructs a dictionary keyed by `(name,type)` and retains one record when names collide. The existing analyzer instead groups those keys, sorts by run count/time and pairs every member. For example053609_920585 has167records in each arm but108unique keys,17duplicate keys; the existing analyzer retains41pairs and gives1.197038, versus the reported rounded1.562 over25retained entries. Therefore the headline37-run reduction is also sensitive to duplicate loss. We retain both the full analyzer result and OMP's rounded result in each report row; OMP's record is unchanged.
+
+Even its outlier-excluded0.805 is19.5percent lower per-call time, below a20percent reduction. The inverse is a different quantity (speedup), so it cannot establish the stipulated time target. No unfavorable run is removed to meet a target. Current-image Tracee behavior belongs to coordinator's per-image checks and prescribed timing; the latest07:13todo notice reports Tracee1.971x per-call in the short ac047e92a check, separate from these historical aggregates. Keep P helper calls and its direct-native LTO bodies/entry closure as instructed.

@@ -151,3 +151,7 @@ of the entry sets contradicts the table above, say so and I will re-derive it. T
 and are not yours unless you want them: request 64's `NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`
 (`kprog/libnativeloader/src/native_loader.cpp:4126-4127`), and the 3 emitter relative-table refusals at
 `stage == 'generation'`.
+
+### PERF 2026-11-20T07:19:27Z: historical OTel/Tracee timing review
+
+Re-derived OMP date-split claims with the existing per-program analyzer; record `kprog/results/perf-history-review-20261120/`. OTel already shifts from0.071754 at11-13 01:17 to0.995897 at03:30, so11-14 is not the first observed boundary. The earlier run has independently recorded zero native unwind attempts/frames in `equal-work-20261113/report.md`; context candidate commits land02:56-02:58. Historical0.09 is not a correct-work speed baseline. All37Tracee runs, without outlier removal and with existing duplicate pairing, give post/base0.923047; OMP dictionary pairing drops same-name records (example167records/108keys). No current-image target or causal change follows from the historical medians. P helpers and direct-native LTO stay unchanged; no tools built.
