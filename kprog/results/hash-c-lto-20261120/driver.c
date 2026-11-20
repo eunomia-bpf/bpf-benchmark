@@ -9,14 +9,7 @@
 #include <sys/mman.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#define _LINUX_BITOPS_H
-#define __LINUX_UNALIGNED_H
-typedef uint32_t u32;
-typedef unsigned char u8;
-#define rol32(v,n) (((u32)(v)<<(n))|((u32)(v)>>(32-(n))))
-#define get_unaligned(p) ({ __typeof__(*(p)) v; memcpy(&v,(p),sizeof(v)); v; })
-#define fallthrough __attribute__((fallthrough))
-#include "../../../vendor/linux-framework/include/linux/jhash.h"
+#include "kernel_hash_reference.h"
 #include "../../x86/micro-prog/native_hash.h"
 __KPROG_HASH_CODE
 _Alignas(64) unsigned char map_a[4096],map_b[4096],map_c[4096];
