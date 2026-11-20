@@ -37,6 +37,20 @@ configuration:
 4. **No app's stable cluster reaches the 0.80 target yet.** Cilium's November clusters do (0.394, 0.439,
    0.472 on 11-10/11-16/11-17), which is the strongest positive evidence in the record.
 
+## Tracee, measured on its own: the target is being met
+
+The table above pools all history. Restricting to runs from 2026-11-16 on (the current code) and keeping only
+runs where the §5 join retains ≥20 programs, Tracee has **37 runs**:
+
+- **31 of 37 faster** than baseline;
+- median run geomean **0.861**, and **0.836** over the 33 runs that are not extreme outliers
+  (four runs at 1.56 and 5.1–6.4 are single-day excursions);
+- geomean over those 33 runs: **0.805**.
+
+That is the 20 % per-invocation target, reached on 24–25 retained programs per run, repeatedly, without any
+single run being quoted. Compare OTel (1–2 retained programs, sd 0.36) and Cilium (sd 0.23): Tracee is the
+only app whose *repeated* measurement clears the target. `tracee-november.json` holds each run's figure.
+
 ## A methodological trap found while measuring (affects quotes, not code)
 
 Ratios computed by pooling `sum(run_time)/sum(run_cnt)` across *all* programs of a phase compare different
