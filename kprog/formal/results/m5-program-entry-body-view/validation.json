@@ -6,7 +6,7 @@
       "KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView"
     ],
     "exit": 0,
-    "seconds": 4.789103984832764,
+    "seconds": 4.501072406768799,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
@@ -22,7 +22,7 @@
       "results/m5-program-entry-body-view/Query.lean"
     ],
     "exit": 0,
-    "seconds": 1.8059203624725342,
+    "seconds": 1.6482665538787842,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
@@ -126,12 +126,13 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
+    "exit": 0,
+    "seconds": 3.0915491580963135,
     "cpus_allowed": [
       16,
       17,
@@ -144,10 +145,58 @@
     ],
     "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 270,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-program-entry-body-view",
   "prior_focused_raw": "/workspaces/kprog-raw/formal/m5-program-entry-body",
   "prior_focused_prefix": "body-view",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "initial_checkpoint_library": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 460.3914773464203,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "source_checkpoint": "61c691624000ec1c0b94dc0058100e0e03018df6",
+    "jobs": 270
+  },
+  "initial_focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView"
+    ],
+    "exit": 0,
+    "seconds": 4.789103984832764,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "retained_readbacks": {
+    "scalar_pointers": 12,
+    "vector_pointers": 64,
+    "typed_tail_fields": 16,
+    "total": 92,
+    "frontier": "original actual allocation frontier"
+  },
+  "initial_source_checkpoint": "61c691624000ec1c0b94dc0058100e0e03018df6"
 }

@@ -297,19 +297,29 @@ theorem entry_setup_represents (initial : CC.Mem) (ctxBlock : CC.Block)
     (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
     (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
       (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i))) :
-    ∃ entry : HeaderLocal initial, ∃ before temps after, ∃ traces : List CC.Trace,
+    ∃ entry : HeaderLocal initial, ∃ cells : (i : Fin 12) → HeaderSourceLocal initial i,
+    ∃ sources : (i : Fin 9) → TailLocal initial i, ∃ localVector : VectorLocal initial,
+    ∃ before temps after, ∃ traces : List CC.Trace,
       traces.length = 98 ∧
       CC.Star (CC.Step2 world)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         traces.flatten (.State Arm64ProgramFixture.f_arm64_execute_compile afterSetup
           k (Arm64ProgramEntryAllocation.allocation initial).1 (setupTemps temps fields) after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) =
+        some (.Vptr (cells i).block 0)) ∧
+      (∀ high (i : Fin 32), CC.Mem.load CC.Mptr after entry.block
+        ((if high then 352 else 96) + 8 * (i.val : Int)) =
+        some (.Vptr localVector.block (vectorLoopSourceOffset high i))) ∧
+      (∀ i, CC.Mem.load (tailChunk i) after entry.block (tailOffset i) =
+        some (Arm64ProgramEntryTail.actualValue sources i)) ∧
       ∃ storage : Storage initial before entry,
         Result storage temps k ctxBlock ctxOfs fields after ∧
         Arm64Registers.Represents addresses origins (fun r => r.val)
           before.nextblock after (.Vptr entry.block 0) (nativeSetup s origins fields) ∧
         Arm64ProgramEntryResources.Resources initial after entry ∧
         Nonempty (Arm64ProgramEntryInitialized.Values initial before (.Vptr ctxBlock ctxOfs)
-          values flags vectors) := by
+          values flags vectors) ∧
+        before.nextblock = (Arm64ProgramEntryAllocation.allocation initial).2.nextblock := by
   obtain ⟨entry, cells, sources, localVector, before, temps, traces, length, run,
     index, ctx, pointers, vectorPointers, tailReads, data, registers, ⟨storage⟩,
     resources, frame, access, next⟩ :=
@@ -319,8 +329,15 @@ theorem entry_setup_represents (initial : CC.Mem) (ctxBlock : CC.Block)
     access.trans (congrArg CC.Mem.access (Arm64ProgramEntryAllocation.allocation_corresponds initial).1.symm)
   obtain ⟨after, result, finalRegisters⟩ := setup_represents storage temps k ctxBlock ctxOfs fields
     ctx old frame reads sourceAccess addresses origins s registers
-  refine ⟨entry, before, temps, after, traces, length, ?_, storage, result, finalRegisters, ?_, data⟩
+  refine ⟨entry, cells, sources, localVector, before, temps, after, traces, length,
+    ?_, ?_, ?_, ?_, storage, result, finalRegisters, ?_, data, next⟩
   · simpa only [CC.E0, CC.Eapp, List.append_nil] using star_trans run result.run.sound
+  · intro i
+    exact (result.local_load _ _ _ entry.binding header_other.1 header_other.2 CC.Mptr _).trans (pointers i)
+  · intro high i
+    exact (result.local_load _ _ _ entry.binding header_other.1 header_other.2 CC.Mptr _).trans (vectorPointers high i)
+  · intro i
+    exact (result.local_load _ _ _ entry.binding header_other.1 header_other.2 (tailChunk i) _).trans (tailReads i)
   · apply Arm64ProgramEntryResources.resources initial after entry cells (result.access.trans sourceAccess)
     intro i
     exact (result.local_load _ _ _ entry.binding header_other.1 header_other.2 CC.Mptr _).trans (pointers i)
