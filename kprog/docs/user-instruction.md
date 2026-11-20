@@ -359,3 +359,4 @@ and are not yours unless you want them: request 64's `NATIVE_LAB_TRUSTED_CHUNK` 
 - 收到于 01:03Z 之前：“还在计时?????”
 - 收到于 01:03Z 到 02:15Z 之间：“干嘛还在构建工具??? 你是不是还在折腾工具链???”
 - 收到于 02:21Z（记录时间 2026-11-20T02:21:27Z）：“最近在修改什么? 我们和把 native code 直接放进去或者在用户态运行有啥区别?”
+- 收到于 02:27Z（记录时间 2026-11-20T02:27:42Z）：“probe read 之类的都做了?”
