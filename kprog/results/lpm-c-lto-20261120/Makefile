@@ -58,7 +58,7 @@ native-receipt:
 
 .PHONY: app-receipt
 app-receipt:
-	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/app_receipt.py
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/app_receipt.py $(APP_RECEIPT_ARGS)
 
 .PHONY: prefix-receipt
 prefix-receipt:

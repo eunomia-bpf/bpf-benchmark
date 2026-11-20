@@ -1,0 +1,941 @@
+{
+  "source_revision": "695d1408e",
+  "raw": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z",
+  "app_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261120_043350_463308",
+  "app_status": "ok",
+  "app_error": "",
+  "requests": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "prog_id": 26,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "read_task_struct",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "274: (07) r2 += 120                   ; R2=scalar(id=21+120,smin=0x8000000000000078,smax=7)",
+        "275: (a5) if r2 < 0x1000 goto pc+6    ; R1=scalar(id=21,smax=-121,umin=0x8000000000000000,umax=0xffffffffffffff87,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R2=scalar(id=21+120,smin=0x8000000000000078,smax=-1,umin=0x8000000000000078,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "276: (b4) w2 = 1                      ; R2=1",
+        "277: (18) r3 = 0xffff8ccc002b6730     ; R3=map_value(map=kprog_unspec,ks=4,vs=8)",
+        "279: (79) r3 = *(u64 *)(r3 +0)        ; R3=scalar()",
+        "280: (57) r3 &= 1                     ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "281: (15) if r3 == 0x0 goto pc+2 284: R0=scalar() R1=scalar(smax=-121,umin=0x8000000000000000,umax=0xffffffffffffff87,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R2=1 R3=0 R4=1 R6=map_value(map=system_analysis,ks=4,vs=144) R7=scalar() R8=map_value(map=kprog_unspec,ks=4,vs=8) R9=0 R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=0000mmmm",
+        "284: (16) if w2 == 0x0 goto pc+1      ; R2=1",
+        "285: (79) r1 = *(u64 *)(r1 +120)",
+        "R1 invalid mem access 'scalar'",
+        "processed 266 insns (limit 1000000) max_states_per_insn 0 total_states 26 peak_states 26 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 27,
+      "prog_id": 32,
+      "native_sha256": "27aebedf60c8118cff46e0f2d0c7634dcfdb061d0c7d7f9ec36d7a1701e76b89",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_stop",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "408: (85) call bpf_get_current_task#35        ; R0=scalar()",
+        "409: (18) r2 = 0xffff8ccc002b6730     ; R2=map_value(map=kprog_unspec,ks=4,vs=8)",
+        "411: (79) r1 = *(u64 *)(r2 +0)        ; R1=scalar() R2=map_value(map=kprog_unspec,ks=4,vs=8)",
+        "412: (65) if r0 s> 0xffffffff goto pc+86      ; R0=scalar(smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "413: (79) r2 = *(u64 *)(r2 +0)        ; R2=scalar()",
+        "414: (57) r2 &= 1                     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "415: (15) if r2 == 0x0 goto pc+1 417: R0=scalar(smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R1=scalar() R2=0 R6=scalar(umax=0xfffffffffffffffe) R7=map_value(map=per_cpu_records,ks=4,vs=5000) R8=map_value(map=kprog_unspec,ks=4,vs=8) R9=map_value(map=go_labels_procs,ks=4,vs=28) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmm???? fp-48=scalar() fp-88=0 fp-96=mmmm???? fp-104=mmmm???? fp-112=fp-88 fp-120=ctx() fp-128=fp-92 fp-136=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))",
+        "417: (55) if r2 != 0x0 goto pc+1      ; R2=0",
+        "418: (79) r1 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'",
+        "processed 407 insns (limit 1000000) max_states_per_insn 0 total_states 29 peak_states 29 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 33,
+      "prog_id": 39,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_native",
+      "native_static_sites_by_map": {
+        "array": {
+          "unwind_info_array": 4
+        },
+        "lpm": {
+          "pid_page_to_mapping_info": 4
+        },
+        "hash": {
+          "interpreter_offsets": 4,
+          "stack_delta_page_to_info": 4
+        }
+      },
+      "array_static_sites": 4,
+      "lpm_static_sites": 4,
+      "hash_static_sites": 8,
+      "generic_lookup_static_sites": 94,
+      "native_entry_bytes": 24003,
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-onvi5x1d/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-onvi5x1d/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 40,
+      "prog_id": 46,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_hotspot",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 28
+        },
+        "hash": {
+          "interpreter_offsets": 4,
+          "hotspot_procs": 1
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 28,
+      "hash_static_sites": 5,
+      "generic_lookup_static_sites": 26,
+      "native_entry_bytes": 22301,
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-u4cixzoz/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-u4cixzoz/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 47,
+      "prog_id": 52,
+      "native_sha256": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_perl",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "134: (85) call bpf_get_current_task#35        ; R0=scalar()",
+        "135: (65) if r0 s> 0xffffffff goto pc+196     ; R0=scalar(smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "136: (b7) r2 = 0                      ; R2=0",
+        "137: (a5) if r0 < 0x1000 goto pc+6    ; R0=scalar(smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff))",
+        "138: (18) r1 = 0xffff8ccc01c3a730     ; R1=map_value(map=kprog_unspec,ks=4,vs=8)",
+        "140: (79) r1 = *(u64 *)(r1 +0)        ; R1=scalar()",
+        "141: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))",
+        "142: (55) if r1 != 0x0 goto pc+1      ; R1=0",
+        "143: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'",
+        "processed 7696 insns (limit 1000000) max_states_per_insn 2 total_states 510 peak_states 510 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 53,
+      "prog_id": 59,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "perf_unwind_php",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 1
+        },
+        "hash": {
+          "php_procs": 1
+        }
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 1,
+      "generic_lookup_static_sites": 26,
+      "native_entry_bytes": 15140,
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-_1o9_817/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-_1o9_817/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 60,
+      "prog_id": 65,
+      "native_sha256": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_python",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "3118: (56) if w1 != 0x6 goto pc+4     ; R1=0",
+        "3123: (61) r1 = *(u32 *)(r10 -176)    ; R1=0 R10=fp0 fp-176=????0",
+        "3124: (54) w1 &= 255                  ; R1=0",
+        "3125: (79) r9 = *(u64 *)(r10 -200)    ; R9=scalar(id=104) R10=fp0 fp-200=scalar(id=104)",
+        "3126: (56) if w1 != 0x4 goto pc+7     ; R1=0",
+        "3134: (bf) r2 = r10                   ; R2=fp0 R10=fp0",
+        "3135: (07) r2 += -128                 ; R2=fp-128",
+        "3136: (79) r1 = *(u64 *)(r10 -152)    ; R1=scalar(id=105) R10=fp0 fp-152=scalar(id=105)",
+        "3137: (1f) r1 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 1937 insns (limit 1000000) max_states_per_insn 1 total_states 162 peak_states 162 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 66,
+      "prog_id": 71,
+      "native_sha256": "526c5a5b29ed353d2fae20554d241c451d6b97c8e3abbfd81dadc87ec40ac71c",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_ruby",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "762: (54) w3 &= 255                   ; R3=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "763: (bc) w3 = w3                     ; R3=scalar(id=19,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "764: (bf) r2 = r1                     ; R1=scalar(id=20) R2=scalar(id=20)",
+        "765: (1f) r2 -= r4                    ; R2=scalar() R4=scalar()",
+        "766: (18) r4 = 0x100000000            ; R4=0x100000000",
+        "768: (ad) if r2 < r4 goto pc+4        ; R2=scalar(umin=0x100000000) R4=0x100000000",
+        "769: (56) if w3 != 0x0 goto pc+7      ; R3=0",
+        "770: (b7) r0 = 0                      ; R0=0",
+        "771: (7b) *(u64 *)(r0 +0) = r0",
+        "R0 invalid mem access 'scalar'",
+        "processed 280 insns (limit 1000000) max_states_per_insn 0 total_states 19 peak_states 19 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 72,
+      "prog_id": 77,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_v8",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "4551: (bc) w2 = w1                    ; R1=0 R2=0",
+        "4552: (04) w2 += -1                   ; R2=0xffffffff",
+        "4553: (a6) if w2 < 0x4 goto pc+2      ; R2=0xffffffff",
+        "4554: (b4) w0 = 0                     ; R0=0",
+        "4555: (56) if w1 != 0x6 goto pc+2     ; R1=0",
+        "4558: (bf) r2 = r10                   ; R2=fp0 R10=fp0",
+        "4559: (07) r2 += -152                 ; R2=fp-152",
+        "4560: (79) r1 = *(u64 *)(r10 -184)    ; R1=scalar(id=660) R10=fp0 fp-184=scalar(id=660)",
+        "4561: (1f) r1 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 8381 insns (limit 1000000) max_states_per_insn 3 total_states 685 peak_states 685 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 78,
+      "prog_id": 83,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_unwind_dotnet",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "1573: (04) w4 += -1                   ; R4=0xffffffff",
+        "1574: (a6) if w4 < 0x4 goto pc+2      ; R4=0xffffffff",
+        "1575: (b4) w6 = 0                     ; R6=0",
+        "1576: (56) if w3 != 0x6 goto pc+2     ; R3=0",
+        "1579: (77) r8 >>= 56                  ; R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))",
+        "1580: (bf) r3 = r10                   ; R3=fp0 R10=fp0",
+        "1581: (07) r3 += -120                 ; R3=fp-120",
+        "1582: (79) r7 = *(u64 *)(r10 -144)    ; R7=scalar(id=47) R10=fp0 fp-144=scalar(id=47)",
+        "1583: (1f) r7 -= r3",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 634 insns (limit 1000000) max_states_per_insn 0 total_states 37 peak_states 37 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 84,
+      "prog_id": 89,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "perf_go_labels",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "282: (b4) w2 = 15                     ; R2=15",
+        "283: (26) if w1 > 0xe goto pc+2       ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "284: (bc) w1 = w1                     ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "285: (bc) w2 = w1                     ; R1=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf)) R2=scalar(id=36,smin=smin32=0,smax=umax=smax32=umax32=14,var_off=(0x0; 0xf))",
+        "286: (67) r5 <<= 6                    ; R5=scalar(smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "287: (79) r1 = *(u64 *)(r10 -216)     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=60) R10=fp0 fp-216=map_value(map=per_cpu_records,ks=4,vs=5000,off=60)",
+        "288: (7b) *(u64 *)(r10 -184) = r5     ; R5=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0)) R10=fp0 fp-184=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "289: (0f) r1 += r5                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,off=60,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0)) R5=scalar(id=37,smin=0,smax=umax=0x3fffffffc0,smax32=0x7fffffc0,umax32=0xffffffc0,var_off=(0x0; 0x3fffffffc0))",
+        "290: (85) call bpf_probe_read_user#112",
+        "R1 unbounded memory access, make sure to bounds check any such access",
+        "processed 341 insns (limit 1000000) max_states_per_insn 1 total_states 25 peak_states 25 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 90,
+      "prog_id": 96,
+      "native_sha256": "20d3130f00e759648085a44409c93b9adc14a2d6861962504cc6a368336f19d2",
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__sched_process_free",
+      "native_static_sites_by_map": {
+        "array": {},
+        "lpm": {
+          "pid_page_to_mapping_info": 1
+        },
+        "hash": {}
+      },
+      "array_static_sites": 0,
+      "lpm_static_sites": 1,
+      "hash_static_sites": 0,
+      "generic_lookup_static_sites": 5,
+      "native_entry_bytes": 621,
+      "native_compile_flags": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-target",
+        "x86_64-linux-gnu",
+        "-O3",
+        "-march=native",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mno-red-zone",
+        "-mllvm",
+        "-force-attribute=noredzone",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-63mtr8si/generated/checked-simulator.linked.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/combined-otel-20261120T043228Z/state/session-mgod2b5g/requests/request-63mtr8si/generated/checked-simulator.native.o"
+      ],
+      "native_no_red_zone_option": true
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 97,
+      "prog_id": 102,
+      "native_sha256": "8f5f0ef7f30bd2911def92a7b6c60a08b1c4921c4250683ab8418be6d87de127",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "native_tracer_entry",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "90: (b7) r1 = 275                     ; R1=275",
+        "91: (05) goto pc+55",
+        "147: (7b) *(u64 *)(r10 -152) = r8     ; R8=scalar(id=12,umin=0x100000000) R10=fp0 fp-152=scalar(id=12,umin=0x100000000)",
+        "148: (77) r8 >>= 32                   ; R8=scalar(smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "149: (63) *(u32 *)(r10 -160) = r8     ; R8=scalar(id=13,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-160=????scalar(id=13,smin=umin=umin32=1,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+        "150: (7b) *(u64 *)(r10 -112) = r1     ; R1=275 R10=fp0 fp-112=275",
+        "151: (bf) r1 = r10                    ; R1=fp0 R10=fp0",
+        "152: (07) r1 += -112                  ; R1=fp-112",
+        "153: (1f) r9 -= r1",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 95 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 103,
+      "prog_id": 108,
+      "native_sha256": "22f44141b87d813ed85f5f46d79adb69142859e2dd55d92e01ecee77ffefcaf9",
+      "execution_path": "direct-native",
+      "status": 0,
+      "b_generated": true,
+      "b_stock_passed": false,
+      "symbol": "custom__generic",
+      "failure_stage": "verification",
+      "verifier_tail": [
+        "122: (bf) r2 = r0                     ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)",
+        "123: (07) r2 += 3952                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952)",
+        "124: (7b) *(u64 *)(r2 +0) = r4        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3952) R4=0",
+        "125: (bf) r2 = r0                     ; R0=map_value(map=per_cpu_records,ks=4,vs=5000) R2=map_value(map=per_cpu_records,ks=4,vs=5000)",
+        "126: (07) r2 += 3960                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960)",
+        "127: (7b) *(u64 *)(r2 +0) = r4        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,off=3960) R4=0",
+        "128: (bf) r2 = r10                    ; R2=fp0 R10=fp0",
+        "129: (07) r2 += -112                  ; R2=fp-112",
+        "130: (1f) r9 -= r2",
+        "math between fp pointer and register with unbounded min value is not allowed",
+        "processed 124 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    }
+  ],
+  "phases": {
+    "baseline": {
+      "run_cnt": 4565394,
+      "run_time_ns": 19141706129,
+      "ns_per_call": 4192.7829512633525,
+      "programs": {
+        "10": {
+          "bytes_jited": 14983,
+          "bytes_xlated": 24736,
+          "id": 10,
+          "name": "perf_unwind_php",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "11": {
+          "bytes_jited": 19605,
+          "bytes_xlated": 33208,
+          "id": 11,
+          "name": "perf_unwind_pyt",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "12": {
+          "bytes_jited": 17840,
+          "bytes_xlated": 30280,
+          "id": 12,
+          "name": "perf_unwind_rub",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "13": {
+          "bytes_jited": 20215,
+          "bytes_xlated": 33448,
+          "id": 13,
+          "name": "perf_unwind_v8",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "14": {
+          "bytes_jited": 22797,
+          "bytes_xlated": 37440,
+          "id": 14,
+          "name": "perf_unwind_dot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "15": {
+          "bytes_jited": 1572,
+          "bytes_xlated": 2504,
+          "id": 15,
+          "name": "perf_go_labels",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "16": {
+          "bytes_jited": 792,
+          "bytes_xlated": 1320,
+          "id": 16,
+          "name": "tracepoint__sch",
+          "run_cnt_delta": 34,
+          "run_time_ns_delta": 127008,
+          "type": "tracepoint"
+        },
+        "17": {
+          "bytes_jited": 3815,
+          "bytes_xlated": 5904,
+          "id": 17,
+          "name": "native_tracer_e",
+          "run_cnt_delta": 4565360,
+          "run_time_ns_delta": 19141579121,
+          "type": "perf_event"
+        },
+        "18": {
+          "bytes_jited": 3679,
+          "bytes_xlated": 5712,
+          "id": 18,
+          "name": "custom__generic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "6": {
+          "bytes_jited": 3650,
+          "bytes_xlated": 6144,
+          "id": 6,
+          "name": "perf_unwind_sto",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "7": {
+          "bytes_jited": 21868,
+          "bytes_xlated": 37024,
+          "id": 7,
+          "name": "perf_unwind_nat",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "8": {
+          "bytes_jited": 18424,
+          "bytes_xlated": 28080,
+          "id": 8,
+          "name": "perf_unwind_hot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "9": {
+          "bytes_jited": 18264,
+          "bytes_xlated": 29640,
+          "id": 9,
+          "name": "perf_unwind_per",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "otel_python3_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 3514840,
+              "elapsed_s": 10.009153,
+              "ops_per_second": 351162.5808897117
+            }
+          ]
+        },
+        {
+          "name": "otel_python3_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 3268554,
+              "elapsed_s": 10.000089,
+              "ops_per_second": 326852.49101283
+            }
+          ]
+        },
+        {
+          "name": "otel_ruby_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 19700850,
+              "elapsed_s": 10.000039,
+              "ops_per_second": 1970077.316698465
+            }
+          ]
+        },
+        {
+          "name": "otel_ruby_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 26497219,
+              "elapsed_s": 10.000037,
+              "ops_per_second": 2649712.096065244
+            }
+          ]
+        },
+        {
+          "name": "otel_nodejs_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 10701391,
+              "elapsed_s": 10.000866,
+              "ops_per_second": 1070046.4339788174
+            }
+          ]
+        },
+        {
+          "name": "otel_nodejs_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 12160917,
+              "elapsed_s": 10.005039,
+              "ops_per_second": 1215479.2200210313
+            }
+          ]
+        },
+        {
+          "name": "otel_perl_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 5903920,
+              "elapsed_s": 10.000696,
+              "ops_per_second": 590350.9115765543
+            }
+          ]
+        },
+        {
+          "name": "otel_perl_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 6422172,
+              "elapsed_s": 10.013682,
+              "ops_per_second": 641339.718996469
+            }
+          ]
+        },
+        {
+          "name": "otel_php_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 34321012,
+              "elapsed_s": 10.000008,
+              "ops_per_second": 3432098.454321237
+            }
+          ]
+        },
+        {
+          "name": "otel_php_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 34258559,
+              "elapsed_s": 10.002203,
+              "ops_per_second": 3425101.350172557
+            }
+          ]
+        },
+        {
+          "name": "otel_stress_ng_cpu",
+          "returncode": 0,
+          "self_counters": []
+        }
+      ]
+    },
+    "post_rejit": {
+      "run_cnt": 5232018,
+      "run_time_ns": 27546312779,
+      "ns_per_call": 5264.949925439859,
+      "programs": {
+        "102": {
+          "bytes_jited": 2729,
+          "bytes_xlated": 24,
+          "id": 102,
+          "name": "native_tracer_e",
+          "run_cnt_delta": 5231993,
+          "run_time_ns_delta": 27546168949,
+          "type": "perf_event"
+        },
+        "108": {
+          "bytes_jited": 2182,
+          "bytes_xlated": 24,
+          "id": 108,
+          "name": "custom__generic",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "kprobe"
+        },
+        "32": {
+          "bytes_jited": 1812,
+          "bytes_xlated": 24,
+          "id": 32,
+          "name": "perf_unwind_sto",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "39": {
+          "bytes_jited": 25325,
+          "bytes_xlated": 53880,
+          "id": 39,
+          "name": "perf_unwind_nat",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "46": {
+          "bytes_jited": 23057,
+          "bytes_xlated": 32824,
+          "id": 46,
+          "name": "perf_unwind_hot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "52": {
+          "bytes_jited": 11332,
+          "bytes_xlated": 24,
+          "id": 52,
+          "name": "perf_unwind_per",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "59": {
+          "bytes_jited": 15368,
+          "bytes_xlated": 29288,
+          "id": 59,
+          "name": "perf_unwind_php",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "65": {
+          "bytes_jited": 8333,
+          "bytes_xlated": 24,
+          "id": 65,
+          "name": "perf_unwind_pyt",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "71": {
+          "bytes_jited": 15226,
+          "bytes_xlated": 24,
+          "id": 71,
+          "name": "perf_unwind_rub",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "77": {
+          "bytes_jited": 11945,
+          "bytes_xlated": 24,
+          "id": 77,
+          "name": "perf_unwind_v8",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "83": {
+          "bytes_jited": 17980,
+          "bytes_xlated": 24,
+          "id": 83,
+          "name": "perf_unwind_dot",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "89": {
+          "bytes_jited": 1032,
+          "bytes_xlated": 16,
+          "id": 89,
+          "name": "perf_go_labels",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "perf_event"
+        },
+        "96": {
+          "bytes_jited": 730,
+          "bytes_xlated": 1168,
+          "id": 96,
+          "name": "tracepoint__sch",
+          "run_cnt_delta": 25,
+          "run_time_ns_delta": 143830,
+          "type": "tracepoint"
+        }
+      },
+      "workload_components": [
+        {
+          "name": "otel_python3_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 2839472,
+              "elapsed_s": 10.00008,
+              "ops_per_second": 283944.92844057246
+            }
+          ]
+        },
+        {
+          "name": "otel_python3_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 2578875,
+              "elapsed_s": 10.012869,
+              "ops_per_second": 257556.05111781647
+            }
+          ]
+        },
+        {
+          "name": "otel_ruby_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 22860309,
+              "elapsed_s": 10.000056,
+              "ops_per_second": 2286018.0982986493
+            }
+          ]
+        },
+        {
+          "name": "otel_ruby_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 21019564,
+              "elapsed_s": 10.000039,
+              "ops_per_second": 2101948.202402011
+            }
+          ]
+        },
+        {
+          "name": "otel_nodejs_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 18556921,
+              "elapsed_s": 10.000425,
+              "ops_per_second": 1855613.2364374513
+            }
+          ]
+        },
+        {
+          "name": "otel_nodejs_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 18273552,
+              "elapsed_s": 10.000394,
+              "ops_per_second": 1827283.2050417215
+            }
+          ]
+        },
+        {
+          "name": "otel_perl_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 5239292,
+              "elapsed_s": 10.006426,
+              "ops_per_second": 523592.7393057222
+            }
+          ]
+        },
+        {
+          "name": "otel_perl_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 5169445,
+              "elapsed_s": 10.00926,
+              "ops_per_second": 516466.25225041615
+            }
+          ]
+        },
+        {
+          "name": "otel_php_int_loop_0",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 29176083,
+              "elapsed_s": 10.000005,
+              "ops_per_second": 2917606.8411965794
+            }
+          ]
+        },
+        {
+          "name": "otel_php_int_loop_1",
+          "returncode": 0,
+          "self_counters": [
+            {
+              "ops": 28805763,
+              "elapsed_s": 10.000008,
+              "ops_per_second": 2880573.9955408038
+            }
+          ]
+        },
+        {
+          "name": "otel_stress_ng_cpu",
+          "returncode": 0,
+          "self_counters": []
+        }
+      ]
+    }
+  },
+  "ebpf_over_native_per_call": 0.7963576122546061,
+  "scope": "One frozen 10-second diagnostic per arm, CPU20-23, current image, installed tools. Report all checked/direct/failed paths, without causal isolation. Tail-call child counts are zero; entry counters include their time. Static helper sites are not dynamic frequencies. Component throughput is reported separately; no aggregate workload rate exists."
+}
