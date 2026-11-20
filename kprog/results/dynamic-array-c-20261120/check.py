@@ -47,6 +47,16 @@ run(['gcc','-O3','-fsanitize=undefined','-fno-sanitize-recover=all','-DBEFORE='+
      *['-D'+k+'='+str(v) for k,v in layout.items()],here/'driver.c',build/'native.o','-o',build/'execute'])
 execution=run([build/'execute'])
 with tarfile.open(out/'native-inputs.tar.gz','w:gz') as archive:archive.add(build,arcname=build.name)
-(out/'report.json').write_text(json.dumps(dict(mode=mode,layout=layout,execution=execution,
-    scope='Actual installed BPF-to-native lowering plus C/host map-op providers, not live kernel callback or app performance.'),indent=2)+'\n')
+report=dict(mode=mode,layout=layout,execution=execution,
+            scope='Host imported-native semantics and callback dispatch; no kernel/app timing claim')
+try:
+    if mode=='after':
+        run([root/'kprog/x86/native_lab/native_link/target/release/native-link',
+             '--input',build/'native.o','--symbol','dynamic','--mode','proof',
+             '--preserve-entry-abi','--output',build/'dynamic.proof.o'])
+        report['dynamic_proof_linked']=True
+finally:
+    (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
+    with tarfile.open(out/'native-inputs.tar.gz','w:gz') as archive:
+        archive.add(build,arcname='program-inputs')
 print(execution,end='')

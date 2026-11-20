@@ -100,15 +100,44 @@ __kprog_percpu_array_lookup(void *map,const void *key) {
     # __kprog_array_lookup is the installed compiler's native C lookup ABI.
     # Exact named LPM/HASH operands select their C body before the ARRAY body;
     # LLVM folds the matching global-pointer identity after inlining.
-    return preamble + '''__attribute__((always_inline))
-void *__kprog_array_lookup(void *map, const void *key) {
-''' + choices + '''
-    unsigned index = *(const unsigned *)key;
+    return preamble + '''typedef unsigned __kprog_array_u32 __attribute__((aligned(1),may_alias));
+static __attribute__((always_inline)) inline void *
+__kprog_native_array_lookup(void *map, const void *key) {
+    unsigned index = *(const __kprog_array_u32 *)key;
     if (index >= *(const unsigned *)((const char *)map + %(limit)d))
         return (void *)0;
     unsigned stride = *(const unsigned *)((const char *)map + %(stride)d);
     unsigned mask = *(const unsigned *)((const char *)map + %(mask)d);
     return (char *)map + %(values)d + (unsigned long)stride * (index & mask);
+}
+''' % fields + '''__attribute__((always_inline))
+void *__kprog_array_lookup(void *map, const void *key) {
+''' + choices + '''    return __kprog_native_array_lookup(map,key);
+}
+'''
+
+
+def dynamic_lookup_source(kernel_btf):
+    """Remaining helper-1 calls: ordinary ARRAY C, otherwise the kernel method."""
+    types = KernelTypes(kernel_btf)
+    try:
+        mapping = types.lib.btf__find_by_name_kind(types.btf, b'bpf_map', 4)
+        ops = types.lib.btf__find_by_name_kind(types.btf, b'bpf_map_ops', 4)
+        fields = dict(kind=field_offset(types, mapping, 'map_type'),
+                      ops=field_offset(types, mapping, 'ops'),
+                      lookup=field_offset(types, ops, 'map_lookup_elem'))
+    finally:
+        types.close()
+    # kernel/bpf/helpers.c invokes this method under the program's existing
+    # RCU read section. Keep other map kinds on that same kernel operation.
+    return '''__attribute__((always_inline))
+void *bpf_map_lookup_elem(void *map, const void *key) {
+    if (*(const unsigned *)((const char *)map+%(kind)d)==2)
+        return __kprog_native_array_lookup(map,key);
+    const void *ops=*(void *const *)((const char *)map+%(ops)d);
+    void *(*lookup)(void *,const void *)=
+        *(void *(**)(void *,const void *))((const char *)ops+%(lookup)d);
+    return lookup(map,key);
 }
 ''' % fields
 

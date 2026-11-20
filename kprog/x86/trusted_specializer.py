@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "kprog"))
 from trusted_generation import context_kind, declarations, validate_native, native_map_label
 from kernel_function_abi import describe as kernel_functions
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
-from inline_array import lookup_source
+from inline_array import lookup_source, dynamic_lookup_source
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
     ROOT / "kprog/x86/micro-prog/generate_micro_sim_proofs.py")
@@ -210,9 +210,11 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     run([compiler, ir, '-o', lowered, '--helper-list', helper_list,
          *[arg for name in arrays + percpu_arrays + [name for name, _ in lpms + hashes] for arg in ('--array-map', name)]])
     helpers = helper_list.read_text().splitlines()
-    if helpers:
+    if helpers or artifacts['maps']:
         helper = directory/'checked-simulator.helpers.c'
-        text = lookup_source(artifacts['kernel_btf'], lpms, hashes, percpu_arrays) if '__kprog_array_lookup' in helpers else ''
+        text = lookup_source(artifacts['kernel_btf'], lpms, hashes, percpu_arrays) if artifacts['maps'] or '__kprog_array_lookup' in helpers else ''
+        if artifacts['maps']:
+            text += dynamic_lookup_source(artifacts['kernel_btf'])
         if any(name.startswith('__kprog_probe_read_') for name in helpers):
             text += '#include ' + json.dumps(str(ROOT/'kprog/x86/micro-prog/inline_probe.c')) + '\n'
         helper.write_text(text)
