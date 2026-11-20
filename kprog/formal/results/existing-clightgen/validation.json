@@ -1,0 +1,55 @@
+{
+  "exports": 23,
+  "byte_identical": true,
+  "sha256": {
+    "kprog/formal/KProgFormal/Clight/Arm64Access.lean": "e7d99b4cbeb219ec224168b48811c0976c00b08e2d1952ea8acc456e7f05e24f",
+    "kprog/formal/KProgFormal/Clight/Arm64Address.lean": "f2ca1e8264f65f93ebac2c24275511c972f00ea170dd4e454ebb77fd3f17e01e",
+    "kprog/formal/KProgFormal/Clight/Arm64Addressing.lean": "9bda22e1be31edda4577f9e8850fa0b3c69a024837e5ec37b80d68dc1c10c6fd",
+    "kprog/formal/KProgFormal/Clight/Arm64Entry.lean": "641055e0bb5d60394ff529ea2de64f1b045bdf3e6c63a83ded9870fc1185429d",
+    "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean": "3deb6674d3397ac12845ccaf56b6b3067559e5823baaee0c44c915bf4d99f252",
+    "kprog/formal/KProgFormal/Clight/Arm64PayloadProfile.lean": "6fef8108ec189f4bdcb29eac3280d67bdd16d0dbf95be4b4c8ff67492b1e8c25",
+    "kprog/formal/KProgFormal/Clight/Arm64Program.lean": "1bb1de8bebf5b083bd8c375fa3b606c6dc95de43503ee5641afc2b2bcda555e0",
+    "kprog/formal/KProgFormal/Clight/Arm64ProgramContext.lean": "027ff34e924c3618f9184124d7d57bfec9fce931c796736f850d4a273e6f0018",
+    "kprog/formal/KProgFormal/Clight/Arm64ProgramFixture.lean": "306d527f6ca095b017dc1baed5d5cec409c81b85697870357df5f073fffb0c6a",
+    "kprog/formal/KProgFormal/Clight/Arm64Stack.lean": "9e96270d6cddd6f0b0e076cf9dababf244225daf0aa2eb3fce344d52cfdcc875",
+    "kprog/formal/KProgFormal/Clight/X86Context.lean": "7e0ca6b530c1b30e5cb351ee82d970be7bf9ad502f3bc7800ffae7777de56618",
+    "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean": "fdffc4ebf3632fc791c144b8282abe59ba0c9b235fc19b0f398ab04927704e48",
+    "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean": "c4bde7b27bb5a998abc2e2a867330fd080bded7fb15d3308e5c8a0a8de2813ef",
+    "kprog/formal/KProgFormal/Clight/X86Helpers.lean": "c278fc694744abee95cdf42d6d0e6b9456066adad1059485206502b7b1c55675",
+    "kprog/formal/KProgFormal/Clight/X86Inline.lean": "647a90a0b63a1bcff540e614f8f6db5dafa1d342a4a63af906dc3e8c97535c0d",
+    "kprog/formal/KProgFormal/Clight/X86Memory.lean": "61d828f9d617fc827fa607f6579ce5c6a7b27d3677e7a1ce734e4ce8861760ef",
+    "kprog/formal/KProgFormal/Clight/X86Numeric.lean": "52d1bf4a7ef6fb28491b3dfbcf53fbf79179870fc548b49fd0f99501d65bef05",
+    "kprog/formal/KProgFormal/Clight/X86Pointer.lean": "a534406fb610eac1fa62f7a3a725159ca5a2a34614fa24870247282756214989",
+    "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean": "d8e87f16f8c6c465e5aab126e2bdea3069f3c6ac218988eabd7b6df5ee831ba5",
+    "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean": "451f073190cdf107409790c0c3a8d77bcac7359702916ca00bcbd29a8346e930",
+    "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean": "c17e93479c498d0d7e21bf1ef5a499551fbae23cd9cfffddb07e5f4812d7aa0d",
+    "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean": "6c1c7fe424c9e833b64739c80ef3a256c50b3a4e0bd3d069263a2449b68cd9f7",
+    "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean": "5286a9c2226994597df55ae9bffeaa5293babff8ac32953dfd6d8b3d1adbc284"
+  },
+  "dry_run": {
+    "command": [
+      "make",
+      "-n",
+      "clight-sources"
+    ],
+    "exit": 0,
+    "seconds": 0.06863832473754883,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "regeneration": {
+    "command": [
+      "make",
+      "clight-sources"
+    ],
+    "exit": 0,
+    "seconds": 130.60144996643066,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-keep-linked"
+}

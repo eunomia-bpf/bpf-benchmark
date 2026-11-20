@@ -357,15 +357,9 @@ mature:
 	cd mature && lake build KProgMature @x86lean/+Tests.CanonicalAddress @x86lean/+Tests.CheckedAccess @lnsym/+Tests.ConditionalSelectTest @lnsym/+Tests.BranchTest @lnsym/+Tests.ThreadPointerTest @lnsym/+Tests.XZRTest @lnsym/+Tests.MultiplyDivideTest @lnsym/+Tests.ExtractCompareTest @lnsym/+Tests.SingleRegMemoryTest @lnsym/+Tests.LDSTTest @lnsym/+Tests.VectorReductionTest @lnsym/+Tests.ExtendedArithmeticTest @lnsym/+Tests.AtomicMemoryTest @lnsym/+Tests.ExclusiveMemoryTest @lnsym/+Tests.PairMemoryTest @lnsym/+Tests.CheckedMemoryTest @lnsym/+Tests.MayModifiedRegsTest @lnsym/+Arm.Memory.MemoryProofs
 	cd external/LNSym && lake build Tests.Tactics.Sym Tests.Tactics.ReduceFetchInst
 
-# CompCert's frontend exports the production C helpers. System build dependencies
-# are Coq, OCaml/findlib, Menhir and the Menhir/Zarith development libraries.
-.PHONY: clightgen clight-sources clight
-clightgen:
-	test -f external/clean/Makefile.config || (cd external/clean && ./configure -clightgen x86_64-linux)
-	$(MAKE) -C external/clean depend
-	$(MAKE) -C external/clean proof
-	$(MAKE) -C external/clean extraction
-	$(MAKE) -C external/clean clightgen
+# Export with the existing CompCert frontend. Toolchain builds are disabled
+# under the operator's 2026-11-20 instruction.
+.PHONY: clight-sources clight
 
 # Clight is a build product. Profile inputs are sole checked-in C snapshots;
 # build symlinks preserve the frontend source_file metadata and include paths.
@@ -398,14 +392,14 @@ build/%.bpf.c: c/%.bpf.c | build
 	ln -s ../$< $@
 
 external/clean/clightgen:
-	$(MAKE) clightgen
+	$(error Existing clightgen is required; toolchain builds are disabled)
 
 $(CLIGHT_OUTPUTS): Makefile external/clean/clightgen | build KProgFormal/Clight
 	external/clean/clightgen -lean -normalize $(CLIGHT_OPTIONS) $(CLIGHT_INCLUDES) -MD -MP -MF build/clight-$(@F:.lean=.d) -MT $@ -o $@ $(firstword $(filter %.c,$^))
 
 -include $(wildcard build/clight-*.d)
 
-clight-sources: clightgen
+clight-sources: external/clean/clightgen
 	$(MAKE) $(CLIGHT_OUTPUTS)
 
 clight: clight-sources
