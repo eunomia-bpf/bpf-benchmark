@@ -100,3 +100,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized
 import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterView
 import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings
 import KProgFormal.ClightRefinement.Arm64MovKeepLinked
+import KProgFormal.ClightRefinement.Arm64MovKeepLinkedCall

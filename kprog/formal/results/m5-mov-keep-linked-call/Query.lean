@@ -1,0 +1,41 @@
+import KProgFormal.ClightRefinement.Arm64MovKeepLinkedCall
+
+open KProgFormal.ClightRefinement
+
+#check Arm64MovImmediate.Dispatch.Keep.body_dispatch_bound
+#print axioms Arm64MovImmediate.Dispatch.Keep.body_dispatch_bound
+#check Arm64MovImmediate.Dispatch.Keep.call_dispatch_bound
+#print axioms Arm64MovImmediate.Dispatch.Keep.call_dispatch_bound
+#check Arm64MovImmediate.allocated_bound
+#print axioms Arm64MovImmediate.allocated_bound
+#check Arm64MovImmediate.unshadowed_bound
+#print axioms Arm64MovImmediate.unshadowed_bound
+#check Arm64MovKeep.call_scalar_returns_bound
+#print axioms Arm64MovKeep.call_scalar_returns_bound
+#check Arm64MovKeep.call_scalar_represents_bound
+#print axioms Arm64MovKeep.call_scalar_represents_bound
+#check Arm64MovKeep.call_scalar_all_behaviors_bound
+#print axioms Arm64MovKeep.call_scalar_all_behaviors_bound
+#check Arm64MovKeep.Native.call_corresponds_bound
+#print axioms Arm64MovKeep.Native.call_corresponds_bound
+#check Arm64MovKeep.call_scalar_in_context_bound
+#print axioms Arm64MovKeep.call_scalar_in_context_bound
+#check Arm64MovKeep.Native.call_corresponds_in_context_bound
+#print axioms Arm64MovKeep.Native.call_corresponds_in_context_bound
+#check Arm64MovKeep.Linked.width_binding
+#print axioms Arm64MovKeep.Linked.width_binding
+#check Arm64MovKeep.Linked.call_scalar_returns
+#print axioms Arm64MovKeep.Linked.call_scalar_returns
+#check Arm64MovKeep.Linked.call_scalar_represents
+#print axioms Arm64MovKeep.Linked.call_scalar_represents
+#check Arm64MovKeep.Linked.call_scalar_all_behaviors
+#print axioms Arm64MovKeep.Linked.call_scalar_all_behaviors
+#check Arm64MovKeep.Linked.call_corresponds
+#print axioms Arm64MovKeep.Linked.call_corresponds
+#check Arm64MovKeep.Linked.call_scalar_in_context
+#print axioms Arm64MovKeep.Linked.call_scalar_in_context
+#check Arm64MovKeep.Linked.call_corresponds_in_context
+#print axioms Arm64MovKeep.Linked.call_corresponds_in_context
+
+#check Arm64MovKeep.Linked.call_corresponds_all_behaviors
+#print axioms Arm64MovKeep.Linked.call_corresponds_all_behaviors

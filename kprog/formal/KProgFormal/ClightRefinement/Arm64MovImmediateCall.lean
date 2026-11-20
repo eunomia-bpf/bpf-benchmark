@@ -51,19 +51,27 @@ private theorem callees_not_local :
     Arm64Program._kprog_arm64_program_read ∉ CC.varNames Arm64Nop.handler.fn_vars ∧
     Arm64Program._kprog_arm64_program_write ∉ CC.varNames Arm64Nop.handler.fn_vars := by decide +kernel
 
+theorem allocated_bound (world : CC.CGenv) (before : CC.Mem) :
+    CC.AllocVariables world.genv_cenv CC.emptyEnv before Arm64Nop.handler.fn_vars
+      (Arm64Nop.allocation world before).1 (Arm64Nop.allocation world before).2 :=
+  CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (Arm64Nop.allocation world before)).symm
+
 theorem allocated (before : CC.Mem) :
     CC.AllocVariables ge.genv_cenv CC.emptyEnv before Arm64Nop.handler.fn_vars
-      (Arm64Nop.allocation ge before).1 (Arm64Nop.allocation ge before).2 :=
-  CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (Arm64Nop.allocation ge before)).symm
+      (Arm64Nop.allocation ge before).1 (Arm64Nop.allocation ge before).2 := allocated_bound ge before
+
+theorem unshadowed_bound (world : CC.CGenv) (before : CC.Mem) :
+    (Arm64Nop.allocation world before).1.get Arm64Program._kprog_arm64_program_read = none ∧
+    (Arm64Nop.allocation world before).1.get Arm64Program._kprog_arm64_program_write = none := by
+  constructor
+  · simpa only [CC.emptyEnv, CC.PTree.gempty] using
+      CC.allocVariables_env_other (allocated_bound world before) callees_not_local.1
+  · simpa only [CC.emptyEnv, CC.PTree.gempty] using
+      CC.allocVariables_env_other (allocated_bound world before) callees_not_local.2
 
 theorem unshadowed (before : CC.Mem) :
     (Arm64Nop.allocation ge before).1.get Arm64Program._kprog_arm64_program_read = none ∧
-    (Arm64Nop.allocation ge before).1.get Arm64Program._kprog_arm64_program_write = none := by
-  constructor
-  · simpa only [CC.emptyEnv, CC.PTree.gempty] using
-      CC.allocVariables_env_other (allocated before) callees_not_local.1
-  · simpa only [CC.emptyEnv, CC.PTree.gempty] using
-      CC.allocVariables_env_other (allocated before) callees_not_local.2
+    (Arm64Nop.allocation ge before).1.get Arm64Program._kprog_arm64_program_write = none := unshadowed_bound ge before
 
 /-- Complete actual nine-argument generic procedure, including both scalar
 stores and freeing its real locals. The writer result refers to the SAME

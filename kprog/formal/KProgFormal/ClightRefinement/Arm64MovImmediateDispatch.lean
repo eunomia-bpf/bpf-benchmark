@@ -100,25 +100,36 @@ def dispatchEnv (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
 def scalarEnv (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
   (dispatchEnv le narrow).set Arm64Program._t'5 (.Vlong 0)
 
+private theorem enter_width_bound (world : CC.CGenv) (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._arm64_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv widthBlock = some (.Internal Arm64Program.f_arm64_width_effective))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
+    (unshadowed : e.get Arm64Program._arm64_width_effective = none)
+    (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow))) :
+    InternalRun world 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m)
+      (.Callstate (.Internal Arm64Program.f_arm64_width_effective) [Arm64Width.argument (flags narrow)]
+        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m) := by
+  have execution : steps world 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m) =
+      some (CC.E0, .Callstate (.Internal Arm64Program.f_arm64_width_effective)
+        [Arm64Width.argument (flags narrow)]
+        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m) ∧
+      InternalPath world 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m) := by
+    simp [body_source, body, widthCall, widthCont, continuation, steps, InternalPath, InternalState,
+      CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.Cop.classifyFun, CC.typeof,
+      CC.lvalOfVar, unshadowed, widthBinding.1, CC.doDerefLoc,
+      CC.accessMode, CC.Genv.findFunct, widthBinding.2, hflags,
+      Arm64Width.cast_argument, CC.typeOfFundef, CC.typeOfFunction, CC.typeOfParams,
+      CC.Integers.MI.zero, Arm64Program.f_arm64_width_effective, CC.E0, CC.Eapp,
+      CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero, CC.Integers.MI.eq]
+  exact internalRun_of_steps execution.2 execution.1
+
 private theorem enter_width (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
     (unshadowed : e.get Arm64Program._arm64_width_effective = none)
     (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow))) :
     InternalRun ge 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m)
       (.Callstate (.Internal Arm64Program.f_arm64_width_effective) [Arm64Width.argument (flags narrow)]
-        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m) := by
-  have execution : steps ge 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m) =
-      some (CC.E0, .Callstate (.Internal Arm64Program.f_arm64_width_effective)
-        [Arm64Width.argument (flags narrow)]
-        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m) ∧
-      InternalPath ge 4 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m) := by
-    simp [body_source, body, widthCall, widthCont, continuation, steps, InternalPath, InternalState,
-      CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.Cop.classifyFun, CC.typeof,
-      CC.lvalOfVar, unshadowed, width_binding.1, CC.doDerefLoc,
-      CC.accessMode, CC.Genv.findFunct, width_binding.2, hflags,
-      Arm64Width.cast_argument, CC.typeOfFundef, CC.typeOfFunction, CC.typeOfParams,
-      CC.Integers.MI.zero, Arm64Program.f_arm64_width_effective, CC.E0, CC.Eapp,
-      CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero, CC.Integers.MI.eq]
-  exact internalRun_of_steps execution.2 execution.1
+        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m) :=
+  enter_width_bound ge (CC.Positive.ofNat 66) width_binding e le m narrow unshadowed hflags
 
 set_option hygiene false in
 private theorem after_width (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
@@ -275,9 +286,9 @@ def temps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
     Arm64Program._t'2826 (.Vint 0)
 
 set_option hygiene false in
-private theorem after_width (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
+private theorem after_width (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
     (hop : le.get Arm64Program._op = some (.Vint 5)) :
-    InternalRun ge 16
+    InternalRun world 16
       (.Returnstate (Arm64Width.result (flags narrow))
         (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m)
       (.State Arm64Nop.handler branch continuation e (temps le narrow) m) := by
@@ -311,17 +322,28 @@ private theorem after_width (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow 
 
 /-- MOVK bypasses the MOV selector and reaches its own branch in 26 body
 transitions, retaining the real width call and all actual control decisions. -/
+theorem body_dispatch_bound (world : CC.CGenv) (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._arm64_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv widthBlock = some (.Internal Arm64Program.f_arm64_width_effective))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
+    (widthUnshadowed : e.get Arm64Program._arm64_width_effective = none)
+    (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow)))
+    (hop : le.get Arm64Program._op = some (.Vint 5)) :
+    InternalRun world 26 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m)
+      (.State Arm64Nop.handler branch continuation e (temps le narrow) m) := by
+  have enter := enter_width_bound world widthBlock widthBinding e le m narrow widthUnshadowed hflags
+  have width := Arm64Width.internal world (flags narrow)
+    (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m
+  have choose := after_width world e le m narrow hop
+  simpa only [CC.callCont] using (enter.trans width).trans choose
+
 theorem body_dispatch (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (narrow : Bool)
     (widthUnshadowed : e.get Arm64Program._arm64_width_effective = none)
     (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow)))
     (hop : le.get Arm64Program._op = some (.Vint 5)) :
     InternalRun ge 26 (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop e le m)
-      (.State Arm64Nop.handler branch continuation e (temps le narrow) m) := by
-  have enter := enter_width e le m narrow widthUnshadowed hflags
-  have width := Arm64Width.internal ge (flags narrow)
-    (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le widthCont) m
-  have choose := after_width e le m narrow hop
-  simpa only [CC.callCont] using (enter.trans width).trans choose
+      (.State Arm64Nop.handler branch continuation e (temps le narrow) m) :=
+  body_dispatch_bound ge (CC.Positive.ofNat 66) width_binding e le m narrow widthUnshadowed hflags hop
 
 def arguments (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) : List CC.Val :=
   [ignored.entry, .Vint 5, ignored.dst, ignored.src, ignored.src2, ignored.src3,
@@ -335,34 +357,45 @@ def initialTemps (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) : CC.Temp
     Arm64Program._flags (Arm64Width.argument (flags narrow))).set
     Arm64Program._aux ignored.aux).set Arm64Program._imm ignored.imm
 
-private theorem enter (m : CC.Mem) (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) :
-    CC.FunctionEntry2 ge Arm64Nop.handler (arguments ignored narrow) m
-      (Arm64Nop.allocation ge m).1 (initialTemps ignored narrow) (Arm64Nop.allocation ge m).2 :=
+private theorem enter (world : CC.CGenv) (m : CC.Mem) (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) :
+    CC.FunctionEntry2 world Arm64Nop.handler (arguments ignored narrow) m
+      (Arm64Nop.allocation world m).1 (initialTemps ignored narrow) (Arm64Nop.allocation world m).2 :=
   .intro Arm64NopDeclarations.vars_norepet Arm64NopDeclarations.params_norepet
     Arm64NopDeclarations.params_temps_disjoint
-    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (Arm64Nop.allocation ge m)).symm) rfl
+    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (Arm64Nop.allocation world m)).symm) rfl
 
 /-- Start at the real nine-argument opcode-5 call and allocate its actual
 locals once. The caller frontier is preserved through this 27-step prefix. -/
-theorem call_dispatch (m : CC.Mem) (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) :
-    InternalRun ge 27
+theorem call_dispatch_bound (world : CC.CGenv) (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._arm64_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv widthBlock = some (.Internal Arm64Program.f_arm64_width_effective))
+    (m : CC.Mem) (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) :
+    InternalRun world 27
       (.Callstate (.Internal Arm64Nop.handler) (arguments ignored narrow) .Kstop m)
-      (.State Arm64Nop.handler branch continuation (Arm64Nop.allocation ge m).1
-        (temps (initialTemps ignored narrow) narrow) (Arm64Nop.allocation ge m).2) ∧
-      FrameBelow m.nextblock m (Arm64Nop.allocation ge m).2 := by
-  have first : InternalRun ge 1
+      (.State Arm64Nop.handler branch continuation (Arm64Nop.allocation world m).1
+        (temps (initialTemps ignored narrow) narrow) (Arm64Nop.allocation world m).2) ∧
+      FrameBelow m.nextblock m (Arm64Nop.allocation world m).2 := by
+  have first : InternalRun world 1
       (.Callstate (.Internal Arm64Nop.handler) (arguments ignored narrow) .Kstop m)
-      (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop (Arm64Nop.allocation ge m).1
-        (initialTemps ignored narrow) (Arm64Nop.allocation ge m).2) :=
-    .step trivial (.internal_function _ _ _ _ _ _ _ (enter m ignored narrow)) (.refl _)
+      (.State Arm64Nop.handler Arm64Nop.handler.fn_body .Kstop (Arm64Nop.allocation world m).1
+        (initialTemps ignored narrow) (Arm64Nop.allocation world m).2) :=
+    .step trivial (.internal_function _ _ _ _ _ _ _ (enter world m ignored narrow)) (.refl _)
   have hflags : (initialTemps ignored narrow).get Arm64Program._flags =
       some (Arm64Width.argument (flags narrow)) := by
     simp +decide only [initialTemps, CC.PTree.gss, CC.PTree.gso]
   have hop : (initialTemps ignored narrow).get Arm64Program._op = some (.Vint 5) := by
     simp +decide only [initialTemps, CC.PTree.gss, CC.PTree.gso]
-  have rest := body_dispatch (Arm64Nop.allocation ge m).1 (initialTemps ignored narrow)
-    (Arm64Nop.allocation ge m).2 narrow (Arm64Nop.entry_unshadowed ge m) hflags hop
-  exact ⟨first.trans rest, Arm64Nop.entry_frame ge m⟩
+  have rest := body_dispatch_bound world widthBlock widthBinding (Arm64Nop.allocation world m).1 (initialTemps ignored narrow)
+    (Arm64Nop.allocation world m).2 narrow (Arm64Nop.entry_unshadowed world m) hflags hop
+  exact ⟨first.trans rest, Arm64Nop.entry_frame world m⟩
+
+theorem call_dispatch (m : CC.Mem) (ignored : Arm64Nop.IgnoredArguments) (narrow : Bool) :
+    InternalRun ge 27
+      (.Callstate (.Internal Arm64Nop.handler) (arguments ignored narrow) .Kstop m)
+      (.State Arm64Nop.handler branch continuation (Arm64Nop.allocation ge m).1
+        (temps (initialTemps ignored narrow) narrow) (Arm64Nop.allocation ge m).2) ∧
+      FrameBelow m.nextblock m (Arm64Nop.allocation ge m).2 :=
+  call_dispatch_bound ge (CC.Positive.ofNat 66) width_binding m ignored narrow
 
 end Keep
 

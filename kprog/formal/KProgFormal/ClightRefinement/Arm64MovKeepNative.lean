@@ -103,6 +103,36 @@ theorem reference_step (s : Reference.AArch64.State) (instruction : Reference.AA
 
 /-- The actual ordinary scalar MOVK203 call refines the real checked step,
 using actual typed cell loads and preserving the original reader frontier. -/
+theorem call_corresponds_bound (world : CC.CGenv) (binding : CallBindings world)
+    {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m before entry)
+    (unused : Arm64Nop.IgnoredArguments) (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State)
+    (instruction : Reference.AArch64.Instruction)
+    (i : Fin 31) (bits : BitVec 64) (imm : BitVec 16) (column : Fin 4) (narrow : Bool)
+    (word : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock i) 0 = some (.Vlong bits))
+    (tag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock i) 0 = some (.Vint 0))
+    (represented : Arm64Registers.Represents addresses origins (fun r => r.val)
+      before.nextblock before (.Vptr entry.block 0) s)
+    (valid : narrow = true → column.val < 2)
+    (decoded : instruction.decoded = .DPI (.Move_wide_imm (fields i imm column narrow)))
+    (noError : read_err s.machine = .None)
+    (fetched : fetch_inst (read_pc s.machine) s.machine = some instruction.encoding) :
+    ∃ after, InternalRun world 203
+      (.Callstate (.Internal Arm64Nop.handler)
+        (Arm64MovImmediate.Dispatch.Keep.arguments
+          (operands unused entry.block (BitVec.ofNat 64 i.val) imm column) narrow) .Kstop before)
+      (.Returnstate .Vundef .Kstop after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val)
+        before.nextblock after (.Vptr entry.block 0) (Reference.AArch64.step s).state ∧
+      (Reference.AArch64.step s).events = [] ∧ (Reference.AArch64.step s).fault = none := by
+  obtain ⟨after, run, rep⟩ := call_scalar_represents_bound world binding storage unused addresses origins s i bits imm column narrow
+    word tag represented
+  rw [reference_step s instruction i imm column narrow valid decoded noError fetched]
+  exact ⟨after, run, (Arm64Registers.cursor after (.Vptr entry.block 0)
+    (Arm64RegisterWrite.nativeUpdate s i (merge (Reference.AArch64.gpr s i) imm column) narrow)
+      (read_pc s.machine + 4#64)).mpr rep, rfl, rfl⟩
+
 theorem call_corresponds {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
     (storage : Arm64ProducerRegisterStorage.Storage m before entry)
     (unused : Arm64Nop.IgnoredArguments) (addresses : Arm64Registers.PointerOrigins)
@@ -124,12 +154,8 @@ theorem call_corresponds {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal 
       (.Returnstate .Vundef .Kstop after) ∧
       Arm64Registers.Represents addresses origins (fun r => r.val)
         before.nextblock after (.Vptr entry.block 0) (Reference.AArch64.step s).state ∧
-      (Reference.AArch64.step s).events = [] ∧ (Reference.AArch64.step s).fault = none := by
-  obtain ⟨after, run, rep⟩ := call_scalar_represents storage unused addresses origins s i bits imm column narrow
-    word tag represented
-  rw [reference_step s instruction i imm column narrow valid decoded noError fetched]
-  exact ⟨after, run, (Arm64Registers.cursor after (.Vptr entry.block 0)
-    (Arm64RegisterWrite.nativeUpdate s i (merge (Reference.AArch64.gpr s i) imm column) narrow)
-      (read_pc s.machine + 4#64)).mpr rep, rfl, rfl⟩
+      (Reference.AArch64.step s).events = [] ∧ (Reference.AArch64.step s).fault = none :=
+  call_corresponds_bound Arm64NumericProgram.ge numeric_bindings storage unused addresses origins s instruction
+    i bits imm column narrow word tag represented valid decoded noError fetched
 
 end KProgFormal.ClightRefinement.Arm64MovKeep.Native
