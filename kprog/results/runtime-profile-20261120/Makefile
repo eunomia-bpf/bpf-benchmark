@@ -14,3 +14,7 @@ perf:
 
 inspect:
 	$(PERF_BUILD)/perf version --build-options
+
+.PHONY: capture
+capture:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/capture.py $(OUT) $(APP)
