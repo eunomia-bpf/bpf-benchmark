@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryInitialized.Values.transport
+#print axioms Arm64ProgramEntryInitialized.Values.transport
+#check Arm64ProgramEntryInitialized.Values.storage
+#print axioms Arm64ProgramEntryInitialized.Values.storage
+#check Arm64ProgramEntryInitialized.Values.gpr_reads
+#print axioms Arm64ProgramEntryInitialized.Values.gpr_reads
+#check Arm64ProgramEntryInitialized.Values.cold_cache_reads
+#print axioms Arm64ProgramEntryInitialized.Values.cold_cache_reads
+#check Arm64ProgramEntryInitialized.entry_initialized
+#print axioms Arm64ProgramEntryInitialized.entry_initialized

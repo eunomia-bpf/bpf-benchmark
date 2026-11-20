@@ -1,0 +1,128 @@
+{
+  "step": "M5 actual entry to initialized production body",
+  "status": "focused-pass-full-running",
+  "recorded_utc": "2026-11-20T01:01:37Z",
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized"
+      ],
+      "exit": 1,
+      "seconds": 65.50009393692017,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized"
+      ],
+      "exit": 0,
+      "seconds": 3.356367349624634,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized"
+      ],
+      "exit": 1,
+      "seconds": 4.874752998352051,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized"
+      ],
+      "exit": 0,
+      "seconds": 3.955061674118042,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-program-entry-initialized/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7095332145690918,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    }
+  },
+  "public_query_counts": {
+    "types": 5,
+    "axiom_reports": 5
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.Values.transport": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.Values.storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.Values.gpr_reads": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.Values.cold_cache_reads": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInitialized.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "source_sha256": {
+    "kprog/formal/KProgFormal.lean": "18992338ad1a8b9bf54433c72cbceef9e0781dff7b56e14c600efd42266bbc5f",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryInitialized.lean": "2b43c9dc0ee036112547aa122bc6406db0c48ae9756b51af56fd5776045e0f9f"
+  },
+  "full_confirmation": {
+    "status": "running",
+    "command": "lake build",
+    "raw_json": "/workspaces/kprog-raw/formal/m5-program-entry-initialized/lake-build1.json",
+    "lake_pid": 582254,
+    "wrapper_session": 55352,
+    "cpu": 17,
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "comment_precision": {
+    "change": "comment/docs:92 typed header readbacks, not92 pointers; tail includes three Mint32 scalar constants",
+    "semantics_changed": false,
+    "during_full_build": true,
+    "post_full_subset_confirmation": "focused5 and query2 planned"
+  },
+  "scope": "formal module, root import, receipts and own todo line; no runtime/C/compiler/kernel/image/base/benchmark/paper/design changes",
+  "M5": "open",
+  "M6": "open, follows M5",
+  "completed_isa_families": 0,
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-initialized"
+}
