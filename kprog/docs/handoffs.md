@@ -159,3 +159,7 @@ Re-derived OMP date-split claims with the existing per-program analyzer; record 
 ### PERF 2026-11-20T07:33:04Z: exact 7510-byte OTel body and Tracee count subgroup
 
 The 7510B marker is program48 in equal-work-20261113/raw-otel/post_rejit-0013/programs.json, the same native entry whose paired capture has zero unwind attempts/frames. Size therefore identifies at least one known incorrect-context member, not a hidden optimization. The01:17run also has7510B; PERF0622capture instead has2650B, so2729B is not universal. Evidence appended to results/perf-history-review-20261120/README.md. OMP0.90-1.15 total-call subgroup is exploratory: totals do not prove equivalent behavior and differing totals can follow throughput. Keep all37runs and existing duplicate pairing, no new count gate or0.91 replacement headline. No source/tool/guest/image changes.
+
+### PERF 2026-11-20T07:45:55Z: native stub tag is not P identity
+
+The07:40log inference is disproved by one captured inventory: ten native programs26/28/30/32/34/36/38/40/42/48 all share26449268576adffc despite different functions and7928..41433B bodies (entry7510B). Native stub tag/24Bxlatedlength/name/fd do not hold P bytes/IR/flags/maps/context constant. Added exact inventory references to perf-history-review-20261120/README.md. OMP08e01b7bd already corrects the broken-reference claim; b38644534 fixes pairing. No compiler/toolbuild, nativebodyrestore or new timing.
