@@ -66,7 +66,19 @@ OTel served 14 requests over 14 distinct programs and installed 4. Reading every
 | 2, 5, 8 | — | `R0 invalid mem access 'scalar'` |
 | 11 | — | `R1 unbounded memory access` |
 
-So this shape accounts for **5 of OTel's 10 fallbacks, on 5 distinct programs**. Fixing the emitter would
+Every one of the five rejects on the same instruction and the same message — the destination differs because
+the compiler picked a different register, the loaded pointer register differs for the same reason:
+
+| request | PC | failing insn | scalar register |
+|---|---|---|---|
+| 7 | 3137 | `r1 -= r2` | `r1` = stack reload, `smin == S64_MIN` |
+| 9 | 4561 | `r1 -= r2` | same |
+| 10 | 1583 | `r7 -= r3` | same |
+| 13 | 153 | `r9 -= r1` | `r9` = `kprog_unspec` map load, unbounded |
+| 14 | 130 | `r9 -= r2` | same |
+
+(`requests/*.json` holds each site verbatim from the capture.) So this shape accounts for
+**5 of OTel's 10 fallbacks, on 5 distinct programs**. Fixing the emitter would
 take OTel from 4/14 installed to at most 9/14, and from 4/14 programs to 9/14 programs. The remaining 5
 fallbacks (`invalid mem access 'scalar'` × 4, `unbounded memory access` × 1) are a different class and are
 not addressed here.
