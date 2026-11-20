@@ -1,0 +1,323 @@
+{
+  "source": "709c1c486",
+  "raw": "/workspaces/kprog-raw/perf/hash-tail-20261120/subset-20261120T052435Z",
+  "host": {
+    "layout": {
+      "buckets": 448,
+      "count": 824,
+      "seed": 832,
+      "stride": 16,
+      "head": 0,
+      "hash_node": 0,
+      "next": 0,
+      "hash_offset": 40,
+      "key_offset": 48
+    },
+    "helpers": [
+      "__kprog_array_lookup"
+    ],
+    "execution": "1032 kernel hash oracle cases, 143388 C/native lookup cases, 1 nulls restart, 589 generic calls",
+    "undefined_symbols": "                 U bpf_map_lookup_elem\n                 U map_a\n                 U map_b\n                 U map_c\n",
+    "raw": "/workspaces/kprog-raw/perf/hash-tail-20261120/subset-20261120T052435Z/host",
+    "scope": "Kernel-header hash oracle, native helper C and installed compiler ABI, including mixed key shapes/generic retention/nulls restart. No stock/app/performance result."
+  },
+  "native_api": {
+    "native": {
+      "native_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/checked-simulator.native.o",
+      "native_proof_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/checked-simulator.proof.o",
+      "simulator_object": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.o",
+      "simulator_program": "trusted_x86_x86_sim_xdp",
+      "simulator_source": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.c",
+      "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.i",
+      "context_kind": "raw",
+      "symbol": "trusted_x86_x86_sim_xdp",
+      "native_sha256": "8bebd668e8316f6402c413e56e32bd9d9f2a2158b4670e68ff47ee51942774c0",
+      "maps": [
+        {
+          "name": "map_a",
+          "map_type": 1,
+          "key_size": 8,
+          "value_size": 8,
+          "max_entries": 64,
+          "map_flags": 0,
+          "value_offset": null
+        }
+      ],
+      "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "simulator_frontend": {
+        "path": "/var/tmp/kprog-tmp/perf/hash-c-lto/generation/trusted_x86.bpf.bounds-input.bc",
+        "source_sha256": "bd74fe3b9bf4ff6d216f55ee0a95fbe4135807aca091960441e18e9e152a6d47",
+        "ir_sha256": "b5a452020cf7252edfdb4a4d152cde2b4113364058d019fec54522d82ff141ee"
+      }
+    },
+    "layout": {
+      "buckets": 448,
+      "count": 824,
+      "seed": 832,
+      "stride": 16,
+      "head": 0,
+      "hash_node": 0,
+      "next": 0,
+      "hash_offset": 40,
+      "key_offset": 48
+    },
+    "execution": "112 actual compiler-API hash cases",
+    "scope": "Actual stock accepted B then installed native compiler API/host execution; no app/performance claim"
+  },
+  "unchanged_b_stock": {
+    "command": [
+      "/workspaces/kprog-raw/perf/hash-c-lto-20261120/production-20261120T041613Z/probe-inputs/archive-stock",
+      "/workspaces/kprog-raw/perf/hash-c-lto-20261120/production-20261120T041613Z/generation-inputs/trusted_x86.bpf.o",
+      "/workspaces/kprog-raw/perf/hash-c-lto-20261120/production-20261120T041613Z/metadata.json",
+      "/workspaces/kprog-raw/perf/hash-c-lto-20261120/production-20261120T041613Z/kernel-facts.json",
+      "/workspaces/kprog-raw/perf/hash-c-lto-20261120/production-20261120T041613Z/verifier.log"
+    ],
+    "returncode": 0,
+    "stdout": "{\"stock_loaded\":true,\"errno\":0,\"instructions\":18}\n",
+    "stderr": "",
+    "scope": "Detached sole-kernel stock verification with fresh plain HASH map; not native/app execution",
+    "verdict": {
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 18
+    }
+  },
+  "replay": {
+    "capture": "/workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z/service.tar.gz",
+    "rows": [
+      {
+        "request_id": 15,
+        "symbol": "sys_exit",
+        "before": {
+          "native": {
+            "entry_bytes": 228,
+            "executable_bytes": 513,
+            "functions": [
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 205
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 228
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 72
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 232,
+            "executable_bytes": 430,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 232
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 198
+              }
+            ]
+          }
+        },
+        "after": {
+          "native": {
+            "entry_bytes": 228,
+            "executable_bytes": 481,
+            "functions": [
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 173
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 228
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 72
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 232,
+            "executable_bytes": 388,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 232
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 156
+              }
+            ]
+          }
+        },
+        "native": {
+          "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/15/checked-simulator.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/15/checked-simulator.proof.o",
+          "simulator_object": "/workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z/state/session-_moi7y60/requests/request-4nq8hhxh/generated/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/15/trusted_x86.bpf.c",
+          "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/15/trusted_x86.bpf.i",
+          "context_kind": "raw",
+          "symbol": "trusted_x86_x86_sim_xdp",
+          "native_sha256": "054d330d60bd4a76e414a73ed047990375305dd60a5f326d75b2dbd3cce44387",
+          "maps": [
+            {
+              "name": "data",
+              "value_offset": null,
+              "key_size": 4,
+              "value_size": 32,
+              "map_type": 1,
+              "max_entries": 8192,
+              "map_flags": 0
+            },
+            {
+              "name": "start",
+              "value_offset": null,
+              "key_size": 4,
+              "value_size": 8,
+              "map_type": 1,
+              "max_entries": 8192,
+              "map_flags": 0
+            }
+          ],
+          "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+          "simulator_frontend": {
+            "path": "/var/tmp/kprog-tmp/perf/helper-sharing/15/trusted_x86.bpf.bounds-input.bc",
+            "source_sha256": "07e5e87221b21eb45365c7a0158b1c01adc22db7a65477f2185c6cf4567b81cf",
+            "ir_sha256": "a9068cb3af5a41a4079fe270f878bd8bd3c0f9b5684ed8aa30b7781fdcfee455"
+          }
+        },
+        "native_emission_seconds": 0.1401777970022522,
+        "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+      },
+      {
+        "request_id": 20,
+        "symbol": "sched_switch",
+        "before": {
+          "native": {
+            "entry_bytes": 1388,
+            "executable_bytes": 1673,
+            "functions": [
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 205
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 1388
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 72
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 1392,
+            "executable_bytes": 1590,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 1392
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 198
+              }
+            ]
+          }
+        },
+        "after": {
+          "native": {
+            "entry_bytes": 1388,
+            "executable_bytes": 1641,
+            "functions": [
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 173
+              },
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 1388
+              },
+              {
+                "name": "__kprog_array_lookup",
+                "bytes": 72
+              }
+            ]
+          },
+          "proof": {
+            "entry_bytes": 1392,
+            "executable_bytes": 1548,
+            "functions": [
+              {
+                "name": "trusted_x86_x86_sim_xdp",
+                "bytes": 1392
+              },
+              {
+                "name": "__kprog_hash_key_4",
+                "bytes": 156
+              }
+            ]
+          }
+        },
+        "native": {
+          "native_object": "/var/tmp/kprog-tmp/perf/helper-sharing/20/checked-simulator.native.o",
+          "native_proof_object": "/var/tmp/kprog-tmp/perf/helper-sharing/20/checked-simulator.proof.o",
+          "simulator_object": "/workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z/state/session-_moi7y60/requests/request-u6wvnalp/generated/trusted_x86.bpf.o",
+          "simulator_program": "trusted_x86_x86_sim_xdp",
+          "simulator_source": "/var/tmp/kprog-tmp/perf/helper-sharing/20/trusted_x86.bpf.c",
+          "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/helper-sharing/20/trusted_x86.bpf.i",
+          "context_kind": "raw",
+          "symbol": "trusted_x86_x86_sim_xdp",
+          "native_sha256": "d1f803389eb83acf2a88b3f6095e5df9f855133fbe8ab34907550897bad3c739",
+          "maps": [
+            {
+              "name": "hists",
+              "value_offset": null,
+              "key_size": 4,
+              "value_size": 120,
+              "map_type": 1,
+              "max_entries": 10240,
+              "map_flags": 0
+            },
+            {
+              "name": "start",
+              "value_offset": null,
+              "key_size": 4,
+              "value_size": 8,
+              "map_type": 1,
+              "max_entries": 10240,
+              "map_flags": 0
+            },
+            {
+              "name": "zero",
+              "value_offset": 0,
+              "key_size": 4,
+              "value_size": 120,
+              "map_type": 2,
+              "max_entries": 1,
+              "map_flags": 0
+            }
+          ],
+          "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+          "simulator_frontend": {
+            "path": "/var/tmp/kprog-tmp/perf/helper-sharing/20/trusted_x86.bpf.bounds-input.bc",
+            "source_sha256": "5de4745f952b4bd9fe93599b6463c5062460621848f084c12cb2c51bc6e8c020",
+            "ir_sha256": "22a298ade5ba09378e89a8bc4aa22f4436760b08828bef2b643fec5f9bc53df3"
+          }
+        },
+        "native_emission_seconds": 0.20163700300327037,
+        "scope": "Same archived accepted B frontend/native API. Proof executable bytes include all reachable workers. Native object total also includes unreferenced helper definitions. No app execution or speed claim."
+      }
+    ],
+    "failed": []
+  },
+  "scope": "Native C HASH tail-word loads, existing kernel-header/guarded-key/restart and compiler-API checks. Same archived accepted BCC frontends, full reachable proof bytes including workers. B unchanged; old stock receipt reused. No app/runtime speed claim."
+}
