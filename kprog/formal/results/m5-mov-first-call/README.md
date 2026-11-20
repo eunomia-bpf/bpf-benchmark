@@ -31,8 +31,10 @@ MOVK priority, physical-memory/ABI admission, all-outcome/final-return proofs
 and other ISA families also remain.
 
 Focused 226 jobs and the public type/axiom query pass at original caps,
-CPU 17, nice 0, one worker and 32 GiB address space. Whole proof-library
-confirmation follows this batch together with the frontier transport step.
+CPU 17, nice 0, one worker and 32 GiB address space. The whole
+`lake build KProgFormal` proof library/root passes 275 jobs, confirming both
+steps on CPUs 16–23, nice 19, one worker and 32 GiB address space.
+Executable/tool builds are excluded under the current directive.
 One initial proof failure required unfolding a local memory alias in a
 permission equality; its raw log is retained and limits are unchanged.
 Validation lists inherited logic/external-semantics axioms. Raw:

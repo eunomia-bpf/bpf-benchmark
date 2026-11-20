@@ -19,8 +19,10 @@ not execution of a fetched ISA instruction. The actual MOV_IMM dispatch and
 cold-reader suffix must still be composed using these laws.
 
 Focused 176 jobs and eleven public type/axiom queries pass at original caps,
-CPU 17, nice 0, one worker and 32 GiB address space. Whole proof-library
-confirmation follows the completed batch. Initial failures were finite
+CPU 17, nice 0, one worker and 32 GiB address space. The whole
+`lake build KProgFormal` proof library/root passes 275 jobs together with the
+actual-call composition, on CPUs 16–23, nice 19, one worker and 32 GiB address
+space. Executable/tool builds are excluded under the current directive. Initial failures were finite
 source-equation normalization at field names, conditional vector offsets and
 Ptrofs zero addition; raw logs are preserved and limits were unchanged.
 Validation and inherited logic axioms are recorded in validation.json.

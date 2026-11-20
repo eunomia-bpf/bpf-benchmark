@@ -44,9 +44,34 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending end-of-batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.0633761882781982,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 275,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-mov-first-call/full.log"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-mov-first-call",
   "frontier_source_checkpoint": "fbe0c8c70b33ca2d26b6dbed349366c88e703fcf",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "root_artifact_modified_utc": "2026-11-20T06:25:36.387385+00:00",
+  "source_checkpoint": "d3d6c5c40aad174155df2d9926a60b0ef889aa71"
 }
