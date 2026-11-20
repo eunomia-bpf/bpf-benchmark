@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF native plain HASH application measurement (59763bf01; 2026-11-20T04:18:18Z): C helper host1032hash/143388lookup/restart1, stock18instructions and actual native compiler API112cases pass; ARRAY/LPM/probe subset passes with all LTO. Results/hash-c-lto-20261120/report.json/evidence.tar.gz. Installed tools unchanged. Queued OTel639209 includes HASH plus prefix6d18958c0/private-binding76c41e98a; record actual coverage/counters, no component-to-runtime speed claim.
+
 - [ ] PERF kernel probe source publication (81f126f69; 2026-11-20T04:01:33Z): removes recovered-load byte/string expansions that lose helper fault return/full-zero behavior.99copy/51string provider controls,12links/6P-to-B pass; result/evidence runtime-profile-20261120/kernel-source-result.json. C/coordinator next P publication includes header with all LTO; actual app fault behavior and speed remain unmeasured, no toolchain builds.
 
 - [x] PERF private inline binding qualifier (76c41e98a; 2026-11-20T03:53:33Z): remove remaining private pointee volatile,72existing alias/tag/partial/release cases pass; O1 IR45→42volatile accesses. Source primitive cleanup399f53f9b had missed this binding. Results/runtime-profile-20261120/inline-private-result.json; actual OTel performance and FORMAL export reconciliation stay separate.

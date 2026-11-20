@@ -22,3 +22,7 @@ stock-guest:
 	python3 $(ROOT)/kprog/results/hash-c-lto-20261120/stock.py $(OUT)
 native:
 	python3 $(ROOT)/kprog/results/hash-c-lto-20261120/production.py $(OUT) native
+
+.PHONY: receipt
+receipt:
+	python3 $(ROOT)/kprog/results/hash-c-lto-20261120/receipt.py
