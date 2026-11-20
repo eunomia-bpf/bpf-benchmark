@@ -15,6 +15,10 @@ locks/timing after the coordinator's six-app read loop released it.
 - `tracepoint__sched_process_exit`: 1962 -> 1950 ns/inv, 1.006x, the only other program with a retained pair.
 - Call parity: 418 697 682 base against 408 195 517 post, 0.97, so the two arms did equal work and the per-call
   ratio is comparable.
+- Third independent confirmation: the coordinator's 3 x 60 s stats-on run of the same change (todo line
+  2026-11-20T08:21:06Z) reads OTel at 0.945x per call. Three measurements of different sample counts and
+  different recipes (0.945, 0.950, and the 1.05 median over 39 runs) agree, so the deficit is a property of the
+  emitted body, not of a recipe.
 - The 7 direct-native programs (B rejected) are why OTel's coverage matters for any claim from this app: the
   ratio above is the accepted-B subset, not the whole app.
 
