@@ -32,8 +32,9 @@ theorem entry_call {initial before supplied : CC.Mem} {entry : HeaderLocal initi
       [.Vint 1] (Arm64Nop.allocation world before).2 trace (.Vlong origins.stack) supplied)
     (outcome : Arm64ProgramEntryCacheFrame.Frame initial false (Arm64Nop.allocation world before).2 supplied)
     (k : CC.Cont) (valid : CC.isCallCont k = true) :
-    ∃ written after,
-      Nonempty (Storage initial after entry) ∧
+    ∃ written after, ∃ finalStorage : Storage initial after entry,
+      CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 1) 0 = some (.Vlong (mark.setWidth 64)) ∧
+      CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 1) 0 = some (.Vint 0) ∧
       CC.Star (CC.Step2 world)
         (.Callstate (.Internal Arm64Nop.handler) (Dispatch.arguments (LinkedRead.entry_operands entry.block mark) false)
           k before) trace (.Returnstate .Vundef k after) ∧
@@ -104,7 +105,18 @@ theorem entry_call {initial before supplied : CC.Mem} {entry : HeaderLocal initi
       (.Returnstate .Vundef .Kstop after) :=
     .step trivial (.skip_call _ _ _ _ _ _ rfl freed) (.refl _)
   have dispatch := LinkedRead.entry_dispatch before entry.block mark
-  refine ⟨written, after, ⟨storage_frame result.storage before.nextblock bound freeFrame⟩, ?_, finalRegisters,
+  let finalStorage := storage_frame result.storage before.nextblock bound freeFrame
+  have finalWord : CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 1) 0 =
+      some (.Vlong (mark.setWidth 64)) := by
+    change CC.Mem.load .Mint64 after ((cachedStorage.tables false).cellBlock 1) 0 = _
+    have kept := freeFrame.load .Mint64 ((cachedStorage.tables false).cellBlock 1) 0
+      (Nat.lt_of_lt_of_le (local_owned initial _ _ _ ((cachedStorage.tables false).cellBinding 1)) bound)
+    simpa only [Arm64RegisterWrite.written, Bool.false_eq_true, ite_false] using kept.trans result.word
+  have finalTag : CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 1) 0 = some (.Vint 0) := by
+    change CC.Mem.load .Mint8unsigned after ((cachedStorage.tables true).cellBlock 1) 0 = _
+    exact (freeFrame.load .Mint8unsigned ((cachedStorage.tables true).cellBlock 1) 0
+      (Nat.lt_of_lt_of_le (local_owned initial _ _ _ ((cachedStorage.tables true).cellBinding 1)) bound)).trans result.tag
+  refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
     (allocateCaller.trans caller).trans freeCaller, freed, freeFrame, contents, freeNext.trans next, released⟩
   have run : CC.Star (CC.Step2 world)
       (.Callstate (.Internal Arm64Nop.handler) (Dispatch.arguments (LinkedRead.entry_operands entry.block mark) false)
