@@ -18,7 +18,9 @@ for name in ('user8','user_dynamic'):
         command=[str(root/'kprog/x86/native_lab/native_link/target/release/native-link'),
             '--input',str(build/('user.o' if mode=='proof' else 'user.proof.o')),
             '--symbol',name,'--mode',mode,'--output',str(build/('user.proof.o' if mode=='proof' else 'user.bin'))]
-        command+=['--preserve-entry-abi'] if mode=='proof' else ['--link-plan',str(plan)]
+        command+=['--preserve-entry-abi'] if mode=='proof' else [
+            '--link-plan',str(plan),'--output-relocs',str(build/'user.relocs'),
+            '--output-abi',str(build/'user.abi')]
         p=subprocess.run(command,text=True,capture_output=True)
         commands.append(dict(command=command,returncode=p.returncode,stdout=p.stdout,stderr=p.stderr))
         (out/'source-links.json').write_text(json.dumps(commands,indent=2)+'\n')

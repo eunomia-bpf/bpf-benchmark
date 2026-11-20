@@ -52,3 +52,8 @@ branches:
 	install -d $(OUT)
 	$(PERF_BUILD)/perf record -a -C 20-23 -e cycles:G -F 199 -j any_call,any_ret \
 		-o $(OUT)/branches.data -- sleep 5
+
+.PHONY: branch-decode
+branch-decode:
+	DEBUGINFOD_URLS= $(PERF_BUILD)/perf script -i $(OUT)/branches.data --guestkallsyms $(SYMBOLS) \
+		-F time,misc,ip,brstack --no-inline --hide-call-graph --ns > $(OUT)/branches.txt
