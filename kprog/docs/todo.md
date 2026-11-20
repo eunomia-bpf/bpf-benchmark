@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] PERF consecutive C lookup-case grouping (2026-11-20T05:33:42Z): join only adjacent same-kind/key-size worker cases, preserving aliases and first-match order. Actual BCC sys_exit compare/select before identical HASH-key4 call motivates change; baseline560same-map alias cases pass. Next HASH/LPM/API and actual BCC code replay with all LTO; installed tools/P/B/image unchanged, no runtime gain yet.
+
 - [x] PERF HASH tail-word native optimization (709c1c486; 2026-11-20T05:33:06Z): guarded/kernel-hash/native API checks pass; actual key4 worker198→156B, full sys_exit430→388B/sched_switch1590→1548B. BCC678934 exit0/appOK,25native/22checked/3direct,14HASH sites;133.095→127.837ns/call (1.041x), sys_exit84.013→75.578ns/call, stress-ng rates mixed. Results lpm-c-lto-20261120/tail-bcc-result.json/evidence.tar.gz; prior0.945x kept. All LTO on, tools/P/B/image unchanged; hard speed/throughput targets remain open.
 
 - [x] PERF touched BCC shared-helper check (2026-11-20T05:22:10Z): PID673631 exit0/appOK,25native installs/22checked/3direct,14 HASH static sites. eBPF129.332→native136.793ns/call (0.945x), regression retained; sys_exit80.847→98.026ns/call dominates added time, native full proof430B/root232B/HASH-key4 worker198B. Actual mixed stress-ng rates and raw workload table retained in lpm-c-lto-20261120/shared-bcc-result.json/evidence.tar.gz. All LTO on; tools/P/image unchanged. Next inspect native HASH tail word loads; no target achieved.
