@@ -41,6 +41,16 @@ __KPROG_HELPER(long, bpf_get_current_comm, void *, unsigned int);
 __KPROG_HELPER(unsigned long long, bpf_get_current_cgroup_id, void);
 __KPROG_HELPER(unsigned long long, bpf_get_current_task, void);
 __KPROG_HELPER(void *, bpf_get_current_task_btf, void);
+/* Instantiate after B verification with the boot kernel's task field offsets.
+ * P keeps its named helper call; this is the kernel helper's C body for LTO. */
+#define __KPROG_PID_TGID_CODE(PID_OFFSET, TGID_OFFSET) \
+__attribute__((always_inline)) \
+unsigned long long (bpf_get_current_pid_tgid)(void) { \
+    const char *task = (const char *)(unsigned long)__KPROG_CALL(bpf_get_current_task); \
+    if (!task) return (unsigned long long)-22; \
+    return (unsigned long long)*(const int *)(task + (TGID_OFFSET)) << 32 | \
+           *(const int *)(task + (PID_OFFSET)); \
+}
 __KPROG_HELPER(unsigned long long, bpf_jiffies64, void);
 /* bpf_ktime_get_ns is ktime_get_mono_fast_ns, and the helpers the kernel
  * inlines for the JIT (do_misc_fixups) read one kernel variable; P does the
