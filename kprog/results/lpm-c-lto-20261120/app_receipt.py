@@ -41,9 +41,9 @@ with tarfile.open(raw/'service.tar.gz') as service:
                     input=capsule.extractfile('request/generated/checked-simulator.native.bc').read(),
                     capture_output=True, check=True).stdout.decode()
                 sites = [line for line in ir.splitlines() if 'call ptr @__kprog_array_lookup(' in line]
-                selected = {kind: {} for kind in ['array', 'lpm', 'hash']}
+                selected = {kind: {} for kind in ['array', 'lpm', 'hash', 'percpu_array']}
                 for mapping in artifact['maps']:
-                    kind = {2: 'array', 11: 'lpm', 1: 'hash'}.get(mapping['map_type'])
+                    kind = {2: 'array', 11: 'lpm', 1: 'hash', 6: 'percpu_array'}.get(mapping['map_type'])
                     if kind:
                         label = re.escape(native_map_label(mapping['name']))
                         count = sum(bool(re.search('@(?:'+label+'|"'+label+'")(?=[,\\s)])', line)) for line in sites)
@@ -108,5 +108,5 @@ installed = [row for row in rows if row['status'] == 0]
 print(json.dumps(dict(status=app['status'], installed=len(installed),
     checked=sum(row['execution_path']=='checked-sim-c' for row in installed),
     static_sites={kind: sum(row.get(kind+'_static_sites', 0) for row in installed
-                  if row['execution_path']=='checked-sim-c') for kind in ['array', 'lpm', 'hash']},
+                  if row['execution_path']=='checked-sim-c') for kind in ['array', 'lpm', 'hash', 'percpu_array']},
     ns_per_call={phase: value['ns_per_call'] if value else None for phase, value in phases.items()}), indent=2))
