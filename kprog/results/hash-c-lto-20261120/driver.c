@@ -21,6 +21,7 @@ typedef unsigned char u8;
 __KPROG_HASH_CODE
 _Alignas(64) unsigned char map_a[4096],map_b[4096],map_c[4096];
 extern void *entry(const void *);
+extern void *entry_b(const void *);
 struct query { unsigned selector; unsigned char key[260]; };
 extern void *entry_select(struct query *);
 extern void *entry_unknown(const void *);
@@ -47,7 +48,12 @@ static void *reference(void *map,const void *key,unsigned size)
     return NULL;
 }
 void *bpf_map_lookup_elem(void *map,const void *key)
-{ ++generic_calls;assert(map==map_c && key);return map_c; }
+{
+    ++generic_calls;assert(key);
+    if(map==map_a) return reference(map,key,8);
+    if(map==map_b) return reference(map,key,16);
+    assert(map==map_c);return map_c;
+}
 static void *actual(void *map,const void *key,unsigned size)
 { return __kprog_hash_lookup(map,key,size,BUCKETS,COUNT,SEED,STRIDE,HEAD,HASH_NODE,NEXT,HASH_OFFSET,KEY_OFFSET); }
 static void shape(unsigned char *key,unsigned size,unsigned seed,unsigned count)
@@ -88,6 +94,7 @@ static void shape(unsigned char *key,unsigned size,unsigned seed,unsigned count)
         memcpy(map_b,map_a,sizeof(map_a));pointer(table+index*STRIDE+HEAD,nodes[0]+HASH_NODE);
         memcpy(nodes[0]+KEY_OFFSET,key,size);word(nodes[0]+HASH_OFFSET,h);
         struct query q={.selector=1};memcpy(q.key,key,size);
+        assert(entry_b(key)==reference(map_b,key,size));
         assert(entry_select(&q)==reference(map_b,key,size));++cases;
     }
     for(unsigned i=0;i<3;++i) free(nodes[i]);free(table);
@@ -106,7 +113,7 @@ int main(void)
             if(size && size<=256) for(unsigned count=1;count<=64;count*=2) shape(key,size,seeds[s],count);
         }
     }
-    assert(entry_unknown(arena)==map_c && generic_calls==1);
+    assert(entry_unknown(arena)==map_c && generic_calls==589);
     /* Shared memory across processes supplies a genuine changed nulls marker,
      * without a private test hook or a second helper implementation. */
     unsigned char *table=mmap(NULL,page,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
@@ -120,5 +127,5 @@ int main(void)
     assert((uintptr_t)read_pointer(table+index*STRIDE+HEAD)==index*2+1);++restarts;
     int status;assert(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==0);
     assert(!munmap(table,page) && !munmap(arena,page*2));
-    printf("%u kernel hash oracle cases, %u C/native lookup cases, %u nulls restart, %u generic call\n",hash_cases,cases,restarts,generic_calls);
+    printf("%u kernel hash oracle cases, %u C/native lookup cases, %u nulls restart, %u generic calls\n",hash_cases,cases,restarts,generic_calls);
 }
