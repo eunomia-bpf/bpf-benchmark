@@ -3,24 +3,13 @@ RAW ?= /workspaces/kprog-raw/perf/lpm-c-lto-20261120
 TMP := /var/tmp/kprog-tmp/perf/lpm-c-lto
 TOOL := $(ROOT)/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto
 
-.PHONY: check
-check:
-	install -d $(RAW) $(TMP)
-	$(CXX) -std=c++20 -O1 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
-		$(ROOT)/kprog/results/lpm-c-lto-20261120/layout.cpp \
-		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(TMP)/layout
-	$(TMP)/layout /workspaces/.agent-state/kprog-ck/build-x86/vmlinux > $(RAW)/layout.json
-	clang-18 -O3 -march=native -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
-		-fno-stack-protector -fomit-frame-pointer -c $(ROOT)/kprog/results/lpm-c-lto-20261120/fixture.c -o $(TMP)/fixture.o
-	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/check.py $(RAW) $(TMP)
-
 .PHONY: compatibility syntax
 compatibility:
-	install -d $(RAW)/array /var/tmp/kprog-tmp/perf/inner-array-lto
-	clang-18 -O3 -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
-		-c $(ROOT)/kprog/results/inner-array-lto-20261116/fixture.c -o /var/tmp/kprog-tmp/perf/inner-array-lto/fixture.native.o
-	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/check.py $(RAW)/array /var/tmp/kprog-tmp/perf/inner-array-lto \
-		> $(RAW)/array-check.log 2>&1
+	install -d $(RAW) $(TMP)/array $(TMP)/probe
+	$(MAKE) -f $(ROOT)/kprog/results/checked-array-c-20261119/Makefile test OUT=$(TMP)/array \
+		> $(RAW)/array.log 2>&1
+	$(MAKE) -f $(ROOT)/kprog/results/checked-probe-c-20261119/Makefile test OUT=$(TMP)/probe \
+		> $(RAW)/probe.log 2>&1
 
 syntax:
 	$(CXX) -std=gnu++20 -fsyntax-only -I$(ROOT)/kprog/libnativeloader/include \
