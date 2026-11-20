@@ -9,7 +9,7 @@ BUILD := $(VENDOR)/build/native-bpf
 # The one kernel (AGENTS.md first section), never the host uname.
 KERNEL_RELEASE ?= $(shell cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)
 ARCH := x86
-GOARCH := amd64
+GOARCH := $(if $(filter arm64 aarch64,$(ARCH)),arm64,amd64)
 
 CLANG ?= clang-18
 LLC ?= llc-18

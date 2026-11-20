@@ -46,6 +46,7 @@ image: module negative native
 # One application in QEMU with the guest settings of kprog/perf/one-image (native lab module, stats
 # sysctl, unbound shim path, SKIP_REJIT=norejit). /run and /tmp are tmpfs, as the x86 guest's overlays:
 # the 9p root holds neither unix sockets (the shim's) nor ip netns bind mounts.
+# Cilium's etcd starts on arm64 only with ETCD_UNSUPPORTED_ARCH=arm64 in its environment.
 # The frozen qemu-arm64-init enters /home/yunwei37/workspace/bpf-benchmark; the root carries a link
 # from there to the image workspace.
 APPS ?= bcc/set
@@ -75,7 +76,7 @@ corpus:
 	printf '%s\n' '#!/bin/sh' 'set -eu' 'mount -t tmpfs tmpfs /run' 'mount -t tmpfs tmpfs /tmp' 'depmod' 'insmod /artifacts/kinsn/bpf_arm64_native_lab.ko' \
 	  'echo $(if $(filter 0,$(BPFREJIT_CORPUS_BPF_STATS)),0,1) > /proc/sys/kernel/bpf_stats_enabled' \
 	  'unset BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF' \
-	  "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root PATH=/usr/lib/llvm-18/bin:\$$PATH TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:arm64 RUNTIME_IMAGE_TAR=$(IMAGE_TAR) RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon RUN_TOKEN=$(RUN_TOKEN) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) BPFREJIT_SHIM_NATIVE_LOADER=$(NATIVE_LOADER_MODE) BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE)" \
+	  "export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root PATH=/usr/lib/llvm-18/bin:\$$PATH TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm RUNTIME_CONTAINER_IMAGE=bpf-benchmark/runner-runtime:arm64 RUNTIME_IMAGE_TAR=$(IMAGE_TAR) RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon RUN_TOKEN=$(RUN_TOKEN) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) BPFREJIT_SHIM_NATIVE_LOADER=$(NATIVE_LOADER_MODE) BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE) ETCD_UNSUPPORTED_ARCH=arm64" \
 	  'exec python3 -m corpus.driver' > $(QROOT)/qemu-run.sh
 	chmod +x $(QROOT)/qemu-run.sh && : > $(QROOT)/qemu-status
 	qemu-system-aarch64 -M virt -cpu cortex-a57 -smp $(VM_CPUS) -m $(VM_MEM) -nographic -no-reboot \
