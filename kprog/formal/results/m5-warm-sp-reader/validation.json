@@ -1,0 +1,72 @@
+{
+  "actual_warm_reader": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryWarmRead"
+    ],
+    "exit": 0,
+    "seconds": 1.924245834350586,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-warm-sp-reader/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.6524949073791504,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "actual_warm_reader_jobs": 220,
+  "public_query_count": 4,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_warm_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_warm": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryWarmRead.read": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryWarmRead.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-warm-sp-reader",
+  "completed_isa_families": 0
+}

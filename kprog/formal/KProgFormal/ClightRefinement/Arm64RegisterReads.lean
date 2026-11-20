@@ -2,6 +2,8 @@ import KProgFormal.ClightRefinement.StepEquations
 import KProgFormal.ClightRefinement.Arm64Registers
 import KProgFormal.ClightRefinement.Arm64OriginCache
 
+set_option Elab.async false
+
 namespace KProgFormal.ClightRefinement.Arm64RegisterReads
 
 def ge : CC.CGenv := Arm64Program.prog.globalenv
@@ -728,6 +730,48 @@ private theorem borrowed_loads {frontier : CC.Block} {chunk : CC.Chunk} {m : CC.
   obtain ⟨block, offset, rfl, _, actual⟩ := Arm64EntryMemory.load_pointer cell
   exact ⟨block, offset, header, actual⟩
 
+private theorem read_warm_tail_stack_bound (world : CC.CGenv) (layout : StackLayout world) (b vb bb : CC.Block)
+    (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (valid : BitVec 8) (nonzero : valid ≠ 0)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag =
+      some (.Vint 4#32))
+    (validHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (validRead : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (valid.setWidth 32)))
+    (baseHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 16))) = some (.Vptr bb bo))
+    (baseRead : CC.Mem.loadv .Mint64 m (.Vptr bb bo) = some (.Vlong base)) :
+    steps world 36
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) m) ∧
+    InternalPath world 36
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  have widened : valid.setWidth 32 ≠ (0#32) := by
+    intro h; apply nonzero
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at validHeader baseHeader
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+      step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set,
+      step_if, step_return, read_return_type, CC.PTree.gso,
+      Arm64Program.s_kprog_arm64_program_read_1, Arm64Program.s_kprog_arm64_program_read_2,
+      CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.typeconv,
+      CC.removeAttributes, CC.tattr, CC.accessMode, layout.entry, layout.valid, layout.base,
+      CC.Cop.semUnaryOperation, CC.Cop.semNotbool, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+      CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.zero, CC.Integers.Int.one,
+      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      CC.Integers.Int64.add, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
+      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
+      CC.E0, CC.Eapp, empty, widened, entryRead, valueRead, tagRead,
+      validHeader, validRead, baseHeader, baseRead] <;> rfl
+
 private theorem read_warm_tail_stack (b vb bb : CC.Block)
     (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (value base : BitVec 64) (valid : BitVec 8) (nonzero : valid ≠ 0)
@@ -745,32 +789,9 @@ private theorem read_warm_tail_stack (b vb bb : CC.Block)
       (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
       some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) m) ∧
     InternalPath ge 36
-      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
-  have widened : valid.setWidth 32 ≠ (0#32) := by
-    intro h; apply nonzero
-    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
-  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
-  have offsets := cache_offsets false
-  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at validHeader baseHeader
-  try simp only [Bool.false_eq_true, ↓reduceIte] at offsets validHeader baseHeader tagRead
-  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
-      step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set,
-      step_if, step_return, read_return_type, CC.PTree.gso,
-      Arm64Program.s_kprog_arm64_program_read_1, Arm64Program.s_kprog_arm64_program_read_2,
-      CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.typeconv,
-      CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, offsets.1, offsets.2,
-      CC.Cop.semUnaryOperation, CC.Cop.semNotbool, CC.Cop.boolVal, CC.Cop.classifyBool,
-      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
-      CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
-      CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
-      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
-      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.zero, CC.Integers.Int.one,
-      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
-      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
-      CC.Integers.Int64.add, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
-      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
-      CC.E0, CC.Eapp, empty, widened, entryRead, valueRead, tagRead,
-      validHeader, validRead, baseHeader, baseRead] <;> rfl
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) :=
+  read_warm_tail_stack_bound ge program_stack_layout b vb bb ofs vo bo m k le value base valid nonzero
+    entryRead valueRead tagRead validHeader validRead baseHeader baseRead
 
 private theorem read_warm_tail_return (b vb bb : CC.Block)
     (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
@@ -1015,18 +1036,19 @@ theorem sp_read_prefix (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
       [.Vptr b ofs, .Vlong (32#64)] k m) :=
   sp_read_prefix_bound ge program_stack_layout b sb ofs so m k offset header cell
 
-/-- SP materialization reads the actual offset and selected warm STACK cache,
-returning their wrapped sum while preserving the complete memory. -/
-theorem sp_read_warm (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+/-- The same actual warm SP reader in a linked world, using only its four
+required layout facts. No helper call, external outcome or memory change. -/
+theorem sp_read_warm_bound (world : CC.CGenv) (layout : StackLayout world)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
     (m : CC.Mem) (k : CC.Cont) (offset base : BitVec 64)
     (observed : Arm64EntryMemory.borrowed frontier .Mint64 m (.Vptr b ofs) Arm64Program._sp =
       some (.Vlong offset))
     (cache : WarmEntryCache false frontier m (.Vptr b ofs) base) :
-    InternalRun ge 71 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+    InternalRun world 71 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
       [.Vptr b ofs, .Vlong (32#64)] k m)
       (.Returnstate (.Vlong (offset + base)) (CC.callCont k) m) := by
   obtain ⟨sb, so, header, cell⟩ := borrowed_loads observed
-  have beforeCall := sp_read_prefix b sb ofs so m k offset
+  have beforeCall := sp_read_prefix_bound world layout b sb ofs so m k offset
     (field_load frontier b ofs m _ 40 _ sp_offset header) cell
   have entryRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
       Arm64Program._entry = some (.Vptr b ofs) := by
@@ -1037,8 +1059,27 @@ theorem sp_read_warm (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
   have tagRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
       Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
     simp +decide [spReadTemps, CC.PTree.gso]
-  exact (internalRun_of_steps beforeCall.2 beforeCall.1).trans
-    (warm_entry_finishes false frontier b ofs m k _ offset base entryRead valueRead tagRead cache)
+  obtain ⟨valid, nonzero, validObserved, baseObserved⟩ := cache
+  obtain ⟨vb, vo, validHeader, validRead⟩ := borrowed_loads validObserved
+  obtain ⟨bb, bo, baseHeader, baseRead⟩ := borrowed_loads baseObserved
+  have offsets := cache_offsets false
+  have finish := read_warm_tail_stack_bound world layout b vb bb ofs vo bo m k _ offset base valid nonzero
+    entryRead valueRead tagRead
+    (field_load frontier b ofs m _ _ _ offsets.1 validHeader) validRead
+    (field_load frontier b ofs m _ _ _ offsets.2 baseHeader) baseRead
+  exact (internalRun_of_steps beforeCall.2 beforeCall.1).trans (internalRun_of_steps finish.2 finish.1)
+
+/-- SP materialization reads the actual offset and selected warm STACK cache,
+returning their wrapped sum while preserving the complete memory. -/
+theorem sp_read_warm (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (offset base : BitVec 64)
+    (observed : Arm64EntryMemory.borrowed frontier .Mint64 m (.Vptr b ofs) Arm64Program._sp =
+      some (.Vlong offset))
+    (cache : WarmEntryCache false frontier m (.Vptr b ofs) base) :
+    InternalRun ge 71 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+      [.Vptr b ofs, .Vlong (32#64)] k m)
+      (.Returnstate (.Vlong (offset + base)) (CC.callCont k) m) :=
+  sp_read_warm_bound ge program_stack_layout frontier b ofs m k offset base observed cache
 
 /-- Every actual Kstop SP read returns the native SP from the concrete register
 relation, under an explicit warm invocation stack-origin binding. -/
