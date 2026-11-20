@@ -25,6 +25,8 @@
 | probe_read 走函数调用（helper，或 C 实现里调 copy_from_kernel_nofault） | Tracee、Tetragon 每次调用 41–46% 的时间 | 内核地址直接 load，出错由 load site 恢复（同 JIT 的 PROBE_MEM）；用户地址照旧调 helper | 本次 |
 | 同一配置反复重跑计时 | 运营者：“不要随便重跑” | 代码变了才测；六应用直接原生沿用 lean 第 1 次 | 9fbc4e584 |
 | 单样本计时 | 数据不完整 | 每个应用 3 x 180 s，广度优先（运营者 11-11） | 11-19 todo |
+| 计时时在命令行改 benchmark 设置（WORKLOAD_DURATION=60、只跑 stats 开） | 运营者 11-20：“整个 benchmark 框架不是说都不允许改动??? 还在动啥???” | 计时只用冻结入口的默认值（rotate：3 x 180 秒，stats 关再开） | 2026-11-20 |
+| 往 benchmark 框架里加代码（runner/libs/rejit.py 等原生装载完成，47491721e、2bdb09335） | 同上；11-09：“也要确保 benchmark framework 不能变化” | 框架回到 05-29；验证路径的需要在 kprog 自己的代码里解决 | 25b802208 |
 | 没查原话就删（c3960d089 删了 direct-native 回落） | 违背运营者 11-16 的原话 | 已恢复，删除前先查原话 | 0a993eb37 |
 
 ## 还在清理的（协调者自己做）
