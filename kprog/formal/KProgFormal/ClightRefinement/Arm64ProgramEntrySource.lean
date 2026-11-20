@@ -225,7 +225,13 @@ private def parts : { rows : List (List CC.Stmt) × (List (List CC.Stmt) × CC.S
 
 def initialization : List (List CC.Stmt) := parts.val.1
 def actualInitialization : List (List CC.Stmt) := parts.val.2.1
-def body : CC.Stmt := parts.val.2.2
+/-- Cache the reached source constructor for bounded kernel comparisons.
+The value is a reference-derived part of the imported actual function. -/
+def body : CC.Stmt := by
+  run_tac do
+    let term ← Lean.Elab.Term.elabTerm (← `(parts.val.2.2)) none
+    Lean.Elab.Tactic.closeMainGoal `actual_entry_body
+      (← Lean.Meta.withTransparency .all (Lean.Meta.whnf term))
 
 theorem producer_source : Spine Arm64Producer.producer.fn_body
     initialization Arm64Producer.afterVectorLoop := parts.property.1
