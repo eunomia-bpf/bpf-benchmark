@@ -28,7 +28,7 @@ def field_offset(types, identity, field):
     return None if member is None else member[0]
 
 
-def lookup_source(kernel_btf, lpms=(), hashes=()):
+def lookup_source(kernel_btf, lpms=(), hashes=(), percpu_arrays=()):
     types = KernelTypes(kernel_btf)
 
     try:
@@ -39,6 +39,8 @@ def lookup_source(kernel_btf, lpms=(), hashes=()):
                       stride=field_offset(types, array, 'elem_size') - base,
                       mask=field_offset(types, array, 'index_mask') - base,
                       values=field_offset(types, array, 'value') - base)
+        if percpu_arrays:
+            fields['pptrs'] = field_offset(types, array, 'pptrs') - base
     finally:
         types.close()
     # kernel/bpf/arraymap.c:array_map_lookup_elem. The map type is selected
@@ -73,6 +75,28 @@ def lookup_source(kernel_btf, lpms=(), hashes=()):
                 preamble += f'extern unsigned char {alias}[] __asm__({json.dumps(name)});\n'
                 aliases.append(f'map == {alias}')
             choices += f'    if ({" || ".join(aliases)}) return __kprog_hash_key_{key_size}(map,key);\n'
+    if percpu_arrays:
+        # kernel/bpf/arraymap.c:percpu_array_map_lookup_elem. Keep CPU-address
+        # translation in its existing kernel helper, including NMI context.
+        preamble += '''
+extern void *bpf_this_cpu_ptr(const void *);
+typedef unsigned __kprog_percpu_u32 __attribute__((aligned(1),may_alias));
+static __attribute__((always_inline)) inline void *
+__kprog_percpu_array_lookup(void *map,const void *key) {
+    unsigned index=*(const __kprog_percpu_u32 *)key;
+    if (index>=*(const unsigned *)((const char *)map+%(limit)d)) return (void *)0;
+    unsigned mask=*(const unsigned *)((const char *)map+%(mask)d);
+    const void *base=*(void *const *)((const char *)map+%(pptrs)d+
+        (unsigned long)(index&mask)*sizeof(void *));
+    return bpf_this_cpu_ptr(base);
+}
+''' % fields
+        aliases = []
+        for index, name in enumerate(percpu_arrays):
+            alias = f'__kprog_percpu_map_{index}'
+            preamble += f'extern unsigned char {alias}[] __asm__({json.dumps(name)});\n'
+            aliases.append(f'map == {alias}')
+        choices = f'    if ({" || ".join(aliases)}) return __kprog_percpu_array_lookup(map,key);\n' + choices
     # __kprog_array_lookup is the installed compiler's native C lookup ABI.
     # Exact named LPM/HASH operands select their C body before the ARRAY body;
     # LLVM folds the matching global-pointer identity after inlining.
