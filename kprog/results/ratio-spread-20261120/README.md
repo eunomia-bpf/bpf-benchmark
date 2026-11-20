@@ -196,3 +196,17 @@ pooled way should be re-derived before it is compared with these.
 
 This record changes no number already quoted from a specific run. It says which comparisons a single run can
 decide.
+
+## `bytes_xlated` is not a replacement tell (OMP 2026-11-20)
+
+I used `bytes_xlated <= 100` in this record as a marker for "the program was replaced by a native body". Checked
+against the shim logs of 154 post arms, it is wrong: the log's `native-loader replaced prog=` count and the number
+of entries with `bytes_xlated <= 100` disagree in 147 of 154 arms (e.g. 14 replaced in the log against 0 such
+entries). `bytes_xlated` is the replaced program's xlated size as the loader reports it: 24 B for an entry whose
+native load carried no body, and the full size where it did.
+
+So of the two tells in this record, only the shim log's `native-loader replaced` line is evidence about
+replacement. The consequence for the OTel finding: "a run with the 7510 B body has zero post entries with
+`bytes_xlated > 100`" is not a statement about replacement at all, and the zero-unwind conclusion must rest on the
+program-owned counters (unwind attempts, frames, register errors) that
+`kprog/results/equal-work-20261113/report.md` records, which it does independently.
