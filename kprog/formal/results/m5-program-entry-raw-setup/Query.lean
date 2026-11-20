@@ -1,0 +1,44 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.stack_tags_initialized_body
+#print axioms Arm64Producer.stack_tags_initialized_body
+#check Arm64Producer.sp_initialized_body
+#print axioms Arm64Producer.sp_initialized_body
+#check Arm64Producer.stack_tags_and_sp_bound
+#print axioms Arm64Producer.stack_tags_and_sp_bound
+#check Arm64Producer.context_cast_body
+#print axioms Arm64Producer.context_cast_body
+#check Arm64Producer.context_cast
+#print axioms Arm64Producer.context_cast
+#check Arm64Producer.context_lvalue_body
+#print axioms Arm64Producer.context_lvalue_body
+#check Arm64Producer.context_rhs_body
+#print axioms Arm64Producer.context_rhs_body
+#check Arm64Producer.context_initialized_body
+#print axioms Arm64Producer.context_initialized_body
+#check Arm64Producer.context_initialized_bound
+#print axioms Arm64Producer.context_initialized_bound
+#check Arm64Producer.stack_sp_and_context_bound
+#print axioms Arm64Producer.stack_sp_and_context_bound
+#check Arm64ProgramEntryRawSetup.stack_source
+#print axioms Arm64ProgramEntryRawSetup.stack_source
+#check Arm64ProgramEntryRawSetup.sp_source
+#print axioms Arm64ProgramEntryRawSetup.sp_source
+#check Arm64ProgramEntryRawSetup.context_source
+#print axioms Arm64ProgramEntryRawSetup.context_source
+#check Arm64ProgramEntryRawSetup.boundary
+#print axioms Arm64ProgramEntryRawSetup.boundary
+#check Arm64ProgramEntryRawSetup.tag_binding
+#print axioms Arm64ProgramEntryRawSetup.tag_binding
+#check Arm64ProgramEntryRawSetup.sp_binding
+#print axioms Arm64ProgramEntryRawSetup.sp_binding
+#check Arm64ProgramEntryRawSetup.context_binding
+#print axioms Arm64ProgramEntryRawSetup.context_binding
+#check Arm64ProgramEntryRawSetup.context_layout
+#print axioms Arm64ProgramEntryRawSetup.context_layout
+#check Arm64ProgramEntryRawSetup.initialized
+#print axioms Arm64ProgramEntryRawSetup.initialized
+#check Arm64ProgramEntryRawSetup.entry_initialized
+#print axioms Arm64ProgramEntryRawSetup.entry_initialized

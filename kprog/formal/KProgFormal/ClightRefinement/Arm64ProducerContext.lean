@@ -22,6 +22,11 @@ def contextRhs (i : Fin 5) : CC.Expr :=
   if i.val < 3 then .Ecast (.Etempvar Arm64Entry._ctx (CC.tptr CC.tvoid)) (CC.tptr CC.tvoid)
   else .Econst_int (if i.val = 3 then 10 else 1) CC.tuint
 
+/-- Parameter type and temporary of the real caller, retaining the void* cast. -/
+def contextRhsFor (temporary : CC.Ident) (pointee : CC.Ty) (i : Fin 5) : CC.Expr :=
+  if i.val < 3 then .Ecast (.Etempvar temporary (CC.tptr pointee)) (CC.tptr CC.tvoid)
+  else .Econst_int (if i.val = 3 then 10 else 1) CC.tuint
+
 def contextValue (ctx : CC.Val) (i : Fin 5) : CC.Val :=
   if i.val < 3 then ctx else .Vint (if i.val = 3 then 10 else 1)
 
@@ -29,6 +34,9 @@ def contextChunk (i : Fin 5) : CC.Chunk :=
   if i.val < 3 then CC.Mptr else .Mint8unsigned
 
 def contextAssignment (i : Fin 5) : CC.Stmt := .Sassign (contextTarget i) (contextRhs i)
+
+def contextAssignmentFor (temporary : CC.Ident) (pointee : CC.Ty) (i : Fin 5) : CC.Stmt :=
+  .Sassign (contextTarget i) (contextRhsFor temporary pointee i)
 
 private theorem five_cases : ∀ i : Fin 5, i = 0 ∨ i = 1 ∨ i = 2 ∨ i = 3 ∨ i = 4 := by
   decide +kernel
@@ -64,15 +72,26 @@ theorem context_pointer_layout :
     CC.unionFieldOffset ge.genv_cenv Arm64Entry._ptr gprComposite.co_members = .OK (0, .Full) := by
   decide +kernel
 
+/-- Only the named union and its pointer-member offset are needed. -/
+def ContextLayout (world : CC.CGenv) : Prop :=
+  world.genv_cenv.get Arm64Entry._arm64_sim_gpr = some gprComposite ∧
+  CC.unionFieldOffset world.genv_cenv Arm64Entry._ptr gprComposite.co_members = .OK (0, .Full)
+
 /-- Reuse the defined architectural-value representation: undef and 32-bit
 integer contexts cannot silently become a 64-bit ABI pointer. -/
-theorem context_cast {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+theorem context_cast_body (pointee : CC.Ty) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (memory : CC.Mem) :
-    CC.Cop.semCast ctx (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) memory = some ctx ∧
+    CC.Cop.semCast ctx (CC.tptr pointee) (CC.tptr CC.tvoid) memory = some ctx ∧
       CC.Val.loadResult CC.Mptr ctx = ctx := by
   cases ctx <;> try contradiction
   all_goals simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Archi.ptr64,
     CC.tptr, CC.Val.loadResult, CC.Mptr]
+
+theorem context_cast {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+    (represented : Arm64Registers.ValueRep addresses ctx word) (memory : CC.Mem) :
+    CC.Cop.semCast ctx (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) memory = some ctx ∧
+      CC.Val.loadResult CC.Mptr ctx = ctx :=
+  context_cast_body CC.tvoid represented memory
 
 structure ContextLocal (m : CC.Mem) (i : Fin 5) where
   block : CC.Block
@@ -91,40 +110,43 @@ theorem context_local (m : CC.Mem) (i : Fin 5) : Nonempty (ContextLocal m i) := 
     scalar_local m (contextName i) (contextLocalType i) (contextChunk i) present size align
   exact ⟨⟨block, binding, fresh, writable⟩⟩
 
-private theorem context_lvalue (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 5)
-    (cell : ContextLocal m i) :
-    CC.doEvalLvalue world (allocation m).1 le before (contextTarget i) = some (cell.block, 0, .Full) := by
+theorem context_lvalue_body (world : CC.CGenv) (e : CC.Env)
+    (layout : ContextLayout world) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 5)
+    (cell : ContextLocal m i)
+    (actualBinding : e.get (contextName i) = some (cell.block, contextLocalType i)) :
+    CC.doEvalLvalue world e le before (contextTarget i) = some (cell.block, 0, .Full) := by
   rcases five_cases i with rfl | rfl | rfl | rfl | rfl
   all_goals simp +decide [contextTarget, contextLocalType, CC.doEvalLvalue, CC.lvalOfVar,
     CC.doEvalExpr, CC.doDerefLoc, CC.accessMode, CC.lvalOfField, CC.typeof,
-    cell.binding, layout, context_pointer_layout.1, context_pointer_layout.2,
+    actualBinding, layout.1, layout.2,
     CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add,
     CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
 
-private theorem context_rhs (world : CC.CGenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
-    (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
-    (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (i : Fin 5) :
-    CC.doEvalExpr world (allocation m).1 le before (contextRhs i) = some (contextValue ctx i) ∧
-    CC.Cop.semCast (contextValue ctx i) (CC.typeof (contextRhs i))
+theorem context_rhs_body (world : CC.CGenv) (e : CC.Env) (temporary : CC.Ident) (pointee : CC.Ty) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+    (represented : Arm64Registers.ValueRep addresses ctx word) (before : CC.Mem)
+    (le : CC.TempEnv) (input : le.get temporary = some ctx) (i : Fin 5) :
+    CC.doEvalExpr world e le before (contextRhsFor temporary pointee i) = some (contextValue ctx i) ∧
+    CC.Cop.semCast (contextValue ctx i) (CC.typeof (contextRhsFor temporary pointee i))
       (CC.typeof (contextTarget i)) before = some (contextValue ctx i) ∧
     CC.Val.loadResult (contextChunk i) (contextValue ctx i) = contextValue ctx i := by
-  have cast := context_cast represented before
+  have cast := context_cast_body pointee represented before
+  have selfCast := context_cast represented before
   rcases five_cases i with rfl | rfl | rfl | rfl | rfl
-  all_goals simp +decide [contextRhs, contextValue, contextTarget, contextLocalType, contextChunk,
-    CC.doEvalExpr, input, CC.typeof, cast.1, cast.2]
+  all_goals simp +decide [contextRhsFor, contextValue, contextTarget, contextLocalType, contextChunk,
+    CC.doEvalExpr, input, CC.typeof, cast.1, selfCast.1, cast.2]
   all_goals simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
     CC.tuint, CC.tuchar, CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext]
 
-private theorem context_write (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+private theorem context_write (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (temporary : CC.Ident) (pointee : CC.Ty)
+    (layout : ContextLayout world) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
-    (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
+    (le : CC.TempEnv) (input : le.get temporary = some ctx) (k : CC.Cont)
     (i : Fin 5) (cell : ContextLocal m i) (rest : CC.Stmt)
+    (actualBinding : e.get (contextName i) = some (cell.block, contextLocalType i))
     (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world 3
-        (.State producer (.Ssequence (contextAssignment i) rest) k (allocation m).1 le before)
-        (.State producer rest k (allocation m).1 le after) ∧
+        (.State f (.Ssequence (contextAssignmentFor temporary pointee i) rest) k e le before)
+        (.State f rest k e le after) ∧
       CC.Mem.load (contextChunk i) after cell.block 0 = some (contextValue ctx i) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ contextName i →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
@@ -132,21 +154,21 @@ private theorem context_write (world : CC.CGenv)
       after.nextblock = before.nextblock := by
   obtain ⟨after, stored, afterAccess⟩ :=
     create_store m before (contextChunk i) cell.block (contextValue ctx i) access cell.writable
-  have target := context_lvalue world layout m before le i cell
-  have rhs := context_rhs world represented m before le input i
+  have target := context_lvalue_body world e layout m before le i cell actualBinding
+  have rhs := context_rhs_body world e temporary pointee represented before le input i
   have mode : CC.accessMode (CC.typeof (contextTarget i)) = .By_value (contextChunk i) := by
     rcases five_cases i with rfl | rfl | rfl | rfl | rfl <;> rfl
   have assigned : CC.doStep world
-      (.State producer (contextAssignment i) (.Kseq rest k) (allocation m).1 le before) =
-      some (CC.E0, .State producer .Sskip (.Kseq rest k) (allocation m).1 le after) := by
-    simp only [contextAssignment, CC.doStep, target, rhs.1, rhs.2.1, CC.doAssignLoc, mode]
+      (.State f (contextAssignmentFor temporary pointee i) (.Kseq rest k) e le before) =
+      some (CC.E0, .State f .Sskip (.Kseq rest k) e le after) := by
+    simp only [contextAssignmentFor, CC.doStep, target, rhs.1, rhs.2.1, CC.doAssignLoc, mode]
     change (match CC.Mem.store (contextChunk i) before cell.block 0 (contextValue ctx i) with
-      | some memory => some (CC.E0, CC.State.State producer .Sskip (.Kseq rest k) (allocation m).1 le memory)
+      | some memory => some (CC.E0, CC.State.State f .Sskip (.Kseq rest k) e le memory)
       | none => none) = _
     rw [stored]
   have run : InternalRun world 3
-      (.State producer (.Ssequence (contextAssignment i) rest) k (allocation m).1 le before)
-      (.State producer rest k (allocation m).1 le after) :=
+      (.State f (.Ssequence (contextAssignmentFor temporary pointee i) rest) k e le before)
+      (.State f rest k e le after) :=
     .step trivial (CC.doStep_sound world _ _ _ rfl)
       (.step trivial (CC.doStep_sound world _ _ _ assigned)
         (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)))
@@ -159,16 +181,18 @@ private theorem context_write (world : CC.CGenv)
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound cell.binding different))
 
-private theorem run_context (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+private theorem run_context (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (temporary : CC.Ident) (pointee : CC.Ty)
+    (layout : ContextLayout world) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m : CC.Mem)
-    (cells : (i : Fin 5) → ContextLocal m i) (rows : List (Fin 5)) (rest : CC.Stmt)
-    (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont) (before : CC.Mem)
+    (cells : (i : Fin 5) → ContextLocal m i)
+    (actualBindings : ∀ i, e.get (contextName i) = some ((cells i).block, contextLocalType i))
+    (rows : List (Fin 5)) (rest : CC.Stmt)
+    (le : CC.TempEnv) (input : le.get temporary = some ctx) (k : CC.Cont) (before : CC.Mem)
     (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world (3 * rows.length)
-        (.State producer (rows.foldr (fun i next => .Ssequence (contextAssignment i) next) rest)
-          k (allocation m).1 le before)
-        (.State producer rest k (allocation m).1 le after) ∧
+        (.State f (rows.foldr (fun i next => .Ssequence (contextAssignmentFor temporary pointee i) next) rest)
+          k e le before)
+        (.State f rest k e le after) ∧
       (∀ i ∈ rows, CC.Mem.load (contextChunk i) after (cells i).block 0 = some (contextValue ctx i)) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) →
         (∀ i ∈ rows, id ≠ contextName i) →
@@ -182,8 +206,8 @@ private theorem run_context (world : CC.CGenv)
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headFrame, headAccess, headNext⟩ :=
-      context_write world layout represented m before le input k head (cells head)
-        (tail.foldr (fun i next => .Ssequence (contextAssignment i) next) rest) access
+      context_write world f e temporary pointee layout represented m before le input k head (cells head)
+        (tail.foldr (fun i next => .Ssequence (contextAssignmentFor temporary pointee i) next) rest) (actualBindings head) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
     refine ⟨after, ?_, ?_, ?_, headFrame.trans tailFrame,
@@ -206,6 +230,35 @@ private theorem run_context (world : CC.CGenv)
 
 /-- The actual five stores take fifteen internal transitions. All three context
 cells retain the represented input, LR has RETURN tag 10, and x0 has ABI tag 1. -/
+theorem context_initialized_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (temporary : CC.Ident) (pointee : CC.Ty)
+    (layout : ContextLayout world) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+    (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
+    (le : CC.TempEnv) (input : le.get temporary = some ctx) (k : CC.Cont)
+    (rest : CC.Stmt)
+    (actualBindings : ∀ i block, (allocation m).1.get (contextName i) = some (block, contextLocalType i) →
+      e.get (contextName i) = some (block, contextLocalType i))
+    (access : before.access = (allocation m).2.access) :
+    ∃ cells : (i : Fin 5) → ContextLocal m i, ∃ after,
+      InternalRun world 15 (.State f ((List.ofFn (contextAssignmentFor temporary pointee)).foldr CC.Stmt.Ssequence rest) k e le before)
+        (.State f rest k e le after) ∧
+      (∀ i, CC.Mem.load (contextChunk i) after (cells i).block 0 = some (contextValue ctx i)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        (∀ i, id ≠ contextName i) →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  classical
+  let cells : (i : Fin 5) → ContextLocal m i := fun i => Classical.choice (context_local m i)
+  obtain ⟨after, run, read, other, frame, finalAccess, next⟩ :=
+    run_context world f e temporary pointee layout represented m cells
+      (fun i => actualBindings i _ (cells i).binding) (List.finRange 5) rest le input k before access
+  refine ⟨cells, after, ?_, (fun i => read i (List.mem_finRange i)), ?_, frame, finalAccess, next⟩
+  · have mapped : List.ofFn (contextAssignmentFor temporary pointee) = (List.finRange 5).map (contextAssignmentFor temporary pointee) := by
+      simp only [List.finRange, List.map_ofFn, Function.comp_def]
+    simpa only [List.length_finRange, mapped, List.foldr_map] using run
+  · intro id ty block bound different chunk ofs
+    exact other id ty block bound (fun i _ => different i) chunk ofs
+
 theorem context_initialized_bound (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
@@ -220,17 +273,11 @@ theorem context_initialized_bound (world : CC.CGenv)
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
-  classical
-  let cells : (i : Fin 5) → ContextLocal m i := fun i => Classical.choice (context_local m i)
-  obtain ⟨after, run, read, other, frame, finalAccess, next⟩ :=
-    run_context world layout represented m cells (List.finRange 5) afterContext le input k before access
-  refine ⟨cells, after, ?_, (fun i => read i (List.mem_finRange i)), ?_, frame, finalAccess, next⟩
-  · have mapped : List.ofFn contextAssignment = (List.finRange 5).map contextAssignment := by
-      simp only [List.finRange, List.map_ofFn, Function.comp_def]
-    rw [context_source]
-    simpa only [List.length_finRange, mapped, List.foldr_map] using run
-  · intro id ty block bound different chunk ofs
-    exact other id ty block bound (fun i _ => different i) chunk ofs
+  have actualLayout : ContextLayout world := by rw [ContextLayout, layout]; exact context_pointer_layout
+  have run := context_initialized_body world producer (allocation m).1 Arm64Entry._ctx CC.tvoid
+    actualLayout represented m before le input k afterContext (fun _ _ bound => bound) access
+  rw [context_source]
+  exact run
 
 /-- Source-composed stack-tag/SP/context setup. Previously initialized stack
 metadata survives the context writes, with no external boundary in this segment. -/

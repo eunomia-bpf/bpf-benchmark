@@ -1,0 +1,513 @@
+{
+  "step": "M5 actual RAW/tag/SP/context setup and 98-visit entry composition",
+  "status": "pass",
+  "recorded_utc": "2026-11-20T00:35:44Z",
+  "before_commit_head": "d374390dfd9356ba75fd36270da33303cd368e89",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-raw-setup",
+  "execution": {
+    "checked_actual_assignments": 30,
+    "stack_tag_clears": 24,
+    "sp_zero_stores": 1,
+    "context_and_tag_stores": 5,
+    "stack_tag_internal_steps": 72,
+    "sp_internal_steps": 3,
+    "context_internal_steps": 15,
+    "actual_segment_internal_steps": 90,
+    "sp_type": "signed CC.tlong, unchanged from actual C",
+    "actual_context_parameter_type": "pointer to __sk_buff",
+    "source_context_parameter_type": "void pointer",
+    "context_requirement": "explicit Arm64Registers.ValueRep addresses ctx ctxWord",
+    "derived_values": "24 zero stack tags, SP0, helper context/ABI base ctx, x0 pointer payload ctx, x30 tag10, x0 tag1",
+    "endpoint": "actual beforeHeader, kernel-equal to Arm64ProgramEntryAssignments.beforeHeader",
+    "ordered_provider_traces_retained": 98,
+    "new_external_calls": 0,
+    "temporaries": "unchanged by all 30 stores",
+    "overwritten": "old x0 scalar payload and tag; old x30 tag",
+    "preserved": "x30 zero payload, other GPR words/tags, 62 table targets, flags/LR, 64 vector words, cache words/validity bytes, original context temporary, caller frame, permissions and allocation frontier",
+    "actual_bindings": "stack-tag array, signed SP local and all five context/tag locals derived from allocation correspondence",
+    "provider_contract": "preceding ProviderAt contracts and context ValueRep remain explicit; native/provider/original-context/all-outcome admission remains open",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerStack"
+      ],
+      "exit": 1,
+      "seconds": 9.345179080963135,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerContext"
+      ],
+      "exit": 1,
+      "seconds": 20.883397579193115,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerContext"
+      ],
+      "exit": 0,
+      "seconds": 12.85128140449524,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 155
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup"
+      ],
+      "exit": 1,
+      "seconds": 405.0025770664215,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused5": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup"
+      ],
+      "exit": 0,
+      "seconds": 8.424695014953613,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 193
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-raw-setup/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.5398242473602295,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 476.5278568267822,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 356
+    }
+  },
+  "repaired_attempts": {
+    "focused1": "generic stack execution simp still referenced the source Env binding; supplied the real Env binding",
+    "focused2": "generalized pointee cast also needed the original void-to-void self cast for the outer store; both follow from ValueRep",
+    "focused4": "finite protection predicate needed reducible transparency and three if-True conclusions needed explicit simplification"
+  },
+  "public_query_counts": {
+    "types": 20,
+    "axiom_reports": 20
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_initialized_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.sp_initialized_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_and_sp_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_cast_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_cast": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_lvalue_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_rhs_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_initialized_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.context_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.stack_sp_and_context_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.stack_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.sp_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.context_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.boundary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.tag_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.sp_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.context_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.context_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRawSetup.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule",
+    "full_build_priority_adjustment": {
+      "recorded_utc": "2026-11-20T00:28:02Z",
+      "notice": "COORDINATOR 2026-11-20T00:22:55Z",
+      "cpu": 17,
+      "processes": [
+        {
+          "pid": 556629,
+          "before_nice": 0,
+          "after_nice": 19,
+          "command": "python3 /workspaces/kprog-raw/formal/m5-program-entry-raw-setup/run.py lake-build1 lake build"
+        },
+        {
+          "pid": 556631,
+          "before_nice": 0,
+          "after_nice": 19,
+          "command": "/root/.elan/toolchains/leanprover--lean4---v4.35.0/bin/lake build"
+        },
+        {
+          "pid": 557746,
+          "before_nice": 0,
+          "after_nice": 19,
+          "command": "/root/.elan/toolchains/leanprover--lean4---v4.35.0/bin/lean -j1 /workspaces/repository/kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProgram.lean -o /workspaces/repository/kprog/formal/.lake/build/lib/lean/KProgFormal/ClightRefinement/Arm64NumericProgram.olean -i /workspaces/repository/kprog/formal/.lake/build/lib/lean/KProgFormal/ClightRefinement/Arm64NumericProgram.ilean -c /workspaces/repository/kprog/formal/.lake/build/ir/KProgFormal/ClightRefinement/Arm64NumericProgram.c --setup /workspaces/repository/kprog/formal/.lake/build/ir/KProgFormal/ClightRefinement/Arm64NumericProgram.setup.json --json"
+        }
+      ]
+    },
+    "full_build_thread_priority_adjustment": {
+      "recorded_utc": "2026-11-20T00:30:31Z",
+      "notice": "COORDINATOR 2026-11-20T00:22:55Z",
+      "reason": "Linux niceness is per thread; initial PID-only adjustment left existing Lake/Lean workers at nice0",
+      "changes": [
+        {
+          "round": 0,
+          "pid": 556629,
+          "tid": 556629,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556631,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556632,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556633,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556634,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556671,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556672,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 556689,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 556631,
+          "tid": 572129,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 572128,
+          "tid": 572128,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 572128,
+          "tid": 572130,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 572128,
+          "tid": 572131,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 572128,
+          "tid": 572132,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 0,
+          "pid": 572128,
+          "tid": 572133,
+          "before_nice": 0,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556629,
+          "tid": 556629,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556631,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556632,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556633,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556634,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556671,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556672,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 556689,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 556631,
+          "tid": 572129,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 572128,
+          "tid": 572128,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 572128,
+          "tid": 572130,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 572128,
+          "tid": 572131,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 572128,
+          "tid": 572132,
+          "before_nice": 19,
+          "after_nice": 19
+        },
+        {
+          "round": 1,
+          "pid": 572128,
+          "tid": 572133,
+          "before_nice": 19,
+          "after_nice": 19
+        }
+      ]
+    }
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "41854dc0fd8b6d0eb2794f09f7a39228d91af2895aab9093eba07ef324af0940",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerStack.lean": "8b4dc226e47ec817e0981914650f86a824424902af2d51fad684e4784f4b15d9",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerContext.lean": "a92d39f014d1fd7dd3edf0282292bf08e4b323ef09a20af3bbc0c131491ee850",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRawSetup.lean": "beab5d9aded3b2af6653f5efc68a6561c27194d5489ad32be29eb3c82751a7ee",
+    "kprog/formal/results/m5-program-entry-raw-setup/Query.lean": "22032b07fe79c40fa2793c1c62d3992024dd3d9ad6c42ec4dfe02c085885a3cd"
+  },
+  "scope": {
+    "changed": "formal proofs, receipts and own todo line",
+    "memory_witness": "original StackTagLocal/ContextLocal scalar allocation, writable range, alignment, Mem.store, readback and separation/frame constructions",
+    "traversal": "original stack-tag and context list inductions parameterized by actual function/environment/bindings/successors",
+    "source_interfaces": "stack_tags_initialized_bound, sp_initialized_bound, stack_tags_and_sp_bound, context_cast, context_initialized_bound and stack_sp_and_context_bound signatures retained",
+    "actual_ast_certificate": "all actual stack-tag/SP/context segments and real successors; final boundary matches existing actual header initializer",
+    "composite_requirement": "actual named GPR union and pointer-member offset0; no full composite-environment equality in actual instance",
+    "code_growth": "286-line actual module, 80 net supporting source lines and one root import",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
+  },
+  "goal_closure": {
+    "M5": "open: actual header/body/live storage and native/provider/original-context/all-outcome admission, return-type bridge, ISA refinement and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}
