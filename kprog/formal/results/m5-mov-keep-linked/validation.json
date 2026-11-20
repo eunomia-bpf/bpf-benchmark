@@ -153,17 +153,60 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
-    "nice": 19,
+    "exit": 0,
+    "seconds": 393.30098390579224,
     "cpu": 17,
+    "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 267,
+    "scope": "Entire KProgFormal Lean library including the root import module; executable/tool native builds are not requested.",
+    "affinity_adjustment": {
+      "utc": "2026-11-20T03:10:34.638008+00:00",
+      "initial_cpus": [
+        17
+      ],
+      "final_cpus": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "processes": [
+        {
+          "pid": 628789,
+          "command": "lake build KProgFormal",
+          "exit": 0,
+          "output": "pid 628789's current affinity list: 17\npid 628789's new affinity list: 16-23\npid 628790's current affinity list: 17\npid 628790's new affinity list: 16-23\npid 628791's current affinity list: 17\npid 628791's new affinity list: 16-23\npid 628806's current affinity list: 17\npid 628806's new affinity list: 16-23\npid 628930's current affinity list: 17\npid 628930's new affinity list: 16-23\npid 628931's current affinity list: 17\npid 628931's new affinity list: 16-23\npid 629074's current affinity list: 17\npid 629074's new affinity list: 16-23\npid 629222's current affinity list: 17\npid 629222's new affinity list: 16-23\n"
+        },
+        {
+          "pid": 629221,
+          "command": "/root/.elan/toolchains/leanprover--lean4---v4.35.0/bin/lean -j1 /workspaces/repository/kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.lean -o /workspaces/repository/kprog/formal/.lake/build/lib/lean/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.olean -i /workspaces/repository/kprog/formal/.lake/build/lib/lean/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.ilean -c /workspaces/repository/kprog/formal/.lake/build/ir/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.c --setup /workspaces/repository/kprog/formal/.lake/build/ir/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.setup.json --json",
+          "exit": 0,
+          "output": "pid 629221's current affinity list: 17\npid 629221's new affinity list: 16-23\npid 629223's current affinity list: 17\npid 629223's new affinity list: 16-23\npid 629224's current affinity list: 17\npid 629224's new affinity list: 16-23\npid 629225's current affinity list: 17\npid 629225's new affinity list: 16-23\npid 629226's current affinity list: 17\npid 629226's new affinity list: 16-23\n"
+        }
+      ]
+    },
+    "root_olean_mtime_utc": "2026-11-20T03:12:06.859454+00:00"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-mov-keep-linked",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "exports_after_confirmation": {
+    "count": 23,
+    "byte_identical_to_before_export": true
+  },
+  "source_hashes_after_confirmation": "unchanged"
 }

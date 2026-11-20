@@ -6,6 +6,6 @@
 
 The shared reader, merge, call edges and writer-return proofs now accept a world with the specific layouts and bindings they use. Prior Numeric-world APIs remain instances. No C body or ISA implementation is copied or synthesized.
 
-Focused 194 jobs and 17 public type/axiom queries pass at original proof caps on CPU17, one worker, 32 GiB address space. Imported execution semantics retain CC.externalFunctionsSem and CC.inlineAssemblySem; exact reported dependencies are in validation.json. Whole proof-library confirmation is pending there. Existing tool binaries are used; toolchain builds remain disabled.
+Focused 194 jobs and 17 public type/axiom queries pass at original proof caps on CPU17, one worker, 32 GiB address space. Imported execution semantics retain CC.externalFunctionsSem and CC.inlineAssemblySem; exact reported dependencies are in validation.json. The whole KProgFormal proof library, including its root import module, passes 267 jobs. It ran at nice 19 with one worker and 32 GiB address space; its initial CPU17 affinity was expanded to the agreed CPUs16–23, with the event recorded. Source hashes and all23 exported-source hashes remain unchanged. Existing tool binaries are used; toolchain builds remain disabled.
 
 Next: lift the opcode-5 dispatch and actual generic allocation/release, obtaining the complete 203-step call and its native/all-outcome composition in this world. Then join the actual fixture MOV_IMM/MOVK callsites. M5/M6 and the final default Lake/make check remain open; completed ISA-family count is 0.
