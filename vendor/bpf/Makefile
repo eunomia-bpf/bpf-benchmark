@@ -49,7 +49,7 @@ NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-lin
 # --target=aarch64-linux-gnu, with /usr/include after it for generic headers.
 SYS_INC := $(if $(filter arm64 aarch64,$(ARCH)),-idirafter /usr/include,-I/usr/include -I/usr/include/x86_64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
+	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics)
 # One compile-flag set for every app (operator 2026-11-15: "编译参数所有 app 统一.", "所有优化参数必须打开").
 # -fPIC makes map references R_X86_64_REX_GOTPCRELX, the form native-link patches; without it
 # clang emits R_X86_64_PC32 and the map address reaches the kernel unpatched. It costs no
