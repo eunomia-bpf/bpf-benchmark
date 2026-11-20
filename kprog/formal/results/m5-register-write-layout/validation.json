@@ -1,0 +1,24 @@
+{
+  "source": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWrite.lean",
+  "sha256": "f9f025032d2eadc0fe60e37efa05cec156a20d42d1b1290638368cf1a0c06a7e",
+  "validation": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovKeepLinked"
+    ],
+    "exit": 0,
+    "seconds": 756.5309133529663,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "scope": "Writer layout-bound 67-step scalar and 38-step XZR executions; prior whole-environment APIs retained as instances. The intermediate linked helper certificate is superseded by the subsequent branch work.",
+  "raw": "/workspaces/kprog-raw/formal/m5-mov-keep-linked",
+  "proof_caps": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  }
+}
