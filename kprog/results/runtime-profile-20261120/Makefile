@@ -19,6 +19,10 @@ inspect:
 capture:
 	python3 $(ROOT)/kprog/results/runtime-profile-20261120/capture.py $(OUT) $(APP)
 
+.PHONY: analyze
+analyze:
+	DEBUGINFOD_URLS= python3 $(ROOT)/kprog/results/runtime-profile-20261120/analyze.py $(OUT)
+
 PRIVATE_BUILD := /var/tmp/kprog-tmp/perf/runtime-profile-private
 .PHONY: private
 private:
