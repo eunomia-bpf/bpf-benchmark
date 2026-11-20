@@ -30,3 +30,7 @@ syntax:
 		-I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
 		$(ROOT)/kprog/libnativeloader/src/native_loader.cpp
+
+.PHONY: archive
+archive:
+	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/archive.py

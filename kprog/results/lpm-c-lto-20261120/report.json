@@ -1,0 +1,131 @@
+{
+  "layout": {
+    "ROOT_OFF": 288,
+    "SIZE_OFF": 392,
+    "MAX_OFF": 384,
+    "CHILD_OFF": 0,
+    "PREFIX_OFF": 16,
+    "FLAGS_OFF": 20,
+    "DATA_OFF": 24
+  },
+  "cases": [
+    {
+      "name": "fixed",
+      "cases": 112917,
+      "generic_calls": 0,
+      "lpm_lowered_per_entry": 1
+    },
+    {
+      "name": "dynamic",
+      "cases": 692913,
+      "generic_calls": 0,
+      "lpm_lowered_per_entry": 1
+    },
+    {
+      "name": "mixed",
+      "cases": 692913,
+      "generic_calls": 692913,
+      "lpm_lowered_per_entry": 0
+    },
+    {
+      "name": "unknown",
+      "cases": 692913,
+      "generic_calls": 1385826,
+      "lpm_lowered_per_entry": 0
+    }
+  ],
+  "scope": "Host C and imported machine-code semantics, existing ARRAY compatibility, real captured OTel emission and proof/kernel linking. Combined-image acceptance and application speed remain pending.",
+  "raw": "/workspaces/kprog-raw/perf/lpm-c-lto-20261120/host-20261120T013826Z",
+  "completed": "2026-11-20T01:38:52Z",
+  "candidate": "277e16633 through 10c04de6a",
+  "array": {
+    "scope": "Exercise real lowered ARRAY machine code and the captured OTel inner shapes.",
+    "fixture": [
+      {
+        "name": "table",
+        "symbol": "entry",
+        "lowered": 1,
+        "execution_vectors": 360
+      },
+      {
+        "name": "select",
+        "symbol": "entry_select",
+        "lowered": 1,
+        "execution_vectors": 360
+      },
+      {
+        "name": "numeric",
+        "symbol": "entry_numeric",
+        "lowered": 1,
+        "execution_vectors": 0
+      },
+      {
+        "name": "mixed",
+        "symbol": "entry",
+        "lowered": 0,
+        "execution_vectors": 360
+      },
+      {
+        "name": "unknown",
+        "symbol": "entry",
+        "lowered": 0,
+        "execution_vectors": 360
+      },
+      {
+        "name": "mutable",
+        "symbol": "entry_mutable",
+        "lowered": 0,
+        "execution_vectors": 360
+      },
+      {
+        "name": "arithmetic",
+        "symbol": "entry_arithmetic",
+        "lowered": 0,
+        "execution_vectors": 0
+      },
+      {
+        "name": "barrier",
+        "symbol": "entry_barrier",
+        "lowered": 1,
+        "execution_vectors": 360
+      },
+      {
+        "name": "nonempty-barrier",
+        "symbol": "entry_nonempty_barrier",
+        "lowered": 0,
+        "execution_vectors": 0
+      },
+      {
+        "name": "narrow",
+        "symbol": "entry_narrow_handle",
+        "lowered": 0,
+        "execution_vectors": 0
+      },
+      {
+        "name": "value-size",
+        "symbol": "entry",
+        "lowered": 1,
+        "execution_vectors": 360
+      }
+    ],
+    "otel": {
+      "baseline": {
+        "selected_function_bytes": 27047,
+        "payload_bytes": 28611,
+        "lowered": 0
+      },
+      "typed": {
+        "selected_function_bytes": 28870,
+        "payload_bytes": 30458,
+        "lowered": 68
+      }
+    },
+    "fact_provenance": "Captured checked-six-apps OTel request 3 inner shapes, not current FD-query execution",
+    "installed_bytes": "unmeasured",
+    "per_call_body_helpers_maps": "pending publication"
+  },
+  "lpm_oracle_cases": 2191656,
+  "otel_lpm_sites": 4,
+  "loader_syntax_exit": 0,
+  "compiler_build_exit": 0
+}
