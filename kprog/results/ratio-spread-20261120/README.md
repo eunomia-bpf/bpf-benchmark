@@ -109,6 +109,15 @@ program-owned counters going **913,099,438 → 0 unwind attempts** and **840,462
 errors 325,721 → 74,119,936 and empty stacks 22,331 → 65,351,909. It ran 12x faster because it stopped
 unwinding.
 
+The counters carry the same signature, independently of the equal-work report: in a run with the 7510 B body
+**zero** post-arm entries report `bytes_xlated > 100`, while a 11-20 run reports four — and the three unwind
+programs among them all have `run_cnt_delta = 0` (only `tracepoint__sch` fires, 38 calls):
+
+```
+2026-11-12 post arm: entries with real xlated body = 0
+2026-11-20 post arm: perf_unwind_nat/-hot/-php report 53880/32824/29288 bytes, cnt = 0
+```
+
 So the fast family must not be restored as-is; it is a broken reference. What the record does establish is the
 opposite direction of the one I first drew: today's ~2700 B body runs at 3700–4600 ns against the baseline
 JIT's ~3200 ns, i.e. the current native body is *slower than the JIT it replaces* on this program while doing
