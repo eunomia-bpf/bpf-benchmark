@@ -69,6 +69,20 @@
 #define _(P) (__builtin_preserve_access_index(P))
 #endif
 
+/* pt_regs register names per architecture, as libbpf's bpf_tracing.h names them. */
+#if defined(__TARGET_ARCH_arm64) || defined(__aarch64__)
+#define __PT_PARM1_REG regs[0]
+#define __PT_PARM2_REG regs[1]
+#define __PT_PARM3_REG regs[2]
+#define __PT_PARM4_REG regs[3]
+#define __PT_PARM5_REG regs[4]
+#define __PT_PARM6_REG regs[5]
+#define __PT_RET_REG regs[30]
+#define __PT_FP_REG regs[29]
+#define __PT_RC_REG regs[0]
+#define __PT_SP_REG sp
+#define __PT_IP_REG pc
+#else
 #define __PT_PARM1_REG di
 #define __PT_PARM2_REG si
 #define __PT_PARM3_REG dx
@@ -80,6 +94,7 @@
 #define __PT_RC_REG ax
 #define __PT_SP_REG sp
 #define __PT_IP_REG ip
+#endif
 
 #if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
 #define bpf_target_x86
@@ -127,7 +142,12 @@
 #endif
 #define PT_REGS_PARM7_CORE(x) 0
 #define PT_REGS_PARM8_CORE(x) 0
+#if defined(__TARGET_ARCH_arm64) || defined(__aarch64__)
+/* arm64 syscalls keep the first argument in orig_x0; x0 holds the return value. */
+#define PT_REGS_PARM1_CORE_SYSCALL(x) BPF_CORE_READ(__PT_REGS_CAST(x), orig_x0)
+#else
 #define PT_REGS_PARM1_CORE_SYSCALL(x) PT_REGS_PARM1_CORE(x)
+#endif
 #define PT_REGS_PARM2_CORE_SYSCALL(x) PT_REGS_PARM2_CORE(x)
 #define PT_REGS_PARM3_CORE_SYSCALL(x) PT_REGS_PARM3_CORE(x)
 #ifdef MICRO_NATIVE_CORE_REG_PROBE_READS

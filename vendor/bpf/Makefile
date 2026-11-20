@@ -42,7 +42,12 @@ CILIUM_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/cilium
 TRACEE_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tracee
 TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
+# The kernel architecture name the apps and their headers use (x86, arm64).
+BPF_ARCH := $(if $(filter arm64 aarch64,$(ARCH)),arm64,x86)
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
+# System headers: the host multiarch directory on x86; on arm64 the cross sysroot clang finds for
+# --target=aarch64-linux-gnu, with /usr/include after it for generic headers.
+SYS_INC := $(if $(filter arm64 aarch64,$(ARCH)),-idirafter /usr/include,-I/usr/include -I/usr/include/x86_64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
 # One compile-flag set for every app (operator 2026-11-15: "编译参数所有 app 统一.", "所有优化参数必须打开").
@@ -118,21 +123,21 @@ clean:
 # in this table and fails the compile on a query it does not hold.
 CORE_ANSWERS := $(OUT)/answers
 CORE_ANSWERS_PY := $(CURDIR)/core-answers.py
-BCC_CORE_CFLAGS := -Ibcc/libbpf-tools -Ibcc/libbpf-tools/x86 \
-	-Ibcc/src/cc/libbpf/include/uapi -I. -I/usr/include -I/usr/include/x86_64-linux-gnu
-TRACEE_CORE_CFLAGS := -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD -I. \
-	-Itracee/pkg/ebpf/c -I/usr/include -I/usr/include/x86_64-linux-gnu
+BCC_CORE_CFLAGS := -Ibcc/libbpf-tools -Ibcc/libbpf-tools/$(BPF_ARCH) \
+	-Ibcc/src/cc/libbpf/include/uapi -I. $(SYS_INC)
+TRACEE_CORE_CFLAGS := -D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD -I. \
+	-Itracee/pkg/ebpf/c $(SYS_INC)
 # Tetragon compiles each object under several variant defines; a query can exist
 # in one variant only, so the scan carries every variant the compile uses.
-TETRAGON_CORE_CFLAGS := -D__TARGET_ARCH_x86 -fms-extensions \
+TETRAGON_CORE_CFLAGS := -D__TARGET_ARCH_$(BPF_ARCH) -fms-extensions \
 	-DMICRO_NATIVE_TETRAGON \
 	-D__LARGE_BPF_PROG -D__V511_BPF_PROG -D__V61_BPF_PROG \
 	-D__MULTI_KPROBE -D__RHEL7_BPF_PROG -D__BPF_OVERRIDE_RETURN -I. \
 	-Itetragon/bpf -Itetragon/bpf/include -Itetragon/bpf/lib -Itetragon/bpf/libbpf \
 	-Itetragon/bpf/process -Itetragon/bpf/errmetrics \
-	-I/usr/include -I/usr/include/x86_64-linux-gnu
+	$(SYS_INC)
 
-$(CORE_ANSWERS)/bcc.h: $(CORE_ANSWERS_PY) $(wildcard bcc/libbpf-tools/*.h) bcc/libbpf-tools/x86/vmlinux.h
+$(CORE_ANSWERS)/bcc.h: $(CORE_ANSWERS_PY) $(wildcard bcc/libbpf-tools/*.h) bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h
 	install -d "$(CORE_ANSWERS)"
 	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
 		--cflags "$(BCC_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/bcc.json" bcc/libbpf-tools
@@ -142,7 +147,7 @@ $(CORE_ANSWERS)/tracee.h: $(CORE_ANSWERS_PY) $(wildcard tracee/pkg/ebpf/c/*.h) t
 	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
 		--cflags "$(TRACEE_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/tracee.json" tracee
 
-$(CORE_ANSWERS)/tetragon.h: $(CORE_ANSWERS_PY) $(wildcard tetragon/bpf/lib/*.h) tetragon/bpf/include/vmlinux_generated_x86.h
+$(CORE_ANSWERS)/tetragon.h: $(CORE_ANSWERS_PY) $(wildcard tetragon/bpf/lib/*.h) tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h
 	install -d "$(CORE_ANSWERS)"
 	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
 		--cflags "$(TETRAGON_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/tetragon.json" \
@@ -152,13 +157,13 @@ $(CORE_ANSWERS)/tetragon.h: $(CORE_ANSWERS_PY) $(wildcard tetragon/bpf/lib/*.h) 
 $(CORE_ANSWERS)/otel.h: $(CORE_ANSWERS_PY) $(wildcard otel/support/ebpf/*.h)
 	install -d "$(CORE_ANSWERS)"
 	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
-		--cflags "-Iotel/support/ebpf -I. -I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		--cflags "-Iotel/support/ebpf -I. $(SYS_INC)" \
 		--out "$@" --report "$(CORE_ANSWERS)/otel.json" otel/support/ebpf
 
 $(CORE_ANSWERS)/cilium.h: $(CORE_ANSWERS_PY) $(wildcard cilium/bpf/lib/*.h)
 	install -d "$(CORE_ANSWERS)"
 	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
-		--cflags "-Icilium/bpf -Icilium/bpf/include -Icilium/bpf/include/bpf -Icilium/bpf/include/linux -Icilium/bpf/lib -I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		--cflags "-Icilium/bpf -Icilium/bpf/include -Icilium/bpf/include/bpf -Icilium/bpf/include/linux -Icilium/bpf/lib $(SYS_INC)" \
 		--out "$@" --report "$(CORE_ANSWERS)/cilium.json" cilium/bpf
 
 CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h $(CORE_ANSWERS)/otel.h $(CORE_ANSWERS)/cilium.h
@@ -168,16 +173,16 @@ core_flags = -include "$(CURDIR)/core-compat.h" -D__KPROG_CORE_ANSWERS='"$(1)"'
 
 core-answers: $(CORE_ANSWER_TABLES)
 
-vmlinux: $(VMLINUX_H) bcc/libbpf-tools/x86/vmlinux.h tetragon/bpf/include/vmlinux_generated_x86.h
+vmlinux: $(VMLINUX_H) bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h
 
 $(VMLINUX_H): $(VMLINUX_BTF)
 	install -d "$(dir $@)"
 	"$(BPFTOOL)" btf dump file "$(VMLINUX_BTF)" format c > "$@"
 
-bcc/libbpf-tools/x86/vmlinux.h: $(VMLINUX_H)
+bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h: $(VMLINUX_H)
 	install -D -m 0644 "$<" "$@"
 
-tetragon/bpf/include/vmlinux_generated_x86.h: $(VMLINUX_H)
+tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h: $(VMLINUX_H)
 	install -d "$(dir $@)"
 	sed 's/__VMLINUX_H__/__VMLINUX_GENERATED_X86_H__/g' "$<" > "$@"
 
@@ -191,16 +196,16 @@ katran:
 		| "$(LLC)" -march=bpf -filetype=obj -o "$(OUT)/katran/$${src}.bpf.o"; \
 	done
 
-bcc: bcc/libbpf-tools/x86/vmlinux.h
+bcc: bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h
 	$(MAKE) -C "$(CURDIR)/bcc/libbpf-tools" CLANG="$(CLANG)" LLVM_STRIP="$(LLVM_STRIP)" \
 		OUTPUT="$(OUT)/bcc/output" APPS="$(BCC_TOOLS)" LIBBPF_OBJ= \
-		INCLUDES="-I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		INCLUDES="$(SYS_INC)" \
 		$(BCC_OBJS)
 
-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h
+tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h
 	install -d "$(OUT)/tetragon"
 	$(MAKE) -C "$(CURDIR)/tetragon/bpf" CLANG="$(CLANG)" LLC="$(LLC)" \
-		BPF_TARGET_ARCH=x86 \
+		BPF_TARGET_ARCH=$(BPF_ARCH) \
 		OBJS='$$(filter-out $$(OBJSDIR)bpf_map_test_p1.o $$(OBJSDIR)bpf_map_test_p2.o $$(OBJSDIR)bpf_map_test_p3.o,$$(PROCESSOBJ) $$(CGROUPOBJ) $$(ALIGNCHECKEROBJ))' \
 		DEPS='$$(patsubst $$(OBJSDIR)%.o,$$(DEPSDIR)%.d,$$(OBJS))' -j"$$(nproc)"
 	for obj in "$(CURDIR)/tetragon/bpf/objs/"*.o; do \
@@ -227,13 +232,13 @@ tracee:
 	install -d "$(OUT)/tracee/lsm_support"
 	install -D -m 0644 "$(VENDOR)/repos/tracee/pkg/ebpf/c/vmlinux.h" \
 		"$(CURDIR)/tracee/pkg/ebpf/c/vmlinux.h"
-	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c -I/usr/include -I/usr/include/x86_64-linux-gnu"; \
-	"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c $(SYS_INC)"; \
+	"$(CLANG)" -D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
 		-c "$(CURDIR)/tracee/pkg/ebpf/c/tracee.bpf.c" \
 		-o "$(OUT)/tracee/tracee.bpf.o"; \
 	for src in kprobe_check lsm_check; do \
-		"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
+		"$(CLANG)" -D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 			$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
 			-c "$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport/$${src}.bpf.c" \
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
@@ -243,16 +248,16 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h nativ
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/katran-compat.h" -DDEBUG -D__KERNEL__ \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h \
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h \
 		core-compat.h native-helpers.h $(CORE_ANSWERS)/bcc.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/bcc.h) \
-		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
+		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_ARCH)" \
 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS)
@@ -285,7 +290,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h native-helpers.h $
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
 		-I"$(CURDIR)/cilium/bpf/include/linux" \
 		-I"$(CURDIR)/cilium/bpf/lib" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
@@ -319,7 +324,7 @@ $(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnat
 
 $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	install -d "$(dir $@)"
-	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
+	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(OTEL_NATIVE_IR_DIR)"
 	rm -f "$(OTEL_NATIVE_IR_DIR)"/*.bc
 	for o in $(OTEL_NATIVE_UNIT_OBJS); do \
@@ -333,19 +338,19 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		core-compat.h native-helpers.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
 		core-compat.h native-helpers.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
+		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_LINK):
@@ -355,7 +360,7 @@ native-katran: $(KATRAN_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
-	install -m 0644 $(foreach obj,balancer healthchecking_ipip xdp_root,$(VENDOR)/build/x86/katran/bpf/$(obj).bpf.o) "$(KATRAN_NATIVE_STAGE_OUT)"
+	install -m 0644 $(foreach obj,balancer healthchecking_ipip xdp_root,$(VENDOR)/build/$(BPF_ARCH)/katran/bpf/$(obj).bpf.o) "$(KATRAN_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
 		--output "$(NATIVE_OUT)/katran/manifest.json" \
 		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
@@ -367,11 +372,11 @@ native-katran: $(KATRAN_NATIVE_OBJS)
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o,source=$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.bpf.o" \
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o,source=$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.bpf.o"
 
-native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS)
+native-bcc: bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h $(BCC_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
-	install -m 0644 $(foreach tool,$(BCC_TOOLS),$(VENDOR)/build/.bcc-libbpf/x86/output/$(tool).bpf.o) "$(BCC_NATIVE_STAGE_OUT)"
+	install -m 0644 $(foreach tool,$(BCC_TOOLS),$(VENDOR)/build/.bcc-libbpf/$(BPF_ARCH)/output/$(tool).bpf.o) "$(BCC_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/bcc/manifest.json" \
 		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
@@ -423,14 +428,14 @@ native-tracee: $(TRACEE_NATIVE_OBJS)
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
-	install -m 0644 "$(VENDOR)/build/.tracee-build/x86/dist/tracee.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o"
-	for src in $(TRACEE_LSM_SUPPORT_SRCS); do install -m 0644 "$(VENDOR)/build/.tracee-build/x86/dist/lsm_support/$${src}.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/$${src}.bpf.o"; done
+	install -m 0644 "$(VENDOR)/build/.tracee-build/$(BPF_ARCH)/dist/tracee.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o"
+	for src in $(TRACEE_LSM_SUPPORT_SRCS); do install -m 0644 "$(VENDOR)/build/.tracee-build/$(BPF_ARCH)/dist/lsm_support/$${src}.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/$${src}.bpf.o"; done
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/$(src).bpf.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h native-helpers.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h core-compat.h native-helpers.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
@@ -439,14 +444,14 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h nati
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
 	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_TETRAGON \
 		$(call core_flags,$(CORE_ANSWERS)/tetragon.h) \
-		-D__TARGET_ARCH_x86 \
+		-D__TARGET_ARCH_$(BPF_ARCH) \
 		-I"$(CURDIR)/tetragon/bpf" \
 		-I"$(CURDIR)/tetragon/bpf/include" \
 		-I"$(CURDIR)/tetragon/bpf/lib" \
 		-I"$(CURDIR)/tetragon/bpf/libbpf" \
 		-I"$(CURDIR)/tetragon/bpf/process" \
 		-I"$(CURDIR)/tetragon/bpf/errmetrics" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu); \
+		$(SYS_INC)); \
 	compile_native() { \
 		local name="$$1"; \
 		local src="$$2"; \
@@ -534,7 +539,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h nati
 		native_args=(); \
 		stage_args=(); \
 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
-		for obj in "$${stage_out}"/*.native.o; do b="$$(basename "$${obj}" .native.o)"; src="$(VENDOR)/build/x86/tetragon/$${b}.o"; if [ -f "$${src}" ]; then install -m 0644 "$${src}" "$${stage_out}/$${b}.o"; stage_args+=(--object "$${obj},source=$${stage_out}/$${b}.o"); fi; done; \
+		for obj in "$${stage_out}"/*.native.o; do b="$$(basename "$${obj}" .native.o)"; src="$(VENDOR)/build/$(BPF_ARCH)/tetragon/$${b}.o"; if [ -f "$${src}" ]; then install -m 0644 "$${src}" "$${stage_out}/$${b}.o"; stage_args+=(--object "$${obj},source=$${stage_out}/$${b}.o"); fi; done; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" \
