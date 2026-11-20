@@ -28,10 +28,14 @@ word/tag0. Joining the two calls across their advancing allocation frontiers,
 then relating fetched native instructions and physical ABI/provenance admission,
 remains M5 work. No ISA family or whole entry refinement is claimed complete.
 
-Focused validation and public type/axiom queries use CPU 17, nice 0, one worker,
-32 GiB address space and the original 200000-heartbeat/512-depth caps. Whole
-proof-library confirmation follows this source checkpoint. No executable/tool
-build is performed under the current directive. Failed finite attempts stay
+Focused checks pass: shared scalar call 189 jobs, actual-world call 200 jobs,
+actual fixture edge 228 jobs and 12 public type/axiom queries. They use CPU 17,
+nice 0, one worker, 32 GiB address space and the original 200000-heartbeat/512-depth
+caps. The entire `lake build KProgFormal` proof library/root passes 277 jobs
+on CPUs 16–23, nice 19, one worker and 32 GiB address space. Host Lake runs
+without the timing lock under the coordinator notice of 2026-11-19T18:18:59Z;
+the initial unstarted shared-lock waiter was ended before the sole full run.
+No executable/tool build is performed under the current directive. Failed finite attempts stay
 in `/workspaces/kprog-raw/formal/m5-entry-movk`; validation.json records final
 checks and inherited logic/external-semantics axioms. M5/M6 remain open;
 completed ISA-family count is zero.

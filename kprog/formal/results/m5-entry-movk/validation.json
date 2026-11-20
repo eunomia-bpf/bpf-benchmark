@@ -145,8 +145,39 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 4.0833823680877686,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 277,
+    "scope": "Entire KProgFormal leanArts proof library including root; executable/tool native builds excluded",
+    "resource_policy": "Coordinator 2026-11-19T18:18:59Z: host Lake on CPUs8-23 without timing lock"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-entry-movk",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_checkpoint": "156a09fce58326f48eccb82a6fb79c325fcbe72b",
+  "root_artifact_modified_utc": "2026-11-20T07:10:51.527074+00:00",
+  "unstarted_shared_lock_waiter": {
+    "pid": 772963,
+    "ended_utc": "2026-11-20T07:10:47.558446+00:00",
+    "started_build": false,
+    "reason": "Apply coordinator 2026-11-19T18:18:59Z host Lake CPU8-23 without timing lock policy; no child/build had started"
+  }
 }
