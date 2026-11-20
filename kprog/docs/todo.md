@@ -192,6 +192,13 @@
   actual journal reconciliation; prior verified receipt remains14).
 
 - [ ] P-B-relative-table-live-partials (PERF 2026-11-19T19:57:44Z): actual Cilium
+  PERF 2026-11-20T00:21:48Z: diagnostic d4c5c074e/02f011386 follows spilled
+  upperbits through exit: each22/40/58 visits114instructions, same1direct
+  dead-register readback, no laterdirectread/overwrite or unresolvedalias.
+  Adds post-readback perf_event_output at9107/9309/9313, dataroots abovecell;
+  sixhelpers total. Both make targets0;8native escape cases retain rejection.
+  lifetime-result.json records fullinventory. Prior-escape/helpermemory proof
+  andproduction repair remainopen; noB/stock/app/speedgain claimed.
   PERF 2026-11-19T22:00:21Z: 66f54a68e actualnative escape regressionpasses8cases:
   bothlocalupper24readbacksdead, butpriorpointerescape makesupperbits
   observable(5vs0x12345605etc). Currentguardstillrejectsescapedspill.

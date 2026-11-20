@@ -51,6 +51,28 @@ and the same helper pointer roots. Final raw `/workspaces/kprog-raw/perf/cilium-
 worker315898 is terminal. `memory-result.json` now records this stronger
 input provenance. The helper memory proof and production repair stay open.
 
+PERF 2026-11-20T00:21:48Z: `d4c5c074e`/`02f011386` extend the diagnostic
+past the first readback until overwrite or function exit. Each of requests
+22/40/58 visits114 instructions, encounters the same single direct readback
+with dead upper24register bits, and reaches exit without another direct read
+or overwrite of those spilled bits. There are no unresolved memory aliases
+on these paths. The cell itself remains live in memory through exit; this
+does not establish that it is private or that helpers cannot observe it.
+
+The complete lifetime adds one helper omitted by the earlier prefix: a
+`bpf_perf_event_output` at9107/9309/9313. Its data pointer starts at private
+offset-208/-224/-224, above the respective saved cell-248/-268/-268. Each
+lifetime also includes the previous five lookup/update/tail-call sites.
+Pointer roots and local register liveness alone remain insufficient to
+justify elision: prior escapes, callback memory effects and implicit pointer
+stores still need an actual preservation argument. The existing native
+escape regression again passes all8executions, both local-readback checks,
+and the production escaped-spill rejection. Both make targets exit0.
+`lifetime-result.json` retains the complete inventory and escape result;
+raw `lifetime-final-20261120T002144Z` stays under the persistent raw directory
+above. No production lowering, native/B/stock acceptance or speed result
+changes in this step.
+
 ## A prior escape defeats local readback liveness
 
 PERF 2026-11-19T22:00:21Z. `94c995e19` exposes the existing ABI's final incoming states
