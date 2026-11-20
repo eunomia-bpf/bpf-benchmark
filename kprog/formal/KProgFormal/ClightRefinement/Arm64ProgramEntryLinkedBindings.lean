@@ -20,6 +20,13 @@ theorem execute_signature :
         CC.tuint, CC.tulong, CC.tulong, CC.tulong, CC.tulong, CC.tuchar, CC.tuint, CC.tulong]
         CC.tvoid CC.cc_default := by rfl
 
+/-- The actual MOV path selector resolves to its exported Numeric C body. -/
+theorem mov_selector_binding :
+    CC.Genv.findSymbol ge.genv_genv Arm64Program._kprog_arm64_mov_path = some (CC.Positive.ofNat 98) ∧
+    CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 98) =
+      some (.Internal Arm64Numeric.f_kprog_arm64_mov_path) := by
+  constructor <;> run_tac sourceEquality
+
 /-- Both actual payload callbacks retain their original positions and bodies. -/
 theorem callback_binding (store : Bool) :
     CC.Genv.findSymbol ge.genv_genv

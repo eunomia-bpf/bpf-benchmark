@@ -1,0 +1,174 @@
+{
+  "source_link": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLinkedBindings"
+    ],
+    "exit": 0,
+    "seconds": 146.83251118659973,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "source_link_jobs": 43,
+  "shared_dispatch": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateDispatch"
+    ],
+    "exit": 0,
+    "seconds": 15.369849920272827,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "shared_dispatch_jobs": 180,
+  "actual_entry": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead"
+    ],
+    "exit": 0,
+    "seconds": 428.7694764137268,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "actual_entry_jobs": 224,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-support/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.682276964187622,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 13,
+  "prior_suffix_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-mov-sp-suffix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7050676345825195,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "prior_public_query_count": 6,
+  "prior_closed_binding_query_count": 1,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.linked_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.linked_wellformed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.definition_count": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.composite_count": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.original_names": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.global_frontier": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.fixture_composites_preserved": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryLinked.mov_selector_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_dispatch_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.call_dispatch_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRead.entry_dispatch": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRead.entry_temp_data": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRead.scalar_write": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "actual_link": {
+    "whole_source_units": [
+      "Arm64ProgramFixture",
+      "Arm64Program",
+      "Arm64Numeric"
+    ],
+    "definitions": 210,
+    "composites": 14,
+    "global_frontier": 211,
+    "mov_selector_block": 98,
+    "mov_selector_definition": "Arm64Numeric.f_kprog_arm64_mov_path"
+  },
+  "whole_proof_library": {
+    "status": "pending"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-entry-support",
+  "completed_isa_families": 0
+}

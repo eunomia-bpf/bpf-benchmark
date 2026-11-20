@@ -20,13 +20,10 @@ open KProgFormal.ClightRefinement
 #check Arm64MovImmediate.LinkedRead.scalar_write
 #print axioms Arm64MovImmediate.LinkedRead.scalar_write
 
-/-- The existing actual link declares this support selector externally.
-Do not instantiate the Numeric-world internal-dispatch theorem here. -/
+/-- The support-unit migration resolves the formerly external selector. -/
 example :
     CC.Genv.findSymbol Arm64ProgramEntryAllocation.world.genv_genv Arm64Program._kprog_arm64_mov_path =
       some (CC.Positive.ofNat 98) ∧
     CC.Genv.findFunctPtr Arm64ProgramEntryAllocation.world.genv_genv (CC.Positive.ofNat 98) =
-      some (.External (.EF_external "kprog_arm64_mov_path"
-        (CC.mksignature [.Xlong, .Xlong] .Xlong CC.cc_default))
-        [CC.tulong, CC.tulong] CC.tulong CC.cc_default) := by
-  constructor <;> run_tac Arm64ProgramEntryLinked.sourceEquality
+      some (.Internal Arm64Numeric.f_kprog_arm64_mov_path) :=
+  Arm64ProgramEntryLinked.mov_selector_binding

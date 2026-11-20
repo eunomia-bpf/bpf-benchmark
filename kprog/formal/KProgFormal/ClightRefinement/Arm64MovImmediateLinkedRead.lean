@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCacheFrame
+import KProgFormal.ClightRefinement.Arm64MovKeepLinkedCall
 
 set_option Elab.async false
 
@@ -7,6 +8,39 @@ namespace KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRead
 open Arm64Producer Arm64ProducerRegisterStorage Arm64ProducerEntryView
 open Arm64ProgramEntryAllocation (world)
 open Arm64ProgramEntryCacheFrame (Frame)
+
+/-- The actual first handler call's operands: mark is an unrestricted uint32,
+SRC is SP32, SRC2/SRC3 are NONE, and AUX is zero. Width eight is selected below. -/
+def entry_operands (entry : CC.Block) (mark : BitVec 32) : Arm64Nop.IgnoredArguments :=
+  ⟨.Vptr entry 0, .Vlong 1, .Vlong 32, .Vlong 255, .Vlong 255, .Vint 0,
+    .Vlong (mark.setWidth 64)⟩
+
+def entry_temps (entry : CC.Block) (mark : BitVec 32) : CC.TempEnv :=
+  Dispatch.scalarEnv (Dispatch.initialTemps (entry_operands entry mark) false) false
+
+/-- Allocate the real generic frame and execute both actual linked helper calls.
+The original caller frame survives; the eager SP32 read is the next operation. -/
+theorem entry_dispatch (memory : CC.Mem) (entry : CC.Block) (mark : BitVec 32) :
+    InternalRun world 54
+      (.Callstate (.Internal Arm64Nop.handler) (Dispatch.arguments (entry_operands entry mark) false) .Kstop memory)
+      (.State Arm64Nop.handler Dispatch.scalarBranch Dispatch.continuation
+        (Arm64Nop.allocation world memory).1 (entry_temps entry mark) (Arm64Nop.allocation world memory).2) ∧
+      FrameBelow memory.nextblock memory (Arm64Nop.allocation world memory).2 :=
+  Dispatch.call_dispatch_bound world (CC.Positive.ofNat 97) (CC.Positive.ofNat 98)
+    Arm64MovKeep.Linked.width_binding Arm64ProgramEntryLinked.mov_selector_binding
+    memory (entry_operands entry mark) false
+
+/-- Derive the actual read/write inputs from the dispatch's reached temporaries. -/
+theorem entry_temp_data (entry : CC.Block) (mark : BitVec 32) :
+    (entry_temps entry mark).get Arm64Program._entry = some (.Vptr entry 0) ∧
+    (entry_temps entry mark).get Arm64Program._src = some (.Vlong 32) ∧
+    (entry_temps entry mark).get Arm64Program._dst = some (.Vlong 1) ∧
+    (entry_temps entry mark).get Arm64Program._op = some (.Vint 1) ∧
+    (entry_temps entry mark).get Arm64Program._imm = some (.Vlong (mark.setWidth 64)) ∧
+    (entry_temps entry mark).get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width false) := by
+  simp +decide only [entry_temps, entry_operands, Dispatch.scalarEnv, Dispatch.dispatchEnv,
+    Dispatch.initialTemps, Arm64Nop.resultEnv, Dispatch.flags, Arm64Width.result,
+    Arm64Width.argument, Arm64RegisterWrite.width, CC.PTree.gss, CC.PTree.gso, ite_false]
 
 /-- Execute the actual MOV_IMM scalar suffix with its eager cold SP32 read.
 The external trace, supplied memory and two cache stores remain observable.

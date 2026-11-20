@@ -22,13 +22,13 @@ from the host zero-origin fixture.
 
 The theorem starts at the scalar branch. It does not yet establish dispatch,
 handler allocation/free, the actual fixture callsite or a fetched ISA step.
-A closed query confirms that the CURRENT fixture/handler world binds
-`kprog_arm64_mov_path` at block 98 to its external declaration. The older
-54-transition Numeric dispatch therefore cannot be instantiated here. Next
-link the existing exported Numeric support bodies through the imported linker,
-preserving the fixture's original identifier order and deriving the updated
-global/initial-memory facts, then generalize dispatch and compose the actual
-call. Do not replace the external selector by an assumed silent result.
+At this receipt's source checkpoint, a closed query confirmed that the
+fixture/handler world bound `kprog_arm64_mov_path` at block 98 externally;
+the older 54-transition Numeric dispatch could not be instantiated there.
+The [Numeric support migration](../m5-entry-support/README.md) now links the
+complete exported unit and resolves that selector internally. Query.lean
+tracks the new binding; the original validation/source checkpoint remains
+recorded below. Fixture callsite/free and fetched ISA composition remain open.
 
 Validation: shared 182 jobs, final linked subset 221 jobs, six public type/axiom
 queries and one closed source-binding query pass at original proof caps.

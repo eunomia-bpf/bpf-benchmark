@@ -1,5 +1,6 @@
 import KProgFormal.Clight.Arm64ProgramFixture
 import KProgFormal.Clight.Arm64Program
+import KProgFormal.Clight.Arm64Numeric
 import CCLib.Linking
 import Lean
 
@@ -13,7 +14,7 @@ private def types : List CC.CompositeDef :=
 
 /-- Source-row references cache the imported linker's ordered result. No C body
 or declaration is synthesized; linked_source checks the complete merge. -/
-private def definitions : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty) :=
+private def fixtureDefinitions : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty) :=
   (Arm64ProgramFixture.global_definitions.drop 0).take 63 ++
   (Arm64Program.global_definitions.drop 72).take 1 ++
   (Arm64Program.global_definitions.drop 74).take 2 ++
@@ -41,9 +42,28 @@ private def definitions : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty) :=
   (Arm64Program.global_definitions.drop 127).take 22 ++
   (Arm64Program.global_definitions.drop 151).take 30
 
-def program : CC.Program := CC.mkprogram types definitions
+private def fixtureProgram : CC.Program := CC.mkprogram types fixtureDefinitions
   (Arm64ProgramFixture.prog.prog_public ++ Arm64Program.prog.prog_public.filter
     (fun id => !Arm64ProgramFixture.prog.prog_public.contains id)) Arm64ProgramFixture.prog.prog_main
+
+/-- Cache source-row references for the complete Numeric support merge. The
+nested linked_source theorem checks every declaration and definition. -/
+private def definitions : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty) :=
+  fixtureDefinitions.take 61 ++
+  [Arm64Numeric.global_definitions[77], Arm64Numeric.global_definitions[60]] ++
+  (fixtureDefinitions.drop 63).take 34 ++
+  (Arm64Numeric.global_definitions.drop 57).take 3 ++
+  [Arm64Numeric.global_definitions[63], Arm64Numeric.global_definitions[62],
+    Arm64Numeric.global_definitions[73]] ++
+  (fixtureDefinitions.drop 103).take 94 ++
+  [Arm64Numeric.global_definitions[56], Arm64Numeric.global_definitions[61]] ++
+  (Arm64Numeric.global_definitions.drop 64).take 9 ++
+  [Arm64Numeric.global_definitions[74], Arm64Numeric.global_definitions[76]]
+
+/-- The sole actual entry world includes the unchanged Numeric support unit. -/
+def program : CC.Program := CC.mkprogram types definitions
+  (fixtureProgram.prog_public ++ Arm64Numeric.prog.prog_public.filter
+    (fun id => !fixtureProgram.prog_public.contains id)) fixtureProgram.prog_main
 
 def ge : CC.CGenv := program.globalenv
 
@@ -56,15 +76,16 @@ def sourceEquality : Lean.Elab.Tactic.TacticM Unit := do
   goal.assign (← Lean.Meta.mkEqRefl target.getAppArgs[2]!)
   Lean.Elab.Tactic.replaceMainGoal []
 
-/-- The complete actual fixture and complete handler export link through
-Clean's imported linker, retaining original source definitions. -/
-theorem linked_source : CC.Link.linkProgram Arm64ProgramFixture.prog Arm64Program.prog =
-    some program := by
+/-- Link all three complete exported source units through the imported linker.
+No helper implementation or external-call result is postulated. -/
+theorem linked_source :
+    (CC.Link.linkProgram Arm64ProgramFixture.prog Arm64Program.prog).bind
+      (fun linked => CC.Link.linkProgram linked Arm64Numeric.prog) = some program := by
   run_tac sourceEquality
 
 theorem linked_wellformed : CC.compositesWellFormed program = true := by decide +kernel
 
-theorem definition_count : program.prog_defs.length = 197 := by decide +kernel
+theorem definition_count : program.prog_defs.length = 210 := by decide +kernel
 
 theorem composite_count : program.prog_types.length = 14 := by decide +kernel
 
@@ -75,7 +96,7 @@ theorem original_names : (program.prog_defs.take 90).map Prod.fst =
 
 /-- This is the global-environment frontier; initial-memory allocation is a
 separate fact, not inferred from the older source program's count. -/
-theorem global_frontier : ge.genv_genv.genv_next = CC.Positive.ofNat 198 := by run_tac sourceEquality
+theorem global_frontier : ge.genv_genv.genv_next = CC.Positive.ofNat 211 := by run_tac sourceEquality
 
 /-- Every composite already present in the actual fixture retains its complete
 computed layout. The linked environment may contain additional composites. -/

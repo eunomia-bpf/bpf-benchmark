@@ -1,0 +1,42 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRead
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryLinked.linked_source
+#print axioms Arm64ProgramEntryLinked.linked_source
+
+#check Arm64ProgramEntryLinked.linked_wellformed
+#print axioms Arm64ProgramEntryLinked.linked_wellformed
+
+#check Arm64ProgramEntryLinked.definition_count
+#print axioms Arm64ProgramEntryLinked.definition_count
+
+#check Arm64ProgramEntryLinked.composite_count
+#print axioms Arm64ProgramEntryLinked.composite_count
+
+#check Arm64ProgramEntryLinked.original_names
+#print axioms Arm64ProgramEntryLinked.original_names
+
+#check Arm64ProgramEntryLinked.global_frontier
+#print axioms Arm64ProgramEntryLinked.global_frontier
+
+#check Arm64ProgramEntryLinked.fixture_composites_preserved
+#print axioms Arm64ProgramEntryLinked.fixture_composites_preserved
+
+#check Arm64ProgramEntryLinked.mov_selector_binding
+#print axioms Arm64ProgramEntryLinked.mov_selector_binding
+
+#check Arm64MovImmediate.Dispatch.body_dispatch_bound
+#print axioms Arm64MovImmediate.Dispatch.body_dispatch_bound
+
+#check Arm64MovImmediate.Dispatch.call_dispatch_bound
+#print axioms Arm64MovImmediate.Dispatch.call_dispatch_bound
+
+#check Arm64MovImmediate.LinkedRead.entry_dispatch
+#print axioms Arm64MovImmediate.LinkedRead.entry_dispatch
+
+#check Arm64MovImmediate.LinkedRead.entry_temp_data
+#print axioms Arm64MovImmediate.LinkedRead.entry_temp_data
+
+#check Arm64MovImmediate.LinkedRead.scalar_write
+#print axioms Arm64MovImmediate.LinkedRead.scalar_write
