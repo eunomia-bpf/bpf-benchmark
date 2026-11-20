@@ -1,4 +1,8 @@
-# Tracee in the main-configuration recipe (2026-11-20 10:01 UTC, source e10ec26c4)
+# Tracee arm with the stale base loader (2026-11-20 10:01 UTC, source e10ec26c4) — superseded
+
+**Root cause (OMP 2026-11-20T14:37Z): the base's verified-loader (11-19 11:59) predates 02429959e (11-20 02:57),
+which taught the link schema to bind `current_task`/`cpu_number`/`jiffies_64`; the stale plan failed 140 of 169
+requests on exactly those symbols. Loader rebuilt from HEAD, base replaced in place; the arm is re-run.**
 
 Run x86_kvm_corpus_20261120_100152_964232, recipe kprog/results/lto-apps-20261119/Makefile
 (APP=tracee/monitor, 3 x 180 s per arm, stats on), omp's arm under `flock -x` on locks/timing.
