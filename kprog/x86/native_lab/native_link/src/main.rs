@@ -1640,6 +1640,12 @@ fn rewrite_arm64(
                                 continue;
                             }
                         }
+                        // bpf_tail_call has no callable kernel body (the JIT emits it) and arm64 has no
+                        // native tail-call stub: the program keeps its eBPF (2026-11-20 QEMU check, Tetragon
+                        // execve_rate branched to 0xdead00000000eb9f).
+                        if reloc.target_name == "bpf_tail_call" {
+                            bail!("arm64 native code has no tail-call stub; {} keeps its eBPF", sym.name);
+                        }
                         // Map lookups call the kernel helper, which dispatches on the map's ops: arm64 has
                         // no native provenance for the map in x0, and matching link-plan sites by call order
                         // gave Tetragon a wrong array shape (2026-11-20 QEMU check, oops in
