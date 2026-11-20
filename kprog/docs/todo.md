@@ -33,6 +33,8 @@
 - [ ] PERF runtime helper follow-up 2026-11-20T03:36:17Z: OTel installed-tool LPM functional run appOK/14native (4checked/10direct),34static LPM sites;1033.533→4875.659ns/call, regression. Raw/result/evidence in results/lpm-c-lto-20261120/app-result.json. Keep all LTO on and existing tools unchanged; optimize native C then measure. Stock coverage defects stay with OMP; performance targets remain open.
 
 
+- [x] **OMP** OTel 回退类的判定依据（%s）：`scalar -= pointer` 是同一非法形式的两个分支 —— 标量有界报 `R%%d tried to subtract pointer from scalar`（verifier.c:14990，errno 13），标量无界（`smin == S64_MIN`）先在 `check_reg_sane_offset`（14931）报 `unbounded min value`（errno 22）。OTel 实际请求带 errno 22，所以走无界分支。用手工汇编的 8 条指令复现（`bounded_scalar.o`/`unbounded_scalar.o`/`otel_shape.o`），宿主与访客内核 7.0.0-rc2+ 结果一致。范围按抓取自身的 journal 数：14 请求/14 程序装 4 个，该形态是请求 7、9、10、13、14 共 5 个不同程序，另 5 个回退是 `invalid mem access 'scalar'`×4 与 `unbounded memory access`×1（另一类）。修法：发 `16 < d < 25` 而不发 `24 - d < 8`，全程不形成 `scalar - pointer`。PERF 的 otel7-review 结论（锚定已生效、残差是 `sub i64 24, %%pointer_difference`）与此一致，不冲突：残差正是把锚定后的标量再与常量相减。记录 kprog/results/otel-ptr-scalar-20261120/（27a0d4193、447052a6c）。
+
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
   PERF 2026-11-20T03:44:58Z: OMP OTel7 review does not justify constant-minus-difference repair: cited bounds block1402 is guarded by tag4 but tag selects0/6. Actual B3137 maps to C1759/native0x9eb ALU_SUB before3141tag test. See b-pointer-difference-20261119/otel7-review.json. No pass/toolchain edit or verdict-dependent switch; coverage class stays open.
   PERF 2026-11-19T19:35:18Z: coordinator Katran B4145 also hoists constant-offset
