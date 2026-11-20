@@ -21,6 +21,8 @@ The operator's words are recorded verbatim in kprog/docs/user-instruction.md (op
 
 ## Freeze (operator 2026-11-16, recorded 2026-11-16T23:42:48Z)
 
+Benchmark framework and settings unchanged (operator 2026-11-20: "整个 benchmark 框架不是说都不允许改动??? 还在动啥??? 明确记住, 记到很多地方"; 2026-11-09: "也要确保 benchmark framework 不能变化"; 2026-11-15: "不许改 bench 除非我同意"). The benchmark framework (runner/, corpus/, micro/, e2e/, and the frozen entry kprog/perf/one-image/Makefile) and its settings stay at the 2026-05-29 definition: no code change (the only difference from 9f3855f6f is the native-sim -> kprog and module/ -> kinsn/module/ path rename) and no setting override on the command line (SAMPLES, WORKLOAD_DURATION, STATS, BENCH_PASSES and the like). Timing runs use the frozen entry with its defaults only (rotate: 3 x 180 s per app, stats off then stats on). make check (1 x 10 s per app) is a functional check; its numbers are diagnostics. Needs of the verified path or the native side (waiting for loads, faster loading) are met in kprog's own code, outside the framework. Restored: runner/libs/rejit.py in 25b802208. (recorded 2026-11-20T08:26:09Z)
+
 Operator: "需要有东西冻结并且明确禁止修改, 除了删除死代码. 是不是? 性能优化为啥没有做?"; "这些是不是应该你去看看回退到一个稳定版本并且禁止修改? 5/29?"; "我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?"
 
 - Frozen at the tree that built image 603cacfb442a (checked 2026-11-16): kprog/ (simulator, specializers, verify path, loader core, modules, perf, test, build, fidelity, stock-path), kinsn/, bpfopt/shim/, runner/, micro/, corpus/ configs, vendor/bpf/ upstream sources, the timing entry kprog/perf/one-image/Makefile, and the kernel vendor/linux-framework (stock c23719abc330 + 423 lines). In these paths a commit may delete dead code and nothing else.
