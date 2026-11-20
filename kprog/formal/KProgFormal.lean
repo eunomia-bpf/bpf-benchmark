@@ -122,3 +122,4 @@ import KProgFormal.ClightRefinement.Arm64PointerWriteLinked
 import KProgFormal.ClightRefinement.Arm64AddOperandReads
 import KProgFormal.ClightRefinement.Arm64AddImmediate
 import KProgFormal.ClightRefinement.Arm64AddImmediateDispatch
+import KProgFormal.ClightRefinement.Arm64AddImmediateNative
