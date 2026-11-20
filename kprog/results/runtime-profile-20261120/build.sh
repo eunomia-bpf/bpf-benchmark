@@ -9,4 +9,4 @@ date -u +%FT%TZ > "$out/build-started"
 taskset -c 20-23 nice -n 19 prlimit --as=8589934592 -- \
     make -f kprog/results/runtime-profile-20261120/Makefile dependencies
 taskset -c 20-23 nice -n 19 prlimit --as=8589934592 -- \
-    make -f kprog/results/runtime-profile-20261120/Makefile perf
+    make -f kprog/results/runtime-profile-20261120/Makefile dependencies perf
