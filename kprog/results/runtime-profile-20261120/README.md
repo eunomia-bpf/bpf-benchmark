@@ -11,12 +11,13 @@ actual counters, live JIT bytes/source metadata, symbols, clocks and samples.
 |---|---:|---:|---|
 | OTel | 4258.9 | 5092.8 | LPM lookup and user nofault copy dominate guest roots; native unwind text also costs more. |
 | BCC | 132.3 | 130.9 | sys_enter holds most inclusive runtime; its text itself is small. Clock reads, map updates and userspace map iteration dominate guest roots. |
-| Katran | 204.8 | 196.2 | balancer_ingres text costs209.4 versus194.9 cycles/call; clock, hash and packet-generator work also appear. |
-| Cilium | 869.5 | 880.1 | The busiest cil_from_container programs remain eBPF with1093JIT/1720translated bytes in both arms; endpoint constants do not match the prebuilt native programs. |
+| Katran | 204.8 | 196.2 | balancer_ingres text costs 209.4 versus 194.9 cycles/call; clock, hash and packet-generator work also appear. |
+| Cilium | 869.5 | 880.1 | The busiest cil_from_container programs remain eBPF with 1093 JIT / 1720 translated bytes in both arms; endpoint constants do not match the prebuilt native programs. |
 
-OTel's native guest root cycles per application call include LPM3838.8,
-user nofault copy3000.5, hash lookup/compare1072.8, hash524.4→577.4,
-array lookup230.1→803.9 and generic lookup dispatch167.9→429.7.
+OTel's guest root cycles per application call change from baseline to native:
+LPM lookup 3652.9→3838.8, user nofault copy 2612.0→3000.5,
+`lookup_nulls_elem_raw` 806.9→1072.8, `htab_map_hash` 524.4→577.4,
+array lookup 230.1→803.9 and generic lookup dispatch 167.9→429.7.
 These are exclusive guest root samples normalized by application counters,
 not caller-owned helper measurements. Program text includes inline helpers;
 it is not a measurement of pure application bodies. Tail-called unwind
@@ -57,6 +58,6 @@ archive retain the exact scope and raw failures from initial test recipes.
 
 The wrapper and volatile cleanup are not in the measured image. The next
 combined publication must measure their actual app behavior and per-call
-effect. The20%/50% targets remain open. LPM traversal and exact helper caller
+effect. The 20%/50% targets remain open. LPM traversal and exact helper caller
 attribution remain the next runtime work; no hand-written linker helper or
 benchmark definition changed in this step.
