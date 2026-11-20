@@ -16,3 +16,7 @@ hash-tail:
 	$(MAKE) -f $(ROOT)/kprog/results/hash-c-lto-20261120/Makefile native OUT=$(OUT)/production
 	$(MAKE) replay OUT=$(OUT)/bcc REPLAY_ARGS='--capture /workspaces/kprog-raw/perf/helper-sharing-20261120/bcc-20261120T051434Z/service.tar.gz --requests 15 20' -f $(ROOT)/kprog/results/helper-sharing-20261120/Makefile
 	date -u +%FT%TZ > $(OUT)/finished
+
+.PHONY: hash-tail-receipt
+hash-tail-receipt:
+	python3 $(ROOT)/kprog/results/helper-sharing-20261120/hash_tail_receipt.py $(OUT)
