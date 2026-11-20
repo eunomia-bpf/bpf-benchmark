@@ -178,12 +178,13 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
+    "exit": 0,
+    "seconds": 8.199554204940796,
     "cpus_allowed": [
       16,
       17,
@@ -196,8 +197,16 @@
     ],
     "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 268,
+    "scope": "Whole KProgFormal leanArts library including the fresh root module; no executable/tool native build requested."
   },
   "raw": "/workspaces/kprog-raw/formal/m5-mov-keep-linked-call",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "source_hashes_after_confirmation": "unchanged",
+  "clight_exports_after_confirmation": {
+    "count": 23,
+    "byte_identical": true
+  }
 }
