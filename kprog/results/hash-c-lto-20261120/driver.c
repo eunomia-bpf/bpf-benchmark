@@ -13,12 +13,14 @@
 #include "../../x86/micro-prog/native_hash.h"
 __KPROG_HASH_CODE
 _Alignas(64) unsigned char map_a[4096],map_b[4096],map_c[4096];
+extern unsigned char map_same[4096] __attribute__((alias("map_a")));
 extern void *entry(const void *);
 extern void *entry_b(const void *);
+extern void *entry_same(const void *);
 struct query { unsigned selector; unsigned char key[260]; };
 extern void *entry_select(struct query *);
 extern void *entry_unknown(const void *);
-static unsigned cases,hash_cases,restarts,generic_calls;
+static unsigned cases,hash_cases,restarts,generic_calls,same_map_aliases;
 static void word(void *p,unsigned v) { memcpy(p,&v,4); }
 static void pointer(void *p,void *v) { memcpy(p,&v,sizeof(v)); }
 static unsigned read_word(const void *p) { unsigned v;memcpy(&v,p,4);return v; }
@@ -75,6 +77,7 @@ static void shape(unsigned char *key,unsigned size,unsigned seed,unsigned count)
             assert(actual(map_a,key,size)==expected);
             if(size==8) {
                 assert(entry(key)==expected);
+                assert(entry_same(key)==expected);++same_map_aliases;
                 struct query q={0};memcpy(q.key,key,size);assert(entry_select(&q)==expected);
             }
             for(unsigned i=0;i<n;++i) memcpy(nodes[i]+KEY_OFFSET,key,size);
@@ -120,5 +123,5 @@ int main(void)
     assert((uintptr_t)read_pointer(table+index*STRIDE+HEAD)==index*2+1);++restarts;
     int status;assert(waitpid(child,&status,0)==child && WIFEXITED(status) && WEXITSTATUS(status)==0);
     assert(!munmap(table,page) && !munmap(arena,page*2));
-    printf("%u kernel hash oracle cases, %u C/native lookup cases, %u nulls restart, %u generic calls\n",hash_cases,cases,restarts,generic_calls);
+    printf("%u kernel hash oracle cases, %u C/native lookup cases, %u nulls restart, %u generic calls, %u same-map alias cases\n",hash_cases,cases,restarts,generic_calls,same_map_aliases);
 }

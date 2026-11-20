@@ -19,10 +19,10 @@ def run(args):
     (out/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
     p.check_returncode();return p.stdout
 layout=hash_layout(kernel)
-(build/'helpers.c').write_text(lookup_source(kernel,hashes=[('map_a',8),('map_b',16)]))
+(build/'helpers.c').write_text(lookup_source(kernel,hashes=[('map_a',8),('map_same',8),('map_b',16)]))
 run(['clang-18','-target','bpf','-O1','-emit-llvm','-c',here/'fixture.c','-o',build/'input.bc'])
 run([compiler,build/'input.bc','-o',build/'native.bc','--helper-list',build/'helpers.txt',
-     '--array-map','map_a','--array-map','map_b'])
+     '--array-map','map_a','--array-map','map_same','--array-map','map_b'])
 helpers=(build/'helpers.txt').read_text().splitlines()
 assert helpers==['__kprog_array_lookup'],helpers
 run(['clang-18','-O3','-mgeneral-regs-only','-emit-llvm','-c',build/'helpers.c','-o',build/'helpers.bc'])
