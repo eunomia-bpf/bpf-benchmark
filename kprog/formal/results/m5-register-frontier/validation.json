@@ -1,0 +1,99 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier"
+    ],
+    "exit": 0,
+    "seconds": 2.362431526184082,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 176,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-register-frontier/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5465962886810303,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 11,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.load_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.field_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.local_owned": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.borrowed_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.storage_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.gpr_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.sp_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.flag_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.flags_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.vector_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.represents_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_proof_library": {
+    "status": "pending end-of-batch confirmation"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-register-frontier",
+  "completed_isa_families": 0
+}

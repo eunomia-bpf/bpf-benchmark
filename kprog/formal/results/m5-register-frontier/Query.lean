@@ -1,0 +1,36 @@
+import KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier
+
+open KProgFormal.ClightRefinement
+
+#check Arm64RegisterStorageFrontier.load_eq
+#print axioms Arm64RegisterStorageFrontier.load_eq
+
+#check Arm64RegisterStorageFrontier.field_eq
+#print axioms Arm64RegisterStorageFrontier.field_eq
+
+#check Arm64RegisterStorageFrontier.local_owned
+#print axioms Arm64RegisterStorageFrontier.local_owned
+
+#check Arm64RegisterStorageFrontier.borrowed_eq
+#print axioms Arm64RegisterStorageFrontier.borrowed_eq
+
+#check Arm64RegisterStorageFrontier.storage_frame
+#print axioms Arm64RegisterStorageFrontier.storage_frame
+
+#check Arm64RegisterStorageFrontier.gpr_eq
+#print axioms Arm64RegisterStorageFrontier.gpr_eq
+
+#check Arm64RegisterStorageFrontier.sp_eq
+#print axioms Arm64RegisterStorageFrontier.sp_eq
+
+#check Arm64RegisterStorageFrontier.flag_eq
+#print axioms Arm64RegisterStorageFrontier.flag_eq
+
+#check Arm64RegisterStorageFrontier.flags_eq
+#print axioms Arm64RegisterStorageFrontier.flags_eq
+
+#check Arm64RegisterStorageFrontier.vector_eq
+#print axioms Arm64RegisterStorageFrontier.vector_eq
+
+#check Arm64RegisterStorageFrontier.represents_iff
+#print axioms Arm64RegisterStorageFrontier.represents_iff
