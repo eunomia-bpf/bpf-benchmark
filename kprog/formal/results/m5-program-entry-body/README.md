@@ -6,6 +6,8 @@ Three original-context Mint32 loads at the imported __sk_buff offsets 8/32/68 su
 
 Source statements and successors are cached from the imported actual AST and checked by small equations. The existing reached-body definition caches its source constructor; its production spine and prefix correspondence are rechecked. Original proof caps are unchanged. The source-equation retries in the raw record isolate deep normalization into smaller equations; integer and byte casts use imported semantics.
 
-Focused 196 jobs and 14 public type/axiom queries pass on CPU17, one worker and 32 GiB address space. Imported execution axioms remain visible in validation.json. Whole proof-library confirmation is pending. C/runtime/toolchain/benchmark sources are unchanged.
+Focused 196 jobs and 14 public type/axiom queries pass on CPU17, one worker and 32 GiB address space. Imported execution axioms remain visible in validation.json. Whole KProgFormal proof-library confirmation passes 269 jobs on CPUs 16–23, nice 19, one worker and 32 GiB address space; executable/tool native builds are excluded.
 
 Next transport the established borrowed storage and architectural relation through these five writes, then admit the actual first MOV_IMM with SRC=SP32 and the following MOVK with unrestricted u32 priority. Actual native/context ABI and final return, other families, the recount and M6 remain open.
+
+The existing frontend also regenerated eight x86 exports after PERF’s private inline-stack qualifier change (76c41e98a). The other fifteen match the earlier frontend receipt. The regenerated dependencies are checked by the whole proof-library build. This regeneration uses existing tools; it does not build a toolchain.

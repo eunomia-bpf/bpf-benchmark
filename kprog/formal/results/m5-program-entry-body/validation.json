@@ -118,12 +118,13 @@
     "Elab.async": false
   },
   "whole_proof_library": {
-    "status": "pending",
     "command": [
       "lake",
       "build",
       "KProgFormal"
     ],
+    "exit": 0,
+    "seconds": 1540.415607213974,
     "cpus_allowed": [
       16,
       17,
@@ -136,8 +137,26 @@
     ],
     "nice": 19,
     "workers": 1,
-    "address_space_bytes": 34359738368
+    "address_space_bytes": 34359738368,
+    "status": "passed",
+    "jobs": 269,
+    "scope": "KProgFormal leanArts proof library including root; executable/tool native builds excluded"
   },
   "raw": "/workspaces/kprog-raw/formal/m5-program-entry-body",
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "clight_reconciliation": {
+    "changed_from_prior_frontend_receipt": [
+      "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+      "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+      "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+      "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+      "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+      "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+      "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+      "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean"
+    ],
+    "cause_notice": "PERF 2026-11-20T03:50:58Z and 03:53:33Z, private x86_sim_inline_bindings.stack qualifier removal 76c41e98a; Lake regenerated affected exports using existing frontend",
+    "validation": "Regenerated exports compiled by the whole proof-library build using the existing frontend."
+  },
+  "source_checkpoint": "408a4c3d4707a5bc7920efd22904ceddd219cdf1"
 }
