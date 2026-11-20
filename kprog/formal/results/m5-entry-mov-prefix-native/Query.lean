@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefixNative
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryMovPrefixNative.entry_corresponds
+#print axioms Arm64ProgramEntryMovPrefixNative.entry_corresponds
