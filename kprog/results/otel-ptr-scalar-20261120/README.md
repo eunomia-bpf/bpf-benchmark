@@ -11,10 +11,13 @@ I first read that as `check_reg_sane_offset`'s `smin == S64_MIN` test, then "cor
 `ALU64 SUB` with a scalar destination and a pointer source. Which message appears depends only on whether the
 scalar still has a bound:
 
-| scalar on the left | message | errno |
-|---|---|---|
-| bounded (`r1 = 24`) | `R1 tried to subtract pointer from scalar` (verifier.c:14990) | 13 |
-| unbounded (`r1` reloaded from a spill of `ctx`) | `math between fp pointer and register with unbounded min value` (verifier.c:14503) | 13 |
+| scalar on the left | object | message | errno |
+|---|---|---|---|
+| bounded (`r1 = 24`) | `bounded_scalar.o` | `R1 tried to subtract pointer from scalar` (verifier.c:14990) | **13** (EACCES) |
+| unbounded (helper return, reloaded) | `unbounded_scalar.o` | `math between fp pointer and register with unbounded min value` (verifier.c:14503) | **22** (EINVAL) |
+
+Both verified on the guest kernel 7.0.0-rc2+ as well as the host. The real OTel request shows errno 22 with
+the second message, which is how it is known to take the unbounded branch.
 
 Mechanism: `adjust_scalar_min_max_vals` sends any pointer operand to `adjust_ptr_min_max_vals`, which runs
 `check_reg_sane_offset` on **both** the offset register and the pointer at line 14931. An unbounded scalar
@@ -24,7 +27,7 @@ the program is refused; the exact text is cosmetic.
 ## Reproduced by hand, minimal
 
 `otel_shape.o` holds exactly the eight instructions OTel emits at 3134–3137, hand-assembled so nothing else
-can be responsible:
+can be responsible; `bounded_scalar.o` and `unbounded_scalar.o` differ only in where the scalar comes from:
 
 ```
 r1 = 24; *(u64*)(fp-152) = r1;      # scalar, bounded
@@ -33,9 +36,10 @@ r1 = *(u64*)(fp-152);                # reload (OTel's is from a map: unbounded)
 r1 -= r2                             # scalar -= fp pointer
 ```
 
-Bounded reload → `R1 tried to subtract pointer from scalar`. The same object with the spill replaced by a
-reload of `ctx` (unbounded) → `math between fp pointer and register with unbounded min value`, i.e. the
-message the real request shows. Both on the host; the guest kernel 7.0.0-rc2+ rejects both the same way.
+`bounded_scalar.o` (the constant `24` spilled and reloaded) → `R1 tried to subtract pointer from scalar`,
+errno 13. `unbounded_scalar.o` (a `bpf_ktime_get_ns()` return spilled and reloaded, so `smin == S64_MIN`) →
+`math between fp pointer and register with unbounded min value`, errno 22 — the message and errno the real
+request shows. Host and guest agree on both.
 
 ## What this means for the emitter
 
