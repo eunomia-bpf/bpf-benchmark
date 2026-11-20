@@ -1,0 +1,51 @@
+{
+  "source_commit": "8ec5413f9",
+  "source_kernel_commit": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "perf_product": "/workspaces/.agent-state/kprog-ck/perf/perf",
+  "raw": "/workspaces/kprog-raw/perf/runtime-profile-20261120/build-deps-20261120T002743Z",
+  "started": "2026-11-20T00:27:43Z",
+  "finished": "2026-11-20T00:28:27Z",
+  "build_exit_code": 0,
+  "capabilities": [
+    "/workspaces/.agent-state/kprog-ck/perf/perf version --build-options",
+    "perf version 7.0.rc2.g83e0fabe355d",
+    "                   aio: [ on  ]  # HAVE_AIO_SUPPORT",
+    "                   bpf: [ OFF ]  # HAVE_LIBBPF_SUPPORT",
+    "         bpf_skeletons: [ OFF ]  # HAVE_BPF_SKEL",
+    "            debuginfod: [ OFF ]  # HAVE_DEBUGINFOD_SUPPORT",
+    "                 dwarf: [ on  ]  # HAVE_LIBDW_SUPPORT",
+    "    dwarf_getlocations: [ on  ]  # HAVE_LIBDW_SUPPORT",
+    "          dwarf-unwind: [ on  ]  # HAVE_DWARF_UNWIND_SUPPORT",
+    "                libbfd: [ OFF ]  # HAVE_LIBBFD_SUPPORT ( tip: Deprecated, license incompatibility, use BUILD_NONDISTRO=1 and install binutils-dev[el] )",
+    "         libbabeltrace: [ OFF ]  # HAVE_LIBBABELTRACE_SUPPORT",
+    "        libbpf-strings: [ OFF ]  # HAVE_LIBBPF_STRINGS_SUPPORT",
+    "           libcapstone: [ OFF ]  # HAVE_LIBCAPSTONE_SUPPORT",
+    "    libdw-dwarf-unwind: [ on  ]  # HAVE_LIBDW_SUPPORT",
+    "                libelf: [ on  ]  # HAVE_LIBELF_SUPPORT",
+    "               libLLVM: [ on  ]  # HAVE_LIBLLVM_SUPPORT",
+    "               libnuma: [ OFF ]  # HAVE_LIBNUMA_SUPPORT",
+    "            libopencsd: [ OFF ]  # HAVE_CSTRACE_SUPPORT",
+    "               libperl: [ OFF ]  # HAVE_LIBPERL_SUPPORT ( tip: Deprecated, use LIBPERL=1 and install perl-ExtUtils-Embed/libperl-dev to build with it )",
+    "               libpfm4: [ OFF ]  # HAVE_LIBPFM",
+    "             libpython: [ OFF ]  # HAVE_LIBPYTHON_SUPPORT",
+    "              libslang: [ OFF ]  # HAVE_SLANG_SUPPORT",
+    "         libtraceevent: [ OFF ]  # HAVE_LIBTRACEEVENT",
+    "             libunwind: [ OFF ]  # HAVE_LIBUNWIND_SUPPORT ( tip: Deprecated, use LIBUNWIND=1 and install libunwind-dev[el] to build with it )",
+    "                  lzma: [ on  ]  # HAVE_LZMA_SUPPORT",
+    "numa_num_possible_cpus: [ OFF ]  # HAVE_LIBNUMA_SUPPORT",
+    "                  zlib: [ on  ]  # HAVE_ZLIB_SUPPORT",
+    "                  zstd: [ on  ]  # HAVE_ZSTD_SUPPORT",
+    "                  rust: [ on  ]  # HAVE_RUST_SUPPORT"
+  ],
+  "earlier_failures": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/runtime-profile-20261120/build-20261120T002515Z",
+      "error": "jevents Python interpreter not selected"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/runtime-profile-20261120/build-python-20261120T002634Z",
+      "error": "python3-config missing"
+    }
+  ],
+  "scope": "Tool build and capability inspection only. No VM profiling or runtime speed result. Kernel/image/workload definitions unchanged."
+}
