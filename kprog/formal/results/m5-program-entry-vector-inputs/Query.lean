@@ -1,0 +1,40 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.vector_layout_bound
+#print axioms Arm64Producer.vector_layout_bound
+#check Arm64Producer.vector_store_exists
+#print axioms Arm64Producer.vector_store_exists
+#check Arm64Producer.vector_call_body
+#print axioms Arm64Producer.vector_call_body
+#check Arm64Producer.vector_return_body
+#print axioms Arm64Producer.vector_return_body
+#check Arm64Producer.vector_input_returns_body
+#print axioms Arm64Producer.vector_input_returns_body
+#check Arm64Producer.vector_input_returns_bound
+#print axioms Arm64Producer.vector_input_returns_bound
+#check Arm64ProducerVectorInputs.run_suffix_body
+#print axioms Arm64ProducerVectorInputs.run_suffix_body
+#check Arm64ProducerVectorInputs.vector_inputs_initialized_bound
+#print axioms Arm64ProducerVectorInputs.vector_inputs_initialized_bound
+#check Arm64ProgramEntryVectorInputs.metadata
+#print axioms Arm64ProgramEntryVectorInputs.metadata
+#check Arm64ProgramEntryVectorInputs.source
+#print axioms Arm64ProgramEntryVectorInputs.source
+#check Arm64ProgramEntryVectorInputs.first_stage
+#print axioms Arm64ProgramEntryVectorInputs.first_stage
+#check Arm64ProgramEntryVectorInputs.chain
+#print axioms Arm64ProgramEntryVectorInputs.chain
+#check Arm64ProgramEntryVectorInputs.last_stage
+#print axioms Arm64ProgramEntryVectorInputs.last_stage
+#check Arm64ProgramEntryVectorInputs.layout
+#print axioms Arm64ProgramEntryVectorInputs.layout
+#check Arm64ProgramEntryVectorInputs.binding
+#print axioms Arm64ProgramEntryVectorInputs.binding
+#check Arm64ProgramEntryVectorInputs.input_returns
+#print axioms Arm64ProgramEntryVectorInputs.input_returns
+#check Arm64ProgramEntryVectorInputs.initialized
+#print axioms Arm64ProgramEntryVectorInputs.initialized
+#check Arm64ProgramEntryVectorInputs.entry_initialized
+#print axioms Arm64ProgramEntryVectorInputs.entry_initialized

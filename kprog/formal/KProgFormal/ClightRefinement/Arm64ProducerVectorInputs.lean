@@ -23,18 +23,32 @@ def ProviderAt (world : CC.CGenv) (m : CC.Mem) (values : Fin 64 → BitVec 64) :
 def Provider (m : CC.Mem) (values : Fin 64 → BitVec 64) : Prop :=
   ProviderAt ge m values
 
-private theorem run_suffix (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv)
-    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
-        some (CC.Positive.ofNat 64) ∧
-      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m : CC.Mem) (localVector : VectorLocal m)
-    (values : Fin 64 → BitVec 64) (provider : ProviderAt world m values) (count : Nat) :
+/-- Shared 64-visit induction with actual function, environment, stages and temps. -/
+theorem run_suffix_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (atStage : Nat → CC.Stmt) (inputTemp : Fin 64 → CC.Ident)
+    (m : CC.Mem) (localVector : VectorLocal m)
+    (values : Fin 64 → BitVec 64) (provider : ProviderAt world m values)
+    (runInput : ∀ (i : Fin 64) (before supplied : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) (trace : CC.Trace),
+      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+        [.Vint (6#32)] before trace (.Vlong (values i)) supplied →
+      supplied.access = (allocation m).2.access →
+      ∃ chosen : VectorLocal m, ∃ after,
+        CC.Star (CC.Step2 world) (.State f (atStage i.val) k e le before)
+          trace (.State f (atStage (i.val + 1)) k e (le.set (inputTemp i) (.Vlong (values i))) after) ∧
+        CC.Mem.load .Mint64 after chosen.block (8 * (i.val : Int)) = some (.Vlong (values i)) ∧
+        (∀ j : Fin 64, j ≠ i → CC.Mem.load .Mint64 after chosen.block (8 * (j.val : Int)) =
+          CC.Mem.load .Mint64 supplied chosen.block (8 * (j.val : Int))) ∧
+        (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
+          ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+        FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+        after.nextblock = supplied.nextblock)
+    (count : Nat) :
     ∀ start, start + count = 64 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
     before.access = (allocation m).2.access →
     ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
       CC.Star (CC.Step2 world)
-        (.State producer (vectorStage start) k (allocation m).1 le before)
-        traces.flatten (.State producer (vectorStage 64) k (allocation m).1 finalLe after) ∧
+        (.State f (atStage start) k e le before)
+        traces.flatten (.State f (atStage 64) k e finalLe after) ∧
       (∀ j : Fin 64, start ≤ j.val →
         CC.Mem.load .Mint64 after localVector.block (8 * (j.val : Int)) = some (.Vlong (values j))) ∧
       (∀ j : Fin 64, j.val < start →
@@ -42,7 +56,7 @@ private theorem run_suffix (world : CC.CGenv)
           CC.Mem.load .Mint64 before localVector.block (8 * (j.val : Int))) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
-      (∀ id, (∀ i : Fin 64, id ≠ vectorInputTemp i) → finalLe.get id = le.get id) ∧
+      (∀ id, (∀ i : Fin 64, id ≠ inputTemp i) → finalLe.get id = le.get id) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   induction count with
@@ -61,13 +75,13 @@ private theorem run_suffix (world : CC.CGenv)
     obtain ⟨trace, supplied, call, providerAccess, providerNext, providerFrame, providerLocals⟩ :=
       provider i before access
     obtain ⟨chosen, middle, headRun, headRead, headWords, headLocals, headFrame, headAccess, headNext⟩ :=
-      vector_input_returns_bound world layout inputBinding i m before supplied le k (values i) trace call (providerAccess.trans access)
+      runInput i before supplied le k trace call (providerAccess.trans access)
     have sameBlock : chosen.block = localVector.block :=
       congrArg Prod.fst (Option.some.inj (chosen.binding.symm.trans localVector.binding))
     rw [sameBlock] at headRead headWords
     obtain ⟨after, finalLe, traces, length, tailRun, tailReads, tailWords, tailLocals,
         tailTemps, tailFrame, tailAccess, tailNext⟩ :=
-      ih (start + 1) (by omega) middle (le.set (vectorInputTemp i) (.Vlong (values i))) k
+      ih (start + 1) (by omega) middle (le.set (inputTemp i) (.Vlong (values i))) k
         (headAccess.trans (providerAccess.trans access))
     refine ⟨after, finalLe, trace :: traces, by simp [length], ?_, ?_, ?_, ?_, ?_,
       (providerFrame.trans headFrame).trans tailFrame,
@@ -91,6 +105,32 @@ private theorem run_suffix (world : CC.CGenv)
           (providerLocals id ty block binding chunk ofs))
     · intro id different
       exact (tailTemps id different).trans (CC.PTree.gso _ _ _ _ (Ne.symm (different i)))
+
+private theorem run_suffix (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m : CC.Mem) (localVector : VectorLocal m)
+    (values : Fin 64 → BitVec 64) (provider : ProviderAt world m values) (count : Nat) :
+    ∀ start, start + count = 64 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
+    before.access = (allocation m).2.access →
+    ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
+      CC.Star (CC.Step2 world)
+        (.State producer (vectorStage start) k (allocation m).1 le before)
+        traces.flatten (.State producer (vectorStage 64) k (allocation m).1 finalLe after) ∧
+      (∀ j : Fin 64, start ≤ j.val →
+        CC.Mem.load .Mint64 after localVector.block (8 * (j.val : Int)) = some (.Vlong (values j))) ∧
+      (∀ j : Fin 64, j.val < start →
+        CC.Mem.load .Mint64 after localVector.block (8 * (j.val : Int)) =
+          CC.Mem.load .Mint64 before localVector.block (8 * (j.val : Int))) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      (∀ id, (∀ i : Fin 64, id ≠ vectorInputTemp i) → finalLe.get id = le.get id) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  exact run_suffix_body world producer (allocation m).1 vectorStage vectorInputTemp m localVector values provider
+    (fun i before supplied le k trace call access =>
+      vector_input_returns_bound world layout inputBinding i m before supplied le k (values i) trace call access) count
 
 /-- All 64 real source visits, with one trace per call in source order.
 Earlier local reads and caller memory survive each explicitly framed provider

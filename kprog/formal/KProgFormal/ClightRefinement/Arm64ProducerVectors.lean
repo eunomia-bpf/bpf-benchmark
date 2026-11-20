@@ -4,6 +4,9 @@ set_option Elab.async false
 
 namespace KProgFormal.ClightRefinement.Arm64Producer
 
+def vectorTypeFor (tag : CC.Ident) : CC.Ty := .Tstruct tag CC.noattr
+def vectorArrayTypeFor (tag : CC.Ident) : CC.Ty := CC.tarray (vectorTypeFor tag) 32
+
 def vectorType : CC.Ty := .Tstruct Arm64Entry.__2854 CC.noattr
 def vectorArrayType : CC.Ty := CC.tarray vectorType 32
 
@@ -66,18 +69,22 @@ def vectorField (i : Fin 64) : CC.Ident :=
 
 def vectorFieldOffset (i : Fin 64) : Int := if i.val % 2 == 0 then 0 else 8
 
-def vectorTarget (i : Fin 64) : CC.Expr :=
-  .Efield (.Ederef (.Ebinop .Oadd (.Evar Arm64Entry.___a64_vectors vectorArrayType)
-    (.Econst_int (CC.Integers.Int.repr (i.val / 2)) CC.tint) (CC.tptr vectorType)) vectorType)
+def vectorTargetFor (tag : CC.Ident) (i : Fin 64) : CC.Expr :=
+  .Efield (.Ederef (.Ebinop .Oadd (.Evar Arm64Entry.___a64_vectors (vectorArrayTypeFor tag))
+    (.Econst_int (CC.Integers.Int.repr (i.val / 2)) CC.tint) (CC.tptr (vectorTypeFor tag))) (vectorTypeFor tag))
     (vectorField i) CC.tulong
 
-def vectorStore (i : Fin 64) : CC.Stmt :=
-  .Sassign (vectorTarget i) (.Etempvar (vectorInputTemp i) CC.tulong)
+def vectorStoreFor (tag temporary : CC.Ident) (i : Fin 64) : CC.Stmt :=
+  .Sassign (vectorTargetFor tag i) (.Etempvar temporary CC.tulong)
 
-def vectorInitializer (i : Fin 64) : CC.Stmt :=
-  .Ssequence (.Scall (some (vectorInputTemp i))
+def vectorInitializerFor (tag temporary : CC.Ident) (i : Fin 64) : CC.Stmt :=
+  .Ssequence (.Scall (some temporary)
     (.Evar Arm64Entry._native_lab_entry_input (.Tfunction [CC.tuint] CC.tulong CC.cc_default))
-    [.Econst_int (6#32) CC.tint]) (vectorStore i)
+    [.Econst_int (6#32) CC.tint]) (vectorStoreFor tag temporary i)
+
+def vectorTarget (i : Fin 64) : CC.Expr := vectorTargetFor Arm64Entry.__2854 i
+def vectorStore (i : Fin 64) : CC.Stmt := vectorStoreFor Arm64Entry.__2854 (vectorInputTemp i) i
+def vectorInitializer (i : Fin 64) : CC.Stmt := vectorInitializerFor Arm64Entry.__2854 (vectorInputTemp i) i
 
 private theorem vector_initializers_source : vectorParts.1.map Prod.fst = List.ofFn vectorInitializer := by rfl
 
@@ -131,24 +138,26 @@ theorem vector_local (m : CC.Mem) : Nonempty (VectorLocal m) := by
   exact ⟨⟨block, binding, fresh, CC.Mem.rangePerm_implies range
     (by decide : CC.permOrder .Freeable .Writable = true)⟩⟩
 
-def vectorContinuation (i : Fin 64) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
-  .Kcall (some (vectorInputTemp i)) producer (allocation m).1 le
-    (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k))
+def vectorContinuationFor (f : CC.Function) (e : CC.Env) (tag temporary : CC.Ident)
+    (i : Fin 64) (rest : CC.Stmt) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+  .Kcall (some temporary) f e le (.Kseq (vectorStoreFor tag temporary i) (.Kseq rest k))
 
-private theorem vector_call_exec (world : CC.CGenv)
-    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
-        some (CC.Positive.ofNat 64) ∧
-      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    steps world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) =
+def vectorContinuation (i : Fin 64) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+  vectorContinuationFor producer (allocation m).1 Arm64Entry.__2854 (vectorInputTemp i)
+    i (vectorStage (i.val + 1)) le k
+
+/-- The real call prefix with explicit function, environment, symbol and successor. -/
+theorem vector_call_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (inputBlock : CC.Block)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction)
+    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt)
+    (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (unshadowed : e.get Arm64Entry._native_lab_entry_input = none) :
+    steps world 3 (.State f (.Ssequence (vectorInitializerFor tag temporary i) rest) k e le memory) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
-        (vectorContinuation i m le k) memory) ∧
-    InternalPath world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) := by
-  rw [vector_stage_next i]
-  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
-    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
-    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
-      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
-  simp +decide [steps, InternalPath, InternalState, vectorInitializer, vectorContinuation,
+        (vectorContinuationFor f e tag temporary i rest le k) memory) ∧
+    InternalPath world 3 (.State f (.Ssequence (vectorInitializerFor tag temporary i) rest) k e le memory) := by
+  simp +decide [steps, InternalPath, InternalState, vectorInitializerFor, vectorContinuationFor,
     CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof,
     CC.tptr, CC.tint, CC.tuint, CC.tulong, CC.Cop.classifyFun, CC.Cop.semCast, CC.Cop.classifyCast,
     CC.Cop.castIntInt, CC.Genv.findFunct, CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
@@ -156,7 +165,6 @@ private theorem vector_call_exec (world : CC.CGenv)
     Arm64OriginCache.inputEF, unshadowed, inputBinding.1, inputBinding.2,
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.E0, CC.Eapp]
 
-/-- All 64 actual vector word declarations reach their real kind-6 call. -/
 theorem vector_input_ready_bound (world : CC.CGenv)
     (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
         some (CC.Positive.ofNat 64) ∧
@@ -164,10 +172,16 @@ theorem vector_input_ready_bound (world : CC.CGenv)
     InternalRun world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         (vectorContinuation i m le k) memory) := by
-  have run := vector_call_exec world inputBinding i m memory le k
+  rw [vector_stage_next i]
+  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
+    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
+    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
+  have run := vector_call_body world producer (allocation m).1 (CC.Positive.ofNat 64) inputBinding
+    Arm64Entry.__2854 (vectorInputTemp i) i (vectorStage (i.val + 1)) memory le k unshadowed
   exact internalRun_of_steps run.2 run.1
 
-private theorem vector_store_exists (m supplied : CC.Mem) (localVector : VectorLocal m)
+theorem vector_store_exists (m supplied : CC.Mem) (localVector : VectorLocal m)
     (i : Fin 64) (value : BitVec 64) (access : supplied.access = (allocation m).2.access) :
     ∃ after, CC.Mem.store .Mint64 supplied localVector.block (8 * (i.val : Int))
       (.Vlong value) = some after := by
@@ -190,53 +204,119 @@ private theorem vector_store_exists (m supplied : CC.Mem) (localVector : VectorL
   rw [writable]
   exact ⟨_, rfl⟩
 
-private theorem vector_return_exec (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv) (i : Fin 64) (m supplied after : CC.Mem)
-    (localVector : VectorLocal m) (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64)
+/-- The vector target needs only its own composite record, stride and fields. -/
+structure VectorLayout (world : CC.CGenv) (tag : CC.Ident) where
+  composite : CC.Composite
+  binding : world.genv_cenv.get tag = some composite
+  size : composite.co_sizeof = 16
+  offsets : ∀ i : Fin 64, CC.fieldOffset world.genv_cenv (vectorField i) composite.co_members =
+    .OK (vectorFieldOffset i, .Full)
+
+theorem vector_layout_bound (world : CC.CGenv) (layout : world.genv_cenv = ge.genv_cenv) :
+    Nonempty (VectorLayout world Arm64Entry.__2854) := by
+  refine ⟨⟨vectorComposite, ?_, ?_, ?_⟩⟩
+  · rw [layout]; exact vector_layout.1
+  · simpa only [vectorType, vectorTypeFor, CC.sizeof, vector_layout.1] using vector_layout.2.1
+  · rw [layout]; exact vector_field_offsets
+
+/-- Shared return/store execution, independent of the function and anonymous tag. -/
+theorem vector_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt) (m supplied after : CC.Mem)
+    (localVector : VectorLocal m) (shape : VectorLayout world tag)
+    (actualBinding : e.get Arm64Entry.___a64_vectors = some (localVector.block, vectorArrayTypeFor tag))
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64)
     (stored : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
       (.Vlong value) = some after) :
-    InternalRun world 4 (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied)
-      (.State producer (vectorStage (i.val + 1)) k (allocation m).1
-        (le.set (vectorInputTemp i) (.Vlong value)) after) := by
-  have size : vectorComposite.co_sizeof = 16 := by
-    simpa only [vectorType, CC.sizeof, vector_layout.1] using vector_layout.2.1
-  have address : CC.doEvalLvalue world (allocation m).1
-      (le.set (vectorInputTemp i) (.Vlong value)) supplied (vectorTarget i) =
+    InternalRun world 4
+      (.Returnstate (.Vlong value) (vectorContinuationFor f e tag temporary i rest le k) supplied)
+      (.State f rest k e (le.set temporary (.Vlong value)) after) := by
+  have address : CC.doEvalLvalue world e
+      (le.set temporary (.Vlong value)) supplied (vectorTargetFor tag i) =
       some (localVector.block, vectorPointerOffset i, .Full) := by
-    simp [vectorTarget, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
-      CC.lvalOfField, CC.typeof, CC.accessMode, vectorType, vectorArrayType,
-      layout, vector_layout.1, size, vector_field_offsets i, localVector.binding,
+    simp [vectorTargetFor, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
+      CC.lvalOfField, CC.typeof, CC.accessMode, vectorTypeFor, vectorArrayTypeFor,
+      shape.binding, shape.size, shape.offsets i, actualBinding,
       CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
       CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,
       CC.tptr, CC.tarray, CC.tint, vectorPointerOffset]
   have assignment : CC.doStep world
-      (.State producer (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)
-        (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) supplied) =
-      some (CC.E0, .State producer .Sskip (.Kseq (vectorStage (i.val + 1)) k)
-        (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) after) := by
-    simp only [vectorStore, CC.doStep, address, CC.doEvalExpr, CC.PTree.gss, CC.typeof]
-    simp [vectorTarget, CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
+      (.State f (vectorStoreFor tag temporary i) (.Kseq rest k)
+        e (le.set temporary (.Vlong value)) supplied) =
+      some (CC.E0, .State f .Sskip (.Kseq rest k)
+        e (le.set temporary (.Vlong value)) after) := by
+    simp only [vectorStoreFor, CC.doStep, address, CC.doEvalExpr, CC.PTree.gss, CC.typeof]
+    simp [vectorTargetFor, CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
       CC.doAssignLoc, CC.accessMode, stored]
-  have r0 : CC.doStep world (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) =
-      some (CC.E0, .State producer .Sskip
-        (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)) (allocation m).1
-        (le.set (vectorInputTemp i) (.Vlong value)) supplied) := rfl
-  have r1 : CC.doStep world (.State producer .Sskip
-        (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)) (allocation m).1
-        (le.set (vectorInputTemp i) (.Vlong value)) supplied) =
-      some (CC.E0, .State producer (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)
-        (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) supplied) := rfl
-  have r3 : CC.doStep world (.State producer .Sskip (.Kseq (vectorStage (i.val + 1)) k)
-        (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) after) =
-      some (CC.E0, .State producer (vectorStage (i.val + 1)) k (allocation m).1
-        (le.set (vectorInputTemp i) (.Vlong value)) after) := rfl
+  have r0 : CC.doStep world (.Returnstate (.Vlong value) (vectorContinuationFor f e tag temporary i rest le k) supplied) =
+      some (CC.E0, .State f .Sskip
+        (.Kseq (vectorStoreFor tag temporary i) (.Kseq rest k)) e
+        (le.set temporary (.Vlong value)) supplied) := rfl
+  have r1 : CC.doStep world (.State f .Sskip
+        (.Kseq (vectorStoreFor tag temporary i) (.Kseq rest k)) e
+        (le.set temporary (.Vlong value)) supplied) =
+      some (CC.E0, .State f (vectorStoreFor tag temporary i) (.Kseq rest k)
+        e (le.set temporary (.Vlong value)) supplied) := rfl
+  have r3 : CC.doStep world (.State f .Sskip (.Kseq rest k)
+        e (le.set temporary (.Vlong value)) after) =
+      some (CC.E0, .State f rest k e
+        (le.set temporary (.Vlong value)) after) := rfl
   exact .step trivial (CC.doStep_sound world _ _ _ r0)
     (.step trivial (CC.doStep_sound world _ _ _ r1)
       (.step trivial (CC.doStep_sound world _ _ _ assignment)
         (.step trivial (CC.doStep_sound world _ _ _ r3) (.refl _))))
 
-/-- Each stated scalar vector-input outcome writes the actual low/high word.
-Other lanes and other local loads are framed relative to provider post-memory. -/
+/-- One shared memory witness and readback/frame construction for every visit. -/
+theorem vector_input_returns_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (inputBlock : CC.Block)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction)
+    (unshadowed : e.get Arm64Entry._native_lab_entry_input = none)
+    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt) (m before supplied : CC.Mem)
+    (localVector : VectorLocal m) (shape : VectorLayout world tag)
+    (actualBinding : e.get Arm64Entry.___a64_vectors = some (localVector.block, vectorArrayTypeFor tag))
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (6#32)] before trace (.Vlong value) supplied)
+    (access : supplied.access = (allocation m).2.access) :
+    ∃ after, CC.Star (CC.Step2 world)
+      (.State f (.Ssequence (vectorInitializerFor tag temporary i) rest) k e le before)
+      trace (.State f rest k e (le.set temporary (.Vlong value)) after) ∧
+      CC.Mem.load .Mint64 after localVector.block (8 * (i.val : Int)) = some (.Vlong value) ∧
+      (∀ j : Fin 64, j ≠ i → CC.Mem.load .Mint64 after localVector.block (8 * (j.val : Int)) =
+        CC.Mem.load .Mint64 supplied localVector.block (8 * (j.val : Int))) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+      FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock := by
+  obtain ⟨after, stored⟩ := vector_store_exists m supplied localVector i value access
+  have storev : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
+      (.Vlong value) = some after := by
+    simpa only [CC.Mem.storev, vector_offsets] using stored
+  have suffix := vector_return_body world f e tag temporary i rest m supplied after localVector shape
+    actualBinding le k value storev
+  have call : CC.Star (CC.Step2 world)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (vectorContinuationFor f e tag temporary i rest le k) before)
+      trace (.Returnstate (.Vlong value) (vectorContinuationFor f e tag temporary i rest le k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.E0, CC.Eapp])
+  have prefixRun := vector_call_body world f e inputBlock inputBinding tag temporary i rest before le k unshadowed
+  refine ⟨after, ?_, CC.Mem.load_store_same stored, ?_, ?_,
+    FrameBelow.store localVector.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
+  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+      star_trans (internalRun_of_steps prefixRun.2 prefixRun.1).sound
+        (star_trans call suffix.sound)
+  · intro j different
+    have ne : j.val ≠ i.val := fun h => different (Fin.ext h)
+    have separate : 8 * (j.val : Int) + 8 ≤ 8 * (i.val : Int) ∨
+        8 * (i.val : Int) + 8 ≤ 8 * (j.val : Int) := by omega
+    apply CC.Mem.load_store_other stored
+    exact Or.inr separate
+  · intro id ty block bound different chunk ofs
+    have distinct := (allocated_local_storage
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
+    exact CC.Mem.load_store_other stored chunk block ofs
+      (.inl (distinct _ _ _ _ bound localVector.binding different))
+
 theorem vector_input_returns_bound (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv)
     (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
@@ -259,32 +339,18 @@ theorem vector_input_returns_bound (world : CC.CGenv)
       FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
       after.nextblock = supplied.nextblock := by
   obtain ⟨localVector⟩ := vector_local m
-  obtain ⟨after, stored⟩ := vector_store_exists m supplied localVector i value access
-  have storev : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
-      (.Vlong value) = some after := by
-    simpa only [CC.Mem.storev, vector_offsets] using stored
-  have suffix := vector_return_exec world layout i m supplied after localVector le k value storev
-  have call : CC.Star (CC.Step2 world)
-      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (vectorContinuation i m le k) before)
-      trace (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) :=
-    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
-      (by simp [CC.E0, CC.Eapp])
-  refine ⟨localVector, after, ?_, CC.Mem.load_store_same stored, ?_, ?_,
-    FrameBelow.store localVector.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
-  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
-      star_trans (vector_input_ready_bound world inputBinding i m before le k).sound
-        (star_trans call suffix.sound)
-  · intro j different
-    have ne : j.val ≠ i.val := fun h => different (Fin.ext h)
-    have separate : 8 * (j.val : Int) + 8 ≤ 8 * (i.val : Int) ∨
-        8 * (i.val : Int) + 8 ≤ 8 * (j.val : Int) := by omega
-    apply CC.Mem.load_store_other stored
-    exact Or.inr separate
-  · intro id ty block bound different chunk ofs
-    have distinct := (allocated_local_storage
-      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
-    exact CC.Mem.load_store_other stored chunk block ofs
-      (.inl (distinct _ _ _ _ bound localVector.binding different))
+  obtain ⟨shape⟩ := vector_layout_bound world layout
+  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
+    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
+    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
+  obtain ⟨after, run, reads, lanes, locals, frame, finalAccess, next⟩ :=
+    vector_input_returns_body world producer (allocation m).1 (CC.Positive.ofNat 64) inputBinding unshadowed
+      Arm64Entry.__2854 (vectorInputTemp i) i (vectorStage (i.val + 1)) m before supplied localVector shape
+      localVector.binding le k value trace provider access
+  refine ⟨localVector, after, ?_, reads, lanes, locals, frame, finalAccess, next⟩
+  rw [vector_stage_next i]
+  exact run
 
 theorem vector_input_ready (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
     InternalRun ge 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory)

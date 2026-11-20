@@ -1,0 +1,262 @@
+{
+  "step": "M5 actual 64 vector inputs and 98-visit entry composition",
+  "status": "pass",
+  "recorded_utc": "2026-11-20T00:01:26Z",
+  "before_commit_head": "fd30e6c92359ee51b3a1f17b34687f24ee49302d",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-vector-inputs",
+  "execution": {
+    "checked_actual_initializers": 64,
+    "actual_input_block": 59,
+    "source_anonymous_tag": "__2854",
+    "actual_anonymous_tag": "__5183",
+    "vector_stride_bytes": 16,
+    "field_offsets_bytes": [
+      0,
+      8
+    ],
+    "vector_array_bytes": 512,
+    "word_offsets": "8 * input index",
+    "per_visit_call_internal_steps": 3,
+    "per_visit_return_store_internal_steps": 4,
+    "provider_external_steps": "one per vector visit, kept separate from internal transitions",
+    "endpoint": "actual afterVectorInputs, before RAW/tag/SP/context setup",
+    "derived_vector_words": 64,
+    "ordered_provider_traces_retained": 98,
+    "trace_order": "30 GPR, four flag, then 64 vector traces",
+    "preserved": "all 31 GPR words/tags, 62 table pointers to those same cells, masked flags/LR zero, cache words/validity bytes, original context, unselected temporaries, caller frame, permissions and allocation frontier",
+    "actual_bindings": "actual anonymous vector-array type bound to the same allocated vector block",
+    "provider_contract": "GPR/flag/vector ProviderAt contracts remain explicit; no native/provider/original-context/all-outcome admission claimed",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerVectors"
+      ],
+      "exit": 0,
+      "seconds": 17.507874965667725,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 153
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs"
+      ],
+      "exit": 1,
+      "seconds": 103.56756782531738,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs"
+      ],
+      "exit": 1,
+      "seconds": 428.94513964653015,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs"
+      ],
+      "exit": 0,
+      "seconds": 22.724489212036133,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 192
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-vector-inputs/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0349957942962646,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 494.688325881958,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 355
+    }
+  },
+  "repaired_attempts": {
+    "focused2": "new aliases for the existing source vector types made an old loop simp proof exceed its recursion limit; kept the original source type definitions and used the new parameterized types alongside them",
+    "focused3": "quoted Fin construction with deferred tactic proofs left metavariables in the certificate; numeric finite indices eliminate the deferred proof goals"
+  },
+  "public_query_counts": {
+    "types": 18,
+    "axiom_reports": 18
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_layout_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_store_exists": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_call_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_return_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.run_suffix_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.metadata": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.first_stage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.chain": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.last_stage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.input_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryVectorInputs.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "3e7be7ca9505b35e87caf4cdc4b25a92ff862c2c39043b25ade41609c94db9b5",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectors.lean": "5ff3a2459f1815e9a34f8a191743861c796e42d9501a0bfdd1b004dc374399e7",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectorInputs.lean": "8d3d3083d1cf9af54001423e80e0b91ba7e5d86f094e6683c76d9ae95aec83cd",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryVectorInputs.lean": "3861d20dac78c96af5e1e536c6c2e30935e8e55ff7a0646fe546170eb059f9f4",
+    "kprog/formal/results/m5-program-entry-vector-inputs/Query.lean": "3d656de76687d77111eb04d870832e8147e55de30f1122f73f0c580403a6361d"
+  },
+  "scope": {
+    "changed": "formal proofs, receipts and own todo line",
+    "memory_witness": "original VectorLocal 512-byte range, slot-alignment, Mem.store, readback and separation/frame construction",
+    "traversal": "original 64-visit induction parameterized by actual function/environment/stages/temporaries and per-input execution",
+    "source_interfaces": "original source type definitions and vector_input_ready_bound/vector_input_returns_bound/vector_inputs_initialized_bound signatures retained",
+    "actual_ast_certificate": "all 64 complete actual initializer bodies, indices, mapped temporaries and real successor chain",
+    "composite_requirement": "selected vector composite binding, size16 and lo/hi offsets0,8; no full composite-environment equality in actual instance",
+    "code_growth": "246-line actual module, 106 net supporting source lines and one root import",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
+  },
+  "goal_closure": {
+    "M5": "open: actual RAW/tag/SP/context setup and header/body/native/provider/original-context/all-outcome admission, return-type bridge, ISA refinement and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}
