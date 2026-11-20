@@ -39,20 +39,25 @@ configuration:
 
 ## Why some apps scatter and others do not: the retained population
 
-### Correction: `native_tracer_entry` regressed on 2026-11-14
+### What `native_tracer_entry` actually does, day by day
 
-An earlier reading of these runs said the main program was consistently 0.07-0.11 and only the low-count
-program moved. That holds only up to 11-13. Splitting the same program by date:
+Per-day median ratio for that program, from the full record (`measure.py` reproduces the pipeline):
 
-| window | runs | median ratio for `native_tracer_entry` |
+| period | median | note |
 |---|---|---|
-| 2026-11-07 … 11-13 | 46 | **0.09** |
-| 2026-11-14 … 11-20 | 75 | **1.05** |
+| 2026-05-03 … 05-23 | 0.96 – 1.16 | **~1.00**, ordinary scatter |
+| 2026-05-28 … 05-29 | 0.07 | short window, 14x faster |
+| 2026-05-31 … 06-05 | 0.97 – 1.12 | back to ~1.00 |
+| 2026-06-21 … 06-22 | 0.11 | short window, 9x faster |
+| 2026-06-27 … 10-01 | 0.99 – 1.09 | ~1.00 |
+| 2026-11-06 | 1.01 | ~1.00 |
+| 2026-11-07 … 11-13 | 0.08 – 0.12 | short window, 12x faster |
+| **2026-11-14 … 11-20** | **1.01 – 1.08** | **back to ~1.00** |
 
-A tenfold change across a date boundary with the population count unchanged is a **real regression**, not
-noise — and it lines up with the 11-14 image/compiler changes, well before PERF's 0.796 figure. The 0.796 that
-prompted this record is therefore a *symptom* of something that started on 11-14, and the fix is upstream of
-the OTel timing.
+So the program's **normal value is 1.00**, and the 0.07–0.12 readings are three short windows
+(05-28/29, 06-21/22, 11-07…11-13) rather than the norm. An earlier draft of this file called 11-14 a
+regression; that was wrong — 11-14 returned to the value May and June had. The interesting question is the
+opposite one: what made the program 10x faster in those three windows, and why did it stop.
 
 Two things are worth separating when OTel has two programs. In 34 such runs the pair is usually
 `native_tracer_entry` (10^7–10^8 dispatches) reading **0.07–0.11** and `tracepoint__sched_switch`
