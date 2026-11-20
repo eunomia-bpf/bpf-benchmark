@@ -4254,7 +4254,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::ostringstream map_types;
     map_types << '{';
     bool map_separator = false;
-    bool array_inner = false;
+    bool typed_lookups = false;
     for (const auto &[name, loaded] : companion.native_map_symbols) {
         if (companion.native_data_symbols.contains(name)) continue;
         const auto *meta = find_map_meta_by_native_symbol(companion, name);
@@ -4262,10 +4262,12 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (map_separator) map_types << ',';
         write_json_string(map_types, name);
         map_types << ":{\"type\":" << meta->type << ",\"inner_type\":" << meta->inner_type
+                  << ",\"key_size\":" << meta->key_size
                   << ",\"value_size\":" << meta->value_size
                   << ",\"inner_value_size\":" << meta->inner_value_size << '}';
         map_separator = true;
-        array_inner |= meta->inner_type == BPF_MAP_TYPE_ARRAY;
+        typed_lookups |= meta->inner_type == BPF_MAP_TYPE_ARRAY ||
+                         meta->type == BPF_MAP_TYPE_LPM_TRIE || meta->inner_type == BPF_MAP_TYPE_LPM_TRIE;
     }
     map_types << '}';
     const auto function_bodies = native_source_function_bodies(
@@ -4274,7 +4276,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
         kNativeLinkCacheDir, function_bodies,
         companion.immutable_globals.empty() ? std::string{} : immutable.str(),
-        array_inner ? map_types.str() : std::string{});
+        typed_lookups ? map_types.str() : std::string{});
     if (optimized != native_object_path) {
         native_object_path = optimized;
         entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);

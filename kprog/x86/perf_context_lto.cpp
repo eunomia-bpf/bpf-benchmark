@@ -21,6 +21,7 @@
 #include "../libnativeloader/src/native_loader_lto.hpp"
 #include "bpf_function_bodies.hpp"
 #include "runtime_bpf_callee.hpp"
+#include "../../vendor/bpf/native-lpm.h"
 #include <memory>
 #include <functional>
 using namespace llvm;
@@ -40,11 +41,82 @@ static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Aggressive;
 
 struct NativeMapType {
   int64_t type = 0, inner = 0;
-  uint64_t value_size = 0, inner_value_size = 0;
+  uint64_t value_size = 0, inner_value_size = 0, key_size = 0;
   bool operator==(const NativeMapType &Other) const {
     return type == Other.type && inner == Other.inner;
   }
 };
+
+#define KPROG_STRINGIFY_BODY(...) #__VA_ARGS__
+#define KPROG_STRINGIFY(...) KPROG_STRINGIFY_BODY(__VA_ARGS__)
+// Keep the map algorithm in the same C source as native-helpers.h. Only the
+// boot layout and actual loaded map shape are supplied by load-time LTO.
+static Expected<Function *> importLpmLookup(Module &M, Function &Entry, btf *Types,
+                                            uint64_t KeySize, unsigned Index) {
+  const auto Prefix = Output + ".lpm." + std::to_string(Index);
+  const auto Source = Prefix + ".c", IR = Prefix + ".ll", Log = Prefix + ".log";
+  const auto Name = "__native_link_typed_lpm_lookup_" + std::to_string(Index);
+  const auto Base = native_lto::offset(Types, "lpm_trie", "map");
+  auto Field = [&](const char *Name, bool Word = false) {
+    return native_lto::relative(Types, "lpm_trie", Name, Base, Word);
+  };
+  auto Size = [&](const char *Name) {
+    auto Member = native_lto::field(Types, "lpm_trie", Name);
+    if (btf__resolve_size(Types, Member.type_id) != 8)
+      throw std::runtime_error("LPM metadata requires a native size_t: " + std::string(Name));
+    return "*(const unsigned long *)((const char *)map+" + std::to_string(Field(Name)) + ")";
+  };
+  const auto Bytes = KeySize > 4 ? std::to_string(KeySize - 4) : Size("data_size");
+  const auto Maximum = KeySize > 4 ? std::to_string((KeySize - 4) * 8) : Size("max_prefixlen");
+  {
+    std::ofstream Out(Source, std::ios::trunc);
+    Out << KPROG_STRINGIFY(__KPROG_LPM_CODE) << '\n'
+        << "void *" << Name << "(void *map,const void *key) { return __kprog_lpm_lookup(map,key,"
+        << Bytes << ',' << Maximum << ',' << Field("root") << ','
+        << native_lto::offset(Types, "lpm_trie_node", "child") << ','
+        << native_lto::offset(Types, "lpm_trie_node", "prefixlen", true) << ','
+        << native_lto::offset(Types, "lpm_trie_node", "flags", true) << ','
+        << native_lto::offset(Types, "lpm_trie_node", "data") << "); }\n";
+    Out.close();
+    if (!Out) return native_bpf::failure("write LPM helper source: " + Source);
+  }
+  const std::vector<std::string> Args = {"clang-18", "-O3", "-march=native", "-mgeneral-regs-only",
+      "-mno-red-zone", "-fPIC", "-fomit-frame-pointer", "-fno-stack-protector",
+      "-fno-asynchronous-unwind-tables", "-fno-unwind-tables", "-S", "-emit-llvm", Source, "-o", IR};
+  const int Status = native_loader_detail::run_subprocess(Args, Log);
+  if (Status) {
+    auto Diagnostics = MemoryBuffer::getFile(Log);
+    return native_bpf::failure("LPM C compiler failed: " +
+        (Diagnostics ? (*Diagnostics)->getBuffer().str() : Diagnostics.getError().message()));
+  }
+  SMDiagnostic Diagnostic;
+  auto Imported = parseIRFile(IR, Diagnostic, M.getContext());
+  if (!Imported) {
+    std::string Message;
+    raw_string_ostream Stream(Message);
+    Diagnostic.print("LPM helper IR", Stream);
+    return native_bpf::failure(Stream.str());
+  }
+  Imported->setTargetTriple(M.getTargetTriple());
+  Imported->setDataLayout(M.getDataLayout());
+  for (auto &F : *Imported) if (!F.isDeclaration()) {
+    for (const auto *Attribute : {"target-cpu", "target-features", "tune-cpu", "frame-pointer"}) {
+      auto Value = Entry.getFnAttribute(Attribute);
+      if (Value.isValid()) F.addFnAttr(Value);
+    }
+    if (Entry.hasFnAttribute(Attribute::NoRedZone)) F.addFnAttr(Attribute::NoRedZone);
+    F.addFnAttr(Attribute::AlwaysInline);
+  }
+  if (Linker::linkModules(M, std::move(Imported)))
+    return native_bpf::failure("link LPM helper IR");
+  auto *Lookup = M.getFunction(Name);
+  if (!Lookup) return native_bpf::failure("LPM helper entry is missing");
+  Lookup->setLinkage(GlobalValue::InternalLinkage);
+  Lookup->setDSOLocal(true);
+  return Lookup;
+}
+#undef KPROG_STRINGIFY
+#undef KPROG_STRINGIFY_BODY
 
 static bool isMapLookup(const CallBase &Call) {
   auto *Callee = Call.getCalledOperand()->stripPointerCasts();
@@ -79,7 +151,8 @@ static bool isMapLookup(const CallBase &Call) {
   return ID && ID->equalsInt(BPF_FUNC_map_lookup_elem);
 }
 
-static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRef Path) {
+static Expected<unsigned> lowerMapLookups(Module &M, Function &Entry, StringRef Path,
+                                         unsigned &LpmCount) {
   if (Path.empty()) return 0;
   auto File = MemoryBuffer::getFile(Path);
   if (!File) return errorCodeToError(File.getError());
@@ -98,6 +171,7 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
     Known[Global] = {*Type, *Inner};
     Known[Global].value_size = Fields->getInteger("value_size").value_or(0);
     Known[Global].inner_value_size = Fields->getInteger("inner_value_size").value_or(0);
+    Known[Global].key_size = Fields->getInteger("key_size").value_or(0);
     // These are handles rebound to kernel objects, not native map-definition
     // storage. Do not let later optimization read their C initializers.
     Global->setInitializer(nullptr);
@@ -119,6 +193,7 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
           if (!(Common == Current)) return NativeMapType{};
           if (Common.value_size != Current.value_size) Common.value_size = 0;
           if (Common.inner_value_size != Current.inner_value_size) Common.inner_value_size = 0;
+          if (Common.key_size != Current.key_size) Common.key_size = 0;
         }
       }
       return Common;
@@ -169,25 +244,40 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
   SmallVector<Function *, 16> Functions{&Entry};
   SmallPtrSet<Function *, 16> Seen;
   SmallVector<CallBase *, 64> Calls;
+  SmallVector<CallBase *, 64> LpmCalls;
   while (!Functions.empty()) {
     auto *F = Functions.pop_back_val();
     if (!Seen.insert(F).second || F->isDeclaration()) continue;
     for (auto &I : instructions(F)) if (auto *Call = dyn_cast<CallBase>(&I)) {
       if (isMapLookup(*Call) && Call->arg_size() == 2 && Call->getType()->isPointerTy() &&
           Call->getArgOperand(0)->getType()->isPointerTy() &&
-          Call->getArgOperand(1)->getType()->isPointerTy() &&
-          !isa<GlobalVariable>(Call->getArgOperand(0)->stripPointerCasts()) &&
-          Infer(Call->getArgOperand(0)).type == BPF_MAP_TYPE_ARRAY)
-        Calls.push_back(Call);
-      else if (auto *Callee = Call->getCalledFunction()) Functions.push_back(Callee);
+          Call->getArgOperand(1)->getType()->isPointerTy()) {
+        const auto Type = Infer(Call->getArgOperand(0)).type;
+        if (Type == BPF_MAP_TYPE_LPM_TRIE) LpmCalls.push_back(Call);
+        if (Type == BPF_MAP_TYPE_ARRAY &&
+            !isa<GlobalVariable>(Call->getArgOperand(0)->stripPointerCasts())) Calls.push_back(Call);
+      } else if (auto *Callee = Call->getCalledFunction()) Functions.push_back(Callee);
     }
+  }
+  if (Calls.empty() && LpmCalls.empty()) return 0;
+  std::unique_ptr<btf, decltype(&btf__free)> Types(btf__parse(Kernel.c_str(), nullptr), btf__free);
+  if (!Types) return native_bpf::failure("cannot read map lookup kernel BTF");
+  DenseMap<uint64_t, Function *> LpmLookups;
+  for (auto *Call : LpmCalls) {
+    const auto KeySize = Infer(Call->getArgOperand(0)).key_size;
+    auto *&Lookup = LpmLookups[KeySize];
+    if (!Lookup) {
+      auto Imported = importLpmLookup(M, Entry, Types.get(), KeySize, LpmLookups.size());
+      if (!Imported) return Imported.takeError();
+      Lookup = *Imported;
+    }
+    Call->setCalledFunction(Lookup);
+    ++LpmCount;
   }
   if (Calls.empty()) return 0;
   auto ValueSize = Infer(Calls.front()->getArgOperand(0)).value_size;
   for (auto *Call : Calls)
     if (Infer(Call->getArgOperand(0)).value_size != ValueSize) ValueSize = 0;
-  std::unique_ptr<btf, decltype(&btf__free)> Types(btf__parse(Kernel.c_str(), nullptr), btf__free);
-  if (!Types) return native_bpf::failure("cannot read array lookup kernel BTF");
   auto &C = M.getContext();
   auto *Ptr = PointerType::getUnqual(C);
   auto *Signature = FunctionType::get(Ptr, {Ptr, Ptr}, false);
@@ -375,9 +465,11 @@ int main(int argc, char **argv) {
       F->removeParamAttr(0, Attribute::DereferenceableOrNull);
       Converted = Loads.size();
     }
-    auto Arrays = lowerArrayLookups(*M, *F, MapTypes);
+    unsigned LpmCount = 0;
+    auto Arrays = lowerMapLookups(*M, *F, MapTypes, LpmCount);
     if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }
     if (!MapTypes.empty()) errs() << "typed ARRAY lookups lowered: " << *Arrays << '\n';
+    if (!MapTypes.empty()) errs() << "typed LPM lookups lowered: " << LpmCount << '\n';
     if (verifyModule(*M, &errs())) return 1;
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);

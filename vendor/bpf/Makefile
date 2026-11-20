@@ -310,7 +310,7 @@ $(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
 # The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.
 PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
 $(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp \
-		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp
+		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp $(ROOT)/vendor/bpf/native-lpm.h
 	install -d "$(dir $@)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
