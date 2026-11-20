@@ -37,6 +37,22 @@ configuration:
 4. **No app's stable cluster reaches the 0.80 target yet.** Cilium's November clusters do (0.394, 0.439,
    0.472 on 11-10/11-16/11-17), which is the strongest positive evidence in the record.
 
+## The current image, app by app (2026-11-20 runs, corrected join)
+
+| app | run geomeans on 11-20 | retained | post/baseline calls |
+|---|---|---|---|
+| Tracee | 0.57, 0.59, 0.77 | 38–41 | 1.11 – 1.71 |
+| Cilium | 0.88, 0.88, 0.94 | 2 | — |
+| BCC | 0.94, 0.96, 0.97 | 13 | — |
+| Katran | 0.96, 0.98, 0.99 | 1 | — |
+| OTel | 1.03, 1.04, 1.05 | 1 | — |
+| Tetragon | 0.79, 1.75 | 15 | — |
+
+Read with both populations in mind: Tracee's 0.57–0.59 come from the runs whose post arm executed 1.65–1.71x
+the calls, so its honest current figure is nearer the 0.77 of the calibrated run; Cilium and Katran retain
+one program, so their rows are single measurements. What the table does show unambiguously is that **no app
+is far below 1.0 on the current image except Tracee**, and OTel now sits slightly above it.
+
 ## The two arms must execute comparable work
 
 A per-call ratio is only meaningful when both arms execute the same workload. Comparing `sum(run_cnt_delta)`
