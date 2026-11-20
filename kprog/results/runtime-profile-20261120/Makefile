@@ -43,3 +43,12 @@ source-probes:
 		$(ROOT)/kprog/results/checked-probe-c-20261119/driver.c $(USER_BUILD)/user.o -o $(USER_BUILD)/execute
 	$(USER_BUILD)/execute
 	llvm-objdump-18 -dr $(USER_BUILD)/user.o > $(OUT)/user.asm
+
+.PHONY: source-links branches
+source-links:
+	python3 $(ROOT)/kprog/results/runtime-profile-20261120/link.py $(OUT)
+
+branches:
+	install -d $(OUT)
+	$(PERF_BUILD)/perf record -a -C 20-23 -e cycles:G -F 199 -j any_call,any_ret \
+		-o $(OUT)/branches.data -- sleep 5
