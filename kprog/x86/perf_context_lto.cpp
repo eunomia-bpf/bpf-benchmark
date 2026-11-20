@@ -479,6 +479,8 @@ int main(int argc, char **argv) {
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);
     if (EC) { errs() << EC.message() << '\n'; return 1; }
+    // Map lowering imports functions and changes calls after the first O3.
+    MAM.invalidate(*M, PreservedAnalyses::none());
     PB.buildPerModuleDefaultPipeline(NativeOptLevel).run(*M, MAM);
     legacy::PassManager Codegen;
     if (Machine->addPassesToEmitFile(Codegen, Out.os(), nullptr, CodeGenFileType::ObjectFile)) {

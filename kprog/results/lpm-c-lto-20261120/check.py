@@ -40,7 +40,7 @@ for name,types,lowered,extra,expected in [
     run(['llvm-objcopy-18','--localize-symbol=entry_select',objects[0]],name+'-localize-direct')
     run(['llvm-objcopy-18','--localize-symbol=entry',objects[1]],name+'-localize-select')
     exe=tmp/(name+'-execute')
-    run(['clang-18','-O3','-march=native','-fsanitize=undefined','-fno-sanitize-recover=all',
+    run(['gcc','-O3','-march=native','-fsanitize=undefined','-fno-sanitize-recover=all',
          '-DEXPECTED_GENERIC='+str(expected),*extra,*['-D'+k+'='+str(v) for k,v in layout.items()],
          ROOT/'kprog/results/lpm-c-lto-20261120/driver.c',*objects,'-o',exe],name+'-driver')
     text=run([exe],name+'-execution')

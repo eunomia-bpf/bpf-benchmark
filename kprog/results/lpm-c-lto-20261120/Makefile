@@ -16,3 +16,17 @@ check:
 	clang-18 -O3 -march=native -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
 		-fno-stack-protector -fomit-frame-pointer -c $(ROOT)/kprog/results/lpm-c-lto-20261120/fixture.c -o $(TMP)/fixture.o
 	python3 $(ROOT)/kprog/results/lpm-c-lto-20261120/check.py $(RAW) $(TMP)
+
+.PHONY: compatibility syntax
+compatibility:
+	install -d $(RAW)/array /var/tmp/kprog-tmp/perf/inner-array-lto
+	clang-18 -O3 -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
+		-c $(ROOT)/kprog/results/inner-array-lto-20261116/fixture.c -o /var/tmp/kprog-tmp/perf/inner-array-lto/fixture.native.o
+	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/check.py $(RAW)/array /var/tmp/kprog-tmp/perf/inner-array-lto \
+		> $(RAW)/array-check.log 2>&1
+
+syntax:
+	$(CXX) -std=gnu++20 -fsyntax-only -I$(ROOT)/kprog/libnativeloader/include \
+		-I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
+		$(ROOT)/kprog/libnativeloader/src/native_loader.cpp
