@@ -26,4 +26,9 @@ run:
 		printf '%s\n' "$$status" > $(OUT)/exit-code; date -u +%FT%TZ > $(OUT)/finished; exit $$status
 
 guest:
-	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/results/kernel-probe-live-20261120/guest.py $(OUT)
+	CLANG=$(ROOT)/kprog/stock-path/bin/clang BPFREJIT_NATIVE_LINK_BINARY=$(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link python3 $(ROOT)/kprog/results/kernel-probe-live-20261120/guest.py $(OUT)
+
+.PHONY: receipt
+receipt:
+	cp $(OUT)/cases.json $(ROOT)/kprog/results/kernel-probe-live-20261120/$(NAME)-cases.json
+	tar -C $(dir $(OUT)) -czf $(ROOT)/kprog/results/kernel-probe-live-20261120/$(NAME)-evidence.tar.gz $(notdir $(OUT))
