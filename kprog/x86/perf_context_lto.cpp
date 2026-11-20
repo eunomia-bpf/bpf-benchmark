@@ -23,7 +23,6 @@
 #include "bpf_function_bodies.hpp"
 #include "runtime_bpf_callee.hpp"
 #include "../../vendor/bpf/native-lpm.h"
-#include "../../vendor/bpf/native-read-kernel.h"
 #include <memory>
 #include <sstream>
 #include <functional>
@@ -37,7 +36,6 @@ static cl::opt<unsigned> ProgType("prog-type", cl::init(BPF_PROG_TYPE_PERF_EVENT
 static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 static cl::opt<std::string> ImmutableGlobals("immutable-globals");
 static cl::opt<std::string> MapTypes("map-types");
-static cl::opt<bool> InlineKernelReads("inline-kernel-reads");
 
 // -O3, the level vendor/bpf/Makefile compiles P at, so P and its load-time LTO follow one policy.
 static const OptimizationLevel NativeOptLevel = OptimizationLevel::O3;
@@ -134,28 +132,6 @@ static Error importC(Module &M, Function &Entry, const std::string &Prefix, cons
   return Error::success();
 }
 
-// Direct native reads kernel memory with plain loads (operator 2026-11-19: "读内核内存要调用
-// bpf_probe_read...不能也直接内联和解引用???"). P keeps the helper calls, so B and the checked path keep
-// the helper's exact results; this load-time LTO of direct native gives the calls the load bodies.
-static Expected<unsigned> inlineKernelReads(Module &M, Function &Entry) {
-  SmallVector<std::pair<CallBase *, const char *>, 64> Calls;
-  for (auto &F : M) for (auto &I : instructions(F)) if (auto *Call = dyn_cast<CallBase>(&I))
-    if (auto *Callee = Call->getCalledFunction()) {
-      if (Callee->getName() == "bpf_probe_read_kernel") Calls.push_back({Call, "__kprog_direct_read_kernel"});
-      if (Callee->getName() == "bpf_probe_read_kernel_str") Calls.push_back({Call, "__kprog_direct_read_kernel_str"});
-    }
-  if (Calls.empty()) return 0;
-  if (auto E = importC(M, Entry, Output + ".read-kernel", KPROG_STRINGIFY(__KPROG_READ_KERNEL_CODE) "\n"))
-    return std::move(E);
-  for (auto &[Call, Name] : Calls) {
-    auto *Body = M.getFunction(Name);
-    if (!Body) return native_bpf::failure(std::string("kernel read body is missing: ") + Name);
-    Body->setLinkage(GlobalValue::InternalLinkage);
-    Body->setDSOLocal(true);
-    Call->setCalledFunction(Body);
-  }
-  return Calls.size();
-}
 #undef KPROG_STRINGIFY
 #undef KPROG_STRINGIFY_BODY
 
@@ -520,11 +496,6 @@ int main(int argc, char **argv) {
     if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }
     if (!MapTypes.empty()) errs() << "typed ARRAY lookups lowered: " << *Arrays << '\n';
     if (!MapTypes.empty()) errs() << "typed LPM lookups lowered: " << LpmCount << '\n';
-    if (InlineKernelReads) {
-      auto Reads = inlineKernelReads(*M, *F);
-      if (!Reads) { errs() << toString(Reads.takeError()) << '\n'; return 1; }
-      errs() << "kernel reads inlined: " << *Reads << '\n';
-    }
     if (verifyModule(*M, &errs())) return 1;
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);
