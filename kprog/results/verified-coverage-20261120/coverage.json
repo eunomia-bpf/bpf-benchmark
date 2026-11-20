@@ -166,6 +166,29 @@
    "served_total": 95,
    "installed_total": 95,
    "note": "No guest ever wrote service.tar.gz, so the counts come from state/session-*/service.log in the kept raw dirs. Every request any attempt served installed via checked-sim-c; zero fallbacks. Attempt 1 reached 15 distinct programs, so this is a lower bound on Tetragon coverage, not a total."
+  },
+  "tracee/monitor": {
+   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/tracee",
+   "served": 35,
+   "installed": 35,
+   "fallback": 0,
+   "programs": [
+    "2c83395d",
+    "4b28662f",
+    "f0436342"
+   ],
+   "raw_complete": false,
+   "note": "guest did not finish (same stall as Tetragon: driver done, harness never wrote service.tar.gz); counts read from state/session-*/service.log, all installed, zero fallbacks"
+  },
+  "katran": {
+   "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/katran2",
+   "requests": 1,
+   "installed": 1,
+   "fallback": 0,
+   "programs": [
+    "32c9af3a"
+   ],
+   "note": "CHECKED_VM_CPUS=8; the default 2 vCPUs is too few for the frozen pktgen workload, which needs kpktgend_2"
   }
  },
  "classes": {

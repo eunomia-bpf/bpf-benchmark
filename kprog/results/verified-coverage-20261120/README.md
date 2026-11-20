@@ -16,8 +16,8 @@ byte-identical to a build of `19d32566c`. Every run exited 0.
 | `otelcol-ebpf-profiler/profiling` | 14 | 5 | 4 | **10** |
 | `bcc/set` | 25 | 15 | 22 | **3** |
 | `tetragon/observer` | 95 (3 attempts) | 15 | **95** | 0 |
-| `tracee/monitor` | — | — | not yet captured | — |
-| `katran` | — | — | not yet captured | — |
+| `tracee/monitor` | 35 | 3 | **35** | 0 |
+| `katran` | 1 | 1 | **1** | 0 |
 
 Capture size varies with the app and the run (12/14/25 here from one command), so only per-program figures
 compare; the raw `service.tar.gz` of each capture is kept at the path in `coverage.json`.
@@ -72,4 +72,34 @@ The attempts stalled rather than crashed: attempt 3 sat at 0% CPU for 49 minutes
 two *orphaned* guests from attempts 1 and 2 that were still holding 48 GiB and 32 GiB of host memory with their
 parent shells gone — worth knowing, since three concurrent Tetragon guests is what made the host thrash.
 
-Tracee and Katran are not captured yet.
+## Tracee: 35 requests, 35 installed
+
+`tracee/monitor` served 35 requests over 3 distinct programs (`2c83395d`, `4b28662f`, `f0436342`), every one
+`checked-sim-c`, zero fallbacks. Its guest hit the same stall as Tetragon — the driver finished, nothing wrote
+`service.tar.gz` — so the count is read from `state/session-*/service.log` and the raw directory is kept.
+
+## Katran: one program, installed; the frozen workload needs more than 2 vCPUs
+
+The first attempt errored before any BPF program loaded — the frozen `xdp_pktgen` workload writes
+`/proc/net/pktgen/kpktgend_2`, which exists only when the guest has at least 3 vCPUs, and `checked-corpus`
+defaults to `CHECKED_VM_CPUS=2`. With `CHECKED_VM_CPUS=8` the capture completes: **1 request, 1 program
+(`32c9af3a`), installed via `checked-sim-c`**. Katran loads a single XDP program in this configuration, so one
+request is its whole population, not a truncated capture.
+
+That is a real constraint on how this recipe is used, worth recording: any app whose runner needs more vCPUs than
+`CHECKED_VM_CPUS` silently produces a capture of zero BPF programs with `exit-code` 0. Katran is the second app
+(Tetragon and Tracee were the others) whose guest did not write its archive on its own.
+
+## Summary across the six apps
+
+| app | requests | installed | rate |
+|---|---|---|---|
+| `cilium/agent` | 12 | 12 | 100 % |
+| `tetragon/observer` | 95 | 95 | 100 % |
+| `tracee/monitor` | 35 | 35 | 100 % |
+| `katran` | 1 | 1 | 100 % |
+| `bcc/set` | 25 | 22 | 88 % |
+| `otelcol-ebpf-profiler/profiling` | 14 | 4 | 29 % |
+| **total** | **182** | **169** | **93 %** |
+
+Every fallback in the whole set belongs to two apps (OTel 10, BCC 3) and to the four classes listed above.
