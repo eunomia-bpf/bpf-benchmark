@@ -1,0 +1,572 @@
+{
+  "utc": "2026-11-21T19:57:11.718282+00:00",
+  "remote_master": "fe103ab68d7f98c60d36c32f2650c6f4bf4dcf91",
+  "scope": "Original S10 finite publication reread; focused current host observation; current source and guest refresh owned by S2",
+  "historical_final": {
+    "model_commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+    "forms_observed": 14,
+    "forms_guest5_passed": 13,
+    "pair_guest6_passed": true,
+    "safety_count": 34,
+    "safety_stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 21,
+      "specialization_rejected": 2,
+      "accepted_finding": 7
+    },
+    "accepted_findings": [
+      "scalar_vector_load_clear_high",
+      "unpaired_stxr_failure",
+      "unpaired_stlxr_failure",
+      "paired_stxr_failure",
+      "paired_stlxr_failure",
+      "entry_return_address_flags",
+      "stack_base_flags"
+    ],
+    "negative_native_executions": 0,
+    "micro_compiled": 29,
+    "unchecked_read_compiled": 1,
+    "host_suite": {
+      "commands": 116,
+      "passing_banners": 105,
+      "diagnostic_commands": 13
+    },
+    "focused_host_checks_per_compiler": 5711,
+    "lse_width_units": 12,
+    "decoder_words": 10,
+    "pair_metadata_words": 6,
+    "typed_halfword_kernel_test_returns": [
+      2,
+      2,
+      2
+    ],
+    "universal_composition": "partial-C-model-component; universal recovery/O2/compiler/physical extable transport stays with V"
+  },
+  "commits": {
+    "cd0a0c3affa16485ca053bbd4e5ac7e123638c29": "remote-master-ancestor",
+    "b0e107ce6b44585442dcb6002d5e4fab42db32e0": "remote-master-ancestor",
+    "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74": "remote-master-ancestor",
+    "740380180a21f2e5c10791df7d073a67cf35d3ff": "remote-master-ancestor",
+    "dd43bc633d9e1d548a3535105d45abf4744e983a": "remote-master-ancestor",
+    "8579c7ea154a9381b292fdd80a17179a6853ac2d": "remote-master-ancestor"
+  },
+  "published_files": [
+    {
+      "path": "README.md",
+      "bytes": 4249,
+      "sha256": "d72673cbe076667f11765625cfc1268b8d08973912e7430ef545d6b390e19bfd"
+    },
+    {
+      "path": "built-inputs.json",
+      "bytes": 1352,
+      "sha256": "49e42bdd3950683451118239a29ce8e5b4e3d3d2916fcbfd3042bd75f5af4300"
+    },
+    {
+      "path": "cleanup.json",
+      "bytes": 426,
+      "sha256": "a1320f3e98b05cbd2d5da8bfcb473c5b66d240c86650907cec2781c3d489df0e"
+    },
+    {
+      "path": "code-publication.json",
+      "bytes": 1170,
+      "sha256": "f3e8b3eb1dedbac6ad4983baff28c40f7f3f79d45211e988dff25d2c6a86020b"
+    },
+    {
+      "path": "coverage-proposal.tsv",
+      "bytes": 2987,
+      "sha256": "743c5421c89a75a489d72fb02a6c3f9a0f7150760c17fd64a10ad51e2f5246af"
+    },
+    {
+      "path": "effective-address/host-summary.json",
+      "bytes": 1063,
+      "sha256": "577dc8e2317bb181db582804e05b3b035e31feb116dc1dbb18b6351462c337b1"
+    },
+    {
+      "path": "effective-address/inputs.json",
+      "bytes": 340,
+      "sha256": "ef2cf1928a2dfd2bfff8aa6730d508bc3cdfa0fb73953ff627b5dfd1365c5b03"
+    },
+    {
+      "path": "effective-address/lse-units.json",
+      "bytes": 464589,
+      "sha256": "d584f3d4a9bd110d5da66ff1635081bb5f4c40bee59c470928d9e425102b39d7"
+    },
+    {
+      "path": "effective-address/micro.json",
+      "bytes": 17612,
+      "sha256": "a0076480239ba6d63f9332473ac4a3dc8b8b6de9f4cb512e7fa4b737b34b0b36"
+    },
+    {
+      "path": "effective-address/negative-micro.json",
+      "bytes": 601,
+      "sha256": "f6909d99b333aaca65e2ace6025212e58dd0c407296f1957a2f700e3329948f1"
+    },
+    {
+      "path": "effective-address/raw.tar.gz",
+      "bytes": 106841,
+      "sha256": "83bc8ef61cfbf8e86fdd316acdab7f15d009233fce86addaf459ac58100225ea"
+    },
+    {
+      "path": "effective-address/reproduction.json",
+      "bytes": 710,
+      "sha256": "1ca7884706a9dd052e6aeac7186a8dd88b56796e8a05a11056c767d79b73c1b9"
+    },
+    {
+      "path": "final-summary.json",
+      "bytes": 1056,
+      "sha256": "cce6e8d744b0aaf41cae35e105ee94206b813bdc521c3ad2597e2caa9bb43f7c"
+    },
+    {
+      "path": "generator-publication.json",
+      "bytes": 302,
+      "sha256": "2c42b719961b9fc79d59529198b6cff5122f840f6a44728a0a24b6fd7b1955b1"
+    },
+    {
+      "path": "generator.json",
+      "bytes": 26659,
+      "sha256": "44a95b4082aec6d842b7ba9b07a2d0f5f2f5a65e5ceba913a6bd370887926610"
+    },
+    {
+      "path": "guest-fixture-publication.json",
+      "bytes": 628,
+      "sha256": "eeaa6bcd73fd5ac5612b1321ac0f9d893231d79f0d79f6512a8366912052fd65"
+    },
+    {
+      "path": "guest4/README.md",
+      "bytes": 857,
+      "sha256": "914f97b1e074fcfe01d69e7ca4f386fbb116dfc59aa6a0a62ac22d89e16bae75"
+    },
+    {
+      "path": "guest4/atomic16.json",
+      "bytes": 449,
+      "sha256": "609c9d94b3f27291c37285dd417a2d833186e8fdd2622601c132d5e1f9638ff5"
+    },
+    {
+      "path": "guest4/forms.json",
+      "bytes": 7371,
+      "sha256": "2c41b685dbb58b4096dd749e46ddae9d5980bb2a008cc0681a9a41e69bd65f29"
+    },
+    {
+      "path": "guest4/raw.tar.gz",
+      "bytes": 9398000,
+      "sha256": "1a84048b6b38ae2598ce8a54a7fb198195eb6db340fbde4398b5ff342ddc29ce"
+    },
+    {
+      "path": "guest4/safety/outcomes.json",
+      "bytes": 242242,
+      "sha256": "1397d63cd9dee94c1ae4c509bea5ca050207c5de19660fab59cefb92622a38fc"
+    },
+    {
+      "path": "guest4/summary.json",
+      "bytes": 1333,
+      "sha256": "8db730fa2ed918d9ace1546f32c97793a17544b3c60f5aa8f6345aa4cad7f7b2"
+    },
+    {
+      "path": "guest5/atomic16.json",
+      "bytes": 449,
+      "sha256": "8c1ea8af1396ca6048fe6028c773ce7a8013ee5ddbf8bf6cd65988e734ea2ffb"
+    },
+    {
+      "path": "guest5/effective-address-publication.json",
+      "bytes": 612,
+      "sha256": "c1632cd5931230d7a5d806c24d3836379c66daca3f86bb9351a56762fe422b69"
+    },
+    {
+      "path": "guest5/forms.json",
+      "bytes": 7927,
+      "sha256": "0661f838b47fbea94b2d17c5e8bdb95c47ca36a365e9d38060a223b35007db74"
+    },
+    {
+      "path": "guest5/input-binary-identities.json",
+      "bytes": 1392,
+      "sha256": "2bbe9c627f422e005aa72ebbc7b111aeaf7c3aa651021b4caee5685f48747a34"
+    },
+    {
+      "path": "guest5/raw.tar.gz",
+      "bytes": 9075534,
+      "sha256": "b1133c40a659e12e8fdbadcb872ec2ce4cfe35cd69a8fe38e3581002029cbf0f"
+    },
+    {
+      "path": "guest5/safety/outcomes.json",
+      "bytes": 249154,
+      "sha256": "b1e931bae4a580b46dbc5d2f4dc4cfc294650f5baa73d02473789bd8e7799336"
+    },
+    {
+      "path": "guest5/safety.stderr",
+      "bytes": 938,
+      "sha256": "76db05722a50f42f26158b292aba8f1d1d8900b87ca4fead7a56a1cf6d11ae0c"
+    },
+    {
+      "path": "guest5/safety.stdout",
+      "bytes": 1337,
+      "sha256": "5f9f28e14ba0885da3163f6b31d9eb6a05531f7b816c2228f1bb0e4f39ef9254"
+    },
+    {
+      "path": "guest5/summary.json",
+      "bytes": 4660,
+      "sha256": "865d39bf57ae1bb311c77c4f6a3e36e72f4e20044b2bd03507c5bdd9b65cf5a4"
+    },
+    {
+      "path": "guest6/arm64.c",
+      "bytes": 2029,
+      "sha256": "fd4640dbfe428e68b544875f4065a7b51dc0b8c42523a72ffc329790262a46ec"
+    },
+    {
+      "path": "guest6/compile.log",
+      "bytes": 1032,
+      "sha256": "28a8831608b756922a7491475432798cc34447da7d816c6f6b2644ffcc4847f6"
+    },
+    {
+      "path": "guest6/disassembly.txt",
+      "bytes": 430,
+      "sha256": "c37eef4774051410b663d80f889a62f3131f174de9a8e99a1bd0ba59a3c42b7b"
+    },
+    {
+      "path": "guest6/entry.c",
+      "bytes": 1895,
+      "sha256": "3dfa392b6831aeec763e2169cc20c3f660b51ced5d0d5cf6ec29b7307782d6d4"
+    },
+    {
+      "path": "guest6/forms.json",
+      "bytes": 561,
+      "sha256": "637094a784649febca4717a5d0c3ddcb8539ad3c26aa8a6dc75e3947be046ea7"
+    },
+    {
+      "path": "guest6/inputs.json",
+      "bytes": 335,
+      "sha256": "8097bac1d2e88bf8766bd05e84631b1e96df76420ffb7b84645f3bb671b8e339"
+    },
+    {
+      "path": "guest6/raw.tar.gz",
+      "bytes": 746054,
+      "sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220"
+    },
+    {
+      "path": "guest6/summary.json",
+      "bytes": 926,
+      "sha256": "8a91d05a8e65cc4f15a3c6878e4b1e7068ba74bb00ed7c40e87e3fb0b140006e"
+    },
+    {
+      "path": "host-comparison.json",
+      "bytes": 1899,
+      "sha256": "ae6c737a4e7fdf9cf5a6af90673343b43581b9055caf2149a0f5dfd6ad23f4ee"
+    },
+    {
+      "path": "host-raw.tar.gz",
+      "bytes": 829059,
+      "sha256": "50d93673963334cce55ffaf38227df7f350837360090252c67455b3630a4820c"
+    },
+    {
+      "path": "host-summary.json",
+      "bytes": 2951,
+      "sha256": "e2182ca34f33622e0d69ae71906c7be67586bde1fdb7c9e1a8f2885d3875b05d"
+    },
+    {
+      "path": "inputs.tar.gz",
+      "bytes": 15593013,
+      "sha256": "7ea95bcd8bd6727f0cbfbd0533b27d64972a0ae82413352e65e581525594dd2a"
+    },
+    {
+      "path": "lse-units.json",
+      "bytes": 464157,
+      "sha256": "8252b6eedc28505b56f7e961e5a00ac3446d030a0b39c51b861bf15e5c762ed7"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 1981,
+      "sha256": "a995faadd4ed62a48ba186f2766cce31dcb1adf605d5686c7b4b20935a252323"
+    },
+    {
+      "path": "micro.json",
+      "bytes": 17612,
+      "sha256": "a0076480239ba6d63f9332473ac4a3dc8b8b6de9f4cb512e7fa4b737b34b0b36"
+    },
+    {
+      "path": "negative-micro.json",
+      "bytes": 601,
+      "sha256": "f6909d99b333aaca65e2ace6025212e58dd0c407296f1957a2f700e3329948f1"
+    },
+    {
+      "path": "publication-inputs.json",
+      "bytes": 3400,
+      "sha256": "d36d289e3465b0cbe03b94eb61e45b2f647dc2131d89aed3221fe3fea04f1516"
+    },
+    {
+      "path": "table-publication.json",
+      "bytes": 486,
+      "sha256": "a22ccd2645bb96e0b051a9801f4d42229965e65feae3d4401109f682441aab90"
+    },
+    {
+      "path": "vector-fixture-publication.json",
+      "bytes": 446,
+      "sha256": "188e6fd2914d34f171d96b3cfee0c739c0f16bf58b9a72e1c610ff09640e4ff3"
+    }
+  ],
+  "archives": [
+    {
+      "path": "effective-address/raw.tar.gz",
+      "members": 14,
+      "regular_files": 14,
+      "decoded_bytes": 2515126,
+      "sha256": "83bc8ef61cfbf8e86fdd316acdab7f15d009233fce86addaf459ac58100225ea"
+    },
+    {
+      "path": "guest4/raw.tar.gz",
+      "members": 250,
+      "regular_files": 243,
+      "decoded_bytes": 11043821,
+      "sha256": "1a84048b6b38ae2598ce8a54a7fb198195eb6db340fbde4398b5ff342ddc29ce"
+    },
+    {
+      "path": "guest5/raw.tar.gz",
+      "members": 262,
+      "regular_files": 254,
+      "decoded_bytes": 11264709,
+      "sha256": "b1133c40a659e12e8fdbadcb872ec2ce4cfe35cd69a8fe38e3581002029cbf0f"
+    },
+    {
+      "path": "guest6/raw.tar.gz",
+      "members": 45,
+      "regular_files": 39,
+      "decoded_bytes": 2240549,
+      "sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220"
+    },
+    {
+      "path": "host-raw.tar.gz",
+      "members": 21,
+      "regular_files": 21,
+      "decoded_bytes": 25811824,
+      "sha256": "50d93673963334cce55ffaf38227df7f350837360090252c67455b3630a4820c"
+    },
+    {
+      "path": "inputs.tar.gz",
+      "members": 223,
+      "regular_files": 223,
+      "decoded_bytes": 51699735,
+      "sha256": "7ea95bcd8bd6727f0cbfbd0533b27d64972a0ae82413352e65e581525594dd2a"
+    }
+  ],
+  "source_publications": [
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "sha256": "a5c3751a66034de7b0b635d0a441d2b2085474d8daf2095707dc3308573cb608"
+    },
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kinsn/module/arm64/bpf_arm64_native_lab.c",
+      "sha256": "e03c720564dd1ff13cbbf20f247d49a08b2814f49316d4e8966bff8dae473b5e"
+    },
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kprog/x86/native_lab/native_link/src/main.rs",
+      "sha256": "074e563b2a523fb69c7f4da59b30f005fc3fbfde522066ab24b9fe3e34377719"
+    },
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kprog/formal/oracles/test_arm64_read_followup_host.c",
+      "sha256": "392213a6b35adb09e2883b8873d82621aefcda7bb1560ce514494f123128cb02"
+    },
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kprog/formal/oracles/test_arm64_load_sites.py",
+      "sha256": "29b0da651affe4bc68ce62b32e79754d4423ba3a3de32770402c64b900f1624b"
+    },
+    {
+      "commit": "cd0a0c3affa16485ca053bbd4e5ac7e123638c29",
+      "path": "kprog/formal/oracles/test_arm64_narrow_atomic_host.py",
+      "sha256": "55f444022cae4b09793897957bf1593d7d54dc81deddba073ac1e31a2b90eba9"
+    },
+    {
+      "commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "sha256": "78be1b5a526791c31bb43e89b7f963a5b3675fc1a430c114513c09227db3709a"
+    },
+    {
+      "commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+      "path": "kprog/arm64/arm64_sim_direct.h",
+      "sha256": "d676394dc964a64a224f23eb04e918462119680526023389ad76b186c7386831"
+    },
+    {
+      "commit": "5363b5ff68146eecd27afaf97a5d3c0a0f18ae74",
+      "path": "kprog/formal/oracles/test_arm64_read_followup_host.c",
+      "sha256": "3ac7f43986dbb2a3f2c460c3a42a03a48ea7198a646e0c25322dcc89562612a2"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/test/native_load_fault/arm64.c",
+      "sha256": "fd4640dbfe428e68b544875f4065a7b51dc0b8c42523a72ffc329790262a46ec"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/summary.json",
+      "sha256": "8a91d05a8e65cc4f15a3c6878e4b1e7068ba74bb00ed7c40e87e3fb0b140006e"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/forms.json",
+      "sha256": "637094a784649febca4717a5d0c3ddcb8539ad3c26aa8a6dc75e3947be046ea7"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/entry.c",
+      "sha256": "3dfa392b6831aeec763e2169cc20c3f660b51ced5d0d5cf6ec29b7307782d6d4"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/arm64.c",
+      "sha256": "fd4640dbfe428e68b544875f4065a7b51dc0b8c42523a72ffc329790262a46ec"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/disassembly.txt",
+      "sha256": "c37eef4774051410b663d80f889a62f3131f174de9a8e99a1bd0ba59a3c42b7b"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/compile.log",
+      "sha256": "28a8831608b756922a7491475432798cc34447da7d816c6f6b2644ffcc4847f6"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/inputs.json",
+      "sha256": "8097bac1d2e88bf8766bd05e84631b1e96df76420ffb7b84645f3bb671b8e339"
+    },
+    {
+      "commit": "740380180a21f2e5c10791df7d073a67cf35d3ff",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/guest6/raw.tar.gz",
+      "sha256": "084f90bbc34a1b5a47c6eadb97714f680c54183e3321093911bcb018be909220"
+    },
+    {
+      "commit": "0af1c2904d8beb277d75d06504043e770d8fe3ca",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/effective-address/micro.json",
+      "sha256": "a0076480239ba6d63f9332473ac4a3dc8b8b6de9f4cb512e7fa4b737b34b0b36"
+    },
+    {
+      "commit": "0af1c2904d8beb277d75d06504043e770d8fe3ca",
+      "path": "kprog/results/kprog_arm64_read_followup_20261109/effective-address/negative-micro.json",
+      "sha256": "f6909d99b333aaca65e2ace6025212e58dd0c407296f1957a2f700e3329948f1"
+    }
+  ],
+  "current_checks": [
+    {
+      "command": [
+        "make",
+        "-f",
+        "kprog/results/arm64-recovery-review-20261121/Makefile",
+        "host",
+        "CC=gcc",
+        "OUT=/var/tmp/kprog-tmp/S10/host"
+      ],
+      "exit": 0,
+      "output": "install -d /var/tmp/kprog-tmp/S10/host\ngcc -O2 -g -fsanitize=undefined -fno-sanitize-recover=undefined -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_arm64_read_followup_host.c -o /var/tmp/kprog-tmp/S10/host/read-followup\n/var/tmp/kprog-tmp/S10/host/read-followup\narm64 read follow-up host: OK (5720 checks; 0 discrepancies)\n"
+    },
+    {
+      "command": [
+        "make",
+        "-f",
+        "kprog/results/arm64-recovery-review-20261121/Makefile",
+        "host",
+        "CC=clang-18",
+        "OUT=/var/tmp/kprog-tmp/S10/host"
+      ],
+      "exit": 2,
+      "output": "install -d /var/tmp/kprog-tmp/S10/host\nclang-18 -O2 -g -fsanitize=undefined -fno-sanitize-recover=undefined -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_arm64_read_followup_host.c -o /var/tmp/kprog-tmp/S10/host/read-followup\n/usr/bin/ld: cannot find /usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.ubsan_standalone-x86_64.a: No such file or directory\nclang-18: error: linker command failed with exit code 1 (use -v to see invocation)\nmake: *** [kprog/results/arm64-recovery-review-20261121/Makefile:6: host] Error 1\n"
+    },
+    {
+      "command": [
+        "make",
+        "-f",
+        "kprog/results/arm64-recovery-review-20261121/Makefile",
+        "sites",
+        "OUT=/var/tmp/kprog-tmp/S10/sites"
+      ],
+      "exit": 0,
+      "output": "python3 /workspaces/repository/kprog/formal/oracles/test_arm64_load_sites.py /var/tmp/kprog-tmp/S10/sites/sites\narm64 production load-site decoder: 10 words plus final-code range, 0 discrepancies\narm64 production pair metadata: 6 words, 0 discrepancies\narm64 production pair metadata: 6 words, 0 discrepancies\n"
+    },
+    {
+      "command": [
+        "python3",
+        "kprog/formal/oracles/test_arm64_narrow_atomic_host.py",
+        "/var/tmp/kprog-tmp/S10/atomic"
+      ],
+      "exit": 0,
+      "output": "arm64 narrow atomic kfunc host: 4737024 cases, 0 discrepancies\n"
+    },
+    {
+      "command": [
+        "python3",
+        "kprog/arm64/micro-prog/test_read_recovery.py"
+      ],
+      "exit": 1,
+      "output": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/arm64/micro-prog/test_read_recovery.py\", line 48, in <module>\n    main()\n  File \"/workspaces/repository/kprog/arm64/micro-prog/test_read_recovery.py\", line 36, in main\n    enc = gen.encode(insn, {}, {})\n          ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 495, in encode\n    return Encoded(\"ARM64_OP_LOAD\", reg_const(ops[0]), mem.base, mem.index,\n                                    ^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py\", line 283, in reg_const\n    raise ValueError(f\"unsupported register: {reg}\")\nValueError: unsupported register: d0\n"
+    },
+    {
+      "command": [
+        "make",
+        "-f",
+        "/var/tmp/kprog-tmp/S10/Makefile",
+        "clang"
+      ],
+      "exit": 0,
+      "output": "clang-18 -O2 -I/workspaces/repository/vendor/libbpf/src -I/workspaces/repository/kprog/formal /workspaces/repository/kprog/formal/oracles/test_arm64_read_followup_host.c -o /var/tmp/kprog-tmp/S10/host/read-followup\n/var/tmp/kprog-tmp/S10/host/read-followup\narm64 read follow-up host: OK (5720 checks; 0 discrepancies)\n",
+      "profile": "Clang O2; GCC UBSan supplied the sanitizer run"
+    }
+  ],
+  "current_source_before": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+    "kprog/arm64/arm64_sim_direct.h": "5590d19f6c2cf6ef5b2d0b80cba64c889125a5bb0fda569341a7cc31ac114349",
+    "kprog/x86/native_lab/native_link/src/main.rs": "819673ffef5c8608b043fce50b7c02ccd837ecf544e788d64fff0fdf1af1377f",
+    "kprog/formal/oracles/test_arm64_read_followup_host.c": "f83daa90e013f50546fc3102fbad65e64c7591be239ab823eff46147c56d8192",
+    "kprog/formal/oracles/test_arm64_load_sites.py": "c744983762b07033c71b35cdca5f250363460d8e16496853d7c8d43c9fb3e5b1",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "e5650fd7528f7aad0136b8131b61bbf9e1877564a5eb3d200fd790f1acee7007",
+    "kprog/stock-path/module/kprog_stock.c": "ee85d301e47b8ddd42406f7d59c60b3b51cce1b66973aad53266ed85060e9015"
+  },
+  "current_source_after": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+    "kprog/arm64/arm64_sim_direct.h": "5590d19f6c2cf6ef5b2d0b80cba64c889125a5bb0fda569341a7cc31ac114349",
+    "kprog/x86/native_lab/native_link/src/main.rs": "819673ffef5c8608b043fce50b7c02ccd837ecf544e788d64fff0fdf1af1377f",
+    "kprog/formal/oracles/test_arm64_read_followup_host.c": "f83daa90e013f50546fc3102fbad65e64c7591be239ab823eff46147c56d8192",
+    "kprog/formal/oracles/test_arm64_load_sites.py": "c744983762b07033c71b35cdca5f250363460d8e16496853d7c8d43c9fb3e5b1",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "e5650fd7528f7aad0136b8131b61bbf9e1877564a5eb3d200fd790f1acee7007",
+    "kprog/stock-path/module/kprog_stock.c": "ee85d301e47b8ddd42406f7d59c60b3b51cce1b66973aad53266ed85060e9015"
+  },
+  "current_source_stable": true,
+  "remaining": "Universal recovery/O2/compiler/physical exception-table composition retains V/FORMAL ownership; original 13 host diagnostic commands retain their recorded stack/exit/helper fixture interfaces; current ARM recovery source publication and guest refresh retain S2 ownership.",
+  "historical_safety_reread": {
+    "cases": 34,
+    "outcomes": 34,
+    "stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 21,
+      "specialization_rejected": 2,
+      "accepted_finding": 7
+    },
+    "case_native_hashes_match": true,
+    "negative_native_executions": 0,
+    "archive": "guest5/raw.tar.gz#run/safety/outcomes.json"
+  },
+  "historical_compiler_receipts": {
+    "micro.json": {
+      "rows": 29,
+      "exit": 0,
+      "sha256": "a0076480239ba6d63f9332473ac4a3dc8b8b6de9f4cb512e7fa4b737b34b0b36"
+    },
+    "negative-micro.json": {
+      "rows": 1,
+      "exit": 0,
+      "sha256": "f6909d99b333aaca65e2ace6025212e58dd0c407296f1957a2f700e3329948f1"
+    },
+    "effective-address/lse-units.json": {
+      "rows": 12,
+      "exit": 0,
+      "sha256": "d584f3d4a9bd110d5da66ff1635081bb5f4c40bee59c470928d9e425102b39d7"
+    }
+  },
+  "current_diagnostics": {
+    "clang_ubsan": "Installed Clang18 references an absent standalone UBSan archive; Clang O2 and GCC UBSan each pass5720 checks.",
+    "generator": "Current encoder rejects d0 in the original180-shape generator test; S2 owns current ARM source/guest refresh. Historical180-shape receipt retains its source epoch."
+  },
+  "completion_boundary": "Original finite S10 work is published and independently reread. Current source refresh is an active S2 task; this continuation preserves its edits and build ownership. Universal composition retains its existing partial status.",
+  "completed_utc": "2026-11-21T19:58:54.732488+00:00"
+}
