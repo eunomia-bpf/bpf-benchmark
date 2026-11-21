@@ -1,0 +1,8 @@
+runs considered 82
+bcc/set                          per-call 1.144x (20261121_001342_075406) progs 16/25 15/25 | thr stats-off 1.023x (20261119_045219_454072) | thr stats-on 1.268x (20261116_060435_731340)
+cilium/agent                     per-call 4.103x (20261116_204952_665276) progs 2/53 4/56 | thr stats-off 3.564x (20261119_202033_415383) | thr stats-on 1.218x (20261116_204952_665276)
+katran                           per-call 1.094x (20261116_145408_662903) progs 1/1 1/1 | thr stats-off 1.121x (20261116_095730_161987) | thr stats-on 1.039x (20261119_190039_078110)
+otelcol-ebpf-profiler/profiling  per-call 14.396x (20261116_053859_493069) progs 2/13 1/12 | thr stats-off 1.866x (20261116_032555_782265) | thr stats-on 2.020x (20261116_053859_493069)
+tetragon/observer                per-call 2.790x (20261120_143937_810796) progs 21/287 19/129 | thr stats-off 3.291x (20261120_222740_505433) | thr stats-on 2.995x (20261120_143937_810796)
+tracee/monitor                   per-call 2.036x (20261121_013353_459359) progs 41/167 41/167 | thr stats-off 1.884x (20261120_225422_198013) | thr stats-on 1.659x (20261121_013353_459359)
+{('otelcol-ebpf-profiler/profiling', False): 9, ('katran', False): 13, ('bcc/set', False): 9, ('cilium/agent', False): 7, ('otelcol-ebpf-profiler/profiling', True): 5, ('bcc/set', True): 9, ('cilium/agent', True): 5, ('katran', True): 5, ('tracee/monitor', False): 8, ('tracee/monitor', True): 4, ('tetragon/observer', False): 5, ('tetragon/observer', True): 3}
