@@ -70,6 +70,19 @@
 #define _(P) (__builtin_preserve_access_index(P))
 #endif
 
+#if defined(__aarch64__)
+#define __PT_PARM1_REG regs[0]
+#define __PT_PARM2_REG regs[1]
+#define __PT_PARM3_REG regs[2]
+#define __PT_PARM4_REG regs[3]
+#define __PT_PARM5_REG regs[4]
+#define __PT_PARM6_REG regs[5]
+#define __PT_RET_REG regs[30]
+#define __PT_FP_REG regs[29]
+#define __PT_RC_REG regs[0]
+#define __PT_SP_REG sp
+#define __PT_IP_REG pc
+#else
 #define __PT_PARM1_REG di
 #define __PT_PARM2_REG si
 #define __PT_PARM3_REG dx
@@ -81,6 +94,7 @@
 #define __PT_RC_REG ax
 #define __PT_SP_REG sp
 #define __PT_IP_REG ip
+#endif
 
 #if defined(__TARGET_ARCH_x86) && !defined(bpf_target_x86)
 #define bpf_target_x86

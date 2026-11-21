@@ -8,7 +8,12 @@ VENDOR := $(ROOT)/vendor
 BUILD := $(VENDOR)/build/native-bpf
 KERNEL_RELEASE ?= $(shell uname -r)
 ARCH := x86
-GOARCH := amd64
+GOARCH := $(if $(filter arm64 aarch64,$(ARCH)),arm64,amd64)
+# The kernel architecture name the apps and their headers use, and the system headers: the host
+# multiarch directory on x86, the cross sysroot clang finds for --target=aarch64-linux-gnu on arm64.
+BPF_ARCH := $(if $(filter arm64 aarch64,$(ARCH)),arm64,x86)
+BPF_ARCH_UC := $(if $(filter arm64 aarch64,$(ARCH)),ARM64,X86)
+SYS_INC := $(if $(filter arm64 aarch64,$(ARCH)),-idirafter /usr/include,-I/usr/include -I/usr/include/x86_64-linux-gnu)
 
 CLANG ?= clang-18
 LLC ?= llc-18
@@ -39,7 +44,7 @@ TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
-	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
+	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
@@ -52,23 +57,16 @@ KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types \
 	-mllvm -switch-to-lookup=false
 KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS))
-KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
 BCC_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/bcc/%.native.o,$(BCC_TOOLS))
-BCC_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/bcc/%.proof.ok,$(BCC_TOOLS))
 CILIUM_NATIVE_PLACEHOLDER_OBJS := $(NATIVE_OUT)/cilium/cilium_placeholders.native.o
 CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS)) $(CILIUM_NATIVE_PLACEHOLDER_OBJS)
-CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS)) $(NATIVE_OUT)/cilium/cilium_placeholders.proof.ok
 OTEL_EBPF_DIR := otel/support/ebpf
 OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
-OTEL_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.proof.ok
 TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
-TRACEE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee.proof.ok
-TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
 
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DPOLICY_AUDIT_MODE=1 \
@@ -105,18 +103,18 @@ clean:
 	$(MAKE) -C "$(CURDIR)/cilium/bpf" clean >/dev/null
 	$(MAKE) -C "$(CURDIR)/otel/support/ebpf" clean >/dev/null
 
-vmlinux: $(VMLINUX_H) bcc/libbpf-tools/x86/vmlinux.h tetragon/bpf/include/vmlinux_generated_x86.h
+vmlinux: $(VMLINUX_H) bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h
 
 $(VMLINUX_H): $(VMLINUX_BTF)
 	install -d "$(dir $@)"
 	"$(BPFTOOL)" btf dump file "$(VMLINUX_BTF)" format c > "$@"
 
-bcc/libbpf-tools/x86/vmlinux.h: $(VMLINUX_H)
+bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h: $(VMLINUX_H)
 	install -D -m 0644 "$<" "$@"
 
-tetragon/bpf/include/vmlinux_generated_x86.h: $(VMLINUX_H)
+tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h: $(VMLINUX_H)
 	install -d "$(dir $@)"
-	sed 's/__VMLINUX_H__/__VMLINUX_GENERATED_X86_H__/g' "$<" > "$@"
+	sed 's/__VMLINUX_H__/__VMLINUX_GENERATED_$(BPF_ARCH_UC)_H__/g' "$<" > "$@"
 
 katran:
 	install -d "$(OUT)/katran"
@@ -128,16 +126,16 @@ katran:
 		| "$(LLC)" -march=bpf -filetype=obj -o "$(OUT)/katran/$${src}.bpf.o"; \
 	done
 
-bcc: bcc/libbpf-tools/x86/vmlinux.h
+bcc: bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h
 	$(MAKE) -C "$(CURDIR)/bcc/libbpf-tools" CLANG="$(CLANG)" LLVM_STRIP="$(LLVM_STRIP)" \
 		OUTPUT="$(OUT)/bcc/output" APPS="$(BCC_TOOLS)" LIBBPF_OBJ= \
-		INCLUDES="-I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		INCLUDES="$(SYS_INC)" \
 		$(BCC_OBJS)
 
-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h
+tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h
 	install -d "$(OUT)/tetragon"
 	$(MAKE) -C "$(CURDIR)/tetragon/bpf" CLANG="$(CLANG)" LLC="$(LLC)" \
-		BPF_TARGET_ARCH=x86 \
+		BPF_TARGET_ARCH=$(BPF_ARCH) \
 		OBJS='$$(filter-out $$(OBJSDIR)bpf_map_test_p1.o $$(OBJSDIR)bpf_map_test_p2.o $$(OBJSDIR)bpf_map_test_p3.o,$$(PROCESSOBJ) $$(CGROUPOBJ) $$(ALIGNCHECKEROBJ))' \
 		DEPS='$$(patsubst $$(OBJSDIR)%.o,$$(DEPSDIR)%.d,$$(OBJS))' -j"$$(nproc)"
 	for obj in "$(CURDIR)/tetragon/bpf/objs/"*.o; do \
@@ -164,13 +162,13 @@ tracee:
 	install -d "$(OUT)/tracee/lsm_support"
 	install -D -m 0644 "$(VENDOR)/repos/tracee/pkg/ebpf/c/vmlinux.h" \
 		"$(CURDIR)/tracee/pkg/ebpf/c/vmlinux.h"
-	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c -I/usr/include -I/usr/include/x86_64-linux-gnu"; \
-	"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+	trace_inc="-I$(CURDIR)/tracee/pkg/ebpf/c $(SYS_INC)"; \
+	"$(CLANG)" -D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
 		-c "$(CURDIR)/tracee/pkg/ebpf/c/tracee.bpf.c" \
 		-o "$(OUT)/tracee/tracee.bpf.o"; \
 	for src in kprobe_check lsm_check; do \
-		"$(CLANG)" -D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
+		"$(CLANG)" -D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 			$${trace_inc} -target bpf -O2 -g -mcpu=v2 \
 			-c "$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport/$${src}.bpf.c" \
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
@@ -180,15 +178,15 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 	install -d "$(dir $@)"
 	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
-		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
+		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_ARCH)" \
 		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
@@ -207,14 +205,14 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
 		-I"$(CURDIR)/cilium/bpf/include/linux" \
 		-I"$(CURDIR)/cilium/bpf/lib" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
@@ -229,44 +227,31 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
 
 $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
-	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
+	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 
 $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
 		-include "$(CURDIR)/native_compat.h" \
-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
+		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
 		-include "$(CURDIR)/native_compat.h" \
-		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
+		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		$(SYS_INC) \
 		-o "$@" "$<"
 
 $(NATIVE_LINK):
 	cargo build --release --manifest-path "$(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml"
 
-$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
+native-katran: $(KATRAN_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
@@ -281,20 +266,7 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
 
-$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
+native-bcc: bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h $(BCC_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
@@ -305,20 +277,7 @@ native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF
 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
 		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
 
-$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
+native-cilium: $(CILIUM_NATIVE_OBJS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
 	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
@@ -345,20 +304,7 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/cilium_placeholders.native.o"
 
-$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
+native-otel: $(OTEL_NATIVE_OBJECT)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
@@ -368,33 +314,7 @@ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 
-$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
+native-tracee: $(TRACEE_NATIVE_OBJS)
 	install -d "$(TRACEE_NATIVE_STAGE_OUT)"
 	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o
 	for obj in $(TRACEE_NATIVE_OBJS); do \
@@ -409,15 +329,15 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_compat.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
-	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
+	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
 	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
-		-D__TARGET_ARCH_x86 \
+		-D__TARGET_ARCH_$(BPF_ARCH) \
 		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/tetragon/bpf" \
 		-I"$(CURDIR)/tetragon/bpf/include" \
@@ -425,7 +345,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 		-I"$(CURDIR)/tetragon/bpf/libbpf" \
 		-I"$(CURDIR)/tetragon/bpf/process" \
 		-I"$(CURDIR)/tetragon/bpf/errmetrics" \
-		-I/usr/include -I/usr/include/x86_64-linux-gnu); \
+		$(SYS_INC)); \
 	compile_native() { \
 		local name="$$1"; \
 		local src="$$2"; \
@@ -513,11 +433,6 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 			echo "no native text symbols in $${obj}" >&2; \
 			exit 1; \
 		fi; \
-		for sym in $${symbols}; do \
-			"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
-				--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
-			done; \
-			printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
 			install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
 		done; \
 		native_args=(); \
@@ -525,10 +440,10 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
 		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
+			--source-object-root "$(VENDOR)/build/$(BPF_ARCH)/tetragon" --helper-disambiguate 174 \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
+			--source-object-root "$(VENDOR)/build/$(BPF_ARCH)/tetragon" --helper-disambiguate 174 \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 # The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.

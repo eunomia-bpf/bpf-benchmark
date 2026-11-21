@@ -1809,21 +1809,10 @@ fn plan_arm64_entry_abi_strip(bytes: &[u8]) -> Result<Arm64EntryAbiStrip> {
         if *saves == 0 && *restores == 0 {
             continue;
         }
-        if *saves == 0 || *restores == 0 {
-            bail!(
-                "arm64 entry ABI strip found unbalanced save/restore for x{}: saves={}, restores={}",
-                19 + idx,
-                saves,
-                restores
-            );
-        }
-        if *saves > 1 {
-            bail!(
-                "arm64 entry ABI strip found multiple save sites for x{}: saves={}, restores={}",
-                19 + idx,
-                saves,
-                restores
-            );
+        // Shrink-wrapped saves (several sites, or one side only): the entry keeps
+        // its own AAPCS saves and the frame saves nothing for it.
+        if *saves != 1 || *restores == 0 {
+            return Ok(Arm64EntryAbiStrip::default());
         }
         out.callee_saved_mask |= 1u8 << idx;
     }
