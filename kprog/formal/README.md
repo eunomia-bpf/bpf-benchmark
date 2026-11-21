@@ -154,6 +154,19 @@ record default proof budgets and the existing logical/CompCert axioms; the two
 native value equalities use no axioms. Integration with the original shift flag
 call sites and stores remains open.
 
+The [original shift flag width prefix](KProgFormal/ClightRefinement/X86ShiftFlagWidths.lean)
+retains the selected source case, loop and switch fallthrough. It performs the
+raw-width assignment and all three original effective-width, bit-count and mask
+calls, returning to the untouched operand/count/flag code in 45/53/61/61 silent
+steps for byte/word/dword/qword widths. Its seven written temporaries read back
+the derived ISA values; other temporaries, caller locals and complete memory
+retain their incoming values. Real callee bindings, caller symbol lookup and
+typed incoming width are explicit input premises. The
+[nine public audits](../results/kprog_verification_20261107/x86-shift-flag-widths.log.gz)
+record the actual source identity and relational execution at existing proof
+budgets and inherited logical/CompCert axioms. Operand/count setup, flag stores,
+writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
