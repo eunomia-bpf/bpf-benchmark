@@ -1,0 +1,36 @@
+{
+  "source": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean",
+  "source_sha256": "f6e494ea24709495d66bd756610a37733563c86167b9e8f7e283743da866419d",
+  "module": "KProgFormal.ClightRefinement.Arm64RegisterReads",
+  "build_evidence": {
+    "log": "/workspaces/kprog-raw/formal/m5-add-register/batch1.log",
+    "marker": "[155/184] Built KProgFormal.ClightRefinement.Arm64RegisterReads (46s)",
+    "batch_terminal": false
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/workspaces/kprog-raw/formal/m5-add-register/StackPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.367635726928711,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-stack1.log",
+  "theorem": "Arm64RegisterReads.gpr_read_stack_bound",
+  "axioms": [
+    "propext",
+    "CC.externalFunctionsSem",
+    "CC.inlineAssemblySem",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "status": "module and public theorem checked; caller/RHS batch and whole library pending",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

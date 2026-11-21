@@ -882,6 +882,52 @@ private theorem warm_entry_finishes (returns : Bool) (frontier b : CC.Block)
     (field_load frontier b ofs m _ _ _ offsets.2 baseHeader) baseRead
   exact internalRun_of_steps exec.2 exec.1
 
+/-- Bind the actual STACK-tag GPR reader to any linked world with the same
+checked layouts. Its warm cache supplies the origin, without a new provider. -/
+theorem gpr_read_stack_bound (world : CC.CGenv) (gprLayout : GprLayout world)
+    (stackLayout : StackLayout world) (frontier b : CC.Block)
+    (ofs : CC.Integers.Ptrofs) (i : Fin 31) (m : CC.Mem) (k : CC.Cont)
+    (value base : BitVec 64)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (.Vlong value, .Vint ((4#8).setWidth 32)))
+    (cache : WarmEntryCache false frontier m (.Vptr b ofs) base) :
+    InternalRun world 91
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate (.Vlong (value + base)) (CC.callCont k) m) := by
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have cellsLoad := field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells
+  simp only [offset_zero] at cellsLoad
+  have beforeCall := gpr_read_prefix_bound world gprLayout i b cb vb tb kb ofs co vo to ko m k (.Vlong value)
+    (4#8) cellsLoad slot
+    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot cell kind rfl
+  have entryRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (4#8)).get Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [gprReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (4#8)).get Arm64Program.___a64_read_value = some (.Vlong value) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  have tagRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (4#8)).get Arm64Program.___a64_read_tag =
+      some (.Vint (4#32)) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  obtain ⟨valid, nz, validObserved, baseObserved⟩ := cache
+  obtain ⟨validBlock, validOfs, validHeader, validCell⟩ := borrowed_loads validObserved
+  obtain ⟨baseBlock, baseOfs, baseHeader, baseCell⟩ := borrowed_loads baseObserved
+  have offsets := cache_offsets false
+  have tail := read_warm_tail_stack_bound world stackLayout b validBlock baseBlock ofs validOfs baseOfs
+    m k _ value base valid nz entryRead valueRead tagRead
+    (field_load frontier b ofs m _ _ _ offsets.1 validHeader) validCell
+    (field_load frontier b ofs m _ _ _ offsets.2 baseHeader) baseCell
+  have afterRead := internalRun_of_steps tail.2 tail.1
+  have run := (internalRun_of_steps beforeCall.2 beforeCall.1).trans afterRead
+  exact run
+
+
 /-- The complete actual combined reader materializes a relative GPR word
 through its selected borrowed warm cache. STACK takes 91 transitions and RETURN
 92. All header/cell loads are imported Clight loads; the entire memory is kept. -/
