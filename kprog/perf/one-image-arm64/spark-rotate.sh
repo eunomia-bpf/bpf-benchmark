@@ -11,7 +11,8 @@ set -u
 W=$(cd "$(dirname "$0")" && pwd)
 R=$W/root
 LOG=$W/progress.log
-ORDER="otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/observer tracee/monitor katran"
+# ORDER from the environment splits the six applications across Sparks, one guest per machine.
+ORDER=${ORDER:-"otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/observer tracee/monitor katran"}
 for s in 0 1; do for a in $ORDER; do
   [ -e "$W/STOP" ] && { echo "$(date -u +%FT%TZ) STOP" >> "$LOG"; exit 0; }
   d=${a%%/*}
