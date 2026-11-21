@@ -1,0 +1,57 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CacheLocalFrame.lean": "658dd9fcf8daddb43001be79d9476a42b0f9e88d6078fbf3d15518eb8212e4f4",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddPrefixNative.lean": "4132830366be143237f486e6dff3623a32c0b9312d46b1beaf3d1452ca308a2f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddPrefixNative"
+    ],
+    "exit": 0,
+    "seconds": 323.65830397605896,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/d1-frame2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/D1Public.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5258395671844482,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-d1-1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.cell_load": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddPrefixNative.entry_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "earlier_attempt": {
+    "receipt": "/workspaces/kprog-raw/formal/m5-add-register/d1-frame1.json",
+    "outcome": "rewrite failed on unreduced Prod.fst projection; explicit sameBlock result type fixed it"
+  },
+  "whole_library_confirmation": "pending after source publication",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

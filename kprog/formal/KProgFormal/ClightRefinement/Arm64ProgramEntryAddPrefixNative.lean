@@ -59,6 +59,9 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
       CC.Mem.load .Mint8unsigned pairAfter ((pairStorage.tables true).cellBlock 1) 0 = some (.Vint 0) ∧
       CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 2) 0 = some (.Vlong (pairStorage.spValue + (16#64))) ∧
       CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 2) 0 = some (.Vint (4#32)) ∧
+      CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 1) 0 =
+        some (.Vlong (Arm64MovKeep.mergeWord ((fields 0).setWidth 64) ((fields 1).setWidth 64) 1)) ∧
+      CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 1) 0 = some (.Vint 0) ∧
       CC.Star (CC.Step2 world)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         (CC.Eapp traces.flatten trace)
@@ -123,8 +126,10 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     addresses origins _).mpr ((Arm64RegisterStorageFrontier.represents_iff finalStorage pairAfter.nextblock pairBound
       addresses origins _).mp addRegisters)
   have finalWarm := kept.warm ready.nextblock header readyBound pairPointers false origins.stack pairWarm
+  have finalPairWord := (kept.cell_load pairStorage finalStorage false 1 (by decide) .Mint64 0).trans pairWord
+  have finalPairTag := (kept.cell_load pairStorage finalStorage true 1 (by decide) .Mint8unsigned 0).trans pairTag
   refine ⟨firstWritten, middle, secondWritten, pairAfter, pairStorage, thirdWritten, after, finalStorage,
-    pairWord, pairTag, word, tag, ?_, finalRegisters, events1, fault1, events2, fault2, events3, fault3,
+    pairWord, pairTag, word, tag, finalPairWord, finalPairTag, ?_, finalRegisters, events1, fault1, events2, fault2, events3, fault3,
     frame.trans addFrame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
     secondFree, secondFreeFrame, secondContents, pairNext, secondReleased,
     thirdFree, thirdFreeFrame, thirdContents, afterNext, thirdReleased, kept, finalPointers, finalWarm, finalBound⟩

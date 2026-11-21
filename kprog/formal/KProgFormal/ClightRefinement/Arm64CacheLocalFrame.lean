@@ -30,6 +30,30 @@ theorem of_frame {initial before after : CC.Mem} (frontier : CC.Block) (i : Fin 
   intro id ty block binding _ _ chunk offset
   exact frame.load chunk block offset (Nat.lt_of_lt_of_le (local_owned initial id ty block binding) bound)
 
+/-- A real local cell outside the selected destination retains every raw load.
+Both storage witnesses identify the same block through the original allocation;
+no successful-load premise or replacement readback is introduced. -/
+theorem Kept.cell_load {initial before after : CC.Mem} {i : Fin 31} {entry : HeaderLocal initial}
+    (kept : Kept initial before after i)
+    (beforeStorage : Arm64ProducerRegisterStorage.Storage initial before entry)
+    (afterStorage : Arm64ProducerRegisterStorage.Storage initial after entry)
+    (tags : Bool) (j : Fin 31) (different : i ≠ j) (chunk : CC.Chunk) (offset : Int) :
+    CC.Mem.load chunk after ((afterStorage.tables tags).cellBlock j) offset =
+      CC.Mem.load chunk before ((beforeStorage.tables tags).cellBlock j) offset := by
+  have outside (selected : Bool) : tableCellName selected i ≠ tableCellName tags j := by
+    intro same
+    have bindings := (beforeStorage.tables selected).cellBinding i
+    rw [same] at bindings
+    have blocks := congrArg Prod.fst (Option.some.inj
+      (bindings.symm.trans ((beforeStorage.tables tags).cellBinding j)))
+    exact beforeStorage.cells_distinct selected tags i j (Or.inr different) blocks
+  have sameBlock : (afterStorage.tables tags).cellBlock j = (beforeStorage.tables tags).cellBlock j :=
+    congrArg Prod.fst (Option.some.inj
+    (((afterStorage.tables tags).cellBinding j).symm.trans
+      ((beforeStorage.tables tags).cellBinding j)))
+  rw [sameBlock]
+  exact kept _ _ _ ((beforeStorage.tables tags).cellBinding j) (outside false) (outside true) chunk offset
+
 /-- Every actual header pointer survives the selected GPR writes. -/
 theorem Kept.pointers {initial before after : CC.Mem} {i : Fin 31} {entry : HeaderLocal initial}
     (kept : Kept initial before after i) (header : (j : Fin 12) → HeaderSourceLocal initial j)
