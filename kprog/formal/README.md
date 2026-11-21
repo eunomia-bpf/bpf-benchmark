@@ -21,6 +21,15 @@ source is retained in Git history. They are not current refinement coverage.
 Full build validation is recorded with that inventory; M5 correspondence and
 O1/O2/O4 recount remain open.
 
+The [x86 width helper](KProgFormal/ClightRefinement/X86Width.lean) executes the
+actual exported C function in six silent Clight transitions for every byte code,
+global environment, memory and continuation. Zero selects eight bytes; each
+other code retains its value, with the entire memory preserved. Its
+[focused build and public audit](../results/kprog_verification_20261107/x86-width-clight.log.gz)
+record the existing CompCert external-function/assembly semantic axioms.
+This C-helper component retains the current M5 ISA-handler count and root/full
+confirmation ownership.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
