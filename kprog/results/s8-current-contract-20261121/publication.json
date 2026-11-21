@@ -1,0 +1,100 @@
+{
+  "remote_master": "091d168cc5dee1f357ab26ccd1cce6e26a023ba7",
+  "commits": [
+    "f94db22b7734ef909848d35f0bdf9056023d46f8",
+    "5c77f7a9d01520e612cae16184229d3d5b0d646a",
+    "091d168cc5dee1f357ab26ccd1cce6e26a023ba7"
+  ],
+  "ancestry": [
+    {
+      "commit": "f94db22b7734ef909848d35f0bdf9056023d46f8",
+      "exit": 0
+    },
+    {
+      "commit": "5c77f7a9d01520e612cae16184229d3d5b0d646a",
+      "exit": 0
+    },
+    {
+      "commit": "091d168cc5dee1f357ab26ccd1cce6e26a023ba7",
+      "exit": 0
+    }
+  ],
+  "source_readback": {
+    "kprog/trusted_generation.py": "ca2758ecf3f4d003fa82db699f22d1ed887d8a57da3e2c7eea1c6a54c18bd5cf",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "34f94b39c2ac2485fccd5f4d5900273315ccdc4ac3237f3051862c9fc7509127"
+  },
+  "result_files": [
+    {
+      "path": "kprog/results/s8-current-contract-20261121/Makefile",
+      "sha256": "de92425c72d8cd96660518bb6c7f9e041656dd9b2eade874805f384a5af8c777"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/current-source.json",
+      "sha256": "f5dfc9fb6eb2f4e35ef07d9d2fcb4b20443a4f05ce16079c8bfd170cb0cc7746"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/flags.json",
+      "sha256": "9b4b276bdb5b172cc1e160402d38fcb97e5ede7b38f693ecb61e31e9533005d3"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/tc.json",
+      "sha256": "af759ced477d20036420c5cef7b4124516538f39bd9585a6e4466320e790c342"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/micro.json",
+      "sha256": "6e947b3ff49d31dc51ca4b62666a7821b0807a4340ba40d4d19ae6d8212f9de1"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/proposals.json",
+      "sha256": "9ae6de76a64469ae03f7cdb052b0324152b74301881953f7331b4140613ec58d"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/coverage-proposal.tsv",
+      "sha256": "88d640f32720d82ae353d2da21b31412e2a7e47daf5c096d0c405a2d91dd9567"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/tail.json",
+      "sha256": "0f323b29a20a1c7c88ad2b31b9110d580d9a7d13fa880bd8ce7bfd4d8bb5dd4b"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/tc.bpf.c",
+      "sha256": "75df3573e966e9f829faf31513b7eefcff37cb6862e573b8437dfadeb31bf958"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/README.md",
+      "sha256": "cc7f9568f2e9dfeba769459ecb91c0a075627a5c6ae9687ebd832bd0e7d76ca5"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/final-tests.json",
+      "sha256": "b1742f89e212bcd851dcac8100e8fbae0d5e5171b7fdee824b9b23dec45c06fa"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/tail-before.json",
+      "sha256": "0319946e998bf20500adc44895e92693a4b71292de9f65ffdf2bd124a994757a"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/safety.json",
+      "sha256": "61da848cb7800752de151b27684dfd17f62b610ac7d132f0eff705f27c4bf9e0"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/check.py",
+      "sha256": "a177e89728bcca35c2ce8fe7f79253d5b9bd8034a80234defec234f0123aac7b"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/context.json",
+      "sha256": "f1fd733417919d75cc4c6ff4f3d2469aef5957c8d202110435e7c852203bd012"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/context-layout.json",
+      "sha256": "8728942a146fd5a5abd4e5e4cae37d798fdb6703d1d7bf29f54d331ae4cf0eab"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/tc.native.S",
+      "sha256": "a78ebfbc8c222c1f2fa991907cbca94c11cde8e857dbf8824225464a4759d31c"
+    },
+    {
+      "path": "kprog/results/s8-current-contract-20261121/historical-reconciliation.json",
+      "sha256": "1fa0ae1feaff3009d9d24d6e71bb857adb783633ccef809ffd547b383a54c047"
+    }
+  ]
+}
