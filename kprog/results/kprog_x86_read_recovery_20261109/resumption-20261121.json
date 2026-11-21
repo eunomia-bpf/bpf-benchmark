@@ -1,0 +1,129 @@
+{
+  "utc": "2026-11-21T20:04:44.617161+00:00",
+  "scope": "S1 original x86-64 read-form recovery prompt; historical result and source-epoch reconciliation",
+  "remote_master": "bf32780ac55d3799b7b264d371f3fef0111355f1",
+  "published_ancestor_commits": [
+    "0ee16fa8f66cb723f65878ea18a5e8a833e04127",
+    "a146b630aeeafb83fef036f6cb605cde3b3a8032",
+    "493df264e461c002ab9aa3986b313c577e6f72e7",
+    "4de80b3ca955bf718bded55aaff5ee46ae90b0e3",
+    "414f34f505189964d6a6fa2bbcecf034b30a8ac1"
+  ],
+  "archive": {
+    "path": "kprog/results/kprog_x86_read_recovery_20261109/raw.tar.gz",
+    "sha256": "4a515d7c35950e908f69bd7ab3072881de74a7d6a101219ef6725d453858d9fe",
+    "members_verified": 901,
+    "uncompressed_bytes_verified": 57261743,
+    "manifest_exact": true,
+    "independently_tallied_safety_stages": {
+      "valid_executed": 9,
+      "verifier_rejected": 28,
+      "specialization_rejected": 1
+    }
+  },
+  "original_source_blobs_match": {
+    "kprog/x86/x86_sim_local_bpf.h": "d25f13deeb0a5e9c6959186da9119dfadc8435ba0bf43f9e52de9f60b5101eaa",
+    "kprog/x86/micro-prog/generate_micro_sim_proofs.py": "9659359bd0eeeaea9674a0b6fd1a63d23cd744cfed173c692d82b380b52bf928"
+  },
+  "historical_run_date": "2026-11-09",
+  "historical_terminal_exits": {
+    "component.exit": "0",
+    "host-final.exit": "2",
+    "host-published.exit": "0",
+    "host-rest.exit": "0",
+    "host.exit": "2",
+    "initial-micro.exit": "0",
+    "initial-safety.exit": "0",
+    "micro.exit": "0",
+    "more-split.exit": "0",
+    "more.exit": "2",
+    "rep.exit": "0",
+    "safety.exit": "0"
+  },
+  "historical_result": {
+    "host_executables": 135,
+    "host_compile_recipes": 136,
+    "component_cases_per_compiler": {
+      "mov": 2061312,
+      "alu": 2196480,
+      "additional": 2623104,
+      "rep": 549120,
+      "total": 7430016
+    },
+    "micro_compile_cases": 30,
+    "safety_cases": 38,
+    "safety_stages": {
+      "specialization_rejected": 1,
+      "valid_executed": 9,
+      "verifier_rejected": 28
+    },
+    "unsafe_native_executions": 0
+  },
+  "named_remaining_interfaces": [
+    {
+      "form": "RET entry and subroutine",
+      "reason": "Structured return/entry-ABI macros require an explicit physical next-PC fallthrough relation for a recovered return-stack read."
+    },
+    {
+      "form": "CALL_MEMCPY and CALL_MEMCPY_REG",
+      "reason": "The external-body abstraction requires actual called instruction bytes, per-PC exception sites and completed-prefix/clobber mapping."
+    },
+    {
+      "form": "PUSH memory later stack write; POP memory destination write; REP destination write",
+      "reason": "The source-read recovery component is measured. Later write-side faults require a transactional full-instruction/prefix relation, including saved-SP ordering and completed stores."
+    },
+    {
+      "form": "Typed context/stack/map/packet/immutable reads",
+      "reason": "Existing typed routes retain their universal valid-address/lifetime and permission premise. The fresh read-recovery choice is attached to scalar-address routes."
+    },
+    {
+      "form": "Whole compiled-B/native platform relation",
+      "reason": "V retains universal O1/O2/O3/compiler, exact decoder-site/frame/handler registration and physical event projection obligations."
+    }
+  ],
+  "current_followup": {
+    "source_commit": "414f34f505189964d6a6fa2bbcecf034b30a8ac1",
+    "host_receipt": "kprog/results/read-recovery-review-20261121/host.json",
+    "host_saved_cases": 1173,
+    "host_saved_compilers": [
+      "gcc13 UBSan",
+      "clang18"
+    ],
+    "fixture_build_exit": 2,
+    "fixture_log": "/workspaces/kprog-raw/S1/20261121-review-followup/fixture-build.log",
+    "status": "Guest follow-up fixture build exits2 at BPF frontend invalid output constraint +w in path_probe.bpf.c lines18/21/23/24; build flags and register constraints require owner alignment. Existing source/log paths remain in the shared checkout for coordinator continuation.",
+    "source_receipts": {
+      "kprog/test/native_load_fault/recovery_host.c": "38360c3dd4337c422d87ccdcfbcd6057f41b65c6ffe8fd440681fe31ab2642f0",
+      "kprog/x86/x86_sim_local_bpf.h": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336"
+    },
+    "saved_log_receipts": {
+      "host-forms.exit": {
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      "host-forms.log": {
+        "bytes": 447,
+        "sha256": "66c8948dd539712fdb475f748123a116f0981a829c426fcffeacb9d8cb27ffda"
+      },
+      "host-forms-ubsan.log": {
+        "bytes": 495,
+        "sha256": "c1fbb7e6f3bc23dad3357c409818564390016a90ede87a3be341aff528013dba"
+      },
+      "host-forms-clang.log": {
+        "bytes": 453,
+        "sha256": "457dd341b38ba598b0295b1b44d91222b589a388438cdf014bac4743d8d59f37"
+      },
+      "fixture-build.exit": {
+        "bytes": 2,
+        "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+      },
+      "fixture-build.log": {
+        "bytes": 48954600,
+        "sha256": "037b8e7a537be977c74277c07982c52de07724a2d336d65bbb823f5995700c67"
+      }
+    }
+  },
+  "scope_completion": "Original prompt delivers protected-read components plus the named-form list and reasons; complete compiler/platform correspondence retains FORMAL/V ownership.",
+  "production_edits_this_reconciliation": 0,
+  "guest_starts_this_reconciliation": 0
+}

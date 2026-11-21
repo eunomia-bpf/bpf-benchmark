@@ -36,3 +36,7 @@ Named completion interfaces:
 These are measured production/model components and explicit universal interfaces. V owns the full formal check and the universal recovery/compiler/platform rows. Runtime admission additions: 0. The frozen workload and paper paths retain their recorded definitions.
 
 raw.tar.gz contains commands, fixture generators, original/derived host inputs, source snapshots and hashes, all terminal logs, the final safety native/B/request records and micro compiler metadata. Build executables, compiler caches and kernel trees remain temporary outputs.
+
+### Published receipt reconciliation, 2026-11-21
+
+The [resumption receipt](resumption-20261121.json) independently verifies all 901 archived members (57,261,743 uncompressed bytes), the original source hashes, seven terminal success receipts and all four original publications against current remote master. The 135 host programs, 30 micro compiles and 38 safety outcomes above retain their 2026-11-09 source epoch. The current follow-up publishes the external scalar-copy model at `414f34f505189964d6a6fa2bbcecf034b30a8ac1` and records [1,173 focused host cases](../read-recovery-review-20261121/host.json) for GCC UBSan and Clang. Its later guest fixture build exits 2 at BPF frontend inline-assembly constraint `+w` in `path_probe.bpf.c`; the retained source/log paths support coordinator continuation. The named completion interfaces above and universal compiler/platform composition remain explicit.

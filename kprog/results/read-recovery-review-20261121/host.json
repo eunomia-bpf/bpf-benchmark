@@ -1,0 +1,20 @@
+{
+  "utc": "2026-11-21T19:53:49.192554+00:00",
+  "cases": 1173,
+  "compilers": [
+    "gcc13 UBSan",
+    "clang18"
+  ],
+  "audit_item5": [
+    "mov al,[rbx] full-RAX clear",
+    "cmovne false full-RAX clear",
+    "cmp byte [rbx],al retained flags",
+    "push [rbx] retained RSP"
+  ],
+  "both_outcomes": true,
+  "incoming_flags": 64,
+  "known_zero_chain": "second actual load recovers with zero extra environment draws",
+  "external_copy": "invalid address1 takes architectural fault before memory access",
+  "raw": "/workspaces/kprog-raw/S1/20261121-review-followup",
+  "oracle_sha256": "38360c3dd4337c422d87ccdcfbcd6057f41b65c6ffe8fd440681fe31ab2642f0"
+}
