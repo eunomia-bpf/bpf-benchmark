@@ -1,0 +1,55 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddAdmission"
+    ],
+    "exit": 0,
+    "seconds": 1.9406402111053467,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 234,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-admission/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4946014881134033,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddAdmission.next_admission": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddAdmission.setup_next": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-add-prefix-join",
+  "source_checkpoint_before_commit": "d8e0e1d828a9e6011c8be5f0f82d32723a6459c0",
+  "whole_proof_library": {
+    "status": "pending batch-end proof confirmation"
+  },
+  "completed_isa_families": 0
+}

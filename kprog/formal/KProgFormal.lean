@@ -132,3 +132,4 @@ import KProgFormal.ClightRefinement.Arm64AddImmediateBody
 import KProgFormal.ClightRefinement.Arm64AddImmediateCall
 import KProgFormal.ClightRefinement.Arm64AddImmediateNativeCall
 import KProgFormal.ClightRefinement.Arm64ProgramEntryAddCall
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAddAdmission
