@@ -66,5 +66,122 @@
     ]
   },
   "m5_complete": false,
-  "complete_isa_families": 0
+  "complete_isa_families": 0,
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 94.74919986724854,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full1.log",
+    "jobs": 306,
+    "source_snapshot": {
+      "time": "2026-11-21T18:05:21Z",
+      "head": "558bd6946d4aae8d28051ef3dae3eb8cf59de2ec",
+      "sha256": {
+        "kprog/formal/KProgFormal.lean": "d22a2e6c522809dd1d19a04bc131ed30eab45913e3fdd3873f32440a0070ab13",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterCall.lean": "82c6422b6164dc2a9d5d35d7e7463083aeacec790680aa80352e456862529a60",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterOperands.lean": "f30ada915785cef850c91630cdd3de7d4de9c9b00d5421bd8acc2b699f3f7aa5",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterModifier.lean": "3968a65d169a67c11620bc543b308e69e1d1adc556df4291058161b8b5a09a61"
+      }
+    },
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/RootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.033707618713379,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-root2.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.enter": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.leave": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.entry_valid": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.selector": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.enter_reader": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.Linked.rhs_stack": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_stack_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterModifier.finish_lsl_zero": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "earlier_attempt": {
+      "receipt": "/workspaces/kprog-raw/formal/m5-add-register/public-root1.json",
+      "outcome": "thread creation resource failure before proof queries; retried with explicit -j1"
+    }
+  }
 }

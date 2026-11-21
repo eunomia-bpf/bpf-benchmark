@@ -5,3 +5,5 @@
 The module compiled at batch1 job155/184 (46s); its one public type/axiom query exited0 in3.368s. Raw evidence and exact source hash are in validation.json. Axioms are standard logic plus inherited CompCert external/inline semantics; no sorryAx or new axiom. The parent caller/RHS batch and whole-library confirmation remain pending. No runtime tool, application, test or measurement ran. M5/O1/O2/O4/M6 remain open; complete ISA families0.
 
 The next actual fixture call has packed AUX256 (ALU0, modifier1, shift0), not full AUX0. This reader theorem does not claim that complete caller or modifier is verified.
+
+Whole-library/root confirmation: full1 passed (306 jobs,94.749s); import KProgFormal and nine public type/axiom queries passed (2.034s, explicit -j1), with inherited axioms only. Raw m5-add-register/full1 and public-root2; source hashes unchanged from full1-source-hashes.json. Initial public-root1 stopped before proof queries due thread creation resource exhaustion. This confirms the added components compose as library imports; complete fourth handler/native semantics and M5/M6 remain open.
