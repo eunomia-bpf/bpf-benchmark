@@ -27,12 +27,17 @@ pkg_check_modules(ZLIB REQUIRED IMPORTED_TARGET zlib)
 
 add_library(native_loader STATIC
     src/native_loader.cpp
+    src/native_loader_trusted.cpp
 )
 
 add_library(native_loader_shared SHARED
     src/native_loader.cpp
+    src/native_loader_trusted.cpp
 )
 set_target_properties(native_loader_shared PROPERTIES OUTPUT_NAME native_loader)
+
+add_executable(trusted-native-loader ../trusted_loader.cpp)
+target_link_libraries(trusted-native-loader PRIVATE native_loader)
 
 add_library(native_loader_libbpf STATIC IMPORTED GLOBAL)
 set_target_properties(native_loader_libbpf PROPERTIES

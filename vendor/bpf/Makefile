@@ -531,4 +531,15 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(
 			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
-native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon
+# The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.
+PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
+$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp \
+		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp $(ROOT)/vendor/bpf/native-lpm.h
+	install -d "$(dir $@)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
+		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
+		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+
+
+native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon $(PERF_CONTEXT_LTO)

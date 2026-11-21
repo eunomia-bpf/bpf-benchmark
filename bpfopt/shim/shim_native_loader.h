@@ -24,6 +24,15 @@ static int shim_native_loader_enabled(void) {
     return e && strcmp(e, "1") == 0;
 }
 
+/* The verified arm requires every native load to finish before the run
+ * measures; an unbound run keeps measuring with the program on eBPF. */
+static int shim_native_loader_requires_bound_proof(void) {
+    const char *value = getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
+    return value && (strcmp(value, "1") == 0 || strcmp(value, "true") == 0 ||
+                     strcmp(value, "yes") == 0 || strcmp(value, "on") == 0);
+}
+
+
 static void shim_native_loader_fatal(void) {
     fflush(NULL);
     _exit(97);
@@ -349,6 +358,13 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
         dlclose(handle);
+        if (shim_native_loader_requires_bound_proof()) {
+            log_line("native-loader verified program kept on eBPF prog=%s "
+                     "manifest=%s source=%s",
+                     prog_name ? prog_name : "", manifest, prog->bytecode_path);
+            dlclose(handle);
+            return original_fd;
+        }
         shim_native_loader_fatal();
     }
     if (!result.replaced) {

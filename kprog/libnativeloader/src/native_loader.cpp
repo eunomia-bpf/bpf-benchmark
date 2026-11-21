@@ -1,4 +1,5 @@
 #include "native_loader.hpp"
+#include "native_loader_internal.hpp"
 
 #include "kernel_offsets.h"
 
@@ -42,26 +43,11 @@
 
 extern "C" char **environ;
 
-namespace {
+namespace native_loader::internal {
 
 [[noreturn]] void fail(const std::string &message)
 {
     throw std::runtime_error(message);
-}
-
-template <typename T>
-inline __u64 ptr_to_u64(T *ptr)
-{
-    return static_cast<__u64>(reinterpret_cast<uintptr_t>(ptr));
-}
-
-template <typename Clock, typename Duration>
-inline uint64_t elapsed_ns(
-    const std::chrono::time_point<Clock, Duration> &start,
-    const std::chrono::time_point<Clock, Duration> &end)
-{
-    return static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count());
 }
 
 std::string libbpf_error_string(int error_code)
@@ -774,23 +760,6 @@ struct StubLoadAttrs {
     uint32_t attach_prog_id = 0;
 };
 
-struct ScopedFd {
-    int fd = -1;
-
-    ScopedFd() = default;
-    explicit ScopedFd(int value) : fd(value) {}
-    ScopedFd(const ScopedFd &) = delete;
-    ScopedFd &operator=(const ScopedFd &) = delete;
-    ~ScopedFd()
-    {
-        if (fd >= 0) {
-            close(fd);
-        }
-    }
-
-    int get() const { return fd; }
-};
-
 int open_btf_fd_by_id_required(uint32_t id, const char *field_name)
 {
     if (id == 0) {
@@ -1014,47 +983,6 @@ int load_stub_prog(uint32_t prog_type_value,
     }
     return fd;
 }
-
-struct Hash64 {
-    uint64_t value = 1469598103934665603ULL;
-
-    void add_byte(uint8_t byte)
-    {
-        value ^= byte;
-        value *= 1099511628211ULL;
-    }
-
-    void add_u64(uint64_t word)
-    {
-        for (unsigned i = 0; i < 8; i++) {
-            add_byte(static_cast<uint8_t>((word >> (i * 8)) & 0xff));
-        }
-    }
-
-    void add_bytes(const uint8_t *data, size_t size)
-    {
-        add_u64(size);
-        for (size_t i = 0; i < size; i++) {
-            add_byte(data[i]);
-        }
-    }
-
-    void add_string(const std::string &text)
-    {
-        add_u64(text.size());
-        for (unsigned char ch : text) {
-            add_byte(ch);
-        }
-    }
-
-    std::string hex() const
-    {
-        char buf[17];
-        std::snprintf(buf, sizeof(buf), "%016llx",
-                      static_cast<unsigned long long>(value));
-        return std::string(buf);
-    }
-};
 
 void hash_file_contents(Hash64 &hash,
                         const std::filesystem::path &path,
@@ -3369,12 +3297,16 @@ void close_fd_vector(std::vector<int> &fds)
 }
 
 
-} // namespace
+} // namespace native_loader::internal
+
+using namespace native_loader::internal;
 
 namespace native_loader {
 
 LoadedProgram load_from_fd(const FdLoadOptions &options)
 {
+    if (options.trusted_service_fd >= 0 || internal::requires_bound_proof())
+        return internal::load_checked(options);
     if (options.original_prog_fd < 0) {
         fail("native_loader: missing original_prog_fd");
     }
