@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-11-21T20:04:48.064559+00:00",
+  "previous_build_target_fix": "99c1a9f62",
+  "prior_missing_entry_exit": 2,
+  "all_command_preview_exit": 0,
+  "six_app_command_preview_exit": 0,
+  "apps": [
+    "otelcol-ebpf-profiler/profiling",
+    "bcc/set",
+    "cilium/agent",
+    "tetragon/observer",
+    "tracee/monitor",
+    "katran"
+  ],
+  "canonical": {
+    "kernel": "/workspaces/.agent-state/kprog-ck/build-x86",
+    "loader": "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader",
+    "compiler": "/workspaces/.agent-state/kprog-ck/verified-compiler",
+    "image": "bpf-benchmark/kprog:current",
+    "guest_store": "/var/tmp/kprog-tmp/one-image",
+    "guest_cpus": 8,
+    "guest_memory": "64G"
+  },
+  "source_sha256": {
+    "kprog/libnativeloader/Makefile": "795a19260f7749b622967d35f6283b33631d48eac0fabaaed581c4fd5181ea5d",
+    "kprog/test/run_checked_otel.sh": "7a2e67105cf01ade6bd52691055fef7d0255b55a5cd72e62afb6bd899ac7ed38",
+    "kprog/test/verified_corpus.py": "b5de74724c108ce4ac4e616fe481ccda752342cab60018107733a9994e36d5e2"
+  },
+  "execution_scope": "GNU make recursive command previews; child make inherits -n; preview-only output logs",
+  "component_build_status": "queued under existing shared timing lease",
+  "whole_application_status": "queued after canonical component build under existing timing/image leases",
+  "guest_executions": 0,
+  "new_runtime_checks": 0,
+  "new_address_space_limits": 0,
+  "raw": {
+    "file": "command-previews.tar.gz",
+    "bytes": 2288,
+    "sha256": "2ae3d6fe433ffb94f760f177ad75792e397d04adc1e9789fe1c66e83e65b45f1"
+  }
+}
