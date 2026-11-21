@@ -448,6 +448,7 @@ fn main() -> Result<()> {
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs,
         proof_symbols,
         load_sites,
     } = match elf.architecture() {
@@ -540,6 +541,7 @@ fn main() -> Result<()> {
             &blob,
             &proof_symbols,
             &proof_relocs,
+            &proof_data_relocs,
             callee_saved_mask,
         )?;
         eprintln!(
@@ -622,6 +624,7 @@ fn write_proof_object(
     text: &[u8],
     proof_symbols: &[ProofSymbol],
     proof_relocs: &[ProofReloc],
+    proof_data_relocs: &[ProofDataReloc],
     callee_saved_mask: u8,
 ) -> Result<()> {
     let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
@@ -689,6 +692,7 @@ fn write_proof_object(
         SectionKind::ReadOnlyData,
     );
     let mut rodata_ids: HashMap<String, WriteSymbolId> = HashMap::new();
+    let mut rodata_offsets: HashMap<String, (u64, u64)> = HashMap::new();
     for reloc in proof_relocs.iter().filter(|reloc| reloc.data.is_some()) {
         if rodata_ids.contains_key(&reloc.symbol) {
             continue;
@@ -707,6 +711,56 @@ fn write_proof_object(
         });
         symbol_ids.insert(reloc.symbol.clone(), id);
         rodata_ids.insert(reloc.symbol.clone(), id);
+        rodata_offsets.insert(reloc.symbol.clone(), (offset, data.len() as u64));
+    }
+
+    // Relocations inside an embedded table: the loader reads the table out of
+    // the program's own readonly map, so each pointer slot needs its fixup.
+    for reloc in proof_data_relocs {
+        let &(base, size) = rodata_offsets.get(&reloc.owner).ok_or_else(|| {
+            anyhow!(
+                "nested proof relocation has no data owner {}",
+                reloc.owner
+            )
+        })?;
+        let width = match reloc.r_type {
+            1 => 8,
+            2 => 4,
+            other => bail!("unsupported nested proof relocation type {other}"),
+        };
+        if reloc.offset.checked_add(width).is_none_or(|end| end > size) {
+            bail!(
+                "nested proof relocation exceeds {} or has unsupported type",
+                reloc.owner
+            );
+        }
+        let symbol = match symbol_ids.get(&reloc.symbol) {
+            Some(&symbol) => symbol,
+            None if reloc.r_type == 1 => {
+                let symbol = object.add_symbol(WriteSymbol {
+                    name: reloc.symbol.as_bytes().to_vec(),
+                    value: 0,
+                    size: 0,
+                    kind: SymbolKind::Data,
+                    scope: SymbolScope::Linkage,
+                    weak: false,
+                    section: WriteSymbolSection::Undefined,
+                    flags: SymbolFlags::None,
+                });
+                symbol_ids.insert(reloc.symbol.clone(), symbol);
+                symbol
+            }
+            None => bail!("nested proof relocation has no text target {}", reloc.symbol),
+        };
+        object.add_relocation(
+            data_section,
+            WriteRelocation {
+                offset: base + reloc.offset,
+                symbol,
+                addend: reloc.addend,
+                flags: RelocationFlags::Elf { r_type: reloc.r_type },
+            },
+        )?;
     }
 
     for reloc in proof_relocs {
@@ -875,6 +929,7 @@ struct RewriteResult {
     map_patches: Vec<MapPatch>,
     callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
+    proof_data_relocs: Vec<ProofDataReloc>,
     proof_symbols: Vec<ProofSymbol>,
     load_sites: Vec<LoadSite>,
 }
@@ -885,6 +940,17 @@ struct LoadSite {
     offset: u32,
     insn_len: u16,
     destination: u16,
+}
+
+/// A relocation inside a block of embedded read-only data, resolved by the
+/// linker so the loader can copy the table out of bpf_map__initial_value.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct ProofDataReloc {
+    owner: String,
+    offset: u64,
+    r_type: u32,
+    symbol: String,
+    addend: i64,
 }
 
 #[derive(Clone, Debug)]
@@ -2665,6 +2731,7 @@ fn rewrite_arm64(
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs: Vec::new(),
         proof_symbols,
         load_sites: Vec::new(),
     })

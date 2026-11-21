@@ -5,9 +5,12 @@ use iced_x86::{
     Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use crate::*;
+
+#[path = "x86_readonly_relocs.rs"]
+mod readonly_relocs;
 
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
@@ -413,6 +416,73 @@ fn resolve_x86_pc32_defined_text_target(
     ))
 }
 
+/// Direct tail jumps (`jmp`) and `jcc` out of a function reach a callee that
+/// no relocation names: the branch is the only edge. Without this the proof
+/// drops every function a program only reaches by tail jump — Tetragon's
+/// `filter_16ty` reaches `filter_16ty_range` this way. Matches the shape
+/// `x86_direct_tail_transfers` gave the pre-restore linker.
+fn extend_reachable_with_tail_jumps(
+    elf: &object::File,
+    sym: &SymInfo,
+    included: &mut Vec<SymInfo>,
+    seen: &mut HashSet<SymbolKey>,
+    queue: &mut Vec<SymInfo>,
+) -> Result<()> {
+    let section = elf.section_by_index(sym.section_index)?;
+    let bytes = read_symbol_bytes(elf, sym)?;
+    let relocations: HashMap<_, _> = section.relocations().collect();
+    let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
+    while decoder.can_decode() {
+        let insn = decoder.decode();
+        let is_jump = insn.flow_control() == FlowControl::UnconditionalBranch
+            || insn.is_jcc_short_or_near();
+        if !is_jump || !matches!(insn.op0_kind(), OpKind::NearBranch64) {
+            continue;
+        }
+        let displacement =
+            insn.ip() + decoder.get_constant_offsets(&insn).immediate_offset() as u64;
+        let callee = match relocations.get(&displacement) {
+            Some(reloc) => match reloc.flags() {
+                RelocationFlags::Elf { r_type: 2 | 4 } => {
+                    match resolve_x86_plt32_defined_target_addr(elf, reloc)? {
+                        Some((section_index, address)) => {
+                            let found =
+                                find_text_symbol_in_section_at_address(elf, section_index, address)
+                                    .ok_or_else(|| {
+                                        anyhow!(
+                                            "tail branch from {} has no function at {address:#x}",
+                                            sym.name
+                                        )
+                                    })?;
+                            // A cold fragment inside another symbol shares its
+                            // frame; only a real function entry is a tail call.
+                            (address == found.address).then_some(found)
+                        }
+                        None => None,
+                    }
+                }
+                _ => None,
+            },
+            None => {
+                let address = insn.near_branch_target();
+                if address >= sym.address && address < sym.address + sym.size {
+                    None
+                } else {
+                    find_decoded_call_target(elf, sym, address)
+                        .filter(|callee| address == callee.address)
+                }
+            }
+        };
+        if let Some(callee) = callee {
+            if seen.insert(symbol_key(&callee)) {
+                included.push(callee.clone());
+                queue.push(callee);
+            }
+        }
+    }
+    Ok(())
+}
+
 fn discover_reloc_reachable(
     elf: &object::File,
     sym: &SymInfo,
@@ -523,6 +593,7 @@ pub(super) fn discover_reachable(elf: &object::File, entry: &SymInfo) -> Result<
             }
         }
         discover_reloc_reachable(elf, &sym, &mut included, &mut seen, &mut queue)?;
+        extend_reachable_with_tail_jumps(elf, &sym, &mut included, &mut seen, &mut queue)?;
     }
     Ok(included)
 }
@@ -1697,9 +1768,13 @@ pub(super) fn rewrite_x86(
     // Stage 2: resolve ELF relocations. GOT helper calls keep their original
     // RIP-relative indirect-call form and point at in-blob literal-pool entries;
     // PLT32 helper calls use in-blob absolute trampolines.
+    let proof_data_relocs;
     let proof_relocs = if proof_mode {
-        collect_x86_proof_relocs(elf, &layouts)?
+        let (collected, nested) = collect_x86_proof_relocs(elf, &layouts, map_addrs)?;
+        proof_data_relocs = nested;
+        collected
     } else {
+        proof_data_relocs = Vec::new();
         relocs.extend(apply_elf_relocations(
             elf,
             &layouts,
@@ -1771,6 +1846,7 @@ pub(super) fn rewrite_x86(
         map_patches,
         callee_saved_mask,
         proof_relocs,
+        proof_data_relocs,
         proof_symbols,
         load_sites,
     })
@@ -1853,11 +1929,17 @@ fn proof_symbols_from_x86_layouts(
     Ok(out)
 }
 
+/// A section whose bytes the proof may embed verbatim. `.data.rel.ro` holds
+/// pointer tables (Tetragon's `string_maps_*` array) the compiler relocated
+/// into PCB32 reach; it is written once at load and never mutated by the
+/// program, so it is as immutable as `.rodata` for the proof's purposes.
 fn collect_x86_proof_relocs(
     elf: &object::File,
     layouts: &[SymbolLayout],
-) -> Result<Vec<ProofReloc>> {
+    map_addrs: &HashMap<String, u64>,
+) -> Result<(Vec<ProofReloc>, Vec<ProofDataReloc>)> {
     let mut relocs = Vec::new();
+    let mut nested: BTreeMap<(String, u64), ProofDataReloc> = BTreeMap::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymbolLayout>> = HashMap::new();
     for layout in layouts {
         sections
@@ -2040,11 +2122,38 @@ fn collect_x86_proof_relocs(
                             anyhow!("PC32 proof target {} below section base", target_name)
                         })?;
                     let sym_size = target_sym.size();
-                    let (data_symbol_name, sym_bytes) = if sym_size == 0 {
+                    // A section-symbol relocation into a read-only table names
+                    // no object: embed only the table the instruction reaches,
+                    // and record the relocations inside it so the loader can
+                    // fill the pointers from the program's own maps.
+                    let table = if sym_size == 0 && target_name.is_empty() {
+                        readonly_relocs::table_span(
+                            elf,
+                            layouts,
+                            target_section_idx,
+                            i128::from(sym_off_in_sec) + i128::from(reloc.addend()) + 4,
+                        )?
+                    } else {
+                        None
+                    };
+                    let (data_symbol_name, sym_bytes, copy_start) = if let Some((start, size)) = table {
+                        let begin = usize::try_from(start)
+                            .map_err(|_| anyhow!("proof code-table start overflow"))?;
+                        let end = usize::try_from(start + size)
+                            .map_err(|_| anyhow!("proof code-table end overflow"))?;
+                        let bytes = target_data
+                            .get(begin..end)
+                            .ok_or_else(|| anyhow!("referenced code table exceeds section"))?
+                            .to_vec();
+                        let owner = format!(
+                            "section:{target_section_idx:?}:{section_name}:table_{start:x}"
+                        );
+                        (owner, bytes, start)
+                    } else if sym_size == 0 {
                         if !target_name.is_empty() {
                             bail!("PC32 proof target {} has zero size", target_name);
                         }
-                        let section_bytes = if section_name.starts_with(".rodata") {
+                        let section_bytes = if readonly_relocs::immutable_section(target_section.kind(), &section_name) {
                             target_data.to_vec()
                         } else if section_name == ".bss" {
                             let section_size = usize::try_from(target_section.size())
@@ -2052,12 +2161,13 @@ fn collect_x86_proof_relocs(
                             vec![0; section_size]
                         } else {
                             bail!(
-                                "PC32 proof section-symbol target {section_name} is not rodata/bss"
+                                "PC32 proof section-symbol target {section_name} is not rodata/data.rel.ro/bss"
                             );
                         };
                         (
                             format!("section:{target_section_idx:?}:{section_name}"),
                             section_bytes,
+                            0,
                         )
                     } else {
                         let end = sym_off_in_sec
@@ -2069,7 +2179,7 @@ fn collect_x86_proof_relocs(
                                 anyhow!("PC32 proof target {} out of section bounds", target_name)
                             })?
                             .to_vec();
-                        (target_name.clone(), bytes)
+                        (target_name.clone(), bytes, sym_off_in_sec)
                     };
                     let insn_idx = layout
                         .insn_local_ip
@@ -2089,11 +2199,31 @@ fn collect_x86_proof_relocs(
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
+                    // One table can be addressed by many instructions; the
+                    // same slot must not get two disagreeing fixups.
+                    for nested_reloc in readonly_relocs::data_relocations(
+                        elf,
+                        layouts,
+                        target_section_idx,
+                        copy_start,
+                        sym_bytes.len() as u64,
+                        &data_symbol_name,
+                        map_addrs,
+                    )? {
+                        let reloc = nested_reloc.proof();
+                        let key = (reloc.owner.clone(), reloc.offset);
+                        if let Some(previous) = nested.insert(key, reloc.clone()) {
+                            if previous != reloc {
+                                bail!("conflicting nested read-only relocations");
+                            }
+                        }
+                    }
                     relocs.push(ProofReloc {
                         offset: (new_insn_off + off_within_insn) as u64,
                         r_type,
                         symbol: data_symbol_name,
-                        addend: reloc.addend(),
+                        addend: reloc.addend()
+                            - i64::try_from(if table.is_some() { copy_start } else { 0 })?,
                         data: Some(sym_bytes),
                     });
                 }
@@ -2107,7 +2237,7 @@ fn collect_x86_proof_relocs(
         }
     }
     relocs.sort_by_key(|reloc| reloc.offset);
-    Ok(relocs)
+    Ok((relocs, nested.into_values().collect()))
 }
 
 /// Resolve ELF .text relocations attached to the bytes we just encoded.
@@ -2501,14 +2631,14 @@ fn apply_elf_relocations(
                         if !target_name.is_empty() {
                             bail!("PC32 target {} has zero size; cannot embed", target_name);
                         }
-                        let section_bytes = if section_name.starts_with(".rodata") {
+                        let section_bytes = if readonly_relocs::immutable_section(target_section.kind(), &section_name) {
                             target_data.to_vec()
                         } else if section_name == ".bss" {
                             let section_size = usize::try_from(target_section.size())
                                 .map_err(|_| anyhow!("PC32 .bss section too large"))?;
                             vec![0; section_size]
                         } else {
-                            bail!("PC32 section-symbol target {section_name} is not rodata/bss");
+                            bail!("PC32 section-symbol target {section_name} is not rodata/data.rel.ro/bss");
                         };
                         (
                             format!("section:{target_section_idx:?}:{section_name}"),
