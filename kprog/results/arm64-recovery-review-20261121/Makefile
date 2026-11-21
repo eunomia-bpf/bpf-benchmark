@@ -37,17 +37,3 @@ micro:
 	python3 $(ROOT)/kprog/arm64/micro-prog/generate_micro_sim_proofs.py --config $(ROOT)/micro/config/micro_pure_jit.yaml --proof-object-dir $(ROOT)/kprog/arm64/micro-prog/build/native-link --output-dir $(OUT)/micro-src
 	python3 $(ROOT)/kprog/arm64/micro-prog/generate_micro_sim_proofs.py --config $(ROOT)/kprog/test/kprog_negative_stage2.yaml --proof-object-dir $(ROOT)/kprog/arm64/micro-prog/build/native-link --output-dir $(OUT)/negative-src
 	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/compile_micro.py $(OUT)
-
-.PHONY: safety-build safety
-safety-build:
-	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/safety.py $(OUT)
-	aarch64-linux-gnu-g++ -std=c++20 -O2 -I$(ARM_LIBBPF)/prefix/include $(ROOT)/kprog/results/arm64-recovery-review-20261121/safety_probe.cpp $(OUT)/loader/libnative_loader.a $(ARM_LIBBPF)/pic-obj/libbpf.a -L$(ARM_SYSROOT)/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o $(OUT)/safety-probe
-safety:
-	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/guest.py host $(OUT) safety
-
-.PHONY: host-existing generator
-host-existing:
-	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/replay_hosts.py $(OUT)
-generator:
-	python3 $(ROOT)/kprog/arm64/micro-prog/test_read_recovery.py > $(OUT)/generator-current.json
-	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/generator_inventory.py $(OUT)
