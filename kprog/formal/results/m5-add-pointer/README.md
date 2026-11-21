@@ -29,3 +29,8 @@ its original enclosing handler continuation. Full generic allocation/body/free,
 original source successor, fetched native ADD composition and all-outcome
 contracts remain. General W/SP/ZR/tag alternatives remain open. M5/O1/O2/O4/M6
 are open, completed ISA families0. Whole confirmation follows at batch end.
+
+Batch confirmation2026-11-21: lake build KProgFormal passes297 jobs in4.948s.
+Root artifact UTC2026-11-21T15:40:27.922020+00:00; CPUs16-23/nice19/j1/32GiB AS.
+Native tools/executables excluded. Actual axiom names are parsed directly from
+the retained queries; the initial empty-list extraction is corrected forward.

@@ -30,10 +30,30 @@
   },
   "public_query_count": 4,
   "reported_axioms": {
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.branch_source": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.tail_source": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.evaluate": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.body_operands": []
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.branch_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.tail_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.evaluate": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.body_operands": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
   },
   "proof_limits": {
     "maxHeartbeats": 200000,
@@ -74,5 +94,10 @@
     "source_checkpoint": "da475838028b885d94698e7fca6cddbc7d995549",
     "scope": "complete KProgFormal Lean proof-library/root; native tools and executables excluded"
   },
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "axiom_extraction_correction": {
+    "date_utc": "2026-11-21",
+    "source_log": "/workspaces/kprog-raw/formal/m5-add-prefix/public1.log",
+    "reason": "Lean prints comma-separated unquoted axiom names; original quoted-name extraction incorrectly recorded empty lists. Corrected from retained successful queries without rerunning unchanged proofs."
+  }
 }

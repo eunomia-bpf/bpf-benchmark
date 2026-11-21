@@ -30,10 +30,32 @@
   },
   "public_query_count": 4,
   "reported_axioms": {
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.source": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.enter_writer": [],
-    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.execute": []
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.enter_writer": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
   },
   "proof_limits": {
     "maxHeartbeats": 200000,
@@ -48,7 +70,37 @@
   "source_checkpoint_before_commit": "03d9b166e361e342d77725a94242e9e13ce86feb",
   "raw": "/workspaces/kprog-raw/formal/m5-add-tail",
   "whole_proof_library": {
-    "status": "pending batch-end confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 4.948369741439819,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "jobs": 297,
+    "root_artifact": "kprog/formal/.lake/build/lib/lean/KProgFormal.olean",
+    "root_artifact_utc": "2026-11-21T15:40:27.922020+00:00",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-add-tail/full1.log",
+    "source_checkpoint": "c94be9b8c3c5d8d9ac3d8e07b3d0ed9de523159f",
+    "scope": "complete KProgFormal Lean proof library/root; excludes native tools/executables"
   },
-  "completed_isa_families": 0
+  "completed_isa_families": 0,
+  "axiom_extraction_correction": {
+    "date_utc": "2026-11-21",
+    "source_log": "/workspaces/kprog-raw/formal/m5-add-tail/public-pointer1.log",
+    "reason": "Lean prints comma-separated unquoted axiom names; original quoted-name extraction incorrectly recorded empty lists. Corrected from retained successful queries without rerunning unchanged proofs."
+  }
 }
