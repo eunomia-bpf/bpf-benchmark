@@ -20,6 +20,15 @@ An isolated H2 control restores only the RSP/absent-base recovery choices while 
 
 The original38 safety cases complete with8 valid executions,24 verifier rejections,1 generation frontier,4 load-only accepted findings and1 positive-load diagnostic. The accepted names are stack_oob, uninitialized_stack, immediate_push_branch and stack_base_flags. The original negative suite performs TEST_RUN calls0. The coordinator-selected immediate_push_branch and stack_base_flags controls execute separately and each returns result0/retval0, as the revised recovery semantics predicts. Their original annotations stay visible. The aligned below-SP memory access and valid_spill_restore load diagnostic remain S7's integration boundary. The final source keeps an ordinary full-word stack read before forgetting its value, so clang's dead-load treatment remains a precise source/compiler investigation.
 
+The coordinator's 2026-11-09 06:55 UTC decision sets the following x86 expected outcomes for the measured program bytes at `73f51958b5dc453b520debdfaa624919f277f2be`, under the unmapped-zero-page platform profile. Each separate guest execution supplies the recovery-to-zero evidence. `summary.json` records the original annotation, the accepted expectation, its reason, native-byte hash and receipt identity.
+
+| Case | Expected acceptance | Recovered read / return | Guest evidence |
+| --- | --- | --- | --- |
+| immediate_push_branch | accepted | 0 / 0 | exit0; result0; retval0 |
+| stack_base_flags | accepted | 0 / 0 | exit0; result0; retval0 |
+
+The reason is that the complete effective address selects the zero-page recovery arm, which clears the saved load destination and resumes execution. Every other effective address retains the existing nondeterministic scalar arm, including a zero base plus a large index or displacement. The original negative annotations and original-cohort outcomes stay in `receipts.tar.gz:guest/safety/outcomes.json`; the published historical expectation remains available at `c728c35ca`. These updates record measured regression expectations; V retains the universal semantics and compilation obligations.
+
 ## Publication and remaining boundary
 
 The production delta for the EA correction is30 insertions/23 deletions across the header and generator; the explicit address operand reaches every existing read-recovery site. Test/fixture growth exercises the requested state changes and keeps existing fixture inputs visible. Production admission additions:0. Frozen workload and paper paths retain their definitions. Builds and guest outputs use CPU8-23 and `/var/tmp/kprog-tmp/S9`; guests run serially at2GiB. The full Lean slot stays with V.

@@ -225,5 +225,54 @@
   "remaining": [
     "S7 aligned below-SP read preservation through clang and the valid_spill_restore load diagnostic",
     "V universal current-C/compiled-B/native handler composition"
-  ]
+  ],
+  "expectation_updates": {
+    "recorded_utc": "2026-11-21T19:43:31.600017+00:00",
+    "cases": [
+      {
+        "name": "immediate_push_branch",
+        "isa": "x86-64",
+        "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+        "original_expectation": {
+          "negative": true,
+          "historical_observed_stage": "accepted_finding",
+          "source": "receipts.tar.gz:guest/safety/outcomes.json"
+        },
+        "expected_acceptance": "accepted",
+        "expected_read_result": 0,
+        "expected_return_value": 0,
+        "reason": "The complete effective address lies in the platform unmapped zero page, so the authorized recovery arm clears the saved load destination and continues execution.",
+        "domain": "Measured program bytes at production commit 73f51958b5dc453b520debdfaa624919f277f2be, with the unmapped-zero-page platform profile. Other effective addresses retain the nondeterministic scalar read arm.",
+        "decision_utc": "2026-11-09T06:55:00Z",
+        "guest_evidence": {
+          "source": "receipts.tar.gz:guest/controls.json",
+          "archive_sha256": "3f78c9f41869d24f7f7212e379ef78b98dbbaab6c625cf669a6241bf11b6ac79",
+          "exit": 0,
+          "stdout": "native program id=136 source_prog_id=0\nnative_raw_context result=0 retval=0 expected_result=0 expected_retval=0\n"
+        }
+      },
+      {
+        "name": "stack_base_flags",
+        "isa": "x86-64",
+        "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+        "original_expectation": {
+          "negative": true,
+          "historical_observed_stage": "accepted_finding",
+          "source": "receipts.tar.gz:guest/safety/outcomes.json"
+        },
+        "expected_acceptance": "accepted",
+        "expected_read_result": 0,
+        "expected_return_value": 0,
+        "reason": "The complete effective address lies in the platform unmapped zero page, so the authorized recovery arm clears the saved load destination and continues execution.",
+        "domain": "Measured program bytes at production commit 73f51958b5dc453b520debdfaa624919f277f2be, with the unmapped-zero-page platform profile. Other effective addresses retain the nondeterministic scalar read arm.",
+        "decision_utc": "2026-11-09T06:55:00Z",
+        "guest_evidence": {
+          "source": "receipts.tar.gz:guest/controls.json",
+          "archive_sha256": "3f78c9f41869d24f7f7212e379ef78b98dbbaab6c625cf669a6241bf11b6ac79",
+          "exit": 0,
+          "stdout": "native program id=140 source_prog_id=0\nnative_raw_context result=0 retval=0 expected_result=0 expected_retval=0\n"
+        }
+      }
+    ]
+  }
 }
