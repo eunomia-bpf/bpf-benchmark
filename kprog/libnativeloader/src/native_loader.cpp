@@ -3381,8 +3381,25 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         : prog_info.attach_btf_obj_id;
     stub_attrs.attach_prog_id = options.attach_prog_id;
 
-    std::vector<int> map_ref_fds =
-        reopen_relocated_map_fds(linked.relocated_map_ids);
+    // B keeps P's maps alive. A prog array the original program does not use has an
+    // owner of another program type (OTel's uprobe custom__generic names perf_progs),
+    // and the kernel's owner check would refuse B; B keeps the arrays the original uses.
+    std::vector<uint32_t> retained_ids;
+    {
+        const std::vector<uint32_t> original_ids = load_prog_map_ids(options.original_prog_fd);
+        const std::unordered_set<uint32_t> used(original_ids.begin(), original_ids.end());
+        for (uint32_t id : linked.relocated_map_ids) {
+            bpf_map_info info = {};
+            __u32 info_len = sizeof(info);
+            ScopedFd fd(bpf_map_get_fd_by_id(id));
+            if (fd.get() >= 0 && bpf_obj_get_info_by_fd(fd.get(), &info, &info_len) == 0 &&
+                info.type == BPF_MAP_TYPE_PROG_ARRAY && !used.contains(id)) {
+                continue;
+            }
+            retained_ids.push_back(id);
+        }
+    }
+    std::vector<int> map_ref_fds = reopen_relocated_map_fds(retained_ids);
     const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
     LoadedStub loaded_stub{};
     try {
