@@ -1,0 +1,5 @@
+# Original sixth CMP-register caller
+
+`Arm64ProgramEntryCompareCall` extracts the original caller from `Arm64ProgramEntryMulCall.afterMul`, retains the untouched `afterCompare` successor, and proves actual nine-argument generic entry binding plus the two-step call entry and two-step void-return continuation. Parameters are op23, dst4, src1, src2/src3 NONE255, flags8, packed AUX_ALU(0,LSL0)=256 and imm0. Source argument expressions and every original signed/unsigned cast remain present; both NONE arguments are the actual unsigned macro constants.
+
+Focused component249jobs and four public type/axiom queries passed on CPU17/j1/32GiB with unchanged proof limits and inherited logical/CompCert semantic axioms only. Exact source hash, logs, timings and the retained failed signedness diagnostic are in validation.json. This admits only the original caller and its genuine continuation; CMP execution, NZCV stores, native SUBS-to-ZR and the complete six-call prefix remain next. M5/O1/O2/O4/M6 open; complete ISA families:0. No runtime application or measurement.

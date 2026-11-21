@@ -1,0 +1,97 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareCall.lean": "5a15fa357457e11709f0aecdbfb2a84616098d5d6654e61bfbad381dbd92791e"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall"
+    ],
+    "exit": 0,
+    "seconds": 47.979689598083496,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 249,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/caller2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CallerPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.506563425064087,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-caller1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall.entry_valid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall.enter": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall.leave": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "arguments": {
+    "op": 23,
+    "dst": 4,
+    "src": 1,
+    "src2": 255,
+    "src3": 255,
+    "flags": 8,
+    "aux": 256,
+    "imm": 0
+  },
+  "enter_steps": 2,
+  "leave_steps": 2,
+  "scope": "original sixth CMP_REG caller AST/all9args/casts/generic entry allocation and actual void-return to unchanged afterCompare; no CMP body/native semantics claim",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall"
+        ],
+        "exit": 1,
+        "seconds": 50.25817537307739,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/caller1.log",
+      "reason": "actual macro ARM64_REG_NONE arguments have uint255U type; corrected both source AST constant types without changing the cast or value"
+    }
+  ],
+  "whole_library_confirmation": "pending completed CMP handler/native batch; active independent V ShiftFlagWidths source WIP retained",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
