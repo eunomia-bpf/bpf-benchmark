@@ -889,6 +889,26 @@ struct ProofSymbol {
     size: u64,
 }
 
+#[cfg(test)]
+mod tbz_tests {
+    use super::*;
+
+    #[test]
+    fn tbz_tbnz_decode_and_retarget() {
+        // tbz x8, #63, +0x10c (0xb6f8 0868 encodes imm14 = 0x43 = 67 words)
+        let insn: u32 = 0xb6f8_0868;
+        assert!(a64_is_tbz_tbnz(insn));
+        assert!(!a64_is_cbz_cbnz(insn));
+        assert_eq!(a64_branch_target(0x1000, 2, insn), Some(0x1000 + 8 + 67 * 4));
+        let moved = a64_patch_tbz_tbnz(insn, 2, 2 + 83).unwrap();
+        assert_eq!((moved >> 5) & 0x3fff, 83);
+        assert_eq!(moved & !(0x3fff << 5), insn & !(0x3fff << 5));
+        let back = a64_patch_tbz_tbnz(insn, 10, 4).unwrap();
+        assert_eq!(a64_branch_target(0, 10, back), Some(16));
+        assert!(a64_patch_tbz_tbnz(insn, 0, 1 << 13).is_err());
+    }
+}
+
 fn a64_sign_extend(value: u32, bits: u8) -> i64 {
     let shift = 64 - bits;
     ((value as i64) << shift) >> shift
@@ -924,6 +944,14 @@ fn a64_patch_cbz_cbnz(insn: u32, word_index: usize, target_index: usize) -> Resu
         bail!("arm64 CBZ/CBNZ displacement out of range: {disp}");
     }
     Ok((insn & !(0x7ffff << 5)) | (((disp as u32) & 0x7ffff) << 5))
+}
+
+fn a64_patch_tbz_tbnz(insn: u32, word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
+    if disp < -(1 << 13) || disp >= (1 << 13) {
+        bail!("arm64 TBZ/TBNZ displacement out of range: {disp}");
+    }
+    Ok((insn & !(0x3fff << 5)) | (((disp as u32) & 0x3fff) << 5))
 }
 
 fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
@@ -967,6 +995,10 @@ fn a64_is_cbz_cbnz(insn: u32) -> bool {
     (insn & 0x7e00_0000) == 0x3400_0000
 }
 
+fn a64_is_tbz_tbnz(insn: u32) -> bool {
+    (insn & 0x7e00_0000) == 0x3600_0000
+}
+
 fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
     if a64_is_uncond_b(insn) {
         let imm26 = insn & 0x03ff_ffff;
@@ -981,6 +1013,11 @@ fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u6
     if a64_is_cbz_cbnz(insn) {
         let imm19 = (insn >> 5) & 0x7ffff;
         let disp = a64_sign_extend(imm19, 19) << 2;
+        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
+    }
+    if a64_is_tbz_tbnz(insn) {
+        let imm14 = (insn >> 5) & 0x3fff;
+        let disp = a64_sign_extend(imm14, 14) << 2;
         return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
     }
     None
@@ -1360,6 +1397,12 @@ enum Arm64PatchKind {
         target_address: u64,
     },
     CbzCbnz {
+        insn: u32,
+        source_symbol_address: u64,
+        target_is_symbol_end: bool,
+        target_address: u64,
+    },
+    TbzTbnz {
         insn: u32,
         source_symbol_address: u64,
         target_is_symbol_end: bool,
@@ -1793,6 +1836,16 @@ fn rewrite_arm64(
                         target_is_symbol_end,
                         target_address: target,
                     }
+                } else if a64_is_tbz_tbnz(insn) {
+                    // TBZ/TBNZ carry a 14-bit displacement; left as emitted, a call expanded between
+                    // them and their target shifted the landing point (2026-11-21 QEMU check 4: Tetragon
+                    // event_wake_up_new_task reached a helper-call blr with a stale x10).
+                    Arm64PatchKind::TbzTbnz {
+                        insn,
+                        source_symbol_address: sym.address,
+                        target_is_symbol_end,
+                        target_address: target,
+                    }
                 } else {
                     bail!(
                         "arm64 unsupported branch rewrite in {} at byte offset {off:#x}: {insn:#010x}",
@@ -1898,6 +1951,7 @@ fn rewrite_arm64(
                 | Arm64PatchKind::B { .. }
                 | Arm64PatchKind::BCond { .. }
                 | Arm64PatchKind::CbzCbnz { .. }
+                | Arm64PatchKind::TbzTbnz { .. }
         )
     }) {
         let patched = match patch.kind {
@@ -1955,6 +2009,21 @@ fn rewrite_arm64(
                     target_address,
                 )?;
                 a64_patch_cbz_cbnz(insn, patch.word_index, target_word)?
+            }
+            Arm64PatchKind::TbzTbnz {
+                insn,
+                source_symbol_address,
+                target_is_symbol_end,
+                target_address,
+            } => {
+                let target_word = arm64_branch_target_word(
+                    &addr_word_offset,
+                    &sym_end_word_offset,
+                    source_symbol_address,
+                    target_is_symbol_end,
+                    target_address,
+                )?;
+                a64_patch_tbz_tbnz(insn, patch.word_index, target_word)?
             }
             _ => continue,
         };
