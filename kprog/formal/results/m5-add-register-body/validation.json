@@ -1,0 +1,73 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterBody.lean": "dd5e869b30fff0a74b6d31133edea7148941d01aed6637f33364b461636e5b59"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddRegisterBody"
+    ],
+    "exit": 0,
+    "seconds": 4.839541673660278,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/body3.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/BodyPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5478408336639404,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-body1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddRegisterBody.scalar_write": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterBody.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": {
+    "operands": 286,
+    "arithmetic": 56,
+    "selection": 52,
+    "scalar_call_stores_return": 69,
+    "exit_loops": 4,
+    "total": 467
+  },
+  "earlier_attempts": [
+    {
+      "receipt": "/workspaces/kprog-raw/formal/m5-add-register/body1.json",
+      "outcome": "whole evaluator call hit recursion depth and combined temporary reads hit heartbeat; replaced with actual call constructor and separate read theorems at original caps"
+    },
+    {
+      "receipt": "/workspaces/kprog-raw/formal/m5-add-register/body2.json",
+      "outcome": "remaining local-let rewrite matching in final read facts; supplied existing facts directly"
+    }
+  ],
+  "whole_library_confirmation": "pending after source publication",
+  "scope": "complete generic body for scalar LHS and warm STACK RHS, X width/AUX256; own handler frame still live",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

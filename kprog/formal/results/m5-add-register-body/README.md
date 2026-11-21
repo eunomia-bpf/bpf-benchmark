@@ -1,0 +1,7 @@
+# Actual ADD-register generic body
+
+The original generic body now executes467 checked internal steps for a scalar GPR LHS and warm STACK-tag GPR RHS, X width and full AUX256. This composes operands286, actual tag/ADD candidate56, scalar selection52, real scalar call/stores/return69, and both loop exits4. Source indices, ordinary destination, words, reached storage, environment and caller continuation remain arbitrary under the actual typed observations/cache. The result records the real destination word and tag stores through Arm64RegisterWrite.Result. No provider is replayed and the unchanged source body is never replaced by a specialized instruction model.
+
+Component build passed236 jobs4.840s; public scalar_write and execute type/axiom queries passed with standard logic and inherited CompCert external/inline semantics only. Exact hashes/timings/raw logs in validation.json. The first finite attempt exceeded default limits when expanding the whole call/temporary context; the proof now uses the actual call constructor and separate temporary-read lemmas at unchanged limits. The second failed only local-let rewrite matching, fixed by supplying existing facts directly. No new axiom/admission/native oracle or limit raise.
+
+The handler's own local frame is still live at the final skip statement. Its actual release/return, full native register correspondence/all-behavior law and original-entry composition remain open. Whole-library confirmation follows publication. M5/O1/O2/O4/M6 open/families0. No apps/runtime tests/measurement.
