@@ -1,0 +1,65 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulBody.lean": "131b97180a07defe09e5e60c2dcad2775ae4cddd8b6b542e8a5b4b92729ecdb6"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MulBody"
+    ],
+    "exit": 0,
+    "seconds": 4.641590356826782,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/body2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/BodyPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.485816478729248,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-body1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Mul.Body.scalar_write": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Body.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 435,
+  "segments": {
+    "prefix": 348,
+    "product": 16,
+    "scalar_call_stores_return": 69,
+    "outer_loop_exit": 2
+  },
+  "scope": "actual W/X generic MUL handler, both source reads+actual third read, product, real scalar writer and full Result storage/frame law; handler own frame still live",
+  "whole_library_confirmation": "pending completed MUL call/native batch",
+  "prior_failed_attempts": [
+    "/workspaces/kprog-raw/formal/m5-mul/body1.json"
+  ],
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
