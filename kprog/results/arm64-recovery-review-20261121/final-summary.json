@@ -1,0 +1,63 @@
+{
+  "production_commits": [
+    "bf32780ac55d3799b7b264d371f3fef0111355f1",
+    "0556b28f5c4f4f82bf2f94a7cea53b5075d2cc39"
+  ],
+  "replay_commit": "fc5e43b1807bbd9ea3610bac113fe0333f9f347c",
+  "host_oracles": {
+    "retained_compile_run_pairs": 77,
+    "retired_source_paths": 40,
+    "protected_read_states": 6144,
+    "followup_checks": 5720,
+    "followup_discrepancies": 0
+  },
+  "generator": {
+    "accepted_shapes": 156,
+    "named_vector_shape_exclusions": 24,
+    "broader_named_form_exclusions": 40
+  },
+  "micro_compilation": {
+    "total": 30,
+    "exit0": 30
+  },
+  "guest": {
+    "total": 14,
+    "passed": 10,
+    "generation_exclusions": [
+      "entry_d0",
+      "entry_q0",
+      "entry_d0_post",
+      "entry_q0_post"
+    ],
+    "driver_exit": 2
+  },
+  "safety": {
+    "total": 34,
+    "stages": {
+      "valid_executed": 4,
+      "verifier_rejected": 17,
+      "pipeline_rejected_unclassified": 3,
+      "accepted_load_only": 7,
+      "generation_rejected": 3
+    },
+    "driver_exit": 2,
+    "accepted_load_only": [
+      "uninitialized_stack",
+      "unpaired_stxr_failure",
+      "unpaired_stlxr_failure",
+      "paired_stxr_failure",
+      "paired_stlxr_failure",
+      "entry_return_address_flags",
+      "stack_base_flags"
+    ],
+    "pipeline_outcomes": [
+      "map_value_oob",
+      "nullable_map_dereference",
+      "invalid_helper_argument"
+    ],
+    "negative_native_executions": 0
+  },
+  "stable_guest_hashes": true,
+  "stable_safety_hashes": true,
+  "universal_composition": "partial-C-model-component; current universal ISA/O2/compiler/physical recovery correspondence remains with formal/V"
+}
