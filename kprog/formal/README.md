@@ -129,8 +129,18 @@ map. The kind reads back seven; all other temporaries, caller locals and complet
 memory retain their values for every incoming map with the typed operation.
 The [six public audits](../results/kprog_verification_20261107/x86-shift-left-classify.log.gz)
 record the actual classifier/switch identities, relational execution and existing
-logical/CompCert axioms at original budgets. Composition with entry/operand and
-old-CF reads, actual flag stores and the writer remain open.
+logical/CompCert axioms at original budgets.
+
+Its universal route composition joins the actual arithmetic route, old-CF
+loads and classifier into 100/104/108/108 silent steps for byte/word/dword/qword
+operands. The binding and operation observations at the two intermediate states
+follow from the preceding temporary frame laws. The endpoint retains the full
+heap, caller locals and exact nested temporary map at the original shift flag
+branch. Callee bindings, the two source-derived world layouts, typed incoming
+operands and genuine current-heap CF loads are explicit input premises. The
+[seven public audits](../results/kprog_verification_20261107/x86-shift-left-through-flags.log.gz)
+record this composition and the preceding classifier results at original proof
+budgets. Entry/world representation, actual flag stores and the writer remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked

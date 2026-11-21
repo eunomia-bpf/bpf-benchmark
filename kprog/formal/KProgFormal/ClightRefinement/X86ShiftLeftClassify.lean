@@ -159,4 +159,63 @@ theorem to_shift (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
     .step (by trivial) (CC.doStep_sound ge _ _ _ selected) (.refl _)
   exact (internal ge function e le k m operation).trans last
 
+/-- Original arithmetic routing, genuine old-CF reads and actual classification
+compose in the same heap and caller, deriving each intermediate observation. -/
+theorem route_to_shift (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv aluBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_alu_result))
+    (shiftBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._kprog_x86_shl_result = some shiftBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv shiftBlock =
+        some (.Internal X86_program_profile_bpf.f_kprog_x86_shl_result))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_alu_result = none)
+    (lhs rhs : BitVec 64) (size : X86.Size)
+    (left : le.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs))
+    (right : le.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (k : CC.Cont) (m : CC.Mem)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (old : BitVec 8)
+    (heapBinding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (byte : CC.Mem.load .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset) =
+      some (.Vint (old.setWidth 32))) :
+    InternalRun ge ((3 + X86ShiftLeftSite.length size + 1) + 11 + 37)
+      (.State function X86ShiftLeftRoute.dispatch k e le m)
+      (.State function shiftBranch (.Kswitch (X86ShiftLeftCarry.continuation k)) e
+        (afterTemps (X86ShiftLeftCarry.afterTemps
+          (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+          cfBlock offset old)) m) := by
+  have arithmetic := X86ShiftLeftRoute.to_flags ge aluBlock shiftBlock binding shiftBinding
+    function e le unshadowed lhs rhs size left right operation width k m
+  have keptBinding :
+      (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size)).get
+        X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0) := by
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact heapBinding
+  have carry := X86ShiftLeftCarry.enter_classifier ge bindingsLayout valueLayout function e
+    (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size)) k m
+    bindingBlock cfBlock offset old keptBinding pointer byte
+  have keptOperation :
+      (X86ShiftLeftCarry.afterTemps
+        (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+        cfBlock offset old).get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)) := by
+    rw [(X86ShiftLeftCarry.temps
+      (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+      cfBlock offset old).2.2.2 _ (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact operation
+  have classified := to_shift ge function e
+    (X86ShiftLeftCarry.afterTemps
+      (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size)) cfBlock offset old)
+    (X86ShiftLeftCarry.continuation k) m keptOperation
+  exact (arithmetic.trans carry).trans classified
+
 end KProgFormal.ClightRefinement.X86ShiftLeftClassify
