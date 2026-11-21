@@ -1,0 +1,63 @@
+{
+  "source": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterCall.lean",
+  "source_sha256": "82c6422b6164dc2a9d5d35d7e7463083aeacec790680aa80352e456862529a60",
+  "module": "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall"
+    ],
+    "exit": 0,
+    "seconds": 47.58173394203186,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/caller-final1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/workspaces/kprog-raw/formal/m5-add-register/CallerPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4099230766296387,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-caller1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.enter": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.leave": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall.entry_valid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "whole_library_confirmation": "pending until modifier batch complete",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
