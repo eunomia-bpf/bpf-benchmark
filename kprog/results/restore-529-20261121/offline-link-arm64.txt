@@ -1,5 +1,2 @@
-arm64 /tmp/vb529a/arm64/stage: 269/289 entries link; 6 stop at lookup metadata the loader supplies
-  tetragon                    9  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. bpf_execve_event_v61.native.o:event_execve
+arm64 /tmp/vb529a/arm64/stage: 281/289 entries link; 6 stop at lookup metadata the loader supplies
   bcc                         2  Error: armN ADR_GOT in …   e.g. biosnoop.native.o:block_rq_insert
-  bcc                         2  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. runqlat.native.o:handle_sched_switch
-  katran                      1  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. balancer.native.o:balancer_ingress

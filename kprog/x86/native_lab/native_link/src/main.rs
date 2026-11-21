@@ -1336,6 +1336,87 @@ fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<V
     Ok(w)
 }
 
+/// The call for one helper ID: the tail-call sequence for 12, else a call to the helper.
+fn arm64_helper_id_body(id: u64, helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {
+    if id == 12 {
+        return build_arm64_tail_call_inline(helper_addrs);
+    }
+    let name = x86::bpf_helper_name_from_id(id).ok_or_else(|| anyhow!("helper ID {id} is unknown"))?;
+    arm64_helper_call_sequence(resolve_helper_target(name, helper_addrs, &format!("arm64 helper call {name}"))?)
+}
+
+/// An indirect call through xN with a helper ID in xN. When the function writes a
+/// single small constant to xN and that is the nearest write, the call is that
+/// helper. Otherwise the optimizer merged calls of several helpers (or moved the
+/// ID through other registers and the stack): the call dispatches on xN's value at
+/// run time over every helper ID the function loads, `brk` for any other value.
+fn build_arm64_helper_id_call(
+    bytes: &[u8],
+    word_index: usize,
+    n: u32,
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Vec<u32>> {
+    let movz = |reg: Option<u32>| -> std::collections::BTreeSet<u64> {
+        bytes
+            .chunks_exact(4)
+            .map(|w| u32::from_le_bytes(w.try_into().unwrap()))
+            .filter(|w| w & 0x7fe0_0000 == 0x5280_0000 && reg.map_or(true, |r| w & 31 == r))
+            .map(|w| u64::from((w >> 5) & 0xffff))
+            .filter(|&id| (1..512).contains(&id))
+            .collect()
+    };
+    if movz(Some(n)).len() == 1 {
+        if let Some(id) = arm64_helper_id_before(bytes, word_index, n) {
+            return arm64_helper_id_body(id, helper_addrs);
+        }
+    }
+    let ids: Vec<u64> = movz(None)
+        .into_iter()
+        .filter(|&id| id == 12 || x86::bpf_helper_name_from_id(id).is_some_and(|h| helper_addrs.contains_key(h)))
+        .collect();
+    if ids.is_empty() {
+        bail!("no helper ID reaches x{n}");
+    }
+    let mut words = Vec::new();
+    let mut to_done = Vec::new();
+    for id in ids {
+        words.push(0xf100_001f | ((id as u32) << 10) | (n << 5)); // cmp xN, #id
+        let skip = words.len();
+        words.push(0); // b.ne next
+        words.extend(arm64_helper_id_body(id, helper_addrs)?);
+        to_done.push(words.len());
+        words.push(0); // b done
+        words[skip] = 0x5400_0001 | (((words.len() - skip) as u32) << 5);
+    }
+    words.push(0xd420_0020); // brk #1: no helper with this ID
+    let done = words.len();
+    for at in to_done {
+        words[at] = 0x1400_0000 | ((done - at) as u32);
+    }
+    Ok(words)
+}
+
+/// The helper ID an indirect call through xN uses: the nearest earlier write of
+/// xN in the function, which must be `mov wN, #id`. A call in between clobbers x0-x18.
+fn arm64_helper_id_before(bytes: &[u8], word_index: usize, n: u32) -> Option<u64> {
+    for i in (0..word_index).rev() {
+        let w = u32::from_le_bytes(bytes[i * 4..i * 4 + 4].try_into().unwrap());
+        let call = w & 0xfc00_0000 == 0x9400_0000 || w & 0xffff_fc1f == 0xd63f_0000;
+        if call && n <= 18 {
+            return None;
+        }
+        let ldst = w & 0x0a00_0000 == 0x0800_0000;
+        let store = ldst && w & (1 << 22) == 0;
+        let branch = w & 0x1c00_0000 == 0x1400_0000;
+        let pair_load = ldst && !store && w & 0x3800_0000 == 0x2800_0000 && (w >> 10) & 31 == n;
+        if (w & 31 == n && !store && !branch) || pair_load {
+            let movz = w & 0x7fe0_0000 == 0x5280_0000;
+            return movz.then(|| u64::from((w >> 5) & 0xffff)).filter(|&id| id < 512);
+        }
+    }
+    None
+}
+
 fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X0: u32 = 0;
     const X1: u32 = 1;
@@ -1647,6 +1728,8 @@ struct Arm64RelocInfo {
     target_name: String,
     target_section_index: Option<object::SectionIndex>,
     addend: i64,
+    /// A call into this object's own text: the callee's address.
+    text_target: Option<u64>,
 }
 
 fn arm64_text_relocations(
@@ -1676,6 +1759,7 @@ fn arm64_text_relocations(
                 _ => continue,
             };
             let mut section_symbol_value: i64 = 0;
+            let mut text_target = None;
             let (target_name, target_section_index) = match reloc.target() {
                 RelocationTarget::Symbol(idx) => {
                     let target_sym = elf.symbol_by_index(idx)?;
@@ -1688,6 +1772,9 @@ fn arm64_text_relocations(
                     let target_text = target_section_index
                         .and_then(|i| elf.section_by_index(i).ok())
                         .is_some_and(|s| s.kind() == object::SectionKind::Text);
+                    if target_text {
+                        text_target = Some((target_sym.address() as i64 + reloc.addend()) as u64);
+                    }
                     let target_name = if raw_name.is_empty() && !target_text {
                         format!("__arm64_section_{:?}", target_section_index)
                     } else if raw_name.is_empty() {
@@ -1717,6 +1804,7 @@ fn arm64_text_relocations(
                     target_name,
                     target_section_index,
                     addend: section_symbol_value + reloc.addend(),
+                    text_target,
                 },
             );
         }
@@ -1775,14 +1863,18 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
         let relocs = arm64_text_relocations(elf, std::slice::from_ref(&sym))?;
         for (word_index, word) in bytes.chunks_exact(4).enumerate() {
             let insn = u32::from_le_bytes(word.try_into().unwrap());
-            if relocs
+            let call = relocs
                 .get(&(sym.section_index, sym.address, (word_index * 4) as u64))
-                .is_some_and(|reloc| reloc.r_type == R_AARCH64_CALL26)
-            {
-                continue;
-            }
-            let Some(target) = a64_bl_target(sym.address, word_index, insn) else {
-                continue;
+                .filter(|reloc| reloc.r_type == R_AARCH64_CALL26);
+            let target = match call {
+                Some(reloc) => match reloc.text_target {
+                    Some(target) => target,
+                    None => continue,
+                },
+                None => match a64_bl_target(sym.address, word_index, insn) {
+                    Some(target) => target,
+                    None => continue,
+                },
             };
             if seen.contains(&target) {
                 continue;
@@ -2096,6 +2188,23 @@ fn rewrite_arm64(
                         continue;
                     }
                     R_AARCH64_CALL26 => {
+                        // A call into the object's own text is a call inside the blob.
+                        if let Some(target) = reloc.text_target {
+                            if !included.iter().any(|s| s.address == target) {
+                                bail!(
+                                    "arm64 call in {} at byte offset {off:#x} targets {target:#x}, outside included symbols",
+                                    sym.name
+                                );
+                            }
+                            patches.push(Arm64Patch {
+                                word_index: emit_word_index,
+                                kind: Arm64PatchKind::Bl {
+                                    target_symbol_address: target,
+                                },
+                            });
+                            blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
                         if proof_mode {
                             proof_relocs.push(ProofReloc {
                                 offset: (emit_word_index * 4) as u64,
@@ -2280,6 +2389,19 @@ fn rewrite_arm64(
                     }
                     _ => {}
                 }
+            }
+
+            // An indirect call is a helper called by its ID: the native helper macros
+            // keep the ID in a register. BPF code has no other function pointers.
+            if !proof_mode && insn & 0xffff_fc1f == 0xd63f_0000 {
+                let n = (insn >> 5) & 31;
+                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, helper_addrs)
+                    .with_context(|| format!("arm64 indirect call in {} at byte offset {off:#x}", sym.name))?
+                {
+                    append_u32(&mut blob, word);
+                }
+                arm64_call_clobber_map_regs(&mut reg_map_names);
+                continue;
             }
 
             if a64_is_adr_or_adrp(insn) {

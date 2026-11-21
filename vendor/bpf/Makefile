@@ -35,6 +35,9 @@ BCC_OBJS := $(patsubst %,$(OUT)/bcc/output/%.bpf.o,$(BCC_TOOLS))
 CILIUM_OBJS := bpf_lxc.o bpf_overlay.o bpf_sock.o bpf_host.o bpf_wireguard.o bpf_xdp.o bpf_alignchecker.o
 NATIVE_OUT := $(OUT)/native
 NATIVE_STAGE_ROOT := $(BUILD)/$(ARCH)/stage
+# arm64: each staged object gets a single executable section (merge-text.ld), so native-link
+# resolves a program's calls into the object's other functions by address; x86 keeps its sections.
+native_merge_text = $(if $(filter arm64 aarch64,$(ARCH)),for o in "$(1)"/*.native.o; do aarch64-linux-gnu-ld -r -T "$(CURDIR)/merge-text.ld" "$$o" -o "$$o.merged" && mv "$$o.merged" "$$o"; done,true)
 KATRAN_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/katran
 BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
@@ -260,6 +263,7 @@ native-katran: $(KATRAN_NATIVE_OBJS)
 		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
 		--object "$(NATIVE_OUT)/katran/healthchecking_ipip.native.o" \
 		--object "$(NATIVE_OUT)/katran/xdp_root.native.o"
+	$(call native_merge_text,$(KATRAN_NATIVE_STAGE_OUT))
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
 		--output "$(KATRAN_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/balancer.native.o" \
@@ -273,6 +277,7 @@ native-bcc: bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h $(BCC_NATIVE_OBJS)
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/bcc/manifest.json" \
 		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
+	$(call native_merge_text,$(BCC_NATIVE_STAGE_OUT))
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
 		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
@@ -292,6 +297,7 @@ native-cilium: $(CILIUM_NATIVE_OBJS)
 		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
 		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6" \
 		--object "$(NATIVE_OUT)/cilium/cilium_placeholders.native.o"
+	$(call native_merge_text,$(CILIUM_NATIVE_STAGE_OUT))
 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
 		--output "$(CILIUM_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
@@ -310,6 +316,7 @@ native-otel: $(OTEL_NATIVE_OBJECT)
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/otel/manifest.json" \
 		--object "$(OTEL_NATIVE_OBJECT)"
+	$(call native_merge_text,$(OTEL_NATIVE_STAGE_OUT))
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
@@ -324,6 +331,7 @@ native-tracee: $(TRACEE_NATIVE_OBJS)
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
+	$(call native_merge_text,$(TRACEE_NATIVE_STAGE_OUT))
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
@@ -442,6 +450,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_com
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
 			--source-object-root "$(VENDOR)/build/$(BPF_ARCH)/tetragon" --helper-disambiguate 174 \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
+		$(call native_merge_text,$${stage_out}); \
 		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
 			--source-object-root "$(VENDOR)/build/$(BPF_ARCH)/tetragon" --helper-disambiguate 174 \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"

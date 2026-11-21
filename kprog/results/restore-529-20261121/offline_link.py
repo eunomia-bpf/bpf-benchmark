@@ -16,9 +16,17 @@ KEYS = {'x86': {'__native_x86_bpf_map_max_entries_offset': 68, '__native_x86_bpf
                   '__native_arm64_tail_call_offset': 28}}[arch]
 
 import re as _re
+# The names the loader's link plan carries: kSupportedHelpers, kTypedHelperSymbols, kRuntimeCallSymbols,
+# the lookup symbols, and the canonical bpf_<name> the helper_targets query returns per helper ID.
 _src = open('/workspaces/repository/kprog/libnativeloader/src/native_loader.cpp').read()
-LOADER_HELPERS = sorted(set(_re.findall(r'"((?:bpf_|ktime_|__htab|array_of|htab_)[a-z0-9_]+)"', _src))
-                        | {'memset', 'memcpy', 'memmove'})
+def _array(name):
+    m = _re.search(r'%s\[\] = \{(.*?)\};' % name, _src, _re.S)
+    return set(_re.findall(r'"([A-Za-z0-9_]+)"', m.group(1))) if m else set()
+_uapi = open('/workspaces/repository/vendor/linux-framework/include/uapi/linux/bpf.h').read()
+LOADER_HELPERS = sorted(set(_re.findall(r'\{BPF_FUNC_\w+, "(\w+)"\}', _src)) | _array('kTypedHelperSymbols')
+                        | _array('kRuntimeCallSymbols')
+                        | set(_re.findall(r'k\w+LookupElemSymbol\s*=\s*\n?\s*"(\w+)"', _src))
+                        | {'bpf_' + n for n in _re.findall(r'^\s*FN\((\w+),', _uapi, _re.M)})
 
 def nm(obj, *flags):
     out = subprocess.run(['llvm-nm-18', *flags, '--format=posix', obj], capture_output=True, text=True).stdout
