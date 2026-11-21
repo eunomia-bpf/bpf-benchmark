@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 import json
 import subprocess
 from collections import defaultdict
@@ -10,6 +9,8 @@ from pathlib import Path
 from typing import Iterable
 
 
+BPF_LD_IMM64 = 0x18
+BPF_CALL = 0x85
 
 BPF_MAP_TYPE_HASH = 1
 BPF_MAP_TYPE_ARRAY = 2
@@ -72,9 +73,7 @@ CILIUM_MAP_RULES = [
     map_rule("exact", "cilium_ratelimit", BPF_MAP_TYPE_LRU_HASH, 8, 16, 1024),
     map_rule("exact", "cilium_lb4_reverse_nat", BPF_MAP_TYPE_HASH, 2, 6, 65536),
     map_rule("exact", "cilium_lb6_reverse_nat", BPF_MAP_TYPE_HASH, 2, 18, 65536),
-    # Cilium sizes this NAT map from host memory (591427 in the 64G guest); type, key and value
-    # sizes separate it from cilium_snat_v4_alloc_retries under the shared 15-character name.
-    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40),
+    map_rule("exact", "cilium_snat_v4_external", BPF_MAP_TYPE_LRU_HASH, 14, 40, 591428),
     map_rule("exact", "cilium_snat_v4_alloc_retries", BPF_MAP_TYPE_PERCPU_ARRAY, 4, 4, 33),
     map_rule("exact", "cilium_l2_responder_v4", BPF_MAP_TYPE_HASH, 8, 8, 4096),
     map_rule("exact", "cilium_l2_responder_v6", BPF_MAP_TYPE_HASH, 24, 8, 4096),
@@ -163,51 +162,83 @@ def map_rules_for_app(app: str) -> list[dict[str, object]]:
     return []
 
 
-def parse_object_spec(raw: str) -> tuple[Path, Path | None]:
-    path, sep, source = raw.partition(",source=")
-    if not path:
-        raise SystemExit("--object requires a native object path")
-    return Path(path), (Path(source) if sep else None)
+def source_object_for_native(root: Path, native_obj: Path) -> Path:
+    name = native_obj.name
+    if not name.endswith(".native.o"):
+        raise SystemExit(f"cannot infer source BPF object for {native_obj}")
+    return root / f"{name[:-len('.native.o')]}.o"
 
 
-def function_facts(obj: Path) -> dict[str, tuple[str, list[str]]]:
-    """ELF section and referenced map symbols of every function in a native object."""
+def scan_bpf_source_helpers(source_obj: Path) -> dict[str, set[int]]:
     try:
         from elftools.elf.elffile import ELFFile
-        from elftools.elf.relocation import RelocationSection
     except ImportError as exc:
-        raise SystemExit("pyelftools is required to read native objects") from exc
-    facts: dict[str, tuple[str, list[str]]] = {}
-    with obj.open("rb") as f:
+        raise SystemExit("pyelftools is required for --source-object-root") from exc
+
+    by_program: dict[str, set[int]] = defaultdict(set)
+    with source_obj.open("rb") as f:
         elf = ELFFile(f)
         symtab = elf.get_section_by_name(".symtab")
         if symtab is None:
-            raise SystemExit(f"native object has no .symtab: {obj}")
-        sections = list(elf.iter_sections())
-        maps_sections = {i for i, sec in enumerate(sections) if sec.name in (".maps", "maps")}
-        functions: dict[int, list[tuple[int, int, str]]] = defaultdict(list)
+            raise SystemExit(f"source BPF object has no .symtab: {source_obj}")
         for sym in symtab.iter_symbols():
-            if sym["st_info"]["type"] == "STT_FUNC" and isinstance(sym["st_shndx"], int):
-                functions[sym["st_shndx"]].append((int(sym["st_value"]), int(sym["st_size"]), sym.name))
-        used: dict[str, set[str]] = defaultdict(set)
-        for rel_section in sections:
-            if not isinstance(rel_section, RelocationSection):
+            info = sym["st_info"]
+            if info["type"] != "STT_FUNC" or info["bind"] not in {"STB_GLOBAL", "STB_WEAK"}:
                 continue
-            index = rel_section["sh_info"]
-            if index not in functions:
+            if not isinstance(sym["st_shndx"], int):
                 continue
-            rel_symbols = sections[rel_section["sh_link"]]
-            for rel in rel_section.iter_relocations():
-                target = rel_symbols.get_symbol(rel["r_info_sym"])
-                if not isinstance(target["st_shndx"], int) or target["st_shndx"] not in maps_sections:
+            section = elf.get_section(sym["st_shndx"])
+            if section is None or not (section["sh_flags"] & 0x4):
+                continue
+            data = section.data()
+            start = int(sym["st_value"])
+            size = int(sym["st_size"])
+            if size <= 0:
+                continue
+            end = start + size
+            if start < 0 or end > len(data) or size % 8 != 0:
+                raise SystemExit(f"invalid BPF function bounds for {sym.name} in {source_obj}")
+            helpers = by_program[sym.name[:15]]
+            body = data[start:end]
+            for off in range(0, len(body), 8):
+                insn = body[off:off + 8]
+                if insn[0] == BPF_CALL and insn[1] == 0:
+                    helpers.add(int.from_bytes(insn[4:8], "little", signed=True))
+                elif insn[0] == BPF_LD_IMM64:
+                    # Skip the second half of an ldimm64 pair.
                     continue
-                for start, size, name in functions[index]:
-                    if start <= rel["r_offset"] < start + max(size, 1):
-                        used[name].add(target.name)
-        for index, items in functions.items():
-            for _start, _size, name in items:
-                facts[name] = (sections[index].name, sorted(used[name]))
-    return facts
+    return by_program
+
+
+def helper_signature(helpers: set[int] | None, ids: Iterable[int]) -> tuple[tuple[int, ...], tuple[int, ...]]:
+    if helpers is None:
+        return (), ()
+    required = tuple(sorted(helper for helper in ids if helper in helpers))
+    forbidden = tuple(sorted(helper for helper in ids if helper not in helpers))
+    return required, forbidden
+
+
+def parse_object_spec(raw: str) -> tuple[Path, dict[str, object]]:
+    parts = raw.split(",")
+    if not parts or not parts[0]:
+        raise SystemExit("--object requires a native object path")
+    path = Path(parts[0])
+    attrs: dict[str, object] = {}
+    for part in parts[1:]:
+        key, sep, value = part.partition("=")
+        if sep != "=" or not key or not value:
+            raise SystemExit(f"invalid --object attribute: {part!r}")
+        if key == "prog_type":
+            attrs["prog_type"] = int(value, 0)
+        elif key == "source_xlated_len":
+            attrs["source_xlated_len"] = int(value, 0)
+        elif key == "symbol":
+            attrs["symbol"] = value
+        elif key == "source_map_prefix":
+            attrs.setdefault("source_map_prefixes", []).append(value)
+        else:
+            raise SystemExit(f"unsupported --object attribute: {key}")
+    return path, attrs
 
 
 def text_symbols(llvm_nm: str, obj: Path, skip_prefixes: tuple[str, ...]) -> list[str]:
@@ -231,6 +262,10 @@ def text_symbols(llvm_nm: str, obj: Path, skip_prefixes: tuple[str, ...]) -> lis
     return out
 
 
+def manifest_sort_key(key: tuple[object, ...]) -> tuple[str, ...]:
+    return tuple("" if value is None else str(value) for value in key)
+
+
 def rel_object(output: Path, obj: Path) -> str:
     try:
         return str(obj.resolve().relative_to(output.parent.resolve()))
@@ -245,34 +280,90 @@ def main() -> None:
     parser.add_argument("--llvm-nm", required=True)
     parser.add_argument("--object", action="append", required=True)
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
-
+    parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
+    parser.add_argument("--source-object-root", type=Path)
+    parser.add_argument("--helper-disambiguate", action="append", type=lambda v: int(v, 0), default=[])
     args = parser.parse_args()
 
     output: Path = args.output
-    objects: list[dict[str, object]] = []
+    entries_by_key: dict[tuple[object, ...], set[str]] = defaultdict(set)
+    native_object_by_key: dict[tuple[object, ...], str] = {}
+    helper_require_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
+    helper_forbid_by_key: dict[tuple[object, ...], tuple[int, ...]] = {}
+    selected_by_program: dict[tuple[object, ...], tuple[str, set[str]]] = {}
+    selected_helpers_by_program: dict[tuple[object, ...], tuple[tuple[int, ...], tuple[int, ...]]] = {}
+    source_helpers_cache: dict[Path, dict[str, set[int]]] = {}
     for raw in args.object:
-        obj, source = parse_object_spec(raw)
-        if source is not None and not source.is_file():
-            raise SystemExit(f"source BPF object {source} for {obj} is missing")
+        obj, attrs = parse_object_spec(raw)
         rel = rel_object(output, obj)
-        facts = function_facts(obj)
-        by_program: dict[str, list[str]] = defaultdict(list)
+        source_helpers: dict[str, set[int]] | None = None
+        if args.source_object_root:
+            source_obj = source_object_for_native(args.source_object_root, obj)
+            if not source_obj.is_file():
+                raise SystemExit(f"source BPF object not found for {obj}: {source_obj}")
+            source_helpers = source_helpers_cache.setdefault(
+                source_obj, scan_bpf_source_helpers(source_obj))
+        prefixes = attrs.get("source_map_prefixes") or [None]
         for symbol in text_symbols(args.llvm_nm, obj, tuple(args.skip_prefix)):
-            by_program[symbol[:15]].append(symbol)
-        for program in sorted(by_program):
-            symbols = sorted(by_program[program])
-            entry: dict[str, object] = {
-                "program": program,
-                "native_object": rel,
-            }
-            if len(symbols) == 1:
-                entry["symbol"] = symbols[0]
-                section, _maps = facts.get(symbols[0], ("", []))
-                if section:
-                    entry["section"] = section
-            if source is not None:
-                entry["source_bpf_object"] = rel_object(output, source)
-            objects.append(entry)
+            if attrs.get("symbol") and symbol != attrs["symbol"]:
+                continue
+            program = symbol[:15]
+            required, forbidden = helper_signature(
+                None if source_helpers is None else source_helpers.get(program),
+                args.helper_disambiguate)
+            for prefix in prefixes:
+                if args.dedupe_program == "last":
+                    key = (program, attrs.get("prog_type"), prefix,
+                           attrs.get("source_xlated_len"), required, forbidden)
+                    if key not in selected_by_program or selected_by_program[key][0] != rel:
+                        selected_by_program[key] = (rel, set())
+                        selected_helpers_by_program[key] = (required, forbidden)
+                    selected_by_program[key][1].add(symbol)
+                else:
+                    key = (program, rel, attrs.get("prog_type"), prefix,
+                           attrs.get("source_xlated_len"), required, forbidden)
+                    native_object_by_key[key] = rel
+                    helper_require_by_key[key] = required
+                    helper_forbid_by_key[key] = forbidden
+                    entries_by_key[key].add(symbol)
+
+    if args.dedupe_program == "last":
+        for key, (rel, symbols) in selected_by_program.items():
+            program, prog_type, prefix, source_xlated_len, required, forbidden = key
+            out_key = (program, rel, prog_type, prefix, source_xlated_len,
+                       required, forbidden)
+            native_object_by_key[out_key] = rel
+            helper_require_by_key[out_key] = selected_helpers_by_program[key][0]
+            helper_forbid_by_key[out_key] = selected_helpers_by_program[key][1]
+            entries_by_key[out_key].update(symbols)
+
+    objects: list[dict[str, object]] = []
+    for key in sorted(entries_by_key, key=manifest_sort_key):
+        program, rel, prog_type, prefix, source_xlated_len, _required, _forbidden = key
+        symbols = sorted(entries_by_key[key])
+        entry: dict[str, object] = {
+            "program": program,
+            "native_object": native_object_by_key[key],
+        }
+        if len(symbols) == 1:
+            entry["symbol"] = symbols[0]
+        if prog_type is not None:
+            entry["prog_type"] = prog_type
+        if source_xlated_len is not None:
+            entry["source_xlated_len"] = source_xlated_len
+        if prefix is not None:
+            entry["source_map_prefix"] = prefix
+        required = helper_require_by_key.get(key, ())
+        forbidden = helper_forbid_by_key.get(key, ())
+        if required:
+            if len(required) != 1:
+                raise SystemExit("manifest supports one required helper discriminator")
+            entry["source_has_helper"] = required[0]
+        if forbidden:
+            if len(forbidden) != 1:
+                raise SystemExit("manifest supports one forbidden helper discriminator")
+            entry["source_lacks_helper"] = forbidden[0]
+        objects.append(entry)
 
     manifest: dict[str, object] = {
         "version": 1,

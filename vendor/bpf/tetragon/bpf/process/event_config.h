@@ -94,13 +94,7 @@ FUNC_INLINE int arg_idx(int index)
 	if (!config)
 		return -1;
 
-#ifdef __bpf__
-	asm volatile("%[index] &= %1 ;\n"
-		     : [index] "+r"(index)
-		     : "i"(MAX_POSSIBLE_ARGS_MASK));
-#else
 	index &= MAX_POSSIBLE_ARGS_MASK;
-#endif
 	return config->idx[index];
 }
 

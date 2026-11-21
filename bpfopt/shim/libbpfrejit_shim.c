@@ -374,9 +374,18 @@ __attribute__((constructor)) static void shim_init(void) {
         }
     }
 
+    /* Periodic dump worker, if enabled by env. */
+    pthread_t tid;
+    pthread_create(&tid, NULL, worker_thread, NULL);
+    pthread_detach(tid);
+
+    /* Socket server thread — per-pid app-level shim socket.
+     * Disable by setting BPFREJIT_SHIM_SOCK_DISABLE=1. */
+    if (!getenv("BPFREJIT_SHIM_SOCK_DISABLE")) {
         pthread_t stid;
         pthread_create(&stid, NULL, socket_thread, NULL);
         pthread_detach(stid);
+    }
 }
 
 /* Intercept syscall(2). */
@@ -464,14 +473,6 @@ long syscall(long number, ...) {
     int cmd = (int)a0;
     union bpf_attr *attr = (union bpf_attr *)a1;
     unsigned int size = (unsigned int)a2;
-
-    struct shim_native_load_scope native_scope
-        __attribute__((cleanup(shim_native_load_scope_end))) = {0};
-    if (cmd == BPF_PROG_LOAD && attr && shim_native_loader_enabled()) {
-        pthread_rwlock_rdlock(&shim_native_load_lock);
-        native_scope.active = 1;
-        __atomic_add_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
-    }
 
     if (!in_shim && cmd == BPF_OBJ_GET_INFO_BY_FD && attr) {
         int query_fd = (int)attr->info.bpf_fd;
@@ -575,9 +576,6 @@ long syscall(long number, ...) {
     uint32_t resolved_id = 0;
     if (pending_prog) {
         if (ret >= 0) {
-            /* Native replacement consumes this original identity and the
-             * pre-verifier function offsets during the following call. */
-            dump_original_function_info((int)ret, pending_prog);
             long native_ret =
                 shim_maybe_replace_with_native_fd(ret, pending_prog);
             if (native_ret < 0) {
@@ -1050,6 +1048,7 @@ int close_range(unsigned int first, unsigned int last, int flags) {
 }
 
 /* Write a JSON snapshot of all tracked objects.
+ * Invoked by the periodic worker thread (BPFREJIT_SHIM_PERIODIC_DUMP_MS) and
  * by the `dump_state` socket RPC. */
 static void dump_state_json(void) {
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
@@ -1165,7 +1164,6 @@ static int unix_socket_listen(const char *path) {
 }
 
 static void emit_list_progs(int cli) {
-    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     /* Estimate buffer size: ~256 bytes per prog. */
@@ -1173,17 +1171,10 @@ static void emit_list_progs(int cli) {
     char *buf = (char *)malloc(cap);
     if (!buf) {
         pthread_mutex_unlock(&state_mutex);
-        pthread_rwlock_unlock(&shim_native_load_lock);
         return;
     }
     size_t len = 0;
-    len += snprintf(buf + len, cap - len,
-                    "{\"ok\":true,\"native_loads_inflight\":%u,"
-                    "\"native_bound_completed\":%u,\"progs\":[",
-                    __atomic_load_n(&shim_native_loads_inflight,
-                                    __ATOMIC_SEQ_CST),
-                    __atomic_load_n(&shim_native_bound_completed,
-                                    __ATOMIC_SEQ_CST));
+    len += snprintf(buf + len, cap - len, "{\"ok\":true,\"progs\":[");
     int first = 1;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
@@ -1205,7 +1196,6 @@ static void emit_list_progs(int cli) {
     }
     pthread_mutex_unlock(&state_mutex);
     len += snprintf(buf + len, cap - len, "]}\n");
-    pthread_rwlock_unlock(&shim_native_load_lock);
     if (write(cli, buf, len) < 0) { /* best effort */ }
     free(buf);
 }
@@ -1497,3 +1487,24 @@ static void *socket_thread(void *arg) {
     return NULL;
 }
 
+/* Worker thread: optional periodic state JSON dump
+ * (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms). Optimization itself is driven
+ * by the runner over the socket via execute_plan, not by this thread. */
+static void *worker_thread(void *arg) {
+    (void)arg;
+    const char *dump_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");
+    int dump_ms = dump_env ? atoi(dump_env) : 0;
+    if (dump_ms <= 0)
+        return NULL;
+    sigset_t mask;
+    sigfillset(&mask);
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
+    while (1) {
+        struct timespec ts = {dump_ms / 1000,
+                              (long)(dump_ms % 1000) * 1000000L}, rem;
+        while (nanosleep(&ts, &rem) == -1 && errno == EINTR)
+            ts = rem;
+        dump_state_json();
+    }
+    return NULL;
+}

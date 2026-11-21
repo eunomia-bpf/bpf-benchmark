@@ -62,7 +62,7 @@
  */
 #define get_hash(ctx)		ctx->hash
 
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 struct __native_skb_net_device {
 	__u8 __pad[224];
 	int ifindex;
@@ -142,7 +142,7 @@ ctx_full_len(const struct __sk_buff *ctx)
 static __always_inline __maybe_unused __u32
 ctx_wire_len(const struct __sk_buff *ctx)
 {
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	return ctx->len;
 #else
 	return ctx->wire_len;
@@ -179,7 +179,7 @@ ctx_get_protocol(const struct __sk_buff *ctx)
 static __always_inline __maybe_unused __u32
 ctx_get_ifindex(const struct __sk_buff *ctx)
 {
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	if (!ctx->dev)
 		return 0;
 	return ((const struct __native_skb_net_device *)ctx->dev)->ifindex;

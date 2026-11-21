@@ -203,11 +203,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a0 = ({
 		unsigned long ctx_off = config->off[0];
 		int ty = config->arg[0];
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+		ctx_off &= 0xffff;
+#else
 		asm volatile("%[ctx_off] &= 0xffff;\n"
 			     : [ctx_off] "+r"(ctx_off));
-#else
-		ctx_off &= 0xffff;
 #endif
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
@@ -215,11 +215,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a1 = ({
 		unsigned long ctx_off = config->off[1];
 		int ty = config->arg[1];
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+		ctx_off &= 0xffff;
+#else
 		asm volatile("%[ctx_off] &= 0xffff;\n"
 			     : [ctx_off] "+r"(ctx_off));
-#else
-		ctx_off &= 0xffff;
 #endif
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
@@ -227,11 +227,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a2 = ({
 		unsigned long ctx_off = config->off[2];
 		int ty = config->arg[2];
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+		ctx_off &= 0xffff;
+#else
 		asm volatile("%[ctx_off] &= 0xffff;\n"
 			     : [ctx_off] "+r"(ctx_off));
-#else
-		ctx_off &= 0xffff;
 #endif
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
@@ -239,11 +239,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a3 = ({
 		unsigned long ctx_off = config->off[3];
 		int ty = config->arg[3];
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+		ctx_off &= 0xffff;
+#else
 		asm volatile("%[ctx_off] &= 0xffff;\n"
 			     : [ctx_off] "+r"(ctx_off));
-#else
-		ctx_off &= 0xffff;
 #endif
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});
@@ -251,11 +251,11 @@ generic_tracepoint_event(struct generic_tracepoint_event_arg *ctx)
 	msg->a4 = ({
 		unsigned long ctx_off = config->off[4];
 		int ty = config->arg[4];
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+		ctx_off &= 0xffff;
+#else
 		asm volatile("%[ctx_off] &= 0xffff;\n"
 			     : [ctx_off] "+r"(ctx_off));
-#else
-		ctx_off &= 0xffff;
 #endif
 		get_ctx_ul((char *)ctx + ctx_off, ty);
 	});

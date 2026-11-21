@@ -61,12 +61,12 @@ preload_pt_regs_arg(struct pt_regs *ctx, struct event_config *config, int index)
 	__s32 ty;
 	arg_status_t status = 0;
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	index &= EVENT_CONFIG_MAX_REG_ARG_MASK;
+#else
 	asm volatile("%[index] &= %1 ;\n"
 		     : [index] "+r"(index)
 		     : "i"(EVENT_CONFIG_MAX_REG_ARG_MASK));
-#else
-	index &= EVENT_CONFIG_MAX_REG_ARG_MASK;
 #endif
 
 	reg = &config->reg_arg[index];
@@ -144,12 +144,12 @@ struct preload_arg_data {
 FUNC_LOCAL int
 try_preload_arg(int idx, struct preload_arg_data *data)
 {
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	idx &= MAX_POSSIBLE_ARGS_MASK;
+#else
 	asm volatile("%[idx] &= %1 ;\n"
 		     : [idx] "+r"(idx)
 		     : "i"(MAX_POSSIBLE_ARGS_MASK));
-#else
-	idx &= MAX_POSSIBLE_ARGS_MASK;
 #endif
 
 	if (data->config->arm[idx] & ARGM_PRELOAD) {

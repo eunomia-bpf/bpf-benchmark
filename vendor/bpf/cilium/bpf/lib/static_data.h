@@ -62,7 +62,7 @@
  * accesses must be done through this macro to ensure the loader's dead code
  * elimination can recognize them.
  */
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 #define CONFIG(name) (__config_##name)
 #else
 #define CONFIG(name)	\

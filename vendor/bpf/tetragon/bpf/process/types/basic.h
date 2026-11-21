@@ -230,11 +230,11 @@ FUNC_INLINE int return_error(int *s, int err)
 FUNC_INLINE char *
 args_off(struct msg_generic_kprobe *e, unsigned long off)
 {
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	off &= 0x3fff;
+#else
 	asm volatile("%[off] &= 0x3fff;\n"
 		     : [off] "+r"(off));
-#else
-	off &= 0x3fff;
 #endif
 	return e->args + (off & 0x3fff);
 }
@@ -246,7 +246,10 @@ args_off(struct msg_generic_kprobe *e, unsigned long off)
 FUNC_INLINE int
 return_stack_error(char *args, int orig, int err)
 {
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	orig &= 0xfff;
+	*(int *)(args + orig) = err;
+#else
 	asm volatile("%[orig] &= 0xfff;\n"
 		     "r1 = *(u64 *)%[args];\n"
 		     "r1 += %[orig];\n"
@@ -254,9 +257,6 @@ return_stack_error(char *args, int orig, int err)
 		     : [orig] "+r"(orig), [args] "+m"(args), [err] "+r"(err)
 		     :
 		     : "r1");
-#else
-	orig &= 0xfff;
-	*(int *)(args + orig) = err;
 #endif
 	return sizeof(int);
 }
@@ -279,11 +279,11 @@ parse_iovec_array(long off, unsigned long arg, int i, unsigned long max,
 		size = max;
 	if (size > 4094)
 		return char_buf_toolarge;
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	size &= 0xfff;
+#else
 	asm volatile("%[size] &= 0xfff;\n"
 		     : [size] "+r"(size));
-#else
-	size &= 0xfff;
 #endif
 	err = probe_read(args_off(e, off), size, (char *)iov.iov_base);
 	if (err < 0)
@@ -2697,19 +2697,19 @@ FUNC_INLINE const struct path *get_path(long type, unsigned long arg, struct pat
 
 #define __STR(x) #x
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+#define set_if_not_errno_or_zero(x, y)         \
+	({                                     \
+		if ((long)(x) > 0 || (long)(x) < -4095) \
+			(x) = (y);                  \
+	})
+#else
 #define set_if_not_errno_or_zero(x, y)                  \
 	({                                              \
 		asm volatile("if %0 s< -4095 goto +1\n" \
 			     "if %0 s<= 0 goto +1\n"    \
 			     "%0 = " __STR(y) "\n"      \
 			     : "+r"(x));                \
-	})
-#else
-#define set_if_not_errno_or_zero(x, y)         \
-	({                                     \
-		if ((long)(x) > 0 || (long)(x) < -4095) \
-			(x) = (y);                  \
 	})
 #endif
 

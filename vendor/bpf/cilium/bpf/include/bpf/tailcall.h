@@ -46,7 +46,7 @@ tail_call_dynamic(struct __ctx_buff *ctx, const void *map, __u32 slot)
 	 */
 	tail_call(ctx, map, slot);
 }
-#elif !defined(__bpf__)
+#elif defined(MICRO_NATIVE)
 #define tail_call_static(ctx_ptr, map, slot)				\
 {								\
 	if (!__builtin_constant_p(slot))			\

@@ -32,7 +32,7 @@
 /* This must be a mask and all offsets guaranteed to be less than that. */
 #define __CTX_OFF_MAX			0xff
 
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 static __always_inline void *
 micro_native_xdp_data(const struct xdp_md *ctx)
 {
@@ -50,31 +50,13 @@ micro_native_xdp_data_meta(const struct xdp_md *ctx)
 {
 	return *(void * const *)((const char *)ctx + 16);
 }
-
-/* The real entry context is struct xdp_buff: rxq at +32, xdp_rxq_info.dev at
- * +0, net_device.ifindex at +224. The kernel lowers a read of
- * xdp_md.ingress_ifindex to exactly that chain (net/core/filter.c,
- * "rxq->dev->ifindex"), so this reads the same word the verifier would. */
-static __always_inline __u32
-micro_native_xdp_ingress_ifindex(const struct xdp_md *ctx)
-{
-	const void *rxq = *(const void * const *)((const char *)ctx + 32);
-	const void *dev;
-
-	if (unlikely(!rxq))
-		return 0;
-	dev = *(const void * const *)rxq;
-	if (unlikely(!dev))
-		return 0;
-	return *(const __u32 *)((const char *)dev + 224);
-}
 #endif
 
 #ifndef HAVE_XDP_LOAD_BYTES
 static __always_inline __maybe_unused int
 xdp_load_bytes(const struct xdp_md *ctx, __u64 off, void *to, const __u64 len)
 {
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	char *data = micro_native_xdp_data(ctx);
 	char *data_end = micro_native_xdp_data_end(ctx);
 	char *from;
@@ -118,7 +100,7 @@ static __always_inline __maybe_unused int
 xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
 		const __u64 len, __u64 flags __maybe_unused)
 {
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	char *data = micro_native_xdp_data(ctx);
 	char *data_end = micro_native_xdp_data_end(ctx);
 	char *to;
@@ -178,7 +160,7 @@ xdp_store_bytes(const struct xdp_md *ctx, __u64 off, const void *from,
 #define get_hash(ctx)			({ 0; })
 #define get_hash_recalc(ctx)		get_hash(ctx)
 
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 #define DEFINE_FUNC_CTX_POINTER(FIELD)						\
 static __always_inline void *							\
 ctx_ ## FIELD(const struct xdp_md *ctx)						\
@@ -229,7 +211,7 @@ l3_csum_replace(const struct xdp_md *ctx, __u64 off, const __u32 from,
 {
 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
 	__sum16 *sum;
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	char *data = micro_native_xdp_data(ctx);
 	char *data_end = micro_native_xdp_data_end(ctx);
 #else
@@ -240,7 +222,7 @@ l3_csum_replace(const struct xdp_md *ctx, __u64 off, const __u32 from,
 		return -EINVAL;
 	if (unlikely(size != 0 && size != 2))
 		return -EINVAL;
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	off &= __CTX_OFF_MAX;
 	sum = (__sum16 *)(data + off);
 	if ((char *)sum + 2 > data_end)
@@ -280,7 +262,7 @@ l4_csum_replace(const struct xdp_md *ctx, __u64 off, __u32 from, __u32 to,
 	bool is_mmzero = flags & BPF_F_MARK_MANGLED_0;
 	__u32 size = flags & BPF_F_HDR_FIELD_MASK;
 	__sum16 *sum;
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	char *data = micro_native_xdp_data(ctx);
 	char *data_end = micro_native_xdp_data_end(ctx);
 #else
@@ -292,7 +274,7 @@ l4_csum_replace(const struct xdp_md *ctx, __u64 off, __u32 from, __u32 to,
 		return -EINVAL;
 	if (unlikely(size != 0 && size != 2))
 		return -EINVAL;
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	off &= __CTX_OFF_MAX;
 	sum = (__sum16 *)(data + off);
 	if ((char *)sum + 2 > data_end)
@@ -446,30 +428,10 @@ ctx_adjust_hroom(struct xdp_md *ctx, const __s32 len_diff, const __u32 mode,
 	return ret;
 }
 
-static __always_inline __maybe_unused __u32
-ctx_get_ifindex(const struct xdp_md *ctx)
-{
-#ifndef __bpf__
-	return micro_native_xdp_ingress_ifindex(ctx);
-#else
-	return ctx->ingress_ifindex;
-#endif
-}
-
-static __always_inline __maybe_unused __u32
-ctx_get_ingress_ifindex(const struct xdp_md *ctx)
-{
-#ifndef __bpf__
-	return micro_native_xdp_ingress_ifindex(ctx);
-#else
-	return ctx->ingress_ifindex;
-#endif
-}
-
 static __always_inline __maybe_unused int
 ctx_redirect(const struct xdp_md *ctx, int ifindex, const __u32 flags)
 {
-	if ((__u32)ifindex == ctx_get_ingress_ifindex(ctx))
+	if ((__u32)ifindex == ctx->ingress_ifindex)
 		return CTX_ACT_TX;
 
 	return redirect(ifindex, flags);
@@ -494,7 +456,7 @@ ctx_full_len(const struct xdp_md *ctx)
 static __always_inline __maybe_unused __u64
 ctx_full_len(const struct xdp_md *ctx)
 {
-#ifndef __bpf__
+#ifdef MICRO_NATIVE
 	return (__u64)((unsigned long)micro_native_xdp_data_end(ctx) -
 		       (unsigned long)micro_native_xdp_data(ctx));
 #else
@@ -577,3 +539,14 @@ ctx_get_protocol(const struct xdp_md *ctx)
 	return eth->h_proto;
 }
 
+static __always_inline __maybe_unused __u32
+ctx_get_ifindex(const struct xdp_md *ctx)
+{
+	return ctx->ingress_ifindex;
+}
+
+static __always_inline __maybe_unused __u32
+ctx_get_ingress_ifindex(const struct xdp_md *ctx)
+{
+	return ctx->ingress_ifindex;
+}

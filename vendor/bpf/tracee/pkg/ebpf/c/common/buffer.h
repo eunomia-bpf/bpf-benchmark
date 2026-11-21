@@ -96,15 +96,15 @@ statfunc int save_to_submit_buf(args_buffer_t *buf, void *ptr, u32 size, u8 inde
     // Save argument index (add 1 to offset later)
     buf->args[buf->offset] = index;
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+    if (size > MAX_ELEMENT_SIZE)
+        size = MAX_ELEMENT_SIZE;
+#else
     // Force verifier to compare size register with a bound maximum
     asm volatile("if %[size] < %[max_size] goto +1;\n"
                  "%[size] = %[max_size];\n"
                  :
                  : [size] "r"(size), [max_size] "i"(MAX_ELEMENT_SIZE));
-#else
-    if (size > MAX_ELEMENT_SIZE)
-        size = MAX_ELEMENT_SIZE;
 #endif
 
     u32 buffer_arg_offset = buffer_index_offset + size; // buffer offset after writing the ptr
@@ -723,15 +723,15 @@ statfunc int events_perf_submit(program_data_t *p)
     // context + argnum + arg buffer size
     u32 size = sizeof(event_context_t) + sizeof(u8) + p->event->args_buf.offset;
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+    if (size > MAX_EVENT_SIZE)
+        size = MAX_EVENT_SIZE;
+#else
     // inline bounds check to force compiler to use the register of size
     asm volatile("if %[size] < %[max_size] goto +1;\n"
                  "%[size] = %[max_size];\n"
                  :
                  : [size] "r"(size), [max_size] "i"(MAX_EVENT_SIZE));
-#else
-    if (size > MAX_EVENT_SIZE)
-        size = MAX_EVENT_SIZE;
 #endif
 
     long perf_ret = bpf_perf_event_output(p->ctx, &events, BPF_F_CURRENT_CPU, p->event, size);
@@ -746,15 +746,15 @@ statfunc int signal_perf_submit(void *ctx, controlplane_signal_t *sig)
     // signal id + argnum + arg buffer size
     u32 size = sizeof(u32) + sizeof(u8) + sig->args_buf.offset;
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+    if (size > MAX_SIGNAL_SIZE)
+        size = MAX_SIGNAL_SIZE;
+#else
     // inline bounds check to force compiler to use the register of size
     asm volatile("if %[size] < %[max_size] goto +1;\n"
                  "%[size] = %[max_size];\n"
                  :
                  : [size] "r"(size), [max_size] "i"(MAX_SIGNAL_SIZE));
-#else
-    if (size > MAX_SIGNAL_SIZE)
-        size = MAX_SIGNAL_SIZE;
 #endif
 
     long perf_ret = bpf_perf_event_output(ctx, &signals, BPF_F_CURRENT_CPU, sig, size);

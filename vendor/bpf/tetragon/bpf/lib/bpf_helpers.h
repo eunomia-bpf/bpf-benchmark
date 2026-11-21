@@ -79,7 +79,9 @@ enum bpf_enum_value_kind {
  */
 FUNC_INLINE void relax_verifier(void)
 {
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+	compiler_barrier();
+#else
 	/* Calling get_smp_processor_id() in asm saves an instruction as we
 	 * don't have to store the result to ensure the call takes place.
 	 * However, we have to specifiy the call target by number and not
@@ -88,8 +90,6 @@ FUNC_INLINE void relax_verifier(void)
 	 */
 	asm volatile("call 8;\n" ::
 			     : "r0", "r1", "r2", "r3", "r4", "r5");
-#else
-	compiler_barrier();
 #endif
 }
 

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <linux/bpf.h>
-#include <bpf/libbpf.h>
-#include <set>
 
 #include <cctype>
 #include <cstdint>
@@ -43,12 +41,6 @@ struct ManifestResolution {
     std::filesystem::path native_object_path;
     std::string symbol_name;
     std::vector<NativeMapRule> map_rules;
-    std::string loader_timing_log;
-    bool kernel_kfunc_context = false;
-    std::filesystem::path kernel_kfunc_btf;
-    std::filesystem::path source_bpf_object;
-    bool source_matches = false;
-    std::string source_difference;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -500,6 +492,46 @@ inline void canonicalize_source_fd_array(std::vector<bpf_insn> &insns,
     }
 }
 
+inline bool source_has_helper(const std::vector<bpf_insn> &source_insns,
+                              int helper_id)
+{
+    for (const bpf_insn &insn : source_insns) {
+        if (insn.code == (BPF_JMP | BPF_CALL) &&
+            insn.src_reg == 0 &&
+            insn.imm == helper_id) {
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename LoadMapInfo>
+bool source_has_map_prefix(const std::vector<bpf_insn> &source_insns,
+                           const std::string &prefix,
+                           LoadMapInfo load_map_info)
+{
+    if (prefix.empty()) {
+        return false;
+    }
+    for (size_t i = 0; i < source_insns.size(); i++) {
+        const bpf_insn &insn = source_insns[i];
+        if (insn.code != (BPF_LD | BPF_DW | BPF_IMM)) {
+            continue;
+        }
+        if (insn.src_reg == BPF_PSEUDO_MAP_FD ||
+            insn.src_reg == BPF_PSEUDO_MAP_VALUE) {
+            bpf_map_info info = load_map_info(static_cast<int>(insn.imm));
+            char name[sizeof(info.name) + 1] = {};
+            std::memcpy(name, info.name, sizeof(info.name));
+            if (starts_with(name, prefix)) {
+                return true;
+            }
+        }
+        i++;
+    }
+    return false;
+}
+
 inline std::filesystem::path manifest_relative_path(
     const std::filesystem::path &manifest_path,
     const std::string &native_object)
@@ -559,12 +591,12 @@ inline std::vector<NativeMapRule> parse_manifest_map_rules(
     return rules;
 }
 
-template <typename SourceAgreement>
+template <typename LoadMapInfo>
 std::optional<ManifestResolution> resolve_native_manifest(
     const std::filesystem::path &manifest_path,
     const bpf_prog_info &prog_info,
-    SourceAgreement source_agreement,
-    size_t source_insns_count)
+    const std::vector<bpf_insn> &source_insns,
+    LoadMapInfo load_map_info)
 {
     const std::string manifest = read_text_file_required(manifest_path);
     std::vector<std::string> objects = json_array_objects(manifest, "objects");
@@ -576,62 +608,56 @@ std::optional<ManifestResolution> resolve_native_manifest(
     std::memcpy(prog_name_buf, prog_info.name, sizeof(prog_info.name));
     const std::string prog_name(prog_name_buf);
 
-    // One rule for every application: entries named like the loaded program, of its program type
-    // (libbpf's section-name mapping), scored by how many leading instructions of the entry's source
-    // BPF program agree with the loaded program.
     std::optional<ManifestResolution> selected;
-    long best = -1;
     for (const std::string &entry : objects) {
-        if (json_required_string(entry, "program") != prog_name) {
+        const std::string entry_program = json_required_string(entry, "program");
+        if (entry_program != prog_name) {
             continue;
         }
-        if (auto section = json_object_string(entry, "section")) {
-            enum bpf_prog_type type = BPF_PROG_TYPE_UNSPEC;
-            enum bpf_attach_type attach = BPF_CGROUP_INET_INGRESS;
-            if (libbpf_prog_type_by_name(section->c_str(), &type, &attach) == 0 &&
-                static_cast<uint32_t>(type) != prog_info.type) {
-                continue;
-            }
+        std::optional<uint64_t> prog_type = json_object_u64(entry, "prog_type");
+        if (prog_type && *prog_type != prog_info.type) {
+            continue;
         }
+        std::optional<uint64_t> source_xlated_len =
+            json_object_u64(entry, "source_xlated_len");
+        if (source_xlated_len && *source_xlated_len != prog_info.xlated_prog_len) {
+            continue;
+        }
+        std::optional<std::string> map_prefix =
+            json_object_string(entry, "source_map_prefix");
+        if (map_prefix && !map_prefix->empty() &&
+            !source_has_map_prefix(source_insns, *map_prefix, load_map_info)) {
+            continue;
+        }
+        std::optional<uint64_t> required_helper =
+            json_object_u64(entry, "source_has_helper");
+        if (required_helper &&
+            !source_has_helper(source_insns, static_cast<int>(*required_helper))) {
+            continue;
+        }
+        std::optional<uint64_t> forbidden_helper =
+            json_object_u64(entry, "source_lacks_helper");
+        if (forbidden_helper &&
+            source_has_helper(source_insns, static_cast<int>(*forbidden_helper))) {
+            continue;
+        }
+
         ManifestResolution candidate{};
         candidate.native_object_path =
             manifest_relative_path(manifest_path,
                                    json_required_string(entry, "native_object"));
         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
-        if (auto timing_log = json_object_string(entry, "loader_timing_log"))
-            candidate.loader_timing_log = *timing_log;
-        candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
-        if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
-            candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);
-        long score = 0;
-        if (auto source = json_object_string(entry, "source_bpf_object")) {
-            candidate.source_bpf_object = manifest_relative_path(manifest_path, *source);
-            // An entry without a symbol carries the kernel's truncated name; the caller names the
-            // whole function from the loaded program's BTF.
-            const auto agree = source_agreement(candidate.source_bpf_object, candidate.symbol_name);
-            candidate.source_matches = agree.length > 0 && agree.leading == agree.length;
-            candidate.source_difference = agree.difference;
-            // Leading agreement first, then agreement at aligned positions, then the closer length.
-            const long gap = std::min<long>(99, std::labs(static_cast<long>(agree.length) -
-                                                          static_cast<long>(source_insns_count)));
-            score = static_cast<long>(agree.leading) * 100000000L + static_cast<long>(agree.aligned) * 100L + (99 - gap);
+        if (selected &&
+            (selected->native_object_path != candidate.native_object_path ||
+             selected->symbol_name != candidate.symbol_name)) {
+            manifest_fail("native_loader: manifest has ambiguous entries for prog=" +
+                          prog_name);
         }
-        if (score > best) {
-            best = score;
-            selected = std::move(candidate);
-        }
+        selected = std::move(candidate);
     }
 
     if (!selected) {
         return std::nullopt;
-    }
-    // A program whose source differs from every entry (other constants, other build) keeps its eBPF;
-    // the error names where the closest entry differs.
-    if (!selected->source_matches) {
-        manifest_fail("native_loader: " + prog_name + " keeps its eBPF; its closest source " +
-                      selected->source_bpf_object.filename().string() + " differs at " +
-                      (selected->source_difference.empty() ? std::string("its length")
-                                                           : selected->source_difference));
     }
     std::error_code ec;
     if (!std::filesystem::exists(selected->native_object_path, ec) || ec) {

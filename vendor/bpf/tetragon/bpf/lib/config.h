@@ -28,10 +28,7 @@
 			     : "=r"(out));                            \
 		(typeof(CONFIG_##name) *)out;                         \
 	}))
-#ifdef __bpf__
-#else
-/* The asm reconstructs the rodata pointer from a symbol name; natively the
- * constant is the declaration itself. */
+#ifdef MICRO_NATIVE
 #undef CONFIG
 #define CONFIG(name) CONFIG_##name
 #endif

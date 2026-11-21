@@ -10,7 +10,11 @@
 #define AF_INET		2
 #define AF_INET6	10
 
+#ifdef MICRO_NATIVE
+#define NATIVE_RODATA_ALIGN(N) __attribute__((aligned(N)))
+#else
 #define NATIVE_RODATA_ALIGN(N)
+#endif
 
 const volatile bool filter_sport = false;
 const volatile bool filter_dport = false;

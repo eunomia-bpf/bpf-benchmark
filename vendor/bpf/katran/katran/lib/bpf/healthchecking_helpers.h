@@ -36,12 +36,13 @@
 
 __attribute__((__always_inline__)) static inline bool
 set_hc_key(const struct __sk_buff* skb, struct hc_key* hckey, bool is_ipv6) {
-  void* iphdr = (void*)(long)skb->data + sizeof(struct ethhdr);
+  void* data_end = katran_skb_data_end(skb);
+  void* iphdr = katran_skb_data(skb) + sizeof(struct ethhdr);
   void* transport_hdr;
 
   if (is_ipv6) {
     struct ipv6hdr* ip6h = iphdr;
-    if (ip6h + 1 > (void*)(long)skb->data_end) {
+    if (ip6h + 1 > data_end) {
       return false;
     }
     transport_hdr = iphdr + sizeof(struct ipv6hdr);
@@ -49,7 +50,7 @@ set_hc_key(const struct __sk_buff* skb, struct hc_key* hckey, bool is_ipv6) {
     hckey->proto = ip6h->nexthdr;
   } else {
     struct iphdr* iph = iphdr;
-    if (iph + 1 > (void*)(long)skb->data_end) {
+    if (iph + 1 > data_end) {
       return false;
     }
     transport_hdr = iphdr + sizeof(struct iphdr);
@@ -59,13 +60,13 @@ set_hc_key(const struct __sk_buff* skb, struct hc_key* hckey, bool is_ipv6) {
 
   if (hckey->proto == IPPROTO_TCP) {
     struct tcphdr* tcp = transport_hdr;
-    if (tcp + 1 > (void*)(long)skb->data_end) {
+    if (tcp + 1 > data_end) {
       return false;
     }
     hckey->port = tcp->dest;
   } else if (hckey->proto == IPPROTO_UDP) {
     struct udphdr* udp = transport_hdr;
-    if (udp + 1 > (void*)(long)skb->data_end) {
+    if (udp + 1 > data_end) {
       return false;
     }
     hckey->port = udp->dest;
@@ -81,13 +82,14 @@ __attribute__((__always_inline__)) static inline bool set_hc_dst_key(
     const struct __sk_buff* skb,
     struct hc_dst_key* key,
     bool is_ipv6) {
-  void* iphdr = (void*)(long)skb->data + sizeof(struct ethhdr);
+  void* data_end = katran_skb_data_end(skb);
+  void* iphdr = katran_skb_data(skb) + sizeof(struct ethhdr);
   void* transport_hdr;
   __u8 proto;
 
   if (is_ipv6) {
     struct ipv6hdr* ip6h = iphdr;
-    if (ip6h + 1 > (void*)(long)skb->data_end) {
+    if (ip6h + 1 > data_end) {
       return false;
     }
     transport_hdr = iphdr + sizeof(struct ipv6hdr);
@@ -96,7 +98,7 @@ __attribute__((__always_inline__)) static inline bool set_hc_dst_key(
     proto = ip6h->nexthdr;
   } else {
     struct iphdr* iph = iphdr;
-    if (iph + 1 > (void*)(long)skb->data_end) {
+    if (iph + 1 > data_end) {
       return false;
     }
     transport_hdr = iphdr + sizeof(struct iphdr);
@@ -107,13 +109,13 @@ __attribute__((__always_inline__)) static inline bool set_hc_dst_key(
 
   if (proto == IPPROTO_TCP) {
     struct tcphdr* tcp = transport_hdr;
-    if (tcp + 1 > (void*)(long)skb->data_end) {
+    if (tcp + 1 > data_end) {
       return false;
     }
     key->port = tcp->dest;
   } else if (proto == IPPROTO_UDP) {
     struct udphdr* udp = transport_hdr;
-    if (udp + 1 > (void*)(long)skb->data_end) {
+    if (udp + 1 > data_end) {
       return false;
     }
     key->port = udp->dest;
@@ -152,14 +154,14 @@ __attribute__((__always_inline__)) static inline bool hc_encap_ipip(
     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
       return false;
     }
-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct ipv6hdr)) >
-        skb->data_end) {
+    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) >
+        katran_skb_data_end(skb)) {
       return false;
     }
-    ethh = (void*)(long)skb->data;
+    ethh = katran_skb_data(skb);
     ethh->h_proto = BE_ETH_P_IPV6;
 
-    struct ipv6hdr* ip6h = (void*)(long)skb->data + sizeof(struct ethhdr);
+    struct ipv6hdr* ip6h = katran_skb_data(skb) + sizeof(struct ethhdr);
     if (!is_ipv6) {
       proto = IPPROTO_IPIP;
     }
@@ -182,11 +184,11 @@ __attribute__((__always_inline__)) static inline bool hc_encap_ipip(
     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
       return false;
     }
-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct iphdr)) >
-        skb->data_end) {
+    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct iphdr) >
+        katran_skb_data_end(skb)) {
       return false;
     }
-    struct iphdr* iph = (void*)(long)skb->data + sizeof(struct ethhdr);
+    struct iphdr* iph = katran_skb_data(skb) + sizeof(struct ethhdr);
 #ifdef MANGLE_HC_SRC
     __u32 ip_src = create_encap_ipv4_src(MANGLED_HC_SRC_PORT, src->daddr);
 #else
@@ -233,14 +235,15 @@ __attribute__((__always_inline__)) static inline bool hc_encap_gue(
     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
       return false;
     }
-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) +
-         sizeof(struct udphdr)) > skb->data_end) {
+    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct ipv6hdr) +
+            sizeof(struct udphdr) >
+        katran_skb_data_end(skb)) {
       return false;
     }
-    ethh = (void*)(long)skb->data;
+    ethh = katran_skb_data(skb);
     ethh->h_proto = BE_ETH_P_IPV6;
 
-    struct ipv6hdr* ip6h = (void*)(long)skb->data + sizeof(struct ethhdr);
+    struct ipv6hdr* ip6h = katran_skb_data(skb) + sizeof(struct ethhdr);
     struct udphdr* udph = (void*)ip6h + sizeof(struct ipv6hdr);
     pkt_len += sizeof(struct udphdr);
     create_udp_hdr(udph, sport, GUE_DPORT, pkt_len, GUE_CSUM);
@@ -260,11 +263,12 @@ __attribute__((__always_inline__)) static inline bool hc_encap_gue(
     if (bpf_skb_adjust_room(skb, adjust_len, BPF_ADJ_ROOM_MAC, flags)) {
       return false;
     }
-    if ((skb->data + sizeof(struct ethhdr) + sizeof(struct iphdr) +
-         sizeof(struct udphdr)) > skb->data_end) {
+    if (katran_skb_data(skb) + sizeof(struct ethhdr) + sizeof(struct iphdr) +
+            sizeof(struct udphdr) >
+        katran_skb_data_end(skb)) {
       return false;
     }
-    struct iphdr* iph = (void*)(long)skb->data + sizeof(struct ethhdr);
+    struct iphdr* iph = katran_skb_data(skb) + sizeof(struct ethhdr);
     struct udphdr* udph = (void*)iph + sizeof(struct iphdr);
     pkt_len += sizeof(struct udphdr);
     create_udp_hdr(udph, sport, GUE_DPORT, pkt_len, GUE_CSUM);

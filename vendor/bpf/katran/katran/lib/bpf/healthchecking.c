@@ -53,12 +53,12 @@ int healthcheck_encap(struct __sk_buff* skb) {
     return TC_ACT_UNSPEC;
   }
 
-  if ((skb->data + sizeof(struct ethhdr)) > skb->data_end) {
+  if (katran_skb_data(skb) + sizeof(struct ethhdr) > katran_skb_data_end(skb)) {
     prog_stats->pckts_dropped += 1;
     return TC_ACT_SHOT;
   }
 
-  ethh = (void*)(long)skb->data;
+  ethh = katran_skb_data(skb);
   if (ethh->h_proto == BE_ETH_P_IPV6) {
     is_ipv6 = true;
   }
@@ -133,13 +133,13 @@ int healthcheck_encap(struct __sk_buff* skb) {
     return TC_ACT_SHOT;
   }
 
-  if (skb->data + sizeof(struct ethhdr) > skb->data_end) {
+  if (katran_skb_data(skb) + sizeof(struct ethhdr) > katran_skb_data_end(skb)) {
     prog_stats->pckts_dropped += 1;
     return TC_ACT_SHOT;
   }
 
 #if HC_WITH_REDIRECT
-  ethh = (void*)(long)skb->data;
+  ethh = katran_skb_data(skb);
   memcpy(ethh->h_source, esrc->mac, 6);
   memcpy(ethh->h_dest, edst->mac, 6);
 #endif /* HC_WITH_REDIRECT */

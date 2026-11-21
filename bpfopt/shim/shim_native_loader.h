@@ -1,22 +1,6 @@
 #ifndef BPFREJIT_SHIM_NATIVE_LOADER_H
 #define BPFREJIT_SHIM_NATIVE_LOADER_H
 
-/* A snapshot must describe a completed load, including native replacement.
- * The outer syscall scope includes capture and state insertion, so a
- * verified startup cannot confuse a load in flight with an idle program
- * set. */
-static pthread_rwlock_t shim_native_load_lock = PTHREAD_RWLOCK_INITIALIZER;
-static unsigned shim_native_loads_inflight;
-/* Counts completed bound attempts, including an eBPF pass-through. */
-static unsigned shim_native_bound_completed;
-struct shim_native_load_scope { int active; };
-static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
-    if (scope->active) {
-        __atomic_sub_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
-        pthread_rwlock_unlock(&shim_native_load_lock);
-    }
-}
-
 struct native_loader_c_result {
     int prog_fd;
     int replaced;
@@ -40,12 +24,9 @@ static int shim_native_loader_enabled(void) {
     return e && strcmp(e, "1") == 0;
 }
 
-/* The verified arm requires every native load to finish before the run
- * measures; an unbound run keeps measuring with the program on eBPF. */
-static int shim_native_loader_requires_bound_proof(void) {
-    const char *value = getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
-    return value && (strcmp(value, "1") == 0 || strcmp(value, "true") == 0 ||
-                     strcmp(value, "yes") == 0 || strcmp(value, "on") == 0);
+static void shim_native_loader_fatal(void) {
+    fflush(NULL);
+    _exit(97);
 }
 
 static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
@@ -74,9 +55,25 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
         insn_cnt <= 6)
         return 1;
     if (prog && (!name || !name[0]) &&
+        prog->prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT &&
+        prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
+        insn_cnt == 11 && prog->hash == 0x71725f032fe1d5e4ULL)
+        return 1;
+    if (prog && (!name || !name[0]) &&
+        prog->prog_type == BPF_PROG_TYPE_TRACING &&
+        prog->expected_attach_type != 0 && prog->attach_btf_id != 0 &&
+        insn_cnt == 3 && prog->hash == 0x145b4e38542e17e8ULL)
+        return 1;
+    if (prog && (!name || !name[0]) &&
         prog->prog_type == BPF_PROG_TYPE_KPROBE &&
         prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
         insn_cnt <= 6)
+        return 1;
+    if (prog && (!name || !name[0]) &&
+        prog->prog_type == BPF_PROG_TYPE_LSM &&
+        prog->expected_attach_type == BPF_LSM_MAC &&
+        prog->attach_btf_id != 0 && insn_cnt == 3 &&
+        prog->hash == 0x145b4e38542e17e8ULL)
         return 1;
     if (name && strcmp(name, "libbpf_nametest") == 0 && insn_cnt <= 2)
         return 1;
@@ -111,8 +108,8 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
          strcmp(name, "probe_upm_link") == 0 ||
          strcmp(name, "probe_fmod_ret") == 0 ||
          strcmp(name, "probe_sys_fmod_") == 0 ||
-         strcmp(name, "probe_get_func_") == 0 ||
          strcmp(name, "probe_lsm_file_") == 0 ||
+         strcmp(name, "probe_get_func_") == 0 ||
          strcmp(name, "uprobe_regs") == 0) &&
         insn_cnt <= 6)
         return 1;
@@ -123,6 +120,30 @@ static int shim_native_loader_is_internal_prog(const struct prog_entry *prog) {
     const char *name = prog ? prog->name : "";
 
     return name && strcmp(name, "native_lab_stub") == 0;
+}
+
+static int shim_native_loader_is_runtime_helper(const struct prog_entry *prog,
+                                                const char *manifest) {
+    const char *name = prog ? prog->name : "";
+
+    if (!prog || !manifest)
+        return 0;
+    if (!strstr(manifest, "/tetragon/manifest.json"))
+        return 0;
+
+    /* Tetragon dynamically creates this one-shot PROG_RUN helper in
+     * pkg/sensors/map_update.go::UpdateStatsMap() to update an internal stats
+     * map. It has no stable native symbol because the map fd and value are
+     * generated at runtime. */
+    if ((!name || !name[0]) &&
+        prog->prog_type == BPF_PROG_TYPE_SOCKET_FILTER &&
+        strcmp(prog->license, "GPL") == 0 &&
+        prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
+        prog->load_attr.prog_btf_fd == 0 && prog->fd_array_slots_needed == 0 &&
+        prog->insn_cnt == 18)
+        return 1;
+
+    return 0;
 }
 
 static void shim_native_loader_log_jit_info(const char *label, int fd) {
@@ -277,21 +298,23 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (!prog || !prog->bytecode_path[0]) {
         log_line("native-loader missing captured source bytecode for prog=%s",
                  prog_name ? prog_name : "");
-        errno = ENOENT;
-        return -1;
+        shim_native_loader_fatal();
     }
     if (access(prog->bytecode_path, R_OK) != 0) {
         log_line("native-loader source bytecode unreadable prog=%s path=%s errno=%d",
                  prog_name ? prog_name : "", prog->bytecode_path, errno);
-        errno = ENOENT;
-        return -1;
+        shim_native_loader_fatal();
     }
     const char *manifest = getenv("BPFREJIT_SHIM_NATIVE_MANIFEST");
     if (!manifest || !manifest[0]) {
         log_line("native-loader missing BPFREJIT_SHIM_NATIVE_MANIFEST for prog=%s",
                  prog_name ? prog_name : "");
-        errno = ENOENT;
-        return -1;
+        shim_native_loader_fatal();
+    }
+    if (shim_native_loader_is_runtime_helper(prog, manifest)) {
+        log_line("native-loader skipped runtime helper program name=%s insn_cnt=%u",
+                 prog_name ? prog_name : "", prog ? prog->insn_cnt : 0);
+        return original_fd;
     }
 
     const char *so_path = getenv("BPFREJIT_NATIVE_LOADER_SO");
@@ -300,8 +323,7 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     void *handle = dlopen(so_path, RTLD_NOW | RTLD_LOCAL);
     if (!handle) {
         log_line("native-loader dlopen %s failed: %s", so_path, dlerror());
-        errno = ENOENT;
-        return -1;
+        shim_native_loader_fatal();
     }
 
     dlerror();
@@ -312,44 +334,35 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     if (sym_err || !load) {
         log_line("native-loader dlsym failed: %s", sym_err ? sym_err : "null");
         dlclose(handle);
-        errno = ENOENT;
-        return -1;
+        shim_native_loader_fatal();
     }
 
     struct native_loader_c_result result;
     memset(&result, 0, sizeof(result));
     result.prog_fd = -1;
-    const int load_status =
-        load((int)original_fd, manifest, prog->bytecode_path,
+    if (load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
-             &result);
-    if (load_status != 0) {
+             &result) != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
-        if (shim_native_loader_requires_bound_proof())
-            log_line("native-loader verified program kept on eBPF prog=%s "
-                     "manifest=%s source=%s",
-                     prog_name ? prog_name : "", manifest,
-                     prog->bytecode_path);
+        dlclose(handle);
+        shim_native_loader_fatal();
     }
-    if (shim_native_loader_requires_bound_proof())
-        __atomic_add_fetch(&shim_native_bound_completed, 1, __ATOMIC_SEQ_CST);
     if (!result.replaced) {
         log_line("native-loader no manifest match for prog=%s manifest=%s "
-                 "source=%s; keeping original BPF fd",
+                 "source=%s",
                  prog_name ? prog_name : "", manifest, prog->bytecode_path);
         dlclose(handle);
-        return original_fd;
+        shim_native_loader_fatal();
     }
     if (result.prog_fd < 0) {
         log_line("native-loader returned invalid fd for prog=%s",
                  prog_name ? prog_name : "");
         dlclose(handle);
-        errno = EINVAL;
-        return -1;
+        shim_native_loader_fatal();
     }
 
     shim_native_loader_log_jit_info("original", (int)original_fd);
@@ -359,28 +372,24 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
 
     int shadow_original_fd = fcntl((int)original_fd, F_DUPFD_CLOEXEC, 3);
     if (shadow_original_fd < 0) {
-        int saved = errno ? errno : EIO;
         log_line("native-loader failed to dup original fd=%ld errno=%d",
                  original_fd, errno);
         real_close(result.prog_fd);
         dlclose(handle);
-        errno = saved;
-        return -1;
+        shim_native_loader_fatal();
     }
     if (prog->native_loader_original_fd >= 0)
         real_close(prog->native_loader_original_fd);
     prog->native_loader_original_fd = shadow_original_fd;
 
     if (real_close((int)original_fd) != 0) {
-        int saved = errno ? errno : EIO;
         log_line("native-loader failed to close replaced original fd=%ld errno=%d",
                  original_fd, errno);
         real_close(result.prog_fd);
         real_close(shadow_original_fd);
         prog->native_loader_original_fd = -1;
         dlclose(handle);
-        errno = saved;
-        return -1;
+        shim_native_loader_fatal();
     }
     log_line("native-loader replaced prog=%s original_fd=%ld native_fd=%d "
              "manifest=%s source=%s",

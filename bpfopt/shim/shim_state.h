@@ -438,25 +438,6 @@ static void dump_bytecode(uint64_t hash, const struct bpf_insn *insns,
                  bytes, path);
 }
 
-#include "shim_function_info.h"
-
-static void dump_original_function_info(int original_fd, const struct prog_entry *entry) {
-    if (!entry->func_info_buf || !entry->func_info_cnt) return;
-    struct bpf_prog_info info = {0};
-    union bpf_attr attr = {0};
-    attr.info.bpf_fd = (uint32_t)original_fd;
-    attr.info.info_len = sizeof(info);
-    attr.info.info = (uintptr_t)&info;
-    if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &attr, sizeof(attr)) < 0) {
-        log_line("  original function metadata program info failed: fd=%d errno=%d", original_fd, errno);
-        return;
-    }
-    if (write_original_function_info(entry->bytecode_path, info.id, info.btf_id,
-                                     entry->func_info_buf, entry->func_info_cnt,
-                                     entry->func_info_rec_size) < 0)
-        log_line("  original function metadata write failed: prog_id=%u errno=%d", info.id, errno);
-}
-
 static int prog_load_fd_array_slots_needed(const struct bpf_insn *insns,
                                            uint32_t insn_cnt,
                                            uint32_t *slots_out) {

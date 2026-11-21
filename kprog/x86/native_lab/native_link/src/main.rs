@@ -2,8 +2,8 @@
 //!
 //! Reads a userspace-compiled `.so` (typically produced by
 //! `micro/programs/Makefile`'s `MICRO_NATIVE` build), discovers an entry
-//! function plus every static subprogram reachable from direct calls or
-//! function tail jumps, and emits a single position-independent byte stream
+//! function plus every static subprogram reachable from it via direct
+//! `call rel32` edges, and emits a single position-independent byte stream
 //! suitable for splatting into a BPF JIT image via the
 //! `bpf_x86_native_lab` kinsn.
 //!
@@ -14,8 +14,6 @@
 //!   1. Every `RET` in the **entry** function becomes `JMP rel32 -> end_label`.
 //!      Subprogram `RET`s are left alone — they pop the return address the
 //!      entry's `CALL` pushed and resume execution in the entry's body.
-//!      An entry with direct function tail exits gets a small call/exit wrapper;
-//!      its original body and tail callees keep their SysV returns and frames.
 //!   2. Every `CALL rel32` to a discovered subprogram has its `disp32`
 //!      patched so it points at the subprogram's new offset within the
 //!      blob (entry first, then subprograms in discovery order).
@@ -105,13 +103,9 @@ struct Args {
     #[arg(long)]
     link_plan: Option<PathBuf>,
 
-    /// Print rewritten disassembly and retained x86 instruction source maps to stderr.
+    /// Print a human-readable disassembly of the rewritten blob to stderr.
     #[arg(long)]
     show: bool,
-
-    /// Keep the compiler's entry-function saves in the verifier's proof input.
-    #[arg(long)]
-    preserve_entry_abi: bool,
 
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
@@ -126,10 +120,9 @@ enum LinkMode {
     Proof,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug)]
 enum LookupKind {
     Call,
-    Lpm12,
     Hash,
     LruHash,
     PerCpuHash,
@@ -149,13 +142,28 @@ struct LookupSiteSpec {
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
+    /// Optional BPF map name observed at the source helper call. The kernel
+    /// truncates map names to BPF_OBJ_NAME_LEN - 1, so target-specific
+    /// linkers must compare this field using kernel-visible truncation.
+    map_name: Option<String>,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-struct MapOps {
-    name: String,
-    update: u64,
-    remove: u64,
+#[derive(Clone, Copy, Debug)]
+enum UpdateKind {
+    Call,
+    Array,
+    PerCpuArray,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct UpdateSiteSpec {
+    kind: UpdateKind,
+    target_addr: u64,
+    max_entries: u32,
+    elem_size: u32,
+    value_size: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
 }
 
 #[derive(Debug)]
@@ -164,7 +172,7 @@ struct LinkSideInputs {
     map_addrs: HashMap<String, u64>,
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
-    map_ops: Vec<MapOps>,
+    update_sites: Vec<UpdateSiteSpec>,
 }
 
 #[derive(Deserialize)]
@@ -179,7 +187,7 @@ struct LinkPlan {
     #[serde(default)]
     lookup_maps: Vec<LinkPlanLookupMap>,
     #[serde(default)]
-    map_ops: Vec<MapOps>,
+    update_sites: Vec<LinkPlanUpdateSite>,
 }
 
 #[derive(Deserialize)]
@@ -198,6 +206,7 @@ struct LinkPlanLookupSite {
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
+    map_name: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -209,6 +218,17 @@ struct LinkPlanLookupMap {
     max_entries: u32,
     elem_size: u32,
     index_mask: u32,
+    value_offset: u32,
+    percpu_base_addr: u64,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanUpdateSite {
+    kind: String,
+    target_addr: u64,
+    max_entries: u32,
+    elem_size: u32,
+    value_size: u32,
     value_offset: u32,
     percpu_base_addr: u64,
 }
@@ -236,6 +256,7 @@ fn lookup_site_from_plan(site: LinkPlanLookupSite) -> Result<LookupSiteSpec> {
         index_mask: site.index_mask,
         value_offset: site.value_offset,
         percpu_base_addr: site.percpu_base_addr,
+        map_name: site.map_name,
     })
 }
 
@@ -255,8 +276,21 @@ fn lookup_map_from_plan(site: LinkPlanLookupMap) -> Result<(String, LookupSiteSp
             index_mask: site.index_mask,
             value_offset: site.value_offset,
             percpu_base_addr: site.percpu_base_addr,
+            map_name: Some(name),
         },
     ))
+}
+
+fn update_site_from_plan(site: LinkPlanUpdateSite) -> Result<UpdateSiteSpec> {
+    Ok(UpdateSiteSpec {
+        kind: parse_update_kind(&site.kind)?,
+        target_addr: site.target_addr,
+        max_entries: site.max_entries,
+        elem_size: site.elem_size,
+        value_size: site.value_size,
+        value_offset: site.value_offset,
+        percpu_base_addr: site.percpu_base_addr,
+    })
 }
 
 fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
@@ -282,7 +316,11 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
             .map(lookup_site_from_plan)
             .collect::<Result<Vec<_>>>()?,
         lookup_maps,
-        map_ops: plan.map_ops,
+        update_sites: plan
+            .update_sites
+            .into_iter()
+            .map(update_site_from_plan)
+            .collect::<Result<Vec<_>>>()?,
     })
 }
 
@@ -295,14 +333,13 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
         map_addrs: HashMap::new(),
         lookup_sites: Vec::new(),
         lookup_maps: HashMap::new(),
-        map_ops: Vec::new(),
+        update_sites: Vec::new(),
     })
 }
 
 fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
     match s {
         "call" => Ok(LookupKind::Call),
-        "lpm12" => Ok(LookupKind::Lpm12),
         "hash" => Ok(LookupKind::Hash),
         "lru_hash" => Ok(LookupKind::LruHash),
         "percpu_hash" => Ok(LookupKind::PerCpuHash),
@@ -310,6 +347,15 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
         _ => bail!("unknown lookup kind {s:?}"),
+    }
+}
+
+fn parse_update_kind(s: &str) -> Result<UpdateKind> {
+    match s {
+        "call" => Ok(UpdateKind::Call),
+        "array" => Ok(UpdateKind::Array),
+        "percpu_array" => Ok(UpdateKind::PerCpuArray),
+        _ => bail!("unknown update kind {s:?}"),
     }
 }
 
@@ -322,7 +368,7 @@ fn require_call_target(target: u64, context: &str) -> Result<u64> {
 
 fn resolve_lookup_site_target(spec: &LookupSiteSpec, context: &str) -> Result<u64> {
     match spec.kind {
-        LookupKind::Call | LookupKind::Lpm12 => require_call_target(spec.target_addr, context),
+        LookupKind::Call => require_call_target(spec.target_addr, context),
         LookupKind::Hash
         | LookupKind::LruHash
         | LookupKind::PerCpuHash
@@ -372,10 +418,7 @@ struct SymInfo {
 }
 
 fn main() -> Result<()> {
-    link(Args::parse())
-}
-
-fn link(args: Args) -> Result<()> {
+    let args = Args::parse();
     let proof_mode = args.mode == LinkMode::Proof;
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
@@ -389,7 +432,7 @@ fn link(args: Args) -> Result<()> {
         map_addrs,
         lookup_sites,
         lookup_maps,
-        map_ops,
+        update_sites,
     } = load_link_side_inputs(&args)?;
     let RewriteResult {
         blob,
@@ -397,9 +440,7 @@ fn link(args: Args) -> Result<()> {
         map_patches,
         callee_saved_mask,
         proof_relocs,
-        proof_data_relocs,
         proof_symbols,
-        load_sites,
     } = match elf.architecture() {
         object::Architecture::X86_64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -431,11 +472,12 @@ fn link(args: Args) -> Result<()> {
                 &included,
                 &helper_addrs,
                 &map_addrs,
+                &lookup_sites,
                 &lookup_maps,
-                &map_ops,
+                &update_sites,
                 proof_mode,
-                args.preserve_entry_abi,
-                args.show,)?
+                args.show,
+            )?
         }
         object::Architecture::Aarch64 => {
             let entry = find_symbol_by_name(&elf, &args.symbol)?;
@@ -466,8 +508,8 @@ fn link(args: Args) -> Result<()> {
                 &helper_addrs,
                 &map_addrs,
                 &lookup_sites,
+                &update_sites,
                 proof_mode,
-                args.preserve_entry_abi,
                 args.show,
             )?
         }
@@ -487,7 +529,6 @@ fn link(args: Args) -> Result<()> {
             &blob,
             &proof_symbols,
             &proof_relocs,
-            &proof_data_relocs,
             callee_saved_mask,
         )?;
         eprintln!(
@@ -547,17 +588,12 @@ fn link(args: Args) -> Result<()> {
         );
     }
     if let Some(path) = &args.output_abi {
-        let mut text = format!(
+        let text = format!(
             "version\tnative-link-abi-v2\ncallee_saved_mask\t{}\n",
             output_callee_saved_mask
         );
-        for site in &load_sites {
-            text.push_str(&format!("load_site\t{},{},{}\n", site.offset, site.insn_len, site.destination));
-        }
         fs::write(path, text).with_context(|| format!("write {}", path.display()))?;
         eprintln!("native-link: wrote ABI metadata -> {}", path.display());
-    } else if !load_sites.is_empty() {
-        bail!("exception-recovery load sites require --output-abi");
     }
     Ok(())
 }
@@ -569,7 +605,6 @@ fn write_proof_object(
     text: &[u8],
     proof_symbols: &[ProofSymbol],
     proof_relocs: &[ProofReloc],
-    proof_data_relocs: &[ProofDataReloc],
     callee_saved_mask: u8,
 ) -> Result<()> {
     let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
@@ -637,7 +672,6 @@ fn write_proof_object(
         SectionKind::ReadOnlyData,
     );
     let mut rodata_ids: HashMap<String, WriteSymbolId> = HashMap::new();
-    let mut rodata_offsets = HashMap::new();
     for reloc in proof_relocs.iter().filter(|reloc| reloc.data.is_some()) {
         if rodata_ids.contains_key(&reloc.symbol) {
             continue;
@@ -656,29 +690,6 @@ fn write_proof_object(
         });
         symbol_ids.insert(reloc.symbol.clone(), id);
         rodata_ids.insert(reloc.symbol.clone(), id);
-        rodata_offsets.insert(reloc.symbol.clone(), (offset, data.len() as u64));
-    }
-
-    for reloc in proof_data_relocs {
-        let &(base, size) = rodata_offsets.get(&reloc.owner)
-            .ok_or_else(|| anyhow!("nested proof relocation has no data owner {}", reloc.owner))?;
-        let width = match reloc.r_type { 1 => 8, 2 => 4, _ => bail!("unsupported nested proof relocation type") };
-        if reloc.offset.checked_add(width).is_none_or(|end| end > size) {
-            bail!("nested proof relocation exceeds {} or has unsupported type", reloc.owner);
-        }
-        let symbol = if let Some(&symbol) = symbol_ids.get(&reloc.symbol) { symbol } else if reloc.r_type == 1 {
-            let symbol = object.add_symbol(WriteSymbol {
-                name: reloc.symbol.as_bytes().to_vec(), value: 0, size: 0,
-                kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
-                section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
-            });
-            symbol_ids.insert(reloc.symbol.clone(), symbol);
-            symbol
-        } else { bail!("nested proof relocation has no text target {}", reloc.symbol); };
-        object.add_relocation(data_section, WriteRelocation {
-            offset: base + reloc.offset, symbol, addend: reloc.addend,
-            flags: RelocationFlags::Elf { r_type: reloc.r_type },
-        })?;
     }
 
     for reloc in proof_relocs {
@@ -736,11 +747,6 @@ fn write_proof_object(
         callee_saved_mask
     );
     object.append_section_data(abi_section, abi.as_bytes(), 1);
-
-    if arch == object::Architecture::X86_64 {
-        let section = object.add_section(Vec::new(), b".native_link_x86_effects".to_vec(), SectionKind::Other);
-        object.append_section_data(section, &serde_json::to_vec(&x86::proof_effects(text)?)?, 1);
-    }
 
     let bytes = object.write().context("write proof ELF object")?;
     fs::write(path, bytes).with_context(|| format!("write {}", path.display()))
@@ -852,16 +858,7 @@ struct RewriteResult {
     map_patches: Vec<MapPatch>,
     callee_saved_mask: u8,
     proof_relocs: Vec<ProofReloc>,
-    proof_data_relocs: Vec<ProofDataReloc>,
     proof_symbols: Vec<ProofSymbol>,
-    load_sites: Vec<LoadSite>,
-}
-
-#[derive(Debug, Clone)]
-struct LoadSite {
-    offset: u32,
-    insn_len: u16,
-    destination: u16,
 }
 
 #[derive(Clone, Debug)]
@@ -873,40 +870,11 @@ struct ProofReloc {
     data: Option<Vec<u8>>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-struct ProofDataReloc {
-    owner: String,
-    offset: u64,
-    r_type: u32,
-    symbol: String,
-    addend: i64,
-}
-
 #[derive(Clone, Debug)]
 struct ProofSymbol {
     name: String,
     offset: u64,
     size: u64,
-}
-
-#[cfg(test)]
-mod tbz_tests {
-    use super::*;
-
-    #[test]
-    fn tbz_tbnz_decode_and_retarget() {
-        // tbz x8, #63, +0x10c (0xb6f8 0868 encodes imm14 = 0x43 = 67 words)
-        let insn: u32 = 0xb6f8_0868;
-        assert!(a64_is_tbz_tbnz(insn));
-        assert!(!a64_is_cbz_cbnz(insn));
-        assert_eq!(a64_branch_target(0x1000, 2, insn), Some(0x1000 + 8 + 67 * 4));
-        let moved = a64_patch_tbz_tbnz(insn, 2, 2 + 83).unwrap();
-        assert_eq!((moved >> 5) & 0x3fff, 83);
-        assert_eq!(moved & !(0x3fff << 5), insn & !(0x3fff << 5));
-        let back = a64_patch_tbz_tbnz(insn, 10, 4).unwrap();
-        assert_eq!(a64_branch_target(0, 10, back), Some(16));
-        assert!(a64_patch_tbz_tbnz(insn, 0, 1 << 13).is_err());
-    }
 }
 
 fn a64_sign_extend(value: u32, bits: u8) -> i64 {
@@ -946,12 +914,18 @@ fn a64_patch_cbz_cbnz(insn: u32, word_index: usize, target_index: usize) -> Resu
     Ok((insn & !(0x7ffff << 5)) | (((disp as u32) & 0x7ffff) << 5))
 }
 
-fn a64_patch_tbz_tbnz(insn: u32, word_index: usize, target_index: usize) -> Result<u32> {
-    let disp = target_index as i64 - word_index as i64;
-    if disp < -(1 << 13) || disp >= (1 << 13) {
-        bail!("arm64 TBZ/TBNZ displacement out of range: {disp}");
+fn a64_cbz64(rt: u32) -> Result<u32> {
+    if rt >= 32 {
+        bail!("arm64 CBZ register out of range: x{rt}");
     }
-    Ok((insn & !(0x3fff << 5)) | (((disp as u32) & 0x3fff) << 5))
+    Ok(0xb400_0000 | rt)
+}
+
+fn a64_cbnz64(rt: u32) -> Result<u32> {
+    if rt >= 32 {
+        bail!("arm64 CBNZ register out of range: x{rt}");
+    }
+    Ok(0xb500_0000 | rt)
 }
 
 fn a64_adr(rd: u32, word_index: usize, target_byte_offset: usize) -> Result<u32> {
@@ -995,10 +969,6 @@ fn a64_is_cbz_cbnz(insn: u32) -> bool {
     (insn & 0x7e00_0000) == 0x3400_0000
 }
 
-fn a64_is_tbz_tbnz(insn: u32) -> bool {
-    (insn & 0x7e00_0000) == 0x3600_0000
-}
-
 fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
     if a64_is_uncond_b(insn) {
         let imm26 = insn & 0x03ff_ffff;
@@ -1013,11 +983,6 @@ fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u6
     if a64_is_cbz_cbnz(insn) {
         let imm19 = (insn >> 5) & 0x7ffff;
         let disp = a64_sign_extend(imm19, 19) << 2;
-        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
-    }
-    if a64_is_tbz_tbnz(insn) {
-        let imm14 = (insn >> 5) & 0x3fff;
-        let disp = a64_sign_extend(imm14, 14) << 2;
         return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
     }
     None
@@ -1061,6 +1026,30 @@ fn a64_blr(reg: u32) -> Result<u32> {
     Ok(0xd63f_0000 | (reg << 5))
 }
 
+fn a64_add_imm64(rd: u32, rn: u32, imm: u32) -> Result<u32> {
+    if rd >= 32 || rn >= 32 {
+        bail!("arm64 ADD imm register out of range: x{rd}, x{rn}");
+    }
+    let (imm12, shift) = if imm <= 0xfff {
+        (imm, 0)
+    } else if imm & 0xfff == 0 && (imm >> 12) <= 0xfff {
+        (imm >> 12, 1)
+    } else {
+        bail!("arm64 ADD imm out of range: {imm}");
+    };
+    Ok(0x9100_0000 | (shift << 22) | (imm12 << 10) | (rn << 5) | rd)
+}
+
+fn a64_add_shift64(rd: u32, rn: u32, rm: u32, shift: u32) -> Result<u32> {
+    if rd >= 32 || rn >= 32 || rm >= 32 {
+        bail!("arm64 ADD shifted register out of range: x{rd}, x{rn}, x{rm}");
+    }
+    if shift > 63 {
+        bail!("arm64 ADD shifted amount out of range: {shift}");
+    }
+    Ok(0x8b00_0000 | (rm << 16) | (shift << 10) | (rn << 5) | rd)
+}
+
 fn a64_ldr_u32(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
     if rt >= 32 || rn >= 32 {
         bail!("arm64 LDR w register out of range: w{rt}, x{rn}");
@@ -1076,6 +1065,104 @@ fn a64_mrs_sp_el0(rt: u32) -> Result<u32> {
         bail!("arm64 MRS SP_EL0 target register out of range: x{rt}");
     }
     Ok(0xd538_4100 | rt)
+}
+
+fn a64_ldr_u64(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 LDR x register out of range: x{rt}, x{rn}");
+    }
+    if byte_off % 8 != 0 || byte_off / 8 > 0xfff {
+        bail!("arm64 LDR x unsigned offset out of range: {byte_off}");
+    }
+    Ok(0xf940_0000 | ((byte_off / 8) << 10) | (rn << 5) | rt)
+}
+
+fn a64_str_u8(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 STR b register out of range: w{rt}, x{rn}");
+    }
+    if byte_off > 0xfff {
+        bail!("arm64 STR b unsigned offset out of range: {byte_off}");
+    }
+    Ok(0x3900_0000 | (byte_off << 10) | (rn << 5) | rt)
+}
+
+fn a64_ldr_u8(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 LDR b register out of range: w{rt}, x{rn}");
+    }
+    if byte_off > 0xfff {
+        bail!("arm64 LDR b unsigned offset out of range: {byte_off}");
+    }
+    Ok(0x3940_0000 | (byte_off << 10) | (rn << 5) | rt)
+}
+
+fn a64_str_u16(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 STR h register out of range: w{rt}, x{rn}");
+    }
+    if byte_off % 2 != 0 || byte_off / 2 > 0xfff {
+        bail!("arm64 STR h unsigned offset out of range: {byte_off}");
+    }
+    Ok(0x7900_0000 | ((byte_off / 2) << 10) | (rn << 5) | rt)
+}
+
+fn a64_ldr_u16(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 LDR h register out of range: w{rt}, x{rn}");
+    }
+    if byte_off % 2 != 0 || byte_off / 2 > 0xfff {
+        bail!("arm64 LDR h unsigned offset out of range: {byte_off}");
+    }
+    Ok(0x7940_0000 | ((byte_off / 2) << 10) | (rn << 5) | rt)
+}
+
+fn a64_str_u32(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 STR w register out of range: w{rt}, x{rn}");
+    }
+    if byte_off % 4 != 0 || byte_off / 4 > 0xfff {
+        bail!("arm64 STR w unsigned offset out of range: {byte_off}");
+    }
+    Ok(0xb900_0000 | ((byte_off / 4) << 10) | (rn << 5) | rt)
+}
+
+fn a64_str_u64(rt: u32, rn: u32, byte_off: u32) -> Result<u32> {
+    if rt >= 32 || rn >= 32 {
+        bail!("arm64 STR x register out of range: x{rt}, x{rn}");
+    }
+    if byte_off % 8 != 0 || byte_off / 8 > 0xfff {
+        bail!("arm64 STR x unsigned offset out of range: {byte_off}");
+    }
+    Ok(0xf900_0000 | ((byte_off / 8) << 10) | (rn << 5) | rt)
+}
+
+fn a64_cmp_imm64(rn: u32, imm: u32) -> Result<u32> {
+    if rn >= 32 {
+        bail!("arm64 CMP imm register out of range: x{rn}");
+    }
+    let (imm12, shift) = if imm <= 0xfff {
+        (imm, 0)
+    } else if imm & 0xfff == 0 && (imm >> 12) <= 0xfff {
+        (imm >> 12, 1)
+    } else {
+        bail!("arm64 CMP imm out of range: {imm}");
+    };
+    Ok(0xf100_001f | (shift << 22) | (imm12 << 10) | (rn << 5))
+}
+
+fn a64_cmp_reg64(rn: u32, rm: u32) -> Result<u32> {
+    if rn >= 32 || rm >= 32 {
+        bail!("arm64 CMP reg register out of range: x{rn}, x{rm}");
+    }
+    Ok(0xeb00_001f | (rm << 16) | (rn << 5))
+}
+
+fn a64_madd64(rd: u32, rn: u32, rm: u32, ra: u32) -> Result<u32> {
+    if rd >= 32 || rn >= 32 || rm >= 32 || ra >= 32 {
+        bail!("arm64 MADD register out of range: x{rd}, x{rn}, x{rm}, x{ra}");
+    }
+    Ok(0x9b00_0000 | (rm << 16) | (ra << 10) | (rn << 5) | rd)
 }
 
 fn a64_movz(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
@@ -1176,6 +1263,257 @@ fn build_arm64_get_smp_processor_id_inline(
         a64_mrs_sp_el0(X16)?,
         a64_ldr_u32(X0, X16, cpu_offset)?,
     ]))
+}
+
+fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const X1: u32 = 1;
+    const X8: u32 = 8;
+    const X9: u32 = 9;
+    const X10: u32 = 10;
+    const A64_MOV_X0_XZR: u32 = 0xaa1f_03e0;
+    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
+
+    if spec.max_entries == 0 {
+        bail!("arm64 array lookup max_entries must be non-zero");
+    }
+    if spec.elem_size == 0 {
+        bail!("arm64 array lookup elem_size must be non-zero");
+    }
+
+    let mut words = Vec::new();
+    words.push(a64_add_imm64(X8, X0, spec.value_offset)?);
+    words.push(a64_ldr_u32(X9, X1, 0)?);
+    if let Ok(cmp) = a64_cmp_imm64(X9, spec.max_entries) {
+        words.push(cmp);
+    } else {
+        words.extend(arm64_mov_imm64_sequence(X10, u64::from(spec.max_entries))?);
+        words.push(a64_cmp_reg64(X9, X10)?);
+    }
+
+    let null_branch = words.len();
+    words.push(0);
+    if spec.elem_size.is_power_of_two() {
+        let shift = spec.elem_size.trailing_zeros();
+        words.push(a64_add_shift64(X0, X8, X9, shift)?);
+    } else {
+        words.extend(arm64_mov_imm64_sequence(X10, u64::from(spec.elem_size))?);
+        words.push(a64_madd64(X0, X9, X10, X8)?);
+    }
+
+    if matches!(spec.kind, LookupKind::PerCpuArray) {
+        words.push(a64_ldr_u64(X0, X0, 0)?);
+        words.push(A64_MRS_X10_TPIDR_EL1);
+        words.push(a64_add_shift64(X0, X0, X10, 0)?);
+    }
+
+    let done_branch = words.len();
+    words.push(0);
+    let null_target = words.len();
+    words.push(A64_MOV_X0_XZR);
+    let done_target = words.len();
+
+    words[null_branch] = a64_patch_b_cond(0x5400_0002, null_branch, null_target)?;
+    words[done_branch] = a64_patch_b(done_branch, done_target)?;
+    Ok(words)
+}
+
+fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const X8: u32 = 8;
+    const X10: u32 = 10;
+    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
+
+    if matches!(
+        spec.kind,
+        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray
+    ) {
+        return Ok(Vec::new());
+    }
+
+    let mut words = Vec::new();
+    let null_branch = words.len();
+    words.push(a64_cbz64(X0)?);
+    match spec.kind {
+        LookupKind::Hash => {
+            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+        }
+        LookupKind::HashOfMaps => {
+            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+            words.push(a64_ldr_u64(X0, X0, 0)?);
+        }
+        LookupKind::LruHash => {
+            words.push(a64_ldr_u8(X8, X0, spec.value_offset)?);
+            let skip_store = words.len();
+            words.push(a64_cbnz64(X8)?);
+            words.extend(arm64_mov_imm64_sequence(X8, 1)?);
+            words.push(a64_str_u8(X8, X0, spec.value_offset)?);
+            let after_store = words.len();
+            words[skip_store] = a64_patch_cbz_cbnz(words[skip_store], skip_store, after_store)?;
+            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+        }
+        LookupKind::PerCpuHash => {
+            words.push(a64_add_imm64(X0, X0, spec.key_offset)?);
+            words.push(a64_ldr_u64(X0, X0, 0)?);
+            words.push(A64_MRS_X10_TPIDR_EL1);
+            words.push(a64_add_shift64(X0, X0, X10, 0)?);
+        }
+        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
+    }
+    let done = words.len();
+    words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, done)?;
+    Ok(words)
+}
+
+fn append_arm64_array_value_ptr(
+    words: &mut Vec<u32>,
+    dst_reg: u32,
+    map_reg: u32,
+    key_reg: u32,
+    scratch_reg: u32,
+    elem_size: u32,
+    value_offset: u32,
+) -> Result<()> {
+    words.push(a64_add_imm64(dst_reg, map_reg, value_offset)?);
+    if elem_size.is_power_of_two() {
+        words.push(a64_add_shift64(
+            dst_reg,
+            dst_reg,
+            key_reg,
+            elem_size.trailing_zeros(),
+        )?);
+    } else {
+        words.extend(arm64_mov_imm64_sequence(scratch_reg, u64::from(elem_size))?);
+        words.push(a64_madd64(dst_reg, key_reg, scratch_reg, dst_reg)?);
+    }
+    Ok(())
+}
+
+fn append_arm64_copy_value(words: &mut Vec<u32>, dst_reg: u32, src_reg: u32) -> Result<()> {
+    const X10: u32 = 10;
+
+    words.push(a64_ldr_u64(X10, src_reg, 0)?);
+    words.push(a64_str_u64(X10, dst_reg, 0)?);
+    Ok(())
+}
+
+fn append_arm64_copy_value_size(
+    words: &mut Vec<u32>,
+    dst_reg: u32,
+    src_reg: u32,
+    value_size: u32,
+) -> Result<()> {
+    const X10: u32 = 10;
+
+    match value_size {
+        1 => {
+            words.push(a64_ldr_u8(X10, src_reg, 0)?);
+            words.push(a64_str_u8(X10, dst_reg, 0)?);
+        }
+        2 => {
+            words.push(a64_ldr_u16(X10, src_reg, 0)?);
+            words.push(a64_str_u16(X10, dst_reg, 0)?);
+        }
+        4 => {
+            words.push(a64_ldr_u32(X10, src_reg, 0)?);
+            words.push(a64_str_u32(X10, dst_reg, 0)?);
+        }
+        8 => append_arm64_copy_value(words, dst_reg, src_reg)?,
+        _ => bail!("unsupported arm64 array update value size: {value_size}"),
+    }
+    Ok(())
+}
+
+fn append_arm64_mov_i64(words: &mut Vec<u32>, reg: u32, value: i64) -> Result<()> {
+    words.extend(arm64_mov_imm64_sequence(reg, value as u64)?);
+    Ok(())
+}
+
+fn build_arm64_array_update(spec: &UpdateSiteSpec) -> Result<Vec<u32>> {
+    const X0: u32 = 0;
+    const X1: u32 = 1;
+    const X2: u32 = 2;
+    const X3: u32 = 3;
+    const X8: u32 = 8;
+    const X9: u32 = 9;
+    const X10: u32 = 10;
+    const A64_MOV_X0_XZR: u32 = 0xaa1f_03e0;
+    const A64_MRS_X10_TPIDR_EL1: u32 = 0xd538_d08a;
+
+    if !matches!(spec.kind, UpdateKind::Array | UpdateKind::PerCpuArray) {
+        bail!(
+            "update kind {:?} is not an arm64 array-style inline",
+            spec.kind
+        );
+    }
+    if spec.max_entries == 0 {
+        bail!("arm64 array update max_entries must be non-zero");
+    }
+    if spec.elem_size == 0 {
+        bail!("arm64 array update elem_size must be non-zero");
+    }
+    if !matches!(spec.value_size, 1 | 2 | 4 | 8) {
+        bail!("arm64 array update value_size must be 1, 2, 4, or 8");
+    }
+
+    let mut words = Vec::new();
+    words.push(a64_ldr_u32(X9, X1, 0)?);
+    if let Ok(cmp) = a64_cmp_imm64(X9, spec.max_entries) {
+        words.push(cmp);
+    } else {
+        words.extend(arm64_mov_imm64_sequence(X10, u64::from(spec.max_entries))?);
+        words.push(a64_cmp_reg64(X9, X10)?);
+    }
+    let bounds_branch = words.len();
+    words.push(0);
+
+    words.push(a64_cmp_imm64(X3, 1)?);
+    let eexist_branch = words.len();
+    words.push(0);
+    words.push(a64_cmp_imm64(X3, 2)?);
+    let invalid_branch = words.len();
+    words.push(0);
+
+    append_arm64_array_value_ptr(
+        &mut words,
+        X8,
+        X0,
+        X9,
+        X10,
+        spec.elem_size,
+        spec.value_offset,
+    )?;
+    if matches!(spec.kind, UpdateKind::PerCpuArray) {
+        words.push(a64_ldr_u64(X8, X8, 0)?);
+        words.push(A64_MRS_X10_TPIDR_EL1);
+        words.push(a64_add_shift64(X8, X8, X10, 0)?);
+    }
+    append_arm64_copy_value_size(&mut words, X8, X2, spec.value_size)?;
+    words.push(A64_MOV_X0_XZR);
+    let success_end_branch = words.len();
+    words.push(0);
+
+    let bounds_target = words.len();
+    append_arm64_mov_i64(&mut words, X0, -7)?;
+    let bounds_end_branch = words.len();
+    words.push(0);
+
+    let eexist_target = words.len();
+    append_arm64_mov_i64(&mut words, X0, -17)?;
+    let eexist_end_branch = words.len();
+    words.push(0);
+
+    let invalid_target = words.len();
+    append_arm64_mov_i64(&mut words, X0, -22)?;
+    let end_target = words.len();
+
+    words[bounds_branch] = a64_patch_b_cond(0x5400_0002, bounds_branch, bounds_target)?;
+    words[eexist_branch] = a64_patch_b_cond(0x5400_0000, eexist_branch, eexist_target)?;
+    words[invalid_branch] = a64_patch_b_cond(0x5400_0008, invalid_branch, invalid_target)?;
+    words[success_end_branch] = a64_patch_b(success_end_branch, end_target)?;
+    words[bounds_end_branch] = a64_patch_b(bounds_end_branch, end_target)?;
+    words[eexist_end_branch] = a64_patch_b(eexist_end_branch, end_target)?;
+    Ok(words)
 }
 
 fn append_u32(blob: &mut Vec<u8>, word: u32) {
@@ -1402,12 +1740,6 @@ enum Arm64PatchKind {
         target_is_symbol_end: bool,
         target_address: u64,
     },
-    TbzTbnz {
-        insn: u32,
-        source_symbol_address: u64,
-        target_is_symbol_end: bool,
-        target_address: u64,
-    },
     MapLiteralLoad {
         target_name: String,
     },
@@ -1551,15 +1883,30 @@ fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
     }
 }
 
+fn arm64_select_map_call_site(
+    sites_len: usize,
+    ordinal: usize,
+    map_name: Option<&String>,
+    seen_by_map: &mut HashMap<String, usize>,
+) -> Option<usize> {
+    if ordinal < sites_len {
+        if let Some(name) = map_name {
+            seen_by_map.entry(name.clone()).or_insert(ordinal);
+        }
+        return Some(ordinal);
+    }
+    map_name.and_then(|name| seen_by_map.get(name).copied())
+}
+
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    _lookup_sites: &[LookupSiteSpec],
+    lookup_sites: &[LookupSiteSpec],
+    update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
-    preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
@@ -1568,10 +1915,14 @@ fn rewrite_arm64(
     let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
+    let mut lookup_call_counter: usize = 0;
+    let mut update_call_counter: usize = 0;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
+    let mut lookup_site_by_map: HashMap<String, usize> = HashMap::new();
+    let mut update_site_by_map: HashMap<String, usize> = HashMap::new();
 
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -1582,7 +1933,7 @@ fn rewrite_arm64(
                 sym.name
             );
         }
-        let entry_abi_strip = if is_entry && !(proof_mode && preserve_entry_abi) {
+        let entry_abi_strip = if is_entry {
             plan_arm64_entry_abi_strip(&bytes)?
         } else {
             Arm64EntryAbiStrip::default()
@@ -1683,23 +2034,100 @@ fn rewrite_arm64(
                                 continue;
                             }
                         }
-                        // bpf_tail_call has no callable kernel body (the JIT emits it) and arm64 has no
-                        // native tail-call stub: the program keeps its eBPF (2026-11-20 QEMU check, Tetragon
-                        // execve_rate branched to 0xdead00000000eb9f).
-                        if reloc.target_name == "bpf_tail_call" {
-                            bail!("arm64 native code has no tail-call stub; {} keeps its eBPF", sym.name);
+                        let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
+                        let mut helper_addr_from_site = false;
+                        let mut lookup_postprocess = None;
+                        if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
+                            let ordinal = lookup_call_counter;
+                            let map_name = reg_map_names[0].as_ref();
+                            let site_index = arm64_select_map_call_site(
+                                lookup_sites.len(),
+                                ordinal,
+                                map_name,
+                                &mut lookup_site_by_map,
+                            )
+                            .ok_or_else(|| {
+                                anyhow!(
+                                    "arm64 bpf_map_lookup_elem call site {ordinal} in {} is missing link-plan lookup_sites metadata",
+                                    sym.name
+                                )
+                            })?;
+                            let spec = &lookup_sites[site_index];
+                            lookup_call_counter += 1;
+                            match spec.kind {
+                                LookupKind::Array | LookupKind::PerCpuArray => {
+                                    for word in build_arm64_array_lookup(spec)? {
+                                        append_u32(&mut blob, word);
+                                    }
+                                    arm64_call_clobber_map_regs(&mut reg_map_names);
+                                    continue;
+                                }
+                                LookupKind::Call
+                                | LookupKind::Hash
+                                | LookupKind::LruHash
+                                | LookupKind::PerCpuHash
+                                | LookupKind::HashOfMaps => {
+                                    helper_addr = Some(resolve_lookup_site_target(
+                                        spec,
+                                        &format!("arm64 lookup-site {ordinal} ({:?})", spec.kind),
+                                    )?);
+                                    helper_addr_from_site = true;
+                                    lookup_postprocess = Some(spec.clone());
+                                }
+                            }
                         }
-                        // Map lookups call the kernel helper, which dispatches on the map's ops: arm64 has
-                        // no native provenance for the map in x0, and matching link-plan sites by call order
-                        // gave Tetragon a wrong array shape (2026-11-20 QEMU check, oops in
-                        // event_wake_up_new_task).
-                        let helper_addr = resolve_helper_target(
-                            &reloc.target_name,
-                            helper_addrs,
-                            &format!("arm64 helper call {}", reloc.target_name),
-                        )?;
+                        if reloc.target_name == "bpf_map_update_elem" && is_entry {
+                            let ordinal = update_call_counter;
+                            let map_name = reg_map_names[0].as_ref();
+                            let site_index = arm64_select_map_call_site(
+                                update_sites.len(),
+                                ordinal,
+                                map_name,
+                                &mut update_site_by_map,
+                            );
+                            update_call_counter += 1;
+                            if let Some(site_index) = site_index {
+                                let spec = &update_sites[site_index];
+                                match spec.kind {
+                                    UpdateKind::Array | UpdateKind::PerCpuArray => {
+                                        for word in build_arm64_array_update(spec)? {
+                                            append_u32(&mut blob, word);
+                                        }
+                                        arm64_call_clobber_map_regs(&mut reg_map_names);
+                                        continue;
+                                    }
+                                    UpdateKind::Call => {
+                                        helper_addr = Some(require_call_target(
+                                            spec.target_addr,
+                                            &format!("arm64 update-site {ordinal}"),
+                                        )?);
+                                        helper_addr_from_site = true;
+                                    }
+                                }
+                            }
+                        }
+                        let helper_addr = if helper_addr_from_site {
+                            helper_addr.ok_or_else(|| {
+                                anyhow!(
+                                    "arm64 CALL26 in {} at byte offset {off:#x} has empty site target for {}",
+                                    sym.name,
+                                    reloc.target_name
+                                )
+                            })?
+                        } else {
+                            resolve_helper_target(
+                                &reloc.target_name,
+                                helper_addrs,
+                                &format!("arm64 helper call {}", reloc.target_name),
+                            )?
+                        };
                         for word in arm64_helper_call_sequence(helper_addr)? {
                             append_u32(&mut blob, word);
+                        }
+                        if let Some(spec) = lookup_postprocess {
+                            for word in build_arm64_lookup_call_postprocess(&spec)? {
+                                append_u32(&mut blob, word);
+                            }
                         }
                         arm64_call_clobber_map_regs(&mut reg_map_names);
                         continue;
@@ -1836,16 +2264,6 @@ fn rewrite_arm64(
                         target_is_symbol_end,
                         target_address: target,
                     }
-                } else if a64_is_tbz_tbnz(insn) {
-                    // TBZ/TBNZ carry a 14-bit displacement; left as emitted, a call expanded between
-                    // them and their target shifted the landing point (2026-11-21 QEMU check 4: Tetragon
-                    // event_wake_up_new_task reached a helper-call blr with a stale x10).
-                    Arm64PatchKind::TbzTbnz {
-                        insn,
-                        source_symbol_address: sym.address,
-                        target_is_symbol_end,
-                        target_address: target,
-                    }
                 } else {
                     bail!(
                         "arm64 unsupported branch rewrite in {} at byte offset {off:#x}: {insn:#010x}",
@@ -1858,7 +2276,7 @@ fn rewrite_arm64(
                 });
             }
 
-            if is_entry && a64_is_ret(insn) && !(proof_mode && preserve_entry_abi) {
+            if is_entry && a64_is_ret(insn) {
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
@@ -1951,7 +2369,6 @@ fn rewrite_arm64(
                 | Arm64PatchKind::B { .. }
                 | Arm64PatchKind::BCond { .. }
                 | Arm64PatchKind::CbzCbnz { .. }
-                | Arm64PatchKind::TbzTbnz { .. }
         )
     }) {
         let patched = match patch.kind {
@@ -2010,21 +2427,6 @@ fn rewrite_arm64(
                 )?;
                 a64_patch_cbz_cbnz(insn, patch.word_index, target_word)?
             }
-            Arm64PatchKind::TbzTbnz {
-                insn,
-                source_symbol_address,
-                target_is_symbol_end,
-                target_address,
-            } => {
-                let target_word = arm64_branch_target_word(
-                    &addr_word_offset,
-                    &sym_end_word_offset,
-                    source_symbol_address,
-                    target_is_symbol_end,
-                    target_address,
-                )?;
-                a64_patch_tbz_tbnz(insn, patch.word_index, target_word)?
-            }
             _ => continue,
         };
         let off = patch.word_index * 4;
@@ -2051,9 +2453,7 @@ fn rewrite_arm64(
         map_patches,
         callee_saved_mask,
         proof_relocs,
-        proof_data_relocs: Vec::new(),
         proof_symbols,
-        load_sites: Vec::new(),
     })
 }
 
@@ -2122,14 +2522,6 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    #[ignore = "requires a captured CLI argument file"]
-    fn replay_captured_link_request() -> Result<()> {
-        let path=std::env::var("NATIVE_LINK_CAPTURE_ARGV")?;
-        let argv:Vec<String>=serde_json::from_slice(&fs::read(path)?)?;
-        link(Args::try_parse_from(argv)?)
-    }
 
     #[test]
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {

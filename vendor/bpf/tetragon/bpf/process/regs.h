@@ -10,7 +10,14 @@ FUNC_LOCAL __u64
 read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 {
 	/* Using inlined asm for same reason we use WRITE_REG above. */
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+#define READ_REG(reg) ({                                             \
+	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
+	val <<= shift;                                               \
+	val >>= shift;                                               \
+	val;                                                         \
+})
+#else
 #define READ_REG(reg) ({                                        \
 	__u64 val;                                              \
 	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"     \
@@ -20,13 +27,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 	val <<= shift;                                          \
 	val >>= shift;                                          \
 	val;                                                    \
-})
-#else
-#define READ_REG(reg) ({                                             \
-	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
-	val <<= shift;                                               \
-	val >>= shift;                                               \
-	val;                                                         \
 })
 #endif
 
@@ -82,7 +82,20 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 	 * Using clang-20 seems to work, but we need to upgrade first ;-)
 	 */
 
-#ifdef __bpf__
+#ifdef MICRO_NATIVE
+#define WRITE_REG(reg) ({                                                  \
+	void *__p = (char *)ctx + offsetof(struct pt_regs, reg);            \
+	if (size == 8)                                                      \
+		*(__u64 *)__p = val;                                        \
+	else if (size == 4)                                                 \
+		*(__u32 *)__p = (__u32)val;                                 \
+	else if (size == 2)                                                 \
+		*(__u16 *)__p = (__u16)val;                                 \
+	else if (size == 1)                                                 \
+		*(__u8 *)__p = (__u8)val;                                   \
+	0;                                                                 \
+})
+#else
 #define WRITE_REG(reg) ({                                                  \
 	asm volatile("if %[size] != 8 goto +2\n"                           \
 		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                \
@@ -98,19 +111,6 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 		     : [ctx] "+r"(ctx), [val] "+r"(val), [size] "+r"(size) \
 		     : [off] "i"(offsetof(struct pt_regs, reg))            \
 		     :);                                                   \
-	0;                                                                 \
-})
-#else
-#define WRITE_REG(reg) ({                                                  \
-	void *__p = (char *)ctx + offsetof(struct pt_regs, reg);            \
-	if (size == 8)                                                      \
-		*(__u64 *)__p = val;                                        \
-	else if (size == 4)                                                 \
-		*(__u32 *)__p = (__u32)val;                                 \
-	else if (size == 2)                                                 \
-		*(__u16 *)__p = (__u16)val;                                 \
-	else if (size == 1)                                                 \
-		*(__u8 *)__p = (__u8)val;                                   \
 	0;                                                                 \
 })
 #endif
@@ -165,7 +165,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 {
 	/* Using inlined asm for same reason we use WRITE_REG above. */
 
-#ifdef __bpf__
 #define READ_REG(reg) ({                                        \
 	__u64 val;                                              \
 	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"     \
@@ -176,14 +175,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 	val >>= shift;                                          \
 	val;                                                    \
 })
-#else
-#define READ_REG(reg) ({    \
-	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, reg)); \
-	val <<= shift; \
-	val >>= shift; \
-	val; \
-})
-#endif
 
 	switch (src) {
 	case offsetof(struct pt_regs, sp):
@@ -191,7 +182,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 	case offsetof(struct pt_regs, pc):
 		return READ_REG(pc);
 #undef READ_REG
-#ifdef __bpf__
 #define READ_REG(offset) ({                                                     \
 	__u64 val;                                                              \
 	asm volatile("%[val] = *(u64 *)(%[ctx] + %[off])\n"                     \
@@ -202,14 +192,6 @@ read_reg(struct pt_regs *ctx, __u32 src, __u8 shift)
 	val >>= shift;                                                          \
 	val;                                                                    \
 })
-#else
-#define READ_REG(offset) ({    \
-	__u64 val = *(__u64 *)((char *)ctx + offsetof(struct pt_regs, regs) + 8 * (offset)); \
-	val <<= shift; \
-	val >>= shift; \
-	val; \
-})
-#endif
 	case offsetof(struct pt_regs, regs) + 8 * 0:
 		return READ_REG(0);
 	case offsetof(struct pt_regs, regs) + 8 * 1:
@@ -290,7 +272,6 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 	 * Using clang-20 seems to work, but we need to upgrade first ;-)
 	 */
 
-#ifdef __bpf__
 #define WRITE_REG(reg) ({                                                  \
 	asm volatile("if %[size] != 8 goto +2\n"                           \
 		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                \
@@ -302,16 +283,6 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 		     :);                                                   \
 	0;                                                                 \
 })
-#else
-#define WRITE_REG(reg) ({    \
-	void *__p = (char *)ctx + offsetof(struct pt_regs, reg); \
-	if (size == 8) \
-		*(__u64 *)__p = val; \
-	else if (size == 4) \
-		*(__u32 *)__p = (__u32)val; \
-	0; \
-})
-#endif
 
 	switch (dst) {
 	case offsetof(struct pt_regs, sp):
@@ -319,7 +290,6 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 	case offsetof(struct pt_regs, pc):
 		return WRITE_REG(pc);
 #undef WRITE_REG
-#ifdef __bpf__
 #define WRITE_REG(offset) ({                                                    \
 	asm volatile("if %[size] != 8 goto +2\n"                                \
 		     "*(u64 *)(%[ctx] + %[off]) = %[val]\n"                     \
@@ -331,16 +301,6 @@ write_reg(struct pt_regs *ctx, __u32 dst, __u8 size, __u64 val)
 		     :);                                                        \
 	0;                                                                      \
 })
-#else
-#define WRITE_REG(offset) ({    \
-	void *__p = (char *)ctx + offsetof(struct pt_regs, regs) + 8 * (offset); \
-	if (size == 8) \
-		*(__u64 *)__p = val; \
-	else if (size == 4) \
-		*(__u32 *)__p = (__u32)val; \
-	0; \
-})
-#endif
 	case offsetof(struct pt_regs, regs) + 8 * 0:
 		WRITE_REG(0);
 		break;
