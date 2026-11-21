@@ -1,0 +1,5 @@
+# Actual MUL dispatcher
+
+Arm64Mul.Dispatch proves an exact structural identity with the unchanged original generic handler and follows opcode12 through73 silent steps: width-call entry4, actual width function6, and real preceding gates63. It reaches the original MUL branch for both W/X widths with arbitrary environment, memory and continuation. The generic law binds the actual width symbol/internal function; the linked law reuses the accepted current source binding. The exact short-circuit comparison temporary map is retained. No body/cast/source-model replacement or memory/provider replay.
+
+Component229jobs7.857s and three public body_source/body_dispatch_bound/Linked.body_dispatch type+axiom queries pass inherited logical/CompCert semantic axioms only, original proof caps. Exact hashes/timings/logs in validation.json. Operand reads, multiply result/scalar writer, frame release, native/all-behavior and original fifth-prefix composition remain next; whole-library confirmation follows that batch and avoids active V X86ShiftLeftAlu WIP. M5/O1/O2/O4/M6 open; complete ISA families0. No application/runtime tests/measurement.
