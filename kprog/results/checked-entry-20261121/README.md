@@ -11,3 +11,9 @@ Actual canonical component refresh and whole-application verification are queued
 ## Loaded program identity accounting
 
 The retained BCC capture has25 requests,25 distinct source program IDs and25 distinct (native ELF hash, entry symbol) pairs, stored in15 native ELF files. Seven ELF groups contain multiple entry functions. The collector now reports the full object hash and full entry separately from the source program ID; an object count carries its ELF-group scope. The archived22 checked-sim-c /3 direct-native outcomes remain unchanged. identity-audit.json preserves every row and the group-to-entry mapping; identity-bcc-service.tar.gz is the complete original22,169,792-byte service archive. These are historical identity/coverage observations, with current queued replay outcomes kept separate. Production/runtime checks added0.
+
+## Failure-stage accounting
+
+The capture reader now retains a request whose execution_path field is absent, together with its actual status/error, native entry and recorded simulator failure stage. Existing stock-verification receipts supply acceptance independently of later native compilation/installation; unavailable stage flags remain null. Input-P proof-object availability is reported separately from B generation and stock acceptance. The runtime service and its loader policy retain their bytes.
+
+Replaying the complete archived BCC capture keeps25 requests/source IDs/entries,22 checked installations/stock acceptances and3 direct-native installations. The actual archived Tetragon request2 retains status-5, path null, generation failure and input proof availability; its B-generation/stock fields remain null because those flags are absent in that failure record. stage-audit.json links the exact request archive already published with the GS diagnosis. This is recorded archive processing; native/guest executions0 and added runtime checks0.
