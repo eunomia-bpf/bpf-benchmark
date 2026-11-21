@@ -201,6 +201,17 @@ record this composition and the preceding source contracts at existing budgets
 and inherited axioms. Actual flag stores, writeback and entry/world
 correspondence remain open.
 
+For a zero effective count, the actual flag loop and parity short circuit
+take eleven silent steps and retain the entire heap. The sole short-circuit
+temporary becomes zero; every other temporary and caller local retains its
+value. The composed SHL route takes 181/193/205/205 steps to its original
+post-flag continuation under the mature ISA count-zero input condition.
+The count observation follows from the preceding preparation and native count
+equality. The [fifteen public audits](../results/kprog_verification_20261107/x86-zero-shift-flags.log.gz)
+record the actual flag-stage identity, source execution, frames and universal
+composition at existing proof budgets and inherited axioms. Nonzero flag
+stores, destination writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

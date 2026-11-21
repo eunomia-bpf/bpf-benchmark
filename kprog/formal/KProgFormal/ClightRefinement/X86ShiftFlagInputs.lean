@@ -380,4 +380,134 @@ theorem route_to_flags (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
     keptLeft keptRight keptResult values.2.2.1 values.2.2.2.2.2.2 values.2.2.2.2.1 keptAlu
   exact routed.trans prepared
 
+
+private def countTest : CC.Expr :=
+  .Ebinop .One (.Etempvar X86_program_profile_bpf.___x86_sh_count CC.tuchar)
+    (.Econst_int (0#32) CC.tint) CC.tint
+
+private def activeFlags : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_87 with
+    | .Sifthenelse _ active _ => active | _ => .Sskip))
+
+/-- The original flag stage retains its active-count arm and parity continuation. -/
+theorem flags_source : flags =
+    .Ssequence (.Sloop (.Sifthenelse countTest activeFlags .Sskip) .Sbreak)
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_89 := rfl
+
+/-- Zero effective count traverses the original flag loop and parity short circuit,
+preserving every byte of the caller heap and recording the real short-circuit write. -/
+theorem zero_count_internal (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (zero : le.get X86_program_profile_bpf.___x86_sh_count = some (.Vint (0#32))) :
+    InternalRun ge 11 (.State function flags k e le m)
+      (.State function .Sskip k e (le.set X86_program_profile_bpf._t'70 (.Vint (0#32))) m) := by
+  rw [flags_source]
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, CC.doStep,
+       CC.typeof,
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_89,
+      CC.doEvalExpr, countTest, zero, CC.Cop.semBinaryOperation, CC.Cop.semCmp,
+      CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tint, CC.tuint,
+        CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.zero, CC.Integers.MI.zero, CC.Val.ofBool, CC.Val.Vfalse,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Eapp, CC.E0]
+
+/-- The actual zero-count flag code is a silent relational execution preserving the full heap. -/
+theorem zero_count_returns (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (zero : le.get X86_program_profile_bpf.___x86_sh_count = some (.Vint (0#32))) :
+    CC.Star (CC.Step2 ge) (.State function flags k e le m) CC.E0
+      (.State function .Sskip k e (le.set X86_program_profile_bpf._t'70 (.Vint (0#32))) m) :=
+  (zero_count_internal ge function e le k m zero).sound
+
+/-- The sole source short-circuit write retains every other temporary. -/
+theorem zero_count_temps (le : CC.TempEnv) :
+    (le.set X86_program_profile_bpf._t'70 (.Vint (0#32))).get
+      X86_program_profile_bpf._t'70 = some (.Vint (0#32)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'70 →
+      (le.set X86_program_profile_bpf._t'70 (.Vint (0#32))).get id = le.get id := by
+  refine ⟨by simp, ?_⟩
+  intro id different
+  simp [CC.PTree.gso, Ne.symm different]
+
+
+private theorem zero_count_readback (le : CC.TempEnv) (lhs rhs value : BitVec 64) (size : X86.Size)
+    (zero : X86.Flags.shiftCount size (rhs.setWidth 8) = 0) :
+    (afterTemps le lhs rhs value size).get X86_program_profile_bpf.___x86_sh_count =
+      some (.Vint (0#32)) := by
+  rw [(temps le lhs rhs value size).2.2.2.1, native_count, zero]
+
+/-- The actual SHL route with a zero mature masked count reaches its original
+post-flag continuation with the complete incoming heap and exact source temporary map. -/
+theorem route_zero_flags (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv aluBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_alu_result))
+    (shiftBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._kprog_x86_shl_result = some shiftBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv shiftBlock =
+        some (.Internal X86_program_profile_bpf.f_kprog_x86_shl_result))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_alu_result = none)
+    (lhs rhs : BitVec 64) (size : X86.Size)
+    (left : le.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs))
+    (right : le.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (k : CC.Cont) (m : CC.Mem)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (old : BitVec 8)
+    (heapBinding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (byte : CC.Mem.load .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset) =
+      some (.Vint (old.setWidth 32)))
+    (effectiveBlock bitsBlock maskBlock : CC.Block)
+    (effectiveBinding :
+      CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some effectiveBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv effectiveBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (bitsBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_bits = some bitsBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv bitsBlock = some (.Internal X86_program_profile_bpf.f_x86_width_bits))
+    (maskBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_mask = some maskBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv maskBlock = some (.Internal X86_program_profile_bpf.f_x86_width_mask))
+    (widthsUnshadowed : e.get X86_program_profile_bpf._x86_width_effective = none ∧
+      e.get X86_program_profile_bpf._x86_width_bits = none ∧
+      e.get X86_program_profile_bpf._x86_width_mask = none)
+    (countBlock : CC.Block)
+    (countBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_shift_count = some countBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv countBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_shift_count))
+    (countUnshadowed : e.get X86_program_profile_bpf._x86_shift_count = none)
+    (zero : X86.Flags.shiftCount size (rhs.setWidth 8) = 0) :
+    InternalRun ge (((((3 + X86ShiftLeftSite.length size + 1) + 11 + 37) +
+      X86ShiftFlagWidths.length size) + 25) + 11)
+      (.State function X86ShiftLeftRoute.dispatch k e le m)
+      (.State function .Sskip
+        (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k))) e
+        ((afterTemps (X86ShiftFlagWidths.afterTemps
+          (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+            (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+            cfBlock offset old)) size) lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8))) size).set X86_program_profile_bpf._t'70 (.Vint (0#32))) m) := by
+  have routed := route_to_flags ge aluBlock shiftBlock binding shiftBinding
+    function e le unshadowed lhs rhs size left right operation width k m
+    bindingsLayout valueLayout bindingBlock cfBlock offset old heapBinding pointer byte
+    effectiveBlock bitsBlock maskBlock effectiveBinding bitsBinding maskBinding widthsUnshadowed
+    countBlock countBinding countUnshadowed
+  let prepared := afterTemps (X86ShiftFlagWidths.afterTemps
+          (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+            (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+            cfBlock offset old)) size) lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8))) size
+  have counted : prepared.get X86_program_profile_bpf.___x86_sh_count =
+      some (.Vint (0#32)) := by
+    exact zero_count_readback _ lhs rhs _ size zero
+  exact routed.trans (zero_count_internal ge function e prepared
+    (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k))) m counted)
+
 end KProgFormal.ClightRefinement.X86ShiftFlagInputs
