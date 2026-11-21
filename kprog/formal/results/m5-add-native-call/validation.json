@@ -1,0 +1,60 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateNativeCall"
+    ],
+    "exit": 0,
+    "seconds": 68.79466986656189,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 237,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-native-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9220354557037354,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Call.corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Call.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "internal_transitions": 333,
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-add-call",
+  "source_checkpoint_before_commit": "478b5c8914602c737e4d89bc7743ae86ef9c0819",
+  "whole_proof_library": {
+    "status": "pending proof-only batch confirmation"
+  },
+  "completed_isa_families": 0
+}
