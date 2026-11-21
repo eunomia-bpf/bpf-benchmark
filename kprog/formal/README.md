@@ -56,6 +56,19 @@ record the final standard-library arithmetic proof and existing logical/CompCert
 semantic axioms; earlier diagnostics retain their attempt labels. This helper
 correspondence remains a component of the open M5 ISA-handler obligation.
 
+The [x86 left-shift result proof](KProgFormal/ClightRefinement/X86ShiftLeft.lean)
+executes the actual exported production helper for every pair of 64-bit operands
+and all four mature operand sizes. The result is the mature model's width
+truncation of the shifted, width-truncated input, using its Flags.shiftCount.
+The byte, word, dword and qword calls take 19, 23, 27 and 27 silent internal
+transitions respectively, preserving complete memory for every environment and
+continuation. Every finite Kstop run is a silent prefix of the same result,
+terminal states are unique, and the complete relation terminates. Its
+[three public audits](../results/kprog_verification_20261107/x86-shift-left.log.gz)
+record the existing logical/CompCert semantic axioms and original proof budgets.
+Flag updates, operand writeback and dispatcher composition remain the
+surrounding instruction-refinement obligations.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
