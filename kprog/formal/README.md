@@ -212,6 +212,20 @@ record the actual flag-stage identity, source execution, frames and universal
 composition at existing proof budgets and inherited axioms. Nonzero flag
 stores, destination writeback and entry/world correspondence remain open.
 
+The [actual nonzero SHL ZF write](KProgFormal/ClightRefinement/X86ShiftFlagZF.lean)
+derives the ZF pointer field at byte offset 128 from the existing source-derived
+composite layout. The original count and operation tests select its real store;
+ten silent steps perform the pointer load and byte assignment, then reach the
+untouched SF/CF/OF suffix with the exact updated heap and pointer temporary.
+The stored scalar value equals ZF in the mature shift-flag definition for every
+operand size and undefined-flag oracle choice. Current composite records,
+binding/result/count observations, the genuine pointer load and actual byte-store
+success remain explicit premises; later source/world proofs derive them from
+the ABI representation. The [nine public audits](../results/kprog_verification_20261107/x86-shift-flag-zf.log.gz)
+record actual source identities, field offset, execution, frames and native flag
+value at existing budgets and inherited axioms. Whole-route composition,
+remaining flag stores, writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
