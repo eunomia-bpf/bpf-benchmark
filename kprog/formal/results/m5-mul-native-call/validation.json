@@ -1,0 +1,56 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulNativeCall.lean": "026a145e6a9dbd1833ed724222168d5da230a1465400eed7110fc7e00ede33e0"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MulNativeCall"
+    ],
+    "exit": 0,
+    "seconds": 2.023256301879883,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/native-call1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/NativeCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6801724433898926,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-native-call1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Mul.NativeCall.corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.NativeCall.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 437,
+  "scope": "actual9arg MUL source call/free-return refines fetched mature MUL Reference step; all relational behaviors",
+  "whole_library_confirmation": "pending completed original fifth-entry/native batch and V active classifier terminal notice",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
