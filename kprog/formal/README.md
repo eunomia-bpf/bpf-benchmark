@@ -69,6 +69,19 @@ record the existing logical/CompCert semantic axioms and original proof budgets.
 Flag updates, operand writeback and dispatcher composition remain the
 surrounding instruction-refinement obligations.
 
+The [actual ALU SHL call proof](KProgFormal/ClightRefinement/X86ShiftLeftAlu.lean)
+selects case 5 of the production ALU function, enters the genuine left-shift
+callee, and resumes through its original assignment, switch break, loop break
+and return. The environment's real symbol and internal-function bindings are
+premises; the callee signature and caller continuation are derived from the
+actual definitions. The call takes 43, 47, 51 and 51 silent transitions for
+byte, word, dword and qword operands, for every operand pair, memory and
+continuation. It returns the mature ISA arithmetic result and preserves complete
+memory; arbitrary finite Kstop runs have silent prefixes, unique terminal state
+and termination. The [three public audits](../results/kprog_verification_20261107/x86-shift-left-alu.log.gz)
+record the inherited logical/CompCert semantic axioms. Full instruction flag
+updates, operand writeback, dispatcher and enclosing program binding remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
