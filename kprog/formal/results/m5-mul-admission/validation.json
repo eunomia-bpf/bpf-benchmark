@@ -1,0 +1,70 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulAdmission.lean": "e791c625d4fdcc35a0490397513de1458ff82b383dfb0a29b6ab4791482caf6e"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission"
+    ],
+    "exit": 0,
+    "seconds": 1.8593170642852783,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/admission2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/AdmissionPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.482241153717041,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-admission1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission.next_admission": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission.setup_next": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "original PC+16 fifth-word admission through four actual mature MOV/MOVK/ADD-immediate/ADD-register transitions and architectural input setup; no fetched/error hypothesis at synthetic successor",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission"
+        ],
+        "exit": 1,
+        "seconds": 1.8484442234039307,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-mul/admission1.log",
+      "reason": "simp unfolded afterThree before the exact fourth-step rewrite; fixed by sequential existing equalities"
+    }
+  ],
+  "whole_library_confirmation": "pending complete original fifth-entry/native batch and V classifier terminal",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

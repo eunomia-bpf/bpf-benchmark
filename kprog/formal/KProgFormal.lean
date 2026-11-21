@@ -160,3 +160,4 @@ import KProgFormal.ClightRefinement.Arm64MulCall
 import KProgFormal.ClightRefinement.Arm64MulNative
 import KProgFormal.ClightRefinement.Arm64MulNativeCall
 import KProgFormal.ClightRefinement.Arm64ProgramEntryMulNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission
