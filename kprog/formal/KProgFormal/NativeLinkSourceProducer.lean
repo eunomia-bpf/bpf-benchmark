@@ -2,9 +2,11 @@ import KProgFormal.NativeLinkSourceLayout
 import KProgFormal.Generated.NativeLinkFields
 
 /-!
-The actual encoded-field constructors, lowered from the Rust source, instantiate
-S5's universal producer/image theorems. The encoder's returned offsets, encoded
-byte layout and later producer edits retain their Rust/iced/compiler contracts;
+The encoded-field constructors instantiate S5's universal producer/image
+theorems. Kind7 helper-pointer and sparse-table bindings retain their historical
+342f94212 source epoch. The Current namespace binds the present kind1 CALL-slot
+record at its instruction start, alongside the unchanged map-field constructor.
+The encoder's returned offsets, encoded byte layout and later producer edits retain their Rust/iced/compiler contracts;
 these theorems derive field coordinates and chunk/byte composition from that
 interface for every symbol, field, table, program and encoded block.
 -/
@@ -59,3 +61,23 @@ theorem source_chunk_field (before : List Byte) (field : Nat) (instruction kind 
   producer_chunk_field _ _ _ _ _ _ conversion selected
 
 end KProgFormal.NativeLinkSourceProducer
+
+namespace KProgFormal.NativeLinkSourceProducer.Current
+open Reference NativeLinkProducer
+
+/-- Current Rust preserves the complete helper target and kind while converting
+the encoded instruction coordinate to its checked u32 relocation offset,
+with the actual emitted CALL-slot bytes. -/
+theorem helper_call_coordinate (before : List Byte) (instruction : BitVec 32) (target : Word)
+    (fits : before.length+instruction.toNat < 2^32) :
+    (NativeLinkFields.Current.helperCallRecord before instruction target).offset.toNat =
+        before.length+instruction.toNat ∧
+      (NativeLinkFields.Current.helperCallRecord before instruction target).kind = 1 ∧
+      (NativeLinkFields.Current.helperCallRecord before instruction target).target = target ∧
+      NativeLinkFields.Current.helperCallSlot = [0xE8, 0, 0, 0, 0] := by
+  refine ⟨?_, rfl, rfl, rfl⟩
+  simpa [NativeLinkFields.Current.helperCallRecord, NativeLinkFields.fieldRecord,
+    NativeLinkFields.Current.helperCallKind, producerRecord] using
+    producer_field_position before.length 0 instruction 1 target (by simpa using fits)
+
+end KProgFormal.NativeLinkSourceProducer.Current

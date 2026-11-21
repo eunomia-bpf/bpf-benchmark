@@ -539,11 +539,21 @@ live bytes and size, overlapping writes, range frames and conditional final-memo
 composition. The five kind5/6/7/8/layout rows retain
 `partial-universal-component` and all prior publication epochs. Focused build
 and independent public import/axiom queries pass; all 14 receipt-manifest hashes
-and the published module hash match on readback. Current source extraction
+and the published module hash match on readback. The captured S5 source extraction
 returns1 at its historical HelperPointer/HelperDispatch grammar; the producer
 uses MapImmediate/HelperCallRel32. Deriving the actual complete edit/field trace,
 wire and same-kernel-copy relation, physical embedding/lifetime and the per-row
 map/helper/readonly/ISA interfaces remains explicit.
+
+The [current field-source repair](current-field-source.log.gz) recognizes the
+present MapImmediate and HelperCallRel32 constructors through the maintained
+extractor; its existing generation/check workflow passes. The new
+`NativeLinkSourceProducer.Current.helper_call_coordinate` derives the checked
+u32 instruction-start coordinate, kind1, complete target and emitted five-byte
+CALL slot. All six earlier theorem statements/proofs and their historical
+kind7/+2/table8 inputs remain intact. Both modules and seven public type/axiom
+queries pass; the new law uses propext. Complete Rust/iced execution, native
+fixup/embedding and current M5 composition retain their interfaces.
 
 S17's [stock-kernel handoff](../../stock-path/results/20261109/final-summary.json)
 adds finite replay links to the tail, load-recovery and thunk rows. The captured
