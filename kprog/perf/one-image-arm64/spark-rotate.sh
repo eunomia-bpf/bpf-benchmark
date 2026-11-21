@@ -3,7 +3,8 @@
 # "AArch64 硬件性能（DGX Spark，单次测试后立刻恢复 deepseek41-flash 部署）"). The guest root, kernel and module are the
 # arm64 entry's (kprog/perf/one-image-arm64) after its QEMU six-app check; the guest script is that entry's with the
 # frozen x86 entry defaults: rotate 3 x 180 s per app, breadth first, stats off then on. 4 vCPUs and 8G as the arm64
-# entry; the vCPUs run on the Cortex-X925 cluster (CPUs 15-19) so -cpu host sees one core type.
+# entry; the vCPUs run on the Cortex-X925 cluster (CPUs 15-19) so -cpu host sees one core type, and the
+# interrupt controller is the host GICv3 (gic-version=host; the virt default is GICv2).
 set -u
 W=$HOME/kprog-arm64
 R=$W/root
@@ -21,7 +22,7 @@ for s in 0 1; do for a in $ORDER; do
   tag=$(date -u +%Y%m%dT%H%M%SZ)-$(echo "$a" | tr / _)-stats$s
   echo "$(date -u +%FT%TZ) start $a stats=$s" >> "$LOG"
   docker run --rm --name kprog-arm64-timing --cpuset-cpus 15-19 --device /dev/kvm -v "$W:$W" kprog-qemu-arm64:24.04 \
-    qemu-system-aarch64 -M virt -accel kvm -cpu host -smp 4 -m 8G -nographic -no-reboot \
+    qemu-system-aarch64 -M virt,gic-version=host -accel kvm -cpu host -smp 4 -m 8G -nographic -no-reboot \
     -kernel "$W/Image" \
     -fsdev local,id=rootfs,path="$R",security_model=none,multidevs=remap \
     -device virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root \
