@@ -1,0 +1,103 @@
+{
+  "time_utc": "2026-11-21T20:29:49.894438+00:00",
+  "repository_parent": "fefbd7814015b324c3fe8c8c1bbd41bf36882a43",
+  "submodules": {
+    "vendor/linux-framework": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+    "kprog/formal/external/LNSym": "da428593b21d6dfa02c6d063600d9ed817747fd5",
+    "kprog/formal/external/x86lean": "28640eb74b85dba563de7099bf21dca138244974",
+    "kprog/formal/external/clean": "00f06101f93f0b953536b362ccb319476962da79"
+  },
+  "proofs": {
+    "kprog/formal/KProgFormal/ControlABI/RCUTarget.lean": {
+      "sha256": "8d14f149657627bd7ea25d86e4f92b8f5a33c5766814cfacf48fdaadaf0ceed8",
+      "theorems": [
+        "program_array_domain",
+        "step_preserves",
+        "run_preserves",
+        "initial_valid",
+        "tail_entry_retained",
+        "tail_entry_payload"
+      ]
+    },
+    "kprog/formal/KProgFormal/ControlABI/HelperQuery.lean": {
+      "sha256": "585c9d9d37dd8536be3ecaea06ca0dd367b5ee354f77088ff1f27c2d9815f170",
+      "theorems": [
+        "ordinary_callback",
+        "extension_callback",
+        "response_length",
+        "alias_identity",
+        "binding_prototype",
+        "typed_call_enters",
+        "same_target_code",
+        "queried_prefix_preserved",
+        "queried_effect_preserved",
+        "external_step_returns"
+      ]
+    },
+    "kprog/formal/KProgFormal/ControlABI/PrivateFrame.lean": {
+      "sha256": "eeffbe7e6cef1e117a9ef0f6a1c78d685d196906dd1ac162ef9d1e0a119849da",
+      "theorems": [
+        "entry_slots",
+        "real_entry",
+        "update_load",
+        "history_load",
+        "spill_body_reload",
+        "helper_return_environment",
+        "return_releases_frame"
+      ]
+    },
+    "kprog/formal/KProgFormal/ControlABI/NativeWrapper.lean": {
+      "sha256": "16dd24334cb15b10c135fe3fa09f1e7bd0b2c329ef7afd6ef53a4c2519de7096",
+      "theorems": [
+        "word_store_load",
+        "push_saved_word",
+        "push_pop",
+        "leave_return",
+        "save_restore_register"
+      ]
+    },
+    "kprog/formal/KProgFormal/ControlABI/ArmWrapper.lean": {
+      "sha256": "667ec0e8da2d75c5e521ef5f336b04934ffb59471f4ec8f7a534502ba62e4c45",
+      "theorems": [
+        "bridge_in_decodes",
+        "bridge_out_decodes",
+        "execute_move",
+        "bridge_in",
+        "bridge_result"
+      ]
+    }
+  },
+  "source_sha256": {
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1",
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+    "vendor/linux-framework/kernel/bpf/core.c": "ed94b244139e6986a010909e38cf679fe6538e698a2be91f3d362a6f66fbf55f",
+    "vendor/linux-framework/kernel/bpf/arraymap.c": "5db997dc9c39b80d6f84ec6879048f00c54eb1f3f4faa83131d6abecc890d517",
+    "vendor/linux-framework/kernel/bpf/syscall.c": "df4d48544144fe49d94cb42067fda80ddd3fc90916a2ee4eadf64d68a5b574cf",
+    "vendor/linux-framework/kernel/trace/bpf_trace.c": "c7d863136047a05744316d41020fc0c00843ae96e2d44031b00c792a7b8ba2c9",
+    "kprog/stock-path/module/native_lab_helper_query_impl.h": "35775e74dd03ce1c4266f72cbace9639590eeccf80bfe8f9e64a799b0fe5bb72",
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "b347e3da58bdb7e8bc0be10f2504c78f6be4158e2617b3f63e616bb93e3f9144",
+    "kprog/libnativeloader/src/native_loader_helper_query.hpp": "32a34a039a8640c1b37191fd0e5193e3ffa0c4808d7b2c617c66a17a7e4bf624",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "0842efde27cf4a92eaafa54ae903ce06d59660ac79cf31c2f4700eccf091cefa",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "34f94b39c2ac2485fccd5f4d5900273315ccdc4ac3237f3051862c9fc7509127",
+    "kprog/x86/x86_sim_local_bpf.h": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336",
+    "kprog/formal/external/clean/export/CCLib/Clight.lean": "a6b1d9f2bf79cc6002d771cba974f05053ccb538cdf1307ec665e076131405bd",
+    "kprog/formal/KProgFormal/Clight/X86Helpers.lean": "c278fc694744abee95cdf42d6d0e6b9456066adad1059485206502b7b1c55675"
+  },
+  "universal_theorems": 33,
+  "validation": {
+    "all_five_modules": 0,
+    "aggregate_import": 0,
+    "all_public_theorem_axioms": 0,
+    "script": "/workspaces/.agent-state/kprog-lanes/S13/resume-20261121/all-audit.sh",
+    "command": "taskset -c 8-15 nice -n 19 bash all-audit.sh",
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "introduced_axioms": [],
+    "imported_external_parameters": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ],
+    "full_library_check_owner": "formal/V"
+  },
+  "o4_status": "partial-universal-component",
+  "closure_dependency": "Current M5 compiler/native/B nonreturn transfer semantics and source-emitter/physical embedding; see README.md"
+}
