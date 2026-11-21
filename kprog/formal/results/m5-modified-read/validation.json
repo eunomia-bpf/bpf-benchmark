@@ -1,0 +1,95 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedRead.lean": "3408e5bcc742b43d7337df64ad1d2e3bd3f5e6f1603a31addbfa7b28a54348c4"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedRead"
+    ],
+    "exit": 0,
+    "seconds": 3.6659634113311768,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 234,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/modified-read3.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/ModifiedReadPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.906446933746338,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-modified-read1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Modified.Read.handler_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Read.read_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Read.prefix_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 53,
+  "scope": "actual standalone modified-helper inlined read loop to original materialization stage, typed value/tag table loads and arbitrary caller e/le/k/fullheap; exact14temp writes",
+  "statement_identity": "actual fn_body/readLoop/RAW/tag/materialization/modify loops extracted; kernel rfl identity; original read not substituted by combined-reader call",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ModifiedRead"
+        ],
+        "exit": 1,
+        "seconds": 5.743574857711792,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/modified-read1.log",
+      "reason": "real modified source has opaque statement0 and distinct intermediate temp IDs; no budget failure"
+    },
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ModifiedRead"
+        ],
+        "exit": 1,
+        "seconds": 6.034240961074829,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/modified-read2.log",
+      "reason": "real tag-table source has opaque statement1; unfolded exact exported source alias"
+    }
+  ],
+  "whole_library_confirmation": "pending completed CMP helper/source/native batch",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
