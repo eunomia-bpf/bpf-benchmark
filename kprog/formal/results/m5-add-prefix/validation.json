@@ -1,0 +1,53 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediatePrefix"
+    ],
+    "exit": 0,
+    "seconds": 4.445813179016113,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 230,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-prefix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6647140979766846,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 4,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.branch_source": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.tail_source": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.evaluate": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.body_operands": []
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "internal_transitions": 152,
+  "source_checkpoint_before_commit": "f831e21456685fecc0ccdf300df54de6fd4a6168",
+  "raw": [
+    "/workspaces/kprog-raw/formal/m5-add-dispatch",
+    "/workspaces/kprog-raw/formal/m5-add-prefix"
+  ],
+  "whole_proof_library": {
+    "status": "pending end-of-batch confirmation"
+  },
+  "completed_isa_families": 0
+}
