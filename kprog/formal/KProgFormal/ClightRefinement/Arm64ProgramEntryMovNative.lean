@@ -74,7 +74,7 @@ theorem keep_corresponds {initial before : CC.Mem} {entry : HeaderLocal initial}
   have native := Arm64MovKeep.Native.reference_word_step s instruction 1 (priority.setWidth 64) 1 false
     (by decide) decoded noError fetched
   obtain ⟨written, after, finalStorage, finalWord, finalTag, run, registers, frame, freed,
-      freeFrame, contents, next, released, kept⟩ :=
+      freeFrame, contents, next, released, kept, _finalBound⟩ :=
     execute_keep storage bound addresses origins s bits priority word tag represented le k loaded
   refine ⟨written, after, finalStorage, finalWord, finalTag, run, ?_, ?_, ?_, frame, freed,
     freeFrame, contents, next, released, kept⟩

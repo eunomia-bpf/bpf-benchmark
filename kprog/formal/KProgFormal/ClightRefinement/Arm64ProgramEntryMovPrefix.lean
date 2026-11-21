@@ -27,6 +27,7 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
       (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i))) :
     ∃ entry : HeaderLocal initial, ∃ header : (j : Fin 12) → HeaderSourceLocal initial j, ∃ ready temps, ∃ traces : List CC.Trace,
       traces.length = 98 ∧
+      ready.nextblock = (Arm64Producer.allocation initial).2.nextblock ∧
       CC.Star (CC.Step2 world)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         traces.flatten (.State Arm64ProgramFixture.f_arm64_execute_compile afterSetup k
@@ -62,7 +63,8 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
-      Arm64RegisterReads.WarmEntryCache false ready.nextblock after (.Vptr entry.block 0) origins.stack := by
+      Arm64RegisterReads.WarmEntryCache false ready.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   obtain ⟨entry, cells, sources, localVector, before, temps, ready, traces, length, entryRun,
       pointers, vectorPointers, tailReads, storage, result, registers, resources, ⟨data⟩, readyAccess, beforeNext⟩ :=
     Arm64ProgramEntryBodyView.entry_setup_represents initial ctxBlock ctxOfs k addresses ctxWord context
@@ -82,16 +84,16 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
       Arm64Program._sp_valid = some (.Vint 0) := by
     rw [result.nextblock]
     exact (Arm64ProgramEntryColdRead.cold_cache_reads result data cells pointers false).2
-  refine ⟨entry, cells, ready, temps, traces, length, entryRun, ?_⟩
+  refine ⟨entry, cells, ready, temps, traces, length, readyNext, entryRun, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag, pair,
       finalRegisters, frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm, finalBound⟩ :=
     Arm64ProgramEntryMovPair.execute result.storage cells pointers access bound cold addresses origins
       (nativeSetup s origins fields) represented (setupTemps temps fields) k ctxBlock ctxOfs
       (fields 0) (fields 1) result.ctx old (result.context 0) (result.context 1) trace origin outcome
   exact ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag,
     star_trans entryRun pair, finalRegisters, result.frame.trans frame, firstFree, firstFreeFrame,
-    firstContents, middleNext, firstReleased, secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩
+    firstContents, middleNext, firstReleased, secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm, finalBound⟩
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovPrefix

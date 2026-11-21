@@ -62,7 +62,8 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
-      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   obtain ⟨firstWritten, middle, middleStorage, word, tag, first, firstRegisters, firstFrame,
       priorityLoaded, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased, middlePointers, middleWarm⟩ :=
     Arm64ProgramEntryMovCall.execute storage header pointers access bound cold addresses origins s represented
@@ -74,7 +75,7 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
     exact Nat.le_trans bound (FrameBelow.allocVariables (Arm64MovImmediate.allocated_bound world before)
       before.nextblock (Nat.le_refl _)).1
   obtain ⟨secondWritten, after, finalStorage, finalWord, finalTag, second, secondRegisters, secondFrame,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, kept⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, kept, finalBound⟩ :=
     execute_keep middleStorage middleBound addresses origins
       (Arm64RegisterWrite.nativeUpdate s 1 (mark.setWidth 64) false) (mark.setWidth 64) priority word tag
       middleRegisters (priorityTemps (markTemps le mark) priority) k priorityLoaded
@@ -85,7 +86,7 @@ theorem execute {initial before supplied : CC.Mem} {entry : HeaderLocal initial}
   have finalWarm := kept.warm before.nextblock header bound middlePointers false origins.stack middleWarm
   refine ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
     firstFrame.trans secondFrame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩
+    secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm, finalBound⟩
   simpa only [CC.Eapp, CC.E0, List.append_nil] using star_trans first second.sound
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovPair

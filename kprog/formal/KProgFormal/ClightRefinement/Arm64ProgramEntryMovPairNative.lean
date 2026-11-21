@@ -76,7 +76,7 @@ theorem corresponds {initial before supplied : CC.Mem} {entry : HeaderLocal init
       Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, registers,
       frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
-      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm⟩ :=
+      secondFree, secondFreeFrame, secondContents, afterNext, secondReleased, finalPointers, finalWarm, _finalBound⟩ :=
     Arm64ProgramEntryMovPair.execute storage header pointers access bound cold addresses origins s represented
       le k ctxBlock ctxOfs mark priority ctx old markRead priorityRead trace provider outcome
   have native := Arm64MovPairNative.steps s first keep mark priority imm column negate literal

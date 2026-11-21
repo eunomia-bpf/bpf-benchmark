@@ -422,15 +422,16 @@ theorem execute_keep {initial before : CC.Mem} {entry : HeaderLocal initial}
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
-      Arm64CacheLocalFrame.Kept initial before after 1 := by
+      Arm64CacheLocalFrame.Kept initial before after 1 ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   obtain ⟨written, after, finalStorage, finalWord, finalTag, call, registers, frame, freed,
-      freeFrame, contents, next, released, kept⟩ :=
+      freeFrame, contents, next, released, kept, finalBound⟩ :=
     Arm64MovKeep.LinkedWord.call storage bound (keepOperands entry.block priority) addresses origins s
       1 bits (priority.setWidth 64) 1 false word tag represented (keepCont initial le k) rfl
   have entered := keep_enter entry le k before priority loaded
   have returned := keep_leave initial le k after
   refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, registers, frame, freed,
-    freeFrame, contents, next, released, kept⟩
+    freeFrame, contents, next, released, kept, finalBound⟩
   exact (entered.trans call).trans returned
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryMovCall

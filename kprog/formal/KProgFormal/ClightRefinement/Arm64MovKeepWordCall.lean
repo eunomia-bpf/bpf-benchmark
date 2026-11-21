@@ -41,7 +41,8 @@ theorem call {initial before : CC.Mem} {entry : HeaderLocal initial}
       (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
         ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
-      Arm64CacheLocalFrame.Kept initial before after i := by
+      Arm64CacheLocalFrame.Kept initial before after i ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   obtain ⟨written, after, result, run, freed, freeFrame, contents, next, released⟩ :=
     call_scalar_word_returns_bound world Linked.bindings storage unused addresses i bits imm column narrow word tag
   obtain ⟨comparison, comparisonResult⟩ := Arm64RegisterWrite.write storage i (mergeWord bits imm column) narrow
@@ -73,8 +74,13 @@ theorem call {initial before : CC.Mem} {entry : HeaderLocal initial}
   have writerKept : Arm64CacheLocalFrame.Kept initial (Arm64Nop.allocation world before).2 written i := result.local_load
   have freeKept := Arm64CacheLocalFrame.of_frame before.nextblock i bound freeFrame
   have kept := (allocationKept.trans writerKept).trans freeKept
+  have finalNext : after.nextblock = (Arm64Nop.allocation world before).2.nextblock := next.trans result.nextblock
+  have finalBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat :=
+    Eq.mpr (congrArg (fun frontier : CC.Block => (Arm64Producer.allocation initial).2.nextblock.toNat ≤ frontier.toNat)
+      finalNext) (Nat.le_trans bound (FrameBelow.allocVariables (Arm64MovImmediate.allocated_bound world before)
+        before.nextblock (Nat.le_refl _)).1)
   refine ⟨written, after, finalStorage, finalWord, finalTag, ?_, finalRegisters,
-    (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released, kept⟩
+    (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released, kept, finalBound⟩
   simpa only [Continuation.state, Continuation.extend] using Continuation.run_extend k valid run
 
 end KProgFormal.ClightRefinement.Arm64MovKeep.LinkedWord
