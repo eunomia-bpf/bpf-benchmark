@@ -10,7 +10,9 @@ def read(d):
         inner=tarfile.open(fileobj=io.BytesIO(t.extractfile(cap).read())); g=inner.getnames()
         txt=inner.extractfile('request/verify.stderr').read().decode('utf-8','replace') if 'request/verify.stderr' in g else ''
         lines=[l for l in txt.splitlines() if l.strip()]
-        out.append({'request_id':rid,'program':r['native_sha256'][:8],'path':r['execution_path'],
+        out.append({'request_id':rid,'native_object_sha256':r['native_sha256'],
+                    'entry':inner.extractfile('request/kernel.entry').read().decode().strip(),
+                    'path':r['execution_path'],
                     'installed':r['execution_path']=='checked-sim-c','status':r['status'],
                     'source_prog_id':r.get('source_prog_id'),
                     'reason':lines[-2] if len(lines)>1 else ''})

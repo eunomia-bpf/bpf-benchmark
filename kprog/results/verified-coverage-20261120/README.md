@@ -10,7 +10,7 @@ make -C kprog/libnativeloader checked-corpus CHECKED_APP=<app> CHECKED_OUTPUT=<d
 Base: `/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds`, 478,096 B, built 2026-11-19T23:47Z,
 byte-identical to a build of `19d32566c`. Every run exited 0.
 
-| app | requests | programs | installed (checked-sim-c) | fallback (direct-native) |
+| app | requests | native ELF groups | installed (checked-sim-c) | fallback (direct-native) |
 |---|---|---|---|---|
 | `cilium/agent` | 12 | 4 | **12** | 0 |
 | `otelcol-ebpf-profiler/profiling` | 14 | 5 | 4 | **10** |
@@ -19,8 +19,8 @@ byte-identical to a build of `19d32566c`. Every run exited 0.
 | `tracee/monitor` | 35 | 3 | **35** | 0 |
 | `katran` | 1 | 1 | **1** | 0 |
 
-Capture size varies with the app and the run (12/14/25 here from one command), so only per-program figures
-compare; the raw `service.tar.gz` of each capture is kept at the path in `coverage.json`.
+Capture size varies with the app and the run (12/14/25 here from one command). The table retains request-level
+outcomes and ELF-object group counts; the raw `service.tar.gz` of each capture is kept at the path in `coverage.json`.
 
 ## The fallbacks are four separate defect classes, not one
 
@@ -63,10 +63,10 @@ is written to its resume message rather than edited here.
 
 No Tetragon guest ever wrote `service.tar.gz` (three attempts: `tetragon/`, `tetragon2/`, `tetragon3/`, all raw
 directories kept). The service log in each is still complete for what it served, and reading
-`state/session-*/service.log` gives: attempt 1 **86 requests / 15 distinct programs**, attempt 2 4/3, attempt 3
+`state/session-*/service.log` gives: attempt 1 **86 requests / 15 distinct ELF groups**, attempt 2 4/3, attempt 3
 5/4 — **95 requests, all `checked-sim-c`, zero fallbacks**. Attempt 1 is the useful one; it is also the reason
-this table says "95" and not a per-run number: one attempt reached 15 programs, which is more than any other
-app's whole capture here.
+this table says "95" and not a per-run number: one attempt reached 15 ELF groups. Source program IDs and full entry symbols identify the loaded instances
+inside those groups.
 
 The attempts stalled rather than crashed: attempt 3 sat at 0% CPU for 49 minutes after its 5th request. I killed
 two *orphaned* guests from attempts 1 and 2 that were still holding 48 GiB and 32 GiB of host memory with their
@@ -74,7 +74,7 @@ parent shells gone — worth knowing, since three concurrent Tetragon guests is 
 
 ## Tracee: 35 requests, 35 installed
 
-`tracee/monitor` served 35 requests over 3 distinct programs (`2c83395d`, `4b28662f`, `f0436342`), every one
+`tracee/monitor` served 35 requests over 3 distinct ELF groups (`2c83395d`, `4b28662f`, `f0436342`), every one
 `checked-sim-c`, zero fallbacks. Its guest hit the same stall as Tetragon — the driver finished, nothing wrote
 `service.tar.gz` — so the count is read from `state/session-*/service.log` and the raw directory is kept.
 
@@ -82,7 +82,7 @@ parent shells gone — worth knowing, since three concurrent Tetragon guests is 
 
 The first attempt errored before any BPF program loaded — the frozen `xdp_pktgen` workload writes
 `/proc/net/pktgen/kpktgend_2`, which exists only when the guest has at least 3 vCPUs, and `checked-corpus`
-defaults to `CHECKED_VM_CPUS=2`. With `CHECKED_VM_CPUS=8` the capture completes: **1 request, 1 program
+in the historical 2026-11-20 recipe defaults to `CHECKED_VM_CPUS=2`. With `CHECKED_VM_CPUS=8` the capture completes: **1 request, 1 program
 (`32c9af3a`), installed via `checked-sim-c`**. Katran loads a single XDP program in this configuration, so one
 request is its whole population, not a truncated capture.
 
@@ -103,3 +103,7 @@ That is a real constraint on how this recipe is used, worth recording: any app w
 | **total** | **182** | **169** | **93 %** |
 
 Every fallback in the whole set belongs to two apps (OTel 10, BCC 3) and to the four classes listed above.
+
+## Identity accounting clarification (2026-11-21)
+
+The historical coverage.json programs/per_program fields grouped the first eight native ELF hash digits. One ELF can contain several entry symbols. collect.py now emits the full native_object_sha256, entry and source_prog_id separately. The preserved BCC capture contains25 requests/25 source IDs/25 distinct ELF-entry pairs in15 ELF groups; its22 checked-sim-c and3 direct-native outcomes retain their original epoch. The exact rows and complete service archive are published in ../checked-entry-20261121/identity-audit.json and identity-bcc-service.tar.gz. The table above keeps the earlier capture values under their ELF-group label; current whole-app coverage follows actual loaded instances.

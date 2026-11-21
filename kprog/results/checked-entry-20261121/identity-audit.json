@@ -1,0 +1,304 @@
+{
+  "observed_at": "2026-11-21T20:13:51.129860+00:00",
+  "capture": "/workspaces/kprog-raw/verified/omp-five-20261120/bcc",
+  "service_archive_sha256": "28ebc051064aa2479f34ef699a6bc7949df00bfc78abccc5377993e06ccc19e8",
+  "requests": 25,
+  "native_elf_groups": 15,
+  "native_entry_pairs": 25,
+  "loaded_source_program_ids": 25,
+  "checked_sim_c_requests": 22,
+  "direct_native_requests": 3,
+  "multi_entry_elfs": {
+    "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3": [
+      "fentry_vfs_create",
+      "fentry_vfs_fsync",
+      "fentry_vfs_open",
+      "fentry_vfs_read",
+      "fentry_vfs_write"
+    ],
+    "9b61fe05401924ad6bf80fc09d493cca86850f85cd979eb78d07996c394a67eb": [
+      "tracepoint__syscalls__sys_enter_open",
+      "tracepoint__syscalls__sys_enter_openat"
+    ],
+    "b013ceeb0b2b6f9307137a43a60d1583b11ce4493856d7da0a4ff61cb951f4a0": [
+      "tcp_v4_connect",
+      "tcp_v6_connect"
+    ],
+    "6ee2064813e60f9a333a39b78c0c0a371f7b237ae97eb9b6140d33e7a8211fd4": [
+      "sched_wakeup",
+      "sched_wakeup_new"
+    ],
+    "fbb59d777bba54f4ef4c3134051795b3cc1f77afcfd6686ff1ef0f3bf9c0c467": [
+      "block_rq_insert",
+      "block_rq_issue"
+    ],
+    "c617f2964ac951881f5555e77a53e0e2d2728eeb3c54eae5c5966c2dabc241b8": [
+      "tcp_v4_connect_ret",
+      "tcp_v6_connect_ret"
+    ],
+    "244edf9ef43bb0cbf2fd9e31951e705b01471a7914db34bcf98537b21a38d46d": [
+      "tracepoint__syscalls__sys_exit_open",
+      "tracepoint__syscalls__sys_exit_openat"
+    ]
+  },
+  "rows": [
+    {
+      "request_id": 1,
+      "native_object_sha256": "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3",
+      "entry": "fentry_vfs_read",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 117,
+      "reason": ""
+    },
+    {
+      "request_id": 2,
+      "native_object_sha256": "9b61fe05401924ad6bf80fc09d493cca86850f85cd979eb78d07996c394a67eb",
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 116,
+      "reason": ""
+    },
+    {
+      "request_id": 3,
+      "native_object_sha256": "988ff533accb8a61b4678aeefc4c903358b3cfb9f866a3cbe4dd5d4d1093e162",
+      "entry": "inet_sock_set_state",
+      "path": "direct-native",
+      "installed": false,
+      "status": 0,
+      "source_prog_id": 112,
+      "reason": "dereference of modified ctx ptr R2 off=30 disallowed"
+    },
+    {
+      "request_id": 4,
+      "native_object_sha256": "255721c808fdf81d1872bd42911eac391db0c2810128d2ac4c14c2145d87d5ba",
+      "entry": "kprobe__cap_capable_entry",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 122,
+      "reason": ""
+    },
+    {
+      "request_id": 5,
+      "native_object_sha256": "c1ffaf43e61d18f6348493ac9e90ce3ff6a56b656373d0fa936fd107a6137646",
+      "entry": "blk_account_io_merge_bio",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 123,
+      "reason": ""
+    },
+    {
+      "request_id": 6,
+      "native_object_sha256": "b013ceeb0b2b6f9307137a43a60d1583b11ce4493856d7da0a4ff61cb951f4a0",
+      "entry": "tcp_v4_connect",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 119,
+      "reason": ""
+    },
+    {
+      "request_id": 7,
+      "native_object_sha256": "ffae3b453769f8a6972b364969737f346297368349f5fed4b2541d07d04e12ec",
+      "entry": "sys_enter",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 126,
+      "reason": ""
+    },
+    {
+      "request_id": 8,
+      "native_object_sha256": "6ee2064813e60f9a333a39b78c0c0a371f7b237ae97eb9b6140d33e7a8211fd4",
+      "entry": "sched_wakeup",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 127,
+      "reason": ""
+    },
+    {
+      "request_id": 9,
+      "native_object_sha256": "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3",
+      "entry": "fentry_vfs_write",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 134,
+      "reason": ""
+    },
+    {
+      "request_id": 10,
+      "native_object_sha256": "9b61fe05401924ad6bf80fc09d493cca86850f85cd979eb78d07996c394a67eb",
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 142,
+      "reason": ""
+    },
+    {
+      "request_id": 11,
+      "native_object_sha256": "ef86a3920cd43f1b0424e4f88b971cc0c724f986269f91839b48f17eb9d7a86a",
+      "entry": "kprobe__cap_capable_exit",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 157,
+      "reason": ""
+    },
+    {
+      "request_id": 12,
+      "native_object_sha256": "fbb59d777bba54f4ef4c3134051795b3cc1f77afcfd6686ff1ef0f3bf9c0c467",
+      "entry": "block_rq_insert",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 165,
+      "reason": ""
+    },
+    {
+      "request_id": 13,
+      "native_object_sha256": "c617f2964ac951881f5555e77a53e0e2d2728eeb3c54eae5c5966c2dabc241b8",
+      "entry": "tcp_v4_connect_ret",
+      "path": "direct-native",
+      "installed": false,
+      "status": 0,
+      "source_prog_id": 173,
+      "reason": "R1 invalid mem access 'scalar'"
+    },
+    {
+      "request_id": 14,
+      "native_object_sha256": "054d330d60bd4a76e414a73ed047990375305dd60a5f326d75b2dbd3cce44387",
+      "entry": "sys_exit",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 181,
+      "reason": ""
+    },
+    {
+      "request_id": 15,
+      "native_object_sha256": "6ee2064813e60f9a333a39b78c0c0a371f7b237ae97eb9b6140d33e7a8211fd4",
+      "entry": "sched_wakeup_new",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 189,
+      "reason": ""
+    },
+    {
+      "request_id": 16,
+      "native_object_sha256": "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3",
+      "entry": "fentry_vfs_fsync",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 196,
+      "reason": ""
+    },
+    {
+      "request_id": 17,
+      "native_object_sha256": "244edf9ef43bb0cbf2fd9e31951e705b01471a7914db34bcf98537b21a38d46d",
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 203,
+      "reason": ""
+    },
+    {
+      "request_id": 18,
+      "native_object_sha256": "fbb59d777bba54f4ef4c3134051795b3cc1f77afcfd6686ff1ef0f3bf9c0c467",
+      "entry": "block_rq_issue",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 217,
+      "reason": ""
+    },
+    {
+      "request_id": 19,
+      "native_object_sha256": "b013ceeb0b2b6f9307137a43a60d1583b11ce4493856d7da0a4ff61cb951f4a0",
+      "entry": "tcp_v6_connect",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 223,
+      "reason": ""
+    },
+    {
+      "request_id": 20,
+      "native_object_sha256": "d1f803389eb83acf2a88b3f6095e5df9f855133fbe8ab34907550897bad3c739",
+      "entry": "sched_switch",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 237,
+      "reason": ""
+    },
+    {
+      "request_id": 21,
+      "native_object_sha256": "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3",
+      "entry": "fentry_vfs_open",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 244,
+      "reason": ""
+    },
+    {
+      "request_id": 22,
+      "native_object_sha256": "244edf9ef43bb0cbf2fd9e31951e705b01471a7914db34bcf98537b21a38d46d",
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 251,
+      "reason": ""
+    },
+    {
+      "request_id": 23,
+      "native_object_sha256": "1eae1f487a4bcde6c719f93e49f2405276079ff90575f3ab6b769fe825049074",
+      "entry": "block_rq_complete",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 258,
+      "reason": ""
+    },
+    {
+      "request_id": 24,
+      "native_object_sha256": "c617f2964ac951881f5555e77a53e0e2d2728eeb3c54eae5c5966c2dabc241b8",
+      "entry": "tcp_v6_connect_ret",
+      "path": "direct-native",
+      "installed": false,
+      "status": 0,
+      "source_prog_id": 265,
+      "reason": "R1 invalid mem access 'scalar'"
+    },
+    {
+      "request_id": 25,
+      "native_object_sha256": "71bd90faf6d45158e22afa45b313af73cfada30455725ca029cf806c9dde4ed3",
+      "entry": "fentry_vfs_create",
+      "path": "checked-sim-c",
+      "installed": true,
+      "status": 0,
+      "source_prog_id": 278,
+      "reason": ""
+    }
+  ],
+  "scope": "archived BCC capture identity units; runtime outcomes retain the original epoch",
+  "production_changes": 0,
+  "new_checks": 0,
+  "raw": {
+    "file": "identity-bcc-service.tar.gz",
+    "bytes": 22169792,
+    "sha256": "28ebc051064aa2479f34ef699a6bc7949df00bfc78abccc5377993e06ccc19e8"
+  }
+}
