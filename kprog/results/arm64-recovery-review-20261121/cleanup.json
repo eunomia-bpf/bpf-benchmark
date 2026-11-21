@@ -1,0 +1,99 @@
+{
+  "utc": "2026-11-21T20:32:41.564319+00:00",
+  "published_result_commit": "1534d1025ffba30d85018e3ffa876190ac1063c6",
+  "archive_sha256": "0a55c28424bc1d993ede6dd282482ced2a9a9d3b48f2a9effc1051419601ce83",
+  "published_archive_readback": true,
+  "removed_rebuildable_outputs": [
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/cargo",
+      "files": 636,
+      "bytes": 229314639
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/loader",
+      "files": 51,
+      "bytes": 3788673
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/module",
+      "files": 19,
+      "bytes": 2692282
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module",
+      "files": 17,
+      "bytes": 1470109
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/hosts",
+      "files": 76,
+      "bytes": 3282512
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/micro-objects",
+      "files": 29,
+      "bytes": 1954176
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/negative-objects",
+      "files": 1,
+      "bytes": 20848
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/sites",
+      "files": 6,
+      "bytes": 4549859
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+      "files": 1,
+      "bytes": 1046600
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/read-followup",
+      "files": 1,
+      "bytes": 372528
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/code.index",
+      "files": 1,
+      "bytes": 27872722
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/read-recovery",
+      "files": 1,
+      "bytes": 710848
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/replay.index",
+      "files": 1,
+      "bytes": 27878151
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/context.index",
+      "files": 1,
+      "bytes": 27874104
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/safety-probe",
+      "files": 1,
+      "bytes": 1046096
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/vmlinux.h",
+      "files": 1,
+      "bytes": 2727969
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/S2/review-20261121/final.index",
+      "files": 1,
+      "bytes": 27882495
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/S2/review-20261121",
+  "raw_file_readbacks": 407,
+  "raw_readback_digest": "25be819eeea20dfa451e46fd9b92e729659ba18e284ee5669d60705f071013c0",
+  "raw_readbacks_equal": true,
+  "retained_active_log": "cleanup-driver.log",
+  "shared_source_index_cache_kernel_root_retained": true
+}
