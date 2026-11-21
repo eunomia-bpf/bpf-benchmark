@@ -1,0 +1,55 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediatePointer.lean": "82c35c02081c4639f1c092971845762e0e32f0c14c698cceec8f3cbba41a9501"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediatePointer"
+    ],
+    "exit": 0,
+    "seconds": 6.74115252494812,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/selection1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/SelectionPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8560705184936523,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-selection1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 52,
+  "whole_library_confirmation": "pending until scalar body batch completes",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

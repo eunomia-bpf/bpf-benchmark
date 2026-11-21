@@ -70,7 +70,7 @@ def readCall : CC.Stmt := by run_tac cachePart (← `(pieces.readCall))
 
 def writeCall : CC.Stmt := by run_tac cachePart (← `(pieces.writeCall))
 
-private def scalar : CC.Stmt := by run_tac cachePart (← `(pieces.scalar))
+def scalar : CC.Stmt := by run_tac cachePart (← `(pieces.scalar))
 
 private def addSequence : CC.Stmt := .Ssequence addGate
   (.Sifthenelse addTest (.Ssequence readCall writeCall) scalar)
@@ -107,6 +107,44 @@ theorem select (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
       Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [CC.doStep, source, spGate, spTest,
         orSequence, orGate, orTest, subSequence, subGate, subTest, addSequence, addGate, addTest,
         selectedTemps, CC.PTree.gss, CC.PTree.gso, CC.doEvalExpr, CC.typeof,
+        width, destination, op, tag, notSP, literal32,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+        CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+        CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+        CC.Cop.semUnaryOperation, CC.Cop.semNotbool,
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.tbool,
+        CC.Integers.Int.cmpu, CC.Integers.Int64.cmpu, CC.Integers.MI.cmpu,
+        CC.Integers.Int.eq, CC.Integers.Int64.eq, CC.Integers.MI.eq,
+        CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int64.repr,
+        CC.Integers.Int.unsigned, CC.Integers.MI.unsigned, CC.Integers.Int.repr, CC.Integers.MI.repr,
+        CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+        CC.E0, CC.Eapp, List.nil_append, List.append_nil,
+        ite_true, ite_false, eq_self, beq_iff_eq, decide_false, decide_true, Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+def scalarTemps (le : CC.TempEnv) : CC.TempEnv :=
+  ((((((((((((le.set Arm64Program._t'30 (.Vint 0)).set Arm64Program._t'31 (.Vint 0)).set Arm64Program._t'32 (.Vint 0)).set Arm64Program._t'27 (.Vint 0)).set Arm64Program._t'28 (.Vint 0)).set Arm64Program._t'29 (.Vint 0)).set Arm64Program._t'24 (.Vint 0)).set Arm64Program._t'25 (.Vint 0)).set Arm64Program._t'26 (.Vint 0)).set Arm64Program._t'21 (.Vint 1)).set Arm64Program._t'22 (.Vint 1)).set Arm64Program._t'23 (.Vint 0))
+
+set_option hygiene false in
+/-- The original gates select the real scalar call for a non-SP destination,
+retaining the computed candidate and all source temporaries. -/
+theorem select_scalar (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (k : CC.Cont) (dst : BitVec 64) (notSP : dst ≠ 32#64)
+    (width : le.get Arm64Program.___a64_alu_width = some (.Vint (8#32)))
+    (destination : le.get Arm64Program._dst = some (.Vlong dst))
+    (op : le.get Arm64Program.___a64_alu_op = some (.Vint (0#32)))
+    (tag : le.get Arm64Program.___a64_alu_src_tag = some (.Vint (0#32))) :
+    InternalRun world 52 (.State Arm64Nop.handler Tail.selection k e le m)
+      (.State Arm64Nop.handler scalar k e (scalarTemps le) m) := by
+  run_tac do
+    for _ in [:52] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [CC.doStep, source, spGate, spTest,
+        orSequence, orGate, orTest, subSequence, subGate, subTest, addSequence, addGate, addTest,
+        scalarTemps, CC.PTree.gss, CC.PTree.gso, CC.doEvalExpr, CC.typeof,
         width, destination, op, tag, notSP, literal32,
         CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
         CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
