@@ -706,3 +706,13 @@ kprog/formal/mature/.lake/
 # Closed capture outputs on persistent storage, S19 tetragon-captures 2026-11-21.
 /corpus/results/tet-eq1/
 /corpus/results/tet-eqD/
+
+# Closed capture outputs on persistent storage, S19 performance-timing 2026-11-21.
+/corpus/results/perf-combined-array-timing-20261114/
+/corpus/results/perf-combined-codegen-timing-20261114/
+/corpus/results/perf-combined-direct-timing-20261114/
+/corpus/results/perf-corrected-all-lto-timing-20261114/
+/corpus/results/perf-known-hash-otel-timing-20261114/
+/corpus/results/perf-known-map-otel-timing-20261114/
+/corpus/results/perf-probe-copy-timing-20261114/
+/corpus/results/perf-probe-read-direct-timing-20261114/
