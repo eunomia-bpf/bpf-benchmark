@@ -47,7 +47,32 @@
     "/workspaces/kprog-raw/formal/m5-add-prefix"
   ],
   "whole_proof_library": {
-    "status": "pending end-of-batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 30.436071634292603,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "jobs": 294,
+    "root_artifact": "kprog/formal/.lake/build/lib/lean/KProgFormal.olean",
+    "root_artifact_utc": "2026-11-21T15:24:43.564922+00:00",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-add-prefix/full1.log",
+    "source_checkpoint": "da475838028b885d94698e7fca6cddbc7d995549",
+    "scope": "complete KProgFormal Lean proof-library/root; native tools and executables excluded"
   },
   "completed_isa_families": 0
 }

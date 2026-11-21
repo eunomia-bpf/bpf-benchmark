@@ -23,3 +23,9 @@ This is an already-entered handler prefix. Tag read, inline ADD, pointer selecti
 raw SP read, write, generic frame free, original caller successor and native-step
 composition remain open. No complete ISA family is added; M5, O1/O2/O4 and M6
 remain open. Whole-library confirmation follows at this batch end.
+
+Batch confirmation (2026-11-21): `lake build KProgFormal` passed all 294 jobs
+in 30.436 seconds, with the root artifact at 2026-11-21T15:24:43.564922+00:00.
+CPUs16-23/nice19/one worker/32GiB AS; native tools/executables excluded.
+This confirms the three changed proof steps together; no complete handler
+count, O1/O2/O4 recount, final default Lake build or make check is claimed.

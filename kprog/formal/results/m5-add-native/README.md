@@ -27,3 +27,9 @@ The matching full Clight ADD call, generic frame/free, original source successor
 and native composition remain M5 work. W/S/SP-destination variants and the
 remaining handlers still need correspondence. O1/O2/O4 and M6 remain open;
 completed ISA-family count0.
+
+Batch confirmation (2026-11-21): `lake build KProgFormal` passed all 294 jobs
+in 30.436 seconds, with the root artifact at 2026-11-21T15:24:43.564922+00:00.
+CPUs16-23/nice19/one worker/32GiB AS; native tools/executables excluded.
+This confirms the three changed proof steps together; no complete handler
+count, O1/O2/O4 recount, final default Lake build or make check is claimed.

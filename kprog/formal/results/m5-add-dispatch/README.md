@@ -27,3 +27,9 @@ follows at batch end; raw /workspaces/kprog-raw/formal/m5-add-dispatch.
 This is dispatch from an already-entered handler body. Generic function entry,
 LHS/RHS/tag/arithmetic/write/free, original source successor and fetched native
 ADD composition remain M5 work. O1/O2/O4 and M6 remain open; ISA-family count0.
+
+Batch confirmation (2026-11-21): `lake build KProgFormal` passed all 294 jobs
+in 30.436 seconds, with the root artifact at 2026-11-21T15:24:43.564922+00:00.
+CPUs16-23/nice19/one worker/32GiB AS; native tools/executables excluded.
+This confirms the three changed proof steps together; no complete handler
+count, O1/O2/O4 recount, final default Lake build or make check is claimed.
