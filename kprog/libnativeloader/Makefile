@@ -12,7 +12,7 @@ all:
 		-DNATIVE_LOADER_LIBBPF_PREFIX="$(LIBBPF_PREFIX)" \
 		-DNATIVE_LOADER_LIBBPF_LIBRARY="$(LIBBPF_LIBRARY)" \
 		-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="$(KERNEL_OFFSETS_INCLUDE)"
-	cmake --build "$(BUILD_DIR)" --target native_loader native_loader_shared
+	cmake --build "$(BUILD_DIR)" --target native_loader native_loader_shared trusted-native-loader
 
 clean:
 	rm -rf "$(BUILD_DIR)"
