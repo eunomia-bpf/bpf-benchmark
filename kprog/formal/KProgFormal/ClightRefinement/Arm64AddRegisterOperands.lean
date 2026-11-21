@@ -137,7 +137,7 @@ private def registerParts : RegisterParts := by
     Lean.Elab.Tactic.closeMainGoal `actual_register_rhs (← Lean.Meta.mkAppM ``RegisterParts.mk
       #[loop[0]!, read[0]!, read[1]!, body[1]!])
 
-private def registerBody : CC.Stmt := by run_tac cachePart (← `(registerParts.body))
+def registerBody : CC.Stmt := by run_tac cachePart (← `(registerParts.body))
 private def readCall : CC.Stmt := by run_tac cachePart (← `(registerParts.readCall))
 def valueSet : CC.Stmt := by run_tac cachePart (← `(registerParts.valueSet))
 def modify : CC.Stmt := by run_tac cachePart (← `(registerParts.modify))

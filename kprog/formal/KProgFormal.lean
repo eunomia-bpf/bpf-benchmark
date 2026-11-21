@@ -136,3 +136,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryAddAdmission
 import KProgFormal.ClightRefinement.Arm64ProgramEntryAddPrefixNative
 import KProgFormal.ClightRefinement.Arm64AddRegisterOperands
 import KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterCall
+import KProgFormal.ClightRefinement.Arm64AddRegisterModifier

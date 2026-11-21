@@ -1,0 +1,47 @@
+{
+  "source": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterModifier.lean",
+  "source_sha256": "3968a65d169a67c11620bc543b308e69e1d1adc556df4291058161b8b5a09a61",
+  "dependency": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterOperands.lean",
+  "dependency_sha256": "f30ada915785cef850c91630cdd3de7d4de9c9b00d5421bd8acc2b699f3f7aa5",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddRegisterModifier"
+    ],
+    "exit": 0,
+    "seconds": 6.482951641082764,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/modifier19.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/workspaces/kprog-raw/formal/m5-add-register/ModifierPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4439208507537842,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-modifier1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddRegisterModifier.finish_lsl_zero": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "whole_library_confirmation": "pending",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
