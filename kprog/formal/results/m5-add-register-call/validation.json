@@ -49,7 +49,99 @@
     ]
   },
   "steps": 469,
-  "whole_library_confirmation": "pending until call/native batch completes",
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 1904.5217430591583,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full5.log",
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/NativeRootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.1575238704681396,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-native-root1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64AddRegisterCall.execute": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterCall.all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNative.execute": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNative.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNative.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNative.source_bits": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall.corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall.all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "source_snapshot": "/workspaces/kprog-raw/formal/m5-add-register/full5-source-hashes.json",
+    "source_snapshot_unchanged": true,
+    "jobs": 319
+  },
   "scope": "actual source call with frame release/full register view/all behaviors; native fetched-instruction/original entry pending",
   "m5_complete": false,
   "complete_isa_families": 0,
