@@ -48,7 +48,94 @@
       "Quot.sound"
     ]
   },
-  "whole_library_confirmation": "pending until source operand prefix batch completes",
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 167.710795879364,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full3.log",
+    "jobs": 307,
+    "source_snapshot": {
+      "head": "6004ea7acf2f11f79fa18787e9a52a992d38a597",
+      "sha256": {
+        "kprog/formal/KProgFormal.lean": "49ce9ccf47d4d27d30228d927648a4ff38fd261a2d2ea9ef750aac64529e142d",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateDispatch.lean": "ce8ed8d636c8e22632d2b7b2d70600a665c78c4a59ae0ceceb4cf4b1020151eb",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateOperands.lean": "67000115d7476d3dff73b844174a0149b47ffb9807f8f7d0eef132ffa63a6d1a",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterPrefix.lean": "aad6e98a15b4de386aeb155300900088a008bdac3d139ac5e7b86e47c37617a2"
+      }
+    },
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/PrefixRootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3984129428863525,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-prefix-root1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.body_dispatch_register_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.Linked.body_dispatch_register": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.lhs_scalar": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.evaluate": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterPrefix.body_operands": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
   "m5_complete": false,
   "complete_isa_families": 0
 }
