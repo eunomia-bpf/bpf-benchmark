@@ -691,3 +691,14 @@ kprog/perf/measure/
 
 # External formal migration build cache
 kprog/formal/mature/.lake/
+
+# Closed capture outputs on persistent storage, S19 otel-captures 2026-11-21.
+/corpus/results/otel-eq11/
+/corpus/results/otel-eq12/
+/corpus/results/otel-eq13/
+/corpus/results/otel-eq14/
+/corpus/results/otel-eq8v/
+/corpus/results/otel-eq9/
+/corpus/results/otel-eqA/
+/corpus/results/otel-eqB/
+/corpus/results/otel-eqC/
