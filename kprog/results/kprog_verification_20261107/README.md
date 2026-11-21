@@ -510,9 +510,17 @@ retain their verifier or scalar-generation outcomes. Negative native executions
 and observed violating acceptances are zero in these finite captures.
 
 S15's [thunk and landing-pad handoff](../kprog_branch_hardening_20261109/README.md)
-adds kind12's four-byte rel32 patch row. Existing destination/locality laws are
-partial components; physical thunk effects and current compiled-B composition
-remain open. Neither handoff promotes a universal completion status.
+records the historical kind12 four-byte rel32 patch row. The coordinator's
+2026-11-09 08:30 decision applies S7's existing released/fresh below-SP byte
+contract to the kernel retpoline, shared with stock JITed programs. The universal
+physical stack-validity and dead-byte relation, kernel thunk effects and
+Rust/compiled-B composition remain open; the row keeps
+`partial-universal-component`. RSP retains the external-symbol generation path.
+The later 2026-11-09 change-necessity audit withdrew this hardening implementation;
+its original source hashes and measured epochs remain historical evidence.
+S15's b3e687165 reconciliation supplies this clarification. Current M5
+correspondence and O1/O2/O4 recount follow the mature ISA/Clight route described
+in the [formal entry point](../../formal/README.md). Model predicates added:0.
 
 The exact827757435 full check exits2 at the old ARM ALU lifetime fixture;
 [its source/log archive](arm-entry-lifetime.log.gz) also records the five repaired
