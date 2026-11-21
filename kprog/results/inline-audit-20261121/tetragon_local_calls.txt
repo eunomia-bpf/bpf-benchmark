@@ -1,0 +1,3 @@
+objects with local calls 43
+native local call targets [('do_action', 45), ('filter_char_buf', 30), ('bpf_strncasestr', 27), ('try_preload_arg', 20), ('filter_32ty', 15), ('filter_inet', 15), ('filter_64ty', 15), ('filter_8ty', 15), ('filter_16ty', 15), ('filter_file_buf', 15), ('filter_sockaddr_un', 15), ('data_event_bytes', 14)]
+eBPF .text subprograms (same objects) [('cwd_read_v61', 16), ('filter_sockaddr_un', 15), ('filter_8ty', 15), ('filter_file_buf', 15), ('filter_inet', 15), ('filter_char_buf', 15), ('filter_32ty', 15), ('filter_16ty', 15), ('filter_64ty', 15), ('do_action', 15), ('filter_64ty_range', 15), ('filter_64ty_selector_val', 15)]

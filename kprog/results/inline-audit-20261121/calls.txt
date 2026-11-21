@@ -1,0 +1,21 @@
+== bcc: 8 objects, out-of-line __kprog_ definitions 0
+    {'helper': 119, 'other': 16, 'memset': 2, 'local function': 2}
+    local calls: [('.text', 2)]
+    other calls: [('ktime_get_mono_fast_ns', 16)]
+== cilium: 7 objects, out-of-line __kprog_ definitions 0
+    {'helper': 2523, 'other': 204}
+    other calls: [('ktime_get_mono_fast_ns', 204)]
+== katran: 4 objects, out-of-line __kprog_ definitions 0
+    {'helper': 97, 'other': 8, 'local function': 3}
+    local calls: [('.text', 2), ('.text+0x5c', 1)]
+    other calls: [('ktime_get_mono_fast_ns', 8)]
+== otelcol-ebpf-profiler: 1 objects, out-of-line __kprog_ definitions 0
+    {'helper': 4566, 'other': 14, 'memset': 5}
+    other calls: [('ktime_get_mono_fast_ns', 14)]
+== tetragon: 88 objects, out-of-line __kprog_ definitions 0
+    {'helper': 55595, 'local function': 265, 'memset': 5910, 'memcpy': 13, 'other': 22}
+    local calls: [('.text', 38), ('.text+0x23bc', 15), ('.text+0x28bc', 15), ('.text+0x162c', 10), ('.text+0x1b2c', 10), ('.text+0x34bc', 10)]
+    other calls: [('ktime_get_mono_fast_ns', 22)]
+== tracee: 3 objects, out-of-line __kprog_ definitions 0
+    {'helper': 9977, 'memset': 823, 'memcpy': 19, 'other': 6}
+    other calls: [('.bss+0xd', 4), ('.L.str.3', 2)]
