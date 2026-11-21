@@ -64,7 +64,15 @@
       "reason": "simp unfolded afterThree before the exact fourth-step rewrite; fixed by sequential existing equalities"
     }
   ],
-  "whole_library_confirmation": "pending complete original fifth-entry/native batch and V classifier terminal",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "m5_complete": false,
   "complete_isa_families": 0
 }

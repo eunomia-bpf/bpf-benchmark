@@ -48,7 +48,15 @@
   },
   "steps": 16,
   "scope": "actual generic MUL switch12/result assignment/copy/real inner-loop exit to unchanged writer, all64bit operands/world/env/memory/continuation",
-  "whole_library_confirmation": "pending completed MUL handler/native batch",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "prior_failed_attempts": [
     "/workspaces/kprog-raw/formal/m5-mul/product1.json",
     "/workspaces/kprog-raw/formal/m5-mul/product2.json",

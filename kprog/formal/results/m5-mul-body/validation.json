@@ -56,7 +56,15 @@
     "outer_loop_exit": 2
   },
   "scope": "actual W/X generic MUL handler, both source reads+actual third read, product, real scalar writer and full Result storage/frame law; handler own frame still live",
-  "whole_library_confirmation": "pending completed MUL call/native batch",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "prior_failed_attempts": [
     "/workspaces/kprog-raw/formal/m5-mul/body1.json"
   ],

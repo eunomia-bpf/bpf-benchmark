@@ -88,7 +88,15 @@
   },
   "scope": "actual three original MUL reads retained; zero reader has no memory/layout/cache/provider/result premise and arbitrary world/memory/continuation; third linked call ends at original product suffix",
   "remaining_reads": [],
-  "whole_library_confirmation": "pending completed MUL handler/native batch",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "prior_rhs_validation": {
     "source_sha256": {
       "kprog/formal/KProgFormal/ClightRefinement/Arm64MulOperands.lean": "3baa7af2eaf703438dc7037666fd497e6d51ede141cb0ea19a677981d8bf8a9f"

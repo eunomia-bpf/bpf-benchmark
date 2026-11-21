@@ -43,7 +43,15 @@
   },
   "scope": "original98 input/provider traces/setup plus actual five source calls and actual native fetched words; preserves reached heaps/all predecessor releases and final D4 product/representation/caller/free/cache/header",
   "operand_derivation": "D1 actual third scalar cell survives fourth Kept3; D3 actual fourth result. No new reached-readback or native-result premise. Original fifth fetch at PC+16 only.",
-  "whole_library_confirmation": "pending root handoff and V classifier terminal notice",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "m5_complete": false,
   "complete_isa_families": 0
 }

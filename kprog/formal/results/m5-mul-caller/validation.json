@@ -61,7 +61,15 @@
   "opcode": 12,
   "arguments": "entry,op12,dst4,src1,src2=3,src3=255,flags8,aux0,imm0",
   "scope": "actual fifth source call arguments/casts/generic function entry/two-step enter/two-step resume",
-  "whole_library_confirmation": "pending MUL handler/native batch",
+  "whole_library_confirmation": {
+    "accepted": true,
+    "receipt": "formal/results/m5-mul-entry-batch/validation.json",
+    "full_build_jobs": 344,
+    "root_public_queries": 42,
+    "source_snapshot_count": 219,
+    "source_bytes_unchanged": true,
+    "scope": "checked snapshot and unchanged accepted root closure; later unimported V WidthShape leaf excluded"
+  },
   "handler_native_execution": "not yet proved",
   "m5_complete": false,
   "complete_isa_families": 0
