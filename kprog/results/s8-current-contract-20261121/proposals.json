@@ -1,0 +1,63 @@
+[
+  {
+    "arch": "x86",
+    "vector_bytes": "660fefc0",
+    "retained_in_proof": true,
+    "text_bytes": 14
+  },
+  {
+    "arch": "arm64",
+    "vector_bytes": "00e4004f",
+    "retained_in_proof": true,
+    "text_bytes": 20
+  },
+  {
+    "arch": "x86",
+    "policy": "plain",
+    "flags": [],
+    "function_bytes": {
+      "jump": 12,
+      "value": 9
+    },
+    "externs": []
+  },
+  {
+    "arch": "x86",
+    "policy": "hardened",
+    "flags": [
+      "-mindirect-branch=thunk-extern",
+      "-mfunction-return=thunk-extern",
+      "-fcf-protection=branch"
+    ],
+    "function_bytes": {
+      "jump": 15,
+      "value": 13
+    },
+    "externs": [
+      "__x86_indirect_thunk_rax",
+      "__x86_return_thunk"
+    ]
+  },
+  {
+    "arch": "arm64",
+    "policy": "plain",
+    "flags": [],
+    "function_bytes": {
+      "jump": 16,
+      "value": 8
+    },
+    "externs": []
+  },
+  {
+    "arch": "arm64",
+    "policy": "hardened",
+    "flags": [
+      "-mbranch-protection=standard"
+    ],
+    "function_bytes": {
+      "jump": 20,
+      "value": 12
+    },
+    "externs": []
+  }
+]

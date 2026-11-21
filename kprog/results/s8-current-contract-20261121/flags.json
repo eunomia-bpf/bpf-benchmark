@@ -1,0 +1,84 @@
+{
+  "executions": [
+    {
+      "helper": 24,
+      "allow_subprogs": 0,
+      "values": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "helper": 7,
+      "allow_subprogs": 0,
+      "values": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "helper": 58,
+      "allow_subprogs": 0,
+      "values": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "helper": 12,
+      "allow_subprogs": 0,
+      "values": [
+        0,
+        0,
+        0,
+        1,
+        512,
+        65535
+      ]
+    },
+    {
+      "helper": 0,
+      "allow_subprogs": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "helper": 12,
+      "allow_subprogs": 1,
+      "values": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        65535
+      ]
+    }
+  ],
+  "source_sha256": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+  "main_stage_order": [
+    3753,
+    4580,
+    4631,
+    4989
+  ],
+  "scope": "Executed actual stock helper metadata statements with local program/aux storage; stock pass ordering is a source correspondence check. Kernel attach behavior remains runtime evidence."
+}

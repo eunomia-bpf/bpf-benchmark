@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc-client",
+    "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc.bpf.o",
+    "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc.native.o",
+    "/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link",
+    "/workspaces/kprog-raw/S8/20261121/tc-requests-pvi_n8w2/jit.bin"
+  ],
+  "returncode": 0,
+  "stdout": "{\"route\":\"stock\",\"retval\":2,\"invocations\":34,\"tail_transfers\":33}\n{\"route\":\"native\",\"retval\":2,\"invocations\":34,\"tail_transfers\":33}\n",
+  "stderr": ""
+}

@@ -3170,11 +3170,28 @@ fn x86_bpf_rbp_location(
     Ok((Some(offset), false))
 }
 
+fn x86_return_value_setup(insn: &Instruction) -> bool {
+    if insn.op0_kind() != OpKind::Register
+        || !matches!(insn.op0_register(), Register::EAX | Register::RAX)
+    {
+        return false;
+    }
+    match insn.mnemonic() {
+        Mnemonic::Mov => matches!(insn.op1_kind(), OpKind::Immediate32 | OpKind::Immediate32to64 | OpKind::Immediate64),
+        Mnemonic::Xor => insn.op1_kind() == OpKind::Register && insn.op1_register() == insn.op0_register(),
+        _ => false,
+    }
+}
+
 fn x86_epilogue_cleanup_start(insns: &[Instruction], first_pop_idx: usize) -> usize {
-    if first_pop_idx == 0 {
+    let mut cursor = first_pop_idx;
+    while cursor > 0 && x86_return_value_setup(&insns[cursor - 1]) {
+        cursor -= 1;
+    }
+    if cursor == 0 {
         return first_pop_idx;
     }
-    let prev = &insns[first_pop_idx - 1];
+    let prev = &insns[cursor - 1];
     if prev.mnemonic() == Mnemonic::Add
         && prev.op_count() >= 2
         && prev.op0_kind() == OpKind::Register
@@ -3191,7 +3208,7 @@ fn x86_epilogue_cleanup_start(insns: &[Instruction], first_pop_idx: usize) -> us
                 | OpKind::Immediate64
         )
     {
-        return first_pop_idx - 1;
+        return cursor - 1;
     }
     first_pop_idx
 }
@@ -3225,6 +3242,9 @@ fn build_x86_tail_call_cleanup_candidate(
 ) -> Result<Vec<u8>> {
     let mut out = Vec::new();
     for insn in epilogue {
+        if x86_return_value_setup(insn) {
+            continue;
+        }
         if let Some(reg) = x86_saved_pop_reg(insn) {
             if strip_set.contains(&reg) {
                 continue;
@@ -4210,6 +4230,16 @@ mod tests {
         let encoded = encode_x86_local_block("helper_slot", 5, &[insn], &[0])?;
 
         assert_eq!(encoded.code_buffer, [0xE8, 0, 0, 0, 0]);
+        Ok(())
+    }
+
+    #[test]
+    fn tail_cleanup_keeps_stack_restore_before_return_value() -> Result<()> {
+        for value in [vec![0xb8, 2, 0, 0, 0], vec![0x31, 0xc0]] {
+            let bytes = [&[0x48, 0x83, 0xec, 24][..], &[0x48, 0x83, 0xc4, 24], &value, &[0xc3]].concat();
+            let frame = plan_x86_entry_abi_strip(&bytes, 0, true, None, false)?;
+            assert_eq!(frame.tail_call_cleanup_bytes, [0x48, 0x83, 0xc4, 24]);
+        }
         Ok(())
     }
 
