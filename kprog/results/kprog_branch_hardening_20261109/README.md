@@ -71,7 +71,16 @@ rel32 destination and immediate-field locality theorems apply to this field
 placement. Its ledger status is `partial-universal-component`. V owns the complete
 Rust/compiled-B/physical-thunk composition, including transient below-SP stack
 accesses, dead-byte effects, landing-pad policy and the full callee-save relation.
-The coordinator received the physical stack-validity case through Notices.
+Coordinator decision, 2026-11-09 08:30 UTC: S7 already treats bytes below SP as
+released with fresh contents. The kernel retpoline's below-SP effect falls inside
+that existing model, and stock JITed programs use the same thunk. Model predicates
+added:0. RSP retains the unresolved-external generation path. V retains the
+universal physical stack-validity and dead-byte relation as a pending part of O4.
+
+This report preserves the historical S15 implementation and its measured receipts.
+The 2026-11-09 change-necessity audit subsequently withdrew the retpoline/ITS/BTI
+changes, as recorded in `kprog/docs/todo.md`; the current implementation follows
+that later audit.
 
 The ordinary ARM ADRP+ADD address-taken-function discovery frontier remains with A.
 The compiled C control exercises the existing ADR route using the tiny code model and retains the saved-x29 scalar equality verifier diagnostic. A separate BTI c/j ADR/BR control with the ordinary unchanged frame executes successfully.
