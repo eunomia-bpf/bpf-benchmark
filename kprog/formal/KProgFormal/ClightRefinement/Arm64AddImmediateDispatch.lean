@@ -86,6 +86,12 @@ def temps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
     Arm64Program._t'2826 (.Vint 0)).set Arm64Program._t'2823 (.Vint 1)).set
     Arm64Program._t'2824 (.Vint 1)).set Arm64Program._t'2825 (.Vint 1)
 
+/-- Opcode7 follows the same original ALU gate with both earlier comparisons false. -/
+def registerTemps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
+  (((((Arm64Nop.resultEnv le (flags narrow)).set Arm64Program._t'2827 (.Vint 0)).set
+    Arm64Program._t'2826 (.Vint 0)).set Arm64Program._t'2823 (.Vint 0)).set
+    Arm64Program._t'2824 (.Vint 0)).set Arm64Program._t'2825 (.Vint 1)
+
 private theorem enter_width_bound (world : CC.CGenv) (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._arm64_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr world.genv_genv widthBlock = some (.Internal Arm64Program.f_arm64_width_effective))
@@ -156,6 +162,53 @@ theorem body_dispatch_bound (world : CC.CGenv) (widthBlock : CC.Block)
   have choose := after_width world e le m k narrow op
   simpa only [CC.callCont] using (enter.trans width).trans choose
 
+set_option hygiene false in
+private theorem after_width_register (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (k : CC.Cont) (narrow : Bool) (op : le.get Arm64Program._op = some (.Vint (7#32))) :
+    InternalRun world 29
+      (.Returnstate (Arm64Width.result (flags narrow))
+        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le (widthCont k)) m)
+      (.State Arm64Nop.handler branch (continuation k) e (registerTemps le narrow) m) := by
+  cases narrow <;>
+    run_tac do
+      for _ in [:29] do
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [CC.doStep, CC.setOpttemp,
+          widthCont, continuation, widthSet, nopGate, nopTest, adrpSequence, adrpTest, adrpCondition,
+          movSequence, movTest, movCondition, movkGate, movkTest, aluSequence, aluTest, aluCondition,
+          flags, registerTemps, Arm64Nop.resultEnv, Arm64Width.result, Arm64Width.argument,
+          CC.PTree.gss, CC.PTree.gso, op, CC.doEvalExpr, CC.typeof,
+          CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+          CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+          CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool,
+          CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.tbool,
+          CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
+          CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.repr, CC.Integers.MI.repr,
+          CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int.unsigned,
+          CC.Integers.MI.unsigned, CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero,
+          CC.Integers.MI.one, CC.E0, CC.Eapp, List.nil_append, List.append_nil,
+          ite_true, ite_false, eq_self, Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- Actual opcode7 dispatch, retaining the real width call, preceding gates,
+shared memory and continuation. The generic handler source is unchanged. -/
+theorem body_dispatch_register_bound (world : CC.CGenv) (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol world.genv_genv Arm64Program._arm64_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv widthBlock = some (.Internal Arm64Program.f_arm64_width_effective))
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (narrow : Bool)
+    (unshadowed : e.get Arm64Program._arm64_width_effective = none)
+    (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow)))
+    (op : le.get Arm64Program._op = some (.Vint (7#32))) :
+    InternalRun world 39 (.State Arm64Nop.handler Arm64Nop.handler.fn_body k e le m)
+      (.State Arm64Nop.handler branch (continuation k) e (registerTemps le narrow) m) := by
+  have enter := enter_width_bound world widthBlock widthBinding e le m k narrow unshadowed hflags
+  have width := Arm64Width.internal world (flags narrow)
+    (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le (widthCont k)) m
+  have choose := after_width_register world e le m k narrow op
+  simpa only [CC.callCont] using (enter.trans width).trans choose
+
 namespace Linked
 open Arm64ProgramEntryLinked (ge sourceEquality)
 
@@ -171,6 +224,15 @@ theorem body_dispatch (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) 
     InternalRun ge 39 (.State Arm64Nop.handler Arm64Nop.handler.fn_body k e le m)
       (.State Arm64Nop.handler branch (continuation k) e (temps le narrow) m) :=
   body_dispatch_bound ge (CC.Positive.ofNat 97) width_binding e le m k narrow unshadowed hflags op
+
+/-- Opcode7 in the actual caller-linked world, using its checked width symbol. -/
+theorem body_dispatch_register (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (narrow : Bool)
+    (unshadowed : e.get Arm64Program._arm64_width_effective = none)
+    (hflags : le.get Arm64Program._flags = some (Arm64Width.argument (flags narrow)))
+    (op : le.get Arm64Program._op = some (.Vint (7#32))) :
+    InternalRun ge 39 (.State Arm64Nop.handler Arm64Nop.handler.fn_body k e le m)
+      (.State Arm64Nop.handler branch (continuation k) e (registerTemps le narrow) m) :=
+  body_dispatch_register_bound ge (CC.Positive.ofNat 97) width_binding e le m k narrow unshadowed hflags op
 
 end Linked
 end KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch

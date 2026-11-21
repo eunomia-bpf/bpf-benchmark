@@ -1,0 +1,54 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateDispatch.lean": "ce8ed8d636c8e22632d2b7b2d70600a665c78c4a59ae0ceceb4cf4b1020151eb"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateDispatch"
+    ],
+    "exit": 0,
+    "seconds": 21.441008806228638,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/dispatch1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/DispatchPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5045647621154785,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-dispatch1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.body_dispatch_register_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Dispatch.Linked.body_dispatch_register": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "whole_library_confirmation": "pending until LHS operand batch completes",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
