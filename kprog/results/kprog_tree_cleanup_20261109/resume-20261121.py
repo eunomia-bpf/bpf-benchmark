@@ -177,20 +177,20 @@ def historical():
  with gzip.open(REPORT/'historical-correspondence-20261121.json.gz','wt') as f:json.dump(result,f,indent=2);f.write('\n')
  print('HISTORICAL COMPLETE',result['matched_files'],len(rows),'archives',len(archives),'diagnostics',len(errors),flush=True)
 def locate():
- source=RAW/'historical-correspondence.json';d=json.loads(source.read_text());remaining=[r for r in d['records'] if not r['published_content']];byname=collections.defaultdict(list)
- for r in remaining:byname[Path(r['path']).name].append(r)
+ source=RAW/'historical-correspondence.json';d=json.loads(source.read_text());remaining=[r for r in d['records'] if not r['published_content'] and not r.get('persistent_content')];byname=collections.defaultdict(list);bysize=collections.defaultdict(list);size_only=sys.argv[1]=='locate-size'
+ for r in remaining:byname[Path(r['path']).name].append(r);bysize[r['bytes']].append(r)
  recovered={};examined=0;hashed=0
  roots=['/workspaces/repository','/workspaces/kprog-raw','/workspaces/.agent-state/kprog-lanes']
  for root in roots:
   for directory,ds,fs in os.walk(root,followlinks=False):
    ds[:]=[x for x in ds if x not in ['.git','node_modules']]
    for name in fs:
-    if name not in byname:continue
+    if not size_only and name not in byname:continue
     f=Path(directory)/name
     if f.is_symlink():continue
     examined+=1
     try:
-     size=f.stat().st_size;candidates=[r for r in byname[name] if r['bytes']==size and r['sha256'] not in recovered]
+     size=f.stat().st_size;candidates=[r for r in (bysize[size] if size_only else byname[name]) if r['bytes']==size and r['sha256'] not in recovered]
      if not candidates:continue
      v=digest(f);hashed+=1
      for r in candidates:
@@ -207,5 +207,5 @@ if __name__=='__main__':
  if sys.argv[1]=='audit':audit()
  elif sys.argv[1]=='move':move(sys.argv[2])
  elif sys.argv[1]=='historical':historical()
- elif sys.argv[1]=='locate':locate()
+ elif sys.argv[1] in ['locate','locate-size']:locate()
  else:raise SystemExit('audit | move GROUP')
