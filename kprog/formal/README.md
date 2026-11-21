@@ -94,6 +94,19 @@ record the exact source, dependency build and existing semantic axioms.
 Deriving these incoming observations from handler entry, selecting this route
 and composing the following flag and writeback stages remain open.
 
+The [actual ALU_REG SHL route](KProgFormal/ClightRefinement/X86ShiftLeftRoute.lean)
+has a kernel-checked structural identity with the complete original handler body.
+Operation 5 follows its real SBB/ADC gates, executes the original arithmetic
+call fragment, and resumes the original flags/writeback remainder. For all
+operand pairs and sizes, the route takes 52, 56, 60 and 60 silent steps to that
+boundary, retaining complete memory, caller locals and continuation with the
+exact source result/call temporary map. The existing typed input and genuine
+function-binding premises remain explicit. Its
+[four public audits](../results/kprog_verification_20261107/x86-shift-left-route.log.gz)
+record the source identity, selected route and relational composition at the
+original proof budgets. Entry and operand-read derivation, execution of the
+remaining flags/writeback code and enclosing dispatcher remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
