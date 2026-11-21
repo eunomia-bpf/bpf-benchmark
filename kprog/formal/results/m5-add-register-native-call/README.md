@@ -1,0 +1,5 @@
+# Actual ADD-register call refines fetched native execution
+
+The original nine-argument AUX256 source call executes469 steps through real allocation, body and frame release to the same complete register representation as the fetched LNSym ADD X3,X1,X2,LSL0 Reference step. Both native operands follow from actual scalar/STACK typed loads and the existing representation. Final D3 sum/scalar tag, caller frame, freeList, revoked local permissions, Kept3, header pointers, warm cache and allocation bound survive. Events and fault are empty; native PC advances4.
+
+The all-behavior corollary covers arbitrary relational finite runs as silent prefixes of the same unique stuck return and excludes infinite runs. No observed silence/result premise is added. Component254jobs1.975s and both public type/axiom queries pass with standard logic and inherited CompCert external/inline semantics only. Exact timings/hashes/logs in validation.json; default proof caps unchanged. Original-entry composition and whole-library confirmation remain open. M5/O1/O2/O4/M6 open; complete ISA families0. No application/runtime tests/measurement.

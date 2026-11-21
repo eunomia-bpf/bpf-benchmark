@@ -1,0 +1,57 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterNativeCall.lean": "f20e1139913fb09b1f9611c728c9f57dfcf9475a07aefb738952b11f5ab7a670"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall"
+    ],
+    "exit": 0,
+    "seconds": 1.9752044677734375,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/native-call1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/NativeCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.608642816543579,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-native-call1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall.corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 469,
+  "scope": "actual nine-argument source call/free-return refines fetched native ADD; arbitrary finite prefixes, unique stuck return and no infinite execution",
+  "whole_library_confirmation": "pending call/native batch",
+  "original_entry_composition": "next",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
