@@ -32102,6 +32102,21 @@
         }
       },
       "o4": "partial-universal-component; V owns physical thunk, compiled source and full composition",
+      "o4_stack_contract_reconciliation": {
+        "source_commit": "b3e687165ef0f1e1f3e184c7b80ef465fc70247f",
+        "decision": "Coordinator 2026-11-09 08:30 UTC: apply S7 released/fresh below-SP bytes to the same retpoline used by stock JITed programs.",
+        "status": "partial-universal-component",
+        "remaining": [
+          "universal physical stack-validity and dead-byte relation",
+          "kernel thunk effects and Rust/compiled-B composition"
+        ],
+        "model_predicates_added": 0,
+        "source_scope": "Historical hardening implementation withdrawn by the later 2026-11-09 change-necessity audit; current M5 correspondence and O1/O2/O4 recount use mature ISA/Clight.",
+        "evidence_sha256": {
+          "kprog/results/kprog_branch_hardening_20261109/coverage-proposal.tsv": "c27794c925b7b0b40656b16759c26b2a55a67f1888e39d6203f6450dc13a0639",
+          "kprog/results/kprog_branch_hardening_20261109/README.md": "e067b6511c7cf775b1821830def1aeac31b21425c446fa0e805d1d185c3717d0"
+        }
+      },
       "x86": {
         "cases": 45,
         "findings": [
