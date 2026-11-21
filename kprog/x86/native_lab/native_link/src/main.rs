@@ -62,6 +62,10 @@ use std::path::PathBuf;
 mod x86;
 
 const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
+const ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_arm64_bpf_map_max_entries_offset";
+const ARM64_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_arm64_bpf_array_ptrs_offset";
+const ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_arm64_bpf_prog_bpf_func_offset";
+const ARM64_TAIL_CALL_OFFSET_KEY: &str = "__native_arm64_tail_call_offset";
 const ARM64_RETURN_TRAMPOLINE_SYMBOL: &str = "__native_link_arm64_ret_trampoline";
 const A64_NOP: u32 = 0xd503_201f;
 
@@ -1287,6 +1291,51 @@ fn build_arm64_get_smp_processor_id_inline(
     ]))
 }
 
+/// bpf_tail_call(ctx = x0, map = x1, index = w2) as the arm64 JIT emits it in
+/// the native frame: the tail-call count is at [x26] (x26 = frame record - 16;
+/// P is built with -ffixed-x26), the frame's five callee-saved pairs lie below
+/// it. A taken tail call leaves P's own frames behind; a refused one falls through.
+fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {
+    let key = |k: &str| -> Result<u32> {
+        let v = *helper_addrs.get(k).ok_or_else(|| anyhow!("arm64 bpf_tail_call needs {k}"))?;
+        u32::try_from(v).map_err(|_| anyhow!("{k} does not fit u32"))
+    };
+    let max_entries = key(ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY)?;
+    let ptrs = key(ARM64_BPF_ARRAY_PTRS_OFFSET_KEY)?;
+    let bpf_func = key(ARM64_BPF_PROG_BPF_FUNC_OFFSET_KEY)?;
+    let entry = key(ARM64_TAIL_CALL_OFFSET_KEY)?;
+    if max_entries % 4 != 0 || max_entries / 4 > 0xfff || ptrs > 0xfff
+        || bpf_func % 8 != 0 || bpf_func / 8 > 0xfff || entry > 0xfff {
+        bail!("arm64 bpf_tail_call offsets exceed their encodings");
+    }
+    let add_imm = |rd: u32, rn: u32, imm: u32| 0x9100_0000 | (imm << 10) | (rn << 5) | rd;
+    let mut w = vec![
+        0x2a02_03e2,                                             // mov w2, w2
+        0xb940_0000 | ((max_entries / 4) << 10) | (1 << 5) | 16, // ldr w16, [x1, #max_entries]
+        0x6b10_005f,                                             // cmp w2, w16
+        0,                                                       // b.hs out
+        0xf940_0350,                                             // ldr x16, [x26]
+        0xf100_861f,                                             // cmp x16, #33 (MAX_TAIL_CALL_CNT)
+        0,                                                       // b.hs out
+        add_imm(15, 1, ptrs),                                    // add x15, x1, #ptrs
+        0xf862_79ee,                                             // ldr x14, [x15, x2, lsl #3]
+        0,                                                       // cbz x14, out
+        0x9100_0610,                                             // add x16, x16, #1
+        0xf900_0350,                                             // str x16, [x26]
+        0xd101_435f,                                             // sub sp, x26, #80
+        add_imm(29, 26, 16),                                     // add x29, x26, #16
+        0xa8c1_73fb, 0xa8c1_6bf9, 0xa8c1_63f7, 0xa8c1_5bf5, 0xa8c1_53f3, // ldp x27,x28 ... x19,x20, [sp], #16
+        0xf940_0000 | ((bpf_func / 8) << 10) | (14 << 5) | 16,   // ldr x16, [x14, #bpf_func]
+        add_imm(16, 16, entry),                                  // add x16, x16, #entry
+        0xd61f_0200,                                             // br x16
+    ];
+    let out = w.len() as u32;
+    for (at, base) in [(3usize, 0x5400_0002u32), (6, 0x5400_0002), (9, 0xb400_000e)] {
+        w[at] = base | ((out - at as u32) << 5);
+    }
+    Ok(w)
+}
+
 fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X0: u32 = 0;
     const X1: u32 = 1;
@@ -1547,6 +1596,8 @@ fn append_u64(blob: &mut Vec<u8>, value: u64) {
 }
 
 fn align_arm64_blob_to_8(blob: &mut Vec<u8>) {
+    // Section data before this point can end at any byte.
+    blob.resize(blob.len().next_multiple_of(4), 0);
     if blob.len() % 8 != 0 {
         append_u32(blob, A64_NOP);
     }
@@ -1601,7 +1652,7 @@ struct Arm64RelocInfo {
 fn arm64_text_relocations(
     elf: &object::File,
     included: &[SymInfo],
-) -> Result<HashMap<(u64, u64), Arm64RelocInfo>> {
+) -> Result<HashMap<(object::SectionIndex, u64, u64), Arm64RelocInfo>> {
     let mut out = HashMap::new();
     let mut sections: HashMap<object::SectionIndex, Vec<&SymInfo>> = HashMap::new();
     for sym in included {
@@ -1624,6 +1675,7 @@ fn arm64_text_relocations(
                 RelocationFlags::Elf { r_type } => r_type,
                 _ => continue,
             };
+            let mut section_symbol_value: i64 = 0;
             let (target_name, target_section_index) = match reloc.target() {
                 RelocationTarget::Symbol(idx) => {
                     let target_sym = elf.symbol_by_index(idx)?;
@@ -1631,7 +1683,14 @@ fn arm64_text_relocations(
                     let raw_name = target_sym
                         .name()
                         .map_err(|e| anyhow!("reloc target symbol name: {e}"))?;
-                    let target_name = if raw_name.is_empty() {
+                    // Section-symbol data targets: one name per section (proof mode
+                    // copies the whole section, as the x86 path does).
+                    let target_text = target_section_index
+                        .and_then(|i| elf.section_by_index(i).ok())
+                        .is_some_and(|s| s.kind() == object::SectionKind::Text);
+                    let target_name = if raw_name.is_empty() && !target_text {
+                        format!("__arm64_section_{:?}", target_section_index)
+                    } else if raw_name.is_empty() {
                         format!(
                             "__arm64_section_{:?}_addend_{}",
                             target_section_index,
@@ -1640,17 +1699,24 @@ fn arm64_text_relocations(
                     } else {
                         raw_name.to_string()
                     };
+                    // A proof object's copy of a section is a defined symbol: the target
+                    // is its value plus the offset the relocation carries.
+                    if raw_name.starts_with("__arm64_section_") && target_section_index.is_some() {
+                        section_symbol_value = target_sym.address() as i64;
+                    }
                     (target_name, target_section_index)
                 }
                 _ => continue,
             };
+            // Section addresses are all 0 in an object file: the section
+            // keeps functions of different sections apart.
             out.insert(
-                (sym.address, reloc_addr - sym.address),
+                (section_index, sym.address, reloc_addr - sym.address),
                 Arm64RelocInfo {
                     r_type,
                     target_name,
                     target_section_index,
-                    addend: reloc.addend(),
+                    addend: section_symbol_value + reloc.addend(),
                 },
             );
         }
@@ -1678,6 +1744,11 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) 
     let data = section
         .data()
         .with_context(|| format!("read arm64 proof data section {section_index:?}"))?;
+    // A section-symbol target carries the whole section (zeros for .bss); the
+    // relocation keeps its offset into it.
+    if reloc.target_name.starts_with("__arm64_section_") {
+        return Ok(if data.is_empty() { vec![0; section.size() as usize] } else { data.to_vec() });
+    }
     let start = reloc.addend as usize;
     if start >= data.len() {
         bail!(
@@ -1705,7 +1776,7 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
         for (word_index, word) in bytes.chunks_exact(4).enumerate() {
             let insn = u32::from_le_bytes(word.try_into().unwrap());
             if relocs
-                .get(&(sym.address, (word_index * 4) as u64))
+                .get(&(sym.section_index, sym.address, (word_index * 4) as u64))
                 .is_some_and(|reloc| reloc.r_type == R_AARCH64_CALL26)
             {
                 continue;
@@ -1966,7 +2037,7 @@ fn rewrite_arm64(
                 blob.extend_from_slice(&insn.to_le_bytes());
                 continue;
             }
-            let reloc = relocs.get(&(sym.address, off as u64));
+            let reloc = relocs.get(&(sym.section_index, sym.address, off as u64));
             if !proof_mode {
                 if let Some((dst, src)) = a64_mov_reg64(insn) {
                     reg_map_names[dst] = reg_map_names[src].clone();
@@ -2034,6 +2105,13 @@ fn rewrite_arm64(
                                 data: None,
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
+                            continue;
+                        }
+                        if reloc.target_name == "__native_bpf_tail_call" {
+                            for word in build_arm64_tail_call_inline(helper_addrs)? {
+                                append_u32(&mut blob, word);
+                            }
+                            arm64_call_clobber_map_regs(&mut reg_map_names);
                             continue;
                         }
                         if reloc.target_name == "bpf_get_smp_processor_id" {

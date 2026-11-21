@@ -808,4 +808,11 @@ static __always_inline long __native_probe_read_str(void *dst, unsigned int size
 #undef bpf_probe_read_str
 #define bpf_probe_read_str(dst, size, src) __native_probe_read_str((dst), (size), (src))
 
+#if defined(__aarch64__)
+/* native-link expands this call into the arm64 JIT's tail-call sequence for the native frame. */
+extern long __native_bpf_tail_call(void *ctx, void *map, unsigned int index);
+#undef bpf_tail_call
+#define bpf_tail_call(ctx, map, index) __native_bpf_tail_call((ctx), (map), (index))
+#endif
+
 #endif
