@@ -1,0 +1,68 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterNative.lean": "02ef847d97b557dc3d3095ec2c00ff8d86b71b48c8f74383ff8f9dee79077cca"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddRegisterNative"
+    ],
+    "exit": 0,
+    "seconds": 2.0447092056274414,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/native6.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/NativePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.731412410736084,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-native1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNative.execute": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNative.native_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNative.reference_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterNative.source_bits": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "actual LNSym ADD X3,X1,X2,LSL0 checked fetch/decode/reference step and both native operands derived from actual scalar/STACK cells",
+  "whole_library_confirmation": "pending completed call/native batch",
+  "source_call_composition": "next",
+  "m5_complete": false,
+  "complete_isa_families": 0,
+  "prior_failed_attempts": [
+    "/workspaces/kprog-raw/formal/m5-add-register/native1.json",
+    "/workspaces/kprog-raw/formal/m5-add-register/native2.json",
+    "/workspaces/kprog-raw/formal/m5-add-register/native3.json",
+    "/workspaces/kprog-raw/formal/m5-add-register/native4.json",
+    "/workspaces/kprog-raw/formal/m5-add-register/native5.json"
+  ]
+}
