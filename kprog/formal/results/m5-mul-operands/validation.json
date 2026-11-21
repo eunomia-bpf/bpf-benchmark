@@ -1,0 +1,67 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulOperands.lean": "12162cd3ab899b132c0c0e1ea6bc7caefb38e88895cbc636abb437779cc0659f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MulOperands"
+    ],
+    "exit": 0,
+    "seconds": 3.8303864002227783,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/operands3.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/OperandsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4604244232177734,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-operands1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Mul.Operands.branch_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Operands.lhs_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 109,
+  "segments": {
+    "original_entry_and_call": 10,
+    "actual_scalar_reader": 73,
+    "original_return_and_full_width_masks": 26
+  },
+  "scope": "actual generic MUL scalar LHS read and original masks on the same reached memory to untouched RHS/addend/product suffix",
+  "whole_library_confirmation": "pending completed MUL handler/native batch",
+  "remaining_reads": [
+    "actual RHS",
+    "actual src3=255 addend"
+  ],
+  "prior_failed_attempts": [
+    "/workspaces/kprog-raw/formal/m5-mul/operands1.json",
+    "/workspaces/kprog-raw/formal/m5-mul/operands2.json"
+  ],
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
