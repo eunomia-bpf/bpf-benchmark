@@ -1,0 +1,70 @@
+{
+  "source": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterOperands.lean",
+  "source_sha256": "c28320b711d097046f76545a57797728b5a5bac0a9bc713600ff752205d0a29c",
+  "module": "KProgFormal.ClightRefinement.Arm64AddRegisterOperands",
+  "build": {
+    "log": "/workspaces/kprog-raw/formal/m5-add-register/batch1.log",
+    "module_result": "job239/248 built in2.8s",
+    "parent_exit": 1,
+    "parent_failure": "separate fourth caller, not this module"
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "/workspaces/kprog-raw/formal/m5-add-register/RhsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.977799654006958,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-rhs1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.rhs_from_handler": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.selector": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.enter_reader": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.Linked.enter_reader": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.Linked.read_stack": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterOperands.Linked.rhs_stack": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
