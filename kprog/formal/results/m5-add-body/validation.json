@@ -1,0 +1,53 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateBody"
+    ],
+    "exit": 0,
+    "seconds": 4.782944679260254,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 234,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-body/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9284701347351074,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 1,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Body.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "internal_transitions": 331,
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-add-call",
+  "source_checkpoint_before_commit": "49dc075ba992f6c471bc3b6eb6138efb474718c0",
+  "whole_proof_library": {
+    "status": "pending proof-only batch confirmation"
+  },
+  "completed_isa_families": 0
+}
