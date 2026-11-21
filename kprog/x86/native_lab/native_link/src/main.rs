@@ -107,6 +107,10 @@ struct Args {
     #[arg(long)]
     show: bool,
 
+    /// Keep the compiler's entry-function saves in the verifier's proof input.
+    #[arg(long)]
+    preserve_entry_abi: bool,
+
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
     /// proof object for the eBPF simulator generator.
@@ -477,6 +481,7 @@ fn main() -> Result<()> {
                 &lookup_maps,
                 &update_sites,
                 proof_mode,
+                args.preserve_entry_abi,
                 args.show,
             )?
         }
@@ -511,6 +516,7 @@ fn main() -> Result<()> {
                 &lookup_sites,
                 &update_sites,
                 proof_mode,
+                args.preserve_entry_abi,
                 args.show,
             )?
         }
@@ -1912,6 +1918,7 @@ fn rewrite_arm64(
     lookup_sites: &[LookupSiteSpec],
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
+    preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
@@ -1938,7 +1945,7 @@ fn rewrite_arm64(
                 sym.name
             );
         }
-        let entry_abi_strip = if is_entry {
+        let entry_abi_strip = if is_entry && !(proof_mode && preserve_entry_abi) {
             plan_arm64_entry_abi_strip(&bytes)?
         } else {
             Arm64EntryAbiStrip::default()
@@ -2281,7 +2288,7 @@ fn rewrite_arm64(
                 });
             }
 
-            if is_entry && a64_is_ret(insn) {
+            if is_entry && a64_is_ret(insn) && !(proof_mode && preserve_entry_abi) {
                 patches.push(Arm64Patch {
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,

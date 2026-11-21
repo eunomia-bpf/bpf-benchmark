@@ -1039,6 +1039,7 @@ pub(super) fn rewrite_x86(
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
+    preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -1101,7 +1102,7 @@ pub(super) fn rewrite_x86(
                 sym.address,
                 entry_has_tail_call,
                 proof_return_jmp_target,
-                !proof_mode && proof_input,
+                (!proof_mode && proof_input) || (proof_mode && preserve_entry_abi),
             )?
         } else {
             X86EntryAbiStrip::default()
@@ -4011,6 +4012,59 @@ mod tests {
             out.push(insn);
         }
         Ok(out)
+    }
+
+    // The verified path hands B the compiler's own entry saves (trusted
+    // specializer, --preserve-entry-abi); every other caller keeps the
+    // stripped entry.
+    #[test]
+    fn proof_entry_abi_preserves_native_saves_only_when_requested() -> Result<()> {
+        let mut object = WriteObject::new(
+            BinaryFormat::Elf,
+            object::Architecture::X86_64,
+            Endianness::Little,
+        );
+        let section = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+        let bytes = [0x53, 0x31, 0xc0, 0x5b, 0xc3]; // push rbx; xor eax,eax; pop rbx; ret
+        object.append_section_data(section, &bytes, 1);
+        object.add_symbol(WriteSymbol {
+            name: b"entry".to_vec(),
+            value: 0,
+            size: bytes.len() as u64,
+            kind: SymbolKind::Text,
+            scope: SymbolScope::Linkage,
+            weak: false,
+            section: WriteSymbolSection::Section(section),
+            flags: SymbolFlags::None,
+        });
+        let encoded = object.write()?;
+        let elf = object::File::parse(encoded.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "entry")?;
+        for preserve in [false, true] {
+            let output = rewrite_x86(
+                &elf,
+                &entry,
+                &[entry.clone()],
+                &HashMap::new(),
+                &HashMap::new(),
+                &[],
+                &HashMap::new(),
+                &[],
+                true,
+                preserve,
+                false,
+            )?;
+            let proof_return = [0xE9, 0x00, 0x00, 0x00, 0x00]; // jmp to the proof entry end
+            let body: &[u8] = if preserve {
+                &[0x53, 0x31, 0xC0, 0x5B] // push rbx; xor eax,eax; pop rbx
+            } else {
+                &[0x31, 0xC0] // xor eax,eax
+            };
+            assert_eq!(output.blob, [body, &proof_return[..]].concat());
+            assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
+            assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
+        }
+        Ok(())
     }
 
     #[test]
