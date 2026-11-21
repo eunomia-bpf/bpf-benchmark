@@ -236,6 +236,20 @@ heap and the original remaining flag continuation. The
 record the universal composition at existing budgets and inherited axioms.
 Remaining flag stores, writeback and entry/world correspondence remain open.
 
+The [actual SF byte write](KProgFormal/ClightRefinement/X86ShiftFlagSF.lean)
+derives its pointer field at byte offset 136 from the existing source member
+layout. Six silent steps execute the original pointer load and byte assignment,
+then reach the original CF/OF remainder with the exact updated heap and pointer
+temporary; other temporaries and caller locals retain their values. The
+source sign-mask test agrees with the mature SF definition for every operand
+size and oracle choice. This equality follows from bit-vector extensionality
+and the imported bit-access/shift lemmas. Current layout, binding/result/sign,
+pointer-load and byte-store observations remain explicit input premises.
+The [seven public audits](../results/kprog_verification_20261107/x86-shift-flag-sf.log.gz)
+record source identity, offset, execution, frames and native SF value at existing
+budgets and inherited axioms. Whole-route composition, remaining flag stores,
+writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
