@@ -1,12 +1,12 @@
 """Run the existing recovery forms through the current stock ARM base."""
 from pathlib import Path
 import fcntl,json,os,subprocess,sys
-R=Path('/workspaces/repository');S=Path(sys.argv[2]);O=S/'guest'
+R=Path('/workspaces/repository');S=Path(sys.argv[2]);SAFETY=len(sys.argv)>3 and sys.argv[3]=='safety';O=S/('safety' if SAFETY else 'guest')
 FORMS=['entry','entry_byte','entry_half','entry_word','entry_signed_byte','entry_signed_half','entry_signed_word','entry_pair','entry_pre','entry_post','entry_d0','entry_q0','entry_d0_post','entry_q0_post']
 
 def guest():
     O.mkdir(exist_ok=True)
-    env=dict(os.environ,PYTHONPATH='/run/pydeps0:/run/pydeps1',KPROG_TRUSTED_COMPILE_STATE=str(S/'broker'),
+    env=dict(os.environ,PYTHONPATH='/run/pydeps0:/run/pydeps1',KPROG_TRUSTED_COMPILE_STATE=str(S/('safety-broker' if SAFETY else 'broker')),
              BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
              BPFREJIT_NATIVE_LINK_BINARY=str(S/'cargo/aarch64-unknown-linux-gnu/release/native-link'),
              PATH=str(R/'kprog/stock-path/bin')+':/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin')
@@ -19,6 +19,9 @@ def guest():
         while '"ready"' not in (O/'service.log').read_text():
             if service.poll() is not None:raise RuntimeError('service startup exit '+str(service.returncode))
             time.sleep(.1)
+        if SAFETY:
+            import safety
+            return safety.run(S,env)
         for symbol in FORMS:
             expected=0xffffffff if symbol in FORMS[-4:] else 0
             obj=S/('native.o' if symbol=='entry' else 'arm64.o')
@@ -41,12 +44,12 @@ if sys.argv[1]=='guest':raise SystemExit(guest())
 if sys.argv[1]!='host':raise SystemExit('usage: guest.py host|guest OUT')
 import hashlib,time
 S.mkdir(exist_ok=True)
-compiler_log=(S/'compiler.log').open('w')
-compiler=subprocess.Popen([sys.executable,str(R/'kprog/trusted_compile.py'),'serve','--scope',str(S),'--state',str(S/'broker'),'--arm64-sysroot',str(R/'.cache/qemu-arm64-root'),'--clang',str(R/'kprog/stock-path/bin/clang')],stdout=compiler_log,stderr=subprocess.STDOUT)
+compiler_log=(S/('safety-compiler.log' if SAFETY else 'compiler.log')).open('w')
+compiler=subprocess.Popen([sys.executable,str(R/'kprog/trusted_compile.py'),'serve','--scope',str(S),'--state',str(S/('safety-broker' if SAFETY else 'broker')),'--arm64-sysroot',str(R/'.cache/qemu-arm64-root'),'--clang',str(R/'kprog/stock-path/bin/clang')],stdout=compiler_log,stderr=subprocess.STDOUT)
 qemu=None
 report={}
 try:
-    while not (S/'broker/ready.json').exists():
+    while not (S/('safety-broker/ready.json' if SAFETY else 'broker/ready.json')).exists():
         if compiler.poll() is not None:raise RuntimeError('compiler startup exit '+str(compiler.returncode))
         time.sleep(.05)
     kernel=Path('/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image')
@@ -61,10 +64,10 @@ try:
     for i,dep in enumerate(deps):cmd += ['-fsdev','local,id=pydeps'+str(i)+',path='+dep+',security_model=none,readonly=on,multidevs=remap','-device','virtio-9p-device,fsdev=pydeps'+str(i)+',mount_tag=pydeps'+str(i)]
     files=[kernel,S/'module/bpf_arm64_native_lab.ko',S/'fixture-module/native_load_fault_module.ko',S/'native.o',S/'arm64.o',S/'probe',S/'loader/trusted-native-loader',S/'cargo/aarch64-unknown-linux-gnu/release/native-link',R/'kprog/arm64/arm64_sim_local_bpf.h',R/'kprog/arm64/arm64_sim_direct.h',R/'kprog/arm64/micro-prog/generate_micro_sim_proofs.py']
     report=dict(command=cmd,hashes_before={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
-    (S/'guest-launch.json').write_text(json.dumps(report,indent=2)+'\n')
+    (S/('safety-launch.json' if SAFETY else 'guest-launch.json')).write_text(json.dumps(report,indent=2)+'\n')
     qemu=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
     booted=False;tail=b''
-    with (S/'qemu.log').open('wb') as log:
+    with (S/('safety-qemu.log' if SAFETY else 'qemu.log')).open('wb') as log:
         while True:
             data=os.read(qemu.stdout.fileno(),4096)
             if not data:break
@@ -73,15 +76,15 @@ try:
                 commands=['mount -t proc proc /proc','mount -t sysfs sysfs /sys','mount -t tmpfs tmpfs /run','mount -t tmpfs tmpfs /tmp','mount -t tmpfs tmpfs /var/tmp',
                           'mount -t 9p -o trans=virtio,version=9p2000.L repo '+str(R),'mkdir -p '+str(S),'mount -t 9p -o trans=virtio,version=9p2000.L run '+str(S),
                           'mount -t debugfs debugfs /sys/kernel/debug','mount -t bpf bpffs /sys/fs/bpf','ulimit -l unlimited','insmod '+str(S/'module/bpf_arm64_native_lab.ko'),
-                          'PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 '+str(Path(__file__).resolve())+' guest '+str(S)]
+                          'PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 '+str(Path(__file__).resolve())+' guest '+str(S)+(' safety' if SAFETY else '')]
                 for i in range(len(deps)):
                     commands[-1:-1]=['mkdir -p /run/pydeps'+str(i),'mount -t 9p -o trans=virtio,version=9p2000.L pydeps'+str(i)+' /run/pydeps'+str(i)]
-                qemu.stdin.write((' && '.join(commands)+'; rc=$?; echo $rc > '+str(S/'guest.exit')+'; echo o > /proc/sysrq-trigger\n').encode());qemu.stdin.flush();booted=True
-    report.update(qemu_exit=qemu.wait(),booted=booted,guest_exit=int((S/'guest.exit').read_text()) if (S/'guest.exit').exists() else None)
+                qemu.stdin.write((' && '.join(commands)+'; rc=$?; echo $rc > '+str(S/('safety.exit' if SAFETY else 'guest.exit'))+'; echo o > /proc/sysrq-trigger\n').encode());qemu.stdin.flush();booted=True
+    report.update(qemu_exit=qemu.wait(),booted=booted,guest_exit=int((S/('safety.exit' if SAFETY else 'guest.exit')).read_text()) if (S/('safety.exit' if SAFETY else 'guest.exit')).exists() else None)
     report['hashes_after']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
-    if (O/'forms.json').exists():report['forms']=json.loads((O/'forms.json').read_text())
+    if (O/('outcomes.json' if SAFETY else 'forms.json')).exists():report['forms']=json.loads((O/('outcomes.json' if SAFETY else 'forms.json')).read_text())
 finally:
     if qemu is not None and qemu.poll() is None:qemu.terminate();qemu.wait()
     compiler.terminate();report['compiler_exit']=compiler.wait();compiler_log.close()
-    (S/'guest-summary.json').write_text(json.dumps(report,indent=2)+'\n')
-raise SystemExit(int(report.get('guest_exit')!=0 or len(report.get('forms',[]))!=len(FORMS)))
+    (S/('safety-summary.json' if SAFETY else 'guest-summary.json')).write_text(json.dumps(report,indent=2)+'\n')
+raise SystemExit(int(report.get('guest_exit')!=0 or len(report.get('forms',[]))!=(34 if SAFETY else len(FORMS))))
