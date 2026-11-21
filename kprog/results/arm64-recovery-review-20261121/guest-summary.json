@@ -1,0 +1,263 @@
+{
+  "command": [
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "max",
+    "-smp",
+    "2",
+    "-m",
+    "2048",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/.cache/qemu-arm64-root,security_model=none,readonly=on,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=rootfs",
+    "-fsdev",
+    "local,id=repo,path=/workspaces/repository,security_model=none,readonly=on,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=repo,mount_tag=repo",
+    "-fsdev",
+    "local,id=run,path=/var/tmp/kprog-tmp/S2/review-20261121,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=run,mount_tag=run",
+    "-append",
+    "console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=1 oops=panic",
+    "-fsdev",
+    "local,id=pydeps0,path=/usr/lib/python3/dist-packages,security_model=none,readonly=on,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=pydeps0,mount_tag=pydeps0"
+  ],
+  "hashes_before": {
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image": "38773d57dab5d61719fc28f03a0a6eb98aff6cdc8f052510fe2514cb872c88d5",
+    "/var/tmp/kprog-tmp/S2/review-20261121/module/bpf_arm64_native_lab.ko": "5dfc042dfb7cb5b29ca9fea53ee863f185a276ba4eea40748b8527111b624a35",
+    "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko": "4925e0d4570ef3072ec76cb4919249582726ed1b32dbbe11c2ee5186cf076676",
+    "/var/tmp/kprog-tmp/S2/review-20261121/native.o": "f18b56c9cb078a124459f19cbe34db902195c3f170f93ebc0d5b054dbb2fe023",
+    "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o": "1632fb6765f3370fc2b67c0a1308f031c856b62a2eb42d17092374e3067395f6",
+    "/var/tmp/kprog-tmp/S2/review-20261121/probe": "c65b1cdf1aa0165a706fd4c0189b5a295cabaa11ce1179b3388777debb42493d",
+    "/var/tmp/kprog-tmp/S2/review-20261121/loader/trusted-native-loader": "1a35156911353f373e1ab8dd7689309c9613cf11e7295b0a2aa6efdb6e60cd2f",
+    "/var/tmp/kprog-tmp/S2/review-20261121/cargo/aarch64-unknown-linux-gnu/release/native-link": "bac8edacdfb4e2ca80fecb14629915b3a64f9d5c425bc26ff78c539793d00f98",
+    "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+    "/workspaces/repository/kprog/arm64/arm64_sim_direct.h": "5590d19f6c2cf6ef5b2d0b80cba64c889125a5bb0fda569341a7cc31ac114349",
+    "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e"
+  },
+  "qemu_exit": 0,
+  "booted": true,
+  "guest_exit": 1,
+  "hashes_after": {
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image": "38773d57dab5d61719fc28f03a0a6eb98aff6cdc8f052510fe2514cb872c88d5",
+    "/var/tmp/kprog-tmp/S2/review-20261121/module/bpf_arm64_native_lab.ko": "5dfc042dfb7cb5b29ca9fea53ee863f185a276ba4eea40748b8527111b624a35",
+    "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko": "4925e0d4570ef3072ec76cb4919249582726ed1b32dbbe11c2ee5186cf076676",
+    "/var/tmp/kprog-tmp/S2/review-20261121/native.o": "f18b56c9cb078a124459f19cbe34db902195c3f170f93ebc0d5b054dbb2fe023",
+    "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o": "1632fb6765f3370fc2b67c0a1308f031c856b62a2eb42d17092374e3067395f6",
+    "/var/tmp/kprog-tmp/S2/review-20261121/probe": "c65b1cdf1aa0165a706fd4c0189b5a295cabaa11ce1179b3388777debb42493d",
+    "/var/tmp/kprog-tmp/S2/review-20261121/loader/trusted-native-loader": "1a35156911353f373e1ab8dd7689309c9613cf11e7295b0a2aa6efdb6e60cd2f",
+    "/var/tmp/kprog-tmp/S2/review-20261121/cargo/aarch64-unknown-linux-gnu/release/native-link": "bac8edacdfb4e2ca80fecb14629915b3a64f9d5c425bc26ff78c539793d00f98",
+    "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+    "/workspaces/repository/kprog/arm64/arm64_sim_direct.h": "5590d19f6c2cf6ef5b2d0b80cba64c889125a5bb0fda569341a7cc31ac114349",
+    "/workspaces/repository/kprog/arm64/micro-prog/generate_micro_sim_proofs.py": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e"
+  },
+  "forms": [
+    {
+      "symbol": "entry",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/native.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":9,\"attach_btf_id\":69903,\"verified_insns\":111,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_byte",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_byte",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":15,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_half",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_half",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":21,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_word",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_word",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":27,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_signed_byte",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_signed_byte",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":33,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_signed_half",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_signed_half",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":39,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_signed_word",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_signed_word",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":45,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_pair",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_pair",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":51,\"attach_btf_id\":69903,\"verified_insns\":124,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_pre",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_pre",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":57,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_post",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_post",
+        "0"
+      ],
+      "exit": 0,
+      "stdout": "{\"native_prog_id\":63,\"attach_btf_id\":69903,\"verified_insns\":112,\"extable_entries\":2,\"control\":4294967295,\"null_result\":0}\n",
+      "stderr": "",
+      "expected_null": 0
+    },
+    {
+      "symbol": "entry_d0",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_d0",
+        "4294967295"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: trusted specializer refused native program: Invalid argument\n",
+      "expected_null": 4294967295
+    },
+    {
+      "symbol": "entry_q0",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_q0",
+        "4294967295"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: trusted specializer refused native program: Invalid argument\n",
+      "expected_null": 4294967295
+    },
+    {
+      "symbol": "entry_d0_post",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_d0_post",
+        "4294967295"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: trusted specializer refused native program: Invalid argument\n",
+      "expected_null": 4294967295
+    },
+    {
+      "symbol": "entry_q0_post",
+      "command": [
+        "/var/tmp/kprog-tmp/S2/review-20261121/probe",
+        "/var/tmp/kprog-tmp/S2/review-20261121/arm64.o",
+        "/var/tmp/kprog-tmp/S2/review-20261121/fixture-module/native_load_fault_module.ko",
+        "entry_q0_post",
+        "4294967295"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "native load guest fixture: trusted specializer refused native program: Invalid argument\n",
+      "expected_null": 4294967295
+    }
+  ],
+  "compiler_exit": -15
+}

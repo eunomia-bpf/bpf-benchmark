@@ -5,6 +5,7 @@ import generate_micro_sim_proofs as gen
 
 def main():
     rows = []
+    excluded = []
     address_forms = [("[x2]",), ("[x2, #16]",), ("[x2, #16]!",),
                      ("[x2]", "#16"), ("[x2, x3]",), ("[x2, w3, uxtw #2]",)]
     forms = []
@@ -33,7 +34,16 @@ def main():
                 forms.append(("st"+family[2:]+order+suffix, ("w0", "[x2]")))
     for op, operands in forms:
         insn = gen.NativeInsn(0x100, op, operands, op+" "+", ".join(operands))
-        enc = gen.encode(insn, {}, {})
+        try:
+            enc = gen.encode(insn, {}, {})
+        except ValueError as error:
+            # Scalar-register production (dba3416ac) leaves these named forms
+            # outside the generator; keep their rejection visible.
+            if op not in {"ldr", "ldur"} or operands[0] not in {"d0", "q0"}:
+                raise
+            assert str(error) == f"unsupported register: {operands[0]}"
+            excluded.append(dict(assembly=insn.raw, diagnostic=str(error)))
+            continue
         lines = []
         gen.append_insn(lines, insn, {0x100, 0x104, 0x900}, 0x900, None, {}, {})
         assert lines[-1] == f"\tgoto {gen.label(0x104)};", lines
@@ -41,7 +51,7 @@ def main():
         rows.append(dict(assembly=insn.raw, operation=enc.op,
                          recovery="SIMD/base preserved before effects; PC+4" if enc.op in {"ARM64_OP_LOAD_D0", "ARM64_OP_LOAD_Q0"}
                          else "whole-GPR clear before effects; PC+4"))
-    print(json.dumps(dict(forms=len(rows), rows=rows), indent=2))
+    print(json.dumps(dict(forms=len(rows), rows=rows, excluded_forms=len(excluded), exclusions=excluded), indent=2))
 
 
 if __name__ == "__main__":

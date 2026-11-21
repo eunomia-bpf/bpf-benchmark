@@ -1,0 +1,779 @@
+{
+  "named_exclusions": [
+    {
+      "form": "ldnp",
+      "assembly": "ldnp x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldnp x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldpsw",
+      "assembly": "ldpsw x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldpsw x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldxp",
+      "assembly": "ldxp x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldxp x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldaxp",
+      "assembly": "ldaxp x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldaxp x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldar",
+      "assembly": "ldar x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldar x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldarb",
+      "assembly": "ldarb w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldarb w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldarh",
+      "assembly": "ldarh w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldarh w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldapr",
+      "assembly": "ldapr x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldapr x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldaprb",
+      "assembly": "ldaprb w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldaprb w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldaprh",
+      "assembly": "ldaprh w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldaprh w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldxrb",
+      "assembly": "ldxrb w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldxrb w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldxrh",
+      "assembly": "ldxrh w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldxrh w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldaxrb",
+      "assembly": "ldaxrb w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldaxrb w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldaxrh",
+      "assembly": "ldaxrh w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldaxrh w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldursb",
+      "assembly": "ldursb x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldursb x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldursh",
+      "assembly": "ldursh x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldursh x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldursw",
+      "assembly": "ldursw x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldursw x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtr",
+      "assembly": "ldtr x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtr x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtrb",
+      "assembly": "ldtrb w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtrb w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtrh",
+      "assembly": "ldtrh w0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtrh w0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtrsb",
+      "assembly": "ldtrsb x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtrsb x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtrsh",
+      "assembly": "ldtrsh x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtrsh x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldtrsw",
+      "assembly": "ldtrsw x0, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldtrsw x0, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "cas",
+      "assembly": "cas x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: cas x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "casp",
+      "assembly": "casp x0, x1, x4, x5, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: casp x0, x1, x4, x5, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "swp",
+      "assembly": "swp x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: swp x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldeor",
+      "assembly": "ldeor x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldeor x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldsmax",
+      "assembly": "ldsmax x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldsmax x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldsmin",
+      "assembly": "ldsmin x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldsmin x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldumax",
+      "assembly": "ldumax x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldumax x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldumin",
+      "assembly": "ldumin x0, x1, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ldumin x0, x1, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_literal",
+      "assembly": "ldr x0, 0x1000",
+      "current_diagnostic": "unsupported memory operand: 0x1000",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_s0",
+      "assembly": "ldr s0, [x2]",
+      "current_diagnostic": "unsupported register: s0",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_d1",
+      "assembly": "ldr d1, [x2]",
+      "current_diagnostic": "unsupported register: d1",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldp_q",
+      "assembly": "ldp q0, q1, [x2]",
+      "current_diagnostic": "unsupported register: q0",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ld1",
+      "assembly": "ld1 {v0.16b}, [x2]",
+      "current_diagnostic": "unsupported arm64 instruction: ld1 {v0.16b}, [x2]",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_d0",
+      "assembly": "ldr d0, [x2]",
+      "current_diagnostic": "unsupported register: d0",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_q0",
+      "assembly": "ldr q0, [x2]",
+      "current_diagnostic": "unsupported register: q0",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_d0_post",
+      "assembly": "ldr d0, [x2], #8",
+      "current_diagnostic": "unsupported register: d0",
+      "current_status": "generation_rejected"
+    },
+    {
+      "form": "ldr_q0_post",
+      "assembly": "ldr q0, [x2], #16",
+      "current_diagnostic": "unsupported register: q0",
+      "current_status": "generation_rejected"
+    }
+  ],
+  "accepted_examples": [
+    {
+      "assembly": "ldr x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldr x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldr x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldur w0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_32",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldur w0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_32",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldur w0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_32",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrb w0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrb w0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldrb w0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldurb w0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldurb w0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldurb w0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_8",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrh w0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrh w0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldrh w0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldurh w0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldurh w0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldurh w0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsb x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDRSB",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsb x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LDRSB",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldrsb x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LDRSB",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsh x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDRSH",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsh x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LDRSH",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldrsh x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LDRSH",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsw x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDRSW",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldrsw x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LDRSW",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldrsw x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LDRSW",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldxr x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldxr x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldxr x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldaxr x0, [x2]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldaxr x0, [x2, #8]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldaxr x0, [x2, x3]",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_X3",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_X3, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldp x0, x1, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDP",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X1",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0)",
+        "imm": "0ULL"
+      }
+    },
+    {
+      "assembly": "ldp w0, w1, [x2], #8",
+      "token": {
+        "op": "ARM64_OP_LDP",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X1",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_32",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_POST)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldp x0, x1, [x2, #16]!",
+      "token": {
+        "op": "ARM64_OP_LDP",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X1",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_PRE)",
+        "imm": "16ULL"
+      }
+    },
+    {
+      "assembly": "ldr x0, [x2], #8",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_POST)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldr x0, [x2, #8]!",
+      "token": {
+        "op": "ARM64_OP_LOAD",
+        "dst": "ARM64_X0",
+        "src": "ARM64_X2",
+        "src2": "ARM64_REG_NONE",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, ARM64_MEM_PRE)",
+        "imm": "8ULL"
+      }
+    },
+    {
+      "assembly": "ldadd x0, x1, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDADD",
+        "dst": "ARM64_X1",
+        "src": "ARM64_X0",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_64",
+        "aux": "0",
+        "imm": "0"
+      }
+    },
+    {
+      "assembly": "ldset w0, w1, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDSET",
+        "dst": "ARM64_X1",
+        "src": "ARM64_X0",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_32",
+        "aux": "0",
+        "imm": "0"
+      }
+    },
+    {
+      "assembly": "ldclralh w0, w1, [x2]",
+      "token": {
+        "op": "ARM64_OP_LDCLR",
+        "dst": "ARM64_X1",
+        "src": "ARM64_X0",
+        "src2": "ARM64_X2",
+        "src3": "ARM64_REG_NONE",
+        "width": "ARM64_WIDTH_16",
+        "aux": "3",
+        "imm": "0"
+      }
+    }
+  ]
+}
