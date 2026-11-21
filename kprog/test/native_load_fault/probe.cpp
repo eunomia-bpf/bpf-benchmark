@@ -21,6 +21,7 @@ static unsigned long parameter(const char *name)
 int main(int argc,char **argv)
 {
     native_loader::LoadedProgram loaded;
+    int original_fd=-1;
     try {
         if (argc < 3 || argc > 5) return 2;
         btf *vmlinux = btf__load_vmlinux_btf();
@@ -28,7 +29,19 @@ int main(int argc,char **argv)
         int target = btf__find_by_name_kind(vmlinux,"bpf_lsm_file_open",BTF_KIND_FUNC);
         btf__free(vmlinux);
         if (target < 0) throw std::runtime_error("resolve file_open target");
+        const bpf_insn context_program[] = {
+            { .code=BPF_ALU64|BPF_MOV|BPF_K, .dst_reg=BPF_REG_0, .imm=0 },
+            { .code=BPF_JMP|BPF_EXIT },
+        };
+        bpf_prog_load_opts load_opts{};
+        load_opts.sz=sizeof(load_opts);
+        load_opts.expected_attach_type=BPF_LSM_MAC;
+        load_opts.attach_btf_id=target;
+        original_fd=bpf_prog_load(BPF_PROG_TYPE_LSM,"recovery_ctx","GPL",
+                                  context_program,2,&load_opts);
+        if (original_fd<0) throw std::runtime_error("load common LSM fixture context");
         native_loader::FdLoadOptions options;
+        options.original_prog_fd=original_fd;
         bpf_prog_info context{};
         context.type=BPF_PROG_TYPE_LSM;context.gpl_compatible=1;
         context.attach_btf_id=target;
@@ -56,9 +69,11 @@ int main(int argc,char **argv)
                     loaded.native_prog_id,target,info.verified_insns,parameter("extable_count"),control,zero);
         syscall(SYS_delete_module,"native_load_fault_module",0);
         native_loader::close_loaded_program(&loaded);
+        close(original_fd); original_fd=-1;
         unsigned long expected_null=argc==5?std::stoul(argv[4],nullptr,0):0;
         return control==0xffffffffUL && zero==expected_null ? 0 : 1;
     } catch (const std::exception &e) {
+        if (original_fd>=0) close(original_fd);
         native_loader::close_loaded_program(&loaded);
         std::fprintf(stderr,"native load guest fixture: %s\n",e.what());return 1;
     }

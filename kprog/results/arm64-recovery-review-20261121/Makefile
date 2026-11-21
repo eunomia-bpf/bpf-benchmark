@@ -31,3 +31,9 @@ guest-build:
 .PHONY: guest
 guest:
 	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/guest.py host $(OUT)
+
+.PHONY: micro
+micro:
+	python3 $(ROOT)/kprog/arm64/micro-prog/generate_micro_sim_proofs.py --config $(ROOT)/micro/config/micro_pure_jit.yaml --proof-object-dir $(ROOT)/kprog/arm64/micro-prog/build/native-link --output-dir $(OUT)/micro-src
+	python3 $(ROOT)/kprog/arm64/micro-prog/generate_micro_sim_proofs.py --config $(ROOT)/kprog/test/kprog_negative_stage2.yaml --proof-object-dir $(ROOT)/kprog/arm64/micro-prog/build/native-link --output-dir $(OUT)/negative-src
+	python3 $(ROOT)/kprog/results/arm64-recovery-review-20261121/compile_micro.py $(OUT)

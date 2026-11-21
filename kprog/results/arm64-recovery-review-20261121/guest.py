@@ -6,7 +6,7 @@ FORMS=['entry','entry_byte','entry_half','entry_word','entry_signed_byte','entry
 
 def guest():
     O.mkdir(exist_ok=True)
-    env=dict(os.environ,KPROG_TRUSTED_COMPILE_STATE=str(S/'broker'),
+    env=dict(os.environ,PYTHONPATH='/run/pydeps0:/run/pydeps1',KPROG_TRUSTED_COMPILE_STATE=str(S/'broker'),
              BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF='1',
              BPFREJIT_NATIVE_LINK_BINARY=str(S/'cargo/aarch64-unknown-linux-gnu/release/native-link'),
              PATH=str(R/'kprog/stock-path/bin')+':/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin')
@@ -56,6 +56,9 @@ try:
          '-fsdev','local,id=repo,path='+str(R)+',security_model=none,readonly=on,multidevs=remap','-device','virtio-9p-device,fsdev=repo,mount_tag=repo',
          '-fsdev','local,id=run,path='+str(S)+',security_model=none,multidevs=remap','-device','virtio-9p-device,fsdev=run,mount_tag=run',
          '-append','console=ttyAMA0 root=rootfs rootfstype=9p rootflags=trans=virtio,version=9p2000.L ro init=/bin/sh loglevel=4 panic=1 oops=panic']
+    import elftools,yaml
+    deps=sorted({str(Path(x.__file__).resolve().parent.parent) for x in [elftools,yaml]})
+    for i,dep in enumerate(deps):cmd += ['-fsdev','local,id=pydeps'+str(i)+',path='+dep+',security_model=none,readonly=on,multidevs=remap','-device','virtio-9p-device,fsdev=pydeps'+str(i)+',mount_tag=pydeps'+str(i)]
     files=[kernel,S/'module/bpf_arm64_native_lab.ko',S/'fixture-module/native_load_fault_module.ko',S/'native.o',S/'arm64.o',S/'probe',S/'loader/trusted-native-loader',S/'cargo/aarch64-unknown-linux-gnu/release/native-link',R/'kprog/arm64/arm64_sim_local_bpf.h',R/'kprog/arm64/arm64_sim_direct.h',R/'kprog/arm64/micro-prog/generate_micro_sim_proofs.py']
     report=dict(command=cmd,hashes_before={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
     (S/'guest-launch.json').write_text(json.dumps(report,indent=2)+'\n')
@@ -71,6 +74,8 @@ try:
                           'mount -t 9p -o trans=virtio,version=9p2000.L repo '+str(R),'mkdir -p '+str(S),'mount -t 9p -o trans=virtio,version=9p2000.L run '+str(S),
                           'mount -t debugfs debugfs /sys/kernel/debug','mount -t bpf bpffs /sys/fs/bpf','ulimit -l unlimited','insmod '+str(S/'module/bpf_arm64_native_lab.ko'),
                           'PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 '+str(Path(__file__).resolve())+' guest '+str(S)]
+                for i in range(len(deps)):
+                    commands[-1:-1]=['mkdir -p /run/pydeps'+str(i),'mount -t 9p -o trans=virtio,version=9p2000.L pydeps'+str(i)+' /run/pydeps'+str(i)]
                 qemu.stdin.write((' && '.join(commands)+'; rc=$?; echo $rc > '+str(S/'guest.exit')+'; echo o > /proc/sysrq-trigger\n').encode());qemu.stdin.flush();booted=True
     report.update(qemu_exit=qemu.wait(),booted=booted,guest_exit=int((S/'guest.exit').read_text()) if (S/'guest.exit').exists() else None)
     report['hashes_after']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
