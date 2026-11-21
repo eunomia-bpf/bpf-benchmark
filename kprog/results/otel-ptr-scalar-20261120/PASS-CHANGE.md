@@ -45,3 +45,25 @@ change can only affect programs that carry the refused instruction. The old bina
 
 That also means the coordinator's rotation is unaffected in principle - it is running the pre-patch base binary,
 and the apps it measures only change where the class applies (OTel).
+
+## Measured: OTel coverage 4/14 -> 14/14, zero failures
+
+Two runs of the same `checked-corpus` entry, the second with one more fix:
+
+| run | installed | failed | note |
+|---|---|---|---|
+| `otel-after-pass-20261121T0230Z` | **11/14** | 3 | pass change in, `copy_from_user_nofault` not in the link plan |
+| `otel-nofault-20261121T0245Z` | **14/14** | 0 | also binds the two nofault routines (8e0d92c7f) |
+
+The first run is what the fp-arithmetic pass alone buys: the three remaining requests are not the subtraction
+class at all, they fail in `native-link` with
+`x86 helper call copy_from_user_nofault has no helper address`, because the inline probe-read wrappers in
+`kprog/x86/micro-prog/inline_probe.c` call the kernel's own nofault routines and nothing bound their addresses.
+
+Both symbols are global text in the one kernel line (`copy_from_user_nofault` at ffffffff8153f040,
+`copy_from_kernel_nofault` at ffffffff8153f1b0 in that build's System.map), so the second change is the two names
+added to `native_lto::kernel_symbols`, which the link plan has bound for `ktime_get_mono_fast_ns` and `jiffies_64`
+all along. Coverage records: `after-pass/coverage.json` (11/14) and `after-pass/coverage-full.json` (14/14).
+
+This is coverage on the verified path, not a timing result: the app still has to be timed, and the two arms
+queued behind the coordinator's rotation are what speak to performance.
