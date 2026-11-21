@@ -42,7 +42,167 @@
     ]
   },
   "steps": 473,
-  "whole_library_confirmation": "not confirmed: full6 library glob includes V active unimported X86ShiftLeft WIP",
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 4.160544395446777,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full7.log",
+    "jobs": 327,
+    "source_snapshot": "/workspaces/kprog-raw/formal/m5-add-register/full7-source-hashes.json",
+    "source_snapshot_unchanged": true,
+    "source_count": 202,
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/EntryBatchRootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.1734507083892822,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-entry-batch-root1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterNative.corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterAdmission.next_admission": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterAdmission.setup_next": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterPrefixNative.entry_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86Width.executes": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86Width.internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86Width.returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86Width.all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86ShiftCount.internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86ShiftCount.returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86ShiftCount.all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86ShiftCount.native_count": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.X86ShiftCount.native_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ControlABI.NativeWrapper.next_word_preserved": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgFormal.ControlABI.NativeWrapper.frame_store_unwind": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ControlABI.NativeWrapper.saved_frame_preserved_iff": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ControlABI.NativeWrapper.entry_stack_store": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "public_root_snapshot": "/workspaces/kprog-raw/formal/m5-add-register/full6-source-hashes.json",
+    "public_root_source_unchanged": true,
+    "public_queries_reused": "root17 public checks retained because all200reachable source hashes including root are unchanged",
+    "context": {
+      "head": "b0f925ccd6b1a063357ecc4a3cf1bd93237762cf",
+      "v_shift_left_source_sha256": "fd507516f159882a89c2257478348afdb400e953825c02baf1a65d9c2fe95120",
+      "v_shift_left_status": "?? kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeft.lean\n",
+      "scope": "V21:29:56 reports exact-source/public3 pass; source publication remains V-owned; original entry/V3 root batch unchanged"
+    },
+    "prior_failed_library_build": "/workspaces/kprog-raw/formal/m5-add-register/full6.json",
+    "m5_complete": false,
+    "complete_isa_families": 0
+  },
   "original_entry_prefix_composition": "next",
   "m5_complete": false,
   "complete_isa_families": 0,
