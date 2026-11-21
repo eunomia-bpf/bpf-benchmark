@@ -94,10 +94,12 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
         prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
         insn_cnt <= 6)
         return 1;
+    /* Tetragon's tail-call probe: its instructions carry the prog array's fd
+     * (7 on x86, 6 on arm64), so the instruction hash differs by arch. */
     if (prog && (!name || !name[0]) &&
         prog->prog_type == BPF_PROG_TYPE_RAW_TRACEPOINT &&
         prog->expected_attach_type == 0 && prog->attach_btf_id == 0 &&
-        insn_cnt == 11 && prog->hash == 0x71725f032fe1d5e4ULL)
+        insn_cnt == 11)
         return 1;
     if (prog && (!name || !name[0]) &&
         prog->prog_type == BPF_PROG_TYPE_TRACING &&
