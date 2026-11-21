@@ -169,4 +169,68 @@ theorem prefix_bound (world : CC.CGenv) (layout : GprLayout world) (i : Fin 31) 
     CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
     CC.E0, CC.Eapp, cells, cellSlot, tags, tagSlot, cell, kind, valueCast]
 
+def finishTemps (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  ((le.set Arm64Program.___a64_mat_value (.Vlong value)).set
+    Arm64Program.___a64_mat_tag (.Vint 0)).set Arm64Program.___a64_modified_input (.Vlong value)
+
+set_option hygiene false in
+private theorem materialize_scalar (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+    (m : CC.Mem) (k : CC.Cont) (value : BitVec 64)
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint 0)) :
+    InternalRun world 16 (.State handler materialize (readCont k) e le m)
+      (.State handler .Sskip k e (finishTemps le value) m) := by
+  run_tac do
+    for _ in [:16] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [CC.doStep, materialize,
+        readCont, readBody, finishTemps, Arm64Program.s_kprog_arm64_program_modified_5,
+        CC.PTree.gss, CC.PTree.gso, valueRead, tagRead, CC.doEvalExpr, CC.typeof,
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.Cop.semBinaryOperation,
+        CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+        CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+        CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool,
+        CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
+        CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+        CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+        CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.tuchar, CC.tint,
+        CC.tuint, CC.tulong, CC.Archi.ptr64, CC.E0, CC.Eapp,
+        List.nil_append, List.append_nil, ite_true, ite_false, eq_self,
+        Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- The real inlined scalar read, materialization and output use the original
+source loops, retaining the whole memory and deriving the value from loads. -/
+theorem scalar_bound (world : CC.CGenv) (layout : GprLayout world) (i : Fin 31) (b cb vb tb kb : CC.Block)
+    (ofs co vo to ko : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (e : CC.Env) (le : CC.TempEnv)
+    (value : BitVec 64)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (regRead : le.get Arm64Program._reg = some (.Vlong (BitVec.ofNat 64 i.val)))
+    (cells : CC.Mem.loadv CC.Mptr m (.Vptr b ofs) = some (.Vptr cb co))
+    (cellSlot : CC.Mem.loadv CC.Mptr m (.Vptr cb (CC.Integers.Ptrofs.add co
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr vb vo))
+    (tags : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 8))) = some (.Vptr tb to))
+    (tagSlot : CC.Mem.loadv CC.Mptr m (.Vptr tb (CC.Integers.Ptrofs.add to
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr kb ko))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr vb vo) = some (.Vlong value))
+    (kind : CC.Mem.loadv .Mint8unsigned m (.Vptr kb ko) = some (.Vint 0))
+ :
+    InternalRun world 69 (.State handler readLoop k e le m)
+      (.State handler .Sskip k e
+        (finishTemps (prefixTemps le (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+          (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val) 0) value) m) := by
+  have prefixRun := prefix_bound world layout i b cb vb tb kb ofs co vo to ko m k e le
+    (.Vlong value) 0 entryRead regRead cells cellSlot tags tagSlot cell kind rfl
+  have observed :
+      (prefixTemps le (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo) (.Vptr tb to) (.Vptr kb ko)
+        (.Vlong value) (BitVec.ofNat 64 i.val) 0).get Arm64Program.___a64_read_value = some (.Vlong value) ∧
+      (prefixTemps le (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo) (.Vptr tb to) (.Vptr kb ko)
+        (.Vlong value) (BitVec.ofNat 64 i.val) 0).get Arm64Program.___a64_read_tag = some (.Vint 0) := by
+    simp +decide [prefixTemps, CC.PTree.gso]
+  have finished := materialize_scalar world e _ m k value observed.1 observed.2
+  exact (internalRun_of_steps prefixRun.2 prefixRun.1).trans finished
+
 end KProgFormal.ClightRefinement.Arm64Modified.Read
