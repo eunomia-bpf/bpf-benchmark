@@ -229,6 +229,99 @@ static unsigned anchor_pointer_differences(Module &module) {
   }
   return differences.size();
 }
+// A PTR_TO_STACK operand cannot take part in any subtraction, in either
+// position: the verifier refuses "stack_ptr - scalar", "scalar - stack_ptr"
+// and a bounded scalar alike (guest 7.0.0-rc2+, four hand-assembled objects,
+// kprog/results/otel-ptr-scalar-20261120). Bounding or reordering the scalar
+// cannot help, so the subtraction itself has to go. OTel's shape is
+//   %inner = sub i64 %s, %p        ; %p = ptrtoint (the simulator's own frame)
+//   %outer = sub i64 32, %inner    ; 32 - (s - p)
+//   icmp ult %outer, 8
+// which is integer-identical to
+//   %outer = add i64 (sub i64 32, %s), %p
+// - one subtraction of two scalars plus a pointer add, both verifier-legal.
+// The rewrite preserves the compared value exactly, in the 64-bit domain.
+static unsigned eliminate_stack_pointer_subtractions(Module &module) {
+  /* The simulator's own frame: ptrtoint of an alloca, through constant adds. */
+  auto stack_pointer=[](Value *value) {
+    while (auto *operation=dyn_cast<Operator>(value)) {
+      auto opcode=operation->getOpcode();
+      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
+          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
+      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
+        value=operation->getOperand(1);
+      else break;
+    }
+    auto *cast=dyn_cast<PtrToIntOperator>(value);
+    return cast && isa<AllocaInst>(cast->getOperand(0));
+  };
+  auto pointer_bits=[](Value *value) {
+    while (auto *operation=dyn_cast<Operator>(value)) {
+      auto opcode=operation->getOpcode();
+      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
+          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
+      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
+        value=operation->getOperand(1);
+      else break;
+    }
+    return isa<PtrToIntOperator>(value);
+  };
+  SmallVector<BinaryOperator *,16> outers;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *outer=dyn_cast<BinaryOperator>(&instruction);
+    if (!outer || outer->getOpcode()!=Instruction::Sub ||
+        !outer->getType()->isIntegerTy(64)) continue;
+    /* After anchor_pointer_differences the difference is the tied asm. */
+    auto *inner=dyn_cast<BinaryOperator>(outer->getOperand(1));
+    auto *inner_call=dyn_cast<CallInst>(outer->getOperand(1));
+    if (inner_call) {
+      auto *assembly=dyn_cast<InlineAsm>(inner_call->getCalledOperand());
+      if (!assembly || inner_call->arg_size()!=2 ||
+          assembly->getAsmString()!="$0 -= $2") continue;
+      const bool left=pointer_bits(inner_call->getArgOperand(0));
+      const bool right=pointer_bits(inner_call->getArgOperand(1));
+      /* The refused operand is the frame itself: ptrtoint of an alloca. A
+       * plain register-valued pointer is a legal difference partner. */
+      const bool stack_left=stack_pointer(inner_call->getArgOperand(0));
+      const bool stack_right=stack_pointer(inner_call->getArgOperand(1));
+      if (stack_left==stack_right || pointer_bits(outer->getOperand(0))) continue;
+      outers.push_back(outer);
+      continue;
+    }
+    if (!inner || inner->getOpcode()!=Instruction::Sub || !inner->hasOneUse() ||
+        !inner->getType()->isIntegerTy(64)) continue;
+    // inner = scalar - pointer, exactly one side pointer-derived.
+    const bool left=pointer_bits(inner->getOperand(0));
+    const bool right=pointer_bits(inner->getOperand(1));
+    if (left==right) continue;
+    if (pointer_bits(outer->getOperand(0))) continue;   // A must be scalar
+    outers.push_back(outer);
+  }
+  for (auto *outer:outers) {
+    Value *inner=outer->getOperand(1);
+    Value *scalar_value=nullptr;Value *pointer_value=nullptr;Instruction *dead=nullptr;
+    if (auto *inner_call=dyn_cast<CallInst>(inner)) {
+      scalar_value=inner_call->getArgOperand(0);pointer_value=inner_call->getArgOperand(1);
+      /* The stack pointer is the side that must leave the subtraction. */
+      if (stack_pointer(scalar_value)) std::swap(scalar_value,pointer_value);
+      dead=inner_call;
+    } else {
+      auto *inner_operator=cast<BinaryOperator>(inner);
+      const bool pointer_left=stack_pointer(inner_operator->getOperand(0));
+      pointer_value=pointer_left?inner_operator->getOperand(0):inner_operator->getOperand(1);
+      scalar_value=pointer_left?inner_operator->getOperand(1):inner_operator->getOperand(0);
+      dead=inner_operator;
+    }
+    IRBuilder<> builder(outer);builder.SetCurrentDebugLocation(outer->getDebugLoc());
+    /* A - (s - p) = (A - s) + p, integer-identical in the 64-bit domain. */
+    Value *scalar_difference=builder.CreateSub(outer->getOperand(0),scalar_value,"scalar_difference");
+    Value *sum=builder.CreateAdd(scalar_difference,pointer_value,"scalar_plus_pointer");
+    sum->takeName(outer);
+    outer->replaceAllUsesWith(sum);outer->eraseFromParent();
+    if (dead->use_empty()) dead->eraseFromParent();
+  }
+  return outers.size();
+}
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
@@ -644,6 +737,7 @@ int main(int argc,char **argv) {
   }
   unsigned packet_values=reuse_packet_data_values(*module);
   unsigned pointer_differences=anchor_pointer_differences(*module);
+  unsigned stack_pointer_subtractions=eliminate_stack_pointer_subtractions(*module);
   if (verifyModule(*module,&errs())) return 1;
   std::error_code ec;ToolOutputFile output(Output,ec,sys::fs::OF_None);
   if (ec) { errs()<<ec.message()<<'\n';return 1; }
@@ -663,5 +757,6 @@ int main(int argc,char **argv) {
   errs()<<"empty memory barriers removed="<<memory_barriers<<'\n';
   errs()<<"helper memory contracts described="<<helper_memory<<'\n';
   errs()<<"private stack accesses normalized="<<private_stack<<'\n';
+  errs()<<"stack pointer subtractions eliminated="<<stack_pointer_subtractions<<'\n';
   errs()<<"pointer differences anchored="<<pointer_differences<<'\n';
 }
