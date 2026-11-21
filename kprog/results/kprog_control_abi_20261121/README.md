@@ -1,0 +1,9 @@
+# S13 control and ABI continuation on the current proof route
+
+The original scope is the four O4 rows TAIL_CALL_BINDING, INVOCATION_ENTRY_ABI, HELPER_IDENTITY_AND_ABI and SPILL_INSERTION_RELOAD_CONTROL. The current foundation is Lean4.35 with the imported Clight, LNSym and x86lean bases. The earlier superseded modules stay in Git history. New modules live under ControlABI and the root has one KernelControl import.
+
+The first checked increment is RCUTarget. The existing program-array owner compatibility conjunction derives equality of caller and target sleepable domains. Its concurrent object protocol tracks active readers, target observation, publication, final-reference retirement, matching-domain grace completion and reclamation. An inductive invariant derives exact observed payload and target lifetime at every tail-entry event across arbitrary finite histories, including arbitrary intervening activity and post-grace address reuse. Payload is arbitrary and can contain complete P/B bytes, ABI, maps and executable permissions.
+
+This proof consumes the standard kernel action projection and RCU callback contracts identified in rcu-source.json. It derives the observation-to-entry invariant from those operational rules, replacing the earlier whole-interval retention hypothesis. The complete source-emitter/JIT and native/B transfer correspondence continues in the same S13 scope. The shared ledger retains its current four row statuses while these interfaces are assembled; formal owns the shared full-library check and ledger merge.
+
+Focused module checking and a separate aggregate import passed on CPUs8-15 using the existing shared caches. The RCU proofs use propext; rcu-check.txt retains the actual checker output. Production paths, benchmark configuration, image/base, paper sources and peer work retain their existing owners.

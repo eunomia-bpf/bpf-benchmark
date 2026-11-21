@@ -1,0 +1,26 @@
+{
+  "time_utc": "2026-11-21T20:16:47.945182+00:00",
+  "repository": "8386b0d4fd0508d46e227c390963e6124cdd22df",
+  "kernel": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "files": {
+    "vendor/linux-framework/kernel/bpf/core.c": "ed94b244139e6986a010909e38cf679fe6538e698a2be91f3d362a6f66fbf55f",
+    "vendor/linux-framework/kernel/bpf/arraymap.c": "5db997dc9c39b80d6f84ec6879048f00c54eb1f3f4faa83131d6abecc890d517",
+    "vendor/linux-framework/kernel/bpf/syscall.c": "df4d48544144fe49d94cb42067fda80ddd3fc90916a2ee4eadf64d68a5b574cf",
+    "vendor/linux-framework/kernel/trace/bpf_trace.c": "c7d863136047a05744316d41020fc0c00843ae96e2d44031b00c792a7b8ba2c9",
+    "kprog/formal/KProgFormal/ControlABI/RCUTarget.lean": "8d14f149657627bd7ea25d86e4f92b8f5a33c5766814cfacf48fdaadaf0ceed8"
+  },
+  "scope": "Generic matching-domain RCU object protocol and source program-array sleepable conjunction",
+  "implementation_contract": "Kernel reference/array actions project to the stated protocol; call_rcu and call_rcu_tasks_trace obey their matching reader-snapshot contracts",
+  "theorems": [
+    "program_array_domain",
+    "step_preserves",
+    "run_preserves",
+    "initial_valid",
+    "tail_entry_retained",
+    "tail_entry_payload"
+  ],
+  "checks": {
+    "module": 0,
+    "independent_aggregate_import": 0
+  }
+}
