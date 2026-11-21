@@ -1,0 +1,5 @@
+# Actual fetched mature MUL step
+
+Arm64Mul.Native checks LNSym exec_data_processing_three_source and its real MADD body for MUL X4,X1,X3 (sf1/op54=0/op31=0/o0=0/Ra31). The actual zero-register addend yields the source product. Its checked fetch/decoder wrapper and Reference step preserve complete state/histories, advance PC4 and add no events/fault. Both input words follow from the existing full register representation and actual scalar D1/D3 typed cells; no native-address/result premise or local ISA evaluator.
+
+Component255jobs2.203s and four public execute/native_step/reference_step/source_bits type+axiom queries pass logical axioms only (propext/Classical.choice/Quot.sound), original proof caps. Exact hashes/timings/logs and initial dependent-width/PC simplification failure retained in validation.json. No source/ISA-model change, admission/new axiom/native oracle/runtime gate. Actual source-call/native composition, fifth-entry and whole-batch confirmation remain open; M5/O1/O2/O4/M6 open, complete ISA families0. No application/runtime tests/measurement.

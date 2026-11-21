@@ -157,3 +157,4 @@ import KProgFormal.ClightRefinement.Arm64MulPrefix
 import KProgFormal.ClightRefinement.Arm64MulProduct
 import KProgFormal.ClightRefinement.Arm64MulBody
 import KProgFormal.ClightRefinement.Arm64MulCall
+import KProgFormal.ClightRefinement.Arm64MulNative

@@ -1,0 +1,62 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulNative.lean": "185a7402d1db6eda2ef2f7f1c2de683632d34d0d5888dc51c11d4b96dc70acfb"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MulNative"
+    ],
+    "exit": 0,
+    "seconds": 2.203490734100342,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/native2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/NativePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6700589656829834,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-native1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Mul.Native.execute": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Native.native_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Native.reference_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Native.source_bits": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "actual mature LNSym MUL X4,X1,X3 alias via MADD Ra31, checked fetch/decoder wrapper/Reference step and scalar D1/D3 operand derivation",
+  "whole_library_confirmation": "pending completed MUL native-call batch",
+  "prior_failed_attempts": [
+    "/workspaces/kprog-raw/formal/m5-mul/native1.json"
+  ],
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
