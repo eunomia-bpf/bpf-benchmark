@@ -1,0 +1,184 @@
+{
+  "source_head": "9c3330418204934b25976903de2ae8dae22d79d5",
+  "raw_source": "/workspaces/kprog-raw/omp/lto-tetragon-20261120T1151Z/service.tar.gz",
+  "requests": [
+    {
+      "request_id": 2,
+      "entry": "event_exit_disassociate_ctty",
+      "archive_member": "service/requests/2.failure.tar.gz",
+      "archive_sha256": "d4c42ea470af625eba401db84dd0e20e9c371b9268b240e705bcbad60472878c",
+      "generated_c_sha256": "ee5ff6d004ea55bf95753cd5109f42c4277c0bfdfe1a6eb057bc6c7723488e54",
+      "current_task_sites": [
+        {
+          "line": 113,
+          "source": "x86_l_53:\n\t/* 0x53: mov    rax,QWORD PTR [rip+0x0] */\n\tX86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&current_task));\nx86_l_5a:\n\t/* 0x5a: mov    r13,QWORD PTR gs:[rax] */\n\tX86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R13, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);\nx86_l_5e:\n\t/* 0x5e: mov    DWORD PTR [rsp+0xc],0x0 */"
+        }
+      ],
+      "failed_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-az0ahtvy/generated/trusted_x86.bpf.i",
+            "-o",
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-az0ahtvy/generated/trusted_x86.bpf.bounds-input.bc"
+          ],
+          "returncode": 1,
+          "diagnostic_lines": [
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-az0ahtvy/generated/trusted_x86.bpf.c:113:117: error: use of undeclared identifier 'current_task'"
+          ]
+        }
+      ],
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 3909,
+        "token_present": 0
+      },
+      "map_names": [
+        "execve_map",
+        "tcpmon_map",
+        "exit_heap_map",
+        "tg_conf_map",
+        "tg_parents_bin",
+        "execve_map_stats",
+        "tg_rb_events",
+        "tg_stats_map"
+      ]
+    },
+    {
+      "request_id": 101,
+      "entry": "generic_kprobe_event",
+      "archive_member": "service/requests/101.failure.tar.gz",
+      "archive_sha256": "14f958ec8137dd5e4d2c6f4666e50c233eef47613261dc594bccc2bb7a06c51d",
+      "generated_c_sha256": "c7c9e9a2fcb058c0d717dac11421f870785a2e978e2f388ea6216aa44c13bad6",
+      "current_task_sites": [
+        {
+          "line": 216,
+          "source": "x86_l_10d:\n\t/* 0x10d: mov    rdx,QWORD PTR [rip+0x0] */\n\tX86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RDX, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&current_task));\nx86_l_114:\n\t/* 0x114: mov    ecx,0xf88 */\n\tX86_SIM_RUN_OP(X86_OP_MOV_IMM, X86_RCX, X86_REG_NONE, X86_WIDTH_32, 0, 3976ULL);\nx86_l_119:\n\t/* 0x119: add    rcx,QWORD PTR gs:[rdx] */"
+        },
+        {
+          "line": 375,
+          "source": "x86_l_22c:\n\t/* 0x22c: mov    rax,QWORD PTR [rip+0x0] */\n\tX86_SIM_RUN_OP(X86_OP_MOV_LOAD_MAP_PTR, X86_RAX, X86_REG_NONE, X86_WIDTH_64, 0, ((__u64)(long)&current_task));\nx86_l_233:\n\t/* 0x233: mov    r15,QWORD PTR gs:[rax] */\n\tX86_SIM_RUN_OP(X86_OP_MOV_LOAD, X86_R15, X86_RAX, X86_WIDTH_64, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);\nx86_l_237:\n\t/* 0x237: mov    rdx,r15 */"
+        }
+      ],
+      "failed_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-qdio60wd/generated/trusted_x86.bpf.i",
+            "-o",
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-qdio60wd/generated/trusted_x86.bpf.bounds-input.bc"
+          ],
+          "returncode": 1,
+          "diagnostic_lines": [
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-qdio60wd/generated/trusted_x86.bpf.c:216:117: error: use of undeclared identifier 'current_task'",
+            "/workspaces/repository/kprog/results/lto-apps-20261119/tetragon/state/session-900e9z5p/requests/request-qdio60wd/generated/trusted_x86.bpf.c:375:117: error: use of undeclared identifier 'current_task'"
+          ]
+        }
+      ],
+      "load_context": {
+        "prog_type": 2,
+        "expected_attach_type": 0,
+        "prog_flags": 0,
+        "attach_btf_id": 0,
+        "attach_btf_obj_id": 0,
+        "attach_prog_id": 0,
+        "prog_ifindex": 0,
+        "gpl_compatible": 1,
+        "source_btf_id": 5292,
+        "token_present": 0
+      },
+      "map_names": [
+        "tg_cgtracker_map",
+        "policy_filter_maps",
+        "tg_conf_map",
+        "kprobe_calls",
+        "config_map",
+        "process_call_heap"
+      ]
+    }
+  ],
+  "parser_file": "kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+  "parser_sha256": "e6095abdbb7f5d2bed665a539d51d701656c19b0425d4b2385b28c15b800c0db",
+  "parser_observations": {
+    "QWORD PTR [rax]": [
+      "X86_RAX",
+      "X86_REG_NONE",
+      0,
+      0
+    ],
+    "QWORD PTR gs:[rax]": [
+      "X86_RAX",
+      "X86_REG_NONE",
+      0,
+      0
+    ],
+    "QWORD PTR fs:[rax]": [
+      "X86_RAX",
+      "X86_REG_NONE",
+      0,
+      0
+    ]
+  },
+  "kernel_current_header": "/* SPDX-License-Identifier: GPL-2.0 */\n#ifndef _ASM_X86_CURRENT_H\n#define _ASM_X86_CURRENT_H\n\n#include <linux/build_bug.h>\n#include <linux/compiler.h>\n\n#ifndef __ASSEMBLER__\n\n#include <linux/cache.h>\n#include <asm/percpu.h>\n\nstruct task_struct;\n\nDECLARE_PER_CPU_CACHE_HOT(struct task_struct *, current_task);\n/* const-qualified alias provided by the linker. */\nDECLARE_PER_CPU_CACHE_HOT(struct task_struct * const __percpu_seg_override,\n\t\t\t  const_current_task);\n\nstatic __always_inline struct task_struct *get_current(void)\n{\n\tif (IS_ENABLED(CONFIG_USE_X86_SEG_SUPPORT))\n\t\treturn this_cpu_read_const(const_current_task);\n\n\treturn this_cpu_read_stable(current_task);\n}\n\n#define current get_current()\n\n#endif /* __ASSEMBLER__ */\n\n#endif /* _ASM_X86_CURRENT_H */\n",
+  "execution_scope": "read-only archived requests and current Python parser; native programs and benchmarks executed0",
+  "new_checks": 0,
+  "observed_at": "2026-11-21T19:51:17.468036+00:00",
+  "kernel_revision": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "stage": "B generation/frontend failure, before stock verifier analysis",
+  "class_name": "per-CPU symbol declaration and GS memory-operand semantics",
+  "findings": [
+    "Archived request2 and request101 emit references to current_task with no matching generated declaration; Clang reports undeclared identifier.",
+    "The same generated sites then turn native gs:[register] loads into ordinary MOV_LOAD operations.",
+    "The current memory parser returns identical base/index/scale/displacement tuples for flat, GS and FS forms; its tuple carries no segment selector.",
+    "The sole kernel declares current_task as a per-CPU task_struct pointer; get_current uses the this_cpu read operations.",
+    "A declaration-only change leaves the segment-base effect unresolved. The generic repair must retain segment addressing and faithful per-CPU access."
+  ],
+  "next_scope": "Retain FS/GS in decoded memory semantics; bind per-CPU symbols/types through existing kernel facts and account for the current-CPU address base. Preserve modeled register/flag/memory effects and existing fault behavior. Coordinate the shared frozen operation body with the coordinator and the universal relation with FORMAL.",
+  "production_code_changes": 0,
+  "raw": {
+    "file": "raw.tar.gz",
+    "bytes": 4122011,
+    "sha256": "4b5ce5e3bfc35659af5543f160a12ed08de6bcf2c4c1dfdb40c07b660d68c328"
+  }
+}
