@@ -188,8 +188,18 @@ the complete memory and caller locals retain their input values at the original
 flag stage. Callee lookup and genuine incoming operand/width observations remain
 explicit premises. The [nine public audits](../results/kprog_verification_20261107/x86-shift-flag-inputs.log.gz)
 record actual source identity, relational execution, the mature count equality
-and temporary frames at existing budgets and inherited axioms. Composition with
-the preceding route, flag stores, writeback and entry/world correspondence remain open.
+and temporary frames at existing budgets and inherited axioms.
+
+Its universal route theorem joins original arithmetic dispatch, old-CF reads,
+classification, three width calls and input preparation in 170/182/194/194
+silent steps to the actual flag code. Incoming operand and operation values
+follow from all preceding temporary frames; the result follows from the real
+arithmetic site, and width/mask/bit values follow from its real calls. The same
+heap and caller locals survive with the exact nested temporary map. The
+[ten public audits](../results/kprog_verification_20261107/x86-shift-through-inputs.log.gz)
+record this composition and the preceding source contracts at existing budgets
+and inherited axioms. Actual flag stores, writeback and entry/world
+correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked

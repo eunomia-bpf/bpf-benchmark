@@ -267,4 +267,117 @@ theorem frame (le : CC.TempEnv) (lhs rhs value : BitVec 64) (size : X86.Size) (i
     Ne.symm leftNe, Ne.symm resultNe, Ne.symm countCallNe,
     Ne.symm countNe, Ne.symm signNe, Ne.symm aluNe]
 
+
+/-- Original arithmetic, old-CF reads, classification, width calls and input preparation
+compose to the actual flag code with a derived mature result and unchanged heap. -/
+theorem route_to_flags (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv aluBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_alu_result))
+    (shiftBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._kprog_x86_shl_result = some shiftBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv shiftBlock =
+        some (.Internal X86_program_profile_bpf.f_kprog_x86_shl_result))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_alu_result = none)
+    (lhs rhs : BitVec 64) (size : X86.Size)
+    (left : le.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs))
+    (right : le.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (k : CC.Cont) (m : CC.Mem)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (old : BitVec 8)
+    (heapBinding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (byte : CC.Mem.load .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset) =
+      some (.Vint (old.setWidth 32)))
+    (effectiveBlock bitsBlock maskBlock : CC.Block)
+    (effectiveBinding :
+      CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some effectiveBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv effectiveBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (bitsBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_bits = some bitsBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv bitsBlock = some (.Internal X86_program_profile_bpf.f_x86_width_bits))
+    (maskBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_mask = some maskBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv maskBlock = some (.Internal X86_program_profile_bpf.f_x86_width_mask))
+    (widthsUnshadowed : e.get X86_program_profile_bpf._x86_width_effective = none ∧
+      e.get X86_program_profile_bpf._x86_width_bits = none ∧
+      e.get X86_program_profile_bpf._x86_width_mask = none)
+    (countBlock : CC.Block)
+    (countBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_shift_count = some countBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv countBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_shift_count))
+    (countUnshadowed : e.get X86_program_profile_bpf._x86_shift_count = none) :
+    InternalRun ge ((((3 + X86ShiftLeftSite.length size + 1) + 11 + 37) +
+      X86ShiftFlagWidths.length size) + 25)
+      (.State function X86ShiftLeftRoute.dispatch k e le m)
+      (.State function flags
+        (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k))) e
+        (afterTemps (X86ShiftFlagWidths.afterTemps
+          (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+            (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+            cfBlock offset old)) size) lhs rhs
+          (X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8))) size) m) := by
+  have routed := X86ShiftFlagWidths.route_to_operands ge aluBlock shiftBlock binding shiftBinding
+    function e le unshadowed lhs rhs size left right operation width k m
+    bindingsLayout valueLayout bindingBlock cfBlock offset old heapBinding pointer byte
+    effectiveBlock bitsBlock maskBlock effectiveBinding bitsBinding maskBinding widthsUnshadowed
+  let incoming := X86ShiftFlagWidths.afterTemps
+          (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+            (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+            cfBlock offset old)) size
+  let resultBits := X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8))
+  have keptLeft : incoming.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs) := by
+    dsimp only [incoming]
+    rw [X86ShiftFlagWidths.frame _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftClassify.temps _).2 _ (by decide +kernel)]
+    rw [(X86ShiftLeftCarry.temps _ cfBlock offset old).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact left
+  have keptRight : incoming.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs) := by
+    dsimp only [incoming]
+    rw [X86ShiftFlagWidths.frame _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftClassify.temps _).2 _ (by decide +kernel)]
+    rw [(X86ShiftLeftCarry.temps _ cfBlock offset old).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact right
+  have keptAlu : incoming.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)) := by
+    dsimp only [incoming]
+    rw [X86ShiftFlagWidths.frame _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftClassify.temps _).2 _ (by decide +kernel)]
+    rw [(X86ShiftLeftCarry.temps _ cfBlock offset old).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact operation
+  have keptResult : incoming.get X86_program_profile_bpf.___x86_l_result = some (.Vlong resultBits) := by
+    dsimp only [incoming]
+    rw [X86ShiftFlagWidths.frame _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftClassify.temps _).2 _ (by decide +kernel)]
+    rw [(X86ShiftLeftCarry.temps _ cfBlock offset old).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    simpa only [X86ShiftLeft.result, resultBits] using
+      (X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).1
+  have values := X86ShiftFlagWidths.temps
+    (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+      (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size)) cfBlock offset old)) size
+  have prepared := internal ge countBlock countBinding function e incoming countUnshadowed
+    lhs rhs resultBits size
+    (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k))) m
+    keptLeft keptRight keptResult values.2.2.1 values.2.2.2.2.2.2 values.2.2.2.2.1 keptAlu
+  exact routed.trans prepared
+
 end KProgFormal.ClightRefinement.X86ShiftFlagInputs
