@@ -1,0 +1,60 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateNativeCall"
+    ],
+    "exit": 0,
+    "seconds": 68.79466986656189,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "checked_module": "KProgFormal.ClightRefinement.Arm64AddImmediateCall",
+  "checked_as_dependency_of_native_target": true,
+  "focused_jobs": 237,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9465436935424805,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Call.entry_valid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Call.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "internal_transitions": 333,
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "source_checkpoint_before_commit": "855f380824414323c4cf35c735c87a182b30c878",
+  "raw": "/workspaces/kprog-raw/formal/m5-add-call",
+  "whole_proof_library": {
+    "status": "pending proof-only batch confirmation"
+  },
+  "completed_isa_families": 0
+}
