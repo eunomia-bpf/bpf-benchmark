@@ -21,3 +21,10 @@ Proof checking uses original200000-heartbeat/512-depth/asyncfalse limits on
 CPU17/j1/32GiB. The operator's2026-11-21 verify-only directive is respected:
 no benchmark, functional test or measurement is run. Raw proofs and finite
 failed attempts are retained under /workspaces/kprog-raw/formal/m5-add-call.
+
+Batch confirmation2026-11-21: lake build KProgFormal passes301 proof jobs
+in4.103s; root artifact UTC2026-11-21T16:11:16.945239+00:00.
+CPUs16-23/nice19/j1/32GiB AS. Native tools/executables and runtime tests
+are excluded. Actual call333, fetched-step/all-behaviors and original caller337
+are recorded by the adjacent m5-add-call, m5-add-native-call and
+m5-entry-add-call receipts; whole original entry-prefix join remains open.

@@ -47,7 +47,32 @@
   "raw": "/workspaces/kprog-raw/formal/m5-add-call",
   "source_checkpoint_before_commit": "49dc075ba992f6c471bc3b6eb6138efb474718c0",
   "whole_proof_library": {
-    "status": "pending proof-only batch confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 4.1031494140625,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "jobs": 301,
+    "root_artifact": "kprog/formal/.lake/build/lib/lean/KProgFormal.olean",
+    "root_artifact_utc": "2026-11-21T16:11:16.945239+00:00",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-add-call/full1.log",
+    "source_checkpoint": "0ae2a66eccd6d05eedda298082e45b915693b6b3",
+    "scope": "complete KProgFormal Lean proof library/root; excludes native tools/executables, benchmark and functional tests"
   },
   "completed_isa_families": 0
 }

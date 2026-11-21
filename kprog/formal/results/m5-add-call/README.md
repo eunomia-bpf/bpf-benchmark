@@ -20,3 +20,10 @@ ABI/provider validity and source producer/successor composition remain separate.
 M5/O1/O2/O4/M6 remain open; completed ISA families0. Proof-only verification;
 no benchmark/functional test/measurement or native tool build. Raw attempts:
 /workspaces/kprog-raw/formal/m5-add-call.
+
+Batch confirmation2026-11-21: lake build KProgFormal passes301 proof jobs
+in4.103s; root artifact UTC2026-11-21T16:11:16.945239+00:00.
+CPUs16-23/nice19/j1/32GiB AS. Native tools/executables and runtime tests
+are excluded. Actual call333, fetched-step/all-behaviors and original caller337
+are recorded by the adjacent m5-add-call, m5-add-native-call and
+m5-entry-add-call receipts; whole original entry-prefix join remains open.

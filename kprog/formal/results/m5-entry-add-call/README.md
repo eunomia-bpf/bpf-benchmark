@@ -19,3 +19,10 @@ This starts at the reached third caller segment. Joining the preceding actual
 later source control and final return remain separate M5 obligations. No complete
 ISA family is added; O1/O2/O4 and M6 remain open. Proof-only verification, no
 benchmark/functional tests/measurement. Raw m5-add-call retains all attempts.
+
+Batch confirmation2026-11-21: lake build KProgFormal passes301 proof jobs
+in4.103s; root artifact UTC2026-11-21T16:11:16.945239+00:00.
+CPUs16-23/nice19/j1/32GiB AS. Native tools/executables and runtime tests
+are excluded. Actual call333, fetched-step/all-behaviors and original caller337
+are recorded by the adjacent m5-add-call, m5-add-native-call and
+m5-entry-add-call receipts; whole original entry-prefix join remains open.
