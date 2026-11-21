@@ -1,0 +1,48 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterPrefixNative.lean": "ed184c20df5b6f2221748b0c8f1edfb097cf25131776fe4cc41757e0968c353c"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterPrefixNative"
+    ],
+    "exit": 0,
+    "seconds": 2.1667349338531494,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/entry-prefix1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/EntryPrefixPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5800542831420898,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-entry-prefix1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterPrefixNative.entry_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "actual original98 inputs/setup/four-call prefix and four fetched native words, provider choices/traces and reached heaps retained",
+  "whole_library_confirmation": "pending original-entry batch",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
