@@ -1,0 +1,211 @@
+{
+  "utc": "2026-11-21T19:48:11.040476+00:00",
+  "lane": "S3",
+  "status": "Historical finite bring-up receipts reconciled; current verifier difference reported to coordinator",
+  "source_revision": "414f34f505189964d6a6fa2bbcecf034b30a8ac1",
+  "base": "c23719abc3308df7ed3ad35650ad211fb2d2003d",
+  "historical_kernel": {
+    "commit": "35ea2cde39fc88b01f2f49b2a357e7cf7102e4c8",
+    "verifier_blob": "159b25f8269ddfd6f66edabbca06e3822e56a330",
+    "base_verifier_blob": "159b25f8269ddfd6f66edabbca06e3822e56a330",
+    "verifier_byte_equal": true,
+    "whole_diffstat": "arch/arm64/mm/fault.c         |   6 ++\n arch/arm64/net/bpf_jit_comp.c | 152 ++++++++++++++++++++++++++++++++++-\n arch/x86/mm/fault.c           |   9 +++\n arch/x86/net/bpf_jit_comp.c   | 181 ++++++++++++++++++++++++++++++++++++++++++\n include/linux/bpf_native.h    |  48 +++++++++++\n kernel/bpf/btf.c              |   1 +\n kernel/bpf/core.c             |  65 +++++++++++++++\n kernel/bpf/syscall.c          |   6 ++\n 8 files changed, 467 insertions(+), 1 deletion(-)",
+    "kinsn_intro_commit_ancestor": false,
+    "current_branch_ancestor": true
+  },
+  "current_kernel": {
+    "commit": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+    "whole_diffstat": "arch/arm64/mm/fault.c         |   6 ++\n arch/arm64/net/bpf_jit_comp.c | 156 +++++++++++++++++++++++++++++++++++++++++-\n arch/x86/mm/fault.c           |   9 +++\n arch/x86/net/bpf_jit_comp.c   | 134 ++++++++++++++++++++++++++++++++++++\n include/linux/bpf.h           |   1 +\n include/linux/bpf_native.h    |  46 +++++++++++++\n include/linux/sched.h         |   3 +\n include/uapi/linux/bpf.h      |   3 +\n kernel/bpf/btf.c              |   1 +\n kernel/bpf/core.c             |  39 +++++++++++\n kernel/bpf/syscall.c          |  18 ++++-\n kernel/bpf/verifier.c         |   4 ++\n kernel/fork.c                 |   7 ++\n 13 files changed, 423 insertions(+), 4 deletions(-)",
+    "verifier_blob": "7b0938e09cbd70c6819dc5888228cc40f8213ae9",
+    "verifier_numstat": "4\t0\tkernel/bpf/verifier.c",
+    "verifier_diff": "diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c\nindex 159b25f8269d..7b0938e09cbd 100644\n--- a/kernel/bpf/verifier.c\n+++ b/kernel/bpf/verifier.c\n@@ -23071,6 +23071,10 @@ static int fixup_call_args(struct bpf_verifier_env *env)\n #endif\n \tint err = 0;\n \n+\t/* B has been verified; the architecture JIT emits the program's image. */\n+\tif (env->prog->aux->native_image)\n+\t\treturn 0;\n+\n \tif (env->prog->jit_requested &&\n \t    !bpf_prog_is_offloaded(env->prog->aux)) {\n \t\terr = jit_subprogs(env);",
+    "introducing_commit": "74d1097af56132da2b325699c5a560b29a790ff2",
+    "disposition": "Coordinator owns current +4 hook and the sole frozen kernel"
+  },
+  "x86_small_raw_output": "kernel result=0 retval=2 expected_result=0 expected_retval=2\nnative program id=11 chunks=0\nnative_bound result=0 retval=2 expected_result=0 expected_retval=2",
+  "arm64_controls": {
+    "arm64-small-once": {
+      "exit": 0,
+      "output": {
+        "ok": true,
+        "original_prog_id": 37,
+        "native_prog_id": 40,
+        "retval": 2,
+        "prebuilt_proof": false
+      },
+      "service_record": {
+        "request_id": 1,
+        "source_prog_id": 37,
+        "native_sha256": "cc5857d4e7885f77df2b730da2ce43e67c694e8ff1995a67e9f42d43032a4dc5",
+        "started": "2026-11-09T09:11:28.328498+00:00",
+        "prog_id": 40,
+        "status": 0,
+        "artifact_archive": "/var/tmp/kprog-tmp/S17/run/arm64-small-once/requests/1.success.tar.gz",
+        "finished": "2026-11-09T09:12:02.774546+00:00"
+      }
+    },
+    "arm64-null-btf-once": {
+      "exit": 0,
+      "output": {
+        "native_prog_id": 43,
+        "attach_btf_id": 62524,
+        "verified_insns": 111,
+        "extable_entries": 2,
+        "control": 4294967295,
+        "null_result": 0
+      },
+      "service_record": {
+        "request_id": 1,
+        "source_prog_id": 0,
+        "native_sha256": "f8c27e739d4f250368cb36aed981d3e852363ca844709fd008d9c778f0585bf3",
+        "started": "2026-11-09T09:13:23.925662+00:00",
+        "prog_id": 43,
+        "status": 0,
+        "artifact_archive": "/var/tmp/kprog-tmp/S17/run/arm64-null-btf-once/requests/1.success.tar.gz",
+        "finished": "2026-11-09T09:14:08.171942+00:00"
+      }
+    }
+  },
+  "suites": {
+    "x86-initial": {
+      "cases": 38,
+      "stages": {
+        "valid_executed": 9,
+        "verifier_rejected": 25,
+        "accepted_finding": 3,
+        "specialization_rejected": 1
+      },
+      "case_stage_returncode_correspondence": true,
+      "negative_native_executions": 0,
+      "load_only_findings": [
+        "uninitialized_stack",
+        "immediate_push_branch",
+        "stack_base_flags"
+      ]
+    },
+    "x86": {
+      "cases": 48,
+      "stages": {
+        "valid_executed": 10,
+        "verifier_rejected": 34,
+        "accepted_finding": 3,
+        "specialization_rejected": 1
+      },
+      "case_stage_returncode_correspondence": true,
+      "negative_native_executions": 0,
+      "load_only_findings": [
+        "uninitialized_stack",
+        "immediate_push_branch",
+        "stack_base_flags"
+      ]
+    },
+    "arm64": {
+      "cases": 48,
+      "stages": {
+        "valid_executed": 4,
+        "verifier_rejected": 33,
+        "accepted_finding": 7,
+        "specialization_rejected": 4
+      },
+      "case_stage_returncode_correspondence": true,
+      "negative_native_executions": 0,
+      "load_only_findings": [
+        "uninitialized_stack",
+        "unpaired_stxr_failure",
+        "unpaired_stlxr_failure",
+        "paired_stxr_failure",
+        "paired_stlxr_failure",
+        "entry_return_address_flags",
+        "stack_base_flags"
+      ]
+    }
+  },
+  "published_guest_memory_mib": 2048,
+  "files": [
+    {
+      "path": "kprog/stock-path/results/20261109/x86-initial-summary.json",
+      "bytes": 565,
+      "sha256": "b8a5916dc6afeb28a46404712421ed40bb18b0dc23325b2ef17eb7b794699129",
+      "git_blob": "c55c61a9e4070e27485bc3c43f08b616d19be1ef"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/x86-initial-outcomes.json.gz",
+      "bytes": 18220,
+      "sha256": "56426d231f389779c2b6adad24f4326eedc7151208fcd9151ef2a8253eed17e3",
+      "git_blob": "79a29aff2b11dbb7dccdbb560ed2635a0060f323"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/x86-initial-cases.tsv",
+      "bytes": 2281,
+      "sha256": "996a37217fa5fc6eec622703817195a4c535154ee2baecb1dde3876d2fe14a44",
+      "git_blob": "197b001b69ddb7573e9bc3cdcca6f675b24e5d78"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/x86-initial-raw.tar.gz",
+      "bytes": 489561,
+      "sha256": "e9c1d1cdcdf207d86ca77fe4d1d3aad67dce2a8c85bb262eb10780b840dd0ca3",
+      "git_blob": "10db759be53b459c9dd94361d9328fb0470c4772"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/x86-outcomes.json.gz",
+      "bytes": 25689,
+      "sha256": "5d9446d41f03fc38e0c6254456455095ab24b23960a77c6fa1411fac45159258",
+      "git_blob": "86f6609b3e852eb08e4a57b18e217f15a3f3c938"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/x86-cases.tsv",
+      "bytes": 3161,
+      "sha256": "4cabd32adb5ec2fdea6eb79fe96a9e775544e936ac381eecef3bf88eae844462",
+      "git_blob": "87c11c87269759d1196a8a7eeace8171953b85f6"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/arm64-outcomes.json.gz",
+      "bytes": 47793,
+      "sha256": "f41b879d89ebf63faf774743c771caa4c434e2f12c1303ec785179e35bf5da6b",
+      "git_blob": "65be81759a0fdff8d2af41c609843b3c6bcab0d5"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/arm64-cases.tsv",
+      "bytes": 3405,
+      "sha256": "1163a039a516dbaa1f10f06271864b992575ff4d46272dc84fbccac2a0141cf9",
+      "git_blob": "d534be62962fad03a51827c4d3dec00c06bb467c"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/arm64-controls-summary.json",
+      "bytes": 1776,
+      "sha256": "9197f0f893415beda9aca2d42f501c5527cf83b89d196a1b029af74cf77c6d27",
+      "git_blob": "122883513223abbb3d7996adcc86331ab36d7717"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/arm64-controls-raw.tar.gz",
+      "bytes": 690685,
+      "sha256": "4e539360ae98ab6bb262c5f31bac04c8e2c618c266ddfc28ac0a6435a34db9cd",
+      "git_blob": "d2d9233123971784fa920b9ee1829d91c84ae0e7"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/final-summary.json",
+      "bytes": 20455,
+      "sha256": "10a0e21eb8de301424d38d855400faa584b06d446b7a34fe4a7c03fe80c3506e",
+      "git_blob": "6e57646bc390221335ca4f390cd22f3d90aa0865"
+    },
+    {
+      "path": "kprog/stock-path/results/20261109/receipt-review.md",
+      "bytes": 6293,
+      "sha256": "9fcb584f7380c2cd15c1658ca8b312f43434c8f0ee99fe766d2c53880747f054",
+      "git_blob": "851db6f56b57b4fa177754b6d5ab01a1651f0fc7"
+    }
+  ],
+  "immutable_http_readback": {
+    "revision": "0935b98478e5b5220bb7d455bf928e7b4b748ffa",
+    "http200_matching_bytes": [
+      "x86-initial-summary.json",
+      "x86-initial-outcomes.json.gz",
+      "arm64-controls-summary.json",
+      "arm64-controls-raw.tar.gz",
+      "final-summary.json"
+    ]
+  },
+  "new_guest_runs": 0,
+  "production_changes": 0,
+  "remaining_universal_obligations": "O1/O2/O4, compiler and successful-tail composition retain their formal owners and existing ledger"
+}
