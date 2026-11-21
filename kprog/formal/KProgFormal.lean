@@ -150,3 +150,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterPrefixNative
 import KProgFormal.ClightRefinement.X86Width
 import KProgFormal.ControlABI.NativeFrameWord
 import KProgFormal.ClightRefinement.X86ShiftCount
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall

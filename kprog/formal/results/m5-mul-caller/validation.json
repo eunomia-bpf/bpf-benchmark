@@ -1,0 +1,68 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulCall.lean": "27d7c45594061853f9f578356cf4f53ebf6cbd63a230a1c9e0c929e543e068ff"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall"
+    ],
+    "exit": 0,
+    "seconds": 46.59574627876282,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/caller1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/CallerPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5457637310028076,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-caller1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall.entry_valid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall.enter": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulCall.leave": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "opcode": 12,
+  "arguments": "entry,op12,dst4,src1,src2=3,src3=255,flags8,aux0,imm0",
+  "scope": "actual fifth source call arguments/casts/generic function entry/two-step enter/two-step resume",
+  "whole_library_confirmation": "pending MUL handler/native batch",
+  "handler_native_execution": "not yet proved",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

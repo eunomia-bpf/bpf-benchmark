@@ -1,0 +1,5 @@
+# Actual fifth MUL caller
+
+Arm64ProgramEntryMulCall extracts the untouched original source statement after the checked ADD-register prefix: MUL X4,X1,X3. The actual nine arguments are entry,op12,dst4,src1,src2=3,src3=255,flags8,aux0,imm0. The proof retains the original argument AST and all casts, including the literal AUX0 int-to-uint conversion. It binds the real generic function entry/allocation and checks two original sequence/call steps and two actual void-return/resume steps to the untouched afterMul successor.
+
+Component248jobs46.596s and four public source/entry_valid/enter/leave type+axiom queries pass, inherited logical/CompCert semantic axioms only/original proof caps. Exact hashes/timings/logs in validation.json. No original AST/model change, admission/new axiom/native oracle or runtime predicate. Multiplication handler/operand reads/result/writeback/native/all-behavior and fifth-entry-prefix composition remain open; whole confirmation follows that batch. M5/O1/O2/O4/M6 open; complete ISA families0. No application/runtime tests/measurement.
