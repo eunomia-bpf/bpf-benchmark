@@ -273,7 +273,7 @@ constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
 // BPF_F_NATIVE_IMAGE: the JIT emits the image this task armed in place of B.
 constexpr uint32_t kBpfFNativeImage = 1U << 8;
-constexpr uint32_t kMaxBlobs = 512;
+constexpr uint32_t kMaxBlobs = 2048;
 
 class NativeLabUploadLock {
 public:

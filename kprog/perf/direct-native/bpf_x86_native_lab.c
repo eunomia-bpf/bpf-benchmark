@@ -33,7 +33,7 @@
 /* helper_targets: the function the kernel calls for each helper ID of a loaded program. */
 #include "../../stock-path/module/native_lab_helper_query_impl.h"
 
-#define NATIVE_LAB_MAX_BLOBS	512
+#define NATIVE_LAB_MAX_BLOBS	2048
 /* Userspace uploads a program as consecutive chunks of at most this size
  * (x86 128, arm64 256). The same source builds bpf_arm64_native_lab.ko (Kbuild).
  */
