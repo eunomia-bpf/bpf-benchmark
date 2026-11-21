@@ -1,31 +1,42 @@
-# Best x86 numbers on the current system (2026-11-21, coordinator)
+# Best x86 numbers on the current system (2026-11-21, coordinator; rewritten 15:3x UTC)
 
-Operator 2026-11-21 ~09:1x UTC: "我们现在最好的数字是啥??? 看看"; 2026-11-18: "你要用历史上最好的数据作为合理的数据 … 功能正常就可以".
+Operator 2026-11-18: "你要用历史上最好的数据作为合理的数据. 你看看能不能复现合理的最好数据, 也要对比比如说程序的功能是不是正常,
+功能正常就可以"; "不应该拿调用次数做对比和 gate? 调用次数很可能不同啊"; "莫名其妙的门槛直接清理掉". 2026-11-21 ~15:1x UTC:
+"两臂工作量不同，不算??? 怎么还是会有被你不算的? 不是都不看工作量了吗?".
 
-`best.py` scans every x86 run of 11-16..11-21 with the frozen settings (3 samples x 180 s, status ok) and takes each
-app's maximum with the 05-29 parser (`raw-maxima.txt`, 82 runs). Maxima whose arms did different work are set aside,
-with the receipt that shows it:
+Rule: every functional run counts, whatever its program or call counts. A run is left out only when its native side did
+something functionally different, with the receipt that shows it. `best.py` scans the x86 runs of 11-16..11-21 with the
+frozen settings (3 samples x 180 s, status ok); ratios are native/eBPF from the 05-29 parser (`raw-maxima.txt`).
 
-| Max in raw-maxima.txt | Set aside because |
+## Image 3b5fa4b40 (bpf-benchmark/kprog:current, sha256:ba86ac5d), best of its frozen-entry runs
+
+| App | Per call | Throughput stats off | Throughput stats on | Runs | 05-29 (kinsn-era system) |
+|---|---|---|---|---|---|
+| Tracee | **2.036x** | **1.884x** | 1.659x | 013353_459359, 225422_198013 | 0.948x |
+| Tetragon | **1.248x** | **3.291x** | 1.093x | 010702_796774, 222740_505433 | 1.009x |
+| Cilium | **1.348x** | 1.027x | **1.123x** | 133941_317114, 121942_061103 | 1.319x |
+| BCC | **1.144x** | 1.009x | **1.251x** | 001342_075406, 115246_054562 | 0.985x |
+| Katran | **1.017x** | 0.962x | 1.004x | 020118_444610, 232145_135785 | 1.113x |
+| OTel | **0.955x** | 0.979x | 1.006x | 124621_300407, 112615_798808 | 1.849x |
+
+Per-call geomean over the six: **1.250x** (20% target: 1.20x). The same image also read BCC 1.017x and Cilium 1.012x per
+call in other runs: the spread between runs of one image is that large.
+
+## Best functional numbers of the week (any image of the current system)
+
+| App | Per call | Throughput stats off | Run |
+|---|---|---|---|
+| Tetragon | 2.790x (main configuration) | 3.291x | 20261120_143937_810796, 20261120_222740_505433 |
+| Tracee | 2.036x | 1.884x | 20261121_013353_459359, 20261120_225422_198013 |
+| Cilium | 1.348x | 1.027x | 20261121_133941_317114, 20261121_121942_061103 |
+| BCC | 1.144x | 1.023x | 20261121_001342_075406, 20261119_045219_454072 |
+| Katran | 1.094x | 1.120x | 20261116_145408_662903, 20261116_092956_863537 |
+| OTel | 0.960x | 1.053x | 20261116_195601_628082, 20261117_091405_442941 |
+
+## Left out: the native side did something functionally different
+
+| Run | Receipt |
 |---|---|
-| OTel per call 14.4x, throughput 1.866x / 2.020x (11-16) | the native path's unrolling did no work, as in 05-29's 1.849x (perf-history-review-20261120: 913,099,438 unroll attempts to 0) |
-| Cilium per call 4.103x (11-16), stats off 3.564x (11-19 202033) | 11-16: natives built with the sample config, the eBPF arm with the agent's; 11-19: native packets also crossed cil_to_host, the sender ran about 3x the packets (todo, coordinator 2026-11-19T21:30:54Z) |
-| Tetragon per call 2.790x, throughput 2.995x / 3.291x | post arm recorded 129 programs against 287, or the eBPF arm ran a third of its own stats-on rate (rotate-3b5fa4b40-20261120) |
-| Katran per call 1.094x (11-16 145408) | samples 1.25 / 0.95 / 1.04 (trend-20261116) |
-| BCC throughput stats on 1.268x (11-16 060435) | sched_switch and sched_wakeup ran 2.51x as often in the native arm (arm-paths-20261116) |
-
-What stands: image 3b5fa4b40, frozen entry rotate (kprog/results/rotate-3b5fa4b40-20261120), against the 05-29 x86
-matrix (the kinsn-era system; stats off throughput).
-
-| App | Per call | Throughput stats off | Throughput stats on | 05-29 |
-|---|---|---|---|---|
-| Tracee | 2.036x | 1.884x | 1.659x | 0.948x |
-| Tetragon | 1.248x | (unequal work) | 1.093x | 1.009x |
-| BCC | 1.144x | rerun queued (best earlier 1.023x, 11-19) | 1.251x | 0.985x |
-| Katran | 1.017x | 0.962x | 1.004x | 1.113x (above its BPF-share bound, about 1.10x) |
-| Cilium | 1.012x | rerun queued | 0.992x | 1.319x |
-| OTel | 0.936x | rerun queued | 0.961x | 1.849x (unrolling did no work) |
-
-Per-call geomean 1.187x (20% target: 1.20x). Above the 05-29 number: Tracee, Tetragon, BCC. Below: Cilium (107 of its
-135 programs are per-endpoint programs the agent compiles with other constants; they stay on eBPF), and Katran and OTel
-against 05-29 figures that themselves exceed what equal work allows.
+| OTel per call 14.4x, throughput 1.866x / 1.854x / 2.020x (11-16) | the native path skipped the stack unwinding the eBPF path does: unroll attempts 913,099,438 to 0 (perf-history-review-20261120) |
+| Cilium per call 4.1x / 4.0x / 3.8x (11-16), stats off 2.819x (11-17), 3.564x (11-19 202033) | natives built with Cilium's sample config ran in place of programs the agent built with its own constants; on 11-19 the native packets also crossed cil_to_host and the sender pushed about 3x the packets (todo, coordinator 2026-11-19T21:30:54Z) |
+| Katran stats off 1.121x (11-16 095730) | the 05-29 image, the May reference of katran-linker-repeat |
