@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] **Coordinator/A** ARM checked-sim-C execution adapter and shared-service integration: current CLI accepts x86; ARM submitted-native B generation remains present. Static source trace0df4fb8e7 in corpus/results/kprog_arm64_app_coverage_20261121; direct ARM functional and x86 timing stay coordinator owned.
+
 - [ ] PERF PID/TGID native C (2026-11-20T09:11:41Z): shared header macro, BTF task offsets2800/2804, same null/signed semantics.56imported-native cases/two proof links pass;105PIDwrapper calls become0, current-task visits unchanged. P/B14 unchanged; existing tools/all LTO/uniform flags. Actual accepted BCC API/kernel/app/runtime checks follow; results/pid-c-lto-20261120.
 
 - [x] PERF dynamic ordinary ARRAY after-B C (442a7e8bc; 2026-11-20T08:48:03Z):16018host cases and both accepted OTel native APIs/proof links pass; unwind18091→21486B,HotSpot18605B unchanged,72static type2sites. OTel835661 completes0/appOK,14native/7checked/7direct,13loaded/2triggered each arm. Section5 one retained caller4067.801→5009.014ns,post/base1.231381/speedup0.812096; target unmet. Raw calls4490522→5429209, worker rates mixed, no aggregate throughput claim. New image d9baf625 and framework restoration context retained; no isolated effect. Results lpm-c-lto-20261120/dynamic-otel-result.json/evidence.tar.gz and dynamic-array-c-20261120 API/component receipts. All LTO on, tools/flags unchanged; global performance and formal obligations stay open.
