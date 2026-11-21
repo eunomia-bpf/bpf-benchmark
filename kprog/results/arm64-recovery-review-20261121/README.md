@@ -1,0 +1,11 @@
+# ARM recovery review H1 / M1 / M2 / L1 / L3
+
+The current user assignment selects an architectural-fault arm for a nonempty external memcpy with a SCALAR source. The5720-check production-body host probe first records9 discrepancies: the copy proceeds and changes8 destination bytes. The four-line model arm reaches the existing fault operation before transfer. Typed and zero-length controls retain their behavior. This scoped requirement supersedes the scalar-copy policy recorded in c5ec29fed; helper argument projection, clobbers and stack lifetime keep their current definitions.
+
+M1 already computes the full effective address and forces recovery in the low4KiB page. M2 already preserves V0 and the base before vector writeback. Their current production-body controls pass with the corrected H1 contract:5720 checks under GCC UBSan. L1's legacy and active stock module masks already include bit31. Their actual C metadata blocks each pass6 instruction words.
+
+The restored native-link tree supplied an empty ARM load-site vector and had dropped its decoder. The existing source-extraction oracle first stopped at that missing function. The final-code collector is present again, with CASP mask0xbfa07c00; proof-mode and native byte rewriting retain their definitions. Its10 instruction words and code-range/literal exclusion check pass. The complete native-link release build and all7 Rust tests pass. ARM cross-build, stock module, existing fixture module and current loader/probe components use the sole warm ARM kernel base, with outputs under /var/tmp/kprog-tmp/S2/review-20261121.
+
+L3 uses the existing14-form fixture inventory: full-word, narrow and sign-extending reads; LDP; pre/post-index reads; D0/Q0 with observable preserved values and post-index forms. Current-base guest observations and final receipt follow here as collection completes. The earlier concrete14-form observations remain in kprog/results/kprog_arm64_read_followup_20261109/guest5 and guest6; their source/runtime epoch is explicitly historical.
+
+Workload and paper paths retain their definitions. Universal ISA/O2/compiled-B and physical fault correspondence remain explicit proof obligations owned by the formal lane. This record carries component tests and concrete guest observations.

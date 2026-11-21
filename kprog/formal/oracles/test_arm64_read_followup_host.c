@@ -70,12 +70,16 @@ static void copy_source(unsigned tag, unsigned length)
     ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X2,length,ARM64_WIDTH_64);
     faults=0; draw=0;
     if (setjmp(fault_return)==0) ARM64_SIM_LIBC_MEMCPY();
-    /* A mapped source remains readable with a scalar tag. A zero-length copy
-     * touches no bytes; provenance alone is not an architectural fault. */
-    CHECK(faults==0,"mapped memcpy source selects transfer");
-    CHECK(memcmp(dst,src,length)==0,"memcpy transfers source bytes");
-    for (unsigned i=length;i<sizeof(dst);++i)
-        CHECK(dst[i]==0x5a,"memcpy preserves bytes outside its length");
+    unsigned scalar_fault=tag==ARM64_SIM_TAG_SCALAR && length>0;
+    CHECK(faults==scalar_fault,"external scalar memcpy selects its architectural fault arm");
+    if (scalar_fault) {
+        for (unsigned i=0;i<sizeof(dst);++i)
+            CHECK(dst[i]==0x5a,"copy fault precedes destination writes");
+    } else {
+        CHECK(memcmp(dst,src,length)==0,"typed or empty memcpy retains its transfer");
+        for (unsigned i=length;i<sizeof(dst);++i)
+            CHECK(dst[i]==0x5a,"memcpy preserves bytes outside its length");
+    }
 }
 static void vector_read(unsigned op, unsigned flags, unsigned via, unsigned selected)
 {

@@ -2239,6 +2239,10 @@ do { \
 #define ARM64_SIM_LIBC_MEMCPY()                                            \
 	do {                                                               \
 		__u64 __a64_lib_len = ARM64_SIM_L_READ_REG(ARM64_X2);       \
+        __u8 __a64_lib_src_tag;                                           \
+        ARM64_SIM_L_REG_TAG_INTO(__a64_lib_src_tag, ARM64_X1);             \
+        if (__a64_lib_len && __a64_lib_src_tag == ARM64_SIM_TAG_SCALAR)    \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE();                            \
 		for (__u64 __a64_lib_i = 0; __a64_lib_i < __a64_lib_len; __a64_lib_i++) \
 			ARM64_SIM_L_MEM_WRITE(ARM64_X0,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,0),0,__a64_lib_i,ARM64_WIDTH_8, \
                 ARM64_SIM_L_MEM_READ(ARM64_X1,ARM64_REG_NONE,ARM64_AUX_MEM(ARM64_REG_NONE,ARM64_MOD_NONE,0,0),0,__a64_lib_i,ARM64_WIDTH_8),ARM64_SIM_TAG_SCALAR); \

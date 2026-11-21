@@ -40,6 +40,8 @@ int main(int argc,char **argv)
 #else
         options.native_link_path="/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link";
 #endif
+        if (const char *linker=std::getenv("BPFREJIT_NATIVE_LINK_BINARY"); linker && *linker)
+            options.native_link_path=linker;
         loaded=native_loader::load_from_fd(options);
         bpf_prog_info info{}; unsigned int info_size=sizeof(info);
         if (bpf_obj_get_info_by_fd(loaded.prog_fd,&info,&info_size))

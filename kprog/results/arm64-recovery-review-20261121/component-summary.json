@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-21T20:00:47.056594+00:00",
+  "H1": {
+    "baseline_checks": 5720,
+    "baseline_discrepancies": 9,
+    "current_checks": 5720,
+    "current_discrepancies": 0
+  },
+  "M1": "effective-address controls in production host probe pass",
+  "M2": "SIMD/base/flags/memory frame and success controls pass",
+  "L1": {
+    "decoder_words": 10,
+    "code_range_exclusion": "pass",
+    "legacy_pair_words": 6,
+    "stock_pair_words": 6
+  },
+  "rust_tests": 7,
+  "rust_test_exit": 0,
+  "host_and_arm_build_exit": 0,
+  "forms_linked": 14,
+  "load_sites_per_form": 2
+}
