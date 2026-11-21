@@ -120,6 +120,18 @@ with the original loop and writer continuation. Its
 record existing logical/CompCert axioms and original proof budgets. Full world
 and entry representation, classification, flag computation and writeback remain open.
 
+The [actual SHL flag classifier](KProgFormal/ClightRefinement/X86ShiftLeftClassify.lean)
+follows all nine original comparisons and nine source writes for operation 5.
+Thirty-six silent internal steps reach the original switch with kind 7, and
+one more selects its original shift flag branch with the real switch
+continuation. Every source cast remains in the execution and exact temporary
+map. The kind reads back seven; all other temporaries, caller locals and complete
+memory retain their values for every incoming map with the typed operation.
+The [six public audits](../results/kprog_verification_20261107/x86-shift-left-classify.log.gz)
+record the actual classifier/switch identities, relational execution and existing
+logical/CompCert axioms at original budgets. Composition with entry/operand and
+old-CF reads, actual flag stores and the writer remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
