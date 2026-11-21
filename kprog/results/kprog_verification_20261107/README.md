@@ -533,6 +533,26 @@ S15's b3e687165 reconciliation supplies this clarification. Current M5
 correspondence and O1/O2/O4 recount follow the mature ISA/Clight route described
 in the [formal entry point](../../formal/README.md). Model predicates added:0.
 
+S13's [current control handoff](../kprog_control_abi_20261121/README.md) adds
+33 universal components across the four existing spill, helper, tail and entry
+rows: matching-domain RCU lifetime, typed helper effects, actual Clight local
+frames, mature x86 stack primitives and the decoded ARM X0/X7 bridge. All four
+rows retain `partial-universal-component`. The returning helper contract covers
+its return branch; successful tail transfer, current compiler CFG/spills and
+physical native/B projection remain current M5 goals. Historical theorem and
+source epochs remain recorded alongside the maintained mature-base components.
+
+S2's [current ARM recovery report](../arm64-recovery-review-20261121/README.md)
+extends the existing shared recovery row with ten successful physical fault
+forms and four deliberate SIMD generation exclusions. It retains 5720 followup
+and 6144 recovery states, 77 oracle pairs and 156 generator shapes. Safety34
+keeps 4 positive executions, 17 verifier refusals, 3 generation refusals,
+3 lookup_sites linking outcomes and 7 `accepted_load_only` outcomes; driver
+exit2 and negative native executions0 remain recorded. The current
+`uninitialized_stack` finding and the other six accepted names keep their
+captured outcomes and formal/coordinator disposition. The catalogue keeps
+22 O4 rows and its existing universal premises and partial statuses.
+
 S5's `b501e2c0c` [post-encoding transport module](../../formal/KProgFormal/NativeLinkProducerEdits.lean)
 adds 11 universal laws for ordered append/write/truncate histories, exact final
 live bytes and size, overlapping writes, range frames and conditional final-memory
