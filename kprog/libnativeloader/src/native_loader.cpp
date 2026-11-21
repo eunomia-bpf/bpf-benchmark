@@ -2329,6 +2329,11 @@ void add_known_kconfig_symbol_addrs(CompanionLoad &load)
 
 bool native_data_section_supported(const std::string &section_name)
 {
+    // Merged string literals are constants native-link keeps in the image; the program's
+    // .rodata.str map has its own layout (Tracee's .L.str.14 lay past it).
+    if (section_name.rfind(".rodata.str", 0) == 0) {
+        return false;
+    }
     return section_name == ".bss" ||
            section_name == ".data" ||
            section_name.rfind(".rodata", 0) == 0;
