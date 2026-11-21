@@ -34,6 +34,16 @@ same return; each terminal execution has the original result and memory, and
 the complete relation terminates. The [all-behavior audit](../results/kprog_verification_20261107/x86-width-behavior.log.gz)
 records all four public contracts at the same semantic assumptions.
 
+The [saved-frame word component](KProgFormal/ControlABI/NativeFrameWord.lean)
+proves adjacent qword preservation over wrapping addresses and the exact mature
+x86 LEAVE/RET state after a saved-frame store, for every machine state and word.
+It derives saved-RBP preservation exactly when the replacement equals the
+original word, and specializes the store address under the explicit RSP=RBP
+entry relation. Live state and canonical adjacent return address are premises;
+physical permissions, emitted wrapper correspondence and native/B projection
+remain platform obligations. Its [four public audits](../results/kprog_verification_20261107/native-frame-word.log.gz)
+use the existing logical axioms. This O4 component retains the partial M5 scope.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
