@@ -44,13 +44,13 @@ theorem branch_source : Dispatch.branch = .Sloop body .Sbreak := rfl
 theorem tail_source : tail = Arm64Program.s_kprog_arm64_program_execute_17 := rfl
 
 def tailCont (k : CC.Cont) : CC.Cont := .Kloop1 body .Sbreak k
-private def rhsCont (k : CC.Cont) : CC.Cont := .Kseq tail (tailCont k)
+def rhsCont (k : CC.Cont) : CC.Cont := .Kseq tail (tailCont k)
 private def lhsCont (k : CC.Cont) (e : CC.Env) (le : CC.TempEnv) : CC.Cont :=
   .Kcall (some Arm64Program._t'7) Arm64Nop.handler e le
     (.Kseq lhsSet (.Kseq (.Ssequence rhsLoop tail) (tailCont k)))
 
 def width (narrow : Bool) : CC.Val := Arm64Width.argument (Dispatch.flags narrow)
-private def widthTemps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
+def widthTemps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
   le.set Arm64Program.___a64_alu_width (width narrow)
 
 def lhsTemps (le : CC.TempEnv) (narrow : Bool) (lhs : BitVec 64) : CC.TempEnv :=
@@ -72,14 +72,14 @@ private theorem lhs_call_source : lhsCall =
        .Etempvar Arm64Program._src CC.tulong] := rfl
 
 private theorem call_lhs (world : CC.CGenv) (block b : CC.Block) (ofs : CC.Integers.Ptrofs)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (sourceWord : BitVec 64)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some block ∧
       CC.Genv.findFunctPtr world.genv_genv block = some (.Internal Arm64Program.f_kprog_arm64_program_read))
     (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
     (entry : le.get Arm64Program._entry = some (.Vptr b ofs))
-    (source : le.get Arm64Program._src = some (.Vlong (32#64))) :
+    (source : le.get Arm64Program._src = some (.Vlong sourceWord)) :
     CC.Step2 world (.State Arm64Nop.handler lhsCall k e le m) CC.E0
-      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read) [.Vptr b ofs, .Vlong (32#64)]
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read) [.Vptr b ofs, .Vlong sourceWord]
         (.Kcall (some Arm64Program._t'7) Arm64Nop.handler e le k) m) := by
   rw [lhs_call_source]
   apply CC.Step.call (tyargs := [CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr), CC.tulong])
@@ -100,17 +100,17 @@ private theorem enter_lhs (world : CC.CGenv) (block : CC.Block)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some block ∧
       CC.Genv.findFunctPtr world.genv_genv block = some (.Internal Arm64Program.f_kprog_arm64_program_read))
     (b : CC.Block) (ofs : CC.Integers.Ptrofs) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
-    (k : CC.Cont) (narrow : Bool)
+    (k : CC.Cont) (narrow : Bool) (sourceWord : BitVec 64)
     (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
     (entry : le.get Arm64Program._entry = some (.Vptr b ofs))
-    (source : le.get Arm64Program._src = some (.Vlong (32#64)))
+    (source : le.get Arm64Program._src = some (.Vlong sourceWord))
     (effective : le.get Arm64Program.___a64_l_width = some (width narrow)) :
     InternalRun world 7 (.State Arm64Nop.handler Dispatch.branch k e le m)
       (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
-        [.Vptr b ofs, .Vlong (32#64)] (lhsCont k e (widthTemps le narrow)) m) := by
+        [.Vptr b ofs, .Vlong sourceWord] (lhsCont k e (widthTemps le narrow)) m) := by
   have entry' : (widthTemps le narrow).get Arm64Program._entry = some (.Vptr b ofs) := by
     simp +decide only [widthTemps, CC.PTree.gso, entry]
-  have source' : (widthTemps le narrow).get Arm64Program._src = some (.Vlong (32#64)) := by
+  have source' : (widthTemps le narrow).get Arm64Program._src = some (.Vlong sourceWord) := by
     simp +decide only [widthTemps, CC.PTree.gso, source]
   cases narrow <;>
     run_tac do
@@ -130,7 +130,7 @@ private theorem enter_lhs (world : CC.CGenv) (block : CC.Block)
           List.nil_append, List.append_nil, ite_true, ite_false, eq_self, Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
       Lean.Elab.Tactic.evalTactic (← `(tactic|
         exact InternalRun.step trivial
-          (call_lhs world block b ofs e _ m _ binding unshadowed entry' source') (InternalRun.refl _)))
+          (call_lhs world block b ofs e _ m _ sourceWord binding unshadowed entry' source') (InternalRun.refl _)))
 
 set_option hygiene false in
 private theorem after_lhs (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
@@ -148,6 +148,33 @@ private theorem after_lhs (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m :
         CC.Cop.semCast, CC.Cop.classifyCast, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tulong,
         CC.E0, CC.Eapp, List.nil_append, List.append_nil] <;> try rfl))
     Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- Actual scalar GPR LHS, preserving the same memory and reaching the original
+RHS loop. The load premises are the real typed storage observations. -/
+theorem lhs_scalar {initial memory : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
+    (storage : Arm64ProducerRegisterStorage.Storage initial memory entry)
+    (i : Fin 31) (value : BitVec 64) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (narrow : Bool)
+    (readName : e.get Arm64Program._kprog_arm64_program_read = none)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr entry.block 0))
+    (source : le.get Arm64Program._src = some (.Vlong (BitVec.ofNat 64 i.val)))
+    (effective : le.get Arm64Program.___a64_l_width = some (width narrow))
+    (word : CC.Mem.load .Mint64 memory ((storage.tables false).cellBlock i) 0 = some (.Vlong value))
+    (tag : CC.Mem.load .Mint8unsigned memory ((storage.tables true).cellBlock i) 0 = some (.Vint 0)) :
+    InternalRun Arm64ProgramEntryLinked.ge 85
+      (.State Arm64Nop.handler Dispatch.branch k e le memory)
+      (.State Arm64Nop.handler rhsLoop (rhsCont k) e (lhsTemps le narrow value) memory) := by
+  have observed : Arm64EntryMemory.gpr memory.nextblock memory (.Vptr entry.block 0) i.val =
+      some (.Vlong value, .Vint ((0#8).setWidth 32)) := by
+    rw [Arm64RegisterWrite.storage_gpr storage i, word, tag]
+    rfl
+  have enter := enter_lhs Arm64ProgramEntryLinked.ge (CC.Positive.ofNat 66)
+    Arm64AddOperandReads.Linked.bindings.2.2 entry.block 0 e le memory k narrow
+    (BitVec.ofNat 64 i.val) readName entryRead source effective
+  have read := Arm64RegisterReads.gpr_read_nonrelative_bound Arm64ProgramEntryLinked.ge
+    Arm64MovKeep.Linked.reader_layout (fun _ => none) memory.nextblock entry.block 0 i memory
+    (lhsCont k e (widthTemps le narrow)) (.Vlong value) value (0#8) observed rfl (by decide) (by decide)
+  have finish := after_lhs Arm64ProgramEntryLinked.ge e le memory k narrow value
+  simpa only [CC.callCont, lhsCont] using (enter.trans read).trans finish
 
 /-- Read the represented SP using its reached warm cache, then run the actual
 conditional immediate RHS and reach the original tag/arithmetic tail. No new
@@ -169,7 +196,7 @@ theorem evaluate (addresses : Arm64Registers.PointerOrigins) (origins : Referenc
       (.State Arm64Nop.handler tail (tailCont k) e
         (tailTemps le narrow (Reference.AArch64.sp native) imm) m) := by
   have enter := enter_lhs Arm64ProgramEntryLinked.ge (CC.Positive.ofNat 66)
-    Arm64AddOperandReads.Linked.bindings.2.2 b ofs e le m k narrow readName entry source effective
+    Arm64AddOperandReads.Linked.bindings.2.2 b ofs e le m k narrow (32#64) readName entry source effective
   have read := Arm64ProgramEntryWarmRead.read addresses origins frontier b ofs m
     (lhsCont k e (widthTemps le narrow)) native represented cache
   have finishRead := after_lhs Arm64ProgramEntryLinked.ge e le m k narrow (Reference.AArch64.sp native)

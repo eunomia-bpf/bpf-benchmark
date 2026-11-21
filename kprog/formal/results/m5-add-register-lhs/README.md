@@ -1,0 +1,5 @@
+# Actual scalar GPR LHS
+
+The original ALU branch now has a checked 85-step scalar GPR LHS run: real call entry7, existing linked combined reader73, actual return/set continuation5. It reaches the original RHS loop with exact temporaries and the same heap. The typed storage word/scalar-tag observations are actual caller resources, not a replacement read model. The original SP-immediate evaluate theorem keeps its public contract and reuses the generalized private call with source32.
+
+Component build passed229 jobs3.345s; public queries for the new scalar LHS and existing SP evaluation passed, only standard logic and inherited CompCert external/inline semantics. Exact hashes/timings/logs are in validation.json. rhsCont and widthTemps are exported to compose the original continuations/temporary facts. No source AST change, new input premise on the existing API, cap raise, axiom or admission. Whole-library confirmation follows the operand-prefix batch. Complete fourth handler/native and M5/O1/O2/O4/M6 remain open/families0. No apps, runtime tests or measurements.

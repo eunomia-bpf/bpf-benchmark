@@ -1,0 +1,54 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateOperands.lean": "67000115d7476d3dff73b844174a0149b47ffb9807f8f7d0eef132ffa63a6d1a"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateOperands"
+    ],
+    "exit": 0,
+    "seconds": 3.3449642658233643,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/lhs1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/LhsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5137882232666016,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-lhs1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.lhs_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Operands.evaluate": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "whole_library_confirmation": "pending until source operand prefix batch completes",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
