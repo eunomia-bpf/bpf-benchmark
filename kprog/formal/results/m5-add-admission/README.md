@@ -13,3 +13,10 @@ or instruction body. Native physical ABI/origin/provider production validity
 remains open. Proof-only verification at original200000/512/asyncfalse limits,
 CPU17/one worker/32GiB. Raw m5-add-prefix-join; actual results in validation.json.
 No runtime test or measurement, no complete ISA family added; M5/M6 open.
+
+Batch confirmation2026-11-21: lake build KProgFormal passes303 proof jobs
+in3.513s; root artifact UTC2026-11-21T16:30:02.213988+00:00.
+CPUs16-23/nice19/j1/32GiB AS, original proof caps. Native executables/tools,
+runtime tests and measurements excluded. The actual original-entry/MOV/ADD
+source composition is verified; production ABI/provider validity, remaining
+handlers, whole-program outcomes/final return and M5/M6 remain open.

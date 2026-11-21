@@ -89,7 +89,32 @@
   "raw": "/workspaces/kprog-raw/formal/m5-add-prefix-join",
   "source_checkpoint_before_commit": "7afcbbfe12c865ba1e7fa1469b538ed526bb5afc",
   "whole_proof_library": {
-    "status": "pending batch-end proof confirmation"
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.513033866882324,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "jobs": 303,
+    "root_artifact": "kprog/formal/.lake/build/lib/lean/KProgFormal.olean",
+    "root_artifact_utc": "2026-11-21T16:30:02.213988+00:00",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-add-prefix-join/full1.log",
+    "source_checkpoint": "128cefa3fbc3fd6ae131140d732aff33b7b80f18",
+    "scope": "complete KProgFormal Lean proof library/root; excludes native tools/executables, runtime tests and benchmark measurement"
   },
   "completed_isa_families": 0
 }
