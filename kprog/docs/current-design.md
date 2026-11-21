@@ -47,8 +47,12 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 | arm64 | 构建按架构参数化（vmlinux 头、__TARGET_ARCH、系统头）；-mno-outline-atomics；pt_regs 参数寄存器；Tetragon regs.h 的 arm64 分支用普通 C；OTel 部分链接带目标；入口函数多处保存（shrink-wrapping）时保留自己的保存 | vendor/bpf、native-link |
 | arm64 | 尾调用内联：P 编译时保留 x26（-ffixed-x26，arm64 所有应用一致），x26 在原生帧里指向尾调用计数；native-link 把 bpf_tail_call 展开成 JIT 同样的序列（界检查、计数、取 prog、回到帧底、弹出五对寄存器、跳到目标序言之后），任何深度的调用点都可用 | native-link、加载器、vendor/bpf |
 | 去掉 | 5/29 构建期对每个符号跑 native-link proof 模式的关卡（产物没有人读；checked 配置在装载时自己跑 proof），90 行 | vendor/bpf |
+| arm64 | 数据重定位按段处理（proof 拷整段、kernel 用段副本加偏移）；调用对象内其它函数（构建时把可执行段合成一个 .text，native-link 跟进 CALL26）；按编号调用的 helper（唯一编号直接调；-O3 合并了几个 helper 时按运行时编号分派） | native-link、vendor/bpf |
+| 功能修复 | helper 绑定到内核对这个程序类型实际调用的函数（模块 helper_targets，按 get_func_proto 查；复用 verify 侧的查询函数） | 模块、加载器 |
+| 功能修复 | 字符串常量（.rodata.str*）留在镜像里，不绑到程序的 map（Tracee）；cilium_snat_v4_external 按类型和 key/value 大小匹配（agent 按内存定大小） | 加载器、manifest |
+| 功能修复 | B 持有 P 引用的全部 map（5/29）；内核因 prog array 主人类型不同拒绝时，去掉原程序没用的 prog array 再装（OTel custom__generic） | 加载器 |
+| 测量修复 | shim 的快照等进行中的原生加载做完（2026-11-12 的 1af32bdae）：Tetragon 288 个原生加载没做完时就取样了 | shim |
 | 优化 | 读内核内存直接 load：头文件把 bpf_probe_read_kernel(_str) 和 bpf_probe_read(_str) 的内核半区写成普通 load；native-link 给 P 里每条读内存指令记 load site；加载器上传；模块转成内核 extable 项（出错读 0 继续，和 JIT 的 PROBE_MEM 一样） | vendor/bpf、native-link、加载器、模块 |
-| 优化 | bpf_ktime_get_ns 直接绑定到它的 C 实现 ktime_get_mono_fast_ns | 加载器 |
 | 路径 | native-sim → kprog | vendor/bpf |
 
 5/29 本来就有的链接时优化：ARRAY/PERCPU_ARRAY 查找和更新内联、hash 查找直接绑定 __htab_map_lookup_elem、CPU 号内联、x86 尾调用内联。
@@ -60,7 +64,6 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 | map 查找 / 更新 | ARRAY、PERCPU_ARRAY 内联；hash 直接调 __htab_map_lookup_elem；其余调 helper |
 | 读内核内存 | 普通 load + load site |
 | 读用户内存 | helper 调用 |
-| bpf_ktime_get_ns | 直接调 ktime_get_mono_fast_ns |
 | bpf_get_smp_processor_id | 内联 |
 | bpf_tail_call | x86 内联（入口函数内）；arm64 内联（任何函数内） |
 | 其余 | 按名字绑定内核 helper |
@@ -84,6 +87,6 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 
 ## 四、下一步（不测量）
 
-1. x86 六应用功能检查（17:0xZ 起，每应用 10 秒、stats 开）：加载错误、各程序是否原生、两臂调用次数；有问题按设计修。
-2. arm64：带尾调用的原生对象构建确认；arm64 来宾（QEMU）功能检查。
+1. x86 六应用功能检查（每应用 10 秒、stats 开）。截至 18:2xZ：BCC 25/25、Katran 1/1、Tracee 169/169 原生且两臂各程序都在跑；Tetragon 288/288 原生，取样时原生加载未完成（shim 快照锁已补，待复查）；OTel、Cilium 的加载问题已修，复查中。
+2. arm64：六应用原生对象全部能链接（离线逐个入口链接）；arm64 镜像和来宾（QEMU）功能检查。
 3. 全部做好后（运营者 11-21：“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”）：先一次六应用功能检查（加载错误、各程序两臂调用次数），再用冻结入口完整测一遍性能（六应用，stats 关、开），和 5/29 的数逐应用对比；不调任何参数。
