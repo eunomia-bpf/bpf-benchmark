@@ -16,6 +16,13 @@ namespace native_lto {
 inline constexpr const char *kernel_symbols[] = {
     "ktime_get_mono_fast_ns",
     "jiffies_64",
+    /* The inline probe-read wrappers call the kernel's own nofault routines
+     * (kprog/x86/micro-prog/inline_probe.c), so the link plan needs their
+     * addresses; without them native-link reports "x86 helper call
+     * copy_from_user_nofault has no helper address". Both are global text
+     * symbols in the one kernel line. */
+    "copy_from_user_nofault",
+    "copy_from_kernel_nofault",
 };
 
 inline const btf_type *type(const btf *types, uint32_t id)
