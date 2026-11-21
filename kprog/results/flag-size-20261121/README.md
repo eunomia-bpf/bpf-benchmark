@@ -18,7 +18,7 @@ Logs: `/workspaces/kprog-raw/coordinator/flagsz-20261121/`.
 | Tracee | 1,630,163 | 1,400,511 | 1,736,116 | 0.859 | 1.065 |
 | All | 8,386,329 | 7,322,357 | 7,102,784 | 0.873 | 0.847 |
 
-- Os shrinks every app; Oz grows Tracee. Os is the one-flag-set candidate; its timing round (image, six-app check,
-  frozen-entry rotate, then the default image back) is queued as kprog-raw/coordinator/tune-os-20261121T075220Z.
+- Os shrinks every app; Oz grows Tracee. Operator 2026-11-21 ~09:0x UTC: "编译参数固定 O3. 不需要调代码大小了. 确保 inline
+  啥的都正常就好": the flags stay -O3 and the queued Os timing round was withdrawn before it started; these sizes are a record.
 - Against the installed native/JIT bytes at O3 (11-17: OTel 0.80, BCC 1.00, Cilium 0.83, Tracee 0.82, Katran 0.69), Os
   gives about OTel 0.61, BCC 0.83, Cilium 0.78, Tracee 0.70, Katran 0.66: the level alone leaves every app above one half.
