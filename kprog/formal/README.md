@@ -151,8 +151,8 @@ at the terminal continuation is a silent prefix of the same return; terminal
 returns are unique and infinite executions are excluded. The
 [ten public audits](../results/kprog_verification_20261107/x86-width-shape.log.gz)
 record default proof budgets and the existing logical/CompCert axioms; the two
-native value equalities use no axioms. Integration with the original shift flag
-call sites and stores remains open.
+native value equalities use no axioms. The original shift flag call sites are
+linked by the width-prefix proof below; the flag stores remain open.
 
 The [original shift flag width prefix](KProgFormal/ClightRefinement/X86ShiftFlagWidths.lean)
 retains the selected source case, loop and switch fallthrough. It performs the
@@ -166,6 +166,18 @@ typed incoming width are explicit input premises. The
 record the actual source identity and relational execution at existing proof
 budgets and inherited logical/CompCert axioms. Operand/count setup, flag stores,
 writeback and entry/world correspondence remain open.
+
+The width-prefix route composition joins original arithmetic dispatch, old-CF
+reads, classification and all three real width calls in one 145/157/169/169-step
+silent execution. Its typed width at the last call stage follows from the
+preceding Site/Carry/Classify temporary frame laws. The full incoming heap and
+caller locals survive, with the exact nested source temporary map and original
+operand/count/flag continuation. All sizes, operands and old CF bytes share this
+theorem under the actual callee/layout/heap input observations. The
+[ten public audits](../results/kprog_verification_20261107/x86-shift-through-widths.log.gz)
+record the universal composition and the preceding source results at existing
+budgets and inherited logical/CompCert axioms. Actual operand/count setup,
+flag stores, writeback and entry/world correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
