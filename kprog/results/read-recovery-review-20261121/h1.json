@@ -1,0 +1,49 @@
+{
+  "utc": "2026-11-21T19:47:05.196252+00:00",
+  "baseline_head": "0935b98478e5b5220bb7d455bf928e7b4b748ffa",
+  "item": "H1",
+  "baseline_make_exit": 2,
+  "baseline_case": 545,
+  "baseline_assertion": "nonempty SCALAR external copy takes architectural fault",
+  "fixed_make_exit": 0,
+  "host_cases": 845,
+  "code_change": "Existing external-copy body takes existing architectural-fault arm for nonempty SCALAR source. Typed and zero-size copies preserve success.",
+  "source_sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336",
+  "raw_directory": "/workspaces/kprog-raw/S1/20261121-review-followup",
+  "logs": {
+    "host-baseline.log": {
+      "sha256": "acea69dee542bea31e0b8f2fe301832a2c849475d678407191e5f34291913d35",
+      "bytes": 437
+    },
+    "host-baseline.exit": {
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+      "bytes": 2
+    },
+    "host-baseline-gdb.log": {
+      "sha256": "129e629168771078b1886e4cfc6677391d3e9a4450abd1d0a4438ffa51780d2b",
+      "bytes": 58
+    },
+    "host-debug-build.log": {
+      "sha256": "430e1d9a5818b7d1dd069adae0d9cf1f5f6361d0c6077af491c77e2603828e49",
+      "bytes": 441
+    },
+    "host-baseline-diagnostic.exit": {
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+      "bytes": 2
+    },
+    "host-h1.log": {
+      "sha256": "cf3c599d81538110181075371634fd79f4db5620fd69b0f1f5dac88d43abcc41",
+      "bytes": 446
+    },
+    "host-baseline-diagnostic.log": {
+      "sha256": "f0d8ef8c6381768f7d6482f24115aae721f5e323e82fec498e4b39ab156a6f41",
+      "bytes": 454
+    },
+    "host-h1.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    }
+  },
+  "arm64_companion": "Requested from current S2/A owner in COORDINATION.md",
+  "kernel_and_image": "current single base retained"
+}

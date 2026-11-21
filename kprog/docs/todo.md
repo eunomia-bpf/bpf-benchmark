@@ -8,6 +8,11 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] **Coordinator 2026-11-21T19:45Z, the performance path on the 5/29 base** (operator 2026-11-21: "应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化", "都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比."; design and differences in kprog/docs/current-design.md):
+  - [x] x86 six-app functional check, all programs native (OTel 14, BCC 25, Cilium 135, Tetragon 288, Tracee 169, Katran 1); Tetragon sampled 287/287 after fd7b7d5d7 (x86_kvm_corpus_20261121_192644_031303).
+  - [ ] x86 frozen-entry rotate on image 8430daa81 (19:29:30Z, /workspaces/kprog-raw/one-image-runs/progress.log); then may29_ratio.py per app against 05-29 and best-numbers-20261121.
+  - [ ] arm64 guest check 2 on the image of 33989a177 (fixes 8294617c9 helper-ID calls, 33989a177 Tetragon probe); then arm64 Spark KVM timing (DeepSeek paused for the run, restored right after).
+
 - [ ] **Coordinator/A** ARM checked-sim-C execution adapter and shared-service integration: current CLI accepts x86; ARM submitted-native B generation remains present. Static source trace0df4fb8e7 in corpus/results/kprog_arm64_app_coverage_20261121; direct ARM functional and x86 timing stay coordinator owned.
 
 - [ ] PERF PID/TGID native C (2026-11-20T09:11:41Z): shared header macro, BTF task offsets2800/2804, same null/signed semantics.56imported-native cases/two proof links pass;105PIDwrapper calls become0, current-task visits unchanged. P/B14 unchanged; existing tools/all LTO/uniform flags. Actual accepted BCC API/kernel/app/runtime checks follow; results/pid-c-lto-20261120.
