@@ -1,0 +1,73 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedPrefix.lean": "3bef32f2247d6cc65c40400ab2277fd7921cb92f8f571e0abc48b7b1e42fe175"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedPrefix"
+    ],
+    "exit": 0,
+    "seconds": 4.35472297668457,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 235,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/modified-prefix1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/ModifiedPrefixPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 4.257333517074585,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-modified-prefix1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Modified.Prefix.entry_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Prefix.entry_observations": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Prefix.enter_read": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Prefix.read_prefix_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 74,
+  "step_decomposition": {
+    "real_entry_and_loop_prefix": 4,
+    "actual_inlined_scalar_read": 69,
+    "real_sequence_resume": 1
+  },
+  "scope": "actual five-argument function entry/actual temps and empty source local environment, scalar read from real typed tables to unchanged original modifier loop, same wholeheap/frontier, W/X source arguments and genuine loop/return continuation",
+  "source_parameters": "entry,reg,mod1,shift0,W4orX8; fn_vars empty/no caller-post result admission",
+  "whole_library_confirmation": "pending complete CMP helper/source/native batch and stable V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
