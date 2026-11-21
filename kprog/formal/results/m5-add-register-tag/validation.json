@@ -48,7 +48,116 @@
       "Quot.sound"
     ]
   },
-  "whole_library_confirmation": "pending until arithmetic/tag batch completes",
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 369.523072719574,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full4.log",
+    "jobs": 308,
+    "source_snapshot": {
+      "head": "b91d36f6ad2d1d1764d9381f63eca1a8042234e3",
+      "sha256": {
+        "kprog/formal/KProgFormal.lean": "fde1c4074c7336ff4ff63b621592d4553ac8691894447d10dd26269bc0445315",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean": "d1d932bb682d4c15afc03206bf8589b1209854d2f10bb44bf7bb114f8215599f",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateTail.lean": "bd03f2fd6c3893e8d02276845fa9e73ed63f24d57f0e5eb7a610e58ee461e8e5",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediatePointer.lean": "82c35c02081c4639f1c092971845762e0e32f0c14c698cceec8f3cbba41a9501",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterBody.lean": "dd5e869b30fff0a74b6d31133edea7148941d01aed6637f33364b461636e5b59"
+      }
+    },
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/BodyRootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0963361263275146,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-body-root1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_tag_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.evaluate_scalar": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.evaluate": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select_scalar": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterBody.scalar_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64AddRegisterBody.execute": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
   "m5_complete": false,
   "complete_isa_families": 0
 }

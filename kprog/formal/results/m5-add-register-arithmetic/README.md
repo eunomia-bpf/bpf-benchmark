@@ -5,3 +5,5 @@ The original tail now has a checked56-step run through operation masking, the ac
 Component arithmetic2 passed231 jobs5.344s; public queries for new scalar and original SP evaluate passed with inherited axioms only. Exact hashes/timings/logs in validation.json. Earlier arithmetic1 rebuilt dependencies879.054s then failed a header conditional normalization; adding ite_true fixed that proof syntax only. No new premise on the existing interface, instruction model, axiom/admission/native oracle or proof-limit raise.
 
 Scalar selection, actual writer, full register relation, free/return/native/all-behavior/entry composition and whole-library confirmation remain open. M5/O1/O2/O4/M6 open/families0. No apps, runtime tests or measurements.
+
+Whole-library/root confirmation passed: full4,308 jobs369.523s; import KProgFormal and eight public type/axiom queries passed, inherited axioms only/source hashes stable. Raw full4/public-body-root1; exact details in validation.json. Complete source body467 still leaves the handler frame live; free/native/all-behavior/entry and M5/M6 remain open.
