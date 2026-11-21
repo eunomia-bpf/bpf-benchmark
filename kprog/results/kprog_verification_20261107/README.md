@@ -533,6 +533,18 @@ S15's b3e687165 reconciliation supplies this clarification. Current M5
 correspondence and O1/O2/O4 recount follow the mature ISA/Clight route described
 in the [formal entry point](../../formal/README.md). Model predicates added:0.
 
+S5's `b501e2c0c` [post-encoding transport module](../../formal/KProgFormal/NativeLinkProducerEdits.lean)
+adds 11 universal laws for ordered append/write/truncate histories, exact final
+live bytes and size, overlapping writes, range frames and conditional final-memory
+composition. The five kind5/6/7/8/layout rows retain
+`partial-universal-component` and all prior publication epochs. Focused build
+and independent public import/axiom queries pass; all 14 receipt-manifest hashes
+and the published module hash match on readback. Current source extraction
+returns1 at its historical HelperPointer/HelperDispatch grammar; the producer
+uses MapImmediate/HelperCallRel32. Deriving the actual complete edit/field trace,
+wire and same-kernel-copy relation, physical embedding/lifetime and the per-row
+map/helper/readonly/ISA interfaces remains explicit.
+
 S17's [stock-kernel handoff](../../stock-path/results/20261109/final-summary.json)
 adds finite replay links to the tail, load-recovery and thunk rows. The captured
 kernel is `35ea2cde39fc`: the tail fixture observes 33 successful transfers,
