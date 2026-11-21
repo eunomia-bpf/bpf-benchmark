@@ -144,3 +144,4 @@ import KProgFormal.NativeLinkProducerEdits
 import KProgFormal.KernelControl
 import KProgFormal.ClightRefinement.Arm64AddRegisterNative
 import KProgFormal.ClightRefinement.Arm64AddRegisterNativeCall
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterNative

@@ -1,0 +1,5 @@
+# Original fourth ADD-register caller refines native execution
+
+The actual source caller after ADD-from-SP now executes473 silent steps: real original packed AUX256 argument evaluation/casts and call continuation2, checked source/native call469, actual void return/resume2. It reaches the untouched afterRegister source successor with the same full fetched-native register view, D3 scalar sum, caller frame, actual frame release/revoked local permissions, Kept3, header pointers, warm cache and bound. No argument AST/cast or model change and no final-readback/native-result premise.
+
+Component255jobs1.840s and public type/axiom query pass with standard logic and inherited CompCert external/inline semantics only, original proof caps. Exact hashes/timings/logs in validation.json. The earlier call/native batch already passed full319jobs/root8 queries; this original-caller extension awaits its own batch confirmation. Original-entry prefix/fourth fetch transport remain next. M5/O1/O2/O4/M6 open; complete ISA families0. No application/runtime tests/measurement.
