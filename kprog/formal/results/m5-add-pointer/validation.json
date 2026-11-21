@@ -1,0 +1,54 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediatePointerCall"
+    ],
+    "exit": 0,
+    "seconds": 4.130808353424072,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 233,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-pointer/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.717179298400879,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 4,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.source": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.select": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.enter_writer": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Pointer.execute": []
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "internal_transitions": {
+    "selection": 53,
+    "enter_writer": 78,
+    "execute": 132
+  },
+  "source_checkpoint_before_commit": "03d9b166e361e342d77725a94242e9e13ce86feb",
+  "raw": "/workspaces/kprog-raw/formal/m5-add-tail",
+  "whole_proof_library": {
+    "status": "pending batch-end confirmation"
+  },
+  "completed_isa_families": 0
+}
