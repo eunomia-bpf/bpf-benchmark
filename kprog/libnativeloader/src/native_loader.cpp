@@ -416,7 +416,6 @@ constexpr const char *kRuntimeCallSymbols[] = {
 };
 
 constexpr const char *kTypedHelperSymbols[] = {
-    "ktime_get_mono_fast_ns",
     "bpf_user_rnd_u32",
     "bpf_xdp_fib_lookup",
     "bpf_skb_fib_lookup",
@@ -1414,10 +1413,6 @@ const char *helper_symbol_for_id(int helper_id)
 
 HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
 {
-    // The helper's whole body is this call (design: helpers compiled in as C).
-    if (helper_id == BPF_FUNC_ktime_get_ns) {
-        return HelperAlias{helper_id, "bpf_ktime_get_ns", "ktime_get_mono_fast_ns"};
-    }
     if (helper_id == BPF_FUNC_get_prandom_u32) {
         return HelperAlias{helper_id, "bpf_get_prandom_u32", "bpf_user_rnd_u32"};
     }
