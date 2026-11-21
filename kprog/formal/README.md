@@ -82,6 +82,18 @@ and termination. The [three public audits](../results/kprog_verification_2026110
 record the inherited logical/CompCert semantic axioms. Full instruction flag
 updates, operand writeback, dispatcher and enclosing program binding remain open.
 
+The [raw ALU_REG arithmetic-call site proof](KProgFormal/ClightRefinement/X86ShiftLeftSite.lean)
+uses its actual generated fragment 59. Given genuine ALU/SHL bindings, an
+unshadowed ALU symbol and the four typed incoming operand/code/width temporaries,
+it executes 48, 52, 56 and 56 silent steps for the four operand sizes and every
+operand pair. It resumes the same caller function, local environment and
+continuation, with complete memory preserved. The call and result temporaries
+both contain the mature ISA result; every other temporary retains its value.
+The [three public audits](../results/kprog_verification_20261107/x86-shift-left-site.log.gz)
+record the exact source, dependency build and existing semantic axioms.
+Deriving these incoming observations from handler entry, selecting this route
+and composing the following flag and writeback stages remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
