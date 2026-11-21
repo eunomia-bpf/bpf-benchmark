@@ -522,6 +522,18 @@ S15's b3e687165 reconciliation supplies this clarification. Current M5
 correspondence and O1/O2/O4 recount follow the mature ISA/Clight route described
 in the [formal entry point](../../formal/README.md). Model predicates added:0.
 
+S17's [stock-kernel handoff](../../stock-path/results/20261109/final-summary.json)
+adds finite replay links to the tail, load-recovery and thunk rows. The captured
+kernel is `35ea2cde39fc`: the tail fixture observes 33 successful transfers,
+retval2 and preserved R12/RSP/RBP; the ARM protected-read control observes
+0xffffffff from its live input and zero from NULL, with two registered entries.
+The injected x86 relocation failure reaches the verifier and propagates
+relocation -34 through armed-load -524 to service -5; native TEST_RUN count0.
+All three archive SHA256 values and the tail archive's 38 recorded member hashes
+match on readback. Existing universal premises and `partial-universal-component`
+statuses remain in place; current M5 correspondence uses its maintained source
+epochs.
+
 The exact827757435 full check exits2 at the old ARM ALU lifetime fixture;
 [its source/log archive](arm-entry-lifetime.log.gz) also records the five repaired
 host groups published in d680faa9b. Implicit pre/post SP release remains under
