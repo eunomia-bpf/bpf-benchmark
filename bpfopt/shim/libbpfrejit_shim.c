@@ -474,6 +474,13 @@ long syscall(long number, ...) {
     union bpf_attr *attr = (union bpf_attr *)a1;
     unsigned int size = (unsigned int)a2;
 
+    struct shim_native_load_scope native_scope
+        __attribute__((cleanup(shim_native_load_scope_end))) = {0};
+    if (cmd == BPF_PROG_LOAD && attr && shim_native_loader_enabled()) {
+        pthread_rwlock_rdlock(&shim_native_load_lock);
+        native_scope.active = 1;
+    }
+
     if (!in_shim && cmd == BPF_OBJ_GET_INFO_BY_FD && attr) {
         int query_fd = (int)attr->info.bpf_fd;
         int original_info_fd = -1;
@@ -1164,6 +1171,7 @@ static int unix_socket_listen(const char *path) {
 }
 
 static void emit_list_progs(int cli) {
+    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     /* Estimate buffer size: ~256 bytes per prog. */
@@ -1171,6 +1179,7 @@ static void emit_list_progs(int cli) {
     char *buf = (char *)malloc(cap);
     if (!buf) {
         pthread_mutex_unlock(&state_mutex);
+        pthread_rwlock_unlock(&shim_native_load_lock);
         return;
     }
     size_t len = 0;
@@ -1196,6 +1205,7 @@ static void emit_list_progs(int cli) {
     }
     pthread_mutex_unlock(&state_mutex);
     len += snprintf(buf + len, cap - len, "]}\n");
+    pthread_rwlock_unlock(&shim_native_load_lock);
     if (write(cli, buf, len) < 0) { /* best effort */ }
     free(buf);
 }

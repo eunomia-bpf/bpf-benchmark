@@ -1,6 +1,14 @@
 #ifndef BPFREJIT_SHIM_NATIVE_LOADER_H
 #define BPFREJIT_SHIM_NATIVE_LOADER_H
 
+/* A snapshot must describe a completed load, including native replacement. */
+static pthread_rwlock_t shim_native_load_lock = PTHREAD_RWLOCK_INITIALIZER;
+struct shim_native_load_scope { int active; };
+static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
+    if (scope->active)
+        pthread_rwlock_unlock(&shim_native_load_lock);
+}
+
 struct native_loader_c_result {
     int prog_fd;
     int replaced;

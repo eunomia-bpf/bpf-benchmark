@@ -47,6 +47,7 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
+    pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);
     current_measure_generation++;
@@ -70,6 +71,7 @@ static void emit_measure_start(int cli) {
         }
     }
     pthread_mutex_unlock(&state_mutex);
+    pthread_rwlock_unlock(&shim_native_load_lock);
     if (count == 0) {
         dprintf(cli, "{\"status\":\"error\",\"error\":\"no tracked BPF programs\"}\n");
         return;
@@ -89,6 +91,7 @@ static void emit_measure_finish(int cli) {
 
     int first = 1;
     uint32_t emitted = 0;
+    pthread_rwlock_wrlock(&shim_native_load_lock);
     pthread_mutex_lock(&state_mutex);
     uint32_t generation = current_measure_generation;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
@@ -128,6 +131,7 @@ static void emit_measure_finish(int cli) {
                     (unsigned long long)run_time_delta, info.jited_prog_len,
                     info.xlated_prog_len) != 0) {
                 pthread_mutex_unlock(&state_mutex);
+                pthread_rwlock_unlock(&shim_native_load_lock);
                 goto oom;
             }
             first = 0;
@@ -135,6 +139,7 @@ static void emit_measure_finish(int cli) {
         }
     }
     pthread_mutex_unlock(&state_mutex);
+    pthread_rwlock_unlock(&shim_native_load_lock);
     if (emitted == 0) {
         free(buf);
         dprintf(cli, "{\"status\":\"error\",\"error\":\"no BPF program stats\"}\n");
