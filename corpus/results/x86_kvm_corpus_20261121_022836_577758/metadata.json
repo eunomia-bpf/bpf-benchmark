@@ -1,5 +1,6 @@
 {
   "bpf_stats": true,
+  "completed_at": "2026-11-21T11:18:44.724871+00:00",
   "config": {
     "enabled_passes": [
       "noop",
@@ -23,8 +24,8 @@
     ]
   },
   "details_dir": "details",
-  "generated_at": "2026-11-21T02:28:36.579519+00:00",
-  "last_updated_at": "2026-11-21T02:28:36.579515+00:00",
+  "generated_at": "2026-11-21T11:18:44.724875+00:00",
+  "last_updated_at": "2026-11-21T11:18:44.724871+00:00",
   "launcher_boot_id": "4ed5b8ed-bfa6-49d4-94bf-7468fe2a18db",
   "launcher_pid": 1830,
   "launcher_start_ticks": 11218,
@@ -32,7 +33,7 @@
   "run_type": "x86_kvm_corpus",
   "samples": 3,
   "started_at": "2026-11-21T02:28:36.577758+00:00",
-  "status": "running",
+  "status": "completed",
   "suite": "corpus",
   "workload_only": false,
   "workload_seconds": 180.0
