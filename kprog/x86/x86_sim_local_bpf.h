@@ -2556,6 +2556,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__x86_l_count = X86_SIM_L_READ_REG(X86_RDX);       \
 		else                                                     \
 			__x86_l_count = (IMM);                            \
+        if (KPROG_X86_CALLMEM_KIND(OP_IS_COPY) == KPROG_X86_CALLMEM_COPY && \
+            __x86_l_count && X86_SIM_L_REG_TAG(X86_RSI) == X86_SIM_TAG_SCALAR) \
+            X86_SIM_L_ARCHITECTURAL_FAULT(); \
 		for (__x86_l_i = 0; __x86_l_i < __x86_l_count;            \
 		     __x86_l_i++) {                                      \
 			__u64 __x86_l_byte;                               \

@@ -80,7 +80,7 @@ int main(void) {
         if(result) {expected.rax.ptr=0;expected.rax_tag=X86_SIM_TAG_SCALAR;}
         calls=0;
         if(recover(&s,reg)!=result || memcmp(&s,&expected,sizeof(s)) ||
-           calls!=(unsigned)(scalar && !zero)) abort();
+           calls!=(unsigned)(scalar && !zero)) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         cases++;
     }
     for(unsigned reg=0;reg<2;reg++)
@@ -93,9 +93,9 @@ int main(void) {
         s.rdx.ptr=(void *)(unsigned long)count;
         int trapped=setjmp(fault);
         if(!trapped) copy(&s,reg,count);
-        if(!!trapped != (!tag && count>0)) abort();
+        if(!!trapped != (!tag && count>0)) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         if(tag) memcpy(expected,src,count);
-        if(memcmp(dst,expected,4)) abort();
+        if(memcmp(dst,expected,4)) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         cases++;
     }
     for (unsigned form=0;form<4;form++)
@@ -110,7 +110,7 @@ int main(void) {
         struct x86_sim_state expected=s;
         if(form<2) {expected.rax.ptr=0;expected.rax_tag=X86_SIM_TAG_SCALAR;}
         choice=1;calls=0;profile(&s,form);
-        if(calls!=1 || memcmp(&s,&expected,sizeof(s)) || datum!=0x12345678) abort();
+        if(calls!=1 || memcmp(&s,&expected,sizeof(s)) || datum!=0x12345678) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         cases++;
     }
     const struct { __u64 base,index; unsigned scale; __s64 disp; int low; } addresses[]={
@@ -130,7 +130,7 @@ int main(void) {
         if(result) expected.rax.ptr=0;
         calls=0;
         if(recover_mem(&s,addresses[i].disp,addresses[i].scale)!=result ||
-           calls!=(unsigned)!addresses[i].low || memcmp(&s,&expected,sizeof(s))) abort();
+           calls!=(unsigned)!addresses[i].low || memcmp(&s,&expected,sizeof(s))) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         cases++;
     }
     {
@@ -138,7 +138,7 @@ int main(void) {
         struct x86_sim_state s={0};
         s.rcx.ptr=&datum;s.rcx_tag=X86_SIM_TAG_ABI;
         choice=0;calls=0;indexed_load(&s);
-        if((unsigned long)s.rax.ptr!=datum || datum!=0x1234 || calls!=1) abort();
+        if((unsigned long)s.rax.ptr!=datum || datum!=0x1234 || calls!=1) { fprintf(stderr, "read-recovery case=%u line=%d\n", cases, __LINE__); return 1; }
         cases++;
     }
     printf("x86 read recovery routes and external copies: OK (%u cases)\n",cases);
