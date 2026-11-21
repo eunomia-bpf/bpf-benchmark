@@ -51,7 +51,70 @@
     "receipt": "/workspaces/kprog-raw/formal/m5-add-register/d1-frame1.json",
     "outcome": "rewrite failed on unreduced Prod.fst projection; explicit sameBlock result type fixed it"
   },
-  "whole_library_confirmation": "pending after source publication",
+  "whole_library_confirmation": {
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 58.313820600509644,
+      "cpus_allowed": [
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "nice": 19,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/full2.log",
+    "jobs": 306,
+    "source_snapshot": {
+      "head": "0d8630c8eebeabff28c837b9886ca4131da2173e",
+      "sha256": {
+        "kprog/formal/KProgFormal.lean": "d22a2e6c522809dd1d19a04bc131ed30eab45913e3fdd3873f32440a0070ab13",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64CacheLocalFrame.lean": "658dd9fcf8daddb43001be79d9476a42b0f9e88d6078fbf3d15518eb8212e4f4",
+        "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddPrefixNative.lean": "4132830366be143237f486e6dff3623a32c0b9312d46b1beaf3d1452ca308a2f"
+      }
+    },
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/D1RootPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0372772216796875,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-d1-root1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64CacheLocalFrame.Kept.cell_load": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddPrefixNative.entry_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
   "m5_complete": false,
   "complete_isa_families": 0
 }
