@@ -1,0 +1,80 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareOperands.lean": "95e34c4eca51162bc70804187bd15be75e6f3c2dafeff814d48c0137a2b8b5ae"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareOperands"
+    ],
+    "exit": 0,
+    "seconds": 2.3369338512420654,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 232,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/operands2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/OperandsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5292012691497803,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-operands1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Operands.branch_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Operands.lhs_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 80,
+  "step_decomposition": {
+    "real_call_enter": 3,
+    "actual_combined_scalar_reader": 73,
+    "actual_return_and_assignment_and_sequence": 4
+  },
+  "scope": "original CMP DST ordinary scalar GPR read and actual assignment to ___a64_l_lhs__4, same whole heap/e/k and exact two temp writes to unchanged RHS+flag suffix",
+  "input_premises": "actual reached storage typed word/tag0; no assumed callee result or native value/result premise",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareOperands"
+        ],
+        "exit": 1,
+        "seconds": 2.365253210067749,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/operands1.log",
+      "reason": "explicit transition equation needed rfl after simp; actual Kcall return resumes Sskip, requiring four return/assignment/sequence steps rather than proposed three; kernel count fixed79 to80"
+    }
+  ],
+  "whole_library_confirmation": "pending completed CMP handler/native batch and terminal published V root handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

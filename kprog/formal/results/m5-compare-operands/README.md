@@ -1,0 +1,5 @@
+# Actual CMP scalar LHS read
+
+`Arm64Compare.Operands.branch_source` binds the actual CMP branch to its original DST read/assignment and untouched RHS+flag suffix. `lhs_scalar` proves the real scalar GPR read in80silent steps: actual caller entry3, actual combined reader73, and genuine Kcall return/assignment/sequence4. The reached storage typed word/tag0 observations supply the reader input. Memory, caller e and original k remain identical; only the exact two source temporaries _t107 and ___a64_l_lhs__4 are written. No callee-return/native-result assumption replaces the read.
+
+Component232jobs and two public type/axiom queries passed CPU17/j1/32GiB/default caps/inherited logical+CompCert semantic axioms only. Exact hash/logs/timings/axioms and the retained initial transition/count diagnostic are in validation.json. The original modified SRC RHS, flag_rhs selection, subtraction compare loop and four NZCV stores remain next; native SUBS-to-ZR and original six-call entry correspondence remain open. No whole instruction/family claim; M5/O1/O2/O4/M6 open/families0. No runtime application or measurement.
