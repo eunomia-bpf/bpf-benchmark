@@ -166,3 +166,4 @@ import KProgFormal.ClightRefinement.X86ShiftLeftClassify
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall
 import KProgFormal.ClightRefinement.Arm64CompareDispatch
 import KProgFormal.ClightRefinement.Arm64CompareOperands
+import KProgFormal.ClightRefinement.Arm64CompareRhsCall

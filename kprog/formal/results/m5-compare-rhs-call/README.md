@@ -1,0 +1,5 @@
+# Actual CMP modified-RHS call
+
+`Arm64Compare.RhsCall.rhs_source` preserves the original RHS and flag loops. `enter_bound` and `Linked.enter` execute the real five-step loop/sequence/call prefix to `kprog_arm64_program_modified` with entry/SRC/mod1/shift0/W4-or-X8. Original AUX256 right shifts, masks and all five casts remain at the source expression site. Memory, e/le and actual caller continuations are unchanged. Linked.enter derives the actual symbol/function binding by checked closed lookup; no helper result or native value is assumed.
+
+Component233jobs and three public type/axiom queries passed CPU17/j1/32GiB/default caps/inherited logical+CompCert semantic axioms only. Exact source hash/logs/timings/axioms and preserved metadata-query failures are in validation.json. The standalone helper inlines the original register-read loop; its actual reading/LSL0/masking execution remains next, then flag_rhs selection, four NZCV stores and native SUBS-to-ZR/six-call entry. Complete ISA families0; M5/O1/O2/O4/M6 open. No runtime application or measurement.

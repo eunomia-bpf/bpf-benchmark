@@ -1,0 +1,74 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRhsCall.lean": "2264d3f0160d672d20fe11937e2dff47222d2696d622151246b084c0ead26a92"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareRhsCall"
+    ],
+    "exit": 0,
+    "seconds": 44.48643088340759,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 233,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/rhs-call1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/RhsCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.545360803604126,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-rhs-call1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.RhsCall.rhs_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.RhsCall.enter_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.RhsCall.Linked.enter": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 5,
+  "arguments": "entry pointer, arbitrary SRC64, mod1, shift0, actual W4/X8; packed AUX256 shifts/masks/uchar casts retained",
+  "scope": "original CMP RHS loop/sequence prefix to real modified-helper call and actual linked definition, same e/le/fullheap/original continuations; no modified execution/result/native assumption",
+  "source_helper_note": "the standalone modified helper inlines the real register reader in its first loop; not a combined-reader function call",
+  "diagnostic_queries": [
+    {
+      "log": "/workspaces/kprog-raw/formal/m5-compare/inspect-modified1.log",
+      "status": "default recursion-depth failure during whole symbol #reduce; no cap increase"
+    },
+    {
+      "log": "/workspaces/kprog-raw/formal/m5-compare/inspect-modified2.log",
+      "status": "default-heartbeat failure during source-row metadata walk; no cap increase"
+    }
+  ],
+  "whole_library_confirmation": "pending completed CMP handler/native batch and terminal latest V root handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
