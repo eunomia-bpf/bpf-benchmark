@@ -34,3 +34,14 @@ a running measurement. Sequenced after the rotation:
 
 A full OTel program exceeds 1M BPF instructions in this harness (errno 7 = E2BIG on the guest verifier), so the
 per-object check is done on the captured per-request sources, not on the whole app.
+
+## The change is inert where it does not apply
+
+The strongest check available without a full app run: on the two captured requests where the new transform finds
+nothing (r8, r13 — 0 sites each), the pass's output bitcode is **byte-identical** to the pre-change binary's
+(`cmp` on both). So any program without the nested `A - (s - fp)` shape comes out exactly as before, and the
+change can only affect programs that carry the refused instruction. The old binary was built from
+`HEAD~1:kprog/x86/packet_bounds_ir.cpp`.
+
+That also means the coordinator's rotation is unaffected in principle - it is running the pre-patch base binary,
+and the apps it measures only change where the class applies (OTel).
