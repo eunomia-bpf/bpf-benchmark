@@ -1,0 +1,49 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulPrefixNative.lean": "eec9caa34308608672f7a8710d08b1a18ddc2a290269ff74af6743ad13c33962"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative"
+    ],
+    "exit": 0,
+    "seconds": 2.557615280151367,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/entry-prefix1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/EntryPrefixPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7396607398986816,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-entry-prefix1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative.entry_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "original98 input/provider traces/setup plus actual five source calls and actual native fetched words; preserves reached heaps/all predecessor releases and final D4 product/representation/caller/free/cache/header",
+  "operand_derivation": "D1 actual third scalar cell survives fourth Kept3; D3 actual fourth result. No new reached-readback or native-result premise. Original fifth fetch at PC+16 only.",
+  "whole_library_confirmation": "pending root handoff and V classifier terminal notice",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
