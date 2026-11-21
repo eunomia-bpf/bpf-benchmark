@@ -176,8 +176,36 @@ def historical():
  RAW.mkdir(parents=True,exist_ok=True);save(RAW/'historical-correspondence.json',result)
  with gzip.open(REPORT/'historical-correspondence-20261121.json.gz','wt') as f:json.dump(result,f,indent=2);f.write('\n')
  print('HISTORICAL COMPLETE',result['matched_files'],len(rows),'archives',len(archives),'diagnostics',len(errors),flush=True)
+def locate():
+ source=RAW/'historical-correspondence.json';d=json.loads(source.read_text());remaining=[r for r in d['records'] if not r['published_content']];byname=collections.defaultdict(list)
+ for r in remaining:byname[Path(r['path']).name].append(r)
+ recovered={};examined=0;hashed=0
+ roots=['/workspaces/repository','/workspaces/kprog-raw','/workspaces/.agent-state/kprog-lanes']
+ for root in roots:
+  for directory,ds,fs in os.walk(root,followlinks=False):
+   ds[:]=[x for x in ds if x not in ['.git','node_modules']]
+   for name in fs:
+    if name not in byname:continue
+    f=Path(directory)/name
+    if f.is_symlink():continue
+    examined+=1
+    try:
+     size=f.stat().st_size;candidates=[r for r in byname[name] if r['bytes']==size and r['sha256'] not in recovered]
+     if not candidates:continue
+     v=digest(f);hashed+=1
+     for r in candidates:
+      if r['sha256']==v:recovered[v]={'persistent_path':str(f),'sha256':v}
+    except (OSError,PermissionError):continue
+  print('LOCATION ROOT',root,'candidates',examined,'hashed',hashed,'matching_hashes',len(recovered),flush=True)
+ for r in d['records']:
+  if not r['published_content'] and r['sha256'] in recovered:r['persistent_content']=recovered[r['sha256']]
+ d.update({'location_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'persistent_roots_searched':roots,'location_candidates':examined,'location_files_hashed':hashed,'persistent_matched_files':sum(bool(r.get('persistent_content')) for r in d['records'])})
+ d['remaining_availability_files']=sum(not r['published_content'] and not r.get('persistent_content') for r in d['records']);save(source,d)
+ with gzip.open(REPORT/'historical-correspondence-20261121.json.gz','wt') as f:json.dump(d,f,indent=2);f.write('\n')
+ print('LOCATION COMPLETE',d['matched_files'],d['persistent_matched_files'],d['remaining_availability_files'],flush=True)
 if __name__=='__main__':
  if sys.argv[1]=='audit':audit()
  elif sys.argv[1]=='move':move(sys.argv[2])
  elif sys.argv[1]=='historical':historical()
+ elif sys.argv[1]=='locate':locate()
  else:raise SystemExit('audit | move GROUP')
