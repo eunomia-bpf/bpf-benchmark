@@ -1,0 +1,70 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedCall.lean": "e45ec8f537f2453dce35d8319c6a37909a293ce30388c87468d55927917d5593"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedCall"
+    ],
+    "exit": 0,
+    "seconds": 3.0719680786132812,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 237,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/modified-call1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/ModifiedCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.0290117263793945,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-modified-call1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Modified.Call.return_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Call.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Call.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 119,
+  "step_decomposition": {
+    "real_entry_and_inlined_scalar_read": 74,
+    "real_W_X_LSL0_mask_loop": 41,
+    "real_outer_loop_exit_return_and_empty_freeList": 4
+  },
+  "scope": "complete actual five-argument modified helper for ordinary scalar GPR/tag0/mod1/shift0/W4-X8, original entry/read/masks/return, same entire memory/frontier. Every relational finite run is silent prefix of unique terminal at Kstop; no infinite execution. No native/whole CMP instruction claim",
+  "input_premises": "actual typed table/slot/word/tag0 loads and GprLayout; all internal values/params derive through exact source temps; no helper return/native value/readback admission",
+  "whole_library_confirmation": "pending completed CMP source/native batch and latest stable V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
