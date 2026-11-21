@@ -1,0 +1,18 @@
+{
+  "head": "f42f59bf8388212af9fa6129983965afabbddb3a",
+  "kernel": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "files": {
+    "kprog/trusted_generation.py": "ca2758ecf3f4d003fa82db699f22d1ed887d8a57da3e2c7eea1c6a54c18bd5cf",
+    "kprog/x86/trusted_specializer.py": "f165d674054d953d5604ca95a74e298dcfc771743fbafdbc49467d21944ca263",
+    "kprog/arm64/trusted_specializer.py": "51eddfaa7b8aaf7aad776c9bcf0e0996de65b5d0af1e72030f4d3e86838c99fe",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "34f94b39c2ac2485fccd5f4d5900273315ccdc4ac3237f3051862c9fc7509127",
+    "kprog/x86/native_lab/native_link/src/main.rs": "819673ffef5c8608b043fce50b7c02ccd837ecf544e788d64fff0fdf1af1377f",
+    "vendor/linux-framework/kernel/bpf/verifier.c": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1",
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+    "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage": "916560e908a8ee28402e552c7623a39a3113c56a6ade772120bb64188993d180",
+    "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko": "317e2e9ad83371262ebb6c8b9542d3f31fd972e519bd6a7e935abc3ef0b022ac",
+    "/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link": "2c0d77d536e32fbedfb406b08e00ba58b8f575f801790e16699ab32d4e2cdc7a"
+  },
+  "verifier_diff_from_stock_bytes": 500
+}

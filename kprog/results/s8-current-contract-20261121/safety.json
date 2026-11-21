@@ -1,0 +1,762 @@
+[
+  {
+    "name": "valid_control",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+    "request": {
+      "request_id": 1,
+      "source_prog_id": 8,
+      "native_sha256": "c9f04193a6aa2a3cde5cbbd05b7c386e423f014db1e5eb109da086f4dbc778f2",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:24.514257+00:00",
+      "prog_id": 11,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/1.success.tar.gz",
+      "finished": "2026-11-21T20:14:28.516096+00:00"
+    }
+  },
+  {
+    "name": "valid_copy_restore",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+    "request": {
+      "request_id": 2,
+      "source_prog_id": 19,
+      "native_sha256": "4ad9cac84858ee1e715f5ff9b324e05aa97f64c2a04646be1a1f1d735516358b",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:28.729164+00:00",
+      "prog_id": 22,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/2.success.tar.gz",
+      "finished": "2026-11-21T20:14:31.424147+00:00"
+    }
+  },
+  {
+    "name": "valid_alias_load",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+    "request": {
+      "request_id": 3,
+      "source_prog_id": 30,
+      "native_sha256": "df63d83fcae91cc09255b1c4f581ef6d482152a9a2aabad929dac572c788f217",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:31.626609+00:00",
+      "prog_id": 33,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/3.success.tar.gz",
+      "finished": "2026-11-21T20:14:34.386027+00:00"
+    }
+  },
+  {
+    "name": "valid_cmov_alias",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+    "request": {
+      "request_id": 4,
+      "source_prog_id": 41,
+      "native_sha256": "01e0a203a3766ca5177ed09e394e8fb941961ed5b2cd937c00e60176ecb946ac",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:34.576224+00:00",
+      "prog_id": 44,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/4.success.tar.gz",
+      "finished": "2026-11-21T20:14:37.289415+00:00"
+    }
+  },
+  {
+    "name": "valid_cmov_from_sp",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+    "request": {
+      "request_id": 5,
+      "source_prog_id": 52,
+      "native_sha256": "a7031d855816abe314a51511e0328331af3a7ee8155d8248d89d6c0db1c64589",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:37.481436+00:00",
+      "prog_id": 55,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/5.success.tar.gz",
+      "finished": "2026-11-21T20:14:40.152731+00:00"
+    }
+  },
+  {
+    "name": "valid_cmov_to_sp",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+    "request": {
+      "request_id": 6,
+      "source_prog_id": 63,
+      "native_sha256": "6ed525857176bd3e6fdd4dcc88ca510c7fb62da2e0ba693b7ce0ff8cec8f6dd8",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:40.359010+00:00",
+      "prog_id": 66,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/6.success.tar.gz",
+      "finished": "2026-11-21T20:14:43.075515+00:00"
+    }
+  },
+  {
+    "name": "valid_cmov_self_sp",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+    "request": {
+      "request_id": 7,
+      "source_prog_id": 74,
+      "native_sha256": "59fac48d454de18ae04d0771accc9191d3a323e6281ea11002120e459d5e8a8d",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:43.280072+00:00",
+      "prog_id": 77,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/7.success.tar.gz",
+      "finished": "2026-11-21T20:14:46.054284+00:00"
+    }
+  },
+  {
+    "name": "valid_xchg_alias",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+    "request": {
+      "request_id": 8,
+      "source_prog_id": 85,
+      "native_sha256": "75e033c227ae8f2bc77a7adb75d5b0a78855447f89c2eafb1de28718f9833ce8",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:46.264038+00:00",
+      "prog_id": 88,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/8.success.tar.gz",
+      "finished": "2026-11-21T20:14:49.060477+00:00"
+    }
+  },
+  {
+    "name": "valid_spill_restore",
+    "negative": false,
+    "stage": "valid_executed",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+    "request": {
+      "request_id": 9,
+      "source_prog_id": 96,
+      "native_sha256": "9e9814fa6216569fb7f70b3e5fc99a4170668fc6de148e2ad431bd369986c96f",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:49.257962+00:00",
+      "prog_id": 99,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/9.success.tar.gz",
+      "finished": "2026-11-21T20:14:51.990328+00:00"
+    }
+  },
+  {
+    "name": "past_data_end_read",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+    "request": {
+      "request_id": 10,
+      "source_prog_id": 105,
+      "native_sha256": "d13322c4f789a82a48d931e245bd4a4cba543c5903614ab7a530eaf606c9dab2",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:52.189862+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '10', '105', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '10', '105', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-qob9asmg/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/10.failure.tar.gz",
+      "finished": "2026-11-21T20:14:54.860842+00:00"
+    }
+  },
+  {
+    "name": "past_data_end_write",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+    "request": {
+      "request_id": 11,
+      "source_prog_id": 113,
+      "native_sha256": "6fef709327bff0f3ba497ceebaa301c339528004ad52369d776e0747c9e1a322",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:55.086312+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '11', '113', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '11', '113', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-9yxd5e_1/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/11.failure.tar.gz",
+      "finished": "2026-11-21T20:14:57.828254+00:00"
+    }
+  },
+  {
+    "name": "missing_data_end_check",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+    "request": {
+      "request_id": 12,
+      "source_prog_id": 121,
+      "native_sha256": "a1eb1ae5b200e4368e9da90f6c30a7e5a6af39a9eddd275285170643ee8fc8b4",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:14:58.052276+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '12', '121', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '12', '121', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-mkbgaws_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/12.failure.tar.gz",
+      "finished": "2026-11-21T20:15:00.730530+00:00"
+    }
+  },
+  {
+    "name": "map_value_oob",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+    "request": {
+      "request_id": 13,
+      "source_prog_id": 129,
+      "native_sha256": "94892fdd4ecbceb5d24f89d6922e01d0aa73b16fa425a32f255d970e3a3e2d4f",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:00.967024+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '13', '129', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '34', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '13', '129', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-4hcsmmhd/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '34', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/13.failure.tar.gz",
+      "finished": "2026-11-21T20:15:03.763122+00:00"
+    }
+  },
+  {
+    "name": "nullable_map_dereference",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+    "request": {
+      "request_id": 14,
+      "source_prog_id": 137,
+      "native_sha256": "c24f3637847c1fec6e095744a1f1076228c2748992741fe850a427b7d230d2f4",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:03.993387+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '14', '137', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '36', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '14', '137', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-lnvao6lq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0', 'neg_map', '36', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/14.failure.tar.gz",
+      "finished": "2026-11-21T20:15:06.794054+00:00"
+    }
+  },
+  {
+    "name": "invalid_helper_argument",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+    "request": {
+      "request_id": 15,
+      "source_prog_id": 145,
+      "native_sha256": "8e0238589df5378bd45e0e321813c2223543467b1e21219bfde808feafbb9efc",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:07.030604+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '15', '145', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '15', '145', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pxtd5zcr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/15.failure.tar.gz",
+      "finished": "2026-11-21T20:15:09.765446+00:00"
+    }
+  },
+  {
+    "name": "stack_oob",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+    "request": {
+      "request_id": 16,
+      "source_prog_id": 153,
+      "native_sha256": "551788d402c2aeb35f76ea4e5ec7935885e531e69d68f90556c8fdefa7bda601",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:09.998750+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '16', '153', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '16', '153', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-w84lbxa8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/16.failure.tar.gz",
+      "finished": "2026-11-21T20:15:12.662695+00:00"
+    }
+  },
+  {
+    "name": "uninitialized_stack",
+    "negative": true,
+    "stage": "accepted_finding",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+    "request": {
+      "request_id": 17,
+      "source_prog_id": 161,
+      "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:12.890812+00:00",
+      "prog_id": 164,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/17.success.tar.gz",
+      "finished": "2026-11-21T20:15:15.523028+00:00"
+    }
+  },
+  {
+    "name": "unbounded_loop",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+    "request": {
+      "request_id": 18,
+      "source_prog_id": 170,
+      "native_sha256": "584a47b0d7a56e0787a38332aed5fab5ee770328f9811ee177e13b478f402e36",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:15.720689+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '18', '170', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '18', '170', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-a5o5lki_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/18.failure.tar.gz",
+      "finished": "2026-11-21T20:15:18.433779+00:00"
+    }
+  },
+  {
+    "name": "unbounded_indirect_jump",
+    "negative": true,
+    "stage": "specialization_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+    "request": {
+      "request_id": 19,
+      "source_prog_id": 178,
+      "native_sha256": "cad9f3c86207b0d3b3da44a092121d9dd28d4e933e0f75caef0dafcbdb95cb11",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:18.662040+00:00",
+      "status": -22,
+      "error": "unresolved finite indirect target at 0x3: jmp    rax",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 257, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/trusted_specializer.py\", line 135, in specialize\n    text = gen.render_program(name, instructions, functions, kind=kind,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1868, in render_program\n    targets = indirect_targets(all_insns, exit_addr, {\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1386, in indirect_targets\n    raise ValueError(f\"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}\")\nValueError: unresolved finite indirect target at 0x3: jmp    rax\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/19.failure.tar.gz",
+      "finished": "2026-11-21T20:15:19.040806+00:00"
+    }
+  },
+  {
+    "name": "unsupported_instruction",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+    "request": {
+      "request_id": 20,
+      "source_prog_id": 184,
+      "native_sha256": "2250b819e251ef58b1807c40fd1dcfd29ffff1846c277a06b86755e4ffa3ce53",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:19.242513+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '20', '184', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '20', '184', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-2fqb1a0j/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/20.failure.tar.gz",
+      "finished": "2026-11-21T20:15:21.985235+00:00"
+    }
+  },
+  {
+    "name": "immediate_push_branch",
+    "negative": true,
+    "stage": "accepted_finding",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+    "request": {
+      "request_id": 21,
+      "source_prog_id": 192,
+      "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:22.215204+00:00",
+      "prog_id": 195,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/21.success.tar.gz",
+      "finished": "2026-11-21T20:15:24.916607+00:00"
+    }
+  },
+  {
+    "name": "entry_return_slot_overwrite",
+    "negative": true,
+    "stage": "accepted_finding",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+    "request": {
+      "request_id": 22,
+      "source_prog_id": 201,
+      "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:25.114955+00:00",
+      "prog_id": 204,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/22.success.tar.gz",
+      "finished": "2026-11-21T20:15:27.861717+00:00"
+    }
+  },
+  {
+    "name": "stack_base_flags",
+    "negative": true,
+    "stage": "accepted_finding",
+    "returncode": 0,
+    "unsafe_native_executed": false,
+    "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+    "request": {
+      "request_id": 23,
+      "source_prog_id": 210,
+      "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:28.078172+00:00",
+      "prog_id": 213,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/23.success.tar.gz",
+      "finished": "2026-11-21T20:15:30.823872+00:00"
+    }
+  },
+  {
+    "name": "undefined_entry_register",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+    "request": {
+      "request_id": 24,
+      "source_prog_id": 219,
+      "native_sha256": "3e72a9dcad4b83da9d572a45036994f5ea3f0e85ad529ca74007c43eb7d1a893",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:31.028635+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '24', '219', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '24', '219', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-ixoom2gm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/24.failure.tar.gz",
+      "finished": "2026-11-21T20:15:33.679956+00:00"
+    }
+  },
+  {
+    "name": "undefined_entry_flags",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+    "request": {
+      "request_id": 25,
+      "source_prog_id": 227,
+      "native_sha256": "bcf1f2d551d9fa28ed672c7b4a6618b21471ea1fa9a6807bb1d70ab1ffef34be",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:33.907905+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '25', '227', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '25', '227', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-3en7p1qr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/25.failure.tar.gz",
+      "finished": "2026-11-21T20:15:36.635524+00:00"
+    }
+  },
+  {
+    "name": "div8_zero",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+    "request": {
+      "request_id": 26,
+      "source_prog_id": 235,
+      "native_sha256": "e181d078966773bfe678096f2f8ce704885bb1c13ec2efebcbea59d49022848f",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:36.861231+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '26', '235', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '26', '235', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-6d3a4wcb/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/26.failure.tar.gz",
+      "finished": "2026-11-21T20:15:39.496406+00:00"
+    }
+  },
+  {
+    "name": "div8_overflow",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+    "request": {
+      "request_id": 27,
+      "source_prog_id": 243,
+      "native_sha256": "09dec18c711dea7f63f24045b8f3839b4f427827fb993fff187c69c90dcdd677",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:39.715409+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '27', '243', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '27', '243', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-c7562x9n/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/27.failure.tar.gz",
+      "finished": "2026-11-21T20:15:42.347211+00:00"
+    }
+  },
+  {
+    "name": "div16_zero",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+    "request": {
+      "request_id": 28,
+      "source_prog_id": 251,
+      "native_sha256": "1db3d4d6855a4629197c61ac5bc7a6a197b3f5209c4809292fd42cc632ce7f0f",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:42.575057+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '28', '251', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '28', '251', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-i481xxlm/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/28.failure.tar.gz",
+      "finished": "2026-11-21T20:15:45.322918+00:00"
+    }
+  },
+  {
+    "name": "div16_overflow",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+    "request": {
+      "request_id": 29,
+      "source_prog_id": 259,
+      "native_sha256": "93ad60528fa9dc96d07cf3a614efbfff1eb36e62c8541721fcd9d7f637d841dc",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:45.562829+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '29', '259', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '29', '259', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-q6qfkpur/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/29.failure.tar.gz",
+      "finished": "2026-11-21T20:15:48.252074+00:00"
+    }
+  },
+  {
+    "name": "div32_zero",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+    "request": {
+      "request_id": 30,
+      "source_prog_id": 267,
+      "native_sha256": "5b92fb091d6fc0f31703a817eb6b4cf7ff34aee69aa09deb9e35ffebf2d0422a",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:48.477632+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '30', '267', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '30', '267', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-pqrvcb99/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/30.failure.tar.gz",
+      "finished": "2026-11-21T20:15:51.075775+00:00"
+    }
+  },
+  {
+    "name": "div32_overflow",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+    "request": {
+      "request_id": 31,
+      "source_prog_id": 275,
+      "native_sha256": "7a173acbb4d86ebf4f61bdfff03fb41210597d7207a07d501f8a5c72fdae2dde",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:51.322194+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '31', '275', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '31', '275', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-od02g9gc/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/31.failure.tar.gz",
+      "finished": "2026-11-21T20:15:53.918363+00:00"
+    }
+  },
+  {
+    "name": "div64_zero",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+    "request": {
+      "request_id": 32,
+      "source_prog_id": 283,
+      "native_sha256": "fb2712e6fcb7e8eb40f834a476869c5ec1124b118a81f0ce0cf896ed2fbd0aea",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:54.156681+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '32', '283', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '32', '283', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-tysvegy6/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/32.failure.tar.gz",
+      "finished": "2026-11-21T20:15:56.786896+00:00"
+    }
+  },
+  {
+    "name": "div64_overflow",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+    "request": {
+      "request_id": 33,
+      "source_prog_id": 291,
+      "native_sha256": "824eefa65613af8f15cc1fd100fead446bf029d07d49e7d659d3ee5590e247e4",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:15:57.006748+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '33', '291', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '33', '291', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-bb1i6r0p/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/33.failure.tar.gz",
+      "finished": "2026-11-21T20:15:59.764179+00:00"
+    }
+  },
+  {
+    "name": "helper_clobbered_register",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+    "request": {
+      "request_id": 34,
+      "source_prog_id": 299,
+      "native_sha256": "a0f35016e58758d1b9b41b669e1fe826964c0b0557c3be3be7a62f39088d07d2",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:16:00.020239+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '34', '299', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '34', '299', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-k0buw2r0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/34.failure.tar.gz",
+      "finished": "2026-11-21T20:16:02.798166+00:00"
+    }
+  },
+  {
+    "name": "high32_positive_byte",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+    "request": {
+      "request_id": 35,
+      "source_prog_id": 307,
+      "native_sha256": "54d0d4208eb31a37b2515d83760f1a8cb0fd76b37eeab355327c2bf53f75d74b",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:16:03.018601+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '35', '307', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '35', '307', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-vm8ita7j/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/35.failure.tar.gz",
+      "finished": "2026-11-21T20:16:05.832161+00:00"
+    }
+  },
+  {
+    "name": "high32_positive_qword",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+    "request": {
+      "request_id": 36,
+      "source_prog_id": 315,
+      "native_sha256": "323eaf857270e7c6fdfde7b68bb922ca4b6da74bdaf0fca61319aa541aeb5538",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:16:06.067426+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '36', '315', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '36', '315', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-n0oq6auq/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/36.failure.tar.gz",
+      "finished": "2026-11-21T20:16:08.878028+00:00"
+    }
+  },
+  {
+    "name": "high32_negative_byte",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+    "request": {
+      "request_id": 37,
+      "source_prog_id": 323,
+      "native_sha256": "58ab137e73914c04b9e598ab384e56a6d2ab2ece60542d37bf1aa3424a8a4d6e",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:16:09.133730+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '37', '323', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '37', '323', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-o_ai29e5/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/37.failure.tar.gz",
+      "finished": "2026-11-21T20:16:11.897681+00:00"
+    }
+  },
+  {
+    "name": "high32_negative_qword",
+    "negative": true,
+    "stage": "verifier_rejected",
+    "returncode": 1,
+    "unsafe_native_executed": false,
+    "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+    "request": {
+      "request_id": 38,
+      "source_prog_id": 331,
+      "native_sha256": "51dc957c6a5b4a9e0a1f73382089c8ad26f216b49db157e9f283db9aff3fe61c",
+      "execution_mode": "submitted-native",
+      "started": "2026-11-21T20:16:12.144636+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '38', '331', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 203, in load_service_artifacts\n    return load('load', artifacts)\n           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'load', '4', '38', '331', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/request.native.o', 'entry', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/request-avqhje5d/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link', '37', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/38.failure.tar.gz",
+      "finished": "2026-11-21T20:16:14.958865+00:00"
+    }
+  }
+]

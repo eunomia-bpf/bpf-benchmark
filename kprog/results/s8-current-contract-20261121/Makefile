@@ -1,5 +1,5 @@
-.PHONY: host micro
-host micro:
+.PHONY: host micro proposals
+host micro proposals:
 	PYTHONDONTWRITEBYTECODE=1 python3 kprog/results/s8-current-contract-20261121/check.py $@
 .PHONY: safety safety-guest
 RAW := /workspaces/kprog-raw/S8/20261121

@@ -1,0 +1,61 @@
+{
+  "observed_utc": "2026-11-21T20:17:30.906448+00:00",
+  "micro": {
+    "total": 60,
+    "by_isa": {
+      "x86": 30,
+      "arm64": 30
+    },
+    "compile_exits": {
+      "0": 60
+    },
+    "source_changes_during_compile": [],
+    "make_exit": 0
+  },
+  "safety": {
+    "total": 38,
+    "stages": {
+      "valid_executed": 9,
+      "verifier_rejected": 24,
+      "accepted_finding": 4,
+      "specialization_rejected": 1
+    },
+    "accepted_load_only": [
+      "uninitialized_stack",
+      "immediate_push_branch",
+      "entry_return_slot_overwrite",
+      "stack_base_flags"
+    ],
+    "negative_executions": 0,
+    "make_exit": 2,
+    "raw_outcomes": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/outcomes.json"
+  },
+  "tc_guest": {
+    "make_exit": 0,
+    "raw_state": "/workspaces/kprog-raw/S8/20261121/tc-requests-pvi_n8w2",
+    "result": {
+      "command": [
+        "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc-client",
+        "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc.bpf.o",
+        "/workspaces/kprog-raw/S8/20261121/tc-inputs/tc.native.o",
+        "/workspaces/kprog-raw/S8/20261121/tc-inputs/native-link",
+        "/workspaces/kprog-raw/S8/20261121/tc-requests-pvi_n8w2/jit.bin"
+      ],
+      "returncode": 0,
+      "stdout": "{\"route\":\"stock\",\"retval\":2,\"invocations\":34,\"tail_transfers\":33}\n{\"route\":\"native\",\"retval\":2,\"invocations\":34,\"tail_transfers\":33}\n",
+      "stderr": ""
+    }
+  },
+  "rust": {
+    "tests": 8,
+    "exit": 0,
+    "raw_log": "/workspaces/kprog-raw/S8/20261121/rust.log"
+  },
+  "host": {
+    "context_types": 32,
+    "stock_metadata_cases": 6,
+    "tail_cases": 48,
+    "make_exit": 0,
+    "raw_log": "/workspaces/kprog-raw/S8/20261121/host-published.log"
+  }
+}
