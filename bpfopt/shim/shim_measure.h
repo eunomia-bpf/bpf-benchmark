@@ -47,6 +47,7 @@ static void emit_has_programs(int cli) {
 
 static void emit_measure_start(int cli) {
     uint32_t count = 0;
+    shim_native_load_wait_quiet();
     pthread_rwlock_wrlock(&shim_native_load_lock);
     discover_bpf_programs();
     pthread_mutex_lock(&state_mutex);

@@ -3,10 +3,33 @@
 
 /* A snapshot must describe a completed load, including native replacement. */
 static pthread_rwlock_t shim_native_load_lock = PTHREAD_RWLOCK_INITIALIZER;
+static uint64_t shim_native_load_last_end_ns;
 struct shim_native_load_scope { int active; };
+static uint64_t shim_native_load_clock_ns(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+}
 static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
-    if (scope->active)
-        pthread_rwlock_unlock(&shim_native_load_lock);
+    if (!scope->active)
+        return;
+    __atomic_store_n(&shim_native_load_last_end_ns, shim_native_load_clock_ns(), __ATOMIC_RELEASE);
+    pthread_rwlock_unlock(&shim_native_load_lock);
+}
+/* An application keeps loading programs after the runner sees enough of them: Tetragon's
+ * 288 native loads run for about 100 s, and a snapshot taken in between missed every
+ * program loaded later. Measurement starts once no native load has ended for 2 s (at most
+ * 180 s of waiting). */
+static void shim_native_load_wait_quiet(void) {
+    const uint64_t quiet_ns = 2000000000ull;
+    const uint64_t start = shim_native_load_clock_ns();
+    for (;;) {
+        uint64_t now = shim_native_load_clock_ns();
+        uint64_t last = __atomic_load_n(&shim_native_load_last_end_ns, __ATOMIC_ACQUIRE);
+        if (last == 0 || now - last >= quiet_ns || now - start >= 180 * 1000000000ull)
+            return;
+        usleep(100000);
+    }
 }
 
 struct native_loader_c_result {
