@@ -247,8 +247,18 @@ and the imported bit-access/shift lemmas. Current layout, binding/result/sign,
 pointer-load and byte-store observations remain explicit input premises.
 The [seven public audits](../results/kprog_verification_20261107/x86-shift-flag-sf.log.gz)
 record source identity, offset, execution, frames and native SF value at existing
-budgets and inherited axioms. Whole-route composition, remaining flag stores,
-writeback and entry/world correspondence remain open.
+budgets and inherited axioms.
+
+Its universal nonzero route theorem joins original dispatch, arithmetic, old-CF
+reads, classification, width calls and both ZF/SF byte stores in
+186/198/210/210 silent steps. The second pointer load and store consume the
+actual heap produced by the first store. Binding, result and sign observations
+follow from the preceding exact temporary maps; caller locals and the original
+CF/OF continuation survive with the final heap and both pointer temporaries.
+The [eight public audits](../results/kprog_verification_20261107/x86-shift-through-sf.log.gz)
+record this composition and the preceding SF contracts at existing budgets and
+inherited axioms. Current heap/layout/callee observations remain explicit.
+CF/OF/PF stores, writeback and entry/world correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
