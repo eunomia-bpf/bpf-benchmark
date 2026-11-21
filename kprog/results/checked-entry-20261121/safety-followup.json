@@ -1,0 +1,89 @@
+{
+  "at": "2026-11-21T20:34:20.894012+00:00",
+  "head": "1b0b04eaf5cde697d390bb73370f66a4b7d5ded1",
+  "scope": "Read-only evidence reconciliation of the existing current38 suite",
+  "new_native_executions": 0,
+  "production_edits": 0,
+  "added_checks": 0,
+  "source_sha256": {
+    "kprog/x86/x86_sim_local_bpf.h": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336",
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1"
+  },
+  "rows": [
+    {
+      "name": "uninitialized_stack",
+      "assembly": "mov rax, QWORD PTR [rsp-8]; ret",
+      "request_id": 17,
+      "original_stage": "accepted_finding",
+      "status": 0,
+      "unsafe_native_executed": false,
+      "native_sha256": "f8f93d3f8bdef16052a409520c01f5db93b2c80bdcdfa78e156f48326bb4824a",
+      "original_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/17.success.tar.gz",
+      "archive_sha256": "f5e7ea60995b4dac62b2595634dd757d29895ad8447b5699e976f06688465498",
+      "archive_bytes": 233304,
+      "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t0\nload_site\t0,5,0\n",
+      "linked_blob_hex": "488b4424f8",
+      "generated_b_c_sha256": "75c90d61a4172514de5f8a7e0ce3d63c732a3babced69dc8cf492c093fbc7cbe",
+      "captured_header_sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336"
+    },
+    {
+      "name": "immediate_push_branch",
+      "assembly": "mov eax, 2; push 1; pop rcx; test rcx, rcx; jz 1f; xor edx, edx; mov eax, DWORD PTR [rdx]; 1: ret",
+      "request_id": 21,
+      "original_stage": "accepted_finding",
+      "status": 0,
+      "unsafe_native_executed": false,
+      "native_sha256": "cdf2b82d4eb97590da580e291117f08f8e2d39144358b5ed7d927fbac819fc7a",
+      "original_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/21.success.tar.gz",
+      "archive_sha256": "43f576dee024851afa5be92e54edbbae03791e4b295676f45764cb14cb6bdabe",
+      "archive_bytes": 237756,
+      "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t0\nload_site\t7,1,1\nload_site\t15,2,0\n",
+      "linked_blob_hex": "b8020000006a01594885c9740431d28b02",
+      "generated_b_c_sha256": "2638fc4003751922334fdecaa6b6716a53e53a7f68e09833fda0d9b417d008f2",
+      "captured_header_sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336"
+    },
+    {
+      "name": "entry_return_slot_overwrite",
+      "assembly": "mov QWORD PTR [rsp], 0; mov eax, 2; ret",
+      "request_id": 22,
+      "original_stage": "accepted_finding",
+      "status": 0,
+      "unsafe_native_executed": false,
+      "native_sha256": "4b4b66d1a588fac9c103dcb201ee1702c5d704eea01400545e994cda6912de50",
+      "original_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/22.success.tar.gz",
+      "archive_sha256": "9ebc7ad98939885c392f681d5d9672abbd496c239be28342b66e1f32a240cc0b",
+      "archive_bytes": 232676,
+      "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t0\n",
+      "linked_blob_hex": "48c7042400000000b802000000",
+      "generated_b_c_sha256": "bc16be21fae9561664e026162f9caf1d38d8d5e2cd24512c3a6b7d7b39c63988",
+      "captured_header_sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336"
+    },
+    {
+      "name": "stack_base_flags",
+      "assembly": "mov eax, 2; sub rsp, 8; add rsp, 8; jz 1f; xor ecx, ecx; mov eax, DWORD PTR [rcx]; 1: ret",
+      "request_id": 23,
+      "original_stage": "accepted_finding",
+      "status": 0,
+      "unsafe_native_executed": false,
+      "native_sha256": "830201e5d40f0666fc8881811501cd788727ba8039bdf76e419ecd8a421a50ea",
+      "original_archive": "/workspaces/kprog-raw/S8/20261121/safety-final-07w448fz/requests/23.success.tar.gz",
+      "archive_sha256": "cd2cb2c1f5cea0d26b79121bc96238ddcb84c0bc973877b582fea5c4c37ac801",
+      "archive_bytes": 237454,
+      "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t0\nload_site\t17,2,0\n",
+      "linked_blob_hex": "b8020000004883ec084883c408740431c98b01",
+      "generated_b_c_sha256": "082eacbd9e636bf729f0c00bc3ba5d7d6392f887126dbc169a2650dc25f9d52c",
+      "captured_header_sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336"
+    }
+  ],
+  "dispositions": {
+    "immediate_push_branch": "Existing M1 coordinator06:55 zero-page recovery decision and S9 guest controls at47cba14b9; current linked load site15,length2,dstRAX",
+    "stack_base_flags": "Existing M1 coordinator06:55 zero-page recovery decision and S9 guest controls at47cba14b9; current linked load site17,length2,dstRAX",
+    "entry_return_slot_overwrite": "Open physical private-frame/ABI correspondence: mask0 P enters after pushRBP/movRBP,RSP and writes0 to saved caller RBP; stock leave restores that slot",
+    "uninitialized_stack": "Open stack/model/compiler correspondence: B declares1stack byte for rsp-8 load and selects unspecified below-SP observation"
+  },
+  "raw_archive": {
+    "path": "safety-followup-raw.tar.gz",
+    "bytes": 840248,
+    "sha256": "5cff2286d01b5c22e2526925e05180cc330c67cffa29afb014785d690bfd2659"
+  }
+}
