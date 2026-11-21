@@ -40,7 +40,22 @@ negative:
 native: kernel
 	$(MAKE) -C $(ROOT)/vendor/bpf native-artifacts ARCH=arm64 VMLINUX_BTF=$(KDIR)/vmlinux KERNEL_RELEASE=$(KRELEASE)
 
-image: module negative native
+# vendor/Makefile builds tracee with OUTPUT_DIR=build/.tracee-build/<arch>/dist, while tracee's
+# //go:embed "dist/tracee.bpf.o" reads the source tree's dist/, which holds the x86 object of 2026-11-11:
+# the arm64 binary carried x86 BPF code, and libbpf poisoned is_compat's thread_info.status read
+# (2026-11-21 QEMU, tracee's own load: "invalid func unknown#195896080"). The arm64 binary is linked
+# with the arm64 object at that path, and the x86 file goes back byte for byte afterwards.
+TRACEE_DIST := $(ROOT)/vendor/repos/tracee/dist/tracee.bpf.o
+TRACEE_ARM64_OUT := $(ROOT)/vendor/build/.tracee-build/arm64/dist
+TRACEE_DIST_SAVE := $(ROOT)/.cache/tracee-dist-x86.bpf.o
+tracee:
+	cp -p $(TRACEE_DIST) $(TRACEE_DIST_SAVE)
+	cp $(TRACEE_ARM64_OUT)/tracee.bpf.o $(TRACEE_DIST)
+	rm -f $(TRACEE_ARM64_OUT)/tracee
+	$(MAKE) -C $(ROOT)/vendor tracee-arm64 JOBS=$(JOBS) || st=$$?; cp -p $(TRACEE_DIST_SAVE) $(TRACEE_DIST); exit $${st:-0}
+	cmp $(TRACEE_DIST_SAVE) $(TRACEE_DIST)
+
+image: module negative native tracee
 	$(MAKE) -C $(ROOT) arm64-runner-runtime-image-tar $(OVERRIDES) -o host-kinsn-arm64
 
 # One application in QEMU with the guest settings of kprog/perf/one-image (native lab module, stats
