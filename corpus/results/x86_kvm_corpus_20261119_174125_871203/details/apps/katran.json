@@ -1,0 +1,10 @@
+{
+  "app": "katran",
+  "baseline": null,
+  "error": "command failed (2): /usr/sbin/ip netns exec katran-router sh -c 'printf '\"'\"'%s\\n'\"'\"' rem_device_all > /proc/net/pktgen/kpktgend_2'\nsh: 1: cannot create /proc/net/pktgen/kpktgend_2: Directory nonexistent",
+  "post_rejit": null,
+  "rejit_result": {},
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "error"
+}
