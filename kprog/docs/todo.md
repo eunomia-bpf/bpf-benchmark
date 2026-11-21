@@ -505,6 +505,7 @@ PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backe
 5. Tetragon 主配置 README 的“不可报”改成照常报数，旁边写两臂程序集的差别（e675fdfb0）。
 6. omp：本轮 05:39 起轮询自己的队列；07:24 在 COORDINATION 写明按 prompt 第 34 行（运营者“如果在等的就关掉 lane是不是”）结束本轮，并给了两项在 CPU 0-7 之外的工作：提交 README 引用的运行目录；Tetragon 120 个程序走 direct-native 的原因。
 7. 代码量和 kprog/results 下的计时外壳放到 11-22 之后处理（21Z 审计第 4 条给的时间）。
+8. 协调者自己做完了原先交给 omp 的两项（运营者“接下来你来做, 不要叫其他人”）：README 和 docs 引用的 182 个运行目录入库（88 MB）；Tetragon 主配置 120 个 direct-native 请求的原因（kprog/results/lto-apps-20261119/tetragon/coverage.json，14:38 那一轮）：54 个生成阶段 clang 报 use of undeclared identifier 'current_task'，来自 3b5fa4b40 之前的头文件，当前镜像上会消失；26 个 relative table computation has live register or flag results；16 个 unresolved finite indirect target（jmp rax，跳转表）；24 个 B 生成了、库存校验器拒绝（R1 invalid mem access 'scalar'）。当前镜像上的主配置重跑给出新的分布。
 
 **协调者 2026-11-20T20:45:03Z（arm64 在当前系统上接通）**：运营者 11-20：“你要确保弄好, 需要支持”。入口 kprog/perf/one-image-arm64（a0f6158da、2cd3853a8）：用唯一内核的 arm64 构建、kprog/perf/direct-native 模块的 arm64 构建（5e3836051）、vendor/bpf ARCH=arm64 的六个应用原生对象（6746408f1、163bb774f）、冻结的 arm64 镜像配方，在 QEMU（2 vCPU、2G，冻结 qemu-arm64 的机器）里按 x86 入口的来宾设置运行。加载器 arm64 的上传协议改成和 x86 同一套（43916865a）。BCC：两阶段 status ok，23 个程序里 20 个走原生（arm64_qemu_corpus_19700101_000006_677126）。其余 3 个 native-link arm64 拒绝（经段符号的调用、段内偏移超出段长、空段里的数据），留在 eBPF，功能一致；记为 arm64 覆盖缺口。六个应用的 arm64 检查在跑（kprog-raw/one-image-arm64-runs）。arm64 计时要有 KVM 的真 arm64 机器：osuosl-bpftime1 没有 /dev/kvm，Workspace 里没有 AWS 凭据；11-22 前 arm64 的计时数用 5/27（06-14 AWS）。x86 不受影响：make -n 不变，108 个 x86 原生对象和 x86 模块的代码段与镜像 kprog:current 相同。
 
