@@ -44,6 +44,18 @@ physical permissions, emitted wrapper correspondence and native/B projection
 remain platform obligations. Its [four public audits](../results/kprog_verification_20261107/native-frame-word.log.gz)
 use the existing logical axioms. This O4 component retains the partial M5 scope.
 
+The [x86 shift-count helper](KProgFormal/ClightRefinement/X86ShiftCount.lean)
+executes the actual exported C call in six silent Clight transitions for every
+64-bit input, byte width, environment, memory and continuation. Its byte result
+uses mask 63 at width eight and mask 31 otherwise. For every mature x86 operand
+size, the complete call returns exactly X86.Flags.shiftCount applied to the
+input's low byte. Every finite Kstop execution is a silent prefix of the same
+return, each terminal state has that result and original memory, and the
+complete relation terminates. The [five public audits](../results/kprog_verification_20261107/x86-shift-count.log.gz)
+record the final standard-library arithmetic proof and existing logical/CompCert
+semantic axioms; earlier diagnostics retain their attempt labels. This helper
+correspondence remains a component of the open M5 ISA-handler obligation.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
