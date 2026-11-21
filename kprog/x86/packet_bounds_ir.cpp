@@ -194,21 +194,35 @@ static unsigned normalize_live_integer_identities(Module &module) {
   }
   return calls.size();
 }
+// Whether a value's bits originate in a pointer: a ptrtoint, a register's
+// frozen concrete bits, or any constant add/sub on top of one. The simulator
+// keeps a lane as "ptrtoint + scaled register bits" (%2795 = add i64
+// %register_bits, %ptrtoint in OTel request 10's retained IR), so adding a
+// scalar to a pointer still yields pointer-derived bits; ending the walk at
+// that add is what left the stack-pointer subtraction at B PC1583 in place.
+static bool pointer_bits(Value *value) {
+  while (true) {
+    if (auto *freeze=dyn_cast<FreezeInst>(value)) { value=freeze->getOperand(0); continue; }
+    if (isa<PtrToIntOperator>(value)) return true;
+    auto *operation=dyn_cast<Operator>(value);
+    if (!operation) return false;
+    auto opcode=operation->getOpcode();
+    if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
+        isa<ConstantInt>(operation->getOperand(1))) { value=operation->getOperand(0); continue; }
+    if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0))) {
+      value=operation->getOperand(1);continue;
+    }
+    if (opcode==Instruction::Add) {
+      if (pointer_bits(operation->getOperand(0))) { value=operation->getOperand(0); continue; }
+      if (pointer_bits(operation->getOperand(1))) { value=operation->getOperand(1); continue; }
+    }
+    return false;
+  }
+}
 // A pointer difference may only be verifier-legal on its original CFG path.
 // Keep the arithmetic there: pure SUB can otherwise be speculated before a
 // tag test, exposing scalar-minus-pointer on an infeasible stack-pointer path.
 static unsigned anchor_pointer_differences(Module &module) {
-  auto pointer_bits=[](Value *value) {
-    while (auto *operation=dyn_cast<Operator>(value)) {
-      auto opcode=operation->getOpcode();
-      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
-          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
-      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
-        value=operation->getOperand(1);
-      else break;
-    }
-    return isa<PtrToIntOperator>(value);
-  };
   SmallVector<BinaryOperator *,16> differences;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
     auto *difference=dyn_cast<BinaryOperator>(&instruction);
@@ -254,17 +268,6 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
     }
     auto *cast=dyn_cast<PtrToIntOperator>(value);
     return cast && isa<AllocaInst>(cast->getOperand(0));
-  };
-  auto pointer_bits=[](Value *value) {
-    while (auto *operation=dyn_cast<Operator>(value)) {
-      auto opcode=operation->getOpcode();
-      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
-          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
-      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
-        value=operation->getOperand(1);
-      else break;
-    }
-    return isa<PtrToIntOperator>(value);
   };
   SmallVector<BinaryOperator *,16> outers;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
