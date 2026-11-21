@@ -1,6 +1,6 @@
 {
   "source_sha256": {
-    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterCall.lean": "fb53e27a0e45d1fde9d724baaeba2f4bfefbd5a15daab266322e094ba64a6036"
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterCall.lean": "5681dad155fd41c13af7dc2bdf084d1cf86771ef8ba32e973e51645be656b370"
   },
   "build": {
     "command": [
@@ -9,31 +9,38 @@
       "KProgFormal.ClightRefinement.Arm64AddRegisterCall"
     ],
     "exit": 0,
-    "seconds": 70.40232992172241,
+    "seconds": 57.150450706481934,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
-  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/call1.log",
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/call-behavior1.log",
   "public": {
     "command": [
       "lake",
       "env",
       "lean",
       "-j1",
-      "/workspaces/kprog-raw/formal/m5-add-register/CallPublic.lean"
+      "/workspaces/kprog-raw/formal/m5-add-register/CallBehaviorPublic.lean"
     ],
     "exit": 0,
-    "seconds": 1.522373914718628,
+    "seconds": 1.5108778476715088,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
-  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-call1.log",
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-call-behavior1.log",
   "axioms": {
     "KProgFormal.ClightRefinement.Arm64AddRegisterCall.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddRegisterCall.all_behaviors": [
       "propext",
       "CC.externalFunctionsSem",
       "CC.inlineAssemblySem",
@@ -43,7 +50,52 @@
   },
   "steps": 469,
   "whole_library_confirmation": "pending until call/native batch completes",
-  "scope": "actual nine-argument caller with local-frame release and existing full register view; native instruction and all-behavior composition pending",
+  "scope": "actual source call with frame release/full register view/all behaviors; native fetched-instruction/original entry pending",
   "m5_complete": false,
-  "complete_isa_families": 0
+  "complete_isa_families": 0,
+  "initial_execute_validation": {
+    "source_sha256": {
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterCall.lean": "fb53e27a0e45d1fde9d724baaeba2f4bfefbd5a15daab266322e094ba64a6036"
+    },
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64AddRegisterCall"
+      ],
+      "exit": 0,
+      "seconds": 70.40232992172241,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-add-register/call1.log",
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-add-register/CallPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.522373914718628,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-call1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64AddRegisterCall.execute": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "all_behaviors": "arbitrary finite relational runs are silent prefixes; unique stuck freed-frame return; no infinite run"
 }

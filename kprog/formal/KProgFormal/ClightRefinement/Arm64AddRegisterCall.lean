@@ -146,4 +146,45 @@ theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
     (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released,
     kept, kept.pointers header pointers, kept.warm before.nextblock header bound pointers false origins.stack warm, finalBound⟩
 
+/-- Every relational execution is a silent prefix of the same real freed-frame
+return. All stuck endpoints coincide, and no infinite execution exists. -/
+theorem all_behaviors {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (header : (j : Fin 12) → HeaderSourceLocal initial j)
+    (pointers : ∀ j, CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0))
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (native : Reference.AArch64.State)
+    (represented : Arm64Registers.Represents addresses origins (fun r => r.val)
+      before.nextblock before (.Vptr entry.block 0) native)
+    (warm : Arm64RegisterReads.WarmEntryCache false before.nextblock before (.Vptr entry.block 0) origins.stack)
+    (lhs raw : BitVec 64)
+    (lhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 1) 0 = some (.Vlong lhs))
+    (lhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 1) 0 = some (.Vint 0))
+    (rhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 2) 0 = some (.Vlong raw))
+    (rhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 2) 0 = some (.Vint (4#32))) :
+    ∃ after,
+      Arm64Registers.Represents addresses origins (fun r => r.val) before.nextblock after (.Vptr entry.block 0)
+        (Arm64RegisterWrite.nativeUpdate native 3 (lhs + (raw + origins.stack)) false) ∧
+      (∀ t other, CC.Star (CC.Step2 world)
+        (.Callstate (.Internal Arm64Nop.handler) (arguments entry.block) .Kstop before) t other →
+        t = CC.E0 ∧ ∃ remaining, InternalRun world remaining other (.Returnstate .Vundef .Kstop after)) ∧
+      (∀ t other, CC.Star (CC.Step2 world)
+        (.Callstate (.Internal Arm64Nop.handler) (arguments entry.block) .Kstop before) t other →
+        (∀ u next, ¬ CC.Step2 world other u next) →
+        t = CC.E0 ∧ other = .Returnstate .Vundef .Kstop after) ∧
+      ¬ (∃ states : Nat → CC.State,
+        states 0 = .Callstate (.Internal Arm64Nop.handler) (arguments entry.block) .Kstop before ∧
+        ∀ j, ∃ t, CC.Step2 world (states j) t (states (j + 1))) := by
+  obtain ⟨written, after, finalStorage, word, tag, run, registers, _⟩ :=
+    execute storage bound header pointers addresses origins native represented warm lhs raw
+      lhsWord lhsTag rhsWord rhsTag .Kstop rfl
+  have stuck : ∀ t next, ¬ CC.Step2 world (.Returnstate .Vundef .Kstop after) t next := by
+    intro t next step
+    cases step
+  exact ⟨after, registers,
+    fun _ _ observed => run.finish_prefix stuck observed,
+    fun _ _ observed endpoint => run.endpoint_unique stuck observed endpoint,
+    run.no_infinite stuck⟩
+
 end KProgFormal.ClightRefinement.Arm64AddRegisterCall
