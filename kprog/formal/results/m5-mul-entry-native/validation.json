@@ -1,0 +1,68 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulNative.lean": "e7d5545c5eee50737979b7132afa307337d879d47d027889af0293221d15783f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMulNative"
+    ],
+    "exit": 0,
+    "seconds": 1.8954553604125977,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/entry-native2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/EntryNativePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.582430124282837,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-entry-native1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulNative.corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 441,
+  "scope": "original fifth caller real arguments/entry2 + fetched mature MUL source call437 + actual return2 to unchanged afterMul; complete register/frame/free/cache/header contracts",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ProgramEntryMulNative"
+        ],
+        "exit": 1,
+        "seconds": 1.9325346946716309,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-mul/entry-native1.log",
+      "reason": "transformation typo in predecessor source identifier; fixed without changing theorem scope or proof caps"
+    }
+  ],
+  "whole_library_confirmation": "pending original fifth-entry/native batch and V classifier terminal notice",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
