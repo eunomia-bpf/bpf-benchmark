@@ -223,8 +223,18 @@ binding/result/count observations, the genuine pointer load and actual byte-stor
 success remain explicit premises; later source/world proofs derive them from
 the ABI representation. The [nine public audits](../results/kprog_verification_20261107/x86-shift-flag-zf.log.gz)
 record actual source identities, field offset, execution, frames and native flag
-value at existing budgets and inherited axioms. Whole-route composition,
-remaining flag stores, writeback and entry/world correspondence remain open.
+value at existing budgets and inherited axioms.
+
+Its nonzero route theorem joins original arithmetic dispatch, old-CF reads,
+classification, width calls, input preparation and the ZF store in
+180/192/204/204 silent steps. Binding, result, count and operation observations
+follow from the preceding frames and actual source values; nonzero count follows
+from the mature count definition. The original heap pointer load and byte-store
+success remain input observations, and the endpoint carries that exact updated
+heap and the original remaining flag continuation. The
+[ten public audits](../results/kprog_verification_20261107/x86-shift-through-zf.log.gz)
+record the universal composition at existing budgets and inherited axioms.
+Remaining flag stores, writeback and entry/world correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
