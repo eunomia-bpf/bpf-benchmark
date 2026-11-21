@@ -46,15 +46,16 @@ theorem corresponds {initial before : CC.Mem} {entry : HeaderLocal initial}
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
       Arm64CacheLocalFrame.Kept initial before after i ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
-      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   have sourceSP := Arm64AddOperandReads.Linked.sp_native storage addresses origins s represented
   have native := Native.reference_step s instruction i imm shifted decoded noError fetched
   have update := Native.pointer_update s i imm shifted origins storage.spValue sourceSP
   obtain ⟨written, after, finalStorage, word, tag, run, registers, frame, freed, freeFrame,
-      contents, next, released, kept, finalPointers, finalWarm⟩ :=
+      contents, next, released, kept, finalPointers, finalWarm, finalBound⟩ :=
     execute storage bound header pointers addresses origins s represented warm i (Native.operand imm shifted) src2 src3 k valid
   refine ⟨written, after, finalStorage, word, tag, run, ?_, ?_, ?_, frame, freed, freeFrame,
-    contents, next, released, kept, finalPointers, finalWarm⟩
+    contents, next, released, kept, finalPointers, finalWarm, finalBound⟩
   · rw [native]
     exact (Arm64Registers.cursor after (.Vptr entry.block 0)
       (Arm64RegisterWrite.nativeUpdate s i (Reference.AArch64.sp s + Native.operand imm shifted) false)
@@ -100,7 +101,7 @@ theorem all_behaviors {initial before : CC.Mem} {entry : HeaderLocal initial}
           (arguments entry.block i (Native.operand imm shifted) src2 src3) .Kstop before ∧
         ∀ j, ∃ t, CC.Step2 ge (states j) t (states (j+1))) := by
   obtain ⟨_written, after, finalStorage, word, tag, run, registers, _events, _fault, frame,
-      _freed, _freeFrame, _contents, _next, _released, _kept, _pointers, finalWarm⟩ :=
+      _freed, _freeFrame, _contents, _next, _released, _kept, _pointers, finalWarm, _finalBound⟩ :=
     corresponds storage bound header pointers addresses origins s represented warm i imm shifted src2 src3
       .Kstop rfl instruction decoded noError fetched
   have stuck : ∀ t next, ¬ CC.Step2 ge (.Returnstate .Vundef .Kstop after) t next := by

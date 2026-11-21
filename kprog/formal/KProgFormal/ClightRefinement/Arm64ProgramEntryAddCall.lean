@@ -178,15 +178,16 @@ theorem corresponds {initial before : CC.Mem} {entry : HeaderLocal initial}
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
       Arm64CacheLocalFrame.Kept initial before after 2 ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
-      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   have entered := enter entry le k before
   obtain ⟨written, after, finalStorage, word, tag, run, registers, events, fault, frame, freed,
-      freeFrame, contents, next, released, kept, finalPointers, finalWarm⟩ :=
+      freeFrame, contents, next, released, kept, finalPointers, finalWarm, finalBound⟩ :=
     Arm64AddImmediate.Call.corresponds storage bound header pointers addresses origins s represented warm
       2 (16#12) false (.Vlong (255#64)) (.Vlong (255#64)) (callCont initial le k) rfl
       instruction decoded noError fetched
   have returned := leave initial le k after
   exact ⟨written, after, finalStorage, word, tag, (entered.trans run).trans returned,
-    registers, events, fault, frame, freed, freeFrame, contents, next, released, kept, finalPointers, finalWarm⟩
+    registers, events, fault, frame, freed, freeFrame, contents, next, released, kept, finalPointers, finalWarm, finalBound⟩
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryAddCall

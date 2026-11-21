@@ -59,6 +59,14 @@ private theorem result_frontier {initial before after : CC.Mem} {entry : HeaderL
   Eq.mpr (congrArg (fun frontier => Arm64Registers.Represents addresses origins (fun r => r.val)
     frontier after (.Vptr entry.block 0) (Arm64PointerWrite.nativeUpdate origins native i value tag)) result.nextblock) registers
 
+private theorem result_bound {initial before after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} {i : Fin 31} {value : BitVec 64} {tag : BitVec 8}
+    (result : Arm64PointerWrite.Result storage i value tag after)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat) :
+    (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat :=
+  Eq.mpr (congrArg (fun frontier : CC.Block =>
+    (Arm64Producer.allocation initial).2.nextblock.toNat ≤ frontier.toNat) result.nextblock) bound
+
 /-- Complete generic ADD-immediate call, deriving actual frame release and
 retaining the caller's original observer frontier, canonical header and warm cache. -/
 theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
@@ -88,7 +96,8 @@ theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
           ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
       Arm64CacheLocalFrame.Kept initial before after i ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
-      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack := by
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
   have allocationFrame := Arm64Nop.entry_frame ge before
   let carried := storage.frame allocationFrame
   have carriedSP : carried.spValue = storage.spValue := frame_sp storage allocationFrame
@@ -165,8 +174,13 @@ theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
         (Body.finalTemps le native rhs carried.spValue) written)
       (.Returnstate .Vundef k after) :=
     .step trivial (.skip_call _ _ _ _ _ _ valid freed) (.refl _)
+  have writtenBound := result_bound result (Nat.le_trans bound
+    (FrameBelow.allocVariables (Arm64MovImmediate.allocated_bound ge before) before.nextblock (Nat.le_refl _)).1)
+  have finalBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat :=
+    Eq.mpr (congrArg (fun frontier : CC.Block =>
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ frontier.toNat) next) writtenBound
   exact ⟨written, after, finalStorage, word, tag, (enter.trans body).trans leave, finalRegisters,
     (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released,
-    kept, kept.pointers header pointers, kept.warm before.nextblock header bound pointers false origins.stack warm⟩
+    kept, kept.pointers header pointers, kept.warm before.nextblock header bound pointers false origins.stack warm, finalBound⟩
 
 end KProgFormal.ClightRefinement.Arm64AddImmediate.Call
