@@ -107,6 +107,19 @@ record the source identity, selected route and relational composition at the
 original proof budgets. Entry and operand-read derivation, execution of the
 remaining flags/writeback code and enclosing dispatcher remain open.
 
+The [actual old-CF input proof](KProgFormal/ClightRefinement/X86ShiftLeftCarry.lean)
+locates the two real exported composite declarations and checks their complete
+layouts against the imported type builder. It derives the CF pointer field at
+byte offset 120 from those members. With the two matching world-layout records,
+the original binding temp and genuine current-memory pointer/byte loads, eleven
+silent source steps reach the untouched classifier for every old CF byte and
+caller state. The pointer, loaded byte and old-CF temporaries read back exactly;
+all other temporaries, complete memory and caller locals retain their values,
+with the original loop and writer continuation. Its
+[six public audits](../results/kprog_verification_20261107/x86-shift-left-carry.log.gz)
+record existing logical/CompCert axioms and original proof budgets. Full world
+and entry representation, classification, flag computation and writeback remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
