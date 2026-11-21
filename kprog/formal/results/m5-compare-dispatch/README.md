@@ -1,0 +1,5 @@
+# Actual CMP-register dispatch
+
+`Arm64Compare.Dispatch.body_source` is the exact original generic-body decomposition. `body_dispatch_bound` and linked `body_dispatch` reach the unchanged CMP branch for opcode23 and either W/X width in118silent steps: actual width entry4, real width helper6, original return/width assignment and all dispatch gates108. All16original gate structures and22actual comparison temporary writes remain present. Same e/heap/continuation are retained, all other inputs arbitrary; no operand or result premise is introduced.
+
+Component230jobs and three public type/axiom queries passed on CPU17/j1/32GiB with default proof limits and inherited logical/CompCert semantic axioms only. Exact source hash, timings and logs are in validation.json; diagnostic AST/count extraction in raw m5-compare was only preparation, not an admitted proof. Actual DST LHS/modified SRC RHS reads and four NZCV stores, mature SUBS-to-ZR/native/original six-call prefix remain next. Whole batch pending. Complete ISA families0; M5/O1/O2/O4/M6 remain open. No runtime application or measurement.

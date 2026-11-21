@@ -1,0 +1,69 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareDispatch.lean": "55ffac55b286c4e555ea298285b0e1830e428e393b1ef1c04969db07167bc52e"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareDispatch"
+    ],
+    "exit": 0,
+    "seconds": 15.571028470993042,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 230,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/dispatch1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/DispatchPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5383894443511963,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-dispatch1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Dispatch.body_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Dispatch.body_dispatch_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Dispatch.Linked.body_dispatch": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 118,
+  "step_decomposition": {
+    "enter_width": 4,
+    "actual_width": 6,
+    "width_return_and_all_dispatch_gates": 108
+  },
+  "source_gates": 16,
+  "exact_comparison_temp_writes": 22,
+  "scope": "op23 actual source dispatch through every preceding gate plus real width call to unchanged CMP branch, W/X/arbitrary e/le/m/k and exact temp map; no CMP execution/native claim",
+  "whole_library_confirmation": "pending completed CMP source/native batch and published V root handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

@@ -164,3 +164,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryMulAdmission
 import KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative
 import KProgFormal.ClightRefinement.X86ShiftLeftClassify
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCompareCall
+import KProgFormal.ClightRefinement.Arm64CompareDispatch
