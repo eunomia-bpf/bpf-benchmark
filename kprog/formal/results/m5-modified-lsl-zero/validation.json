@@ -1,0 +1,144 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedModifier.lean": "0c62f3329751636739fcf4193b9948e9b0e5e9d43429feda6434f110faffdf9e"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedModifier"
+    ],
+    "exit": 0,
+    "seconds": 12.123493194580078,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 236,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/modifier3.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/ModifierPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8755269050598145,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-modifier2.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Modified.Modifier.modify_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Modifier.result_wide": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Modified.Modifier.execute_lsl_zero": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 41,
+  "step_decomposition": {
+    "real_value_kind_shift_amount_prefix": 18,
+    "real_switch_and_LSL0_case": 20,
+    "real_output_and_loop_exit": 3
+  },
+  "scope": "actual standalone LSL0 modifier loop W/X/mod1/shift0, W0xffffffff or Xallones64 source mask, same wholeheap/e/originalk and exact ten source temp writes; X result identity proven, no native/full helper claim",
+  "diagnostic_attempts": [
+    {
+      "build": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ModifiedModifier"
+        ],
+        "exit": 1,
+        "seconds": 10.222275018692017,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/modifier1.log",
+      "reason": "ready temp-read simp reached default depth512; explicit kernel-backed PTree get/set rewrites fixed it. Case-split removed narrow variable; explicit false/true arguments fixed scope. No cap increase or step change."
+    }
+  ],
+  "whole_library_confirmation": "pending completed CMP helper/source/native batch and latest stable V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0,
+  "prepublication_confirmation": {
+    "source_sha256": {
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedModifier.lean": "54bf661bcf4c3d89f9a689c91ef5882dbd76641503d4bb09f03f940fae91947a"
+    },
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ModifiedModifier"
+      ],
+      "exit": 0,
+      "seconds": 10.265624046325684,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "build_log": "/workspaces/kprog-raw/formal/m5-compare/modifier2.log",
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-compare/ModifierPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.1158790588378906,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-modifier1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Modified.Modifier.modify_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Modified.Modifier.result_wide": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Modified.Modifier.execute_lsl_zero": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "publication_diagnostics": [
+    {
+      "log": "/workspaces/kprog-raw/formal/m5-compare/modifier-source-controller.log",
+      "status": "failed before commit at diff --check; removed trailing whitespace outside string literals and rechecked exact bytes with modifier3/public-modifier2"
+    }
+  ]
+}
