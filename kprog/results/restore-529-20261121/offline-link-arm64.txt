@@ -1,0 +1,9 @@
+arm64 /tmp/vb529a/arm64/stage: 224/289 entries link; 4 stop at lookup metadata the loader supplies
+  otelcol-ebpf-profiler      23  Error: armN local data relocation __armN_section_Some(SectionIndex(N))_addend_N addend N exceeds section size N   e.g. otelcol-ebpf-profiler.native.o:custom__generic
+  tracee                     21  Error: armN local data relocation __armN_section_Some(SectionIndex(N))_addend_N addend N exceeds section size N   e.g. tracee.native.o:lkm_seeker_kset_tail
+  tetragon                    9  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. bpf_execve_event_v61.native.o:event_execve
+  bcc                         2  Error: armN ADR_GOT in …   e.g. biosnoop.native.o:block_rq_insert
+  bcc                         2  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. runqlat.native.o:handle_sched_switch
+  bcc                         2  Error: armN proof data relocation __armN_section_Some(SectionIndex(N))_addend_N addend N exceeds section size N   e.g. runqlat.native.o:handle_switch
+  katran                      1  Error: armN helper call __armN_section_Some(SectionIndex(N))_addend_N has no helper address   e.g. balancer.native.o:balancer_ingress
+  tetragon                    1  Error: armN local data relocation __armN_section_Some(SectionIndex(N))_addend_N addend N exceeds section size N   e.g. bpf_execve_event_v61.native.o:execve_send

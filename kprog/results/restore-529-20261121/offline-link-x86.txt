@@ -1,0 +1,4 @@
+x86 vendor/build/native-bpf/x86/stage: 277/289 entries link; 0 stop at lookup metadata the loader supplies
+  cilium                      8  Error: xN helper call bpf_get_netns_cookie has no helper address   e.g. bpf_sock.native.o:cil_sock4_connect
+  otelcol-ebpf-profiler       2  Error: instruction   e.g. otelcol-ebpf-profiler.native.o:kprobe_unwind_hotspot
+  otelcol-ebpf-profiler       2  Error: PCN proof section-symbol … .data.rel.ro is not rodata/bss   e.g. otelcol-ebpf-profiler.native.o:kprobe_unwind_native

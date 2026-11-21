@@ -1,6 +1,11 @@
 #include "native_loader.hpp"
 #include "native_loader_internal.hpp"
 
+namespace native_loader::trusted {
+std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(int program_fd,
+                                                                           uint32_t program_type);
+}
+
 #include "kernel_offsets.h"
 
 #include "native_loader_manifest.hpp"
@@ -411,6 +416,7 @@ constexpr const char *kRuntimeCallSymbols[] = {
 };
 
 constexpr const char *kTypedHelperSymbols[] = {
+    "ktime_get_mono_fast_ns",
     "bpf_user_rnd_u32",
     "bpf_xdp_fib_lookup",
     "bpf_skb_fib_lookup",
@@ -1976,6 +1982,9 @@ struct LinkedBlob {
 };
 
 struct CompanionLoad {
+    // The function the kernel calls for each helper ID of this program (its type's
+    // get_func_proto): bpf_get_socket_cookie of a sock_addr program is the _sock_addr one.
+    std::vector<std::pair<std::string, uint64_t>> context_helpers;
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t source_bytecode_bytes = 0;
@@ -2751,6 +2760,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
 {
     CompanionLoad out{};
     out.prog_type = prog_info.type;
+    out.context_helpers = native_loader::trusted::query_program_helper_targets(program_fd, prog_info.type);
     out.source_bytecode_bytes = source_insn_cnt * sizeof(bpf_insn);
     out.map_rules = std::move(map_rules);
 

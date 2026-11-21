@@ -113,6 +113,14 @@ NativeLinkArgs build_native_link_args(
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
         add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
+        add_name_addr(out.helpers, "__native_arm64_bpf_map_max_entries_offset",
+                      K_BPF_MAP_MAX_ENTRIES_OFFSET);
+        add_name_addr(out.helpers, "__native_arm64_bpf_array_ptrs_offset", K_BPF_ARRAY_PTRS_OFFSET);
+        add_name_addr(out.helpers, "__native_arm64_bpf_prog_bpf_func_offset",
+                      K_BPF_PROG_BPF_FUNC_OFFSET);
+        // PROLOGUE_OFFSET of arch/arm64/net/bpf_jit_comp.c on the one kernel (BTI off, PAC on):
+        // (0 + 2 + 1 + 4) instructions.
+        add_name_addr(out.helpers, "__native_arm64_tail_call_offset", 28);
     }
 #endif
 
@@ -136,6 +144,9 @@ NativeLinkArgs build_native_link_args(
             continue;
         }
         add_name_addr(out.helpers, alias->first, alias->second);
+    }
+    for (const auto &[name, address] : companion.context_helpers) {
+        add_name_addr(out.helpers, name, address);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
         uint64_t addr = kallsyms_lookup(symbol);

@@ -30,6 +30,8 @@
 #include <linux/uaccess.h>
 
 #include <linux/bpf_native.h>
+/* helper_targets: the function the kernel calls for each helper ID of a loaded program. */
+#include "../../stock-path/module/native_lab_helper_query_impl.h"
 
 #define NATIVE_LAB_MAX_BLOBS	512
 /* Userspace uploads a program as consecutive chunks of at most this size
@@ -514,6 +516,7 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 			    &map_value_ptr_fops);
 	debugfs_create_file("arm", 0200, debugfs_root, NULL, &arm_fops);
 	debugfs_create_file("sites", 0200, debugfs_root, NULL, &sites_fops);
+	debugfs_create_file("helper_targets", 0600, debugfs_root, NULL, &helper_targets_fops);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		char name[24];
