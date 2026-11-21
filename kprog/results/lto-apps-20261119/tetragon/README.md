@@ -16,12 +16,13 @@ re-run on the new image.
   11-19 11:59, before 02429959e (11-20 02:57) taught the link schema to bind `current_task`, `cpu_number` and
   `jiffies_64`. `strings` on it showed only `ktime_get_mono_fast_ns`. The guest ran a current native-link
   against that plan, so every object with a `current_task` GOT relocation failed. Fixed in place, same base.
-- Per call: **not quotable from this run.** The post arm recorded 129 program entries against the baseline's
-  287, and its hottest baseline program (`generic_tracepo`, 1.34e9 calls) has no post-arm entry at all, so the
-  two arms' program sets are not the same; the pairing yields no retained pairs at the 1000-call threshold.
-  Total calls 2.30e9 against 2.91e9 (0.79) is the only comparable figure, and it is a workload comparison.
-  Asymmetric arm records are normal for this app (11-19 runs read 287/287, 221/209, 287/192), which is why the
-  ratio needs a run whose two arms loaded the same set.
+- Per call, as measured: **2.790x** (733.1 / 262.7 ns, `kprog/results/flag-tuning-20261117/may29_ratio.py`); throughput
+  2.995x (3.177 / 3.015 / 2.628). Beside them: the post arm recorded 129 program entries against the baseline's 287
+  and 2.30e9 calls against 2.91e9, and the hottest baseline program (`generic_tracepo`, 1.34e9 calls) is absent from
+  the post arm, so the two arms ran different program sets and the throughput above the per-call bound comes from
+  that difference in work. Asymmetric arm records are usual for this app (11-19 runs read 287/287, 221/209, 287/192).
+  Reported as measured per the 2026-11-20 16:48 decision (d514e9efc; operator 2026-11-18: "不应该拿调用次数做对比和
+  gate? 调用次数很可能不同啊").
 - What this run establishes: with the base corrected, Tetragon installs 141 of 142 native programs.
 
 Raw: /workspaces/kprog-raw/omp/lto-tetragon-rerun-20261120T1438Z. The stale-loader arm is kept as
