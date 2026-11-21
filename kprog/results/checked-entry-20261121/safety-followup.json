@@ -85,5 +85,103 @@
     "path": "safety-followup-raw.tar.gz",
     "bytes": 840248,
     "sha256": "5cff2286d01b5c22e2526925e05180cc330c67cffa29afb014785d690bfd2659"
+  },
+  "uninitialized_stack_followup": {
+    "at": "2026-11-21T21:16:24.453577+00:00",
+    "method": "Disassemble the retained B ELF and inspect the matching current kernel/model source; original native input remains load-only.",
+    "b_elf_sha256": "898d230775a757c879f56a15feb05266662df35c1369b585184d2b6e01858652",
+    "generated_c_sha256": "75c90d61a4172514de5f8a7e0ce3d63c732a3babced69dc8cf492c093fbc7cbe",
+    "disassembler": "/usr/lib/llvm-18/bin/llvm-objdump",
+    "disassembler_version": "Ubuntu LLVM version 18.1.3",
+    "disassembly": {
+      "path": "uninitialized-stack-disassembly.txt",
+      "bytes": 3687,
+      "sha256": "8c1330d0f99a6b6610f2e68e0af0721f025b1819feecf66babc7a7e909adc37a"
+    },
+    "emitted_reads": "B instruction33 reads u64 at R10-8; byte-arm instructions41..60 retain the unaligned private reads.",
+    "capacity": "check_definedness tracks lowest RSP in push; this fixture keeps RSP0, renders STACK_BYTES1 and represents rsp-8 by index -7.",
+    "stock_policy": "allow_uninit_stack derives from bpf_allow_uninit_stack(token), which is CAP_PERFMON capability. STACK_INVALID reads and full512-byte stack bounds are allowed when true.",
+    "capture_scope": "Original archive records successful load and no negative execution; it records no loader capability mask. The capability condition is a source contract, and the original accepted_finding remains.",
+    "remaining_correspondence": "Relate generated C private-arena bounds and the physical stack read to the chosen verifier privilege contract; emitted read presence is established by retained ELF.",
+    "new_native_executions": 0,
+    "production_edits": 0,
+    "added_checks": 0,
+    "source": {
+      "kprog/x86/micro-prog/x86_abi.py": {
+        "sha256": "4028d40d02011bd8fee88790d0eb936bdc238eae97aa343b8f84119c6d8835c4",
+        "snippets": [
+          {
+            "first_line": 102,
+            "last_line": 105,
+            "text": "    def push(context, addr, state, backedge=False):\n        nonlocal lowest_stack\n        if type(state.aliases[rsp]) is int:\n            lowest_stack = min(lowest_stack, state.aliases[rsp])"
+          },
+          {
+            "first_line": 218,
+            "last_line": 219,
+            "text": "        def read_memory(operand, width):\n            return read_alias(address(operand), width)"
+          },
+          {
+            "first_line": 669,
+            "last_line": 669,
+            "text": "    return -lowest_stack"
+          }
+        ]
+      },
+      "kprog/x86/x86_sim_local_bpf.h": {
+        "sha256": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336",
+        "snippets": [
+          {
+            "first_line": 859,
+            "last_line": 866,
+            "text": "#define X86_SIM_L_STACK_READ_DECL(NAME, OFF, WIDTH, READ) \\\n    READ(NAME, OFF, WIDTH); \\\n    if ((__s64)(OFF)<X86_SIM_L_STACK_SP()) NAME=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH))\n#define X86_SIM_L_STACK_READ_INTO(OUTPUT, OFF, WIDTH) \\\n    do { X86_SIM_L_STACK_READ_DECL(__x86_observed, OFF, WIDTH, X86_SIM_L_STACK_READ_OWNED_DECLARE_INTO); \\\n         (OUTPUT)=__x86_observed; } while (0)\n#define X86_SIM_L_STACK_READ(OFF, WIDTH) \\\n    ({ X86_SIM_L_STACK_READ_DECL(__x86_observed, OFF, WIDTH, X86_SIM_L_STACK_READ_OWNED_INIT); \\"
+          }
+        ]
+      },
+      "kprog/formal/generated/x86_stack_index.h": {
+        "sha256": "a8d4e4ad98a2ff926e8801271038026a31fa4e684811790c3999d079d634bdc3",
+        "snippets": [
+          {
+            "first_line": 4,
+            "last_line": 5,
+            "text": "#define KPROG_X86_STACK_INDEX(OFF, CAPACITY)                               \\\n\t((__u64)(OFF) + (__u64)(CAPACITY))"
+          }
+        ]
+      },
+      "vendor/linux-framework/kernel/bpf/verifier.c": {
+        "sha256": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+        "snippets": [
+          {
+            "first_line": 5599,
+            "last_line": 5608,
+            "text": "\t\t\t\t\t\tcontinue;\n\t\t\t\t\tif (type == STACK_ZERO) {\n\t\t\t\t\t\tzero_cnt++;\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\t\t\t\t\tif (type == STACK_INVALID && env->allow_uninit_stack)\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\tverbose(env, \"invalid read from stack off %d+%d size %d\\n\",\n\t\t\t\t\t\toff, i, size);\n\t\t\t\t\treturn -EACCES;"
+          },
+          {
+            "first_line": 5650,
+            "last_line": 5658,
+            "text": "\t\t\tif (type == STACK_MISC)\n\t\t\t\tcontinue;\n\t\t\tif (type == STACK_ZERO)\n\t\t\t\tcontinue;\n\t\t\tif (type == STACK_INVALID && env->allow_uninit_stack)\n\t\t\t\tcontinue;\n\t\t\tverbose(env, \"invalid read from stack off %d+%d size %d\\n\",\n\t\t\t\toff, i, size);\n\t\t\treturn -EACCES;"
+          },
+          {
+            "first_line": 7590,
+            "last_line": 7596,
+            "text": "\tif (t == BPF_WRITE || env->allow_uninit_stack)\n\t\tmin_valid_off = -MAX_BPF_STACK;\n\telse\n\t\tmin_valid_off = -state->allocated_stack;\n\n\tif (off < min_valid_off || off > -1)\n\t\treturn -EACCES;"
+          },
+          {
+            "first_line": 25951,
+            "last_line": 25955,
+            "text": "\tenv->allow_ptr_leaks = bpf_allow_ptr_leaks(env->prog->aux->token);\n\tenv->allow_uninit_stack = bpf_allow_uninit_stack(env->prog->aux->token);\n\tenv->bypass_spec_v1 = bpf_bypass_spec_v1(env->prog->aux->token);\n\tenv->bypass_spec_v4 = bpf_bypass_spec_v4(env->prog->aux->token);\n\tenv->bpf_capable = is_priv = bpf_token_capable(env->prog->aux->token, CAP_BPF);"
+          }
+        ]
+      },
+      "vendor/linux-framework/include/linux/bpf.h": {
+        "sha256": "f9b311138cd183e84a3c71f7d7d6e57e9ee3ec9ec9abca0c7b577a8008ab69b8",
+        "snippets": [
+          {
+            "first_line": 2736,
+            "last_line": 2739,
+            "text": "static inline bool bpf_allow_uninit_stack(const struct bpf_token *token)\n{\n\treturn bpf_token_capable(token, CAP_PERFMON);\n}"
+          }
+        ]
+      }
+    }
   }
 }
