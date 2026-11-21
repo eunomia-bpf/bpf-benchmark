@@ -724,4 +724,74 @@ extern int bpf_copy_from_user_str(void *dst, unsigned int dst__sz, const void *u
 				  unsigned long long flags);
 #endif
 
+/* Kernel memory reads are plain loads (operator 2026-11-19: "读内核内存要调用 bpf_probe_read
+ * ... 不能也直接内联和解引用???"). native-link records every load of P as a load site; a faulting
+ * load reads 0 and continues, the JIT's PROBE_MEM behaviour. The empty asm keeps each value in a
+ * general register (the site's fixup destination) and the address in a register. Lower-half
+ * addresses get the helper's answer for them: -ERANGE and a zeroed destination. */
+typedef unsigned long long __attribute__((may_alias, aligned(1))) __native_u64;
+typedef unsigned int __attribute__((may_alias, aligned(1))) __native_u32;
+typedef unsigned short __attribute__((may_alias, aligned(1))) __native_u16;
+#define __NATIVE_LOAD(type, p) ({ type __v = *(const volatile type *)(p); asm volatile("" : "+r"(__v)); __v; })
+#define __NATIVE_KERNEL_ADDRESS(p) ((long)(unsigned long)(p) < 0)
+static __always_inline long __native_read_kernel(void *dst, unsigned int size, const void *src)
+{
+    char *d = dst;
+    const char *s = src;
+    unsigned int i = 0;
+
+    asm volatile("" : "+r"(s));
+    if (!__NATIVE_KERNEL_ADDRESS(s)) {
+        __builtin_memset(d, 0, size);
+        return -34; /* -ERANGE */
+    }
+    for (; i + 8 <= size; i += 8)
+        *(__native_u64 *)(d + i) = __NATIVE_LOAD(__native_u64, s + i);
+    if (size & 4) { *(__native_u32 *)(d + i) = __NATIVE_LOAD(__native_u32, s + i); i += 4; }
+    if (size & 2) { *(__native_u16 *)(d + i) = __NATIVE_LOAD(__native_u16, s + i); i += 2; }
+    if (size & 1) d[i] = __NATIVE_LOAD(char, s + i);
+    return 0;
+}
+static __always_inline long __native_read_kernel_str(void *dst, unsigned int size, const void *src)
+{
+    char *d = dst;
+    const char *s = src;
+    unsigned int i = 0;
+
+    asm volatile("" : "+r"(s));
+    if (!size)
+        return 0;
+    if (!__NATIVE_KERNEL_ADDRESS(s)) {
+        __builtin_memset(d, 0, size);
+        return -34; /* -ERANGE */
+    }
+    for (; i + 1 < size; i++) {
+        char c = __NATIVE_LOAD(char, s + i);
+        d[i] = c;
+        if (!c)
+            return i + 1;
+    }
+    d[i] = 0;
+    return size;
+}
+/* bpf_probe_read and bpf_probe_read_str pick kernel or user memory by address. */
+static __always_inline long __native_probe_read(void *dst, unsigned int size, const void *src)
+{
+    return __NATIVE_KERNEL_ADDRESS(src) ? __native_read_kernel(dst, size, src)
+                                        : bpf_probe_read_user(dst, size, src);
+}
+static __always_inline long __native_probe_read_str(void *dst, unsigned int size, const void *src)
+{
+    return __NATIVE_KERNEL_ADDRESS(src) ? __native_read_kernel_str(dst, size, src)
+                                        : bpf_probe_read_user_str(dst, size, src);
+}
+#undef bpf_probe_read_kernel
+#define bpf_probe_read_kernel(dst, size, src) __native_read_kernel((dst), (size), (src))
+#undef bpf_probe_read_kernel_str
+#define bpf_probe_read_kernel_str(dst, size, src) __native_read_kernel_str((dst), (size), (src))
+#undef bpf_probe_read
+#define bpf_probe_read(dst, size, src) __native_probe_read((dst), (size), (src))
+#undef bpf_probe_read_str
+#define bpf_probe_read_str(dst, size, src) __native_probe_read_str((dst), (size), (src))
+
 #endif

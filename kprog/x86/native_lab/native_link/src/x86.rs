@@ -1,7 +1,8 @@
 use anyhow::{anyhow, bail, Result};
 use iced_x86::{
     BlockEncoder, BlockEncoderOptions, BlockEncoderResult, Code, Decoder, DecoderOptions,
-    FlowControl, Instruction, InstructionBlock, Mnemonic, OpKind, Register,
+    FlowControl, Instruction, InstructionBlock, InstructionInfoFactory, Mnemonic, OpAccess, OpKind,
+    Register,
 };
 use object::{Object, ObjectSection, ObjectSymbol, RelocationFlags, RelocationTarget};
 use std::collections::{HashMap, HashSet};
@@ -1062,6 +1063,7 @@ pub(super) fn rewrite_x86(
 
     let mut sym_global_offset: HashMap<SymbolKey, usize> = HashMap::new();
     let mut blob: Vec<u8> = Vec::new();
+    let mut code_ranges: Vec<(usize, usize)> = Vec::new();
     let mut patches: Vec<PatchInfo> = Vec::new();
     let mut layouts: Vec<SymbolLayout> = Vec::new();
     let mut callee_saved_mask: u8 = proof_callee_saved_mask.unwrap_or(0);
@@ -1629,6 +1631,7 @@ pub(super) fn rewrite_x86(
             insn_local_ip,
             new_offset_in_sym: encoded.new_instruction_offsets.clone(),
         });
+        code_ranges.push((blob.len(), blob.len() + encoded.code_buffer.len()));
         blob.extend_from_slice(&encoded.code_buffer);
     }
 
@@ -1760,6 +1763,7 @@ pub(super) fn rewrite_x86(
     } else {
         Vec::new()
     };
+    let load_sites = if proof_mode { Vec::new() } else { x86_load_sites(&blob, &code_ranges) };
     Ok(RewriteResult {
         blob,
         relocs,
@@ -1767,7 +1771,41 @@ pub(super) fn rewrite_x86(
         callee_saved_mask,
         proof_relocs,
         proof_symbols,
+        load_sites,
     })
+}
+
+/// Every instruction of P that reads memory into a general register is a load
+/// site: the kernel's exception table makes a faulting read yield 0 in that
+/// register and continue, as the JIT does for PROBE_MEM loads.
+fn x86_load_sites(blob: &[u8], ranges: &[(usize, usize)]) -> Vec<LoadSite> {
+    let mut sites = Vec::new();
+    let mut factory = InstructionInfoFactory::new();
+    for &(start, end) in ranges {
+        let end = end.min(blob.len());
+        if start >= end {
+            continue;
+        }
+        for insn in Decoder::with_ip(64, &blob[start..end], start as u64, DecoderOptions::NONE) {
+            let info = factory.info(&insn);
+            let reads = info.used_memory().iter().any(|m| {
+                matches!(m.access(), OpAccess::Read | OpAccess::CondRead | OpAccess::ReadWrite)
+            });
+            if !reads || insn.op_count() == 0 || insn.op0_kind() != OpKind::Register {
+                continue;
+            }
+            let Some(dst) = x86_gpr64_family(insn.op0_register()) else { continue };
+            if dst == Register::RSP {
+                continue;
+            }
+            sites.push(LoadSite {
+                offset: insn.ip() as u32,
+                insn_len: insn.len() as u16,
+                destination: (dst as u32 - Register::RAX as u32) as u16,
+            });
+        }
+    }
+    sites
 }
 fn x86_layout_insn_global_offset(layout: &SymbolLayout, local_patch_off: u64) -> Result<usize> {
     let insn_idx = layout

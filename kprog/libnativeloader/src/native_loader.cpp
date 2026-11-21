@@ -248,6 +248,7 @@ struct NativeLabTarget {
     const char *map_ptr_path;
     const char *map_value_ptr_path;
     const char *arm_path;
+    const char *sites_path;
     uint32_t chunk_bytes;
 };
 
@@ -260,6 +261,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_arm64_native_lab/map_value_ptr",
     .arm_path = "/sys/kernel/debug/bpf_arm64_native_lab/arm",
+    .sites_path = "/sys/kernel/debug/bpf_arm64_native_lab/sites",
     .chunk_bytes = 256,
 };
 #else
@@ -271,6 +273,7 @@ constexpr NativeLabTarget kNativeLabTarget = {
     .map_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_ptr",
     .map_value_ptr_path = "/sys/kernel/debug/bpf_x86_native_lab/map_value_ptr",
     .arm_path = "/sys/kernel/debug/bpf_x86_native_lab/arm",
+    .sites_path = "/sys/kernel/debug/bpf_x86_native_lab/sites",
     .chunk_bytes = 128,
 };
 #endif
@@ -446,7 +449,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v40";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -1133,8 +1136,14 @@ std::vector<MapPatchSite> read_map_patch_file(const std::filesystem::path &path)
     return patches;
 }
 
-uint32_t read_link_abi_file(const std::filesystem::path &path)
+// load_site lines become packed {u32 offset, u16 insn_len, u16 destination}
+// records, the module's sites format.
+uint32_t read_link_abi_file(const std::filesystem::path &path,
+                            std::vector<uint8_t> *load_sites = nullptr)
 {
+    if (load_sites) {
+        load_sites->clear();
+    }
     std::ifstream f(path);
     if (!f) {
         fail("read native-link ABI file: " + path.string());
@@ -1168,6 +1177,23 @@ uint32_t read_link_abi_file(const std::filesystem::path &path)
                 fail("native-link callee-saved mask exceeds 4 bits");
             }
             seen_mask = true;
+        } else if (key == "load_site") {
+            unsigned offset = 0, insn_len = 0, destination = 0;
+            if (std::sscanf(value.c_str(), "%u,%u,%u", &offset, &insn_len, &destination) != 3 ||
+                insn_len > 15 || destination > 0xffff) {
+                fail("invalid native-link load_site in " + path.string() + ": " + value);
+            }
+            if (load_sites) {
+                const uint32_t off = offset;
+                const uint16_t len = static_cast<uint16_t>(insn_len);
+                const uint16_t dst = static_cast<uint16_t>(destination);
+                const auto *b = reinterpret_cast<const uint8_t *>(&off);
+                load_sites->insert(load_sites->end(), b, b + 4);
+                b = reinterpret_cast<const uint8_t *>(&len);
+                load_sites->insert(load_sites->end(), b, b + 2);
+                b = reinterpret_cast<const uint8_t *>(&dst);
+                load_sites->insert(load_sites->end(), b, b + 2);
+            }
         } else {
             fail("unknown native-link ABI key in " + path.string() + ": " + key);
         }
@@ -1454,6 +1480,10 @@ const char *helper_symbol_for_id(int helper_id)
 
 HelperAlias helper_alias_for_call(int helper_id, uint32_t prog_type)
 {
+    // The helper's whole body is this call (design: helpers compiled in as C).
+    if (helper_id == BPF_FUNC_ktime_get_ns) {
+        return HelperAlias{helper_id, "bpf_ktime_get_ns", "ktime_get_mono_fast_ns"};
+    }
     if (helper_id == BPF_FUNC_get_prandom_u32) {
         return HelperAlias{helper_id, "bpf_get_prandom_u32", "bpf_user_rnd_u32"};
     }
@@ -2014,6 +2044,7 @@ struct LinkedBlob {
     uint64_t map_patch_ns = 0;
     uint32_t callee_saved_mask = 0;
     std::vector<uint32_t> relocated_map_ids;
+    std::vector<uint8_t> load_sites;
 };
 
 struct CompanionLoad {
@@ -3149,7 +3180,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
         auto map_patches = read_map_patch_file(source.map_patches);
         linked.relocated_map_ids =
             collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-        linked.callee_saved_mask = read_link_abi_file(source.abi);
+        linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
         const auto read_end = std::chrono::steady_clock::now();
         publish_cache_file(tmp.proof, cache.proof);
         publish_cache_file(tmp.blob, cache.blob);
@@ -3174,7 +3205,7 @@ LinkedBlob load_or_link_native_blob(const std::filesystem::path &native_link_pat
     auto map_patches = read_map_patch_file(source.map_patches);
     linked.relocated_map_ids =
         collect_relocated_map_ids(map_patches, companion.map_addr_ids);
-    linked.callee_saved_mask = read_link_abi_file(source.abi);
+    linked.callee_saved_mask = read_link_abi_file(source.abi, &linked.load_sites);
     const auto read_end = std::chrono::steady_clock::now();
     const auto patch_start = std::chrono::steady_clock::now();
     patch_map_literals(linked.blob, map_patches, companion.map_addrs);
@@ -3210,6 +3241,18 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
         chunks = plan_blob_chunks(linked.blob.size(), relocs);
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
+        if (!linked.load_sites.empty()) {
+            int fd = open(kNativeLabTarget.sites_path, O_WRONLY | O_TRUNC);
+            if (fd < 0) {
+                fail(std::string("open ") + kNativeLabTarget.sites_path + ": " + std::strerror(errno));
+            }
+            ssize_t n = write(fd, linked.load_sites.data(), linked.load_sites.size());
+            int saved = errno;
+            close(fd);
+            if (n != static_cast<ssize_t>(linked.load_sites.size())) {
+                fail(std::string("write ") + kNativeLabTarget.sites_path + ": " + std::strerror(saved));
+            }
+        }
         arm_native_image(linked.callee_saved_mask);
         upload_end = std::chrono::steady_clock::now();
 

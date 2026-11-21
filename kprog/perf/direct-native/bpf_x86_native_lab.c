@@ -32,8 +32,15 @@
 #include <linux/bpf_native.h>
 
 #define NATIVE_LAB_MAX_BLOBS	512
-/* Userspace uploads a program as consecutive chunks of at most this size. */
-#define NATIVE_LAB_MAX_BLOB_BYTES	128
+/* Userspace uploads a program as consecutive chunks of at most this size
+ * (x86 128, arm64 256). The same source builds bpf_arm64_native_lab.ko (Kbuild).
+ */
+#define NATIVE_LAB_MAX_BLOB_BYTES	256
+#ifdef CONFIG_ARM64
+#define NATIVE_LAB_DIRECTORY		"bpf_arm64_native_lab"
+#else
+#define NATIVE_LAB_DIRECTORY		"bpf_x86_native_lab"
+#endif
 
 /*
  * Stage 2 side-band relocations:
@@ -72,6 +79,15 @@ struct native_blob {
 };
 
 static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
+
+/* A memory read of the image: global offset, instruction length, GPR number. */
+struct native_lab_load_site {
+	__u32 offset;
+	__u16 insn_len;
+	__u16 destination;
+};
+static struct native_lab_load_site *load_sites;
+static size_t load_site_count;
 static DEFINE_MUTEX(blobs_lock);
 static struct dentry *debugfs_root;
 
@@ -84,7 +100,8 @@ static int native_lab_arm(void)
 {
 	struct bpf_native_image *image;
 	struct bpf_native_reloc *relocs = NULL;
-	size_t len = 0, nr = 0, off = 0, k = 0;
+	struct bpf_native_site *sites = NULL;
+	size_t len = 0, nr = 0, off = 0, k = 0, ns = 0;
 	u8 *bytes;
 	u32 i, j;
 
@@ -98,12 +115,38 @@ static int native_lab_arm(void)
 	bytes = kvmalloc(len, GFP_KERNEL);
 	if (nr)
 		relocs = kvcalloc(nr, sizeof(*relocs), GFP_KERNEL);
-	if (!image || !bytes || (nr && !relocs)) {
+	if (load_site_count)
+		sites = kvcalloc(load_site_count, sizeof(*sites), GFP_KERNEL);
+	if (!image || !bytes || (nr && !relocs) || (load_site_count && !sites)) {
 		kfree(image);
 		kvfree(bytes);
 		kvfree(relocs);
+		kvfree(sites);
 		return -ENOMEM;
 	}
+#ifdef CONFIG_X86_64
+	/* x86 EX_TYPE_BPF fixup: skip insn_len bytes, zero the pt_regs slot. */
+	for (i = 0; i < load_site_count; i++) {
+		static const u16 regs[] = {
+			offsetof(struct pt_regs, ax), offsetof(struct pt_regs, cx),
+			offsetof(struct pt_regs, dx), offsetof(struct pt_regs, bx),
+			offsetof(struct pt_regs, sp), offsetof(struct pt_regs, bp),
+			offsetof(struct pt_regs, si), offsetof(struct pt_regs, di),
+			offsetof(struct pt_regs, r8), offsetof(struct pt_regs, r9),
+			offsetof(struct pt_regs, r10), offsetof(struct pt_regs, r11),
+			offsetof(struct pt_regs, r12), offsetof(struct pt_regs, r13),
+			offsetof(struct pt_regs, r14), offsetof(struct pt_regs, r15),
+		};
+		const struct native_lab_load_site *s = &load_sites[i];
+
+		if (s->destination >= ARRAY_SIZE(regs) || s->offset >= len ||
+		    s->insn_len > len - s->offset)
+			continue;
+		sites[ns].offset = s->offset;
+		sites[ns].fixup = s->insn_len | ((u32)regs[s->destination] << 8);
+		ns++;
+	}
+#endif
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
 		memcpy(bytes + off, blobs[i].bytes, blobs[i].len);
 		for (j = 0; j < blobs[i].reloc_count; j++, k++) {
@@ -117,6 +160,8 @@ static int native_lab_arm(void)
 	image->len = len;
 	image->relocs = relocs;
 	image->nr_relocs = nr;
+	image->sites = sites;
+	image->nr_sites = ns;
 	image->callee_saved_mask = callee_saved_mask;
 	bpf_native_image_arm(image);
 	return 0;
@@ -173,6 +218,9 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 			kfree(blobs[k].relocs);
 			memset(&blobs[k], 0, sizeof(blobs[k]));
 		}
+		kvfree(load_sites);
+		load_sites = NULL;
+		load_site_count = 0;
 	}
 	kfree(blobs[priv->id].bytes);
 	/* Reuploading the blob invalidates any previously uploaded relocs. */
@@ -284,6 +332,35 @@ static const struct file_operations relocs_fops = {
 	.open = blob_open,
 	.release = blob_release,
 	.write = relocs_write,
+	.llseek = default_llseek,
+};
+
+/* "sites": whole-file write of the program's load sites, global offsets. */
+static ssize_t sites_write(struct file *file, const char __user *ubuf,
+			   size_t len, loff_t *ppos)
+{
+	struct native_lab_load_site *sites;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+	if (*ppos || !len || len % sizeof(*sites) ||
+	    len > NATIVE_LAB_MAX_BLOBS * NATIVE_LAB_MAX_BLOB_BYTES * sizeof(*sites))
+		return -EINVAL;
+	sites = vmemdup_user(ubuf, len);
+	if (IS_ERR(sites))
+		return PTR_ERR(sites);
+	mutex_lock(&blobs_lock);
+	kvfree(load_sites);
+	load_sites = sites;
+	load_site_count = len / sizeof(*sites);
+	mutex_unlock(&blobs_lock);
+	*ppos = len;
+	return len;
+}
+
+static const struct file_operations sites_fops = {
+	.owner = THIS_MODULE,
+	.write = sites_write,
 	.llseek = default_llseek,
 };
 
@@ -427,7 +504,7 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 {
 	long i;
 
-	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
+	debugfs_root = debugfs_create_dir(NATIVE_LAB_DIRECTORY, NULL);
 	if (IS_ERR(debugfs_root))
 		return PTR_ERR(debugfs_root);
 
@@ -436,6 +513,7 @@ static int __init bpf_x86_native_lab_debugfs_init(void)
 	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL,
 			    &map_value_ptr_fops);
 	debugfs_create_file("arm", 0200, debugfs_root, NULL, &arm_fops);
+	debugfs_create_file("sites", 0200, debugfs_root, NULL, &sites_fops);
 
 	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
 		char name[24];
