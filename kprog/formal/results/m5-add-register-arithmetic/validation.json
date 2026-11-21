@@ -1,0 +1,64 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateTail.lean": "bd03f2fd6c3893e8d02276845fa9e73ed63f24d57f0e5eb7a610e58ee461e8e5"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateTail"
+    ],
+    "exit": 0,
+    "seconds": 5.344085931777954,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/arithmetic2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/ArithmeticPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7825543880462646,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-arithmetic1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.evaluate_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.evaluate": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": {
+    "enter": 6,
+    "actual_tag_reader": 28,
+    "candidate": 22,
+    "total": 56
+  },
+  "earlier_attempt": {
+    "receipt": "/workspaces/kprog-raw/formal/m5-add-register/arithmetic1.json",
+    "outcome": "header load equality simplifier omitted ite_true; failed after879.054s including full dependency rebuild; fixed only condition normalization"
+  },
+  "whole_library_confirmation": "pending until scalar selection/writer batch complete",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
