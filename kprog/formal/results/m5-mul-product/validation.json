@@ -1,0 +1,67 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulProduct.lean": "404004edcfcb60f9646bd414ba974df57bdce2d467b307b9b6e4b11c37f367c1"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64MulProduct"
+    ],
+    "exit": 0,
+    "seconds": 3.4949662685394287,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-mul/product7.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-mul/ProductPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5354714393615723,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-mul/public-product1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Mul.Product.product_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Mul.Product.evaluate": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 16,
+  "scope": "actual generic MUL switch12/result assignment/copy/real inner-loop exit to unchanged writer, all64bit operands/world/env/memory/continuation",
+  "whole_library_confirmation": "pending completed MUL handler/native batch",
+  "prior_failed_attempts": [
+    "/workspaces/kprog-raw/formal/m5-mul/product1.json",
+    "/workspaces/kprog-raw/formal/m5-mul/product2.json",
+    "/workspaces/kprog-raw/formal/m5-mul/product3.json",
+    "/workspaces/kprog-raw/formal/m5-mul/product4.json",
+    "/workspaces/kprog-raw/formal/m5-mul/product5.json",
+    "/workspaces/kprog-raw/formal/m5-mul/product6.json"
+  ],
+  "diagnostics": [
+    "/workspaces/kprog-raw/formal/m5-mul/product-diagnostic1.log",
+    "/workspaces/kprog-raw/formal/m5-mul/product-diagnostic2.log",
+    "/workspaces/kprog-raw/formal/m5-mul/product-diagnostic3.log"
+  ],
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
