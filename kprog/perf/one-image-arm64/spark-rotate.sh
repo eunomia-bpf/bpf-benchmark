@@ -5,8 +5,10 @@
 # frozen x86 entry defaults: rotate 3 x 180 s per app, breadth first, stats off then on. 4 vCPUs and 8G as the arm64
 # entry; the vCPUs run on the Cortex-X925 cluster (CPUs 15-19) so -cpu host sees one core type, and the
 # interrupt controller is the host GICv3 (gic-version=host; the virt default is GICv2).
+# Runs as root inside one container, so it writes into the root-owned guest root and starts QEMU directly:
+#   docker run -d --name kprog-arm64-timing --cpuset-cpus 15-19 --device /dev/kvm -v $W:$W kprog-qemu-arm64:24.04 bash $W/spark-rotate.sh
 set -u
-W=$HOME/kprog-arm64
+W=$(cd "$(dirname "$0")" && pwd)
 R=$W/root
 LOG=$W/progress.log
 ORDER="otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/observer tracee/monitor katran"
@@ -21,8 +23,7 @@ for s in 0 1; do for a in $ORDER; do
   chmod +x "$R/qemu-run.sh"; : > "$R/qemu-status"
   tag=$(date -u +%Y%m%dT%H%M%SZ)-$(echo "$a" | tr / _)-stats$s
   echo "$(date -u +%FT%TZ) start $a stats=$s" >> "$LOG"
-  docker run --rm --name kprog-arm64-timing --cpuset-cpus 15-19 --device /dev/kvm -v "$W:$W" kprog-qemu-arm64:24.04 \
-    qemu-system-aarch64 -M virt,gic-version=host -accel kvm -cpu host -smp 4 -m 8G -nographic -no-reboot \
+  qemu-system-aarch64 -M virt,gic-version=host -accel kvm -cpu host -smp 4 -m 8G -nographic -no-reboot \
     -kernel "$W/Image" \
     -fsdev local,id=rootfs,path="$R",security_model=none,multidevs=remap \
     -device virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root \
