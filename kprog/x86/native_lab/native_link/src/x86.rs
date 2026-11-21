@@ -44,6 +44,13 @@ fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) 
         || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
 }
 
+#[path = "x86_effects.rs"]
+mod effects;
+
+pub(super) fn proof_effects(bytes: &[u8]) -> Result<serde_json::Value> {
+    effects::describe(bytes)
+}
+
 fn lookup_map_spec(
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     native_map_name: &str,

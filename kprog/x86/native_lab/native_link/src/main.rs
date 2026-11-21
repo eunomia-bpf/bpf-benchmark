@@ -819,6 +819,11 @@ fn write_proof_object(
     );
     object.append_section_data(abi_section, abi.as_bytes(), 1);
 
+    if arch == object::Architecture::X86_64 {
+        let section = object.add_section(Vec::new(), b".native_link_x86_effects".to_vec(), SectionKind::Other);
+        object.append_section_data(section, &serde_json::to_vec(&x86::proof_effects(text)?)?, 1);
+    }
+
     let bytes = object.write().context("write proof ELF object")?;
     fs::write(path, bytes).with_context(|| format!("write {}", path.display()))
 }
