@@ -67,4 +67,30 @@ theorem returns (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
       CC.E0 (.Returnstate (result code) (CC.callCont k) m) :=
   steps_sound ge 6 _ _ _ (executes ge code k m)
 
+
+/-- Every finite execution is a silent prefix of the same return; the complete
+relational execution terminates with that unique terminal state. -/
+theorem all_behaviors (ge : CC.CGenv) (code : BitVec 8) (m : CC.Mem) :
+    (∀ t other, CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal X86_program_profile_bpf.f_x86_width_effective)
+        [argument code] .Kstop m) t other →
+      t = CC.E0 ∧ ∃ remaining, InternalRun ge remaining other
+        (.Returnstate (result code) .Kstop m)) ∧
+    (∀ t other, CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal X86_program_profile_bpf.f_x86_width_effective)
+        [argument code] .Kstop m) t other →
+      (∀ u next, ¬ CC.Step2 ge other u next) →
+      t = CC.E0 ∧ other = .Returnstate (result code) .Kstop m) ∧
+    ¬ (∃ states : Nat → CC.State,
+      states 0 = .Callstate (.Internal X86_program_profile_bpf.f_x86_width_effective)
+        [argument code] .Kstop m ∧
+      ∀ i, ∃ t, CC.Step2 ge (states i) t (states (i + 1))) := by
+  have run := internal ge code .Kstop m
+  have stuck : ∀ t next, ¬ CC.Step2 ge (.Returnstate (result code) .Kstop m) t next := by
+    intro t next step
+    cases step
+  exact ⟨fun _ _ observed => run.finish_prefix stuck observed,
+    fun _ _ observed endpoint => run.endpoint_unique stuck observed endpoint,
+    run.no_infinite stuck⟩
+
 end KProgFormal.ClightRefinement.X86Width
