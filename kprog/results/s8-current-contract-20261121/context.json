@@ -1,0 +1,652 @@
+{
+  "rows": [
+    {
+      "prog_type": 1,
+      "name": "SOCKET_FILTER",
+      "handler": "sk_filter",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11206,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sk_filter_verifier_ops = {\n\t.get_func_proto\t\t= sk_filter_func_proto,\n\t.is_valid_access\t= sk_filter_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n\t.gen_ld_abs\t\t= bpf_gen_ld_abs,\n};"
+      }
+    },
+    {
+      "prog_type": 3,
+      "name": "SCHED_CLS",
+      "handler": "tc_cls_act",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "typed",
+      "current_dispatch": "tc",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11217,
+        "converter": "tc_cls_act_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops tc_cls_act_verifier_ops = {\n\t.get_func_proto\t\t= tc_cls_act_func_proto,\n\t.is_valid_access\t= tc_cls_act_is_valid_access,\n\t.convert_ctx_access\t= tc_cls_act_convert_ctx_access,\n\t.gen_prologue\t\t= tc_cls_act_prologue,\n\t.gen_ld_abs\t\t= bpf_gen_ld_abs,\n\t.btf_struct_access\t= tc_cls_act_btf_struct_access,\n};"
+      }
+    },
+    {
+      "prog_type": 4,
+      "name": "SCHED_ACT",
+      "handler": "tc_cls_act",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11217,
+        "converter": "tc_cls_act_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops tc_cls_act_verifier_ops = {\n\t.get_func_proto\t\t= tc_cls_act_func_proto,\n\t.is_valid_access\t= tc_cls_act_is_valid_access,\n\t.convert_ctx_access\t= tc_cls_act_convert_ctx_access,\n\t.gen_prologue\t\t= tc_cls_act_prologue,\n\t.gen_ld_abs\t\t= bpf_gen_ld_abs,\n\t.btf_struct_access\t= tc_cls_act_btf_struct_access,\n};"
+      }
+    },
+    {
+      "prog_type": 6,
+      "name": "XDP",
+      "handler": "xdp",
+      "public": "struct xdp_md",
+      "physical": "struct xdp_buff",
+      "category": "typed",
+      "current_dispatch": "xdp",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11230,
+        "converter": "xdp_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops xdp_verifier_ops = {\n\t.get_func_proto\t\t= xdp_func_proto,\n\t.is_valid_access\t= xdp_is_valid_access,\n\t.convert_ctx_access\t= xdp_convert_ctx_access,\n\t.gen_prologue\t\t= bpf_noop_prologue,\n\t.btf_struct_access\t= xdp_btf_struct_access,\n};"
+      }
+    },
+    {
+      "prog_type": 8,
+      "name": "CGROUP_SKB",
+      "handler": "cg_skb",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "typed",
+      "current_dispatch": "cgroup_skb",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11242,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops cg_skb_verifier_ops = {\n\t.get_func_proto\t\t= cg_skb_func_proto,\n\t.is_valid_access\t= cg_skb_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 9,
+      "name": "CGROUP_SOCK",
+      "handler": "cg_sock",
+      "public": "struct bpf_sock",
+      "physical": "struct sock",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11292,
+        "converter": "bpf_sock_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops cg_sock_verifier_ops = {\n\t.get_func_proto\t\t= sock_filter_func_proto,\n\t.is_valid_access\t= sock_filter_is_valid_access,\n\t.convert_ctx_access\t= bpf_sock_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 18,
+      "name": "CGROUP_SOCK_ADDR",
+      "handler": "cg_sock_addr",
+      "public": "struct bpf_sock_addr",
+      "physical": "struct bpf_sock_addr_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11301,
+        "converter": "sock_addr_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops cg_sock_addr_verifier_ops = {\n\t.get_func_proto\t\t= sock_addr_func_proto,\n\t.is_valid_access\t= sock_addr_is_valid_access,\n\t.convert_ctx_access\t= sock_addr_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 10,
+      "name": "LWT_IN",
+      "handler": "lwt_in",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11252,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops lwt_in_verifier_ops = {\n\t.get_func_proto\t\t= lwt_in_func_proto,\n\t.is_valid_access\t= lwt_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 11,
+      "name": "LWT_OUT",
+      "handler": "lwt_out",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11262,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops lwt_out_verifier_ops = {\n\t.get_func_proto\t\t= lwt_out_func_proto,\n\t.is_valid_access\t= lwt_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 12,
+      "name": "LWT_XMIT",
+      "handler": "lwt_xmit",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11272,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops lwt_xmit_verifier_ops = {\n\t.get_func_proto\t\t= lwt_xmit_func_proto,\n\t.is_valid_access\t= lwt_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n\t.gen_prologue\t\t= tc_cls_act_prologue,\n};"
+      }
+    },
+    {
+      "prog_type": 19,
+      "name": "LWT_SEG6LOCAL",
+      "handler": "lwt_seg6local",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11283,
+        "converter": "bpf_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops lwt_seg6local_verifier_ops = {\n\t.get_func_proto\t\t= lwt_seg6local_func_proto,\n\t.is_valid_access\t= lwt_is_valid_access,\n\t.convert_ctx_access\t= bpf_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 13,
+      "name": "SOCK_OPS",
+      "handler": "sock_ops",
+      "public": "struct bpf_sock_ops",
+      "physical": "struct bpf_sock_ops_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11310,
+        "converter": "sock_ops_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sock_ops_verifier_ops = {\n\t.get_func_proto\t\t= sock_ops_func_proto,\n\t.is_valid_access\t= sock_ops_is_valid_access,\n\t.convert_ctx_access\t= sock_ops_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 14,
+      "name": "SK_SKB",
+      "handler": "sk_skb",
+      "public": "struct __sk_buff",
+      "physical": "struct sk_buff",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11319,
+        "converter": "sk_skb_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sk_skb_verifier_ops = {\n\t.get_func_proto\t\t= sk_skb_func_proto,\n\t.is_valid_access\t= sk_skb_is_valid_access,\n\t.convert_ctx_access\t= sk_skb_convert_ctx_access,\n\t.gen_prologue\t\t= sk_skb_prologue,\n};"
+      }
+    },
+    {
+      "prog_type": 16,
+      "name": "SK_MSG",
+      "handler": "sk_msg",
+      "public": "struct sk_msg_md",
+      "physical": "struct sk_msg",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11329,
+        "converter": "sk_msg_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sk_msg_verifier_ops = {\n\t.get_func_proto\t\t= sk_msg_func_proto,\n\t.is_valid_access\t= sk_msg_is_valid_access,\n\t.convert_ctx_access\t= sk_msg_convert_ctx_access,\n\t.gen_prologue\t\t= bpf_noop_prologue,\n};"
+      }
+    },
+    {
+      "prog_type": 22,
+      "name": "FLOW_DISSECTOR",
+      "handler": "flow_dissector",
+      "public": "struct __sk_buff",
+      "physical": "struct bpf_flow_dissector",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11339,
+        "converter": "flow_dissector_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops flow_dissector_verifier_ops = {\n\t.get_func_proto\t\t= flow_dissector_func_proto,\n\t.is_valid_access\t= flow_dissector_is_valid_access,\n\t.convert_ctx_access\t= flow_dissector_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 2,
+      "name": "KPROBE",
+      "handler": "kprobe",
+      "public": "bpf_user_pt_regs_t",
+      "physical": "struct pt_regs",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1364,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops kprobe_verifier_ops = {\n\t.get_func_proto  = kprobe_prog_func_proto,\n\t.is_valid_access = kprobe_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 5,
+      "name": "TRACEPOINT",
+      "handler": "tracepoint",
+      "public": "__u64",
+      "physical": "u64",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1470,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops tracepoint_verifier_ops = {\n\t.get_func_proto  = tp_prog_func_proto,\n\t.is_valid_access = tp_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 7,
+      "name": "PERF_EVENT",
+      "handler": "perf_event",
+      "public": "struct bpf_perf_event_data",
+      "physical": "struct bpf_perf_event_data_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1907,
+        "converter": "pe_prog_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops perf_event_verifier_ops = {\n\t.get_func_proto\t\t= pe_prog_func_proto,\n\t.is_valid_access\t= pe_prog_is_valid_access,\n\t.convert_ctx_access\t= pe_prog_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 17,
+      "name": "RAW_TRACEPOINT",
+      "handler": "raw_tracepoint",
+      "public": "struct bpf_raw_tracepoint_args",
+      "physical": "u64",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1792,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops raw_tracepoint_verifier_ops = {\n\t.get_func_proto  = raw_tp_prog_func_proto,\n\t.is_valid_access = raw_tp_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 24,
+      "name": "RAW_TRACEPOINT_WRITABLE",
+      "handler": "raw_tracepoint_writable",
+      "public": "struct bpf_raw_tracepoint_args",
+      "physical": "u64",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1825,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops raw_tracepoint_writable_verifier_ops = {\n\t.get_func_proto  = raw_tp_prog_func_proto,\n\t.is_valid_access = raw_tp_writable_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 26,
+      "name": "TRACING",
+      "handler": "tracing",
+      "public": "void *",
+      "physical": "void *",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/trace/bpf_trace.c",
+        "line": 1803,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops tracing_verifier_ops = {\n\t.get_func_proto  = tracing_prog_func_proto,\n\t.is_valid_access = tracing_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 15,
+      "name": "CGROUP_DEVICE",
+      "handler": "cg_dev",
+      "public": "struct bpf_cgroup_dev_ctx",
+      "physical": "struct bpf_cgroup_dev_ctx",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/cgroup.c",
+        "line": 1863,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops cg_dev_verifier_ops = {\n\t.get_func_proto\t\t= cgroup_dev_func_proto,\n\t.is_valid_access\t= cgroup_dev_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 23,
+      "name": "CGROUP_SYSCTL",
+      "handler": "cg_sysctl",
+      "public": "struct bpf_sysctl",
+      "physical": "struct bpf_sysctl_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/cgroup.c",
+        "line": 2478,
+        "converter": "sysctl_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops cg_sysctl_verifier_ops = {\n\t.get_func_proto\t\t= sysctl_func_proto,\n\t.is_valid_access\t= sysctl_is_valid_access,\n\t.convert_ctx_access\t= sysctl_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 25,
+      "name": "CGROUP_SOCKOPT",
+      "handler": "cg_sockopt",
+      "public": "struct bpf_sockopt",
+      "physical": "struct bpf_sockopt_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/cgroup.c",
+        "line": 2701,
+        "converter": "cg_sockopt_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops cg_sockopt_verifier_ops = {\n\t.get_func_proto\t\t= cg_sockopt_func_proto,\n\t.is_valid_access\t= cg_sockopt_is_valid_access,\n\t.convert_ctx_access\t= cg_sockopt_convert_ctx_access,\n\t.gen_prologue\t\t= cg_sockopt_get_prologue,\n};"
+      }
+    },
+    {
+      "prog_type": 20,
+      "name": "LIRC_MODE2",
+      "handler": "lirc_mode2",
+      "public": "__u32",
+      "physical": "u32",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "drivers/media/rc/bpf-lirc.c",
+        "line": 130,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops lirc_mode2_verifier_ops = {\n\t.get_func_proto  = lirc_mode2_func_proto,\n\t.is_valid_access = lirc_mode2_is_valid_access\n};"
+      }
+    },
+    {
+      "prog_type": 21,
+      "name": "SK_REUSEPORT",
+      "handler": "sk_reuseport",
+      "public": "struct sk_reuseport_md",
+      "physical": "struct sk_reuseport_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11679,
+        "converter": "sk_reuseport_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sk_reuseport_verifier_ops = {\n\t.get_func_proto\t\t= sk_reuseport_func_proto,\n\t.is_valid_access\t= sk_reuseport_is_valid_access,\n\t.convert_ctx_access\t= sk_reuseport_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 30,
+      "name": "SK_LOOKUP",
+      "handler": "sk_lookup",
+      "public": "struct bpf_sk_lookup",
+      "physical": "struct bpf_sk_lookup_kern",
+      "category": "converted",
+      "current_dispatch": "generation-handler-required",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/core/filter.c",
+        "line": 11891,
+        "converter": "sk_lookup_convert_ctx_access",
+        "body": "const struct bpf_verifier_ops sk_lookup_verifier_ops = {\n\t.get_func_proto\t\t= sk_lookup_func_proto,\n\t.is_valid_access\t= sk_lookup_is_valid_access,\n\t.convert_ctx_access\t= sk_lookup_convert_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 27,
+      "name": "STRUCT_OPS",
+      "handler": "bpf_struct_ops",
+      "public": "void *",
+      "physical": "void *",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/bpf_struct_ops.c",
+        "line": 69,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops bpf_struct_ops_verifier_ops = {\n};"
+      }
+    },
+    {
+      "prog_type": 28,
+      "name": "EXT",
+      "handler": "bpf_extension",
+      "public": "void *",
+      "physical": "void *",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/trampoline.c",
+        "line": 18,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops bpf_extension_verifier_ops = {\n};"
+      }
+    },
+    {
+      "prog_type": 29,
+      "name": "LSM",
+      "handler": "lsm",
+      "public": "void *",
+      "physical": "void *",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/bpf_lsm.c",
+        "line": 413,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops lsm_verifier_ops = {\n\t.get_func_proto = bpf_lsm_func_proto,\n\t.is_valid_access = btf_ctx_access,\n};"
+      }
+    },
+    {
+      "prog_type": 31,
+      "name": "SYSCALL",
+      "handler": "bpf_syscall",
+      "public": "void *",
+      "physical": "void *",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "kernel/bpf/syscall.c",
+        "line": 6518,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops bpf_syscall_verifier_ops = {\n\t.get_func_proto  = syscall_prog_func_proto,\n\t.is_valid_access = syscall_prog_is_valid_access,\n};"
+      }
+    },
+    {
+      "prog_type": 32,
+      "name": "NETFILTER",
+      "handler": "netfilter",
+      "public": "struct bpf_nf_ctx",
+      "physical": "struct bpf_nf_ctx",
+      "category": "identity",
+      "current_dispatch": "raw",
+      "isas": [
+        "x86",
+        "arm64"
+      ],
+      "stock_ops": {
+        "source": "net/netfilter/nf_bpf_link.c",
+        "line": 329,
+        "converter": "identity",
+        "body": "const struct bpf_verifier_ops netfilter_verifier_ops = {\n\t.is_valid_access\t= nf_is_valid_access,\n\t.get_func_proto\t\t= bpf_nf_func_proto,\n};"
+      }
+    }
+  ],
+  "typed": [
+    3,
+    6,
+    8
+  ],
+  "identity": [
+    2,
+    5,
+    15,
+    17,
+    20,
+    24,
+    26,
+    27,
+    28,
+    29,
+    31,
+    32
+  ],
+  "handler_required": [
+    1,
+    4,
+    9,
+    18,
+    10,
+    11,
+    12,
+    19,
+    13,
+    14,
+    16,
+    22,
+    7,
+    23,
+    25,
+    21,
+    30
+  ],
+  "current_source_sha256": "ca2758ecf3f4d003fa82db699f22d1ed887d8a57da3e2c7eea1c6a54c18bd5cf",
+  "decision": "Operator resumes prompt item3 after the recorded421c97bb8 RAW fallback; implemented handlers now select generation."
+}

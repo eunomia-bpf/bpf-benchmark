@@ -1,0 +1,21 @@
+{
+  "executions": [
+    {
+      "arch": "x86",
+      "public_mark_offset": 8,
+      "kernel_mark_offset": 168,
+      "kernel_prev_offset": 8,
+      "raw_store_changes_prev": true,
+      "converted_store_changes_mark": true
+    },
+    {
+      "arch": "arm64",
+      "public_mark_offset": 8,
+      "kernel_mark_offset": 168,
+      "kernel_prev_offset": 8,
+      "raw_store_changes_prev": true,
+      "converted_store_changes_mark": true
+    }
+  ],
+  "stock_mark_conversion": "\n\t\tif (type == BPF_WRITE)\n\t\t\t*insn++ = BPF_EMIT_STORE(BPF_W, si,\n\t\t\t\t\t\t bpf_target_off(struct sk_buff, mark, 4,\n\t\t\t\t\t\t\t\ttarget_size));\n\t\telse\n\t\t\t*insn++ = BPF_LDX_MEM(BPF_W, si->dst_reg, si->src_reg,\n\t\t\t\t\t      bpf_target_off(struct sk_buff, mark, 4,\n\t\t\t\t\t\t\t     target_size));\n\t\t"
+}

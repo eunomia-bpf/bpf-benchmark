@@ -9,8 +9,13 @@ import json
 from elftools.elf.elffile import ELFFile
 
 def context_kind(prog_type):
-    """Select typed packet contexts and the original raw context layout."""
-    return {6: "xdp", 3: "tc", 8: "cgroup_skb"}.get(prog_type, "raw")
+    """Select an implemented context layout for both native ISAs."""
+    typed = {6: "xdp", 3: "tc", 8: "cgroup_skb"}
+    if prog_type in typed:
+        return typed[prog_type]
+    if prog_type in {2, 5, 15, 17, 20, 24, 26, 27, 28, 29, 31, 32}:
+        return "raw"
+    raise ValueError(f"context layout handler required for program type {prog_type}")
 
 
 def elf_symbol(name):
