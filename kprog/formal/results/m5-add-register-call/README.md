@@ -1,0 +1,5 @@
+# Actual fourth ADD-register call and frame release
+
+The original nine arguments and complete generic allocation/parameter binding now execute469 checked steps: entry1, actual body467, genuine frame free/return1. The result constructs final D3 word/scalar tag, full existing GPR/SP/vector/NZCV relation at the original caller frontier, caller frame, actual freeList and revoked permissions for every released local, Kept3, header pointers, warm cache and producer bound. D1 scalar and D2 STACK typed loads are transported through the actual allocation frame; no successful final-readback premise is introduced. The register update is the existing scalar nativeUpdate, pending its native instruction/reference-step law.
+
+Component build passed252 jobs70.402s; public execute type/axiom query passed with standard logic and inherited CompCert external/inline semantics only. Exact hashes/timings/raw logs in validation.json. No source AST/cast change, admission/new axiom/native oracle/proof-limit raise. All-behavior/native/original-entry and whole-library confirmation remain open; M5/O1/O2/O4/M6 open/families0. No apps/runtime tests/measurement.
