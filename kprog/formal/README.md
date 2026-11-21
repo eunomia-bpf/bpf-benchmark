@@ -179,6 +179,18 @@ record the universal composition and the preceding source results at existing
 budgets and inherited logical/CompCert axioms. Actual operand/count setup,
 flag stores, writeback and entry/world correspondence remain open.
 
+The [original shift flag input preparation](KProgFormal/ClightRefinement/X86ShiftFlagInputs.lean)
+executes both operand masks, the real two-argument count call and the source
+sign-mask/operation assignments in 25 silent steps. For every pair of 64-bit
+operands, result, size and caller heap, six source temporaries read back the
+mature truncations/count and derived sign/operation values. Other temporaries,
+the complete memory and caller locals retain their input values at the original
+flag stage. Callee lookup and genuine incoming operand/width observations remain
+explicit premises. The [nine public audits](../results/kprog_verification_20261107/x86-shift-flag-inputs.log.gz)
+record actual source identity, relational execution, the mature count equality
+and temporary frames at existing budgets and inherited axioms. Composition with
+the preceding route, flag stores, writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
