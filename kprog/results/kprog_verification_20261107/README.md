@@ -75,6 +75,17 @@ model. These do not complete the partial helper/RET C-model tokens; the
 [source/model review](s4-o2-review.md) records their precise boundary. S5/S6
 add nine partial universal O4 components with explicit production goals.
 
+S4's 2026-11-21 source/retirement reconciliation makes the current O2 goals
+explicit on the three specialization rows. Helper equality uses the actual
+exported Clight bodies and linked environment, with pre-call arguments, ordered
+effects, result/tag, clobbers, stack facts and all return/transfer/fault behaviors.
+CALL_REG additionally derives its full ID from the real tagged register reader.
+RET additionally derives producer mode selection and executes the current
+invocation guard or internal saved-word read, SP advance, release and continuation
+table. Concrete storage coherence and source/export binding remain open;
+historical routing/control laws retain their component scope. The helper/RET
+categories and separate native ABI/compiler O1/O4 obligations retain their status.
+
 The previously recorded72 x86 O2 equalities cover52 direct bodies, seventeen generic calls and three
 branch-handler bodies. PUSH/POP cover their register/immediate/memory field domain and derive base/index
 addresses from the same input, with an explicit arena/permission interface.
