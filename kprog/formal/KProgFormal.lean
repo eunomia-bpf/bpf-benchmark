@@ -125,3 +125,4 @@ import KProgFormal.ClightRefinement.Arm64AddImmediateDispatch
 import KProgFormal.ClightRefinement.Arm64AddImmediateNative
 import KProgFormal.ClightRefinement.Arm64AddImmediateOperands
 import KProgFormal.ClightRefinement.Arm64AddImmediatePrefix
+import KProgFormal.ClightRefinement.Arm64AddImmediateTail

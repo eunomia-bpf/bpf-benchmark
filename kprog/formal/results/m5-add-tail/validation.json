@@ -1,0 +1,48 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64AddImmediateTail"
+    ],
+    "exit": 0,
+    "seconds": 3.742382764816284,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 231,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-add-tail/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.563394546508789,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 2,
+  "reported_axioms": {
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.source": [],
+    "KProgFormal.ClightRefinement.Arm64AddImmediate.Tail.evaluate": []
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "internal_transitions": 43,
+  "source_checkpoint_before_commit": "7efa6ea52f5e6863bcfcd5f82dd0f9bf3964452c",
+  "raw": "/workspaces/kprog-raw/formal/m5-add-tail",
+  "whole_proof_library": {
+    "status": "pending batch-end confirmation"
+  },
+  "completed_isa_families": 0
+}
