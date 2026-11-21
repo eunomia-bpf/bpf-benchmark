@@ -1,0 +1,54 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean": "d1d932bb682d4c15afc03206bf8589b1209854d2f10bb44bf7bb114f8215599f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads"
+    ],
+    "exit": 0,
+    "seconds": 46.27611565589905,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/tag1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/TagPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4505343437194824,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-tag1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_tag_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "whole_library_confirmation": "pending until arithmetic/tag batch completes",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

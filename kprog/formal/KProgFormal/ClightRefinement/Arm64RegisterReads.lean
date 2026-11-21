@@ -170,6 +170,69 @@ private theorem gpr_executes (tags pointers : Bool) (i : Fin 31)
       CC.blocksOfEnv, CC.Mem.freeList,
       CC.emptyEnv, CC.E0, CC.Eapp, header, slot, cell, valueCast, empty]
 
+/-- The original GPR tag reader is valid in any world with the real used
+layout. Only its actual header/slot/Mint8 load is required; memory is unchanged. -/
+theorem gpr_tag_bound (world : CC.CGenv) (layout : GprLayout world) (i : Fin 31)
+    (b table target : CC.Block) (ofs tableOfs targetOfs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (tag : BitVec 8)
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 8))) = some (.Vptr table tableOfs))
+    (slot : CC.Mem.loadv CC.Mptr m (.Vptr table (CC.Integers.Ptrofs.add tableOfs
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr target targetOfs))
+    (cell : CC.Mem.loadv .Mint8unsigned m (.Vptr target targetOfs) = some (.Vint (tag.setWidth 32))) :
+    InternalRun world 28
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_tag)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) := by
+  have execution :
+      steps world 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_tag)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
+        some (CC.E0, .Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) ∧
+      InternalPath world 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_tag)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) := by
+    have bound := i.isLt
+    have ne : BitVec.ofNat 64 i.val ≠ (32#64) := by
+      intro h
+      have eq := congrArg BitVec.toNat h
+      rw [index_nat] at eq
+      simp only [BitVec.toNat_ofNat] at eq
+      omega
+    have lt : (BitVec.ofNat 64 i.val).ult (31#64) = true := by
+      rw [BitVec.ult_eq_decide, index_nat]
+      simp only [BitVec.toNat_ofNat]
+      simp [bound]
+    have cast := index_cast i m
+    simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.tulong, CC.tuchar, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      BitVec.toNat_ofNat, Int.natCast_emod, Option.some.injEq, CC.Val.Vint.injEq] at cast
+    have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+    simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header slot cell
+    simp +decide [ steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
+        Arm64Program.f_kprog_arm64_program_tag,
+        CC.doAllocVariables, CC.bindParameterTemps,
+        CC.createUndefTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField,
+        CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
+        layout.entry, layout.cell, layout.cells, layout.tags, layout.payload,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+        CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semAdd, CC.Cop.classifyAdd,
+        CC.Cop.semAddPtrInt, CC.Cop.ptrofsOfInt, index_offset, cast,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+        CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+        CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.MI.cmpu,
+        CC.Integers.Int.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+        CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.MI.eq, CC.Integers.MI.ltu, ne, lt,
+        CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+        CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int64.unsigned,
+        CC.Integers.Int.unsigned,
+        CC.Integers.MI.unsigned,
+        offset_zero,
+        CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tvoid, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+        CC.blocksOfEnv, CC.Mem.freeList,
+        CC.emptyEnv, CC.E0, CC.Eapp, header, slot, cell, empty]
+  exact internalRun_of_steps execution.2 execution.1
+
 private theorem gpr_calls (addresses : Arm64Registers.PointerOrigins)
     (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
     (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
