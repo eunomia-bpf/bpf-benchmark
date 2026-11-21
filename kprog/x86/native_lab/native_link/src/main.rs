@@ -1436,8 +1436,10 @@ fn build_arm64_helper_id_call(
             .filter(|&id| (1..512).contains(&id))
             .collect()
     };
-    if movz(Some(n)).len() == 1 {
-        if let Some(id) = arm64_helper_id_before(bytes, word_index, n) {
+    // The nearest write is the ID when the call has no other way in: one ID for xN in the
+    // whole function, or no branch landing between the write and the call.
+    if let Some((id, at)) = arm64_helper_id_before(bytes, word_index, n) {
+        if movz(Some(n)).len() == 1 || !arm64_branch_lands_between(bytes, at, word_index) {
             return arm64_helper_id_body(id, helper_addrs);
         }
     }
@@ -1467,9 +1469,33 @@ fn build_arm64_helper_id_call(
     Ok(words)
 }
 
-/// The helper ID an indirect call through xN uses: the nearest earlier write of
-/// xN in the function, which must be `mov wN, #id`. A call in between clobbers x0-x18.
-fn arm64_helper_id_before(bytes: &[u8], word_index: usize, n: u32) -> Option<u64> {
+/// Whether a branch of the function lands in words (from, to]. An indirect branch
+/// (a jump table) may land anywhere.
+fn arm64_branch_lands_between(bytes: &[u8], from: usize, to: usize) -> bool {
+    let sext = |v: u32, bits: u32| -> i64 { ((v << (32 - bits)) as i32 >> (32 - bits)) as i64 };
+    bytes.chunks_exact(4).enumerate().any(|(i, w)| {
+        let w = u32::from_le_bytes(w.try_into().unwrap());
+        if w & 0xffff_fc1f == 0xd61f_0000 {
+            return true; // br xN
+        }
+        let off = if w & 0xfc00_0000 == 0x1400_0000 {
+            sext(w & 0x03ff_ffff, 26) // b
+        } else if w & 0xff00_0010 == 0x5400_0000 || w & 0x7e00_0000 == 0x3400_0000 {
+            sext((w >> 5) & 0x7_ffff, 19) // b.cond, cbz, cbnz
+        } else if w & 0x7e00_0000 == 0x3600_0000 {
+            sext((w >> 5) & 0x3fff, 14) // tbz, tbnz
+        } else {
+            return false;
+        };
+        let target = i as i64 + off;
+        target > from as i64 && target <= to as i64
+    })
+}
+
+/// The helper ID an indirect call through xN uses and where it is written: the nearest
+/// earlier write of xN in the function, which must be `mov wN, #id`. A call in between
+/// clobbers x0-x18.
+fn arm64_helper_id_before(bytes: &[u8], word_index: usize, n: u32) -> Option<(u64, usize)> {
     for i in (0..word_index).rev() {
         let w = u32::from_le_bytes(bytes[i * 4..i * 4 + 4].try_into().unwrap());
         let call = w & 0xfc00_0000 == 0x9400_0000 || w & 0xffff_fc1f == 0xd63f_0000;
@@ -1482,7 +1508,7 @@ fn arm64_helper_id_before(bytes: &[u8], word_index: usize, n: u32) -> Option<u64
         let pair_load = ldst && !store && w & 0x3800_0000 == 0x2800_0000 && (w >> 10) & 31 == n;
         if (w & 31 == n && !store && !branch) || pair_load {
             let movz = w & 0x7fe0_0000 == 0x5280_0000;
-            return movz.then(|| u64::from((w >> 5) & 0xffff)).filter(|&id| id < 512);
+            return movz.then(|| (u64::from((w >> 5) & 0xffff), i)).filter(|&(id, _)| id < 512);
         }
     }
     None
