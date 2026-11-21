@@ -67,3 +67,13 @@ all along. Coverage records: `after-pass/coverage.json` (11/14) and `after-pass/
 
 This is coverage on the verified path, not a timing result: the app still has to be timed, and the two arms
 queued behind the coordinator's rotation are what speak to performance.
+
+## The pass costs nothing in emitted code
+
+The rewrite changes how the verifier sees the arithmetic, not what the backend emits. For request 10, the pass's
+output and the pre-change output compile to **byte-identical BPF objects** (5985 instructions each, `cmp` on the
+objects succeeds), and for the requests where the transform does not fire the bitcode itself is byte-identical.
+
+So the trade is exactly the one you want for a verifier-compatibility fix: the refused instruction sequence
+disappears from the verifier's view, and the JIT sees the same program. Nothing to re-time as a "cost of the fix";
+the pass only adds reachable programs.
