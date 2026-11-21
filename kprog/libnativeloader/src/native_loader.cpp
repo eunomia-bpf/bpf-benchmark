@@ -3386,13 +3386,32 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         : prog_info.attach_btf_obj_id;
     stub_attrs.attach_prog_id = options.attach_prog_id;
 
-    // B keeps P's maps alive. A prog array the original program does not use has an
-    // owner of another program type (OTel's uprobe custom__generic names perf_progs),
-    // and the kernel's owner check would refuse B; B keeps the arrays the original uses.
-    std::vector<uint32_t> retained_ids;
-    {
+    // B keeps P's maps alive (5/29). A prog array P names that the original program does
+    // not use can belong to programs of another type (OTel's uprobe custom__generic names
+    // perf_progs): the kernel's owner check refuses B with EINVAL. B is then loaded again
+    // without those arrays, which the application itself holds.
+    const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
+    auto load_retaining = [&](const LinkedBlob &blob) {
+        std::vector<int> map_ref_fds = reopen_relocated_map_fds(blob.relocated_map_ids);
+        try {
+            LoadedStub loaded = upload_and_load_stub(blob, prog_info.type, stub_attrs,
+                                                     companion.has_tail_call, stub_prog_name,
+                                                     map_ref_fds);
+            close_fd_vector(map_ref_fds);
+            return loaded;
+        } catch (...) {
+            close_fd_vector(map_ref_fds);
+            throw;
+        }
+    };
+    LoadedStub loaded_stub{};
+    try {
+        loaded_stub = load_retaining(linked);
+    } catch (const std::exception &) {
         const std::vector<uint32_t> original_ids = load_prog_map_ids(options.original_prog_fd);
         const std::unordered_set<uint32_t> used(original_ids.begin(), original_ids.end());
+        LinkedBlob own = linked;
+        own.relocated_map_ids.clear();
         for (uint32_t id : linked.relocated_map_ids) {
             bpf_map_info info = {};
             __u32 info_len = sizeof(info);
@@ -3401,24 +3420,12 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
                 info.type == BPF_MAP_TYPE_PROG_ARRAY && !used.contains(id)) {
                 continue;
             }
-            retained_ids.push_back(id);
+            own.relocated_map_ids.push_back(id);
         }
-    }
-    std::vector<int> map_ref_fds = reopen_relocated_map_fds(retained_ids);
-    const std::string stub_prog_name = prog_info_name_or_stub(prog_info);
-    LoadedStub loaded_stub{};
-    try {
-        loaded_stub = upload_and_load_stub(
-            linked,
-            prog_info.type,
-            stub_attrs,
-            companion.has_tail_call,
-            stub_prog_name,
-            map_ref_fds);
-        close_fd_vector(map_ref_fds);
-    } catch (...) {
-        close_fd_vector(map_ref_fds);
-        throw;
+        if (own.relocated_map_ids.size() == linked.relocated_map_ids.size()) {
+            throw;
+        }
+        loaded_stub = load_retaining(own);
     }
 
     out.prog_fd = loaded_stub.prog_fd;
