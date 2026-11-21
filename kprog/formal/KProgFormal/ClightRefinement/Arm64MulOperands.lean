@@ -353,4 +353,149 @@ theorem rhs_scalar {initial memory : CC.Mem} {entry : Arm64Producer.HeaderLocal 
   have finish := after_rhs Arm64ProgramEntryLinked.ge e le memory k value op
   simpa only [CC.callCont, rhsCont] using (enter.trans read).trans finish
 
+/-- The actual combined reader at255 returns zero without any storage,
+layout, cache, external-input or successful-read premise. -/
+theorem read_zero (world : CC.CGenv) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) :
+    InternalRun world 55
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read) [.Vptr b ofs, .Vlong (255#64)] k m)
+      (.Returnstate (.Vlong 0) (CC.callCont k) m) := by
+  repeat first
+    | exact InternalRun.refl _
+    | apply InternalRun.step
+      · trivial
+      · apply CC.doStep_sound
+        simp +decide only [CC.doStep, CC.doFunctionEntry2, Arm64Program.f_kprog_arm64_program_read,
+        CC.doAllocVariables, CC.bindParameterTemps, CC.createUndefTemps,
+        CC.doEvalExpr, CC.doEvalExprlist, CC.doEvalLvalue, CC.setOpttemp,
+        CC.PTree.gss, CC.PTree.gso, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+        CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+        CC.Cop.boolVal, CC.Cop.classifyBool, CC.tuchar, CC.tuint, CC.tint, CC.tlong, CC.tulong, CC.tptr,
+        CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+        CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.Int64.ltu,
+        CC.Integers.Int.cmpu, CC.Integers.Int.eq, CC.Integers.MI.cmpu, CC.Integers.MI.eq, CC.Integers.MI.ltu,
+        CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+        CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+        CC.Integers.Int.unsigned, CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned,
+        CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+        CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp,
+        List.nil_append, List.append_nil, ite_true, ite_false, eq_self,
+        Bool.false_eq_true, Bool.true_eq_false] <;> try rfl
+
+
+private structure AddendPieces where
+  call : CC.Stmt
+  valueSet : CC.Stmt
+  product : CC.Stmt
+
+private def addendPieces : AddendPieces := by
+  run_tac do
+    let peel (term : Lean.Expr) : Lean.Elab.Tactic.TacticM (Array Lean.Expr) := do
+      let actual ← Lean.Meta.withTransparency .all (Lean.Meta.whnf term)
+      unless actual.isAppOfArity ``CC.Stmt.Ssequence 2 do throwError "actual MUL addend constructors changed"
+      pure actual.getAppArgs
+    let suffix ← peel (← Lean.Elab.Term.elabTerm (← `(addend)) none)
+    let pair ← peel suffix[0]!
+    Lean.Elab.Tactic.closeMainGoal `actual_mul_addend (← Lean.Meta.mkAppM ``AddendPieces.mk
+      #[pair[0]!, pair[1]!, suffix[1]!])
+
+private def addendCall : CC.Stmt := by run_tac cachePart (← `(addendPieces.call))
+private def addendSet : CC.Stmt := by run_tac cachePart (← `(addendPieces.valueSet))
+def product : CC.Stmt := by run_tac cachePart (← `(addendPieces.product))
+
+theorem addend_source : addend = .Ssequence (.Ssequence addendCall addendSet) product := rfl
+
+private def addendCont (k : CC.Cont) (e : CC.Env) (le : CC.TempEnv) : CC.Cont :=
+  .Kcall (some Arm64Program._t'50) Arm64Nop.handler e le
+    (.Kseq addendSet (.Kseq product (tailCont k)))
+
+def addendTemps (le : CC.TempEnv) : CC.TempEnv :=
+  (le.set Arm64Program._t'50 (.Vlong 0)).set Arm64Program.___kprog_a64_mul_addend (.Vlong 0)
+
+private theorem addend_call_source : addendCall =
+    .Scall (some Arm64Program._t'50)
+      (.Evar Arm64Program._kprog_arm64_program_read
+        (.Tfunction [CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr), CC.tulong] CC.tulong CC.cc_default))
+      [.Etempvar Arm64Program._entry (CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr)),
+       .Etempvar Arm64Program._src3 CC.tulong] := rfl
+
+private theorem call_addend (world : CC.CGenv) (block b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (sourceWord : BitVec 64)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some block ∧
+      CC.Genv.findFunctPtr world.genv_genv block = some (.Internal Arm64Program.f_kprog_arm64_program_read))
+    (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
+    (entry : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (source : le.get Arm64Program._src3 = some (.Vlong sourceWord)) :
+    CC.Step2 world (.State Arm64Nop.handler addendCall k e le m) CC.E0
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read) [.Vptr b ofs, .Vlong sourceWord]
+        (.Kcall (some Arm64Program._t'50) Arm64Nop.handler e le k) m) := by
+  rw [addend_call_source]
+  apply CC.Step.call (tyargs := [CC.tptr (.Tstruct Arm64Program._kprog_arm64_entry CC.noattr), CC.tulong])
+    (tyres := CC.tulong) (cconv := CC.cc_default) (vf := .Vptr block 0)
+  · rfl
+  · apply CC.doEvalExpr_sound
+    simp only [CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode,
+      CC.typeof, unshadowed, binding.1, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
+  · apply CC.doEvalExprlist_sound
+    simp +decide [CC.doEvalExprlist, CC.doEvalExpr, entry, source, CC.typeof,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tptr, CC.tulong, CC.Archi.ptr64]
+  · simpa +decide [CC.Genv.findFunct, CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero, CC.Integers.MI.eq, CC.Integers.MI.zero] using binding.2
+  · exact reader_type
+
+set_option hygiene false in
+private theorem enter_addend (world : CC.CGenv) (block : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Program._kprog_arm64_program_read = some block ∧
+      CC.Genv.findFunctPtr world.genv_genv block = some (.Internal Arm64Program.f_kprog_arm64_program_read))
+    (b : CC.Block) (ofs : CC.Integers.Ptrofs) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (k : CC.Cont) (sourceWord : BitVec 64)
+    (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
+    (entry : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (source : le.get Arm64Program._src3 = some (.Vlong sourceWord)) :
+    InternalRun world 3 (.State Arm64Nop.handler addend (tailCont k) e le m)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong sourceWord] (addendCont k e le) m) := by
+  run_tac do
+    for _ in [:2] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| simp only [CC.doStep, addend_source] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic|
+      exact InternalRun.step trivial
+        (call_addend world block b ofs e le m _ sourceWord binding unshadowed entry source) (InternalRun.refl _)))
+
+set_option hygiene false in
+private theorem after_addend (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (k : CC.Cont) :
+    InternalRun world 4 (.Returnstate (.Vlong 0) (addendCont k e le) m)
+      (.State Arm64Nop.handler product (tailCont k) e (addendTemps le) m) := by
+  run_tac do
+    for _ in [:4] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| simp only [CC.doStep, addendCont, addendTemps, addendSet,
+        CC.setOpttemp, CC.PTree.gss, CC.doEvalExpr, CC.typeof,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tulong] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- The actual unused third operand is still read and assigned through the
+original call/reader/return, on arbitrary memory with no provider premise. -/
+theorem addend_zero (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (readName : e.get Arm64Program._kprog_arm64_program_read = none)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (source : le.get Arm64Program._src3 = some (.Vlong (255#64))) :
+    InternalRun Arm64ProgramEntryLinked.ge 62
+      (.State Arm64Nop.handler addend (tailCont k) e le m)
+      (.State Arm64Nop.handler product (tailCont k) e (addendTemps le) m) := by
+  have enter := enter_addend Arm64ProgramEntryLinked.ge (CC.Positive.ofNat 66)
+    Arm64AddOperandReads.Linked.bindings.2.2 b ofs e le m k (255#64) readName entryRead source
+  have read := read_zero Arm64ProgramEntryLinked.ge b ofs m (addendCont k e le)
+  have finish := after_addend Arm64ProgramEntryLinked.ge e le m k
+  simpa only [CC.callCont, addendCont] using (enter.trans read).trans finish
+
 end KProgFormal.ClightRefinement.Arm64Mul.Operands
