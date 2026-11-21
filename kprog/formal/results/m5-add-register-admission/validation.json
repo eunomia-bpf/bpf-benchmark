@@ -1,0 +1,51 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterAdmission.lean": "91ba1d54c51f4138a39ef8857eb5f12f7d4970c4fe14d351d26c153e836052a5"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterAdmission"
+    ],
+    "exit": 0,
+    "seconds": 1.8548920154571533,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_log": "/workspaces/kprog-raw/formal/m5-add-register/admission2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-add-register/AdmissionPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5580453872680664,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-add-register/public-admission1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterAdmission.next_admission": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterAdmission.setup_next": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "original fourth fetch transported through actual three native transitions and architectural setup",
+  "whole_library_confirmation": "pending original-entry batch",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
