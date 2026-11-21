@@ -23,9 +23,12 @@ def live():
    args=(q/'cmdline').read_bytes().split(b'\0');commands.append((q.name,b' '.join(args).decode(errors='replace')))
    for a in args:
     p=Path(os.fsdecode(a))
-    if p.suffix in ['.py','.sh','.mk','.json','.yaml','.yml'] and p.is_file():
+    if (p.suffix in ['.py','.sh','.mk','.json','.yaml','.yml'] or p.name.lower()=='makefile') and p.is_file():
      files.add(str(p));roots.add(str(p.parent))
      files.update(str(f) for f in p.parent.iterdir() if f.is_file() and f.suffix in ['.json','.yaml','.yml'])
+   if args and Path(os.fsdecode(args[0])).name in ['make','gmake']:
+    default=Path(os.readlink(q/'cwd'))/'Makefile'
+    if default.is_file():files.add(str(default));roots.add(str(default.parent))
    for fd in list((q/'fd').iterdir())+[q/'cwd',q/'exe']:
     try:opened.append((q.name,os.readlink(fd)))
     except OSError:pass
@@ -138,7 +141,43 @@ def move(which):
  cs=commit(['.gitignore',str(out.relative_to(REPO)),str((REPORT/'resume-20261121.md').relative_to(REPO))],'Preserve closed '+which+' outputs on persistent storage')
  with (STATE/'COORDINATION.md').open('a') as f:f.write('\n- S19 '+datetime.datetime.now(datetime.timezone.utc).isoformat()+': Published '+which+' '+cs+'; '+str(len(receipts))+' raw files preserve their SHA-256 at '+str(RAW)+'. Current source and active inputs retain their owners.\n')
  print('PUBLISHED',json.dumps(info),cs,flush=True)
+def historical():
+ rows=[]
+ for p in REPORT.glob('*-moves.json.gz'):
+  with gzip.open(p,'rt') as f:rows.extend(json.load(f))
+ wanted={x['sha256'] for x in rows};sizes={x['bytes'] for x in rows};matched={};archives=[];errors=[]
+ roots=['kprog/results/kprog_fidelity_20261107','corpus/results/kprog_app_coverage_20261107','corpus/results/kprog_arm64_app_coverage_20261107','kprog/results/kprog_tree_cleanup_20261109','micro/results']
+ for line in git('ls-tree','-r','-l','HEAD','--',*roots).decode().splitlines():
+  meta,name=line.split('\t',1)
+  if name.endswith('.tar.gz'):archives.append((meta.split()[2],name))
+ class Reader:
+  def __init__(self,f):self.f=f;self.h=hashlib.sha256()
+  def read(self,n=-1):
+   b=self.f.read(n);self.h.update(b);return b
+ import tarfile
+ for blob,name in archives:
+  proc=subprocess.Popen(['git','cat-file','blob',blob],stdout=subprocess.PIPE)
+  reader=Reader(proc.stdout)
+  try:
+   with tarfile.open(fileobj=reader,mode='r|gz') as tar:
+    for member in tar:
+     if member.isfile() and member.size in sizes:
+      h=hashlib.sha256();f=tar.extractfile(member)
+      for b in iter(lambda:f.read(4194304),b''):h.update(b)
+      v=h.hexdigest()
+      if v in wanted and v not in matched:matched[v]={'archive':name,'git_blob':blob,'member':member.name}
+  except (tarfile.TarError,EOFError,OSError) as e:errors.append({'archive':name,'diagnostic':str(e)})
+  for b in iter(lambda:reader.read(4194304),b''):pass
+  assert proc.wait()==0,name
+  v=reader.h.hexdigest()
+  if v in wanted:matched[v]={'archive':name,'git_blob':blob,'member':'archive bytes'}
+  print('HISTORICAL',name,'matched_hashes',len(matched),flush=True)
+ result={'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'receipt_files':len(rows),'archive_files_scanned':len(archives),'matched_files':sum(x['sha256'] in matched for x in rows),'diagnostics':errors,'records':[dict(x,published_content=matched.get(x['sha256'])) for x in rows]}
+ RAW.mkdir(parents=True,exist_ok=True);save(RAW/'historical-correspondence.json',result)
+ with gzip.open(REPORT/'historical-correspondence-20261121.json.gz','wt') as f:json.dump(result,f,indent=2);f.write('\n')
+ print('HISTORICAL COMPLETE',result['matched_files'],len(rows),'archives',len(archives),'diagnostics',len(errors),flush=True)
 if __name__=='__main__':
  if sys.argv[1]=='audit':audit()
  elif sys.argv[1]=='move':move(sys.argv[2])
+ elif sys.argv[1]=='historical':historical()
  else:raise SystemExit('audit | move GROUP')
