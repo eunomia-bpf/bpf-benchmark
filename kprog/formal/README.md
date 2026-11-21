@@ -142,6 +142,18 @@ operands and genuine current-heap CF loads are explicit input premises. The
 record this composition and the preceding classifier results at original proof
 budgets. Entry/world representation, actual flag stores and the writer remain open.
 
+The [actual width-shape helpers](KProgFormal/ClightRefinement/X86WidthShape.lean)
+execute the complete exported bit-width and mask functions for every byte code,
+heap and continuation. Their original comparison, assignment and cast paths take
+6/10/14 steps for codes 1/2/other. For the four mature ISA widths the returned
+values are exactly its existing bit count and 64-bit mask. Every finite execution
+at the terminal continuation is a silent prefix of the same return; terminal
+returns are unique and infinite executions are excluded. The
+[ten public audits](../results/kprog_verification_20261107/x86-width-shape.log.gz)
+record default proof budgets and the existing logical/CompCert axioms; the two
+native value equalities use no axioms. Integration with the original shift flag
+call sites and stores remains open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
