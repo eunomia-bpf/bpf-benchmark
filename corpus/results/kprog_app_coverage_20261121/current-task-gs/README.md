@@ -22,3 +22,9 @@ for operand in ['QWORD PTR [rax]', 'QWORD PTR gs:[rax]', 'QWORD PTR fs:[rax]']:
 ```
 
 The next generic repair retains the segment selector, binds the per-CPU symbol/type through existing kernel facts, and represents the current-CPU address base in the existing memory semantics. Register, flag, stack and architectural fault effects remain part of faithful(I,P). The common operation header is frozen under AGENTS.md's Freeze section; a defect-class opening goes through the coordinator if that body needs additions. The universal per-CPU relation stays with FORMAL. Runtime gates/predicates added0; source changes0; native executions0; benchmark measurements0. The coordinator's live x86 rotation and ARM check retain their image, base and resource ownership.
+
+## Current canonical input scope
+
+The current staged bpf_exit_v511.native.o, containing event_exit_disassociate_ctty, has SHAf32a5db27e88ffc7829d3d5ccb97be4560bfb5ce87a4b43db39dacad316194c5. Its complete symbol table contains zero current_task symbols and its undefined-symbol list is empty. The current native compatibility header routes bpf_get_current_task through helper35. current-input-symbols.json and current-input-raw.tar.gz preserve that exact ELF and both llvm-nm observations.
+
+The archived GS-bearing P and this current P therefore have separate input identities. The diagnosis establishes the archived generation failure and the current parser's segment-loss behavior; current-image application acceptance remains its actual checked replay result. The common-header extension is a verifier-side semantic case for coordinator/FORMAL disposition, with the current performance image, O3 flags and timing rotation retained.
