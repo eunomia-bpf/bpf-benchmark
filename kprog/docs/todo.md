@@ -2352,6 +2352,7 @@ PERF checkpoint 2026-11-14T18:40:53Z（65fe9615e / 4df2d82dd）：最新修正 m
 - M5 增量：CMP X4,X1 实际413步调用/释放/返回及原417步调用者已精化同一真实取指/解码成熟模型步骤；完整 GPR/标签/指针来源/SP/SIMD/NZCV 关系保留，操作数由真实源单元推导，原生产者 frontier 由所有权恢复；267jobs+7公开公理检查通过，见 formal/results/m5-compare-registers。原98输入/setup/六调用入口与 cache/header 集成仍待完成，M5/M6 未关闭。
 - M5 增量：同一实际 CMP 调用已保持全部12个生产者头部指针、非标志借用读取（含失败）及原 frontier 上的栈/返回缓存；由真实局部数据 frame 与分配所有权导出，无新增缓存或读回前提。267jobs+10公开公理检查通过，见 formal/results/m5-compare-registers；cache/header 集成已关闭，原98输入/setup/六调用入口仍待完成，M5/M6 未关闭。
 - M5 增量：原98输入/provider轨迹/setup/真实六调用前缀已接入 CMP，保留前五次分配/释放/堆与观察；第六取指/无错误状态由原PC+20及真实成熟步骤推导，完整GPR/标签/指针来源/SP/SIMD/NZCV、12头指针/缓存/frontier保持，无新增原生后态/读回/权限假设。298jobs+3公开公理检查通过，见 formal/results/m5-compare-sixcall-native；旧标量prefix日志重名覆盖及同源码重检已在两收据如实记录。afterCompare 后续/完整handler/O1/O2/O4/M5/M6仍待完成，families0。
+- M5 增量：CMP 后真实第七次 CSEL 调用的原始9参数/实际符号与handler/2步调用/完整FunctionEntry2分配绑定/2步返回复原已证明；导出AST保留显式signed255与CMP宏unsigned255U的差异，C未变。250jobs+4公开公理检查通过，见 formal/results/m5-select-call；CSEL条件/读写/body/native及原七调用组合仍待完成，M5/M6/O1/O2/O4开放，families0。
 - [ ] M6 旧件退役：旧生成器、contracts、generated 按现有规则移动归档（kprog/docs/cleanup-log.md），冻结的 benchmark 路径逐字节保持一致。顺序固定：先接 submodule，再迁定理，最后退役旧件。
 - 备选：x86-64 用 Zellic/x86-formal-verification-research（Lean，research preview，带 Linux 进程模型）或 Verified-zkEVM/machine-checked（Lean，AArch64/x86-64/RISC-V，早期）；Keel 的 EmbC 公开后可作为 clightgen 的备选。
 - 论文 §4 里关于生成器、Lean 参考和 TCB 的段落，迁移完成后由调研会话起草，交运营者确认。

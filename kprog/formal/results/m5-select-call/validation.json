@@ -1,0 +1,107 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntrySelectCall.lean": "e2c94648b19785bf3cca7cb3cd208c9ed6d460f61767f33470f7ee3fade084e4"
+  },
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareCall.lean": "5a15fa357457e11709f0aecdbfb2a84616098d5d6654e61bfbad381dbd92791e"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall"
+    ],
+    "exit": 0,
+    "seconds": 46.586698055267334,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 250,
+  "build_log": "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/call-build2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/SelectCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5087244510650635,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/call-public1.log",
+  "public_query_sha256": "130295b7711a60aae4c209e2143cbaeb0927a41b392c7f63fcc7f8f6a60d608e",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall.entry_valid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall.enter": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall.leave": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "arguments": {
+    "op": 28,
+    "dst": 5,
+    "src": 1,
+    "src2": 2,
+    "src3": 255,
+    "flags": 8,
+    "aux": 0,
+    "imm": 0
+  },
+  "scope": "actual original CSEL caller immediately after CMP, original nine argument expressions/casts and genuine linked symbol/function target, source sequence/untouched afterSelect, two actual caller-entry steps, complete internal FunctionEntry2 allocation/binding, two actual void-return/caller-restoration steps; arbitrary memory/environment temps/continuation, no CSEL body/native refinement claim",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall"
+        ],
+        "exit": 1,
+        "seconds": 47.08460068702698,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/call-build1.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/call-build1-source.lean",
+      "source_sha256": "d669dbbb329fad26a7f43b455e99daaab9d550001206409f72aabe2bb481444f",
+      "note": "actual RUN_OP3 explicit SRC3 literal255 has signed C tint, unlike CMP macro-supplied255U; exact exported AST inspection identified type and proof corrected at same limits",
+      "inspection_log": "/workspaces/kprog-raw/formal/m5-select/20261122T021459Z/inspect-args1.log"
+    }
+  ],
+  "remaining": "actual CSEL dispatch/condition read and choice, scalar/tagged operands, selected raw/tag pointer writeback, mature native CSEL correspondence and original seventh-call composition; remaining fixture/handler coverage, O1/O2/O4/M5/M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
