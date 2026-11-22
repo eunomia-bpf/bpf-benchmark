@@ -393,6 +393,19 @@ laws retain the genuine union-layout environment premise. The
 records six public declarations with the inherited logical axioms. These
 layouts support the subsequent original writer's pointer reads and stores.
 
+The actual default writer's cell-table/RSP read prefix now executes in ten
+silent transitions. It derives the real pointer addition at cell index four,
+the nested cell-value/union-pointer addresses and the exact three temporary
+writes, retaining the entire heap and all other temporaries. Current composite
+layouts, two actual memory loads and the source word-cast result remain explicit;
+both pointer and 64-bit numeric old-SP casts preserve their value. Composing the
+preceding narrow SHL selectors gives a sixty-one-step original-writer execution
+to width preparation. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-loads.log.gz)
+records nineteen public declarations under the default budgets. Width/value
+preparation, destination storage, qword tag calls and the entry-world relation
+remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

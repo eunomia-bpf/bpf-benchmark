@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.X86ShiftFlagPF
+import KProgFormal.ClightRefinement.X86RegisterLayout
 
 namespace KProgFormal.ClightRefinement.X86ShiftWriteback
 
@@ -445,5 +446,174 @@ theorem narrow_writer (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
     exact width
   have rest := narrow_default ge function e (selectTemps le dst size) k m size narrow kept
   exact selected.trans rest
+
+
+private structure LoadPieces where
+  body : CC.Stmt
+  exit : CC.Stmt
+  cells : CC.Stmt
+  rsp : CC.Stmt
+  save : CC.Stmt
+  rest : CC.Stmt
+
+private def loadPieces : LoadPieces :=
+  match defaultWriter with
+  | .Sloop (.Ssequence (.Ssequence cells (.Ssequence rsp save)) rest) exit =>
+      ⟨.Ssequence (.Ssequence cells (.Ssequence rsp save)) rest, exit, cells, rsp, save, rest⟩
+  | _ => ⟨.Sskip, .Sskip, .Sskip, .Sskip, .Sskip, .Sskip⟩
+
+private def loadBody : CC.Stmt := by run_tac cachePart (← `(loadPieces.body))
+private def loadExit : CC.Stmt := by run_tac cachePart (← `(loadPieces.exit))
+private def loadCells : CC.Stmt := by run_tac cachePart (← `(loadPieces.cells))
+private def loadRsp : CC.Stmt := by run_tac cachePart (← `(loadPieces.rsp))
+private def saveRsp : CC.Stmt := by run_tac cachePart (← `(loadPieces.save))
+def widthWriter : CC.Stmt := by run_tac cachePart (← `(loadPieces.rest))
+
+/-- The real default writer enters its original loop, cell-table/RSP reads,
+old-SP conversion and following width/value preparation. -/
+theorem loads_source : defaultWriter =
+    .Sloop (.Ssequence (.Ssequence loadCells (.Ssequence loadRsp saveRsp)) widthWriter) loadExit ∧
+    loadBody = .Ssequence (.Ssequence loadCells (.Ssequence loadRsp saveRsp)) widthWriter := by
+  constructor <;> rfl
+
+def loadCont (k : CC.Cont) : CC.Cont := .Kloop1 loadBody loadExit k
+
+def loadTemps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : CC.Val) : CC.TempEnv :=
+  ((le.set X86_program_profile_bpf._t'170 (.Vptr block offset)).set
+    X86_program_profile_bpf._t'171 value).set
+    X86_program_profile_bpf.___x86_write_old_sp__5 value
+
+/-- The original casts retain every actual pointer-valued old SP. -/
+theorem old_pointer_cast (m : CC.Mem) (block : CC.Block) (offset : CC.Integers.Ptrofs) :
+    CC.Cop.semCast (.Vptr block offset) (CC.tptr CC.tvoid) CC.tlong m =
+      some (.Vptr block offset) := rfl
+
+/-- The original casts retain every actual 64-bit numeric old SP. -/
+theorem old_long_cast (m : CC.Mem) (value : BitVec 64) :
+    CC.Cop.semCast (.Vlong value) (CC.tptr CC.tvoid) CC.tlong m =
+      some (.Vlong value) := rfl
+
+private def gprMembers : List CC.Member := by
+  run_tac cachePart (← `(X86RegisterLayout.gprRecord.co_members))
+
+
+/-- Ten genuine source transitions read the current cell table and RSP cell,
+save the admitted pointer/numeric word and reach the original width preparation. -/
+theorem load_prefix (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value) :
+    InternalRun ge 10 (.State function defaultWriter k e le m)
+      (.State function widthWriter (loadCont k) e (loadTemps le cellsBlock cellsOffset value) m) := by
+  have addZero (offset : CC.Integers.Ptrofs) :
+      CC.Integers.Ptrofs.add offset (CC.Integers.Ptrofs.repr 0) = offset := by
+    change offset + 0 = offset
+    exact BitVec.add_zero offset
+  have tableAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._cells (.Vptr bindingBlock 0) =
+      some (bindingBlock, 0, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86RegisterLayout.cells_offset ge.genv_cenv, addZero]
+  have valueAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr)
+      X86_program_profile_bpf._value (.Vptr cellsBlock (cellsOffset + 64)) =
+      some (cellsBlock, cellsOffset + 64, .Full) := by
+    simp only [CC.lvalOfField, cellLayout, X86RegisterLayout.value_offset ge.genv_cenv gprLayout, addZero]
+  have ptrOffset : CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr
+      X86RegisterLayout.gprRecord.co_members = .OK (0, .Full) := by
+    change CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr gprMembers = .OK (0, .Full)
+    simp +decide [gprMembers, CC.unionFieldOffset, CC.layoutField, CC.bitalignof,
+      CC.alignof, CC.alignAttr, CC.Ty.attr, CC.align, CC.zdiv, CC.tptr, CC.noattr]
+  have pointerAddress : CC.lvalOfField ge
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr)
+      X86_program_profile_bpf._ptr (.Vptr cellsBlock (cellsOffset + 64)) =
+      some (cellsBlock, cellsOffset + 64, .Full) := by
+    simp only [CC.lvalOfField, gprLayout, ptrOffset, addZero]
+  have cellAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr cellsBlock cellsOffset) (.Tpointer (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) CC.noattr)
+      (.Vint (CC.Integers.Int.repr 4)) CC.tint m = some (.Vptr cellsBlock (cellsOffset + 64)) := by
+    simp only [CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
+      CC.Cop.semAddPtrInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tint,
+      CC.sizeof, cellLayout, X86RegisterLayout.layout.2.2.2.1]
+    rfl
+  have structAccess (name : CC.Ident) :
+      CC.accessMode (.Tstruct name CC.noattr) = .By_copy := rfl
+  have unionAccess : CC.accessMode
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
+  have ptrAccess (ty : CC.Ty) : CC.accessMode (.Tpointer ty CC.noattr) = .By_value CC.Mptr := rfl
+  have unsigned0 : CC.Integers.Ptrofs.unsigned (0 : CC.Integers.Ptrofs) = 0 := rfl
+  have wordCast : CC.Cop.semCast value (.Tpointer CC.tvoid CC.noattr) CC.tlong m =
+      some value := word
+  have recast : CC.Cop.semCast value CC.tlong CC.tlong m = some value := word
+  rw [loads_source.1]
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, loads_source.2, loadCells, loadRsp, saveRsp,
+      loadCont, loadTemps, CC.doStep, CC.doEvalExpr, CC.doDerefLoc,
+      CC.typeof, CC.tptr, CC.PTree.gss, structAccess, unionAccess, ptrAccess,
+      tableAddress, valueAddress, pointerAddress, cellAdd, binding,
+      CC.Mem.loadv, unsigned0, cells, rsp, wordCast, recast, CC.Eapp, CC.E0,
+      List.nil_append, true_and]
+
+/-- The actual table pointer, loaded RSP word and saved old-SP temporary read back exactly;
+every other temporary keeps its incoming value. -/
+theorem load_temps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : CC.Val) :
+    (loadTemps le block offset value).get X86_program_profile_bpf._t'170 =
+      some (.Vptr block offset) ∧
+    (loadTemps le block offset value).get X86_program_profile_bpf._t'171 = some value ∧
+    (loadTemps le block offset value).get X86_program_profile_bpf.___x86_write_old_sp__5 = some value ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'170 → id ≠ X86_program_profile_bpf._t'171 →
+      id ≠ X86_program_profile_bpf.___x86_write_old_sp__5 →
+      (loadTemps le block offset value).get id = le.get id := by
+  refine ⟨by simp +decide [loadTemps, CC.PTree.gso], by simp +decide [loadTemps, CC.PTree.gso],
+    by simp [loadTemps], ?_⟩
+  intro id ne170 ne171 neOld
+  simp [loadTemps, CC.PTree.gso, Ne.symm ne170, Ne.symm ne171, Ne.symm neOld]
+
+/-- The original narrow SHL writer executes all selectors and real pointer reads,
+reaching width preparation in sixty-one silent transitions on the same heap. -/
+theorem narrow_loaded (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (dst : BitVec 8) (size : X86.Size) (narrow : size ≠ .q)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    InternalRun ge 61 (.State function writer k e le m)
+      (.State function widthWriter (loadCont k) e
+        (loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le dst size)))
+          cellsBlock cellsOffset value) m) := by
+  have selected := narrow_writer ge function e le k m dst size narrow destination width alu
+  have keptBinding :
+      (narrowSrcTemps (narrowDstTemps (selectTemps le dst size))).get
+        X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0) := by
+    simp +decide [narrowSrcTemps, narrowDstTemps, selectTemps, CC.PTree.gso, binding]
+  have loaded := load_prefix ge bindingsLayout gprLayout cellLayout function e
+    (narrowSrcTemps (narrowDstTemps (selectTemps le dst size))) k m
+    bindingBlock cellsBlock cellsOffset value keptBinding cells rsp word
+  exact selected.trans loaded
 
 end KProgFormal.ClightRefinement.X86ShiftWriteback
