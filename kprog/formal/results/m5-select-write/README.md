@@ -1,7 +1,7 @@
 # Actual selected CSEL writeback and fetched native match
 
-Work in progress: the source below is prepared; its focused build and public
-queries are pending. No completed refinement is claimed by this receipt.
+Focused build260 and two public type/axiom queries pass at original limits,
+CPU17, one worker and32GiB. Full root confirmation follows the current batch.
 
 The original selected source branch now runs through both raw/tag reads, the
 actual pointer writer and caller return: 66 + 53 + 1 = 120 silent transitions.

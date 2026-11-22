@@ -1,13 +1,52 @@
 {
-  "status": "work in progress; focused dependency build running",
-  "focused_target": "KProgFormal.ClightRefinement.Arm64SelectWrite",
-  "public_query_count_planned": 2,
-  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "status": "focused proof and public queries passed",
+  "source_commit": "4e61c689c2530ccdb846c725bdad4ce47a511333",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectWrite"
+    ],
+    "exit": 0,
+    "seconds": 330.5221178531647,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 260,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-write/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8547635078430176,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 2,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.write": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64Select.write_matches": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
   "proof_limits": {
     "maxHeartbeats": 200000,
     "maxRecDepth": 512,
     "Elab.async": false
   },
-  "whole_library": "not started for this batch",
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "earlier_attempts": [
+    "select1 old-client argument-expansion diagnostic",
+    "select2 interrupted before completion; log retained"
+  ],
+  "whole_library": {
+    "status": "pending batch-end confirmation"
+  },
   "complete_isa_families": 0
 }
