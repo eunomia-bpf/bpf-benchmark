@@ -1,0 +1,126 @@
+{
+  "at": "2026-11-22T02:02:14.763438+00:00",
+  "capture": "partial Tetragon existing controller2200510, first14 completed requests; not terminal whole-app coverage",
+  "counts": {
+    "requests": 14,
+    "b_generated": 14,
+    "stock_accepted": 2,
+    "checked_installed": 2,
+    "direct_native_installed": 12
+  },
+  "accepted_request_ids": [
+    7,
+    12
+  ],
+  "stack_frontier": {
+    "request_id": 9,
+    "entry": "generic_kprobe_filter_arg",
+    "native_object_sha256": "bae7974ff1dc5f8b3b11e2994d349894a11811f019a5c193a85f8a646f44f7de",
+    "started": "2026-11-22T01:43:45.414850+00:00",
+    "finished": "2026-11-22T01:53:27.332406+00:00",
+    "request_seconds": 581.917556,
+    "b_elf_sha256": "ef02010d99a0ef53b94883f389beab0001a2cd82c8b5e84dd465b844d5dbd152",
+    "b_elf_bytes": 6964312,
+    "program_section": "kprobe/trusted",
+    "program_section_bytes": 3419184,
+    "program_instructions": 427398,
+    "program_section_sha256": "352859308a277cf40dfe76b2e5904317ce9b1d7f4ac6a91556f579a15462a992",
+    "first_eight_instructions": [
+      {
+        "opcode": 183,
+        "register_byte": 0,
+        "offset": 0,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1040,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1048,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1056,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1064,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1152,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1160,
+        "immediate": 0
+      },
+      {
+        "opcode": 123,
+        "register_byte": 10,
+        "offset": -1168,
+        "immediate": 0
+      }
+    ],
+    "minimum_r10_store_offset_in_section": -1968,
+    "verifier_stderr": "trusted-native-loader: service simulator verification failed before native compilation: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (7b) *(u64 *)(r10 -1040) = r0\ninvalid write to stack R10 off=-1040 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n",
+    "result": "stock rejected before native compilation; direct-native fallback installed with status0"
+  },
+  "remaining_new_entries": [
+    {
+      "request_id": 10,
+      "entry": "generic_kprobe_output",
+      "execution_path": "direct-native",
+      "b_stock_passed": false,
+      "source_prog_id": 395
+    },
+    {
+      "request_id": 11,
+      "entry": "generic_kprobe_output",
+      "execution_path": "direct-native",
+      "b_stock_passed": false,
+      "source_prog_id": 401
+    },
+    {
+      "request_id": 12,
+      "entry": "generic_kprobe_setup_event",
+      "execution_path": "checked-sim-c",
+      "b_stock_passed": true,
+      "source_prog_id": 407
+    },
+    {
+      "request_id": 13,
+      "entry": "generic_kprobe_event",
+      "execution_path": "direct-native",
+      "b_stock_passed": false,
+      "source_prog_id": 414
+    },
+    {
+      "request_id": 14,
+      "entry": "generic_kprobe_actions",
+      "execution_path": "direct-native",
+      "b_stock_passed": false,
+      "source_prog_id": 420
+    }
+  ],
+  "image_config": "0d35294bc5c9672013efa8c0c4d4e7d81afe05c0265a9abe81907fe6a1040c83",
+  "archive": "kprog/results/checked-entry-20261121/tetragon-stack-frontier-raw.tar.gz",
+  "archive_bytes": 32882266,
+  "archive_sha256": "5622fb006157fb80e05018ee71448558bbe6d9c71a650a6f91631038d888c121",
+  "earlier_raw": "manifest-runtime-raw.tar.gz retains complete requests1-8; this archive adds complete9-14 and cumulative events",
+  "production_changes": 0,
+  "new_checks": 0
+}
