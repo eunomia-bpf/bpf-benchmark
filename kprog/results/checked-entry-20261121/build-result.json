@@ -1,0 +1,248 @@
+{
+  "at": "2026-11-22T00:55:56.955897+00:00",
+  "source_head_at_record": "4bb7477398abe2c7a2396219f7c152e3c9ed87de",
+  "command": "make -C /workspaces/repository/kprog/libnativeloader all BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader",
+  "build_started": "2026-11-22T00:46:18Z",
+  "build_exit": 0,
+  "build_log_sha256": "829ded9f7bb2914b31e74c650ed0252981656bafbe9a615ad99879eefdbca310",
+  "assets": {
+    "kprog/libnativeloader/Makefile": {
+      "bytes": 3027,
+      "sha256": "795a19260f7749b622967d35f6283b33631d48eac0fabaaed581c4fd5181ea5d"
+    },
+    "kprog/libnativeloader/CMakeLists.txt": {
+      "bytes": 2639,
+      "sha256": "d802ea688f1ab6458cc1403a969281219f0e3dcf8c5938580d133d90444e1308"
+    },
+    "kprog/libnativeloader/src/native_loader.cpp": {
+      "bytes": 125481,
+      "sha256": "47c2171e6117cb1a246ff960876293ca6ee3ee3c32816a35ceba46490319a594"
+    },
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": {
+      "bytes": 132446,
+      "sha256": "b347e3da58bdb7e8bc0be10f2504c78f6be4158e2617b3f63e616bb93e3f9144"
+    },
+    "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader": {
+      "bytes": 2674400,
+      "sha256": "7fb7c208a912fda1cc1ad96b8e872953f50bf9f2fa283a8376e613996f73ef8b"
+    },
+    "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so": {
+      "bytes": 4081016,
+      "sha256": "b1a25c478bf501fe1eb554be8864454ba8d12b1b1f6d7acb61e8b0a2aa140557"
+    },
+    "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a": {
+      "bytes": 7258658,
+      "sha256": "e65ea0b9c435eff439c21b8fc0454ce98f1ce46d8249eee5eabe2474b38b19d1"
+    }
+  },
+  "application_outcome": "First OTel guest startup interrupted to yield shared timing/image to coordinator priority retest; six-app verification remains pending.",
+  "handoff": {
+    "at": "2026-11-22T00:54:57.489241+00:00",
+    "controller_pid": 2054512,
+    "process_group": 2054512,
+    "reason": "yield own shared timing/image resources to coordinator priority OTel retest",
+    "build_exit": 0,
+    "next_dependency_pid": 2151863,
+    "raw_preserved": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps",
+    "verification_outcome": "interrupted during first application startup; no six-app acceptance conclusion"
+  },
+  "successor_pid": 2200510,
+  "dependency_pid": 2151863,
+  "successor_output": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest",
+  "raw_archive": {
+    "path": "startup-handoff-raw.tar.gz",
+    "bytes": 102667,
+    "sha256": "82360ed8d3c2a50bf1736ab938a51a52861ac2a1e8a6d7232f40987d1de7129e",
+    "members": [
+      {
+        "path": "whole-apps/otelcol-ebpf-profiler/started",
+        "bytes": 21,
+        "sha256": "be54c704d9709d32d5acbd07f4280199f0b468ec40060d273fa7343172866263"
+      },
+      {
+        "path": "whole-apps/otelcol-ebpf-profiler/state/session-m1yprk9d/requests/request.lock",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "whole-apps/otelcol-ebpf-profiler/state/session-m1yprk9d/service.log",
+        "bytes": 91,
+        "sha256": "76d942c4bc8f305a1efd52aa421ae12a690a512dfb00766bc3882e98da29d589"
+      },
+      {
+        "path": "whole-apps/otelcol-ebpf-profiler.log",
+        "bytes": 3330,
+        "sha256": "e62c8b2b8e89c5f055c38472a1d78b72832233986357f9e11525b56e20ebb712"
+      }
+    ]
+  },
+  "framework_capture_files": [
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_93c7f775f9290b2c.bpf",
+      "bytes": 2264,
+      "sha256": "edae9244f4c5bf2a47e7e3f73648f535e8b08b0ad2d6ff46b511ee71bbc4b01d"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_b110c88559c1dfe7.bpf",
+      "bytes": 55192,
+      "sha256": "833de7df7b5d98f360844af609b8ee5cf325f8ac13f5b8f5d92cbf0482a40ee6"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_10e4d4f66320bfa6.bpf",
+      "bytes": 10024,
+      "sha256": "a19b3086297f8efe597fc360446407259454683a0b41d74cc2b81c4abd4a9e04"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_7a892400a292f73e.bpf",
+      "bytes": 60744,
+      "sha256": "c71a5dda7d16e45e1a73e1e1f54c70faa0a950233d70cabfc06f9aa93e2e2153"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_62554f6f2fd61846.bpf",
+      "bytes": 60744,
+      "sha256": "7e6a9a5827804e3ed91604f51ddd42a611fc9e5dd896cd94e725b17e9daa586a"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_3e19135cd1a97358.bpf",
+      "bytes": 55192,
+      "sha256": "d048b4fcd5f89f9318d42fcbf25f580519c9607a9772b8abfe8f1c97de659f2b"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_300c6e0edeabc6dd.bpf",
+      "bytes": 43664,
+      "sha256": "c24a6be14e43793b079f7614254439c5c04887b8a005ab00ce9f14b4ed60d8ed"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/target.json",
+      "bytes": 37,
+      "sha256": "fc9a249c8e0c3f774ae96912642978530a74a3e3419cf96fe29ca43a868c72ea"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_3e496a6d8a5e538f.bpf",
+      "bytes": 10024,
+      "sha256": "ead95c9931e2fde9689cb9b533c69e0b76c2b34594d12a3f4406f01c4217364f"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_8ef9bd56d3ac9983.bpf",
+      "bytes": 55776,
+      "sha256": "b903c670cffe9d31ebf51d318a7a6d781cd051c19380072e07dce72fcc436455"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_0bfa54d5b660e5cd.bpf",
+      "bytes": 47152,
+      "sha256": "de3125ee17f147fcb88b21613875448caf19c5050951c5cd877d0214cf787059"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_b263b708b376bd5d.bpf",
+      "bytes": 47152,
+      "sha256": "64d00efc6966696f6c8044e2b3343874319a0ee662b6bdec65a5cf1f1c2a4cb7"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_e371de20040d9187.bpf",
+      "bytes": 62536,
+      "sha256": "c31619a7d3c87392492651816e31ac25a82752d52741fe9e1c59b1ef1827f14a"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_9899246ee617703f.bpf",
+      "bytes": 5464,
+      "sha256": "a4a5a57a57e143644a5eb0680489de6e71a8aa65ac198721e9d2a744e29ca40d"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_2dff09727a1418e0.bpf",
+      "bytes": 59800,
+      "sha256": "8cc9df69170277fd6ba8f4570a962e2ee97f67042210b205e82a9da0f25a0815"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_6b2dc94f90220b82.bpf",
+      "bytes": 448,
+      "sha256": "27d3ae9f344e053ddee0b49484132153359b01c38457b48ebb638d47cb170ae1"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_816c8187a4e1e5e3.bpf",
+      "bytes": 43664,
+      "sha256": "2232bcb911ee7e4e75941aa9d6af6563d7a3d381d520a38e829e1065e052bd01"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_7023c4bdeb61daa0.bpf",
+      "bytes": 2264,
+      "sha256": "bc6586a7463af6ca4ae8aa7aa274405d958ad54efafcb753dd90e98fc5114922"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_938d216f9801e20f.bpf",
+      "bytes": 55776,
+      "sha256": "8c497cad001dae853f3483e74e5700e2eb7347d4d0aed8cf40dae92da9c59af2"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_1e40c5b562bec4b2.bpf",
+      "bytes": 63792,
+      "sha256": "8e0c64d9150a3562b0f402a4076ce9b598860ee701a7b69249083fde8682dcd0"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_0838d252ff59e448.bpf",
+      "bytes": 59800,
+      "sha256": "3107af02cc5a61ab3f0154dcbb6899a0440f06d368d5d31e7af54fe01bf65ec5"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_9de356f667987a85.bpf",
+      "bytes": 10576,
+      "sha256": "a3c987bb8852b1abe9b1618ef1ff45238e2bbfa739a0112f760646a6c665d069"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_58255400910d7827.bpf",
+      "bytes": 16,
+      "sha256": "59f4a931744dcdc62944a018ed3990e666ec6444616418d3b09a82dc5c753d52"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_7e4864ff1af3e9d4.bpf",
+      "bytes": 48,
+      "sha256": "2a71da1e3f8d9dc085e4e632bc2c22d8d27f4deb2f2bdd8b5c273d7e85398e53"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_58255400910d7827.bpf",
+      "bytes": 16,
+      "sha256": "59f4a931744dcdc62944a018ed3990e666ec6444616418d3b09a82dc5c753d52"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_3e33ac60d9b3db85.bpf",
+      "bytes": 62536,
+      "sha256": "f9ccc68c435d899692fd69314c34cfa05095c93e90e79f8c873c9cdc7ccc6268"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_7e4864ff1af3e9d4.bpf",
+      "bytes": 48,
+      "sha256": "2a71da1e3f8d9dc085e4e632bc2c22d8d27f4deb2f2bdd8b5c273d7e85398e53"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_625b1d6d6329573d.bpf",
+      "bytes": 5464,
+      "sha256": "2979b45d257f5352368d682d40eb2845bdecb311403fb66c20a5570469c74560"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_e6f7b9fb8a28b520.bpf",
+      "bytes": 13048,
+      "sha256": "2cfb18fc06d1bfb2c14e357d8b6fa7cd1b00b4e00f847c2e827ebcb8e2aa4a83"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_452eee8553ecc0ab.bpf",
+      "bytes": 10576,
+      "sha256": "1bf39b9d09b410f3a5b94efa296f712f52778f531ddc678d2baf4d50ef2d4185"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1829_6b2dc94f90220b82.bpf",
+      "bytes": 448,
+      "sha256": "27d3ae9f344e053ddee0b49484132153359b01c38457b48ebb638d47cb170ae1"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_c1cf9e2cb6fc98c0.bpf",
+      "bytes": 63792,
+      "sha256": "fb442a3711aa8913d99637abc4261eb9936b4f428462dc6fe4c9200c567fe410"
+    },
+    {
+      "path": "corpus/results/verified-captures-o7el_vto/bpfrejit_1935_f60a24f0260db5de.bpf",
+      "bytes": 13048,
+      "sha256": "be501c11683f3cbf9559e805f5fbf6adf63647ce56cad306f0d5fd18a8d6b850"
+    }
+  ],
+  "new_runtime_checks": 0,
+  "unsafe_native_executions": 0
+}
