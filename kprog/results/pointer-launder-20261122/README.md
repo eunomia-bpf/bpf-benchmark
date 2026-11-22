@@ -87,6 +87,15 @@ count falls. Twelve rise: OTel r10 72→149, r9 118→274, r3 69→172,
 r5 2→22, r11 7→10; BCC b17 0→39, b20 0→26, b22 0→39, b3 0→14,
 b12 0→1, b18 0→1, b24 0→2.
 
-Accept/reject status of every request whose B changed was re-measured on
-both the archived B and the new B: OTel r10 and r9 go REJECTED → ACCEPTED,
-no request changes ACCEPTED → REJECTED.
+Accept/reject status was re-measured on both the archived B and the new B
+for all 37 archived requests (`ab-all-requests.txt`), each loaded with
+`BPF_PROG_LOAD` after resolving the object's map relocations against maps
+built from the request's `kernel.metadata.json`/`generation.metadata.json`
+(a map carrying `value_offset` is relocated with `BPF_PSEUDO_MAP_VALUE`,
+everything else with `BPF_PSEUDO_MAP_FD`). The harness reproduces every
+archived `verify.stdout` verdict, so it is a faithful stand-in for the
+loader's B step.
+
+OTel r10 and r9 go REJECTED → ACCEPTED. No request changes
+ACCEPTED → REJECTED, and the 18 requests the archive records as accepted
+stay accepted.
