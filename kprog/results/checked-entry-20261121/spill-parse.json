@@ -1,0 +1,51 @@
+{
+  "at": "2026-11-22T02:34:01.791651+00:00",
+  "change": "process-local functools.cache on existing pure register_effects(line); current two callers only read returned sets",
+  "production_added": 2,
+  "production_deleted": 0,
+  "new_checks": 0,
+  "new_flags_or_settings": 0,
+  "source": "kprog/x86/whole_word_spills.py",
+  "before_source_sha256": "6a54dc5f34c4b09cb82ec988e51981ac3056df62f21c5e5e5308a39ba4cbbbc1",
+  "after_source_sha256": "5fa0a4490af83349984dbcd685f7f5295fca09b27f0dcb489c8d341bd865727f",
+  "component_result": {
+    "at": "2026-11-22T02:32:29.672514+00:00",
+    "elapsed_seconds": 284.8803973469767,
+    "cpu_seconds": 284.71142912199997,
+    "max_rss_kib": 777652,
+    "output_sha256": "e29da3ecd57ce32b97110309b12c6621236e41163d9bc66f4b00404ae3fb2d0b",
+    "output_bytes": 89440773,
+    "output_byte_identical": true,
+    "lowering_records_identical": true,
+    "cache": {
+      "hits": 56317361,
+      "misses": 287562,
+      "maxsize": null,
+      "currsize": 287562
+    },
+    "source_sha256": "5fa0a4490af83349984dbcd685f7f5295fca09b27f0dcb489c8d341bd865727f",
+    "kind": "component regression replay; no application timing or isolated speedup claim"
+  },
+  "reference": {
+    "commit": "77fab2ccd",
+    "archive": "kprog/results/checked-entry-20261121/tetragon-stack-frontier-raw.tar.gz",
+    "member": "requests/9.success.tar.gz",
+    "input_member": "request/generated/trusted_x86.bpf.before.mir",
+    "expected_output_member": "request/generated/trusted_x86.bpf.packed.mir",
+    "input": {
+      "sha256": "b56e7666acd30bc6f8964922a7ca351bf09297179b28a985e840d310ed70b459",
+      "bytes": 89061225
+    },
+    "expected_output": {
+      "sha256": "e29da3ecd57ce32b97110309b12c6621236e41163d9bc66f4b00404ae3fb2d0b",
+      "bytes": 89440773
+    },
+    "old_guest_stage_interval_seconds": 419.108867
+  },
+  "timing_interpretation": "Old interval is in the guest; replay runs on host CPUs20-23 under shared timing lease. Different environments, no isolated speedup or application performance claim.",
+  "model_effect": "Full packed MIR bytes unchanged and all70pair/3222access lowering records equal except test input pathname. No compiler flags, P, I, stock-verifier predicates or benchmark settings changed.",
+  "existing_replay": "controller2200510 retained; current worker already running before source change keeps loaded code, later requests use memoized parser; no verdict reuse",
+  "archive": "kprog/results/checked-entry-20261121/spill-parse-raw.tar.gz",
+  "archive_bytes": 39504,
+  "archive_sha256": "6ddce8e50ef4b27cacb6121b415b7cd80a08ac80b84e9af7d07bc6eead3d0500"
+}

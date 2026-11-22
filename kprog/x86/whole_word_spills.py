@@ -4,6 +4,7 @@ Inputs must be pre-PEI physical MIR;
 all selected slot accesses must be direct STW32/LDW32 at offset zero.
 """
 import argparse
+from functools import cache
 import json
 from pathlib import Path
 import re
@@ -30,6 +31,7 @@ def machine_blocks(body):
     return blocks
 
 
+@cache
 def register_effects(line):
     read_text, definitions = line, set()
     match = re.match(r'\s*(?:dead )?\$[rw](\d+) =', read_text)

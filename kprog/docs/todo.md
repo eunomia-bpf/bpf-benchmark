@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [x] **C** verify compiler repeated MIR register parsing (this commit, 2026-11-22): two-line process-local memoization of existing pure register_effects(line); actual request9 input89,061,225B yields original89,440,773B byte-exact,70pairs/3222access records equal; replay exit0/cache56,317,361hits. Flags/lowering/verdicts unchanged; no application speed claim. Evidence: kprog/results/checked-entry-20261121/spill-parse.json.
+
 - [ ] **Coordinator P-side follow-up** (C2026-11-22): evaluate the unapplied one-token current-task helper35->158 compatibility candidate, whose source bodies return the same current-task address on the supported64bit ABI. I/B/verifier remain unchanged; existing build/load evidence and any generic correspondence remain outstanding. Production P owned by coordinator; current #35 rejections retained. Evidence and patch: kprog/results/checked-entry-20261121/current-task-helper.json.
 
 - [x] **C** checked-loader manifest parity with restored May29 selection (2026-11-22, this commit; follows 1eb5ffc1b): reuse the existing common resolver for type/map/length/helper fields, remove631-line duplicate and retain four checked metadata fields; net625 production lines removed, canonical static/shared/CLI build0. Actual retained-manifest/helper174 routing witness changes wrong single-object selection to multi; positive helper174 case is diagnostic only, runtime same-model whole-app coverage remains open. Evidence: kprog/results/checked-entry-20261121/selector-integration.json.
