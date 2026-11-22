@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64SelectBranchNative
+
+#check KProgFormal.ClightRefinement.Arm64Select.selected_writer_matches
+#print axioms KProgFormal.ClightRefinement.Arm64Select.selected_writer_matches
