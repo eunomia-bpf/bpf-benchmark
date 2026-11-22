@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-22T01:45:15.586939+00:00",
+  "status": "partial ongoing app capture; not whole-app acceptance or timing",
+  "controller": 2200510,
+  "application": "tetragon/observer",
+  "request_subset": "first eight completed requests only",
+  "requests": 8,
+  "b_generated": 8,
+  "stock_accepted": 1,
+  "checked_installed": 1,
+  "direct_native_installed": 7,
+  "native_invocations": "not established by load receipts",
+  "image_config": "blobs/sha256/0d35294bc5c9672013efa8c0c4d4e7d81afe05c0265a9abe81907fe6a1040c83",
+  "image_archive_updated": "2026-11-22T01:40:25Z",
+  "previous_first_three_apps": "different previous image; each functional exit0/service0requests; never combine with this subset as one-model whole-six coverage",
+  "inputs": "six current image manifests and OCI config/layer identities retained; not claimed identical to lost old stage bytes",
+  "checked_selector_gap": {
+    "cilium_ambiguous_names": 12,
+    "tetragon_ambiguous_names": 6,
+    "fields_ignored_by_checked_selector": [
+      "prog_type",
+      "source_map_prefix",
+      "source_xlated_len",
+      "source_has_helper",
+      "source_lacks_helper"
+    ],
+    "proposal": "reuse the existing May29 common manifest selection rather than add a second set of predicates; frozen trusted header/loader integration opening requested under Notices"
+  },
+  "archive": "kprog/results/checked-entry-20261121/manifest-runtime-raw.tar.gz",
+  "archive_bytes": 12600346,
+  "archive_sha256": "a3ad0b7ffa0febf2150497001495c1739041be3a3eee5d9d193b620e91d58069",
+  "production_changes": 0
+}
