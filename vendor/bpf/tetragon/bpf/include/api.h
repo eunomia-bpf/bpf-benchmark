@@ -284,7 +284,7 @@ static int BPF_FUNC(get_func_arg, void *ctx, __u32 n, __u64 *value);
 static int BPF_FUNC(get_func_ret, void *ctx, __u64 *value);
 static long BPF_FUNC(get_func_ip, void *ctx);
 
-#ifdef MICRO_NATIVE_HELPER_MACROS
+#ifdef MICRO_NATIVE
 #undef map_lookup_elem
 #define map_lookup_elem(map, key) bpf_map_lookup_elem((map), (key))
 #undef map_update_elem

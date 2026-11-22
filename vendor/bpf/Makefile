@@ -177,14 +177,14 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-helpers.h native-helpers.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
+	"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) -include "$(CURDIR)/katran-helpers.h" \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h native_compat.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_ARCH)/vmlinux.h native_compat.h native-helpers.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/$(BPF_ARCH)" \
@@ -200,7 +200,7 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h native-helpers.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
@@ -211,7 +211,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h
+$(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_compat.h native-helpers.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
@@ -221,7 +221,7 @@ $(NATIVE_OUT)/cilium/cilium_placeholders.native.o: cilium_placeholders.c native_
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h $(OTEL_EBPF_DIR)/bpfdefs.h native-helpers.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-Wno-unused-function -Wno-unused-variable \
@@ -232,18 +232,18 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 
-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
+	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
+	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-include "$(CURDIR)/native_compat.h" \
 		-D__TARGET_ARCH_$(BPF_ARCH) -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
@@ -344,7 +344,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_com
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
-	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_TETRAGON \
 		-D__TARGET_ARCH_$(BPF_ARCH) \
 		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/tetragon/bpf" \

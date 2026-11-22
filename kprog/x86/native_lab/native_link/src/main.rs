@@ -1338,103 +1338,6 @@ fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<V
     Ok(w)
 }
 
-/// The call for one helper ID: the tail-call sequence for 12, else a call to the helper.
-fn arm64_helper_id_body(
-    id: u64,
-    map: Option<&str>,
-    lookup: Option<&LookupSiteSpec>,
-    helper_addrs: &HashMap<String, u64>,
-) -> Result<Vec<u32>> {
-    if id == 12 {
-        return build_arm64_tail_call_inline(helper_addrs);
-    }
-    // A lookup on a map named in x0 takes its map's form, as a named call does.
-    if let (1, Some(spec)) = (id, lookup) {
-        if let LookupKind::Array | LookupKind::PerCpuArray = spec.kind {
-            return build_arm64_array_lookup(spec);
-        }
-        let mut words = arm64_helper_call_sequence(resolve_lookup_site_target(spec, "arm64 lookup by helper ID")?)?;
-        words.extend(build_arm64_lookup_call_postprocess(spec)?);
-        return Ok(words);
-    }
-    let name = x86::bpf_helper_name_from_id(id).ok_or_else(|| anyhow!("helper ID {id} is unknown"))?;
-    arm64_helper_call_sequence(resolve_map_call_target(name, map, helper_addrs, &format!("arm64 helper call {name}"))?)
-}
-
-/// An indirect call through xN with a helper ID in xN. When the function writes a
-/// single small constant to xN and that is the nearest write, the call is that
-/// helper. Otherwise the optimizer merged calls of several helpers (or moved the
-/// ID through other registers and the stack): the call dispatches on xN's value at
-/// run time over every helper ID the function loads, `brk` for any other value.
-fn build_arm64_helper_id_call(
-    bytes: &[u8],
-    word_index: usize,
-    n: u32,
-    map: Option<&str>,
-    lookup: Option<&LookupSiteSpec>,
-    helper_addrs: &HashMap<String, u64>,
-) -> Result<Vec<u32>> {
-    let movz = |reg: Option<u32>| -> std::collections::BTreeSet<u64> {
-        bytes
-            .chunks_exact(4)
-            .map(|w| u32::from_le_bytes(w.try_into().unwrap()))
-            .filter(|w| w & 0x7fe0_0000 == 0x5280_0000 && reg.map_or(true, |r| w & 31 == r))
-            .map(|w| u64::from((w >> 5) & 0xffff))
-            .filter(|&id| (1..512).contains(&id))
-            .collect()
-    };
-    if movz(Some(n)).len() == 1 {
-        if let Some(id) = arm64_helper_id_before(bytes, word_index, n) {
-            return arm64_helper_id_body(id, map, lookup, helper_addrs);
-        }
-    }
-    let ids: Vec<u64> = movz(None)
-        .into_iter()
-        .filter(|&id| id == 12 || x86::bpf_helper_name_from_id(id).is_some_and(|h| helper_addrs.contains_key(h)))
-        .collect();
-    if ids.is_empty() {
-        bail!("no helper ID reaches x{n}");
-    }
-    let mut words = Vec::new();
-    let mut to_done = Vec::new();
-    for id in ids {
-        words.push(0xf100_001f | ((id as u32) << 10) | (n << 5)); // cmp xN, #id
-        let skip = words.len();
-        words.push(0); // b.ne next
-        words.extend(arm64_helper_id_body(id, map, lookup, helper_addrs)?);
-        to_done.push(words.len());
-        words.push(0); // b done
-        words[skip] = 0x5400_0001 | (((words.len() - skip) as u32) << 5);
-    }
-    words.push(0xd420_0020); // brk #1: no helper with this ID
-    let done = words.len();
-    for at in to_done {
-        words[at] = 0x1400_0000 | ((done - at) as u32);
-    }
-    Ok(words)
-}
-
-/// The helper ID an indirect call through xN uses: the nearest earlier write of
-/// xN in the function, which must be `mov wN, #id`. A call in between clobbers x0-x18.
-fn arm64_helper_id_before(bytes: &[u8], word_index: usize, n: u32) -> Option<u64> {
-    for i in (0..word_index).rev() {
-        let w = u32::from_le_bytes(bytes[i * 4..i * 4 + 4].try_into().unwrap());
-        let call = w & 0xfc00_0000 == 0x9400_0000 || w & 0xffff_fc1f == 0xd63f_0000;
-        if call && n <= 18 {
-            return None;
-        }
-        let ldst = w & 0x0a00_0000 == 0x0800_0000;
-        let store = ldst && w & (1 << 22) == 0;
-        let branch = w & 0x1c00_0000 == 0x1400_0000;
-        let pair_load = ldst && !store && w & 0x3800_0000 == 0x2800_0000 && (w >> 10) & 31 == n;
-        if (w & 31 == n && !store && !branch) || pair_load {
-            let movz = w & 0x7fe0_0000 == 0x5280_0000;
-            return movz.then(|| u64::from((w >> 5) & 0xffff)).filter(|&id| id < 512);
-        }
-    }
-    None
-}
-
 fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
     const X0: u32 = 0;
     const X1: u32 = 1;
@@ -2208,7 +2111,7 @@ fn rewrite_arm64_pass(
                             blob.extend_from_slice(&insn.to_le_bytes());
                             continue;
                         }
-                        if reloc.target_name == "__native_bpf_tail_call" {
+                        if reloc.target_name == "bpf_tail_call" {
                             for word in build_arm64_tail_call_inline(helper_addrs)? {
                                 append_u32(&mut blob, word);
                             }
@@ -2348,20 +2251,9 @@ fn rewrite_arm64_pass(
                 }
             }
 
-            // An indirect call is a helper called by its ID: the native helper macros
-            // keep the ID in a register. BPF code has no other function pointers.
+            // Helpers are called by name (vendor/bpf/native-helpers.h); P makes no indirect call.
             if !proof_mode && insn & 0xffff_fc1f == 0xd63f_0000 {
-                let n = (insn >> 5) & 31;
-                let lookup = reg_map_names[0].as_ref().filter(|_| is_entry).and_then(|name| {
-                    lookup_sites.iter().find(|s| x86::lookup_site_matches_native_map(s, name))
-                });
-                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, reg_map_names[0].as_deref(), lookup, helper_addrs)
-                    .with_context(|| format!("arm64 indirect call in {} at byte offset {off:#x}", sym.name))?
-                {
-                    append_u32(&mut blob, word);
-                }
-                arm64_call_clobber_map_regs(&mut reg_map_names);
-                continue;
+                bail!("arm64 indirect call in {} at byte offset {off:#x}: helpers are called by name", sym.name);
             }
 
             if a64_is_adr_or_adrp(insn) {

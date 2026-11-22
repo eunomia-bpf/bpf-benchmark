@@ -413,6 +413,9 @@ constexpr const char *kRuntimeCallSymbols[] = {
     "memset",
     "memcpy",
     "memmove",
+    // The C bodies of bpf_ktime_get_ns and bpf_jiffies64 in vendor/bpf/native-helpers.h.
+    "ktime_get_mono_fast_ns",
+    "jiffies_64",
 };
 
 constexpr const char *kTypedHelperSymbols[] = {
