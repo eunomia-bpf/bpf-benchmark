@@ -271,4 +271,183 @@ theorem native_other_value (size : X86.Size) (lhs value : BitVec 64) (n : Nat)
     (if size.bits ≤ n then cfU else lhs.getLsbD (size.bits - n)) else ofValue) = ofValue
   simp only [other, ite_false]
 
+
+private theorem count_bound (rhs : BitVec 64) (size : X86.Size) :
+    X86.Flags.shiftCount size (rhs.setWidth 8) < 64 := by
+  cases size <;> simp only [X86.Flags.shiftCount] <;> omega
+
+/-- Every positive-count original SHL route passes the exact OF branch and reaches
+its original continuation, with the reached heap and temporaries selected by count. -/
+theorem route_through_overflow (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv aluBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_alu_result))
+    (shiftBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._kprog_x86_shl_result = some shiftBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv shiftBlock =
+        some (.Internal X86_program_profile_bpf.f_kprog_x86_shl_result))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_alu_result = none)
+    (lhs rhs : BitVec 64) (size : X86.Size)
+    (left : le.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs))
+    (right : le.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (k : CC.Cont) (m : CC.Mem)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (old : BitVec 8)
+    (heapBinding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (byte : CC.Mem.load .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset) =
+      some (.Vint (old.setWidth 32)))
+    (effectiveBlock bitsBlock maskBlock : CC.Block)
+    (effectiveBinding :
+      CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some effectiveBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv effectiveBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (bitsBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_bits = some bitsBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv bitsBlock = some (.Internal X86_program_profile_bpf.f_x86_width_bits))
+    (maskBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_mask = some maskBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv maskBlock = some (.Internal X86_program_profile_bpf.f_x86_width_mask))
+    (widthsUnshadowed : e.get X86_program_profile_bpf._x86_width_effective = none ∧
+      e.get X86_program_profile_bpf._x86_width_bits = none ∧
+      e.get X86_program_profile_bpf._x86_width_mask = none)
+    (countBlock : CC.Block)
+    (countBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_shift_count = some countBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv countBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_shift_count))
+    (countUnshadowed : e.get X86_program_profile_bpf._x86_shift_count = none)
+    (nonzero : X86.Flags.shiftCount size (rhs.setWidth 8) ≠ 0)
+    (zfBlock : CC.Block) (zfOffset : CC.Integers.Ptrofs) (middle : CC.Mem)
+    (zfPointer : CC.Mem.load CC.Mptr m bindingBlock 128 = some (.Vptr zfBlock zfOffset))
+    (zfStored : CC.Mem.store .Mint8unsigned m zfBlock (CC.Integers.Ptrofs.unsigned zfOffset)
+      (X86ShiftFlagZF.bit (X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8)))) = some middle)
+    (sfBlock : CC.Block) (sfOffset : CC.Integers.Ptrofs) (sfHeap : CC.Mem)
+    (sfPointer : CC.Mem.load CC.Mptr middle bindingBlock 136 = some (.Vptr sfBlock sfOffset))
+    (sfStored : CC.Mem.store .Mint8unsigned middle sfBlock (CC.Integers.Ptrofs.unsigned sfOffset)
+      (X86ShiftFlagSF.bit (X86.Value.trunc size ((X86.Value.trunc size lhs) <<<
+          X86.Flags.shiftCount size (rhs.setWidth 8))) ((1#64) <<< (size.bits - 1))) = some sfHeap)
+    (writeBlock : CC.Block) (writeOffset : CC.Integers.Ptrofs) (cfHeap : CC.Mem)
+    (cfPointer : CC.Mem.load CC.Mptr sfHeap bindingBlock 120 = some (.Vptr writeBlock writeOffset))
+    (cfStored : CC.Mem.store .Mint8unsigned sfHeap writeBlock (CC.Integers.Ptrofs.unsigned writeOffset)
+      (X86ShiftFlagCF.byte (X86ShiftFlagCF.payload (X86.Value.trunc size lhs) size.bits (X86.Flags.shiftCount size (rhs.setWidth 8)))) = some cfHeap)
+    (ofBlock readSFBlock readCFBlock : CC.Block)
+    (ofOffset readSFOffset readCFOffset : CC.Integers.Ptrofs) (sf cf : Bool) (after : CC.Mem)
+    (ofPointer : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.load CC.Mptr cfHeap bindingBlock 144 = some (.Vptr ofBlock ofOffset))
+    (readSFPointer : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.load CC.Mptr cfHeap bindingBlock 136 = some (.Vptr readSFBlock readSFOffset))
+    (readCFPointer : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.load CC.Mptr cfHeap bindingBlock 120 = some (.Vptr readCFBlock readCFOffset))
+    (readSFByte : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.load .Mint8unsigned cfHeap readSFBlock (CC.Integers.Ptrofs.unsigned readSFOffset) = some (flag sf))
+    (readCFByte : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.load .Mint8unsigned cfHeap readCFBlock (CC.Integers.Ptrofs.unsigned readCFOffset) = some (flag cf))
+    (ofStored : X86.Flags.shiftCount size (rhs.setWidth 8) = 1 →
+      CC.Mem.store .Mint8unsigned cfHeap ofBlock (CC.Integers.Ptrofs.unsigned ofOffset)
+        (xorValue sf cf) = some after) :
+    InternalRun ge ((((((((3 + X86ShiftLeftSite.length size + 1) + 11 + 37) + X86ShiftFlagWidths.length size) + 25) + 10) + 6) + 11) + (if X86.Flags.shiftCount size (rhs.setWidth 8) = 1 then 17 else 1))
+      (.State function X86ShiftLeftRoute.dispatch k e le m)
+      (.State function .Sskip (X86ShiftFlagZF.continuation (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k)))) e
+        (if X86.Flags.shiftCount size (rhs.setWidth 8) = 1 then
+          afterTemps (X86ShiftFlagCF.afterTemps (X86ShiftFlagCF.calculationTemps (X86ShiftFlagSF.afterTemps (X86ShiftFlagZF.afterTemps (X86ShiftFlagInputs.afterTemps
+          (X86ShiftFlagWidths.afterTemps
+            (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+              (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+              cfBlock offset old)) size) lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<< X86.Flags.shiftCount size (rhs.setWidth 8))) size) zfBlock zfOffset) sfBlock sfOffset) (X86.Value.trunc size lhs) size
+          ⟨X86.Flags.shiftCount size (rhs.setWidth 8), count_bound rhs size⟩) writeBlock writeOffset) (.Vptr ofBlock ofOffset)
+            (.Vptr readSFBlock readSFOffset) (.Vptr readCFBlock readCFOffset) sf cf
+        else (X86ShiftFlagCF.afterTemps (X86ShiftFlagCF.calculationTemps (X86ShiftFlagSF.afterTemps (X86ShiftFlagZF.afterTemps (X86ShiftFlagInputs.afterTemps
+          (X86ShiftFlagWidths.afterTemps
+            (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+              (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+              cfBlock offset old)) size) lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<< X86.Flags.shiftCount size (rhs.setWidth 8))) size) zfBlock zfOffset) sfBlock sfOffset) (X86.Value.trunc size lhs) size
+          ⟨X86.Flags.shiftCount size (rhs.setWidth 8), count_bound rhs size⟩) writeBlock writeOffset))
+        (if X86.Flags.shiftCount size (rhs.setWidth 8) = 1 then after else cfHeap)) := by
+  have routed := X86ShiftFlagCF.route_to_overflow ge aluBlock shiftBlock binding shiftBinding
+    function e le unshadowed lhs rhs size left right operation width k m
+    bindingsLayout valueLayout bindingBlock cfBlock offset old heapBinding pointer byte
+    effectiveBlock bitsBlock maskBlock effectiveBinding bitsBinding maskBinding widthsUnshadowed
+    countBlock countBinding countUnshadowed nonzero zfBlock zfOffset middle zfPointer zfStored
+    sfBlock sfOffset sfHeap sfPointer sfStored writeBlock writeOffset cfHeap cfPointer cfStored
+  let prepared := X86ShiftFlagInputs.afterTemps
+          (X86ShiftFlagWidths.afterTemps
+            (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+              (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size))
+              cfBlock offset old)) size) lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<< X86.Flags.shiftCount size (rhs.setWidth 8))) size
+  let reached := X86ShiftFlagSF.afterTemps
+    (X86ShiftFlagZF.afterTemps prepared zfBlock zfOffset) sfBlock sfOffset
+  let n : Fin 64 := ⟨X86.Flags.shiftCount size (rhs.setWidth 8), count_bound rhs size⟩
+  have incomingBinding : reached.get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    dsimp only [reached]
+    rw [(X86ShiftFlagSF.temps _ sfBlock sfOffset).2 _ (by decide +kernel)]
+    rw [(X86ShiftFlagZF.temps _ zfBlock zfOffset).2 _ (by decide +kernel)]
+    dsimp only [prepared]
+    rw [X86ShiftFlagInputs.frame _ lhs rhs _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [X86ShiftFlagWidths.frame _ size _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftClassify.temps _).2 _ (by decide +kernel)]
+    rw [(X86ShiftLeftCarry.temps _ cfBlock offset old).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    rw [(X86ShiftLeftSite.temps le (X86ShiftLeft.result lhs rhs size)).2.2
+      _ (by decide +kernel) (by decide +kernel)]
+    exact heapBinding
+  have values := X86ShiftFlagInputs.temps
+    (X86ShiftFlagWidths.afterTemps
+      (X86ShiftLeftClassify.afterTemps (X86ShiftLeftCarry.afterTemps
+        (X86ShiftLeftSite.afterTemps le (X86ShiftLeft.result lhs rhs size)) cfBlock offset old)) size)
+      lhs rhs (X86.Value.trunc size ((X86.Value.trunc size lhs) <<< X86.Flags.shiftCount size (rhs.setWidth 8))) size
+  have incomingCount : reached.get X86_program_profile_bpf.___x86_sh_count = some (.Vint (BitVec.ofNat 32 n.val)) := by
+    dsimp only [reached]
+    rw [(X86ShiftFlagSF.temps _ sfBlock sfOffset).2 _ (by decide +kernel)]
+    rw [(X86ShiftFlagZF.temps _ zfBlock zfOffset).2 _ (by decide +kernel)]
+    simpa only [X86ShiftFlagInputs.native_count, n] using values.2.2.2.1
+
+  let finalTemps := X86ShiftFlagCF.afterTemps
+    (X86ShiftFlagCF.calculationTemps reached (X86.Value.trunc size lhs) size n)
+    writeBlock writeOffset
+  have keptBinding : finalTemps.get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    dsimp only [finalTemps]
+    rw [(X86ShiftFlagCF.temps _ writeBlock writeOffset).2 _ (by decide +kernel)]
+    rw [(X86ShiftFlagCF.calculation_temps _ _ size n).2 _ (by decide +kernel)]
+    exact incomingBinding
+  have keptCount : finalTemps.get X86_program_profile_bpf.___x86_sh_count =
+      some (.Vint (BitVec.ofNat 32 n.val)) := by
+    dsimp only [finalTemps]
+    rw [(X86ShiftFlagCF.temps _ writeBlock writeOffset).2 _ (by decide +kernel)]
+    rw [(X86ShiftFlagCF.calculation_temps _ _ size n).2 _ (by decide +kernel)]
+    exact incomingCount
+  by_cases one : X86.Flags.shiftCount size (rhs.setWidth 8) = 1
+  · simp only [ite_eq_left one]
+    have countOne : finalTemps.get X86_program_profile_bpf.___x86_sh_count =
+        some (.Vint (1#32)) := by
+      have codeOne : BitVec.ofNat 32 n.val = (1#32) := by
+        change BitVec.ofNat 32 (X86.Flags.shiftCount size (rhs.setWidth 8)) = (1#32)
+        rw [one]
+      rw [codeOne] at keptCount
+      exact keptCount
+    have wrote := one_internal ge bindingsLayout valueLayout function e finalTemps
+      (X86ShiftFlagZF.continuation (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k)))) cfHeap after bindingBlock ofBlock readSFBlock readCFBlock
+      ofOffset readSFOffset readCFOffset sf cf keptBinding (ofPointer one)
+      (readSFPointer one) (readCFPointer one) (readSFByte one) (readCFByte one)
+      (ofStored one) countOne
+    exact routed.trans wrote
+  · simp only [ite_eq_right one]
+    have codeOther : BitVec.ofNat 32 n.val ≠ (1#32) := by
+      intro same
+      have bounded : n.val < 2 ^ 32 := by have bound := n.isLt; omega
+      have values := congrArg BitVec.toNat same
+      simp only [BitVec.toNat_ofNat, Nat.mod_eq_of_lt bounded] at values
+      exact one values
+    have skipped := skip_other ge function e finalTemps
+      (X86ShiftFlagZF.continuation (X86ShiftFlagWidths.continuation (.Kswitch (X86ShiftLeftCarry.continuation k)))) cfHeap
+      (BitVec.ofNat 32 n.val) codeOther keptCount
+    exact routed.trans skipped
+
 end KProgFormal.ClightRefinement.X86ShiftFlagOF

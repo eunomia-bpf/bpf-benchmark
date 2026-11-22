@@ -309,6 +309,17 @@ record source identity, offset, both branches, frames and native OF values at
 existing budgets and inherited axioms. Whole-route composition, PF storage,
 writeback and entry/world correspondence remain open.
 
+The universal SHL dispatch route now composes both original overflow branches
+with the reached carry heap. Count one takes 214/226/238/238 silent steps for
+64/32/16/8-bit operands; other positive counts take 198/210/222/222. The theorem
+derives the binding and masked count from the actual preceding temporary maps.
+Count-one pointer/flag-byte loads and the overflow store use the genuine reached
+heap as explicit operational premises; the other branch retains that whole heap
+and temporary map. The exact result, locals and enclosing continuation are
+preserved. Parity, writeback and the entry-world relation remain open.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-through-of.log.gz)
+records all twelve public declarations under the default budgets.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
