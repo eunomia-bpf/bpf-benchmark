@@ -36,7 +36,7 @@ fn truncate_bpf_obj_name(name: &str) -> String {
     name.bytes().take(15).map(char::from).collect()
 }
 
-fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
+pub(super) fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
     let Some(source_map_name) = spec.map_name.as_deref() else {
         return false;
     };
@@ -126,11 +126,7 @@ fn select_lookup_site(
         );
     }
 
-    if let Some((idx, spec)) = lookup_sites.iter().enumerate().find(|(idx, _)| !used[*idx]) {
-        used[idx] = true;
-        return Ok((idx.to_string(), Some(idx), spec.clone()));
-    }
-
+    // The map is unknown at this call: the helper dispatches on it.
     if let Some(spec) = generic_lookup_site(generic_target_addr, None) {
         return Ok(("generic".to_string(), None, spec));
     }
@@ -1115,7 +1111,6 @@ pub(super) fn rewrite_x86(
     map_addrs: &HashMap<String, u64>,
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
-    update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
@@ -1158,7 +1153,6 @@ pub(super) fn rewrite_x86(
         .get("bpf_map_lookup_elem")
         .copied()
         .unwrap_or(0);
-    let mut update_call_counter: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
 
@@ -1549,45 +1543,6 @@ pub(super) fn rewrite_x86(
                                 resolved_helper_call_sites.insert(site_key);
                                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                 continue;
-                            }
-                        }
-                    }
-
-                    if name == "bpf_map_update_elem" {
-                        let ordinal = update_call_counter;
-                        update_call_counter += 1;
-                        if let Some(spec) = update_sites.get(ordinal) {
-                            match spec.kind {
-                                UpdateKind::Array | UpdateKind::PerCpuArray => {
-                                    for ib in build_x86_array_update(spec)? {
-                                        push_x86_synthetic(
-                                            &mut local,
-                                            &mut kinds,
-                                            &mut insn_local_ip,
-                                            &mut next_synthetic_ip,
-                                            ib,
-                                        )?;
-                                    }
-                                    resolved_helper_call_sites.insert(site_key);
-                                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                                    continue;
-                                }
-                                UpdateKind::Call => {
-                                    let helper_addr = require_call_target(
-                                        spec.target_addr,
-                                        &format!("x86 update-site {ordinal}"),
-                                    )?;
-                                    push_x86_helper_call_reloc(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        local_ip,
-                                        helper_addr,
-                                    )?;
-                                    resolved_helper_call_sites.insert(site_key);
-                                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                                    continue;
-                                }
                             }
                         }
                     }
@@ -3852,29 +3807,6 @@ fn build_x86_movabs_reg(reg: Register, imm: u64) -> Result<Instruction> {
     declared_bytes(&bytes)
 }
 
-fn x86_sign_extended_imm32(imm: u64) -> Option<i32> {
-    let v = imm as i32;
-    if (v as i64) as u64 == imm {
-        Some(v)
-    } else {
-        None
-    }
-}
-
-fn append_x86_mov_reg_imm64(bytes: &mut Vec<u8>, reg: Register, imm: u64) -> Result<()> {
-    let (low, high) = x86_gpr64_encoding(reg)?;
-    let rex = 0x48 | if high { 0x01 } else { 0x00 };
-    if let Some(imm32) = x86_sign_extended_imm32(imm) {
-        bytes.extend_from_slice(&[rex, 0xC7, 0xC0 | low]);
-        bytes.extend_from_slice(&imm32.to_le_bytes());
-    } else {
-        bytes.push(rex);
-        bytes.push(0xB8 + low);
-        bytes.extend_from_slice(&imm.to_le_bytes());
-    }
-    Ok(())
-}
-
 fn append_x86_scale_rax(bytes: &mut Vec<u8>, elem_size: u32) -> Result<()> {
     if elem_size == 0 {
         bail!("array lookup elem_size must be non-zero");
@@ -4023,18 +3955,6 @@ fn append_x86_add_rax_imm(bytes: &mut Vec<u8>, key_offset: u32) {
     }
 }
 
-fn append_x86_add_rdi_imm(bytes: &mut Vec<u8>, offset: u32) {
-    if offset == 0 {
-        return;
-    }
-    if offset <= 0x7f {
-        bytes.extend_from_slice(&[0x48, 0x83, 0xC7, offset as u8]);
-    } else {
-        bytes.extend_from_slice(&[0x48, 0x81, 0xC7]);
-        bytes.extend_from_slice(&offset.to_le_bytes());
-    }
-}
-
 fn append_x86_cmp_eax_imm(bytes: &mut Vec<u8>, imm: u32) {
     if imm <= 0x7f {
         bytes.extend_from_slice(&[0x83, 0xF8, imm as u8]);
@@ -4042,34 +3962,6 @@ fn append_x86_cmp_eax_imm(bytes: &mut Vec<u8>, imm: u32) {
         bytes.push(0x3D);
         bytes.extend_from_slice(&imm.to_le_bytes());
     }
-}
-
-fn append_x86_array_value_ptr_rdi(
-    bytes: &mut Vec<u8>,
-    elem_size: u32,
-    value_offset: u32,
-) -> Result<()> {
-    if let Some(scale) = x86_sib_scale(elem_size) {
-        bytes.extend_from_slice(&[0x48, 0x8D, 0xBC, (scale << 6) | 0x07]);
-        bytes.extend_from_slice(&value_offset.to_le_bytes());
-        return Ok(());
-    }
-
-    append_x86_scale_rax(bytes, elem_size)?;
-    bytes.extend_from_slice(&[0x48, 0x01, 0xC7]); // add rdi, rax
-    append_x86_add_rdi_imm(bytes, value_offset);
-    Ok(())
-}
-
-fn append_x86_copy_value_to_rdi(bytes: &mut Vec<u8>, value_size: u32) -> Result<()> {
-    match value_size {
-        1 => bytes.extend_from_slice(&[0x8A, 0x02, 0x88, 0x07]), // mov al,[rdx]; mov [rdi],al
-        2 => bytes.extend_from_slice(&[0x66, 0x8B, 0x02, 0x66, 0x89, 0x07]),
-        4 => bytes.extend_from_slice(&[0x8B, 0x02, 0x89, 0x07]),
-        8 => bytes.extend_from_slice(&[0x48, 0x8B, 0x02, 0x48, 0x89, 0x07]),
-        _ => bail!("unsupported x86 array update value size: {value_size}"),
-    }
-    Ok(())
 }
 
 fn append_x86_jcc_rel8(bytes: &mut Vec<u8>, opcode: u8) -> usize {
@@ -4088,70 +3980,6 @@ fn patch_x86_rel8(bytes: &mut [u8], disp_offset: usize, target: usize) -> Result
     })?;
     bytes[disp_offset] = disp_i8 as u8;
     Ok(())
-}
-
-fn append_x86_mov_rax_i32(bytes: &mut Vec<u8>, value: i32) -> Result<()> {
-    append_x86_mov_reg_imm64(bytes, Register::RAX, value as i64 as u64)
-}
-
-fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
-    if !matches!(spec.kind, UpdateKind::Array | UpdateKind::PerCpuArray) {
-        bail!("update kind {:?} is not an array-style inline", spec.kind);
-    }
-    if spec.max_entries == 0 {
-        bail!("array update max_entries must be non-zero");
-    }
-    if spec.elem_size == 0 {
-        bail!("array update elem_size must be non-zero");
-    }
-    if !matches!(spec.value_size, 1 | 2 | 4 | 8) {
-        bail!("array update value_size must be 1, 2, 4, or 8");
-    }
-    if matches!(spec.kind, UpdateKind::PerCpuArray) && spec.percpu_base_addr == 0 {
-        bail!("percpu array update missing this_cpu_off address");
-    }
-
-    let mut body = Vec::new();
-    append_x86_array_value_ptr_rdi(&mut body, spec.elem_size, spec.value_offset)?;
-    if matches!(spec.kind, UpdateKind::PerCpuArray) {
-        body.extend_from_slice(&[0x48, 0x8B, 0x3F]); // mov rdi, [rdi]
-        body.extend_from_slice(&[0x65, 0x48, 0x03, 0x3C, 0x25]); // add rdi, gs:[disp32]
-        body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
-    }
-    append_x86_copy_value_to_rdi(&mut body, spec.value_size)?;
-    body.extend_from_slice(&[0x31, 0xC0]); // xor eax, eax
-
-    let mut bytes = Vec::new();
-    bytes.extend_from_slice(&[0x8B, 0x06]); // mov eax, [rsi]
-    append_x86_cmp_eax_imm(&mut bytes, spec.max_entries);
-    let bounds_jmp = append_x86_jcc_rel8(&mut bytes, 0x73); // jae bounds
-    bytes.extend_from_slice(&[0x83, 0xF9, 0x01]); // cmp ecx, BPF_NOEXIST
-    let eexist_jmp = append_x86_jcc_rel8(&mut bytes, 0x74); // je eexist
-    bytes.extend_from_slice(&[0x83, 0xF9, 0x02]); // cmp ecx, BPF_EXIST
-    let invalid_jmp = append_x86_jcc_rel8(&mut bytes, 0x77); // ja invalid
-    bytes.extend_from_slice(&body);
-    let success_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let bounds_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -7)?; // -E2BIG
-    let bounds_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let eexist_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -17)?; // -EEXIST
-    let eexist_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let invalid_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -22)?; // -EINVAL
-
-    let end_off = bytes.len();
-    patch_x86_rel8(&mut bytes, bounds_jmp, bounds_off)?;
-    patch_x86_rel8(&mut bytes, eexist_jmp, eexist_off)?;
-    patch_x86_rel8(&mut bytes, invalid_jmp, invalid_off)?;
-    patch_x86_rel8(&mut bytes, success_end_jmp, end_off)?;
-    patch_x86_rel8(&mut bytes, bounds_end_jmp, end_off)?;
-    patch_x86_rel8(&mut bytes, eexist_end_jmp, end_off)?;
-
-    declared_byte_chunks(&bytes)
 }
 
 #[cfg(test)]
@@ -4206,7 +4034,6 @@ mod tests {
                 &HashMap::new(),
                 &[],
                 &HashMap::new(),
-                &[],
                 true,
                 preserve,
                 false,
