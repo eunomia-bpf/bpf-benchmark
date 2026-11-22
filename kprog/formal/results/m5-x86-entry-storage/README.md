@@ -32,3 +32,19 @@ The exact updated source plus the public type/axiom query passed in 10.52s at
 one worker and the original proof budgets. The inherited CompCert external/asm
 semantic axioms appear in this execution composition; no new axioms were added.
 See [the output](allocated-writer.txt).
+
+## Other caller blocks
+
+Both writable and allocated writer theorems additionally retain the complete
+raw contents of every unaffected block. The allocated form proves exact bytes
+and Cur/Max permission maps for every old caller block except the register-table
+block. Existing selected/other-register results still cover the table's modeled
+cells. This frames separately allocated flags, memory and SIMD storage when their
+block identities satisfy the stated separation. It does not assume a successful
+load or discard undefined bytes.
+
+The exact source and both public type/axiom queries passed in 9.23s with the
+original proof budgets and a 32 GiB process cap. See [the output](framed-writer.txt).
+The initial arithmetic projection-normalization diagnostic is retained in raw
+`framed-writer.txt`; the successful run is `framed-writer-pass.txt` there.
+No axioms or intermediate-store premises were added.

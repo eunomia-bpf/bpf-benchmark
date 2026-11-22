@@ -264,7 +264,9 @@ theorem byte_writer_writable (ge : CC.CGenv)
           (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) (0#8) index cellsBlock cellsOffset) final) ∧
       RegistersRepresent addresses origins final cellsBlock cellsOffset
         (cpu.setReg .b (X86.GPR.ofIndex index) next (decide (shift.setWidth 32 = (8#32)))) ∧
-      final.access = m.access ∧ final.nextblock = m.nextblock := by
+      final.access = m.access ∧ final.nextblock = m.nextblock ∧
+      (∀ block, block ≠ localBlock → block ≠ cellsBlock →
+        CC.PMap.get block final.contents = CC.PMap.get block m.contents) := by
   obtain ⟨after, stored⟩ := source_store_exists m CC.Mptr localBlock 0 (.Vlong old)
     localWritable
   have localByte : CC.Mem.validAccess after .Mint8unsigned localBlock
@@ -301,12 +303,16 @@ theorem byte_writer_writable (ge : CC.CGenv)
     widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
     localBlock after declared stored currentTag callerBlocks ordinary byteMem byteStored
     bindingSeparate middle final wordStored tagStored addresses origins cpu represented
-  refine ⟨final, actual.1, actual.2, ?_, ?_⟩
+  refine ⟨final, actual.1, actual.2, ?_, ?_, ?_⟩
   · exact (CC.Mem.store_access tagStored).trans ((CC.Mem.store_access wordStored).trans
       ((CC.Mem.store_access byteStored).trans (CC.Mem.store_access stored)))
   · exact (CC.Mem.store_nextblock tagStored).trans ((CC.Mem.store_nextblock wordStored).trans
       ((CC.Mem.store_nextblock byteStored).trans (CC.Mem.store_nextblock stored)))
-
+  · intro block notLocal notCells
+    rw [CC.Mem.store_contents tagStored, CC.PMap.gso _ _ _ _ notCells.symm,
+      CC.Mem.store_contents wordStored, CC.PMap.gso _ _ _ _ notCells.symm,
+      CC.Mem.store_contents byteStored, CC.PMap.gso _ _ _ _ notLocal.symm,
+      CC.Mem.store_contents stored, CC.PMap.gso _ _ _ _ notLocal.symm]
 
 /-- The imported handler allocates its actual nine typed local declarations. -/
 def writerAllocation (ce : CC.CompositeEnv) (m : CC.Mem) : CC.Env × CC.Mem :=
@@ -537,7 +543,10 @@ theorem byte_writer_allocated (ge : CC.CGenv)
         (writerAllocation ge.genv_cenv caller).1 finalTemps final) ∧
       RegistersRepresent addresses origins final cellsBlock cellsOffset
         (cpu.setReg .b (X86.GPR.ofIndex index) next (decide (shift.setWidth 32 = (8#32)))) ∧
-      final.access = m.access ∧ final.nextblock = m.nextblock := by
+      final.access = m.access ∧ final.nextblock = m.nextblock ∧
+      (∀ block, block.toNat < caller.nextblock.toNat → block ≠ cellsBlock →
+        CC.PMap.get block final.contents = CC.PMap.get block m.contents ∧
+        CC.PMap.get block final.access = CC.PMap.get block m.access) := by
   obtain ⟨localBlock, declared, callerBlocks, localWritable, wordWritable, tagWritable⟩ :=
     writer_entry_storage ge.genv_cenv gprLayout caller m bindingBlock cellsBlock
       bindingOld cellsOld access _ _ cellWritable tagWritable
@@ -548,13 +557,22 @@ theorem byte_writer_allocated (ge : CC.CGenv)
       X86_program_profile_bpf._x86_width_effective = none := by
     simpa only [CC.emptyEnv, CC.PTree.gempty] using
       CC.allocVariables_env_other (writer_allocation_valid ge.genv_cenv caller) notLocal
-  obtain ⟨final, run, registers, finalAccess, finalNext⟩ := byte_writer_writable
+  obtain ⟨final, run, registers, finalAccess, finalNext, otherContents⟩ := byte_writer_writable
     ge bindingsLayout gprLayout cellLayout X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
     (writerAllocation ge.genv_cenv caller).1 le k m
     bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
     widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
     localBlock declared currentTag callerBlocks ordinary bindingSeparate
     localWritable wordWritable tagWritable addresses origins cpu represented
-  exact ⟨final, _, run, registers, finalAccess, finalNext⟩
+  refine ⟨final, _, run, registers, finalAccess, finalNext, ?_⟩
+  intro block oldBlock notCells
+  have fresh := ((allocated_local_storage
+    (writer_allocation_valid ge.genv_cenv caller)).1 _ _ declared).1
+  dsimp only at fresh
+  have notLocal : block ≠ localBlock := by
+    intro same
+    have encoded := congrArg CC.Positive.toNat same
+    omega
+  exact ⟨otherContents block notLocal notCells, congrArg (CC.PMap.get block) finalAccess⟩
 
 end KProgFormal.ClightRefinement.X86RegisterView
