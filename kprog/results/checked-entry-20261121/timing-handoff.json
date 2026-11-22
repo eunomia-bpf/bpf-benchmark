@@ -1,0 +1,53 @@
+{
+  "at": "2026-11-22T02:39:48.761954+00:00",
+  "status": "enforced queue handoff, current app continues; resume marker pending",
+  "instruction_source": "Coordinator2026-11-22T02:30Z, timing on CPUs0-7 first",
+  "mechanism": "SIGSTOP only existing parent for-loop, with original-process pidfd held by a separate waiter; SIGCONT only after specified done path exists",
+  "current": {
+    "at": "2026-11-22T02:38:28.636025+00:00",
+    "instruction": "allow running Tetragon app to finish; next checked-corpus-all app only after coordinator otel-rerun2.done exists",
+    "loop_pid": 2211359,
+    "current_app_pid": 2216587,
+    "current_qemu_pid": 2269823,
+    "gate": "/workspaces/kprog-raw/coordinator/restore-529/otel-rerun2.done",
+    "gate_exists_at_setup": false,
+    "loop_fds8_9": {
+      "8": null,
+      "9": null
+    },
+    "controller": 2200510,
+    "raw": "/workspaces/kprog-raw/C/checked-entry-20261121/timing-handoff-20261122T023828Z",
+    "watcher_pid": 2291676
+  },
+  "observed": {
+    "at": "2026-11-22T02:39:00.177537+00:00",
+    "states": {
+      "parent_loop": {
+        "pid": 2211359,
+        "state": "State:\tT (stopped)"
+      },
+      "current_app": {
+        "pid": 2216587,
+        "state": "State:\tS (sleeping)"
+      },
+      "qemu": {
+        "pid": 2269823,
+        "state": "State:\tS (sleeping)"
+      },
+      "watcher": {
+        "pid": 2291676,
+        "state": "State:\tS (sleeping)"
+      }
+    },
+    "next_tracee_started": false,
+    "next_katran_started": false,
+    "gate_exists": false,
+    "current_app_exit_file": false
+  },
+  "locks": "Parent loop and waiter hold no timing/image leases; current app releases its own leases on natural completion. No new app is launched during marker wait.",
+  "outputs": "Existing app result/raw files and original queue script unchanged. Snapshot captures setup only, not future app completion or coordinator completion.",
+  "archive": "kprog/results/checked-entry-20261121/timing-handoff-raw.tar.gz",
+  "archive_bytes": 1285,
+  "archive_sha256": "711099952796f646b19bdad2b33975c5be634e04212f1dd31f421fccd4a059f3",
+  "production_code_changes": 0
+}
