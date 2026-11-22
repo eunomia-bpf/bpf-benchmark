@@ -343,6 +343,16 @@ breaks, register writeback and the entry-world relation remain open.
 The [focused receipt](../results/kprog_verification_20261107/x86-shift-through-pf.log.gz)
 records twelve public declarations under the default budgets.
 
+The original width-loop exit, case break, switch exit and outer flag-loop exit
+now compose in eight silent transitions to the actual writer. They retain the
+complete heap, locals and temporary map. The universal SHL route reaches that
+writer in 239/251/263/263 steps for count one at 64/32/16/8-bit widths, and in
+223/235/247/247 steps for other positive counts, through all five original flag
+stages. The real source continuations identify the exact writer fragment;
+register writeback and the entry-world relation remain open.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-exit.log.gz)
+records all three public declarations under the default budgets.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
