@@ -64,3 +64,47 @@ Class D: R* invalid mem access 'scalar' on fentry/tracepoint programs
   change. Inspecting it requires loading through libbpf (the loader's
   path); the raw BPF_PROG_LOAD harness used here reads ctx arguments as
   scalars without BTF, and vmlinux BTF attach ids differ from the guest's.
+--- Correction and new measurement, 2026-11-22T02:4x Z ---
+
+The load harness above under-reported: map creation needs the real
+attributes, not the flat ones it used. Three facts it now honours, each
+confirmed against the stock verifier's own error path:
+  - a map of maps (type 13) needs the inner map's fd and the inner map's
+    own type/sizes; without it, outer creation is EINVAL;
+  - LRU_HASH / LRU_PERCPU_HASH (types 9-12) take BPF_F_NO_PREALLOC;
+    with prealloc they are ENOTSUPP ("lru && !prealloc");
+  - LPM_TRIE (type 11) requires BPF_F_NO_PREALLOC and a non-zero
+    max_entries (kernel/bpf/lpm_trie.c, the alloc check).
+With those, the harness reproduces 13 of 14 archived OTel verdicts. The
+one difference is r3, which the archive loads through libbpf with BTF and
+which the harness rejects at the 1,000,000-instruction complexity limit.
+It reproduces 13 of 25 BCC verdicts; the other 12 are the fentry/tracepoint
+rows that need attach_btf_id, plus b14.
+
+Class A, measured. Replacing the helper id 35 with 158 in the archived B
+and reloading (nothing else changed) gives:
+
+  r1  prog_type 17  as-is REJECTED   with #158 REJECTED (next class)
+  r2  prog_type  7  as-is REJECTED   with #158 ACCEPTED
+  r5  prog_type  7  as-is REJECTED   with #158 ACCEPTED
+  r8  prog_type  7  as-is REJECTED   with #158 REJECTED (next class)
+
+So the type of the #35 result alone accounts for two of the four. The two
+that stay are different shapes, not more of the same:
+  r1: after typing, "r1 += r0" adds an unbounded scalar to the task
+      pointer (insn 38); the offset must be bounded, not just typed.
+  r8: "*(u64 *)(r0 + 0) = r0" with r0 = 0 (insn 771): the simulator
+      stores through the null value the application itself computed.
+
+The underlying fact stays as recorded: the application's x86 really does
+load through the address the helper returned, so B has to express a load
+from a scalar, and the stock verifier needs a pointer there. The choice is
+still the B contract, but option (2) is now measured to close two of the
+four requests and to leave two shapes that need their own handling.
+
+Harness facts worth keeping, each one cost a wrong verdict when missed:
+  llvm-objdump --section=<sec> -r prints no relocations for this object;
+  plain -r followed by filtering on the "RELOCATION RECORDS FOR [sec]"
+  header does. R_BPF_64_64 map relocations need the source register set to
+  BPF_PSEUDO_MAP_FD, or BPF_PSEUDO_MAP_VALUE with the offset in the next
+  instruction's imm when the map entry carries value_offset.
