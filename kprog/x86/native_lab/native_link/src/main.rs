@@ -339,6 +339,22 @@ fn resolve_helper_target(
         .ok_or_else(|| anyhow!("{context} has no helper address"))
 }
 
+/// A map update or delete on a map the plan names calls that map type's own function
+/// (`<helper>@<map>`), as the verifier's fixup calls ops->map_update_elem; otherwise the helper.
+fn resolve_map_call_target(
+    helper_name: &str,
+    map: Option<&str>,
+    helper_addrs: &HashMap<String, u64>,
+    context: &str,
+) -> Result<u64> {
+    if matches!(helper_name, "bpf_map_update_elem" | "bpf_map_delete_elem") {
+        if let Some(&addr) = map.and_then(|m| helper_addrs.get(&format!("{helper_name}@{m}"))) {
+            return Ok(addr);
+        }
+    }
+    resolve_helper_target(helper_name, helper_addrs, context)
+}
+
 /// A side-band relocation record. The on-disk layout must stay in sync
 /// with `struct native_lab_reloc_record` in
 /// module/x86/bpf_x86_native_lab.c (offset:u32, kind:u32, target:u64 —
@@ -1323,12 +1339,12 @@ fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<V
 }
 
 /// The call for one helper ID: the tail-call sequence for 12, else a call to the helper.
-fn arm64_helper_id_body(id: u64, helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {
+fn arm64_helper_id_body(id: u64, map: Option<&str>, helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {
     if id == 12 {
         return build_arm64_tail_call_inline(helper_addrs);
     }
     let name = x86::bpf_helper_name_from_id(id).ok_or_else(|| anyhow!("helper ID {id} is unknown"))?;
-    arm64_helper_call_sequence(resolve_helper_target(name, helper_addrs, &format!("arm64 helper call {name}"))?)
+    arm64_helper_call_sequence(resolve_map_call_target(name, map, helper_addrs, &format!("arm64 helper call {name}"))?)
 }
 
 /// An indirect call through xN with a helper ID in xN. When the function writes a
@@ -1340,6 +1356,7 @@ fn build_arm64_helper_id_call(
     bytes: &[u8],
     word_index: usize,
     n: u32,
+    map: Option<&str>,
     helper_addrs: &HashMap<String, u64>,
 ) -> Result<Vec<u32>> {
     let movz = |reg: Option<u32>| -> std::collections::BTreeSet<u64> {
@@ -1353,7 +1370,7 @@ fn build_arm64_helper_id_call(
     };
     if movz(Some(n)).len() == 1 {
         if let Some(id) = arm64_helper_id_before(bytes, word_index, n) {
-            return arm64_helper_id_body(id, helper_addrs);
+            return arm64_helper_id_body(id, map, helper_addrs);
         }
     }
     let ids: Vec<u64> = movz(None)
@@ -1369,7 +1386,7 @@ fn build_arm64_helper_id_call(
         words.push(0xf100_001f | ((id as u32) << 10) | (n << 5)); // cmp xN, #id
         let skip = words.len();
         words.push(0); // b.ne next
-        words.extend(arm64_helper_id_body(id, helper_addrs)?);
+        words.extend(arm64_helper_id_body(id, None, helper_addrs)?);
         to_done.push(words.len());
         words.push(0); // b done
         words[skip] = 0x5400_0001 | (((words.len() - skip) as u32) << 5);
@@ -2238,8 +2255,9 @@ fn rewrite_arm64_pass(
                                 )
                             })?
                         } else {
-                            resolve_helper_target(
+                            resolve_map_call_target(
                                 &reloc.target_name,
+                                reg_map_names[0].as_deref(),
                                 helper_addrs,
                                 &format!("arm64 helper call {}", reloc.target_name),
                             )?
@@ -2319,7 +2337,7 @@ fn rewrite_arm64_pass(
             // keep the ID in a register. BPF code has no other function pointers.
             if !proof_mode && insn & 0xffff_fc1f == 0xd63f_0000 {
                 let n = (insn >> 5) & 31;
-                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, helper_addrs)
+                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, reg_map_names[0].as_deref(), helper_addrs)
                     .with_context(|| format!("arm64 indirect call in {} at byte offset {off:#x}", sym.name))?
                 {
                     append_u32(&mut blob, word);

@@ -1565,8 +1565,9 @@ pub(super) fn rewrite_x86(
                         }
                     }
 
-                    let helper_addr = resolve_helper_target(
+                    let helper_addr = resolve_map_call_target(
                         &name,
+                        map_symbol_registers.get(&Register::RDI).map(String::as_str),
                         helper_addrs,
                         &format!("x86 helper call {name}"),
                     )?;

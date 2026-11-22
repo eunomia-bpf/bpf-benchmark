@@ -179,6 +179,25 @@ NativeLinkArgs build_native_link_args(
         CompanionLoad::LookupSite site =
             lookup_site_for_map_meta(*meta, array_offsets, htab_offsets, this_cpu_off_addr);
         site.map_name = kv.first;
+        // ops->map_update_elem / ops->map_delete_elem of the map type, which the verifier's
+        // fixup calls directly; native-link binds `<helper>@<map>` the same way.
+        static const std::unordered_map<int, std::pair<const char *, const char *>> kMapUpdateDelete = {
+            {BPF_MAP_TYPE_HASH, {"htab_map_update_elem", "htab_map_delete_elem"}},
+            {BPF_MAP_TYPE_LRU_HASH, {"htab_lru_map_update_elem", "htab_lru_map_delete_elem"}},
+            {BPF_MAP_TYPE_PERCPU_HASH, {"htab_percpu_map_update_elem", "htab_map_delete_elem"}},
+            {BPF_MAP_TYPE_LRU_PERCPU_HASH, {"htab_lru_percpu_map_update_elem", "htab_lru_map_delete_elem"}},
+            {BPF_MAP_TYPE_ARRAY, {"array_map_update_elem", "array_map_delete_elem"}},
+            {BPF_MAP_TYPE_PERCPU_ARRAY, {"array_map_update_elem", "array_map_delete_elem"}},
+            {BPF_MAP_TYPE_LPM_TRIE, {"trie_update_elem", "trie_delete_elem"}},
+        };
+        if (auto ops = kMapUpdateDelete.find(meta->type); ops != kMapUpdateDelete.end()) {
+            uint64_t update = kallsyms_lookup(ops->second.first);
+            uint64_t del = kallsyms_lookup(ops->second.second);
+            if (update != 0 && del != 0) {
+                add_name_addr(out.helpers, "bpf_map_update_elem@" + kv.first, update);
+                add_name_addr(out.helpers, "bpf_map_delete_elem@" + kv.first, del);
+            }
+        }
         out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
             kv.first,
             make_link_lookup_site(site),
