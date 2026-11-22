@@ -136,112 +136,6 @@ fn select_lookup_site(
     );
 }
 
-pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
-    match helper_id {
-        1 => Some("bpf_map_lookup_elem"),
-        2 => Some("bpf_map_update_elem"),
-        3 => Some("bpf_map_delete_elem"),
-        4 => Some("bpf_probe_read_compat"),
-        5 => Some("bpf_ktime_get_ns"),
-        6 => Some("bpf_trace_printk"),
-        7 => Some("bpf_get_prandom_u32"),
-        8 => Some("bpf_get_smp_processor_id"),
-        9 => Some("bpf_skb_store_bytes"),
-        10 => Some("bpf_l3_csum_replace"),
-        11 => Some("bpf_l4_csum_replace"),
-        12 => Some("bpf_tail_call"),
-        13 => Some("bpf_clone_redirect"),
-        14 => Some("bpf_get_current_pid_tgid"),
-        15 => Some("bpf_get_current_uid_gid"),
-        16 => Some("bpf_get_current_comm"),
-        17 => Some("bpf_get_cgroup_classid"),
-        18 => Some("bpf_skb_vlan_push"),
-        19 => Some("bpf_skb_vlan_pop"),
-        20 => Some("bpf_skb_get_tunnel_key"),
-        21 => Some("bpf_skb_set_tunnel_key"),
-        23 => Some("bpf_redirect"),
-        24 => Some("bpf_get_route_realm"),
-        25 => Some("bpf_perf_event_output"),
-        26 => Some("bpf_skb_load_bytes"),
-        27 => Some("bpf_get_stackid"),
-        28 => Some("bpf_csum_diff"),
-        29 => Some("bpf_skb_get_tunnel_opt"),
-        30 => Some("bpf_skb_set_tunnel_opt"),
-        31 => Some("bpf_skb_change_proto"),
-        32 => Some("bpf_skb_change_type"),
-        33 => Some("bpf_skb_under_cgroup"),
-        34 => Some("bpf_get_hash_recalc"),
-        35 => Some("bpf_get_current_task"),
-        36 => Some("bpf_probe_write_user"),
-        37 => Some("bpf_current_task_under_cgroup"),
-        38 => Some("bpf_skb_change_tail"),
-        39 => Some("bpf_skb_pull_data"),
-        40 => Some("bpf_csum_update"),
-        41 => Some("bpf_set_hash_invalid"),
-        42 => Some("bpf_get_numa_node_id"),
-        43 => Some("bpf_skb_change_head"),
-        44 => Some("bpf_xdp_adjust_head"),
-        45 => Some("bpf_probe_read_compat_str"),
-        46 => Some("bpf_get_socket_cookie"),
-        47 => Some("bpf_get_socket_uid"),
-        48 => Some("bpf_set_hash"),
-        49 => Some("bpf_setsockopt"),
-        50 => Some("bpf_skb_adjust_room"),
-        51 => Some("bpf_redirect_map"),
-        54 => Some("bpf_xdp_adjust_meta"),
-        57 => Some("bpf_getsockopt"),
-        58 => Some("bpf_override_return"),
-        65 => Some("bpf_xdp_adjust_tail"),
-        67 => Some("bpf_get_stack"),
-        68 => Some("bpf_skb_load_bytes_relative"),
-        69 => Some("bpf_fib_lookup"),
-        80 => Some("bpf_get_current_cgroup_id"),
-        84 => Some("bpf_sk_lookup_tcp"),
-        85 => Some("bpf_sk_lookup_udp"),
-        86 => Some("bpf_sk_release"),
-        87 => Some("bpf_map_push_elem"),
-        88 => Some("bpf_map_pop_elem"),
-        95 => Some("bpf_sk_fullsock"),
-        99 => Some("bpf_skc_lookup_tcp"),
-        109 => Some("bpf_send_signal"),
-        118 => Some("bpf_jiffies64"),
-        122 => Some("bpf_get_netns_cookie"),
-        124 => Some("bpf_sk_assign"),
-        127 => Some("bpf_seq_write"),
-        130 => Some("bpf_ringbuf_output"),
-        133 => Some("bpf_ringbuf_discard"),
-        134 => Some("bpf_ringbuf_query"),
-        148 => Some("bpf_copy_from_user"),
-        112 => Some("bpf_probe_read_user"),
-        113 => Some("bpf_probe_read_kernel"),
-        114 => Some("bpf_probe_read_user_str"),
-        115 => Some("bpf_probe_read_kernel_str"),
-        125 => Some("bpf_ktime_get_boot_ns"),
-        131 => Some("bpf_ringbuf_reserve"),
-        132 => Some("bpf_ringbuf_submit"),
-        152 => Some("bpf_redirect_neigh"),
-        155 => Some("bpf_redirect_peer"),
-        158 => Some("bpf_get_current_task_btf"),
-        161 => Some("bpf_ima_inode_hash"),
-        164 => Some("bpf_for_each_map_elem"),
-        173 => Some("bpf_get_func_ip"),
-        174 => Some("bpf_get_attach_cookie"),
-        175 => Some("bpf_task_pt_regs"),
-        181 => Some("bpf_loop"),
-        183 => Some("bpf_get_func_arg"),
-        184 => Some("bpf_get_func_ret"),
-        185 => Some("bpf_get_func_arg_cnt"),
-        186 => Some("bpf_get_retval"),
-        187 => Some("bpf_set_retval"),
-        188 => Some("bpf_xdp_get_buff_len"),
-        189 => Some("bpf_xdp_load_bytes"),
-        190 => Some("bpf_xdp_store_bytes"),
-        193 => Some("bpf_ima_file_hash"),
-        195 => Some("bpf_map_lookup_percpu_elem"),
-        _ => None,
-    }
-}
-
 fn build_x86_get_smp_processor_id_inline(
     helper_addrs: &HashMap<String, u64>,
 ) -> Result<Option<Vec<Instruction>>> {
@@ -896,18 +790,6 @@ fn scan_helper_calls(
     Ok(out)
 }
 
-fn x86_mov_imm_to_gpr64(insn: &Instruction) -> Option<(Register, u64)> {
-    if insn.mnemonic() != Mnemonic::Mov
-        || insn.op_count() < 2
-        || insn.op0_kind() != OpKind::Register
-    {
-        return None;
-    }
-    let reg = x86_gpr64_family(insn.op0_register())?;
-    let imm = insn.try_immediate(1).ok()?;
-    Some((reg, imm))
-}
-
 fn x86_mov_gpr64_to_gpr64(insn: &Instruction) -> Option<(Register, Register)> {
     if insn.mnemonic() != Mnemonic::Mov
         || insn.op_count() < 2
@@ -935,99 +817,6 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     ] {
         registers.remove(&reg);
     }
-}
-
-fn x86_lookahead_indirect_call_uses_register(
-    bytes: &[u8],
-    next_ip: u64,
-    sym_addr: u64,
-    reg: Register,
-) -> Option<Register> {
-    let start = usize::try_from(next_ip.checked_sub(sym_addr)?).ok()?;
-    if start >= bytes.len() {
-        return None;
-    }
-    let mut decoder = Decoder::with_ip(64, &bytes[start..], next_ip, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let next = decoder.decode();
-        if next.is_invalid() {
-            return None;
-        }
-        if is_alignment_nop(&next) {
-            continue;
-        }
-        if x86_indirect_call_register(&next) == Some(reg) {
-            return Some(reg);
-        }
-        if matches!(
-            next.flow_control(),
-            FlowControl::Call
-                | FlowControl::IndirectCall
-                | FlowControl::Return
-                | FlowControl::UnconditionalBranch
-                | FlowControl::ConditionalBranch
-                | FlowControl::IndirectBranch
-                | FlowControl::Interrupt
-                | FlowControl::XbeginXabortXend
-                | FlowControl::Exception
-        ) {
-            return None;
-        }
-        if x86_written_gpr_family(&next) == Some(reg) {
-            return None;
-        }
-    }
-    None
-}
-
-fn x86_immediate_helper_load_before_call(
-    bytes: &[u8],
-    sym_addr: u64,
-    local_ip: u64,
-    insn: &Instruction,
-) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    if helper_id > 255 {
-        return None;
-    }
-    let insn_len = u64::try_from(insn.len()).ok()?;
-    let next_ip = sym_addr.checked_add(local_ip)?.checked_add(insn_len)?;
-    if x86_lookahead_indirect_call_uses_register(bytes, next_ip, sym_addr, reg) == Some(reg) {
-        Some((reg, helper_id))
-    } else {
-        None
-    }
-}
-
-fn x86_known_helper_id_load(insn: &Instruction) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    bpf_helper_name_from_id(helper_id)?;
-    Some((reg, helper_id))
-}
-
-fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
-    let mut decoder = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let insn = decoder.decode();
-        if insn.is_invalid() {
-            bail!(
-                "iced bailed while scanning x86 helper ids at IP {:#x}",
-                insn.ip()
-            );
-        }
-        if is_alignment_nop(&insn) {
-            continue;
-        }
-        let local_ip = insn.ip() - sym_addr;
-        if let Some((_, seen)) =
-            x86_immediate_helper_load_before_call(bytes, sym_addr, local_ip, &insn)
-        {
-            if seen == helper_id {
-                return Ok(true);
-            }
-        }
-    }
-    Ok(false)
 }
 
 fn scan_x86_got_relocations(
@@ -1160,8 +949,7 @@ pub(super) fn rewrite_x86(
         let is_entry = symbol_key(sym) == symbol_key(entry);
         let bytes = read_symbol_bytes(elf, sym)?;
         let entry_abi_strip = if is_entry {
-            let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&bytes, sym.address, 12)?
-                || helper_call_sites.iter().any(|(key, name)| {
+            let entry_has_tail_call = helper_call_sites.iter().any(|(key, name)| {
                     key.0 == sym.section_index && key.1 == sym.address && name == "bpf_tail_call"
                 });
             let proof_return_jmp_target = if !proof_mode && proof_input {
@@ -1203,7 +991,6 @@ pub(super) fn rewrite_x86(
         }
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
-        let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
         let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
 
         // Side table: per-entry patch kind, paired with each kept Instruction
@@ -1238,20 +1025,6 @@ pub(super) fn rewrite_x86(
             }
             if is_entry {
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
-            }
-
-            let mut helper_imm_load_reg = None;
-            if let Some((reg, helper_id)) =
-                x86_immediate_helper_load_before_call(&bytes, sym.address, local_ip, &insn)
-            {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
-                if !proof_mode {
-                    continue;
-                }
-            } else if let Some((reg, helper_id)) = x86_known_helper_id_load(&insn) {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
             }
 
             let mut helper_got_load_reg = None;
@@ -1434,23 +1207,10 @@ pub(super) fn rewrite_x86(
                 let mut helper_call_name = helper_call_sites.get(&site_key).cloned();
                 if helper_call_name.is_none() {
                     if let Some(reg) = call_reg {
-                        if let Some(helper_id) = helper_imm_registers.get(&reg).copied() {
-                            let name = bpf_helper_name_from_id(helper_id).ok_or_else(|| {
-                                anyhow!(
-                                    "x86 immediate BPF helper id {} in {} at local offset {:#x} is unsupported",
-                                    helper_id,
-                                    sym.name,
-                                    local_ip
-                                )
-                            })?;
-                            helper_call_name = Some(name.to_string());
-                        } else {
-                            helper_call_name = helper_got_registers.get(&reg).cloned();
-                        }
+                        helper_call_name = helper_got_registers.get(&reg).cloned();
                     }
                 }
                 if let Some(name) = helper_call_name {
-                    clear_x86_call_clobbered_registers(&mut helper_imm_registers);
                     clear_x86_call_clobbered_registers(&mut helper_got_registers);
                     if proof_mode {
                         local.push(insn);
@@ -1640,7 +1400,6 @@ pub(super) fn rewrite_x86(
             if call_clobbers {
                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                 clear_x86_call_clobbered_registers(&mut helper_got_registers);
-                clear_x86_call_clobbered_registers(&mut helper_imm_registers);
             } else if let Some((dst, name)) = map_reg_move {
                 map_symbol_registers.insert(dst, name);
             } else if let Some(reg) = written_reg {
@@ -1649,9 +1408,6 @@ pub(super) fn rewrite_x86(
             if let Some(reg) = written_reg {
                 if helper_got_load_reg != Some(reg) {
                     helper_got_registers.remove(&reg);
-                }
-                if helper_imm_load_reg != Some(reg) {
-                    helper_imm_registers.remove(&reg);
                 }
             }
         }
