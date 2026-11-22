@@ -1,0 +1,61 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectNative"
+    ],
+    "exit": 0,
+    "seconds": 3.2752177715301514,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 186,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-native/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2554469108581543,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 4,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Native.execute": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.native_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.reference_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.pointer_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "whole_library": "pending batch-end confirmation",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z",
+  "complete_isa_families": 0
+}
