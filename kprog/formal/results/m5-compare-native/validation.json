@@ -1,0 +1,200 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean": "2f88df5be132eaa6a20cd8d342425471907939dce661a363032c25677bb75f49"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareNative"
+    ],
+    "exit": 0,
+    "seconds": 2.1371543407440186,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 76,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-native5.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareNativePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8118157386779785,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-native1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Native.execute": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Native.native_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Native.reference_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Native.registers": [
+      "propext",
+      "Quot.sound"
+    ]
+  },
+  "public_query_sha256": "e0fea302f5ab067e7cb5364e0257211d65c68e7a6f7432f806c608c744cfccef",
+  "scope": "actual mature decoded CMP X4,X1 alias SUBS XZR,X4,X1 LSL0, imported AddWithCarry/PState and PC writers, same true fetched/decoded word, full reference step/event and fault histories and GPR/SP/vector/extraFlags preservation",
+  "isa_arithmetic": "imported DPR.exec_add_sub_shifted_reg and AddWithCarry, not an independent local arithmetic/decoder/effect model",
+  "not_yet_proved": "source C four byte formulas equal mature NZCV; source/native full register representation and actual sixcall entry; W-width native bridge",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [
+    {
+      "name": "compare-native1",
+      "source_sha256": "b4260284f6d576754956527f08e26c273027716c37a29c531899978686a9f63b",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareNative"
+        ],
+        "exit": 1,
+        "seconds": 2.383589744567871,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-native1.log",
+      "note": "after-state record multiline field parser; fixed with let-bound external flags"
+    },
+    {
+      "name": "compare-native2",
+      "source_sha256": "847155052c8a05519ea8df8766dcf494c08a828158ccd63217c5e51e956e47a7",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareNative"
+        ],
+        "exit": 1,
+        "seconds": 2.1428403854370117,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-native2.log",
+      "note": "actual zero shift and memory history update normalization"
+    },
+    {
+      "name": "compare-native3",
+      "source_sha256": "a1498ae87152b2c18afd597fb0253b76b88e792c4470d862257cfe18369c7739",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareNative"
+        ],
+        "exit": 1,
+        "seconds": 2.1268043518066406,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-native3.log",
+      "note": "explicit zero-shift rewrite needed instead of simplifier only"
+    },
+    {
+      "name": "compare-native4",
+      "source_sha256": "d0a069bb8eea4dd008d003eb0d7280de2bfdc016d0d7b1176d8242ae87bff8df",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareNative"
+        ],
+        "exit": 1,
+        "seconds": 2.1552464962005615,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-native4.log",
+      "note": "needed final definitional reflexivity after actual zero-shift rewrite"
+    }
+  ],
+  "whole_library_confirmation": "pending meaningful completed CMP source/native batch/newest stable V; ongoing9file flag Storage rebuild independent",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
