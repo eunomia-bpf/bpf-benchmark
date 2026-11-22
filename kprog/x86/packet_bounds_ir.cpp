@@ -752,6 +752,72 @@ static unsigned fold_equality_edges(Module &module) {
   }
   return count;
 }
+// A loop re-entry reloads a scalar from the map and tests a 32-bit
+// zero-extended copy of it against the iteration bound, while the merge PHI
+// carries the unprojected 64-bit value into the scaled access. The verifier
+// narrows the register the guard compares, never the one the scaling uses,
+// so the offset is unbounded on the re-entry path (OTel request 11, insn 301
+// after the reload at insn 315: "R1 unbounded memory access" at insn 301).
+// Carry the projection onto the arm itself: the arm is then exactly the
+// guarded value, and the widening stays on the narrowed register. Every real
+// use of such a PHI reads only its low 32 bits, so the carried value is
+// unchanged for every consumer.
+static bool low_word_mask(BinaryOperator *operation) {
+  if (operation->getOpcode()!=Instruction::And) return false;
+  for (unsigned side=0;side<2;++side) {
+    auto *mask=dyn_cast<ConstantInt>(operation->getOperand(side));
+    if (mask && mask->getZExtValue()==0xffffffffu) return true;
+  }
+  return false;
+}
+static unsigned carry_guard_projections(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) for (auto &block:function) for (auto &phi:block.phis()) {
+    auto *type=dyn_cast<IntegerType>(phi.getType());
+    if (!type || type->getBitWidth()<=32) continue;
+    bool narrow=true;
+    for (auto &use:phi.uses()) {
+      auto *instruction=dyn_cast<Instruction>(use.getUser());
+      if (!instruction) { narrow=false;break; }
+      if (isa<DbgInfoIntrinsic>(instruction)) continue;
+      bool low=false;
+      if (auto *truncate=dyn_cast<TruncInst>(instruction))
+        low=truncate->getDestTy()->isIntegerTy(32);
+      else if (auto *operation=dyn_cast<BinaryOperator>(instruction))
+        low=low_word_mask(operation);
+      if (!low) { narrow=false;break; }
+    }
+    if (!narrow) continue;
+    for (unsigned index=0;index<phi.getNumIncomingValues();++index) {
+      Value *arm=phi.getIncomingValue(index);
+      auto *incoming=phi.getIncomingBlock(index);
+      auto *branch=dyn_cast<BranchInst>(incoming->getTerminator());
+      if (!branch || !branch->isConditional() ||
+          (branch->getSuccessor(0)!=&block && branch->getSuccessor(1)!=&block)) continue;
+      auto *compare=dyn_cast<ICmpInst>(branch->getCondition());
+      if (!compare) continue;
+      Value *guarded=nullptr;
+      for (unsigned side=0;side<2 && !guarded;++side) {
+        if (!isa<ConstantInt>(compare->getOperand(1-side))) continue;
+        auto *operand=compare->getOperand(side);
+        if (auto *operation=dyn_cast<BinaryOperator>(origin(operand))) {
+          if (!low_word_mask(operation)) continue;
+          for (unsigned field_index=0;field_index<2;++field_index)
+            if (operation->getOperand(field_index)==arm) guarded=operand;
+        } else if (auto *truncate=dyn_cast<TruncInst>(origin(operand))) {
+          if (truncate->getOperand(0)==arm) guarded=operand;
+        }
+      }
+      /* The carried value has to be the very register the compare narrows,
+       * and a value defined before the terminator is not narrowed, so a
+       * widening would have to be inserted on the edge where a PHI incoming
+       * value cannot live. Same width only. */
+      if (!guarded || guarded==arm || guarded->getType()!=phi.getType()) continue;
+      phi.setIncomingValue(index,guarded);++count;
+    }
+  }
+  return count;
+}
 // At a known interval boundary, equality is an ordered scalar predicate:
 // x>=K makes x==K equivalent to x<=K. Its false edge then carries x>K,
 // allowing the existing packet-bound lowering to describe both outcomes.
@@ -798,6 +864,7 @@ int main(int argc,char **argv) {
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
   unsigned equality_edges=fold_equality_edges(*module);
+  unsigned guard_projections=carry_guard_projections(*module);
   unsigned class_stores=canonical_tc_class_stores(*module);
   unsigned count=0,stale_headlen=0;
   for (auto &function:*module) {
@@ -878,6 +945,7 @@ int main(int argc,char **argv) {
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
   errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
   errs()<<"tied integer constant identities folded="<<constants<<'\n';
+  errs()<<"guard projections carried onto PHI arms="<<guard_projections<<'\n';
   errs()<<"live integer identities normalized="<<live_identities<<'\n';
   errs()<<"empty memory barriers removed="<<memory_barriers<<'\n';
   errs()<<"helper memory contracts described="<<helper_memory<<'\n';
