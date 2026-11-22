@@ -1,7 +1,9 @@
-# Mature CMP subtraction, zero and carry arithmetic
+# Mature CMP N/Z/C/V arithmetic and exact C masks
 
-`Arm64Compare.FlagArithmetic.subtraction` derives the actual imported AddWithCarry result x-y from its existing theorem. `zero` derives the mature zero flag from operand equality. `carry` derives the mature carry flag as one exactly when unsigned subtraction needs no borrow. The proof uses the actual65bit unsigned sum, proves its exact natural value and establishes when truncation/re-extension preserves it. No local ISA arithmetic or native proof oracle is introduced.
+`subtraction`, `zero` and `carry` derive the imported AddWithCarry64 result x-y, Z from operand equality and C from unsigned no-borrow. `negative_mask` now proves the actual mature N flag equals the nonzero high-bit sign mask. `overflow_mask` proves the actual mature V flag equals the original XOR/AND high-bit source expression.
 
-Component77jobs passed2.116s; three public type/axiom queries passed1.548s using only inherited logical axioms. Existing low-priority CPU16-23/nice19/j1/32GiB/default200000heartbeats/depth512/asyncfalse. Exact source/logs/timings/axioms and the failed initial source are retained in validation.json. No raised limits or bv_decide/native_decide.
+The V proof rewrites the actual65bit signed sum as the difference of sign-extended operands, proves it does not overflow65bits and shows native re-extension equality exactly when64bit signed subtraction does not overflow. Core kernel-checked overflow/MSB identities then produce the source XOR mask. `sign_mask` relates the high-bit mask to the real MSB; N normalizes the actual one-bit result. No independent ISA operation or native proof oracle is introduced.
 
-Native N/V equality to the C sign/xor masks, actual C byte binding, full source/native flag/register representation and original six-call entry remain open. The separate9file Storage permission rebuild remains independent. M5/O1/O2/O4/M6 open; complete ISA families0. No runtime application or measurement.
+Current component77jobs passed2.305s; seven public type/axiom queries passed1.362s with only inherited logical axioms. CPU16-23/nice19/j1/32GiB/default200000heartbeats/depth512/asyncfalse. Both current source attempts passed (first lacked only the new N lemma); no limit increase, bv_decide or native_decide. Earlier exact-source confirmations/failed history remain nested in validation.json, with baseline source/log snapshots.
+
+Actual CC byte-value binding, full source/native register correspondence and fetched original six-call entry remain open. W native bridge remains open. M5/O1/O2/O4/M6 open; complete ISA families0. No runtime application or measurement.
