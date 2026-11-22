@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.X86ShiftWriteback
 import KProgFormal.ClightRefinement.Arm64Registers
+import KProgFormal.ClightRefinement.Deallocation
 
 namespace KProgFormal.ClightRefinement.X86RegisterView
 
@@ -305,5 +306,108 @@ theorem byte_writer_writable (ge : CC.CGenv)
       ((CC.Mem.store_access byteStored).trans (CC.Mem.store_access stored)))
   · exact (CC.Mem.store_nextblock tagStored).trans ((CC.Mem.store_nextblock wordStored).trans
       ((CC.Mem.store_nextblock byteStored).trans (CC.Mem.store_nextblock stored)))
+
+
+/-- The imported handler allocates its actual nine typed local declarations. -/
+def writerAllocation (ce : CC.CompositeEnv) (m : CC.Mem) : CC.Env × CC.Mem :=
+  CC.doAllocVariables ce CC.emptyEnv m
+    X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_vars
+
+/-- The imported eight parameters are bound in their original order. -/
+def writerInitialTemps (binding op dst src flags aux imm width : CC.Val) : CC.TempEnv :=
+  ((((((((CC.createUndefTemps
+      X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_temps).set
+    X86_program_profile_bpf.___x86_bind binding).set X86_program_profile_bpf._op op).set
+    X86_program_profile_bpf._dst dst).set X86_program_profile_bpf._src src).set
+    X86_program_profile_bpf._flags flags).set X86_program_profile_bpf._aux aux).set
+    X86_program_profile_bpf._imm imm).set X86_program_profile_bpf._width width
+
+private theorem writer_names :
+    CC.listNorepet (CC.varNames
+      X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_vars) ∧
+    CC.listNorepet (CC.varNames
+      X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_params) ∧
+    CC.listDisjoint
+      (CC.varNames X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_params)
+      (CC.varNames X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_temps) := by
+  decide +kernel
+
+private theorem writer_cell_declared :
+    (X86_program_profile_bpf.___x86_wr_cell__2,
+      CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) ∈
+        X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_vars := by
+  decide +kernel
+
+private theorem writer_allocation_valid (ce : CC.CompositeEnv) (m : CC.Mem) :
+    CC.AllocVariables ce CC.emptyEnv m
+      X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_vars
+      (writerAllocation ce m).1 (writerAllocation ce m).2 :=
+  CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (writerAllocation ce m)).symm
+
+/-- Actual function entry allocates the original locals and binds all eight
+parameters for arbitrary caller memory and the linked composite environment. -/
+theorem writer_entry (ge : CC.CGenv) (m : CC.Mem)
+    (binding op dst src flags aux imm width : CC.Val) :
+    CC.FunctionEntry2 ge X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+      [binding, op, dst, src, flags, aux, imm, width] m
+      (writerAllocation ge.genv_cenv m).1
+      (writerInitialTemps binding op dst src flags aux imm width)
+      (writerAllocation ge.genv_cenv m).2 :=
+  .intro writer_names.1 writer_names.2.1 writer_names.2.2
+    (writer_allocation_valid ge.genv_cenv m) rfl
+
+/-- The genuine caller enters the imported handler in one internal step. -/
+theorem writer_entry_internal (ge : CC.CGenv) (m : CC.Mem) (k : CC.Cont)
+    (binding op dst src flags aux imm width : CC.Val) :
+    InternalRun ge 1
+      (.Callstate (.Internal X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG)
+        [binding, op, dst, src, flags, aux, imm, width] k m)
+      (.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+        X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_body k
+        (writerAllocation ge.genv_cenv m).1
+        (writerInitialTemps binding op dst src flags aux imm width)
+        (writerAllocation ge.genv_cenv m).2) :=
+  .step trivial (.internal_function _ _ _ _ _ _ _
+    (writer_entry ge m binding op dst src flags aux imm width)) (.refl _)
+
+/-- The real byte-writer union local has its declared binding, fresh block,
+owned range and writable word from that same actual function allocation. -/
+theorem writer_local_storage (ce : CC.CompositeEnv)
+    (layout : ce.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord) (m : CC.Mem) :
+    ∃ block, (writerAllocation ce m).1.get X86_program_profile_bpf.___x86_wr_cell__2 =
+        some (block, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) ∧
+      m.nextblock.toNat ≤ block.toNat ∧
+      block.toNat < (writerAllocation ce m).2.nextblock.toNat ∧
+      CC.Mem.validAccess (writerAllocation ce m).2 CC.Mptr block 0 .Writable = true := by
+  have allocation := writer_allocation_valid ce m
+  obtain ⟨block, binding⟩ := allocated_local_binding allocation writer_names.1 writer_cell_declared
+  obtain ⟨fresh, owned, range⟩ := (allocated_local_storage allocation).1 _ _ binding
+  have size : CC.sizeof ce (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) =
+      CC.sizeChunk CC.Mptr := by
+    simp only [CC.sizeof, layout]
+    rfl
+  have writable := CC.Mem.rangePerm_implies range
+    (by decide : CC.permOrder .Freeable .Writable = true)
+  have align : (0 : Int) % CC.alignChunk CC.Mptr = 0 := by decide
+  refine ⟨block, binding, fresh, owned, ?_⟩
+  simpa only [CC.Mem.validAccess, size, Int.zero_add, align, beq_self_eq_true,
+    Bool.and_true] using writable
+
+/-- Reached heaps carrying the allocation's access map retain the real local
+word permission; the declared binding identifies its unique allocated block. -/
+theorem writer_local_writable (ce : CC.CompositeEnv)
+    (layout : ce.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord) (caller memory : CC.Mem) (block : CC.Block)
+    (binding : (writerAllocation ce caller).1.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (block, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (access : memory.access = (writerAllocation ce caller).2.access) :
+    CC.Mem.validAccess memory CC.Mptr block 0 .Writable = true := by
+  obtain ⟨allocated, actual, _, _, writable⟩ := writer_local_storage ce layout caller
+  have same : allocated = block := congrArg Prod.fst (Option.some.inj (actual.symm.trans binding))
+  subst allocated
+  exact (CC.Mem.validAccess_congr (m1 := memory) (m2 := (writerAllocation ce caller).2)
+    (chunk := CC.Mptr) (b := block) (ofs := 0) (p := .Writable)
+    (fun offset => by simp only [CC.Mem.perm, access])).trans writable
 
 end KProgFormal.ClightRefinement.X86RegisterView

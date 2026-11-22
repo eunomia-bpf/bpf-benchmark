@@ -576,8 +576,15 @@ carry permissions through each store. Its final heap preserves the original
 permission map and allocation frontier, together with the 169-step/native-GPR
 result. The [permission receipt](../results/kprog_verification_20261107/x86-byte-register-permissions.log.gz)
 records all three public bridge theorems under the same budgets.
-Full world composition, actual function-entry permission premises and the
-remaining writer branches stay open.
+The genuine ALU_REG function entry binds its eight parameters, allocates its
+nine typed locals and enters the original body in one internal step. The same
+actual allocation supplies the byte-writer union's binding, fresh owned block
+and writable eight-byte word. A reached heap with that allocation's permission
+map retains this local permission. The
+[entry receipt](../results/kprog_verification_20261107/x86-byte-writer-entry.log.gz)
+records all seven public bridge and entry theorems under the default budgets.
+Full world composition, caller-table permissions, entry-body control flow and
+the remaining writer branches stay open.
 
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
