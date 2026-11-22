@@ -37,6 +37,7 @@ std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(int p
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <sstream>
@@ -1335,6 +1336,8 @@ struct MapMeta {
     uint64_t value_addr;
     uint32_t btf_id;
     uint32_t btf_value_type_id;
+    /* A map found among the process's fds stays open while the load uses it. */
+    std::shared_ptr<ScopedFd> held;
 };
 
 struct HelperAlias {
@@ -1701,8 +1704,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
         if (fd < 0) {
             continue;
         }
-        ScopedFd pinned_fd(fcntl(fd, F_DUPFD_CLOEXEC, 0));
-        if (pinned_fd.get() < 0) {
+        auto pinned_fd = std::make_shared<ScopedFd>(fcntl(fd, F_DUPFD_CLOEXEC, 0));
+        if (pinned_fd->get() < 0) {
             const int saved = errno;
             if (saved == EBADF || saved == ENOENT) {
                 continue;
@@ -1711,12 +1714,12 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             fail("duplicate /proc/self/fd/" + std::to_string(fd) + " for map scan: " +
                  std::strerror(saved));
         }
-        if (!fd_is_bpf_map(pinned_fd.get())) {
+        if (!fd_is_bpf_map(pinned_fd->get())) {
             continue;
         }
         bpf_map_info info = {};
         __u32 info_len = sizeof(info);
-        const int info_err = bpf_obj_get_info_by_fd(pinned_fd.get(), &info, &info_len);
+        const int info_err = bpf_obj_get_info_by_fd(pinned_fd->get(), &info, &info_len);
         if (info_err != 0) {
             closedir(fd_dir);
             fail("bpf_obj_get_info_by_fd (pinned process map) failed: " +
@@ -1736,10 +1739,11 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.key_size,
             info.value_size,
             info.max_entries,
-            lookup_kernel_map_ptr_by_fd(pinned_fd.get()),
-            lookup_array_value_addr_if_direct(info, pinned_fd.get()),
+            lookup_kernel_map_ptr_by_fd(pinned_fd->get()),
+            lookup_array_value_addr_if_direct(info, pinned_fd->get()),
             info.btf_id,
             info.btf_value_type_id,
+            pinned_fd,
         });
     }
     closedir(fd_dir);
