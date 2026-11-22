@@ -19,11 +19,12 @@
 
 ## 待办
 
-运营者 11-22：“接下来只允许修必要的 bug, 或者通过 profile 找大的性能问题, 框架不改动. 是不是理论上来说性能能好很多? 路径行数也不是 hard limit, 但不能做任何额外的事情. verify 那部分可以叫 codex 继续干活”
+运营者 11-22：“接下来只允许修必要的 bug, 或者通过 profile 找大的性能问题, 框架不改动. 是不是理论上来说性能能好很多? 路径行数也不是 hard limit, 但不能做任何额外的事情. verify 那部分可以叫 codex 继续干活. 可以 profile 但是不允许做任何设计之外的事情或者细节调优, 必须跑几次确保数据全部都在.”
 
 1. **功能检查**（10:35Z 起，chain18）：按 HEAD 重建两个架构的原生对象和镜像，各跑六个应用的 make check；每个应用的 shim 日志里在跑的程序全部原生（库的特性探测程序除外）。
 2. **修检查发现的必要 bug。**
-3. **profile 找大的性能问题**：先用 8430daa81 完整测试里 stats on 的每个程序数据（eBPF 和原生各自的运行时间与次数），找原生比 eBPF 慢或提升小的程序，Tracee（0.948x）、BCC（0.985x）先；再对照这些程序的原生代码和内核 JIT 出的代码找原因。确认是大的问题才改。
-4. **计时**：x86、arm64 各一次完整计时（arm64 在 Spark：暂停 DeepSeek，测完立即恢复），和 5/29 对比。
-5. **验证一侧**：omp 和 Codex lane（V、formal）继续。
-6. **数字写进论文**：kprog/docs/evaluation.md 和论文的 evaluation 节。
+3. **计时**：x86 一次完整计时（P 核，主机安静，框架原样：每个应用三次、广度优先、stats 关和开两列）；arm64 同时在 Spark 上完整计时一次（暂停 DeepSeek，测完立即恢复）。每个应用的样本和时长齐全才算数，缺的补跑。和 5/29 对比。
+4. **profile 找大的性能问题**：计时之后做。冻结 x86 测试里每次调用的原生对 eBPF：Tetragon 2.44x、Tracee 1.98x、Katran 1.24x、Cilium 1.11x、BCC 1.00x；OTel 修好上下文之后 0.90x。先查 OTel，再查 Cilium、Katran、BCC。工具：客户机里的 perf（从内核树构建，kprog-ck/perf-tool）。只改设计之内的大问题，不做细节调优。
+5. **改了的应用补测**：只补测受影响的应用，样本和时长齐全。
+6. **验证一侧**：omp 和 Codex lane（V、formal）继续。
+7. **数字写进论文**：kprog/docs/evaluation.md 和论文的 evaluation 节。
