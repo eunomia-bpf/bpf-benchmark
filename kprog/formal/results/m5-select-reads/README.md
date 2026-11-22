@@ -1,0 +1,9 @@
+# Actual linked CSEL pointer/tag readers
+
+`Arm64SelectReads.helpers` derives both real helper returns from the same existing complete register relation, for every ordinary Fin31 register and independent caller continuations. Each helper takes28 real Clight steps in the actual linked entry world, preserves the full memory, and returns the same observed raw `CC.Val` or complete8-bit tag. The imported native GPR is the existing provenance materialization of that exact pair, including STACK-tagged relative coordinates and pointer identities. The original helper symbols104/65 and actual composite layout are kernel checked.
+
+`Arm64RegisterReads.gpr_calls_bound` exposes the existing raw/tag/pointer certificate with explicit world and used layout parameters. The original private standalone wrapper and five checked public contracts retain their previous signatures. No source reader, native model, register relation or runtime behavior is redefined.
+
+Base build143 and linked build147 passed at the unchanged200000-heartbeat/512-depth limits, CPU17, one worker and32GiB. Six public type/axiom queries cover the new bound certificate, original pointer/tag interfaces and linked layout/bindings/reader pair. Exact hashes, commands, timings and the original source snapshot are in `validation.json`. Axioms are logical or inherited from the existing CompCert interface. These are focused checks; the updated full downstream/root build remains pending.
+
+Next execute the original CSEL source128 caller branch through both real read callsites and the actual pointer writer, retaining source2's STACK4 tag and relative word. Then compose with condition+path66, native CSEL and the original seventh call. This component does not complete the handler or ISA family. M5/O1/O2/O4 and M6 remain open; complete ISA families stay zero.

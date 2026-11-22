@@ -107,7 +107,9 @@ private theorem field_load (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
       offset, CC.Val.offsetPtr]
   exact checked_load (by simpa only [Arm64EntryMemory.field, address, bind, Option.bind_some] using read)
 
-private theorem gpr_executes (tags pointers : Bool) (i : Fin 31)
+private theorem gpr_executes (world : CC.CGenv) (layout : GprLayout world)
+    (pointerLayout : CC.unionFieldOffset world.genv_cenv Arm64Program._ptr cellComposite.co_members = .OK (0,.Full))
+    (tags pointers : Bool) (i : Fin 31)
     (b cb vb : CC.Block) (ofs co vo : CC.Integers.Ptrofs)
     (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (tag : BitVec 8)
     (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
@@ -117,11 +119,11 @@ private theorem gpr_executes (tags pointers : Bool) (i : Fin 31)
     (cell : CC.Mem.loadv (if tags then .Mint8unsigned else .Mint64) m (.Vptr vb vo) =
       some (if tags then .Vint (tag.setWidth 32) else value))
     (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
-    steps ge 28 (.Callstate (.Internal (selected tags pointers))
+    steps world 28 (.Callstate (.Internal (selected tags pointers))
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
       some (CC.E0, .Returnstate (if tags then .Vint (tag.setWidth 32) else value)
         (CC.callCont k) m) ∧
-    InternalPath ge 28 (.Callstate (.Internal (selected tags pointers))
+    InternalPath world 28 (.Callstate (.Internal (selected tags pointers))
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) := by
   have bound := i.isLt
   have ne : BitVec.ofNat 64 i.val ≠ (32#64) := by
@@ -148,11 +150,11 @@ private theorem gpr_executes (tags pointers : Bool) (i : Fin 31)
   all_goals
     simp +decide [selected, reader, steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
       Arm64Program.f_kprog_arm64_program_raw, Arm64Program.f_kprog_arm64_program_tag,
-      Arm64Program.f_kprog_arm64_program_pointer, pointer_offset,
+      Arm64Program.f_kprog_arm64_program_pointer, pointerLayout,
       CC.doAllocVariables, CC.bindParameterTemps,
       CC.createUndefTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField,
       CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
-      layouts.1, layouts.2.1, layouts.2.2.1, layouts.2.2.2.1, layouts.2.2.2.2,
+      layout.entry, layout.cell, layout.cells, layout.tags, layout.payload,
       CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
       CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semAdd, CC.Cop.classifyAdd,
       CC.Cop.semAddPtrInt, CC.Cop.ptrofsOfInt, index_offset, cast,
@@ -233,6 +235,39 @@ theorem gpr_tag_bound (world : CC.CGenv) (layout : GprLayout world) (i : Fin 31)
         CC.emptyEnv, CC.E0, CC.Eapp, header, slot, cell, empty]
   exact internalRun_of_steps execution.2 execution.1
 
+/-- The same actual raw/tag/pointer executions in any matching source world.
+The pointer-field offset is checked separately from the original raw layout. -/
+theorem gpr_calls_bound (world : CC.CGenv) (layout : GprLayout world)
+    (pointerLayout : CC.unionFieldOffset world.genv_cenv Arm64Program._ptr cellComposite.co_members = .OK (0,.Full))
+    (addresses : Arm64Registers.PointerOrigins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw) :
+    InternalRun world 28 (.Callstate (.Internal (reader false))
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) ∧
+    InternalRun world 28 (.Callstate (.Internal (reader true))
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) ∧
+    InternalRun world 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) := by
+  have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
+    cases value <;> try contradiction
+    all_goals rfl
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have rawExec := gpr_executes world layout pointerLayout false false i b cb vb ofs co vo m k value tag
+    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
+  have tagExec := gpr_executes world layout pointerLayout true false i b tb kb ofs to ko m k value tag
+    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot kind valueCast
+  have pointerExec := gpr_executes world layout pointerLayout false true i b cb vb ofs co vo m k value tag
+    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
+  exact ⟨internalRun_of_steps rawExec.2 rawExec.1, internalRun_of_steps tagExec.2 tagExec.1,
+    internalRun_of_steps pointerExec.2 pointerExec.1⟩
+
 private theorem gpr_calls (addresses : Arm64Registers.PointerOrigins)
     (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
     (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
@@ -247,20 +282,8 @@ private theorem gpr_calls (addresses : Arm64Registers.PointerOrigins)
       (.Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) ∧
     InternalRun ge 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
-      (.Returnstate value (CC.callCont k) m) := by
-  have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
-    cases value <;> try contradiction
-    all_goals rfl
-  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
-    Arm64EntryMemory.gpr_loads observed
-  have rawExec := gpr_executes false false i b cb vb ofs co vo m k value tag
-    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
-  have tagExec := gpr_executes true false i b tb kb ofs to ko m k value tag
-    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot kind valueCast
-  have pointerExec := gpr_executes false true i b cb vb ofs co vo m k value tag
-    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
-  exact ⟨internalRun_of_steps rawExec.2 rawExec.1, internalRun_of_steps tagExec.2 tagExec.1,
-    internalRun_of_steps pointerExec.2 pointerExec.1⟩
+      (.Returnstate value (CC.callCont k) m) :=
+  gpr_calls_bound ge program_layout pointer_offset addresses frontier b ofs i m k value raw tag observed represented
 
 /-- Both real exported readers follow the same cells observed by gpr.
 Pointers keep their identity; ValueRep excludes undefined/invented values. -/

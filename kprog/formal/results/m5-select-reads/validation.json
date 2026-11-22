@@ -1,0 +1,127 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean": "ecce62bd6611f87368b046a21fff5d162e4bcf13e48ffe2f64324fadda2813dc",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectReads.lean": "818689bb75a1fdd66777aa1df4a51e631fcd49f214053827edb6bcd537066fde"
+  },
+  "source_lines": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean": 1914,
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectReads.lean": 52
+  },
+  "previous_register_reads_sha256": "d1d932bb682d4c15afc03206bf8589b1209854d2f10bb44bf7bb114f8215599f",
+  "previous_register_reads_snapshot": "/workspaces/kprog-raw/formal/m5-select-reads/20261122T032634Z/RegisterReads-before.lean",
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean": "1d9ccc69adf0443ffeffcbf5b5e3b39234493d9cfbf9095df3fee5ca960fb486",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64Registers.lean": "b49fc2a167dcb24a1989f55179468210f90d6790553c40dc647cd436294fd212",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64EntryMemory.lean": "5970ed661c05a07e786b1c4820abb8dac94ea408a982f0fe47c512661afc69d7",
+    "kprog/formal/KProgFormal/Clight/Arm64Program.lean": "85b0b77efe29050658da9bb3ec4ab17661257f2f6ba985d1c24d9e72532d8df6",
+    "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean": "3deb6674d3397ac12845ccaf56b6b3067559e5823baaee0c44c915bf4d99f252",
+    "kprog/formal/external/clean/export/CCLib/ClightExec.lean": "880cf140497cdd7b223e27dd30420fcbb58eb5ace0b310189d03c232de50fa18",
+    "kprog/formal/external/clean/export/CCLib/Cop.lean": "773cc8d2ed06dc4c791f9c3aa8bb12ca3015350f3da93bb7afa75b771793996f"
+  },
+  "base_build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads"
+    ],
+    "exit": 0,
+    "seconds": 49.1747043132782,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "base_build_jobs": 143,
+  "base_build_log": "/workspaces/kprog-raw/formal/m5-select-reads/20261122T032634Z/reads-base1.log",
+  "linked_build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectReads"
+    ],
+    "exit": 0,
+    "seconds": 37.78992438316345,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "linked_build_jobs": 147,
+  "linked_build_log": "/workspaces/kprog-raw/formal/m5-select-reads/20261122T032634Z/reads-linked1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-reads/20261122T032634Z/SelectReadsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.535714864730835,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_queries": 6,
+  "public_log": "/workspaces/kprog-raw/formal/m5-select-reads/20261122T032634Z/reads-public1.log",
+  "public_query_sha256": "66d8614fa6778daae9ea7c22f9fd9403ee8b5f4788ee17c43115e8bc20473162",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_calls_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_pointer_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_tag_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Reads.layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Reads.bindings": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Reads.helpers": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "steps_each": 28,
+  "scope": "actual linked ordinary GPR pointer/tag helper executions for every Fin31 and each independent continuation, derived from same existing complete Registers.Represents; raw Val identity/all8 tag bits/existing provenance materialization and full memory preserved; actual linked symbols104/65 and composites checked",
+  "generalization": "existing private gpr_executes gains world/layout/pointer-field offset parameters; gpr_calls_bound exposes existing same three raw/tag/pointer certificates, legacy wrapper retains original standalone API",
+  "legacy_contracts_text_identical": [
+    "gpr_returns",
+    "gpr_pointer_returns",
+    "gpr_tag_bound",
+    "register_return_corresponds",
+    "pointer_return_corresponds"
+  ],
+  "remaining": "actual source128 caller branch and two read callsites reaching writer; actual selected raw/tag pointer writer including STACK4; imported native CSEL/full dispatcher/seventh-call/full relation/remaining fixture/O1/O2/O4/M5/M6; fresh downstream/global/root validation pending",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
