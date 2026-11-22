@@ -1,0 +1,192 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareMath.lean": "c20becdd6054075e5367fb5ba1f8df309a83e65b1881bc7902c27a2c9a87cbf4"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareMath"
+    ],
+    "exit": 0,
+    "seconds": 7.734329462051392,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 240,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-math7.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareMathPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7406063079833984,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-math1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Math.loop_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Math.sub_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Math.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Math.values": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 44,
+  "step_decomposition": {
+    "actual_SUB_family_selection_and_loops": 5,
+    "actual_W_X_mask_and_sign_preparation": 30,
+    "actual_masked_lhs_rhs_and_subtraction": 9
+  },
+  "scope": "original CMP flag loop through actual constant-family switch/SUB loop and arithmetic to untouched original Z/N/C/V pointer loads and byte stores; exact11 source temp writes,5 derived reads, same full memory/e/original caller continuation",
+  "input_conditions": "actual captured lhs/rhs and effective width4/8; independent input premises only, no flag value/result/native readback premise",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [
+    {
+      "name": "compare-math1",
+      "source_sha256": "f431eae642379bcff5b2320294746af03ca9c6bea321e713188bd33898ca7962",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math1.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 1,
+        "seconds": 3.6883983612060547,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "wrong Lean.Meta.mkIntLit namespace; downstream source extraction errors"
+    },
+    {
+      "name": "compare-math2",
+      "source_sha256": "0fac8c1ffa177a528f9c21298bf27c9b98c5efce57b73ae228c2005bfc265235",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math2.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 1,
+        "seconds": 26.993894577026367,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "selected arm continuation expansion and calculate automatic simplification depth512"
+    },
+    {
+      "name": "compare-math3",
+      "source_sha256": "265df4e31b2c7a671a62ab073e865b1d1019bea213b3c4aa61e843e78ef87103",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math3.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 1,
+        "seconds": 26.379472017288208,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "InternalState metavariable elaboration and calculate automatic simplification depth512"
+    },
+    {
+      "name": "compare-math4",
+      "source_sha256": "f7fbb3362ed4a4bcd6e139d9e98ab76cb649f7726d7e81ceea1216e114cdce39",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math4.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 1,
+        "seconds": 26.834928035736084,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "calculate step4 automatic simplification depth512; explicit actual-expression evaluations used instead"
+    },
+    {
+      "name": "compare-math5",
+      "source_sha256": "29bf14fac09c82394a913b67b8a6a0465d995c99135b5ff970e87bddaee0fcaa",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math5.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 1,
+        "seconds": 6.105208158493042,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "doEvalExpr_sound requires explicit inferred arguments via apply"
+    },
+    {
+      "name": "compare-math6",
+      "source_sha256": "842bfbd0332b973914e56ff6cb3198430ad69dbaa8f419b811896bd530ac53e2",
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-math6.log",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareMath"
+        ],
+        "exit": 0,
+        "seconds": 6.655954599380493,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "note": "intermediate successful source before adding public five-value observations"
+    }
+  ],
+  "whole_library_confirmation": "pending complete CMP flags/source/native batch and latest stable V OF handoff86fa3ea",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
