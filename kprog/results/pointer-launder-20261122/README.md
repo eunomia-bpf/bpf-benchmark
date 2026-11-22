@@ -39,18 +39,28 @@ Probed directly against `BPF_PROG_LOAD` (prog_type 1, syscall 321, cmd 5):
 ## How the pass emits it
 
 `frame_scalar` (entry block, after every alloca of the block) materialises
-the frame once per frame alloca:
+the frame once per frame alloca.  The laundering window is the frame's own
+first word, not a slot of its own:
 
 ```llvm
-%frame_scalar_slot = alloca i64
 %frame_address = ptrtoint ptr %frame to i64
-store volatile i64 %frame_address, ptr %frame_scalar_slot
+store volatile i64 %frame_address, ptr %frame          ; borrow the frame's first word
 %3 = call i64 asm sideeffect "r1 = $1\012w1 = w1\012$0 = r1", "=r,r,~{r1}"(i64 %frame_address)
-store volatile i32 (trunc %3), ptr %frame_scalar_slot     ; 32-bit store of the laundered register
-%frame_scalar = load volatile i64, ptr %frame_scalar_slot
+store volatile i32 (trunc %3), ptr %frame              ; 32-bit store of the laundered register
+%frame_scalar = load volatile i64, ptr %frame
 ```
 
-Three points are load-bearing:
+The borrowed window costs no frame space.  A dedicated `alloca i64` costs
+16 bytes — llc rounds the frame add — and r3 runs at 504 of the 512-byte
+`MAX_BPF_STACK`, so a new slot pushed it to 520 and the verifier refused it
+(`invalid write to stack R10 off=-520 size=8`).  Borrowing is exact: the
+window is dead there (the simulator's first store has not run, and the
+emulated stack's bytes are uninitialised either way), the four accesses are
+volatile and adjacent in one block with no call between them, and the
+laundered move keeps the low 32 bits, which are all the 32-bit store writes
+back, so the `ld64` returns the frame's own `ptrtoint` bit for bit.
+
+Three more points are load-bearing:
 
 1. The asm takes and returns **i64**. Truncating the pointer to i32 before
    the asm makes clang build the 32-bit value with `r2 <<= 32`, and the
@@ -59,7 +69,9 @@ Three points are load-bearing:
 2. The asm text names **literal registers**, not `$` placeholders
    (`"r1 = $1 ; w1 = w1 ; $0 = r1"`). A one-line `"w1 = w1"` lets the
    backend rematerialise the frame into a different register for the 32-bit
-   store, so the stored register is not the laundered one.
+   store, so the stored register is not the laundered one.  Spelling the
+   window register `r6` instead of `r1` measures identically (512 B on r3),
+   so the literal `r1` of the original form stays.
 3. `r1` is declared clobbered so the register allocator keeps the input
    live across the asm.
 
@@ -114,3 +126,28 @@ Across all fourteen OTel requests (`otel-all-requests.txt`), the pass takes
 the workload from 4 accepted to 6: r10 and r9 join r3, r4, r6 and r12.
 r7, r13 and r14 all leave the stack-pointer subtraction behind and now stop
 at the task-pointer class. BCC is unchanged: 18 accepted before and after.
+
+## Frame cost of the window (2026-11-22, borrow form)
+
+All fourteen OTel requests regenerated with the borrow form
+(`/tmp/rrr1 … /tmp/rrr14`); every frame stays inside `MAX_BPF_STACK` 512:
+
+|req|frame B|call 0x71|req|frame B|call 0x71|
+|---|---|---|---|---|---|
+|r1|40|0|r8|208|0|
+|r2|136|0|r9|352|48|
+|r3|**512**|0|r10|240|0|
+|r4|432|32|r11|272|4|
+|r5|232|0|r12|44|0|
+|r6|168|0|r13|224|0|
+|r7|392|108|r14|216|0|
+
+r3 is the tight one: with the slot form it measured 520 and the verifier
+refused `invalid write to stack R10 off=-520 size=8` at insn 2939; with the
+borrow form it is 512 and ACCEPTED (relocs=127).  A slot-only variant
+(`KPROG_LAUNDER_SLOT_ONLY=1`) confirmed the 16-byte cost: 504 -> 520.
+
+The same fourteen requests run through the same load harness before and
+after the `x86_mem_access.h` change of commit `e3ab03f98` give identical
+verdicts (6 of 14 accepted: r3, r4, r6, r9, r10, r12) and the same failing
+instruction and reason on every rejected request.

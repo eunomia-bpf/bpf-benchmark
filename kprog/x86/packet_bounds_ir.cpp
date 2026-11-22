@@ -316,14 +316,25 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
     if (found!=scalars.end()) return found->second;
     Function *function=alloca->getFunction();
     /* After every alloca of the entry block: the frame's own alloca must be
-     * defined before its ptrtoint, and the new slot must stay in the entry
+     * defined before its ptrtoint, and the launder must stay in the entry
      * block. */
     BasicBlock &entry=function->getEntryBlock();
     auto position=entry.begin();
     for (auto iterator=entry.begin();iterator!=entry.end();++iterator)
       if (isa<AllocaInst>(&*iterator)) position=std::next(iterator);
     IRBuilder<> builder(&*position);
-    auto *slot=builder.CreateAlloca(builder.getInt64Ty(),nullptr,"frame_scalar_slot");
+    /* The laundering window is the frame's own first word, not a slot of its
+     * own: an extra i64 alloca costs 16 bytes of frame (llc rounds the add),
+     * and r3 runs at 504 of the 512-byte limit, so a new slot pushed it to
+     * 520 and the stock verifier refused it ("invalid write to stack R10
+     * off=-520 size=8"). The window is dead at that point -- the simulator's
+     * first store has not run yet, and the emulated stack's bytes are
+     * uninitialised either way -- and the four accesses below are volatile
+     * and adjacent in one block with no call between them, so no use can
+     * observe the borrowed word. The loaded bits equal the frame's own
+     * ptrtoint exactly: the laundered move keeps the low 32 bits, which are
+     * all the 32-bit store writes back. */
+    Value *slot=alloca;
     Value *address=builder.CreatePtrToInt(alloca,builder.getInt64Ty(),"frame_address");
     builder.CreateStore(address,slot,true);
     /* The asm takes and returns 64 bits. Narrowing the pointer before the
