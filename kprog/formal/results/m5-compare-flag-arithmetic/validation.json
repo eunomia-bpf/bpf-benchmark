@@ -1,0 +1,109 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagArithmetic.lean": "2f45df7434c6bbc5facabaee69b97ee043bec3bec2fb15a693a18259de7a69b5"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareFlagArithmetic"
+    ],
+    "exit": 0,
+    "seconds": 2.1161088943481445,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 77,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-flag-arith2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareFlagArithmeticPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5480053424835205,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-flag-arith1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagArithmetic.subtraction": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagArithmetic.zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagArithmetic.carry": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "imported AddWithCarry64 subtraction result x-y, actual zero flag iff operands equal and carry flag iff unsigned no borrow; widened sum and exact-width equivalence proved with kernel-checked Nat arithmetic",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareFlagArithmetic"
+        ],
+        "exit": 1,
+        "seconds": 2.0851895809173584,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-flag-arith1.log",
+      "source_sha256": "2db6c2c841f0d28a54b444de5bdde3f17e0eee766534e4e79503b73c7a3b8f78",
+      "note": "unknown sub_eq_zero_iff replaced with direct bitvector-toNat proof; dependent if-guard rewrite replaced with simp congruence; same proof limits"
+    }
+  ],
+  "remaining": "mature N/V equivalence to C mask/xor formulas, C byte representation binding, full source/native NZCV/register/sixcall; Storage9file permission check separate",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
