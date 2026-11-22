@@ -281,8 +281,19 @@ calculation and storage compose in eleven steps to the original overflow code,
 deriving the payload and retaining the exact updated heap and two temporary
 writes. The [eleven public audits](../results/kprog_verification_20261107/x86-shift-cf-calculation.log.gz)
 record actual calculation, frames and complete carry-stage execution at existing
-budgets and inherited axioms. Whole-route composition, OF/PF stores, writeback
-and entry/world correspondence remain open.
+budgets and inherited axioms.
+
+The universal nonzero SHL route now reaches the original overflow code in
+197/209/221/221 silent steps, executing ZF, SF and CF storage in successive
+actual heaps. Its positive six-bit count follows from the mature ISA mask;
+binding, operand, count, width and operation observations follow from all
+preceding source temporary maps. The third pointer load and byte store use
+the actual heap reached after SF. The endpoint retains that exact final heap,
+caller locals, all derived temporary writes and original OF continuation.
+The [twelve public audits](../results/kprog_verification_20261107/x86-shift-through-cf.log.gz)
+record this composition at existing budgets and inherited axioms. Current
+layout/callee/heap observations remain explicit. OF/PF stores, destination
+writeback and entry/world correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
