@@ -1,0 +1,26 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_table_native
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_table_native
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_native
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_native
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_writable
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_writable
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_internal
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_internal
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_local_storage
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_local_storage
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_local_writable
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_local_writable
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
