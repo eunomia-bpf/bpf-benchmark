@@ -1,38 +1,38 @@
-request  archived-B  launder-B  note
-b1      ACCEPTED  ACCEPTED  same
-b10     ACCEPTED  ACCEPTED  same
-b11     ACCEPTED  ACCEPTED  same
-b12     REJECTED  REJECTED  same
-b13     REJECTED  REJECTED  same
-b14     REJECTED  REJECTED  same
-b15     REJECTED  REJECTED  same
-b16     ACCEPTED  ACCEPTED  same
-b17     ACCEPTED  ACCEPTED  same
-b18     REJECTED  REJECTED  same
-b19     ACCEPTED  ACCEPTED  same
-b2      ACCEPTED  ACCEPTED  same
-b20     REJECTED  REJECTED  same
-b21     ACCEPTED  ACCEPTED  same
-b22     ACCEPTED  ACCEPTED  same
-b23     REJECTED  REJECTED  same
-b24     REJECTED  REJECTED  same
-b25     ACCEPTED  ACCEPTED  same
-b3      REJECTED  REJECTED  same
-b4      ACCEPTED  ACCEPTED  same
-b5      ACCEPTED  ACCEPTED  same
-b6      ACCEPTED  ACCEPTED  same
-b7      ACCEPTED  ACCEPTED  same
-b8      REJECTED  REJECTED  same
-b9      ACCEPTED  ACCEPTED  same
-r10     REJECTED  ACCEPTED  FIXED
-r11     REJECTED  REJECTED  same
-r12     ACCEPTED  ACCEPTED  same
-r13     REJECTED  REJECTED  same
-r14     REJECTED  REJECTED  same
-r2      REJECTED  REJECTED  same
-r3      REJECTED  REJECTED  same
-r4      ACCEPTED  ACCEPTED  same
-r5      REJECTED  REJECTED  same
-r6      ACCEPTED  ACCEPTED  same
-r8      REJECTED  REJECTED  same
-r9      REJECTED  ACCEPTED  FIXED
+request  archived  launder  relation  archived-fail-insn  launder-fail-insn
+b1      ACCEPTED  ACCEPTED same                                
+b10     ACCEPTED  ACCEPTED same                                
+b11     ACCEPTED  ACCEPTED same                                
+b12     REJECTED  REJECTED same                 38           47
+b13     REJECTED  REJECTED same                 38           38
+b14     REJECTED  REJECTED same                 50           50
+b15     REJECTED  REJECTED same                 13           13
+b16     ACCEPTED  ACCEPTED same                                
+b17     ACCEPTED  ACCEPTED same                                
+b18     REJECTED  REJECTED same                 70           79
+b19     ACCEPTED  ACCEPTED same                                
+b2      ACCEPTED  ACCEPTED same                                
+b20     REJECTED  REJECTED same                 76           86
+b21     ACCEPTED  ACCEPTED same                                
+b22     ACCEPTED  ACCEPTED same                                
+b23     REJECTED  REJECTED same                 62           62
+b24     REJECTED  REJECTED same                 36           46
+b25     ACCEPTED  ACCEPTED same                                
+b3      REJECTED  REJECTED same                189          199
+b4      ACCEPTED  ACCEPTED same                                
+b5      ACCEPTED  ACCEPTED same                                
+b6      ACCEPTED  ACCEPTED same                                
+b7      ACCEPTED  ACCEPTED same                                
+b8      REJECTED  REJECTED same                 13           13
+b9      ACCEPTED  ACCEPTED same                                
+r10     REJECTED  ACCEPTED FIXED              1583             
+r11     REJECTED  REJECTED same                290          301
+r12     ACCEPTED  ACCEPTED same                                
+r13     REJECTED  REJECTED same                153          548
+r14     REJECTED  REJECTED same                130          594
+r2      REJECTED  REJECTED same                418          418
+r3      REJECTED  REJECTED same                193          202
+r4      ACCEPTED  ACCEPTED same                                
+r5      REJECTED  REJECTED same                143          152
+r6      ACCEPTED  ACCEPTED same                                
+r8      REJECTED  REJECTED same                771          771
+r9      REJECTED  ACCEPTED FIXED              4561             

@@ -1,0 +1,66 @@
+Remaining B-side verifier rejections after the pointer launder, measured
+2026-11-22 against the stock verifier with BPF_PROG_LOAD (prog_type taken
+from request/generation.metadata.json; perf_event is 7, tracing/fentry is
+26 with attach_btf_id from kernel.metadata.json load_context).
+
+Class A: bpf_get_current_task (#35) result dereferenced as a pointer.
+  r2, r5, r8, r14 (and r13 after the launder advances to it)
+
+  17: (85) call bpf_map_lookup_elem#1  ; R0=map_value(map=per_cpu_records,...)
+  32: (85) call bpf_get_current_task#35 ; R0=scalar()
+  ...
+  (79) r7 = *(u64 *)(r0 +0)
+  R0 invalid mem access 'scalar'
+
+  The kernel proto is the authority and B matches it:
+    vendor/linux-framework/kernel/trace/bpf_trace.c:761-765
+      const struct bpf_func_proto bpf_get_current_task_proto = {
+              .func = bpf_get_current_task, .gpl_only = true,
+              .ret_type = RET_INTEGER,
+      };
+    kernel/trace/bpf_trace.c:772-777
+      ... bpf_get_current_task_btf_proto ... .ret_type = RET_PTR_TO_BTF_ID_TRUSTED
+  and the simulator agrees (kprog/x86/x86_sim_local_bpf.h:4043-4044
+  READONLY_SCALAR_RESULT for #35, :4154-4155 READONLY_POINTER_RESULT for
+  #158).
+
+  Probe results (BPF_PROG_LOAD, prog_type 1):
+    call#35 ; r1 = *(u64 *)(r0+0)                       REJECTED  invalid mem access 'scalar'
+    call#35 ; if r0 s> -1 ; r1 = *(u64 *)(r0+0)         REJECTED  same
+    call#35 ; r1 = 16 ; r0 += r1 ; r1 = *(u64 *)(r0+0)  REJECTED  same
+    call#158 ; r1 = *(u64 *)(r0+0)                       ACCEPTED
+    call#158 ; r1 = 16 ; r0 += r1 ; r1 = *(u64 *)(r0+0) REJECTED  (pointer arithmetic)
+
+  The application casts the integer to struct task_struct * and dereferences:
+    vendor/bpf/otel/support/ebpf/tracemgmt.h:685
+    vendor/bpf/otel/support/ebpf/tsd.h:42
+    vendor/bpf/otel/support/ebpf/system_config.ebpf.c:73
+  libbpf/BPF normally lets this pass because the loader rewrites #35 to a
+  BTF-typed pointer; the stock verifier does not, and B is faithful.
+
+  Consequently this is a decision for the B contract, not a lowering bug:
+  kprog/docs/todo.md:281-285 keeps B's conservative scalar abstraction for
+  unspecified/helper inputs. Typing the #35 result as a pointer needs the
+  coordinator/operator to change that.
+
+Class B: R1 unbounded memory access, before bpf_probe_read_user#112
+  r11
+  301: (85) call bpf_probe_read_user#112
+  R1 unbounded memory access, make sure to bounds check any such access
+  r1 = map_value(map=per_cpu_records) + r5, where r5 is a 64-bit shift
+  (r5 <<= 6) of a value the program bounded only in 32 bits (w1 <= 0xe).
+  The 32-bit bound does not carry to the 64-bit add.
+
+Class C: R1 type=scalar expected=map_ptr (r3) and R3 type=scalar
+  expected=fp, pkt, pkt_meta, map_key, map_value, mem, ringbuf (b14)
+  A map pointer loaded from the stack has lost its map_ptr type; the pass
+  does not change this (same register, same message on both Bs).
+
+Class D: R* invalid mem access 'scalar' on fentry/tracepoint programs
+  b8, b12, b13, b15, b18, b20, b23, b24, b3, r12(accepted)...
+  Only reproduced under a BTF-aware load. On every one of these the
+  archived and the new B fail at the same register and the same message,
+  differing only in instruction numbering, so the class predates this
+  change. Inspecting it requires loading through libbpf (the loader's
+  path); the raw BPF_PROG_LOAD harness used here reads ctx arguments as
+  scalars without BTF, and vmlinux BTF attach ids differ from the guest's.

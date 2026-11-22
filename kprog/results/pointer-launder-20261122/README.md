@@ -92,10 +92,20 @@ for all 37 archived requests (`ab-all-requests.txt`), each loaded with
 `BPF_PROG_LOAD` after resolving the object's map relocations against maps
 built from the request's `kernel.metadata.json`/`generation.metadata.json`
 (a map carrying `value_offset` is relocated with `BPF_PSEUDO_MAP_VALUE`,
-everything else with `BPF_PSEUDO_MAP_FD`). The harness reproduces every
-archived `verify.stdout` verdict, so it is a faithful stand-in for the
-loader's B step.
+everything else with `BPF_PSEUDO_MAP_FD`). The harness agrees with 29 of
+the 37 archived verdicts. The 8 it rejects where the archive accepts
+(r3, b8, b12, b14, b15, b18, b20, b23) are all `fentry`/`tracepoint`
+programs whose ctx arguments libbpf reads through BTF; the harness loads
+without BTF, so their first ctx dereference reads as a scalar. In every
+one of those the new B fails at the same register and the same error as
+the archived B, moved only by instruction renumbering (e.g. b18 insn 70
+`R2 invalid mem access 'scalar'` archived, insn 79 the same after), so
+B's own change is not what rejects them.
 
 OTel r10 and r9 go REJECTED → ACCEPTED. No request changes
 ACCEPTED → REJECTED, and the 18 requests the archive records as accepted
-stay accepted.
+stay accepted. Two more advance without passing: r13 and r14 no longer
+fail on the stack-pointer subtraction itself (insn 153 and insn 130, both
+`math between fp pointer and register with unbounded min value`) and now
+fail later, at insn 548 and insn 594, on the `bpf_get_current_task`
+scalar-dereference class below.

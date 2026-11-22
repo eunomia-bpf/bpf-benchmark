@@ -755,16 +755,7 @@ static inline EBPF_INLINE int collect_trace(
   // Recursive unwind frames
   int unwinder           = PROG_UNWIND_STOP;
   bool has_usermode_regs = false;
-#if defined(MICRO_NATIVE)
-  // A sampling trace runs in a perf-event program: its context is the kernel's struct
-  // bpf_perf_event_data_kern, whose first field points at the sampled registers. The
-  // verifier rewrites the eBPF program's register reads this way; helpers and tail calls
-  // keep ctx.
-  struct pt_regs *regs = origin == TRACE_SAMPLING ? *(struct pt_regs **)ctx : ctx;
-  ErrorCode error      = get_usermode_regs(regs, &record->state, &has_usermode_regs);
-#else
   ErrorCode error        = get_usermode_regs(ctx, &record->state, &has_usermode_regs);
-#endif
   if (error || !has_usermode_regs) {
     goto exit;
   }
