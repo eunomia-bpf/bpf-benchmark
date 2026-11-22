@@ -457,6 +457,18 @@ records forty-one public declarations under the default budgets. Width/local
 updates, final register-table stores, qword tag calls and the native entry-world
 relation remain open.
 
+
+The original width classifier now executes in 2/6/10/10 silent steps for
+byte/word/dword/qword sizes, deriving source temporary 112 as 0/1/2/3.
+Its redundant source assignments collapse to one exact temporary update,
+with every other temporary and the heap retained. The enclosing source
+sequences and branch selection reach the original byte arm or remaining-width
+arm in 6/10/14/14 steps, retaining the genuine final-storage continuation.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-classify.log.gz)
+records forty-five public declarations under the default budgets. Local
+value updates, final register-table stores, qword tag calls and the native
+entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

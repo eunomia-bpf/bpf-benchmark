@@ -1505,4 +1505,100 @@ theorem narrow_tagged (ge : CC.CGenv)
     postTag keptDestination
   exact initialized.trans tagged
 
+
+private def widthBranch : CC.Stmt := by
+  run_tac cachePart (← `(match widthDispatch with
+    | .Ssequence (.Ssequence _ branch) _ => branch | _ => .Sskip))
+
+def storageTail : CC.Stmt := by
+  run_tac cachePart (← `(match widthDispatch with
+    | .Ssequence _ rest => rest | _ => .Sskip))
+
+theorem width_dispatch_source : widthDispatch =
+    .Ssequence (.Ssequence X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_104
+      widthBranch) storageTail := rfl
+
+def widthClass (size : X86.Size) : BitVec 32 :=
+  match size with | .b => 0 | .w => 1 | .d => 2 | .q => 3
+
+def classTemps (le : CC.TempEnv) (size : X86.Size) : CC.TempEnv :=
+  le.set X86_program_profile_bpf._t'112 (.Vint (widthClass size))
+
+def classifyLength (size : X86.Size) : Nat :=
+  match size with | .b => 2 | .w => 6 | .d => 10 | .q => 10
+
+theorem width_classify (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (width : le.get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument size)) :
+    InternalRun ge (classifyLength size)
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_104 k e le m)
+      (.State function .Sskip k e (classTemps le size) m) := by
+  cases size <;> apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, classifyLength,
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_104,
+      classTemps, widthClass, CC.doStep, CC.doEvalExpr, CC.typeof,
+      width, X86ShiftLeft.argument, X86.Size.bytes,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tuchar, CC.tuint, CC.tint,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero,
+      CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext,
+      CC.Integers.MI.zero_ext, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+      CC.Eapp, CC.E0, set_twice]
+
+theorem class_temps (le : CC.TempEnv) (size : X86.Size) :
+    (classTemps le size).get X86_program_profile_bpf._t'112 =
+      some (.Vint (widthClass size)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'112 →
+      (classTemps le size).get id = le.get id := by
+  refine ⟨by simp [classTemps], ?_⟩
+  intro id other
+  simp [classTemps, CC.PTree.gso, Ne.symm other]
+
+def storageArm (size : X86.Size) : CC.Stmt :=
+  match size with
+  | .b => X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105
+  | _ => X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106
+
+theorem width_dispatch (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (width : le.get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument size)) :
+    InternalRun ge (classifyLength size + 4)
+      (.State function widthDispatch k e le m)
+      (.State function (storageArm size) (.Kseq storageTail k) e (classTemps le size) m) := by
+  rw [width_dispatch_source]
+  have entered : InternalRun ge 2
+      (.State function
+        (.Ssequence (.Ssequence X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_104
+          widthBranch) storageTail) k e le m)
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_104
+        (.Kseq widthBranch (.Kseq storageTail k)) e le m) := by
+    apply internalRun_of_steps <;>
+      simp +decide [steps, InternalPath, InternalState, CC.doStep, CC.Eapp, CC.E0]
+  have classified := width_classify ge function e le
+    (.Kseq widthBranch (.Kseq storageTail k)) m size width
+  have selected : InternalRun ge 2
+      (.State function .Sskip (.Kseq widthBranch (.Kseq storageTail k)) e (classTemps le size) m)
+      (.State function (storageArm size) (.Kseq storageTail k) e (classTemps le size) m) := by
+    cases size <;> apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, widthBranch, storageArm,
+        classTemps, widthClass, CC.doStep, CC.doEvalExpr, CC.typeof,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+        CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.boolVal, CC.Cop.classifyBool,
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuint, CC.tint,
+        CC.Integers.Int.eq, CC.Integers.MI.eq,
+        CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+        CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Eapp, CC.E0]
+  have counts : 2 + classifyLength size + 2 = classifyLength size + 4 := by omega
+  rw [← counts]
+  exact (entered.trans classified).trans selected
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
