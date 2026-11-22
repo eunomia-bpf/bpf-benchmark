@@ -1,0 +1,28 @@
+{
+  "build1": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluDecode"
+    ],
+    "exit": 0,
+    "seconds": 59.92447908403119,
+    "workers": 1,
+    "process_memory_gib": 32,
+    "timing_lock": "shared"
+  },
+  "public1": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-alu-decode/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6686125000123866,
+    "workers": 1,
+    "process_memory_gib": 32,
+    "timing_lock": "shared"
+  }
+}

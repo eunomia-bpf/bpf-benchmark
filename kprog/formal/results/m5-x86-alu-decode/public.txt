@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86AluDecode.source :
+  KProgFormal.ClightRefinement.X86AluEntry.afterWidth =
+    KProgFormal.ClightRefinement.X86AluDecode.auxStatement✝.Ssequence
+      (KProgFormal.ClightRefinement.X86AluDecode.operation✝.Ssequence
+        (KProgFormal.ClightRefinement.X86AluDecode.dstShift✝.Ssequence
+          (KProgFormal.ClightRefinement.X86AluDecode.srcShift✝.Ssequence
+            (KProgFormal.ClightRefinement.X86AluDecode.lhs✝.Ssequence
+              (KProgFormal.ClightRefinement.X86AluDecode.rhs✝.Ssequence
+                KProgFormal.ClightRefinement.X86AluDecode.operandReads)))))
+'KProgFormal.ClightRefinement.X86AluDecode.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluDecode.decode (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (k : CC.Cont) (m : CC.Mem) (aux : BitVec 32)
+  (observed : CC.PTree.get X86_program_profile_bpf._aux le = some (CC.Val.Vint aux)) :
+  KProgFormal.ClightRefinement.InternalRun ge 18
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluEntry.afterWidth k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e
+      (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) m)
+'KProgFormal.ClightRefinement.X86AluDecode.decode' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluDecode.field_byte (aux : BitVec 32) (shift : Nat) :
+  KProgFormal.ClightRefinement.X86AluDecode.field aux shift = BitVec.setWidth 32 (BitVec.setWidth 8 (aux >>> shift))
+'KProgFormal.ClightRefinement.X86AluDecode.field_byte' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluDecode.observations (le : CC.TempEnv) (aux : BitVec 32) :
+  CC.PTree.get X86_program_profile_bpf.___x86_l_alu (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86AluDecode.field aux 0)) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) =
+        some (CC.Val.Vint (KProgFormal.ClightRefinement.X86AluDecode.field aux 8)) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) =
+          some (CC.Val.Vint (KProgFormal.ClightRefinement.X86AluDecode.field aux 16)) ∧
+        CC.PTree.get X86_program_profile_bpf.___x86_l_lhs (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) =
+            some (CC.Val.Vlong 0) ∧
+          CC.PTree.get X86_program_profile_bpf.___x86_l_rhs (KProgFormal.ClightRefinement.X86AluDecode.temps le aux) =
+            some (CC.Val.Vlong 0)
+'KProgFormal.ClightRefinement.X86AluDecode.observations' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluDecode.from_call (ge : CC.CGenv) (caller : CC.Mem) (k : CC.Cont)
+  (binding op dst src imm : CC.Val) (aux : BitVec 32) (flags width : BitVec 8) (block : CC.Block)
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some block ∧
+      ge.genv_genv.findFunctPtr block = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective)) :
+  have initial :=
+    KProgFormal.ClightRefinement.X86RegisterView.writerInitialTemps binding op dst src
+      (KProgFormal.ClightRefinement.X86Width.argument flags) (CC.Val.Vint aux) imm
+      (KProgFormal.ClightRefinement.X86Width.argument width);
+  KProgFormal.ClightRefinement.InternalRun ge 37
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG)
+      [binding, op, dst, src, KProgFormal.ClightRefinement.X86Width.argument flags, CC.Val.Vint aux, imm,
+        KProgFormal.ClightRefinement.X86Width.argument width]
+      k caller)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+      KProgFormal.ClightRefinement.X86AluDecode.operandReads (KProgFormal.ClightRefinement.X86AluEntry.continuation k)
+      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst
+      (KProgFormal.ClightRefinement.X86AluDecode.temps
+        (KProgFormal.ClightRefinement.X86AluEntry.widthTemps
+          (CC.PTree.set X86_program_profile_bpf.___x86_l_width (KProgFormal.ClightRefinement.X86Width.argument width)
+            initial)
+          flags)
+        aux)
+      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd)
+'KProgFormal.ClightRefinement.X86AluDecode.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
