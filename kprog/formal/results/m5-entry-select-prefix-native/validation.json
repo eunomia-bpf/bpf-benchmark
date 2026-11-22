@@ -1,0 +1,49 @@
+{
+  "status": "focused full-prefix proof and public query passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative"
+    ],
+    "exit": 0,
+    "seconds": 2.782149314880371,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 316,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-select-prefix-native/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5436944961547852,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 1,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "provider_input_traces": 98,
+  "source_calls_and_native_steps": 7,
+  "all_six_predecessor_contracts_retained": true,
+  "shared_full_confirmation": "V owns; latest make-check3 default passes but DIV fault oracle fails",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-call/20261122T115647Z",
+  "complete_isa_families": 0
+}

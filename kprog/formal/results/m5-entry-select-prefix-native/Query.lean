@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative
+
+set_option Elab.async false
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds
