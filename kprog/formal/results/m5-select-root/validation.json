@@ -1,0 +1,22 @@
+{
+  "status": "accepted focused proofs integrated; shared full confirmation and root query pending",
+  "root_import": "Arm64SelectBody transitively exposes all five new ARM modules",
+  "query_count_prepared": 37,
+  "V_interfaces": 17,
+  "ARM_interfaces": 20,
+  "V_raw": "/workspaces/kprog-raw/V/x86-entry-storage-20261122",
+  "own_batch_started": false,
+  "source_commits": {
+    "selected": "9c3ad0a9f08458385821853a4981c373a6645e2d",
+    "eq": "b634d0a761659b0e5bafdefe9b8fb31a98d5f967",
+    "dispatch": "d2710ff1afbd5e07bdd2a4eef6cc74b827f1b197",
+    "body": "5bf9bb1f13e00a793215776f7b5709a55b5c5607"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "complete_isa_families": 0
+}

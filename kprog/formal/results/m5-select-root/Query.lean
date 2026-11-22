@@ -1,0 +1,78 @@
+import KProgFormal
+
+set_option Elab.async false
+
+#check KProgFormal.ClightRefinement.Arm64Select.Branch.source_eq
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Branch.source_eq
+#check KProgFormal.ClightRefinement.Arm64Select.Branch.to_writer
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Branch.to_writer
+#check KProgFormal.ClightRefinement.Arm64Select.Native.execute
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Native.execute
+#check KProgFormal.ClightRefinement.Arm64Select.Native.native_step
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Native.native_step
+#check KProgFormal.ClightRefinement.Arm64Select.Native.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Native.reference_step
+#check KProgFormal.ClightRefinement.Arm64Select.Native.pointer_step
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Native.pointer_step
+#check KProgFormal.ClightRefinement.Arm64Select.selected_writer_matches
+#print axioms KProgFormal.ClightRefinement.Arm64Select.selected_writer_matches
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_table_native
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_table_native
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_native
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_native
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_writable
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_writable
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_internal
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_internal
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_local_storage
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_local_storage
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_local_writable
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_local_writable
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.execute_value_stores_layout
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.execute_value_stores_layout
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.write_value
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.write_value
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.execute_stores_layout
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.execute_stores_layout
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.write
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.write
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.gpr_update
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.gpr_update
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.represents
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.represents
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.Linked.write_value
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.Linked.write_value
+#check KProgFormal.ClightRefinement.Arm64Select.write
+#print axioms KProgFormal.ClightRefinement.Arm64Select.write
+#check KProgFormal.ClightRefinement.Arm64Select.write_matches
+#print axioms KProgFormal.ClightRefinement.Arm64Select.write_matches
+#check KProgFormal.ClightRefinement.Arm64Select.eq_write_matches
+#print axioms KProgFormal.ClightRefinement.Arm64Select.eq_write_matches
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers
+#check KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#check KProgFormal.ClightRefinement.X86AluEntry.source
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.source
+#check KProgFormal.ClightRefinement.X86AluEntry.width_source
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.width_source
+#check KProgFormal.ClightRefinement.X86AluEntry.enter
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.enter
+#check KProgFormal.ClightRefinement.X86AluEntry.effective_width
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.effective_width
+#check KProgFormal.ClightRefinement.X86AluEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.from_call
+#check KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_source
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_source
+#check KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_dispatch
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_dispatch
+#check KProgFormal.ClightRefinement.Arm64Select.Body.execute
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Body.execute
