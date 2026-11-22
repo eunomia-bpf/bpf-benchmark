@@ -174,3 +174,4 @@ import KProgFormal.ClightRefinement.Arm64ModifiedCall
 import KProgFormal.ClightRefinement.Arm64CompareRhs
 import KProgFormal.ClightRefinement.Arm64ComparePrefix
 import KProgFormal.ClightRefinement.Arm64CompareMath
+import KProgFormal.ClightRefinement.Arm64CompareStores
