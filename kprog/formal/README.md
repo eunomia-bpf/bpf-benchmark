@@ -554,6 +554,14 @@ record sixty-eight and seventy-one public declarations under the default
 budgets; the reference definitions remain in their original ISA module. The
 [readback receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-result.log.gz)
 records seventy-three public declarations under the same budgets.
+The whole table load relation also follows: the selected cell has that native
+value and zero tag, while every other cell's value and tag equal their initial
+reads. Four word/tag field combinations use the actual sixteen-byte stride,
+modular 64-bit addresses and eight-byte separation, covering pointer wrap.
+Existing store frames carry this relation through both local and table stores.
+The [table-frame receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-frame.log.gz)
+records seventy-five public declarations under the same budgets. Full CPU/world
+composition, entry/store premises and the remaining writer branches stay open.
 
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's

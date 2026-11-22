@@ -2936,4 +2936,217 @@ theorem byte_register_result (ge : CC.CGenv)
   refine ⟨source, ?_, reads.2⟩
   simpa only [CC.Val.loadResult, CC.Mptr, CC.Archi.ptr64_eq, ite_true] using reads.1
 
+
+private theorem cell_delta_natural :
+    ∀ index : Fin 16, CC.Integers.Ptrofs.repr (16 * (index.val : Int)) =
+      BitVec.ofNat CC.Archi.ptrWordsize (16 * index.val) := by decide +kernel
+
+private theorem cell_word_number (base : CC.Integers.Ptrofs) (index : Fin 16) :
+    CC.Integers.Ptrofs.unsigned (base +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int))) =
+      (((base.toNat + 16 * index.val) % 18446744073709551616 : Nat) : Int) := by
+  rw [cell_delta_natural index]
+  change (((base.toNat + (16 * index.val) % 18446744073709551616) %
+    18446744073709551616 : Nat) : Int) = _
+  have small : 16 * index.val < 18446744073709551616 := by
+    have bound := index.isLt
+    omega
+  rw [Nat.mod_eq_of_lt small]
+
+private theorem cell_tag_number (base : CC.Integers.Ptrofs) (index : Fin 16) :
+    CC.Integers.Ptrofs.unsigned ((base +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8) =
+      (((base.toNat + 16 * index.val + 8) % 18446744073709551616 : Nat) : Int) := by
+  rw [cell_delta_natural index]
+  change (((((base.toNat + (16 * index.val) % 18446744073709551616) %
+    18446744073709551616) + 8) % 18446744073709551616 : Nat) : Int) = _
+  have small : 16 * index.val < 18446744073709551616 := by
+    have bound := index.isLt
+    omega
+  rw [Nat.mod_eq_of_lt small, Nat.mod_add_mod]
+
+private theorem cell_ranges_natural (base first second left right : Nat)
+    (firstBound : first < 16)
+    (secondBound : second < 16) (different : first ≠ second)
+    (leftBound : left < 2) (rightBound : right < 2) :
+    (((base + 16 * first + 8 * left) % 18446744073709551616 : Nat) : Int) + 8 ≤
+      (((base + 16 * second + 8 * right) % 18446744073709551616 : Nat) : Int) ∨
+    (((base + 16 * second + 8 * right) % 18446744073709551616 : Nat) : Int) + 8 ≤
+      (((base + 16 * first + 8 * left) % 18446744073709551616 : Nat) : Int) := by
+  by_cases ordered : first < second
+  all_goals omega
+
+private theorem cell_other_ranges (base : CC.Integers.Ptrofs) (index other : Fin 16)
+    (different : index ≠ other) :
+    let word := CC.Integers.Ptrofs.unsigned (base +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int)))
+    let tag := CC.Integers.Ptrofs.unsigned ((base +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)
+    let otherWord := CC.Integers.Ptrofs.unsigned (base +
+      CC.Integers.Ptrofs.repr (16 * (other.val : Int)))
+    let otherTag := CC.Integers.Ptrofs.unsigned ((base +
+      CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8)
+    (word + 8 ≤ otherWord ∨ otherWord + 8 ≤ word) ∧
+    (word + 8 ≤ otherTag ∨ otherTag + 8 ≤ word) ∧
+    (tag + 8 ≤ otherWord ∨ otherWord + 8 ≤ tag) ∧
+    (tag + 8 ≤ otherTag ∨ otherTag + 8 ≤ tag) := by
+  dsimp only
+  rw [cell_word_number, cell_word_number, cell_tag_number, cell_tag_number]
+  have distinct : index.val ≠ other.val := by
+    intro same
+    exact different (Fin.ext same)
+  exact ⟨cell_ranges_natural base.toNat index.val other.val 0 0
+      index.isLt other.isLt distinct (by decide) (by decide),
+    cell_ranges_natural base.toNat index.val other.val 0 1
+      index.isLt other.isLt distinct (by decide) (by decide),
+    cell_ranges_natural base.toNat index.val other.val 1 0
+      index.isLt other.isLt distinct (by decide) (by decide),
+    cell_ranges_natural base.toNat index.val other.val 1 1
+      index.isLt other.isLt distinct (by decide) (by decide)⟩
+
+private theorem cell_range_subset (start readStart readSize storeSize : _root_.Int)
+    (readSmall : readSize ≤ 8) (storeSmall : storeSize ≤ 8)
+    (separate : start + 8 ≤ readStart ∨ readStart + 8 ≤ start) :
+    readStart + readSize ≤ start ∨ start + storeSize ≤ readStart := by omega
+
+theorem cell_write_other (m middle final : CC.Mem) (block : CC.Block)
+    (base : CC.Integers.Ptrofs) (index other : Fin 16) (value : CC.Val) (tag : BitVec 8)
+    (different : index ≠ other)
+    (wordStored : CC.Mem.store CC.Mptr m block
+      (CC.Integers.Ptrofs.unsigned (base +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) value = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle block
+      (CC.Integers.Ptrofs.unsigned ((base +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (tag.setWidth 32)) = some final) :
+    CC.Mem.load CC.Mptr final block (CC.Integers.Ptrofs.unsigned (base +
+        CC.Integers.Ptrofs.repr (16 * (other.val : Int)))) =
+      CC.Mem.load CC.Mptr m block (CC.Integers.Ptrofs.unsigned (base +
+        CC.Integers.Ptrofs.repr (16 * (other.val : Int)))) ∧
+    CC.Mem.load .Mint8unsigned final block (CC.Integers.Ptrofs.unsigned ((base +
+        CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8)) =
+      CC.Mem.load .Mint8unsigned m block (CC.Integers.Ptrofs.unsigned ((base +
+        CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8)) := by
+  have ranges := cell_other_ranges base index other different
+  have wordFirst := CC.Mem.load_store_other wordStored CC.Mptr block
+    (CC.Integers.Ptrofs.unsigned (base + CC.Integers.Ptrofs.repr (16 * (other.val : Int))))
+    (.inr (cell_range_subset _ _ _ _ (by decide) (by decide) ranges.1))
+  have wordLast := CC.Mem.load_store_other tagStored CC.Mptr block
+    (CC.Integers.Ptrofs.unsigned (base + CC.Integers.Ptrofs.repr (16 * (other.val : Int))))
+    (.inr (cell_range_subset _ _ _ _ (by decide) (by decide) ranges.2.2.1))
+  have tagFirst := CC.Mem.load_store_other wordStored .Mint8unsigned block
+    (CC.Integers.Ptrofs.unsigned ((base + CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8))
+    (.inr (cell_range_subset _ _ _ _ (by decide) (by decide) ranges.2.1))
+  have tagLast := CC.Mem.load_store_other tagStored .Mint8unsigned block
+    (CC.Integers.Ptrofs.unsigned ((base + CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8))
+    (.inr (cell_range_subset _ _ _ _ (by decide) (by decide) ranges.2.2.2))
+  exact ⟨wordLast.trans wordFirst, tagLast.trans tagFirst⟩
+
+theorem byte_register_table (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (old : BitVec 64)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong old))
+    (localBlock : CC.Block) (after : CC.Mem)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 (.Vlong old) = some after)
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (0#32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (ordinary : (registerByte index).setWidth 32 ≠ (4#32))
+    (byteMem : CC.Mem)
+    (byteStored : CC.Mem.store .Mint8unsigned after localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some byteMem)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (middle final : CC.Mem)
+    (wordStored : CC.Mem.store CC.Mptr byteMem cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (0#32)) = some final) :
+    InternalRun ge 169 (.State function writer k e le m)
+      (.State function .Sskip k e
+        (tableTemps
+          (byteTemps
+            (classTemps
+              (tagTemps
+                (cellReadTemps
+                  (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+                    (selectTemps le (registerByte index) .b))) cellsBlock cellsOffset value)
+                    .b shift next) cellsBlock cellsOffset (.Vlong old))
+                index cellsBlock cellsOffset (0#8)) .b) next)
+          (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) (0#8) index cellsBlock cellsOffset) final) ∧
+    ∀ other : Fin 16,
+      (CC.Mem.load CC.Mptr final cellsBlock
+        (CC.Integers.Ptrofs.unsigned (cellsOffset +
+          CC.Integers.Ptrofs.repr (16 * (other.val : Int)))) =
+        if other = index then some (.Vlong (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))
+        else CC.Mem.load CC.Mptr m cellsBlock
+          (CC.Integers.Ptrofs.unsigned (cellsOffset +
+            CC.Integers.Ptrofs.repr (16 * (other.val : Int))))) ∧
+      (CC.Mem.load .Mint8unsigned final cellsBlock
+        (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+          CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8)) =
+        if other = index then some (.Vint (0#32))
+        else CC.Mem.load .Mint8unsigned m cellsBlock
+          (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+            CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8))) := by
+  have selected := byte_register_result ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
+    widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
+    localBlock after declared stored currentTag callerBlocks ordinary byteMem byteStored
+    bindingSeparate middle final wordStored tagStored
+  refine ⟨selected.1, ?_⟩
+  intro other
+  by_cases same : other = index
+  · subst other
+    simpa using selected.2
+  · have frames := cell_write_other byteMem middle final cellsBlock cellsOffset index other
+      (.Vlong (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next)) (0#8) (Ne.symm same) wordStored tagStored
+    have firstWord := CC.Mem.load_store_other stored CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (other.val : Int))))
+      (.inl callerBlocks.2)
+    have secondWord := CC.Mem.load_store_other byteStored CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (other.val : Int))))
+      (.inl callerBlocks.2)
+    have firstTag := CC.Mem.load_store_other stored .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8))
+      (.inl callerBlocks.2)
+    have secondTag := CC.Mem.load_store_other byteStored .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + CC.Integers.Ptrofs.repr (16 * (other.val : Int))) + 8))
+      (.inl callerBlocks.2)
+    simpa only [same, ite_false] using
+      (And.intro (frames.1.trans (secondWord.trans firstWord))
+        (frames.2.trans (secondTag.trans firstTag)))
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
