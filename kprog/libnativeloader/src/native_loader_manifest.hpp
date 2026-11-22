@@ -41,6 +41,10 @@ struct ManifestResolution {
     std::filesystem::path native_object_path;
     std::string symbol_name;
     std::vector<NativeMapRule> map_rules;
+    std::string loader_timing_log;
+    bool kernel_kfunc_context = false;
+    std::filesystem::path kernel_kfunc_btf;
+    std::filesystem::path source_bpf_object;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -647,6 +651,13 @@ std::optional<ManifestResolution> resolve_native_manifest(
             manifest_relative_path(manifest_path,
                                    json_required_string(entry, "native_object"));
         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
+        if (auto timing_log = json_object_string(entry, "loader_timing_log"))
+            candidate.loader_timing_log = *timing_log;
+        candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
+        if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
+            candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);
+        if (auto source = json_object_string(entry, "source_bpf_object"))
+            candidate.source_bpf_object = manifest_relative_path(manifest_path, *source);
         if (selected &&
             (selected->native_object_path != candidate.native_object_path ||
              selected->symbol_name != candidate.symbol_name)) {

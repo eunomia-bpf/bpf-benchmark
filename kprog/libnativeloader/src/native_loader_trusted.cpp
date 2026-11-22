@@ -64,7 +64,7 @@ extern "C" {
 extern "C" char **environ;
 
 namespace native_loader::trusted {
-#include "native_loader_trusted_manifest.hpp"
+#include "native_loader_manifest.hpp"
 
 using internal::fail;
 
@@ -2942,13 +2942,8 @@ LoadedProgram load_bound_native(const FdLoadOptions &options)
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
                                     prog_info,
-                                    [&](const std::filesystem::path &object, const std::string &symbol) {
-                                        if (symbol.empty() && symbol_name.empty())
-                                            symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
-                                        return SourceBpfMaps(object).agreement(symbol.empty() ? symbol_name : symbol,
-                                                                               source_insns);
-                                    },
-                                    source_insns.size());
+                                    source_insns,
+                                    load_map_info);
         if (!resolution) {
             if (collecting_timings()) {
                 out.timings.source_context_ns = elapsed_ns(context_start, context_end);

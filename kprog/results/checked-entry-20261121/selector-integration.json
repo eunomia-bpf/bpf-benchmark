@@ -1,0 +1,59 @@
+{
+  "at": "2026-11-22T02:09:28.310973+00:00",
+  "change": "checked loader reuses unchanged May29 common selector; duplicated trusted manifest header removed",
+  "production_added": 14,
+  "production_deleted": 639,
+  "net_production": -625,
+  "new_selection_predicates": 0,
+  "checked_metadata_preserved": [
+    "loader_timing_log",
+    "kernel_kfunc_context",
+    "kernel_kfunc_btf",
+    "source_bpf_object"
+  ],
+  "build_command": [
+    "make",
+    "-C",
+    "kprog/libnativeloader",
+    "all",
+    "BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader"
+  ],
+  "build_exit": 0,
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader_manifest.hpp": "83408e19fe8556de13cfeb1620a95eb692d516ef0f91050e27b505263a4d19c8",
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "35163e2b543e6ae6074bfa00213d511e9762cbe6d3c572309826dfa2409170c9"
+  },
+  "loader_sha256": "94586c8f57d429781aae95dbc1357db42c55b2b7141638c8216b705fe9b84583",
+  "diagnostic": {
+    "manifest_sha256": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "capture": {
+      "path": "/workspaces/repository/corpus/results/verified-captures-_e2fj7_m/bpfrejit_1844_00ad43bba51a95be.bpf",
+      "sha256": "dbf42c8e362836c1e75568ba5e4e4bf9897c3f7814777701ff82d9aa5077bbf9",
+      "bytes": 29072
+    },
+    "positive_case": "diagnostic adds one helper174 instruction to an in-memory vector; no actual multi-kprobe execution or original source edit claimed",
+    "native_objects": {
+      "bpf_generic_kprobe_v61.native.o": {
+        "bytes": 1325760,
+        "sha256": "bae7974ff1dc5f8b3b11e2994d349894a11811f019a5c193a85f8a646f44f7de"
+      },
+      "bpf_multi_kprobe_v61.native.o": {
+        "bytes": 1326032,
+        "sha256": "68a5e1fcc7d4f7226c151618b6341011e7ea026d1588abfcd8b067324ee2004d"
+      }
+    },
+    "before": {
+      "actual_capture": "bpf_generic_kprobe_v61.native.o",
+      "helper174_witness": "bpf_generic_kprobe_v61.native.o"
+    },
+    "after": {
+      "actual_capture": "bpf_generic_kprobe_v61.native.o",
+      "helper174_witness": "bpf_multi_kprobe_v61.native.o"
+    }
+  },
+  "runtime_status": "existing guest still uses prior image SO; this source integration has no whole-app runtime result yet; no new image or guest created",
+  "freeze_opening": "three evidence-scoped rows through2026-11-23 under documented AGENTS process; shared staged/working peer rows retained",
+  "archive": "kprog/results/checked-entry-20261121/selector-integration-raw.tar.gz",
+  "archive_bytes": 936737,
+  "archive_sha256": "16892863edf493a2c14756bb7f1854202a5be7bbd21eddf56ae584124702fe54"
+}
