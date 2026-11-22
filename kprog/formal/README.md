@@ -469,6 +469,17 @@ records forty-five public declarations under the default budgets. Local
 value updates, final register-table stores, qword tag calls and the native
 entry-world relation remain open.
 
+
+The narrow writer now composes through actual tag reads and width classification
+to the original byte/word/dword storage arm in 121/125/129 silent steps.
+The reached width observation follows from the real helper-result temporary
+and its frame through subsequent source assignments. The exact local-store
+post-heap, tag readbacks and final-storage continuation are retained. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-storage-route.log.gz)
+records forty-six public declarations under the default budgets. Local value
+updates, final register-table stores, qword tag calls and the native entry-world
+relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

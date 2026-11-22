@@ -1601,4 +1601,71 @@ theorem width_dispatch (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
   rw [← counts]
   exact (entered.trans classified).trans selected
 
+theorem narrow_storage (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16) (size : X86.Size) (narrow : size ≠ .q)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (cellValue : CC.Val)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some cellValue)
+    (cellWord : CC.Cop.semCast cellValue (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) m = some cellValue)
+    (localBlock : CC.Block) (after : CC.Mem)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 cellValue = some after)
+    (tag : BitVec 8)
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (tag.setWidth 32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) :
+    InternalRun ge (115 + (classifyLength size + 4)) (.State function writer k e le m)
+      (.State function (storageArm size) (.Kseq storageTail (loadCont k)) e
+        (classTemps
+          (tagTemps
+            (cellReadTemps
+              (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+                (selectTemps le (registerByte index) size))) cellsBlock cellsOffset value)
+                size shift next) cellsBlock cellsOffset cellValue)
+            index cellsBlock cellsOffset tag) size) after) := by
+  have tagged := narrow_tagged ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index size narrow destination
+    width alu widthBlock widthBinding unshadowed shift next observedShift observedValue
+    cellValue cellCurrent cellWord localBlock after declared stored tag currentTag callerBlocks
+  let reached := tagTemps
+    (cellReadTemps
+      (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+        (selectTemps le (registerByte index) size))) cellsBlock cellsOffset value)
+        size shift next) cellsBlock cellsOffset cellValue)
+    index cellsBlock cellsOffset tag
+  have reachedWidth : reached.get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument size) := by
+    simp +decide [reached, tagTemps, tagReadTemps, tagRegTemps, cellReadTemps,
+      writerWidthTemps, writerEffectiveTemps, CC.PTree.gso]
+  have dispatched := width_dispatch ge function e reached (loadCont k) after size reachedWidth
+  exact tagged.trans dispatched
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
