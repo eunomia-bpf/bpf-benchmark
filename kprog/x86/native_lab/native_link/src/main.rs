@@ -1004,6 +1004,18 @@ fn a64_is_cbz_cbnz(insn: u32) -> bool {
     (insn & 0x7e00_0000) == 0x3400_0000
 }
 
+fn a64_is_tbz_tbnz(insn: u32) -> bool {
+    (insn & 0x7e00_0000) == 0x3600_0000
+}
+
+fn a64_patch_tbz_tbnz(insn: u32, word_index: usize, target_index: usize) -> Result<u32> {
+    let disp = target_index as i64 - word_index as i64;
+    if disp < -(1 << 13) || disp >= (1 << 13) {
+        bail!("arm64 TBZ/TBNZ displacement out of range: {disp}");
+    }
+    Ok((insn & !(0x3fff << 5)) | (((disp as u32) & 0x3fff) << 5))
+}
+
 fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u64> {
     if a64_is_uncond_b(insn) {
         let imm26 = insn & 0x03ff_ffff;
@@ -1018,6 +1030,11 @@ fn a64_branch_target(entry_addr: u64, word_index: usize, insn: u32) -> Option<u6
     if a64_is_cbz_cbnz(insn) {
         let imm19 = (insn >> 5) & 0x7ffff;
         let disp = a64_sign_extend(imm19, 19) << 2;
+        return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
+    }
+    if a64_is_tbz_tbnz(insn) {
+        let imm14 = (insn >> 5) & 0x3fff;
+        let disp = a64_sign_extend(imm14, 14) << 2;
         return Some(((entry_addr as i64) + (word_index as i64 * 4) + disp) as u64);
     }
     None
@@ -1743,6 +1760,13 @@ enum Arm64PatchKind {
         target_is_symbol_end: bool,
         target_address: u64,
     },
+    TbzTbnz {
+        insn: u32,
+        address: u64,
+        source_symbol_address: u64,
+        target_is_symbol_end: bool,
+        target_address: u64,
+    },
     MapLiteralLoad {
         target_name: String,
     },
@@ -1961,6 +1985,20 @@ fn arm64_decoded_load_sites(blob: &[u8], code_word_count: usize) -> Vec<LoadSite
         }).collect()
 }
 
+/// The TBZ/TBNZ instructions whose target ended up beyond their 14-bit reach.
+#[derive(Debug)]
+struct TbzOutOfRange(Vec<u64>);
+
+impl std::fmt::Display for TbzOutOfRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "arm64 TBZ/TBNZ out of range at {:x?}", self.0)
+    }
+}
+
+impl std::error::Error for TbzOutOfRange {}
+
+/// A TBZ/TBNZ reaches 32 KiB; calls expanded in between can move its target farther.
+/// Those become an inverted test over a B, and the layout is redone until every branch reaches.
 fn rewrite_arm64(
     elf: &object::File,
     entry: &SymInfo,
@@ -1971,6 +2009,39 @@ fn rewrite_arm64(
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
+) -> Result<RewriteResult> {
+    let mut long_tbz: HashSet<u64> = HashSet::new();
+    loop {
+        let result = rewrite_arm64_pass(
+            elf, entry, included, helper_addrs, map_addrs, lookup_sites,
+            proof_mode, preserve_entry_abi, show, &long_tbz,
+        );
+        let far = match &result {
+            Err(e) => match e.downcast_ref::<TbzOutOfRange>() {
+                Some(TbzOutOfRange(far)) => far.clone(),
+                None => return result,
+            },
+            Ok(_) => return result,
+        };
+        let before = long_tbz.len();
+        long_tbz.extend(far);
+        if long_tbz.len() == before {
+            return result;
+        }
+    }
+}
+
+fn rewrite_arm64_pass(
+    elf: &object::File,
+    entry: &SymInfo,
+    included: &[SymInfo],
+    helper_addrs: &HashMap<String, u64>,
+    map_addrs: &HashMap<String, u64>,
+    lookup_sites: &[LookupSiteSpec],
+    proof_mode: bool,
+    preserve_entry_abi: bool,
+    show: bool,
+    long_tbz: &HashSet<u64>,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
     let mut sym_start_word_offset: HashMap<u64, usize> = HashMap::new();
@@ -2309,6 +2380,21 @@ fn rewrite_arm64(
                     );
                 }
                 let target_is_symbol_end = target == end;
+                if a64_is_tbz_tbnz(insn) && long_tbz.contains(&(sym.address + off as u64)) {
+                    // Beyond TBZ reach after expansion: the inverted test skips a B to the target.
+                    let skip_b = ((insn ^ (1 << 24)) & !(0x3fff << 5)) | (2 << 5);
+                    blob.extend_from_slice(&skip_b.to_le_bytes());
+                    patches.push(Arm64Patch {
+                        word_index: blob.len() / 4,
+                        kind: Arm64PatchKind::B {
+                            source_symbol_address: sym.address,
+                            target_is_symbol_end,
+                            target_address: target,
+                        },
+                    });
+                    blob.extend_from_slice(&0x1400_0000u32.to_le_bytes());
+                    continue;
+                }
                 let kind = if a64_is_uncond_b(insn) {
                     Arm64PatchKind::B {
                         source_symbol_address: sym.address,
@@ -2325,6 +2411,16 @@ fn rewrite_arm64(
                 } else if a64_is_cbz_cbnz(insn) {
                     Arm64PatchKind::CbzCbnz {
                         insn,
+                        source_symbol_address: sym.address,
+                        target_is_symbol_end,
+                        target_address: target,
+                    }
+                } else if a64_is_tbz_tbnz(insn) {
+                    // A call expanded between a TBZ/TBNZ and its target moves the landing
+                    // point like any other branch (6e68d71a7, lost in 3aa496416).
+                    Arm64PatchKind::TbzTbnz {
+                        insn,
+                        address: sym.address + off as u64,
                         source_symbol_address: sym.address,
                         target_is_symbol_end,
                         target_address: target,
@@ -2427,6 +2523,7 @@ fn rewrite_arm64(
     let ret_trampoline_word = blob.len() / 4;
     append_u32(&mut blob, A64_MOV_X7_X0);
 
+    let mut far_tbz: Vec<u64> = Vec::new();
     for patch in patches.iter().filter(|p| {
         matches!(
             p.kind,
@@ -2435,6 +2532,7 @@ fn rewrite_arm64(
                 | Arm64PatchKind::B { .. }
                 | Arm64PatchKind::BCond { .. }
                 | Arm64PatchKind::CbzCbnz { .. }
+                | Arm64PatchKind::TbzTbnz { .. }
         )
     }) {
         let patched = match patch.kind {
@@ -2493,10 +2591,35 @@ fn rewrite_arm64(
                 )?;
                 a64_patch_cbz_cbnz(insn, patch.word_index, target_word)?
             }
+            Arm64PatchKind::TbzTbnz {
+                insn,
+                address,
+                source_symbol_address,
+                target_is_symbol_end,
+                target_address,
+            } => {
+                let target_word = arm64_branch_target_word(
+                    &addr_word_offset,
+                    &sym_end_word_offset,
+                    source_symbol_address,
+                    target_is_symbol_end,
+                    target_address,
+                )?;
+                match a64_patch_tbz_tbnz(insn, patch.word_index, target_word) {
+                    Ok(word) => word,
+                    Err(_) => {
+                        far_tbz.push(address);
+                        continue;
+                    }
+                }
+            }
             _ => continue,
         };
         let off = patch.word_index * 4;
         blob[off..off + 4].copy_from_slice(&patched.to_le_bytes());
+    }
+    if !far_tbz.is_empty() {
+        return Err(TbzOutOfRange(far_tbz).into());
     }
 
     if show {
@@ -2594,6 +2717,27 @@ fn disasm_arm64_words(blob: &[u8]) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn tbz_tbnz_decode_and_retarget() {
+        use super::*;
+        // tbz x8, #63, +0x10c (imm14 = 67 words)
+        let insn: u32 = 0xb6f8_0868;
+        assert!(a64_is_tbz_tbnz(insn));
+        assert!(!a64_is_cbz_cbnz(insn));
+        assert_eq!(a64_branch_target(0x1000, 2, insn), Some(0x1000 + 8 + 67 * 4));
+        let moved = a64_patch_tbz_tbnz(insn, 2, 2 + 83).unwrap();
+        assert_eq!((moved >> 5) & 0x3fff, 83);
+        assert_eq!(moved & !(0x3fff << 5), insn & !(0x3fff << 5));
+        let back = a64_patch_tbz_tbnz(insn, 10, 4).unwrap();
+        assert_eq!(a64_branch_target(0, 10, back), Some(16));
+        assert!(a64_patch_tbz_tbnz(insn, 0, 1 << 13).is_err());
+        // long form: tbnz x8, #63, +8 skips the B
+        let skip_b = ((insn ^ (1 << 24)) & !(0x3fff << 5)) | (2 << 5);
+        assert!(a64_is_tbz_tbnz(skip_b));
+        assert_eq!(skip_b & (1 << 24), 1 << 24);
+        assert_eq!(a64_branch_target(0x1000, 0, skip_b), Some(0x1008));
+    }
+
     use super::*;
 
     #[test]
