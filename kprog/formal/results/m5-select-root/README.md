@@ -12,7 +12,8 @@ run. The only ARM integration delta is this transitive root import; the leaf
 sources are unchanged from their accepted focused checks. The source metadata
 records sizes and timestamps for collecting the shared result later.
 
-Full confirmation and these37 root queries are pending. Neither a successful
-current full build nor make check is claimed here. Generic frame allocation and
-release, the original seventh call/native prefix, remaining forms, O1/O2/O4 and
-M5/M6 remain open; completed ISA families remain0.
+V collected the shared default485 build and these37 root queries successfully;
+see [the shared receipt](../m5-batch-20261122/README.md). The complete make check
+retains the real DIV fault-path regression reported there. Later generic-call
+and seven-prefix integration is in [m5-select-prefix-root](../m5-select-prefix-root/README.md).
+Remaining instruction forms, O1/O2/O4 and M5/M6 stay open; completed ISA families0.

@@ -1,5 +1,5 @@
 {
-  "status": "accepted focused proofs integrated; shared full confirmation and root query pending",
+  "status": "recorded root37 passed in V shared default485 batch; complete make check retains DIV fault regression",
   "root_import": "Arm64SelectBody transitively exposes all five new ARM modules",
   "query_count_prepared": 37,
   "V_interfaces": 17,
@@ -18,5 +18,34 @@
     "Elab.async": false
   },
   "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
-  "complete_isa_families": 0
+  "complete_isa_families": 0,
+  "root_query": {
+    "command": "lake env lean -j1 results/m5-select-root/Query.lean",
+    "exit": 0,
+    "seconds": 2.143242180987727
+  },
+  "shared_default_build": {
+    "status": "passed",
+    "jobs": 485,
+    "receipt": "../m5-batch-20261122/validation.json",
+    "scope": "original captured root and earlier ARM components; later generic-call/seven-prefix integration is separate"
+  },
+  "make_check_latest": {
+    "command": [
+      "make",
+      "check"
+    ],
+    "exit": 2,
+    "seconds": 201.85925732803298,
+    "source_count": 269,
+    "changed_sources": [],
+    "added_sources": [
+      "KProgFormal/ClightRefinement/Arm64SelectCaller.lean"
+    ],
+    "workers": 1,
+    "process_memory_gib": 32,
+    "timing_lock": "shared"
+  },
+  "make_check_failure": "check_x86_divide_handler.py:73, verifier-visible fault marker versus reachable normal return lowered to llvm.assume(false); preserved V receipt",
+  "later_integration": "../m5-select-prefix-root/README.md"
 }
