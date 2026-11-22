@@ -217,4 +217,59 @@ theorem execute_caller_corresponds {initial before : CC.Mem} {entry : HeaderLoca
   · exact Native.reference_step s instruction decoded noError fetched
   · exact result.represents_at frontier frontierBound addresses origins s represented lhsWord lhsTag rhsWord rhsTag
 
+/-- Every actual producer header pointer survives the flag stores and free. -/
+theorem Result.pointers {initial before written after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} {lhs rhs : BitVec 64} {k : CC.Cont}
+    {finalStorage : Storage initial after entry} (result : Result storage lhs rhs k written after finalStorage)
+    (header : (j : Fin 12) → HeaderSourceLocal initial j)
+    (pointers : ∀ j, CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) :
+    ∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0) := by
+  intro j
+  exact (result.locals _ _ _ entry.binding keep_header CC.Mptr _).trans (pointers j)
+
+/-- Nonflag producer pointees retain all actual borrowed observations,
+including unsuccessful reads, at the same original owned frontier. -/
+theorem Result.borrowed {initial before written after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} {lhs rhs : BitVec 64} {k : CC.Cont}
+    {finalStorage : Storage initial after entry} (result : Result storage lhs rhs k written after finalStorage)
+    (frontier : CC.Block) (header : (j : Fin 12) → HeaderSourceLocal initial j)
+    (bound : (allocation initial).2.nextblock.toNat ≤ frontier.toNat)
+    (pointers : ∀ j, CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0))
+    (j : Fin 12) (chunk : CC.Chunk)
+    (different : ∀ i : Fin 4,
+      headerSourceName (Arm64ProducerEntryView.flagIndex (Stores.flagIndex i)) ≠ headerSourceName j) :
+    Arm64EntryMemory.borrowed frontier chunk after (.Vptr entry.block 0) (headerField j) =
+      Arm64EntryMemory.borrowed frontier chunk before (.Vptr entry.block 0) (headerField j) := by
+  rw [Arm64CacheLocalFrame.borrowed_load frontier entry header bound (result.pointers header pointers),
+    Arm64CacheLocalFrame.borrowed_load frontier entry header bound pointers]
+  exact result.locals _ _ _ (header j).binding different chunk 0
+
+/-- Both existing stack/return caches survive the actual CMP call. No new
+cache predicate, successful-read law or unchanged-flag premise is introduced. -/
+theorem Result.warm {initial before written after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} {lhs rhs : BitVec 64} {k : CC.Cont}
+    {finalStorage : Storage initial after entry} (result : Result storage lhs rhs k written after finalStorage)
+    (frontier : CC.Block) (header : (j : Fin 12) → HeaderSourceLocal initial j)
+    (bound : (allocation initial).2.nextblock.toNat ≤ frontier.toNat)
+    (pointers : ∀ j, CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0))
+    (returns : Bool) (base : BitVec 64)
+    (warm : Arm64RegisterReads.WarmEntryCache returns frontier before (.Vptr entry.block 0) base) :
+    Arm64RegisterReads.WarmEntryCache returns frontier after (.Vptr entry.block 0) base := by
+  have validOther : ∀ (returns : Bool) (i : Fin 4),
+      headerSourceName (Arm64ProducerEntryView.flagIndex (Stores.flagIndex i)) ≠
+        headerSourceName (if returns then 7 else 6) := by decide +kernel
+  have baseOther : ∀ (returns : Bool) (i : Fin 4),
+      headerSourceName (Arm64ProducerEntryView.flagIndex (Stores.flagIndex i)) ≠
+        headerSourceName (if returns then 3 else 2) := by decide +kernel
+  have validField : headerField (if returns then 7 else 6) =
+      (if returns then Arm64Program._return_valid else Arm64Program._sp_valid) := by cases returns <;> rfl
+  have baseField : headerField (if returns then 3 else 2) =
+      (if returns then Arm64Program._return_base else Arm64Program._sp_base) := by cases returns <;> rfl
+  obtain ⟨valid,nonzero,validRead,baseRead⟩ := warm
+  have v := result.borrowed frontier header bound pointers (if returns then 7 else 6) .Mint8unsigned (validOther returns)
+  have b := result.borrowed frontier header bound pointers (if returns then 3 else 2) .Mint64 (baseOther returns)
+  rw [validField] at v
+  rw [baseField] at b
+  exact ⟨valid,nonzero,v.trans validRead,b.trans baseRead⟩
+
 end KProgFormal.ClightRefinement.Arm64Compare.Call

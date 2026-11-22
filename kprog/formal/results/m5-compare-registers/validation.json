@@ -1,6 +1,6 @@
 {
   "source_sha256": {
-    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRegisters.lean": "00f991a62185b07fd492bb45f68a1ae5c9999210b4ddb143e1ddc6ce621cea6c"
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRegisters.lean": "19fb5feff0559e0e15d4e703d78a4232f18b9324bfb9b237860b509f8cf79281"
   },
   "dependency_sha256": {
     "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagBytes.lean": "58fbec30a973e09a787d324870116b8e6059e68221656ff444ac41d054668c6b",
@@ -8,7 +8,8 @@
     "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean": "2f88df5be132eaa6a20cd8d342425471907939dce661a363032c25677bb75f49",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "fb68c6648b10d404b6735ef3f7d602015a84bb169f072fbebfcbb5837772417c",
     "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean": "61745f77d5eb16b7b10ce350cf971cac723f50adbaac01400bfc10241e0208ba",
-    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteFrame.lean": "32ad0ee56100a27340920066d6d1365475087658b7cfecd8c0b7be77ad8aeb18"
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteFrame.lean": "32ad0ee56100a27340920066d6d1365475087658b7cfecd8c0b7be77ad8aeb18",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CacheLocalFrame.lean": "658dd9fcf8daddb43001be79d9476a42b0f9e88d6078fbf3d15518eb8212e4f4"
   },
   "build": {
     "command": [
@@ -17,31 +18,31 @@
       "KProgFormal.ClightRefinement.Arm64CompareRegisters"
     ],
     "exit": 0,
-    "seconds": 2.6563124656677246,
+    "seconds": 2.473938226699829,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
   "build_jobs": 267,
-  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers4.log",
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-frame1.log",
   "public": {
     "command": [
       "lake",
       "env",
       "lean",
       "-j1",
-      "/workspaces/kprog-raw/formal/m5-compare/CompareRegistersPublic.lean"
+      "/workspaces/kprog-raw/formal/m5-compare/CompareFramePublic.lean"
     ],
     "exit": 0,
-    "seconds": 1.699310064315796,
+    "seconds": 1.5515854358673096,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
-  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-registers1.log",
-  "public_query_sha256": "f5116f0ab3420ceb6053e0d60d1af5f53c60e202a259b64e315bcefb73ad6c72",
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-frame1.log",
+  "public_query_sha256": "725df8d467d1b3c745c6de754880a03a103ae390626367f44fd4bbc4287b4cb8",
   "axioms": {
     "KProgFormal.ClightRefinement.Arm64Compare.Native.source_bits": [
       "propext",
@@ -89,6 +90,27 @@
       "CC.inlineAssemblySem",
       "Classical.choice",
       "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.pointers": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.borrowed": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.warm": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
     ]
   },
   "proof_limits": {
@@ -96,84 +118,190 @@
     "maxRecDepth": 512,
     "Elab.async": false
   },
-  "scope": "actual CMP X4,X1 source call413/free/return and original caller417 refines actual fetched/decoded mature CMP with full GPR/tag/pointer-origin/SP/SIMD/NZCV register relation at current or original owned frontier; native operands derived from same real source scalar/tag cells and pre-relation",
-  "attempt_history": [
-    {
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareRegisters"
-        ],
-        "exit": 0,
-        "seconds": 2.573002815246582,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers1.log",
-      "note": "intermediate full Registers result passed first attempt before caller/frontier wrappers",
-      "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers1-source.lean",
-      "source_sha256": "70c15748fa7ceff6b258abdc021114fe143a4e7447ed13ca141485a52c8393db"
+  "scope": "actual CMP X4,X1 source call413/free/return and original caller417 refines actual fetched/decoded mature CMP with full GPR/tag/pointer-origin/SP/SIMD/NZCV register relation at current or original owned frontier; native operands derived from same real source scalar/tag cells and pre-relation; all12 actual header pointers preserved, all nonflag borrowed reads including failures preserved, both existing stack/return caches preserved at the original owned frontier",
+  "frame_derivation": "actual Result.locals keeps header entry and all nonflag typed pointees; borrowed_load uses genuine pre/post header pointers and allocation ownership; finite source-name distinctions derive cache cell separation; no new cache/readback or unchanged-flag premise",
+  "previous_confirmation": {
+    "source_sha256": {
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRegisters.lean": "00f991a62185b07fd492bb45f68a1ae5c9999210b4ddb143e1ddc6ce621cea6c"
     },
-    {
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareRegisters"
-        ],
-        "exit": 1,
-        "seconds": 2.6770191192626953,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers2.log",
-      "note": "nested caller result hit default recursion-depth cap during actual-world comparison",
-      "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers2-source.lean",
-      "source_sha256": "388ee9194f1f9273e56969c9556af465db185111df01d20be9979ccece553a3a"
+    "dependency_sha256": {
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagBytes.lean": "58fbec30a973e09a787d324870116b8e6059e68221656ff444ac41d054668c6b",
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagArithmetic.lean": "bed1b13c33137eeb92fe3ba50b45d0a464b58f065c2353cf9e5c60289a455bdf",
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean": "2f88df5be132eaa6a20cd8d342425471907939dce661a363032c25677bb75f49",
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "fb68c6648b10d404b6735ef3f7d602015a84bb169f072fbebfcbb5837772417c",
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean": "61745f77d5eb16b7b10ce350cf971cac723f50adbaac01400bfc10241e0208ba",
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteFrame.lean": "32ad0ee56100a27340920066d6d1365475087658b7cfecd8c0b7be77ad8aeb18"
     },
-    {
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareRegisters"
-        ],
-        "exit": 1,
-        "seconds": 2.388075590133667,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers3.log",
-      "note": "split tuple retained same cap failure; diagnosed producer world versus original linked-entry world name",
-      "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers3-source.lean",
-      "source_sha256": "22348661f85cb4b67092550973ff5b2b49b605cbf46bc27a7dbf4f2b81607b82"
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CompareRegisters"
+      ],
+      "exit": 0,
+      "seconds": 2.6563124656677246,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
     },
-    {
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareRegisters"
-        ],
-        "exit": 0,
-        "seconds": 2.6563124656677246,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
+    "build_jobs": 267,
+    "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers4.log",
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-compare/CompareRegistersPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.699310064315796,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-registers1.log",
+    "public_query_sha256": "f5116f0ab3420ceb6053e0d60d1af5f53c60e202a259b64e315bcefb73ad6c72",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Compare.Native.source_bits": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.gpr": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.sp": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.vector": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.represents_at": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Call.execute_caller_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "proof_limits": {
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512,
+      "Elab.async": false
+    },
+    "scope": "actual CMP X4,X1 source call413/free/return and original caller417 refines actual fetched/decoded mature CMP with full GPR/tag/pointer-origin/SP/SIMD/NZCV register relation at current or original owned frontier; native operands derived from same real source scalar/tag cells and pre-relation",
+    "attempt_history": [
+      {
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareRegisters"
+          ],
+          "exit": 0,
+          "seconds": 2.573002815246582,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers1.log",
+        "note": "intermediate full Registers result passed first attempt before caller/frontier wrappers",
+        "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers1-source.lean",
+        "source_sha256": "70c15748fa7ceff6b258abdc021114fe143a4e7447ed13ca141485a52c8393db"
       },
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers4.log",
-      "note": "actual Arm64ProgramEntryAllocation.world explicit; full wrappers pass at unchanged limits"
-    }
-  ],
-  "remaining": "original98input/setup/full six-call entry, explicit producer cache/header framing through CMP, W32/native and remaining ISA families, physical memory/compiler correspondence, O1/O2/O4/M5 and M6",
+      {
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareRegisters"
+          ],
+          "exit": 1,
+          "seconds": 2.6770191192626953,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers2.log",
+        "note": "nested caller result hit default recursion-depth cap during actual-world comparison",
+        "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers2-source.lean",
+        "source_sha256": "388ee9194f1f9273e56969c9556af465db185111df01d20be9979ccece553a3a"
+      },
+      {
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareRegisters"
+          ],
+          "exit": 1,
+          "seconds": 2.388075590133667,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers3.log",
+        "note": "split tuple retained same cap failure; diagnosed producer world versus original linked-entry world name",
+        "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-registers3-source.lean",
+        "source_sha256": "22348661f85cb4b67092550973ff5b2b49b605cbf46bc27a7dbf4f2b81607b82"
+      },
+      {
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareRegisters"
+          ],
+          "exit": 0,
+          "seconds": 2.6563124656677246,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-registers4.log",
+        "note": "actual Arm64ProgramEntryAllocation.world explicit; full wrappers pass at unchanged limits"
+      }
+    ],
+    "remaining": "original98input/setup/full six-call entry, explicit producer cache/header framing through CMP, W32/native and remaining ISA families, physical memory/compiler correspondence, O1/O2/O4/M5 and M6",
+    "m5_complete": false,
+    "complete_isa_families": 0
+  },
+  "previous_source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-frame-before.lean",
+  "previous_source_sha256": "00f991a62185b07fd492bb45f68a1ae5c9999210b4ddb143e1ddc6ce621cea6c",
+  "remaining": "original98input/setup/full six-call entry; W32/native and remaining ISA families, physical memory/compiler correspondence, O1/O2/O4/M5 and M6",
   "m5_complete": false,
   "complete_isa_families": 0
 }
