@@ -1,0 +1,160 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectPathCall.lean": "97372ec88bbcefc9d8d1d35889437b884dcd70d2a986f35400a08acc347e6b1c"
+  },
+  "source_lines": 136,
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectCondition.lean": "3b1bac43244108f711634653ca43855356854a3a4dfae257177b300de11872fc",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectPath.lean": "cbbed6bcf727397656afb6b73adec86af4989d3e87525fe7f932367ec2609fb4",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean": "1d9ccc69adf0443ffeffcbf5b5e3b39234493d9cfbf9095df3fee5ca960fb486",
+    "kprog/formal/KProgFormal/ClightRefinement/InternalExecution.lean": "08046c38f730e985d8f1d5ca612cb306c06c5aba600ccc1eba80e45a0d7fe2f1",
+    "kprog/formal/KProgFormal/Clight/Arm64Program.lean": "85b0b77efe29050658da9bb3ec4ab17661257f2f6ba985d1c24d9e72532d8df6",
+    "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean": "3deb6674d3397ac12845ccaf56b6b3067559e5823baaee0c44c915bf4d99f252",
+    "kprog/formal/external/clean/export/CCLib/ClightExec.lean": "880cf140497cdd7b223e27dd30420fcbb58eb5ace0b310189d03c232de50fa18",
+    "kprog/formal/external/clean/export/CCLib/Cop.lean": "773cc8d2ed06dc4c791f9c3aa8bb12ca3015350f3da93bb7afa75b771793996f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectPathCall"
+    ],
+    "exit": 0,
+    "seconds": 48.06238293647766,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 254,
+  "build_log": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/call-build2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/SelectPathCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5923197269439697,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/call-public1.log",
+  "public_query_sha256": "28d90ca3919ee327b8837a79771fb7aaff5e4b6723c35abafe52940309b86fec",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.PathCall.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.PathCall.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.PathCall.temps_other": [
+      "propext"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.PathCall.execute_condition": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.PathCall.csel64_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "steps": {
+    "call_site": 31,
+    "condition_and_path": 66,
+    "decomposition": "2 real caller steps + actual helper26 + return/resume/if3; composed after earlier actual condition35"
+  },
+  "supported_codes": [
+    28,
+    29,
+    30,
+    52,
+    61,
+    62,
+    68,
+    69
+  ],
+  "caller_width_domain": "all BitVec8 byte ABI values; converted to ulong with actual unsigned casts",
+  "scope": "actual Condition.after call and linked Numeric helper at real block99, unchanged full memory/e/k and exact sole temp162 update; reaches original live128 pointer/tag or129 numeric suffix; combined66 derives op/width preservation through Condition.temps_other; EQ0 condition only, not full dispatcher/native/seventh-call refinement",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/CastProbe.lean"
+        ],
+        "exit": 1,
+        "seconds": 28.91392755508423,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/cast-probe1.log",
+      "query": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/CastProbe.lean",
+      "note": "initial ABI probe confirmed binding99; cast_op rfl and width dotted-constructor failed; final proof unfolds imported unsigned cast and uses existing setWidth composition"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPathCall"
+        ],
+        "exit": 1,
+        "seconds": 50.65088391304016,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/call-build1.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/call-build1-source.lean",
+      "source_sha256": "e2b9cd4c5570235520d3fd536f6b416a991f979a36cd07f2cf3a6792a68a89a8",
+      "note": "real enter and casts had no error; only resume boolVal typeconv left opaque; fix unfolds exact existing typeconv/removeAttributes/tattr"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPathCall"
+        ],
+        "exit": 0,
+        "seconds": 48.06238293647766,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path-call/20261122T031737Z/call-build2.log",
+      "note": "resume fixed and condition66/csel64 source identity added; complete checked final source; no limit change"
+    }
+  ],
+  "remaining": "selected source pointer/tag readers and actual writer including STACK4 origin, mature CSEL/full dispatcher/seventh-call native composition; other conditions/remaining fixture/widths/tags/complete ISA/O1/O2/O4/M5/M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
