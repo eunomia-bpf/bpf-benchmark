@@ -28,6 +28,7 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/uaccess.h>
+#include <linux/unaligned.h>
 
 #include <linux/bpf_native.h>
 /* helper_targets: the function the kernel calls for each helper ID of a loaded program. */
@@ -158,6 +159,29 @@ static int native_lab_arm(void)
 		}
 		off += blobs[i].len;
 	}
+#ifdef CONFIG_ARM64
+	/* arm64 EX_TYPE_BPF fixup for a native load (BPF_NATIVE_ARM64_LOAD): zero the
+	 * destination, both registers of a pair load, and skip the instruction
+	 * (5e3836051, lost in 3aa496416).
+	 */
+	for (i = 0; i < load_site_count; i++) {
+		const struct native_lab_load_site *s = &load_sites[i];
+		u32 word, reg, fixup;
+
+		if (s->offset >= len || len - s->offset < AARCH64_INSN_SIZE)
+			continue;
+		word = get_unaligned_le32(bytes + s->offset);
+		reg = s->destination < 31 ? s->destination : 31;
+		fixup = BPF_NATIVE_ARM64_LOAD | (reg << 27);
+		if ((word & 0x3e400000U) == 0x28400000U || (word & 0x3fe00000U) == 0x08600000U)
+			fixup |= BPF_NATIVE_ARM64_PAIR | (((word >> 10) & 31) << 16);
+		else if ((word & 0xbfa07c00U) == 0x08207c00U)
+			fixup |= BPF_NATIVE_ARM64_PAIR | (((reg + 1) & 31) << 16);
+		sites[ns].offset = s->offset;
+		sites[ns].fixup = fixup;
+		ns++;
+	}
+#endif
 	image->bytes = bytes;
 	image->len = len;
 	image->relocs = relocs;
