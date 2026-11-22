@@ -1,0 +1,5 @@
+Reproduced 2026-11-22:
+source  kprog/x86/packet_bounds_ir.cpp sha256 4829369f71ebf3d52d7b44e9cba780b8e029496357cf0aa74091f8d13af60c34
+built   /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds sha256 38cc2c71e92149b9bbeedd987ae92234c2ce8a1d1205799baf06cf6b3bab54c4
+r10 counters: stack pointer subtractions eliminated=149, pointer differences anchored=77
+r10 perf_event section byte-identical to trusted_x86.bpf.o here.
