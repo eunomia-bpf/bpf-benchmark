@@ -1,0 +1,118 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagBytes.lean": "58fbec30a973e09a787d324870116b8e6059e68221656ff444ac41d054668c6b"
+  },
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagArithmetic.lean": "bed1b13c33137eeb92fe3ba50b45d0a464b58f065c2353cf9e5c60289a455bdf",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean": "2f88df5be132eaa6a20cd8d342425471907939dce661a363032c25677bb75f49",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "fb68c6648b10d404b6735ef3f7d602015a84bb169f072fbebfcbb5837772417c",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "6488d083657255f39f4d9753980943eed6a34c63197d1e86e172f1dbcfb469e5",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareMath.lean": "c20becdd6054075e5367fb5ba1f8df309a83e65b1881bc7902c27a2c9a87cbf4",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareBody.lean": "826646bfd9747443e2e96aa0c2777f4a4076591e48f188775bfb0ec065711c16"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareFlagBytes"
+    ],
+    "exit": 0,
+    "seconds": 2.2310140132904053,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 266,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-flag-bytes2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareFlagBytesPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.466545581817627,
+    "cpus_allowed": [
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "nice": 19,
+    "workers": 1,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-flag-bytes1.log",
+  "public_query_sha256": "755b7d1a1cf6f1bb555baf79e4f51adc78ab5ba8a5b7195ce98596981e6a99b3",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagBytes.source_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagBytes.native_bits": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.FlagBytes.native_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "scope": "all four actual original-C CMP X64 Call.flagValue expressions equal Vint of imported native AddWithCarry flag bits zero-extended to32; explicit source order Z,N,C,V; actual native-after flag reads; universal operands and no readback/native-poststate hypothesis",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareFlagBytes"
+        ],
+        "exit": 1,
+        "seconds": 2.342099666595459,
+        "cpus_allowed": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "nice": 19,
+        "workers": 1,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-flag-bytes1.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/flag-bytes-before2.lean",
+      "source_sha256": "13241030e8d9b250eecf412a8fda43a0c7597f3afe3bb6371e4f988aeb3459d5",
+      "note": "nonexistent simp lemma removed; zero literal made width-explicit; native finite flag projections made explicit; same limits"
+    }
+  ],
+  "remaining": "full stored-byte/register representation after actual source alloc/free/return, pointer provenance/cache/header/SP/vector frame, fetched sixth instruction and original98input/setup/six-call entry; W32 native bridge; remaining ISA families and M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
