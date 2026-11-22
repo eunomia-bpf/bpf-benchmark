@@ -260,6 +260,20 @@ record this composition and the preceding SF contracts at existing budgets and
 inherited axioms. Current heap/layout/callee observations remain explicit.
 CF/OF/PF stores, writeback and entry/world correspondence remain open.
 
+The [original SHL carry storage](KProgFormal/ClightRefinement/X86ShiftFlagCF.lean)
+retains the real operation gate, carry calculation, field-120 pointer store and
+overflow continuation. Three silent steps select the original calculation;
+the pointer load and qword-to-byte assignment take four steps for every incoming
+payload word and current heap. The pointer temporary reads back exactly and
+frames every other temporary. The scalar payload/cast theorem agrees with the
+mature defined CF bit; in the undefined range its computed bit supplies a valid
+oracle choice. Original layout, binding, payload and genuine heap load/store
+observations remain explicit premises. The
+[seven public audits](../results/kprog_verification_20261107/x86-shift-flag-cf.log.gz)
+record source selection, storage, frames and scalar CF correspondence at existing
+budgets and inherited axioms. The actual count-test/shift calculation, whole-route
+composition, OF/PF stores, writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
