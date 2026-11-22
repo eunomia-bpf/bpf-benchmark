@@ -5,7 +5,7 @@ Lean ISA models. The current route executes the actual exported C in Clight
 and relates its state to the native model. Per-instruction handler refinement,
 dispatcher composition, and the complete O1/O2/O4 obligations remain unfinished
 (M5/M6 open). Earlier generated-contract counts do not measure current coverage.
-Current work is tracked in [verification item 6](../docs/todo.md).
+Current work is tracked in the [verification worklist](../docs/todo.md).
 
 ## Specification and layout
 
