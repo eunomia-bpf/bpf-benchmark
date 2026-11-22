@@ -205,7 +205,7 @@ int main(int argc,char **argv) {
       // Match the B pass's concrete register bits. The original call snapshot
       // excludes the stable address bases emitted later by memoryAsm.
       result=b.CreateFreeze(call->getArgOperand(0),"register_bits");
-    } else if ((text=="call -1" || text=="r0 = 0; *(u64 *)(r0 + 0) = r0; exit;") &&
+    } else if ((text=="call -1" || text=="r0 = 0; exit;") &&
         call->arg_empty() && call->getType()->isVoidTy()) {
       // The service invokes native compilation only after stock B acceptance.
       // These invalid B paths were proved unreachable; expose that fact to
