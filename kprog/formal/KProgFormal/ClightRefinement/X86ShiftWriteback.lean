@@ -2678,4 +2678,144 @@ theorem byte_memory_native_low (old next : BitVec 64) (shift : BitVec 8)
   have bound := ((((old >>> 8).setWidth 56) ++ next.setWidth 8)).isLt
   omega
 
+
+private theorem byte_high_reassemble (x b : Nat) (decoded : _root_.Int)
+    (changed : decoded + ((x : Int) / 256 % 256) * 256 = (x : Int) + (b : Int) * 256) :
+    decoded = ((x / 65536 * 65536 + b * 256 + x % 256 : Nat) : Int) := by omega
+
+private theorem native_byte_high_concat (old next : BitVec 64) :
+    X86.Value.writeHigh8 old next =
+      (((old >>> 16).setWidth 48 ++ next.setWidth 8) ++ old.setWidth 8) := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  simp only [X86.Value.writeHigh8, BitVec.getLsbD_or, BitVec.getLsbD_and,
+    BitVec.getLsbD_not, BitVec.getLsbD_shiftLeft, X86.Size.mask_getLsbD,
+    X86.Value.trunc_getLsbD, X86.Size.bits_b, BitVec.getLsbD_append,
+    BitVec.getLsbD_setWidth, BitVec.getLsbD_ushiftRight]
+  by_cases low : i < 8
+  · simp [low, hi]
+  · by_cases middle : i < 16
+    · have lane : i - 8 < 8 := by omega
+      simp [low, hi, lane]
+    · have beyond : ¬ i - 8 < 8 := by omega
+      have upper : i - 8 - 8 < 48 := by omega
+      have restored : 16 + (i - 8 - 8) = i := by omega
+      simp [low, hi, beyond, upper, restored]
+
+theorem byte_memory_native_high (old next : BitVec 64) (shift : BitVec 8)
+    (high : shift.setWidth 32 = (8#32)) :
+    byteMemoryWord old next shift = X86.Value.writeHigh8 old next := by
+  have changed := byte_decode_change old next shift
+  simp only [high, ite_true, CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned] at changed
+  have restBound : old.toNat / 65536 < 281474976710656 := by
+    have bound := old.isLt
+    omega
+  have small : (next.setWidth 8).toNat < 256 := (next.setWidth 8).isLt
+  have oldSmall : (old.setWidth 8).toNat < 256 := (old.setWidth 8).isLt
+  have concatNat : ((((old >>> 16).setWidth 48) ++ next.setWidth 8) ++ old.setWidth 8).toNat =
+      old.toNat / 65536 * 65536 + (next.setWidth 8).toNat * 256 + old.toNat % 256 := by
+    rw [BitVec.toNat_append, ← Nat.shiftLeft_add_eq_or_of_lt oldSmall]
+    rw [BitVec.toNat_append, ← Nat.shiftLeft_add_eq_or_of_lt small]
+    simp only [BitVec.toNat_setWidth, BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow,
+      Nat.shiftLeft_eq]
+    simp only [show 2 ^ 8 = 256 from by decide, show 2 ^ 16 = 65536 from by decide,
+      show 2 ^ 48 = 281474976710656 from by decide, Nat.mod_eq_of_lt restBound]
+    omega
+  have decoded : CC.decodeInt (byteMemoryImage old next shift) =
+      ((((((old >>> 16).setWidth 48) ++ next.setWidth 8) ++ old.setWidth 8).toNat) : Int) := by
+    rw [concatNat]
+    exact byte_high_reassemble old.toNat (next.setWidth 8).toNat
+      (CC.decodeInt (byteMemoryImage old next shift)) changed
+  rw [native_byte_high_concat]
+  apply BitVec.eq_of_toNat_eq
+  simp only [byteMemoryWord, CC.Integers.Int64.repr, CC.Integers.MI.repr, decoded,
+    BitVec.toNat_ofInt]
+  have bound := (((((old >>> 16).setWidth 48) ++ next.setWidth 8) ++ old.setWidth 8)).isLt
+  omega
+
+theorem byte_memory_native (old next : BitVec 64) (shift : BitVec 8) :
+    byteMemoryWord old next shift =
+      (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next
+       else X86.Value.writeView .b old next) := by
+  by_cases high : shift.setWidth 32 = (8#32)
+  · simpa only [high, ite_true] using byte_memory_native_high old next shift high
+  · simpa only [high, ite_false] using byte_memory_native_low old next shift high
+
+theorem byte_reference (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (old : BitVec 64)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong old))
+    (localBlock : CC.Block) (after : CC.Mem)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 (.Vlong old) = some after)
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (0#32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (ordinary : (registerByte index).setWidth 32 ≠ (4#32))
+    (byteMem : CC.Mem)
+    (byteStored : CC.Mem.store .Mint8unsigned after localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some byteMem)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (middle final : CC.Mem)
+    (wordStored : CC.Mem.store CC.Mptr byteMem cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (0#32)) = some final) :
+    InternalRun ge 169 (.State function writer k e le m)
+      (.State function .Sskip k e
+        (tableTemps
+          (byteTemps
+            (classTemps
+              (tagTemps
+                (cellReadTemps
+                  (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+                    (selectTemps le (registerByte index) .b))) cellsBlock cellsOffset value)
+                    .b shift next) cellsBlock cellsOffset (.Vlong old))
+                index cellsBlock cellsOffset (0#8)) .b) next)
+          (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) (0#8) index cellsBlock cellsOffset) final) := by
+  have actualStored : CC.Mem.store CC.Mptr byteMem cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))))
+      (.Vlong (byteMemoryWord old next shift)) = some middle := by
+    rw [byte_memory_native]
+    exact wordStored
+  have source := byte_scalar_final ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
+    widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
+    localBlock after declared stored currentTag callerBlocks ordinary byteMem byteStored
+    bindingSeparate middle final actualStored tagStored
+  simpa only [byte_memory_native] using source
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
