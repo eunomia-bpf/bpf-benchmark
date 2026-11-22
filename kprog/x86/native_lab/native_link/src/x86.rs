@@ -1186,6 +1186,21 @@ pub(super) fn rewrite_x86(
         // is meaningful in the ELF address space and we can identify
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
+        // The map a register holds is known only along straight-line code: at a branch
+        // target another path may bring another map (a jump table may land anywhere).
+        let mut join_ips: HashSet<u64> = HashSet::new();
+        let mut any_join = false;
+        let mut scan = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
+        while scan.can_decode() {
+            let i = scan.decode();
+            match i.flow_control() {
+                FlowControl::ConditionalBranch | FlowControl::UnconditionalBranch => {
+                    join_ips.insert(i.near_branch_target());
+                }
+                FlowControl::IndirectBranch => any_join = true,
+                _ => {}
+            }
+        }
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
@@ -1211,6 +1226,9 @@ pub(super) fn rewrite_x86(
             }
             if is_alignment_nop(&insn) {
                 continue;
+            }
+            if any_join || join_ips.contains(&insn.ip()) {
+                map_symbol_registers.clear();
             }
             let local_ip = insn.ip() - sym.address;
             let site_key = local_site_key(sym, local_ip);

@@ -1875,6 +1875,34 @@ fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
     }
 }
 
+/// The word indices a direct branch of the function lands on, and whether an indirect
+/// branch (a jump table) may land anywhere.
+fn arm64_branch_targets(bytes: &[u8]) -> (HashSet<usize>, bool) {
+    let sext = |v: u32, bits: u32| -> i64 { ((v << (32 - bits)) as i32 >> (32 - bits)) as i64 };
+    let mut out = HashSet::new();
+    let mut indirect = false;
+    for (i, w) in bytes.chunks_exact(4).enumerate() {
+        let w = u32::from_le_bytes(w.try_into().unwrap());
+        let off = if w & 0xffff_fc1f == 0xd61f_0000 {
+            indirect = true; // br xN
+            continue;
+        } else if w & 0xfc00_0000 == 0x1400_0000 {
+            sext(w & 0x03ff_ffff, 26) // b
+        } else if w & 0xff00_0010 == 0x5400_0000 || w & 0x7e00_0000 == 0x3400_0000 {
+            sext((w >> 5) & 0x7_ffff, 19) // b.cond, cbz, cbnz
+        } else if w & 0x7e00_0000 == 0x3600_0000 {
+            sext((w >> 5) & 0x3fff, 14) // tbz, tbnz
+        } else {
+            continue;
+        };
+        let t = i as i64 + off;
+        if t >= 0 {
+            out.insert(t as usize);
+        }
+    }
+    (out, indirect)
+}
+
 // A64 load/store encoding groups follow arch/arm64/include/asm/insn.h.
 // Final native code is decoded before the appended literal/data pool.
 fn arm64_load_destination(word: u32) -> Option<u16> {
@@ -1953,8 +1981,6 @@ fn rewrite_arm64(
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
-    let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
-
     for sym in included {
         let is_entry = sym.address == entry.address;
         let bytes = read_symbol_bytes(elf, sym)?;
@@ -1975,7 +2001,14 @@ fn rewrite_arm64(
 
         let end = sym.address + sym.size;
         sym_start_word_offset.insert(sym.address, blob.len() / 4);
+        // The map a register holds is known only along straight-line code: at a branch
+        // target another path may bring another map (a jump table may land anywhere).
+        let (join_words, any_join) = arm64_branch_targets(&bytes);
+        let mut reg_map_names: [Option<String>; 32] = std::array::from_fn(|_| None);
         for (local_word_index, word) in bytes.chunks_exact(4).enumerate() {
+            if any_join || join_words.contains(&local_word_index) {
+                reg_map_names = std::array::from_fn(|_| None);
+            }
             let off = local_word_index * 4;
             let mut insn = u32::from_le_bytes(word.try_into().unwrap());
             let emit_word_index = blob.len() / 4;
