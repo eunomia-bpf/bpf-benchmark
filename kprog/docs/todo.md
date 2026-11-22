@@ -8,6 +8,84 @@
 
 ## 0. Lane 目标与待办
 
+### 运营者的要求（原话）和接下来的待办（协调者 2026-11-22T09:0xZ 整理，以此为准；下面更早的块是历史）
+
+运营者 2026-11-22：“我的要求明确写清楚 todo 了吗”“我们的完整的要求的系统设计是什么? 要的优化是什么? 完整复述? 不允许做什么? 接下来的 todo 完整列表是什么?”
+
+**一、系统设计**（kprog/docs/design.md“核心思想”“编译流水线”，原话）
+
+1. P 从应用源码直接编成机器码：“不是直接出机器码吗? 为啥变成这样了”（11-14）。
+   - 源码尽量不改：“我们应该尽可能禁止改源代码吧? 尽可能减少修改?”（11-13）；“必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改”（11-15）。
+   - 兼容靠头文件：“不允许放进编译过程, 不是用头文件兼容吗”（11-15）。
+   - 编译参数：“编译参数所有 app 统一.”（11-15）；“编译参数固定 O3. 不需要调代码大小了. 确保 inline 啥的都正常就好”（11-21）。
+2. 验证：受保护的服务把忠实解释器 I 特化到 P，得到 sim C，编成直线 eBPF B，交库存 verifier；verifier 接受就确证 P 内存安全。eBPF 只被分析，不执行。
+3. 顺序：“应该是先优化, 再验证优化后的那一份, 再优化, 再链接时优化.”（11-14）。
+4. 链接时优化：verifier 接受后，对同一份被检查过的程序链接、绑定 map 和 helper、就地内联 map 查找和 helper、折叠冻结的 .rodata、整体优化，编成原生代码，内核直接执行。
+   - “比如 inline map / helper 这个就是链接”；“没有额外的 受信改写, 只有 LTO”（11-14）。
+   - “直接执行 P 其实没错, 不需要改写. LTO 只是内核也做的事情, 算是 design detail?”（11-14）。
+5. 两种配置并存、分别报告：LTO 配置（checked-sim-c，主配置）；直接原生配置（对照）。
+6. 每个程序都以原生代码运行：“任何情况下绝对不允许留在 ebpf 上面跑”（11-21）；“verify 不了的也需要跑 native 先.”（11-16）；“恢复这个, 吧 verify 和运行分开看”（11-19）。
+7. 起点和预算：“应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化? 因为之前都跑通了?”；“verify 和功能的部分完整保留?”（11-21）。
+8. 一个工作树、一个内核、一个镜像、一个底座：“任何时候只允许一个镜像和一个底座. 所有原始数据不允许删掉, 不允许建立任何新的 worktree.”（11-11）。
+
+**二、要的优化**（原话）
+
+1. map 查找像 JIT 一样内联：“必须支持, 改 linker 或者或者在源代码的时候内联”（11-14）。
+2. 内联之后常量消除：“helper map 也可以这样内联之后常量消除”（11-11）。
+3. helper 用 C 实现直接编进去：“手写的 helper 例程 是不是应替换成 c 实现的直接编译进去的”（11-19）。
+4. 读内核内存直接解引用：“读内核内存要调用 bpf_probe_read … 不能也直接内联和解引用???”（11-19）。
+5. 去掉内核里不必要的检查、确保内联：“内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了.”（11-16）。
+6. 幅度：“LTO + native 我觉得到 40% 性能进步是完全肯定可以的. 先确保管线正确, 然后开始考虑优化. 每一个优化也得记录在哪里怎么做的.”（11-14）。
+7. 目标：“必须继续优化到至少 20%”；“吞吐肯定也需要好 30% 以上”；“也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”；“你应该无论如何比 kinsn 好得多”（11-18）；“任何都不应该更慢对吧?”（11-22）。
+
+**三、不允许做的事**（原话）
+
+1. 新增检查：“禁止加任何额外的 check”（11-16）；“不允许大幅度修改, 不允许增加新的 check”（11-09）；“改成我没说的都禁止加, 去把所有我没批准的都删掉”（11-20）。
+2. 设计做完之前测量：“去确保设计完全符合我说的, 做好之前不要测量”；“我只说你去按照设计的方案做. 不允许随便测量”；“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”（11-21）；“我是不是说设计达到之前不允许开始跑计时????”（11-22）。
+3. 反复重测：“怎么还是在x86 完整重测?????”；“不是就是这个数字冻结了?”（11-22）。x86 的数冻结在 8430daa81 的完整测试。
+4. 用工作量、调用次数、state 判断一个数：“不应该拿调用次数做对比和 gate? 调用次数很可能不同啊”“功能正常就可以”（11-18）；“不是说禁止说考虑工作量吗”“功能不是看 state 吧”（11-22）。
+5. 改 benchmark 框架和设置：“不许改 bench 除非我同意”（11-15）；“整个 benchmark 框架不是说都不允许改动???”（11-20）。
+6. 调参：“不需要调参”（11-21）；“我不是很早就说不要调仓了吗?”（11-21）。
+7. 让别人写性能代码、跑性能测试：“性能测试和写代码都是你自己来. codex 只负责别的做安全相关的 verify”（11-22）。
+8. 改论文、故事、设计、benchmark 设置；向运营者提问：“所有都不能问我”（11-15）。
+9. 新 worktree、分支、clone、stash；删原始数据；revert 提交；提交里带 AI 署名。
+10. 放进编译过程的我们自己的改写；留着会误导的旧东西：“旧的会误导的不要关闭, 要拆掉丢掉.”（11-15）。
+
+**四、现状和设计的差距**（协调者 2026-11-22 核对）
+
+1. 计时一直跑的是直接原生配置（对照）。它装载的 B 是 `r0 = 0; exit`，P 没有交给 verifier；设计的主配置（验证加 LTO）没有在计时路径上跑通。
+2. 库的特性探测程序留在 eBPF。
+3. 内联之后的常量消除，在直接原生配置里没有做。
+4. helper 例程用 C 编进去：读用户内存、current_task 等仍是 helper 调用。
+5. 六个应用的功能没有用应用自己的输出核对过。OTel：冻结版本的原生入口读错了 perf_event 上下文（c96bfaf8e 改正）。
+6. 行数：路径改动按新增算 1824 行，超过 1000。
+7. 8430daa81 之后协调者加的四条（d9262890c、56cf40e8e、f26e844a9、4415b86f0）属于“inline map / helper”的链接时优化，还没有任何证据表明有用。
+
+**五、接下来的待办**（按顺序；做完之前不跑计时）
+
+1. 功能核对：六个应用逐个比较原生和 eBPF 各自的输出，不改冻结 benchmark，单独跑 10 秒。
+   - OTel：profile 里的栈。
+   - Tetragon、Tracee：事件。
+   - BCC：工具的输出。
+   - Cilium、Katran：包的去向。
+2. 主配置：让验证加 LTO 的配置在六个应用上跑通。执行的是被 verifier 检查过的那份程序经 LTO 的原生代码。
+3. 全部程序原生，包括库的特性探测程序。
+4. 要的优化：
+   - 二.2：内联之后常量消除，折叠冻结的 .rodata 和装载期常量。
+   - 二.3：helper 用 C 实现编进 P，包括读用户内存、current_task。
+   - 二.5：确认内联都生效。
+   - 每一项记录在哪里、怎么做。
+5. 行数回到 1000 以内：逐条对照第一、二节的原话，只保留原话要的修复和优化，其余拆掉。
+6. arm64 用同一套代码和设计，功能核对同第 1 条。
+7. 以上都完成后：x86 和 arm64 各做一次完整、详细的性能测试（冻结入口默认设置，不调参），和 5/29 对比。arm64 在 Spark 上跑，计时前暂停 DeepSeek，测完立刻恢复。
+8. 记录：
+   - 每小时报告；
+   - current-design.md 每小时更新；
+   - 运营者原话逐字记进 user-instruction.md；
+   - 结果写进 best-numbers。
+9. 安全 verify 由 Codex 和 omp 做（formal M5、M6，V，S2、S13，omp 的 checked 路径）。他们不跑整机测试，也不改性能路径代码。
+
+
 - [x] **C** verify compiler repeated MIR register parsing (this commit, 2026-11-22): two-line process-local memoization of existing pure register_effects(line); actual request9 input89,061,225B yields original89,440,773B byte-exact,70pairs/3222access records equal; replay exit0/cache56,317,361hits. Flags/lowering/verdicts unchanged; no application speed claim. Evidence: kprog/results/checked-entry-20261121/spill-parse.json.
 
 - [ ] **Coordinator P-side follow-up** (C2026-11-22): evaluate the unapplied one-token current-task helper35->158 compatibility candidate, whose source bodies return the same current-task address on the supported64bit ABI. I/B/verifier remain unchanged; existing build/load evidence and any generic correspondence remain outstanding. Production P owned by coordinator; current #35 rejections retained. Evidence and patch: kprog/results/checked-entry-20261121/current-task-helper.json.
@@ -2352,6 +2430,7 @@ PERF checkpoint 2026-11-14T18:40:53Z（65fe9615e / 4df2d82dd）：最新修正 m
   - 2026-11-22 formal: `Arm64Compare.Native` actual mature CMP X4,X1=SUBS XZR,X4,X1,LSL0 execution + same real fetched/decoded word + full reference step/events[]/faultnone; imported AddWithCarry/PState/PC writers retained, allGPR/SP/vectors/extraFlags unchanged. Native pure leaf/logical-only/defaultcaps; receipt `formal/results/m5-compare-native`. Source C NZCV equivalence/full Registers/sixcall still open; no local ISA surrogate/M5M6 open/families0.
   - 2026-11-22 formal: `Arm64Compare.FlagArithmetic` imported actual AddWithCarry64 result=x-y/Z iff operands equal/C iff unsigned no-borrow; actual65bit sum/truncate-reextend proved with kernel Nat arithmetic, no native proof oracle. Component77/public3/logicalonly/defaultcaps/low-priority16-23nice19j1; receipt `formal/results/m5-compare-flag-arithmetic`. N/V C-mask correspondence/full byte/register/sixcall remain open/M5M6open/families0.
   - 2026-11-22 formal: actual producer `Storage.flagWritable` derives all4flag bytes from typed allocation and survives real allocation/cache/body/word-tag/pointer/flag stores and bounded free frames. Original five-call native/source prefix now returns these permissions in its existing Storage; CMP `execute_from_storage`413/`execute_caller_from_storage`417 derive their permission internally with old APIs retained. Focused ARM targets/original5call/public checks/defaultcaps/inheritedonly; receipt `formal/results/m5-flag-storage`. Mature CMP NZCV/full sixth/sixcall/M5M6 remain open/families0.
+- 2026-11-22 formal: mature AddWithCarry64 N/V now equal exact C high-bit/nonzero XOR-AND masks, alongside result/Z/C. Actual65bit signed sum and no-wide-overflow/reextension64 proof uses core checked bitvector/Int identities; no surrogate/oracle/limit increase. Component77/public7/logicalonly/low16-23nice19j1; updated `formal/results/m5-compare-flag-arithmetic`. CC byte/register/fetched sixcall bridge next; W native/M5M6open/families0.
 - M5 增量：CMP X64 四个实际 C flagValue 已与成熟原生更新 N/Z/C/V 位的零扩展逐项对应（源存储顺序 Z,N,C,V），任意操作数，无标志读回/原生后态假设；266jobs+3公开公理检查通过，见 formal/results/m5-compare-flag-bytes。完整内存/寄存器及原入口六调用仍待完成，M5/M6 未关闭。
 - M5 增量：CMP X4,X1 实际413步调用/释放/返回及原417步调用者已精化同一真实取指/解码成熟模型步骤；完整 GPR/标签/指针来源/SP/SIMD/NZCV 关系保留，操作数由真实源单元推导，原生产者 frontier 由所有权恢复；267jobs+7公开公理检查通过，见 formal/results/m5-compare-registers。原98输入/setup/六调用入口与 cache/header 集成仍待完成，M5/M6 未关闭。
 - M5 增量：同一实际 CMP 调用已保持全部12个生产者头部指针、非标志借用读取（含失败）及原 frontier 上的栈/返回缓存；由真实局部数据 frame 与分配所有权导出，无新增缓存或读回前提。267jobs+10公开公理检查通过，见 formal/results/m5-compare-registers；cache/header 集成已关闭，原98输入/setup/六调用入口仍待完成，M5/M6 未关闭。
