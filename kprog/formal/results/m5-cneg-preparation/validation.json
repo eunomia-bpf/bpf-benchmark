@@ -2,7 +2,7 @@
   "status": "unverified work in progress",
   "focused_started": false,
   "public_queries_started": false,
-  "public_query_count_prepared": 10,
+  "public_query_count_prepared": 13,
   "root_import_added": false,
   "full_check": "prior V make-check3 DIV fault correspondence failure; not rerun",
   "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
@@ -12,7 +12,8 @@
       "build",
       "KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall",
       "KProgFormal.ClightRefinement.Arm64CnegNative",
-      "KProgFormal.ClightRefinement.Arm64ConditionGe"
+      "KProgFormal.ClightRefinement.Arm64ConditionGe",
+      "KProgFormal.ClightRefinement.Arm64CnegReadEntry"
     ],
     [
       "lake",
@@ -35,6 +36,15 @@
     "proposed_call_steps": 28,
     "source": "actual exported f_kprog_arm64_program_condition, condition10 GE",
     "existing_storage": "both N/V loads from FlagsRepresent",
+    "new_cpu_jobs_started_this_turn": 0
+  },
+  "read_entry": {
+    "status": "unverified draft",
+    "proposed_prefix_steps": 8,
+    "actual_dispatch_branch_index_zero_based": 8,
+    "source_call": "kprog_arm64_program_read",
+    "register_argument": "original source register index; no read value supplied",
+    "preserved": "full memory and original pending copy/condition/numeric/writer continuations",
     "new_cpu_jobs_started_this_turn": 0
   }
 }

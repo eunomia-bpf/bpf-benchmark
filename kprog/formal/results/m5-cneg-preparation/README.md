@@ -8,7 +8,7 @@ The native proof binds the LNSym CSNEG X6,X5,X5,LT alias, including its actual
 condition inversion, register write, PC advance, event history and fault state.
 No independent ISA executor or runtime source is added.
 
-These three modules and the ten public queries are **unverified work in
+These four modules and the thirteen public queries are **unverified work in
 progress**. The focused command reached only the shared timing-lock waiter;
 no Lake/Lean child started while the frozen rotate held the exclusive lock.
 The lane ended that unstarted waiter for batching and retained its raw log.
@@ -18,7 +18,7 @@ is claimed. The accepted predecessor remains the seven-call CSEL prefix.
 Next, under the shared timing lock, CPU 17, one worker and 32 GiB, run:
 
 ```sh
-lake build KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall KProgFormal.ClightRefinement.Arm64CnegNative KProgFormal.ClightRefinement.Arm64ConditionGe
+lake build KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall KProgFormal.ClightRefinement.Arm64CnegNative KProgFormal.ClightRefinement.Arm64ConditionGe KProgFormal.ClightRefinement.Arm64CnegReadEntry
 lake env lean -j1 results/m5-cneg-preparation/Query.lean
 ```
 
@@ -44,3 +44,13 @@ path. The same full memory and original continuation are part of the proposed
 call result. No new runtime implementation or replacement condition semantics
 is introduced. Before acceptance, run all three focused modules followed by
 the ten prepared public queries at the original proof caps.
+
+Arm64CnegReadEntry prepares the next independent source component. It extracts
+the ninth original dispatch branch and retains the actual inner loop, register
+read call, pending value copy, complete condition/numeric suffix and writer.
+The proposed eight-step prefix reaches the genuine read Callstate via the
+imported Step.call rule with the original register-index argument and helper
+binding. It assumes no scalar read result, flags, stores or post-memory.
+Dispatch admission from the top-level handler and reader-return composition
+remain pending. This fourth module and its three queries are also unverified;
+all four modules and thirteen queries must run before accepting these drafts.
