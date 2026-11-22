@@ -1,0 +1,68 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRhs.lean": "9f07f0e97eac8c93cc290da753064cfc0555d3a0dd336ff1192f57ae09b4b9b0"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareRhs"
+    ],
+    "exit": 0,
+    "seconds": 2.860166072845459,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 238,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/rhs1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/RhsPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8085606098175049,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-rhs1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Rhs.tail_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Rhs.resume_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Rhs.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 138,
+  "step_decomposition": {
+    "real_RHS_call_prefix": 5,
+    "real_modified_scalar_helper": 119,
+    "real_return_restore_selection_and_loop_exit": 14
+  },
+  "scope": "actual original linked CMP RHS, real mod1/LSL0/W-X helper result derived from typed GPR tables, original op23 switch/default/assignment to untouched flag loop; same fullheap/e/k/exact3 caller temp writes",
+  "no_result_admission": true,
+  "whole_library_confirmation": "pending completed CMP source/native batch and terminal latest V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
