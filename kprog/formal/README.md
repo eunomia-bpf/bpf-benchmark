@@ -522,17 +522,20 @@ RSP/pointer-tag branches, other widths and the native entry-world relation
 remain open.
 
 
-The ordinary scalar byte writer now returns to its original continuation in
+The ordinary scalar byte writer returns to its original continuation in
 169 silent steps, composing local preparation/storage, final table writes
-and the two genuine outer-loop exits. Its caller-table pointer observation
-follows through both local stores using existing memory frames. All four
-actual successful stores, reached local-word read/cast and block separation
-remain explicit premises; the exact final heap and source temporary maps
-are retained. The
-[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-final.log.gz)
-records sixty-five public declarations under the default budgets. Deriving
-the local-word representation and entry-world premises, together with
-RSP/pointer-tag branches and other widths, remains open.
+and the two genuine outer-loop exits. Existing memory frames derive its
+caller-table pointer through both local stores. For an original scalar
+64-bit word, the actual word store and selected byte overwrite also derive
+full-word readability and exact encoded-byte readback through Clight's
+existing encode/decode functions. The scalar composition derives the
+local-word read and source word casts, retaining all four actual store
+successes, block separation, the final heap and source temporary maps.
+The [composition receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-final.log.gz)
+and [memory receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-memory.log.gz)
+record sixty-five and sixty-seven public declarations under the default
+budgets. The native-register merge correspondence, entry-world/store
+premises, RSP/pointer-tag branches and other widths remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
