@@ -2358,6 +2358,7 @@ PERF checkpoint 2026-11-14T18:40:53Z（65fe9615e / 4df2d82dd）：最新修正 m
 - M5 增量：原98输入/provider轨迹/setup/真实六调用前缀已接入 CMP，保留前五次分配/释放/堆与观察；第六取指/无错误状态由原PC+20及真实成熟步骤推导，完整GPR/标签/指针来源/SP/SIMD/NZCV、12头指针/缓存/frontier保持，无新增原生后态/读回/权限假设。298jobs+3公开公理检查通过，见 formal/results/m5-compare-sixcall-native；旧标量prefix日志重名覆盖及同源码重检已在两收据如实记录。afterCompare 后续/完整handler/O1/O2/O4/M5/M6仍待完成，families0。
 - M5 增量：CMP 后真实第七次 CSEL 调用的原始9参数/实际符号与handler/2步调用/完整FunctionEntry2分配绑定/2步返回复原已证明；导出AST保留显式signed255与CMP宏unsigned255U的差异，C未变。250jobs+4公开公理检查通过，见 formal/results/m5-select-call；CSEL条件/读写/body/native及原七调用组合仍待完成，M5/M6/O1/O2/O4开放，families0。
 - M5 增量：实际EQ0条件函数任意Z字节12步完整调用/完整内存保持/所有Kstop关系行为已证明；同一Storage与已有FlagsRepresent推导真实Z读取及原生Z标量，实际C真假转换等于成熟ConditionHolds0，无新增标志读回/原生后态假设。176jobs+5公开公理检查通过，见 formal/results/m5-select-condition-eq；CSEL实际调用点/selected raw与STACK4标签写回/native/原七调用组合待完成，M5/M6/O1/O2/O4开放，families0。
+- M5 增量：真实CSEL条件调用点35步=4标志指针加载及调用16+实际EQ函数12+返回/真假归一化7，完整heap/e/k与精确7临时变量写入保持；同一Storage/FlagsRepresent导出nativeZ，无新增原生后态/读回假设。252jobs+4公开公理检查通过，见 formal/results/m5-select-condition-site；完整dispatcher/选中raw与STACK4标签读写/native/原七调用组合仍待完成，M5/M6/O1/O2/O4开放，families0。
 - [ ] M6 旧件退役：旧生成器、contracts、generated 按现有规则移动归档（kprog/docs/cleanup-log.md），冻结的 benchmark 路径逐字节保持一致。顺序固定：先接 submodule，再迁定理，最后退役旧件。
 - 备选：x86-64 用 Zellic/x86-formal-verification-research（Lean，research preview，带 Linux 进程模型）或 Verified-zkEVM/machine-checked（Lean，AArch64/x86-64/RISC-V，早期）；Keel 的 EmbC 公开后可作为 clightgen 的备选。
 - 论文 §4 里关于生成器、Lean 参考和 TCB 的段落，迁移完成后由调研会话起草，交运营者确认。

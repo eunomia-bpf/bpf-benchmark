@@ -1,0 +1,177 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectCondition.lean": "3b1bac43244108f711634653ca43855356854a3a4dfae257177b300de11872fc"
+  },
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntrySelectCall.lean": "e2c94648b19785bf3cca7cb3cd208c9ed6d460f61767f33470f7ee3fade084e4",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionEq.lean": "2225976378407105c7f1e25a3035f8bad5c5f4c59b13234499686bbc6c9ae305",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean": "1d9ccc69adf0443ffeffcbf5b5e3b39234493d9cfbf9095df3fee5ca960fb486"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectCondition"
+    ],
+    "exit": 0,
+    "seconds": 51.09998893737793,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 252,
+  "build_log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build5.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/SelectSitePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4844543933868408,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-public1.log",
+  "public_query_sha256": "b1508453d9c15a7fb825a90cff3b2659e5eab8f2bd069c2614739c739cba4c81",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Condition.branch_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Condition.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Condition.taken_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Condition.temps_other": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "steps": 35,
+  "step_decomposition": {
+    "original_pointer_loads_and_call": 16,
+    "complete_actual_EQ_callee": 12,
+    "caller_truth_normalization_and_resumption": 7
+  },
+  "scope": "actual source CSEL condition site at original gate23 through four real NZCV header pointer loads/linked condition function69/actual EQ call/true return and taken normalization, same full heap/e/k/exact7temps; selected raw/tag writeback is untouched original successor",
+  "representation_derivation": "same current allocation-bound Storage and existing FlagsRepresent derive actual header pointers and nativeZ byte; incoming entry/aux0/helper-unshadowed source observations explicit, later derive from handler allocation/dispatch; no nativepoststate or independent readback premise",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectCondition"
+        ],
+        "exit": 1,
+        "seconds": 38.301807165145874,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build1.log",
+      "note": "conditional pointer-eval simp did not instantiate current temporary environment",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build1-source.lean",
+      "source_sha256": "533da59b82b7edc4f5ce0f5469a922a98506e7d88301b740e7c2baa576ca7ddc"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectCondition"
+        ],
+        "exit": 1,
+        "seconds": 37.31095266342163,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build2.log",
+      "note": "explicit four current-load facts progressed, but numeric0 and0#64 map keys needed canonicalization",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build2-source.lean",
+      "source_sha256": "aec5f0873ac8e1476d47db26c4d58fd6b07f2c0b988c21b12adee8d07268f199"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectCondition"
+        ],
+        "exit": 1,
+        "seconds": 58.51431703567505,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build3.log",
+      "note": "canonical pointers proved entry16; storage pointer-zero view and final temps exclusion-list simplification remained",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build3-source.lean",
+      "source_sha256": "978a95f67876746380ebbc318c9f68a32ed3bdf0c31105c31c6730baaf3234b6"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectCondition"
+        ],
+        "exit": 1,
+        "seconds": 59.83328819274902,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build4.log",
+      "note": "pointer-zero equality Decidable synthesis unavailable; exact rfl and explicit-width rfl verified independently by zero-probe1",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build4-source.lean",
+      "source_sha256": "849e0d1e09531dbbd347d334ef70bfcdc1c74bfb799c553f2fe32999e3f7b51c"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectCondition"
+        ],
+        "exit": 0,
+        "seconds": 51.09998893737793,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-site/20261122T023115Z/site-build5.log",
+      "note": "kernel reflexivity for pointer zero and complete list simp; full35 and frame pass at original limits"
+    }
+  ],
+  "remaining": "full handler dispatcher to CSEL branch, actual selected pointer/tag operand readers and writer, mature CSEL/native/seventh-call composition, remaining conditions/fixture/handler/families/O1/O2/O4/M5/M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

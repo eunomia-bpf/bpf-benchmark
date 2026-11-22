@@ -184,3 +184,4 @@ import KProgFormal.ClightRefinement.Arm64CompareRegisters
 import KProgFormal.ClightRefinement.Arm64ProgramEntryComparePrefixNative
 import KProgFormal.ClightRefinement.Arm64ProgramEntrySelectCall
 import KProgFormal.ClightRefinement.Arm64ConditionEq
+import KProgFormal.ClightRefinement.Arm64SelectCondition
