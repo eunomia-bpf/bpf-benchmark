@@ -2,7 +2,7 @@
 
 ## External-base migration (M1–M4 complete, M5 in progress)
 
-The operator's replacement plan is in [todo section 4](../docs/todo.md).
+Current work follows [verification item 6](../docs/todo.md); the M1–M6 replacement plan is retained in [the todo history](../docs/archive/todo-history-20261122.md).
 The external bases are forks, pinned as Git submodules; changes needed by
 kprog belong in those forks. M3 replaced the local ISA bodies; M4 adapted the
 shared simulator C for Clight export. M5 now proves the exported handlers

@@ -79,7 +79,7 @@ def valueArguments (entry : CC.Block) (i : Fin 31) (value : CC.Val) (tag : BitVe
 
 /-- Existing raw-integer interface is an instance of the same arguments. -/
 def arguments (entry : CC.Block) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8) : List CC.Val :=
-  valueArguments entry i (.Vlong value) tag
+  [.Vptr entry 0, .Vlong (BitVec.ofNat 64 i.val), .Vlong value, .Vint (tag.setWidth 32)]
 
 private def entryComposite : CC.Composite :=
   (ge.genv_cenv.get Arm64Program._kprog_arm64_entry).get (by decide +kernel)
