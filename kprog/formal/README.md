@@ -443,6 +443,20 @@ records thirty-four public declarations under the default budgets. Post-store
 tag reads, width/local updates, final register-table stores, qword tag calls and
 the native entry-world relation remain open.
 
+
+For every destination index 0--15, the original tag register assignment, range
+test, table-pointer/tag-byte reads, source casts and loop exits reach the width
+dispatch in nineteen silent steps. Five exact temporary writes and the frame
+for every other temporary are established. Composing the narrow writer gives
+115 steps through the genuine local GPR initialization heap. Existing memory
+store-frame lemmas derive the subsequent table-pointer and tag-byte reads from
+their original observations and explicit separation of the caller blocks from
+the local union block. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-tags.log.gz)
+records forty-one public declarations under the default budgets. Width/local
+updates, final register-table stores, qword tag calls and the native entry-world
+relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

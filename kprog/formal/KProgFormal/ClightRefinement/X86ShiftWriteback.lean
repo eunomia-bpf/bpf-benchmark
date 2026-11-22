@@ -1,3 +1,4 @@
+import CCLib.MemoryLemmas
 import KProgFormal.ClightRefinement.X86ShiftFlagPF
 import KProgFormal.ClightRefinement.X86RegisterLayout
 
@@ -1197,5 +1198,311 @@ theorem narrow_initialized (ge : CC.CGenv)
     (loadCont k) m bindingBlock cellsBlock cellsOffset index cellValue keptBinding cells
     cellCurrent cellWord keptDestination localBlock after declared stored
   exact prepared.trans initialized
+
+
+private def tagLoop : CC.Stmt :=
+  .Ssequence X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_102
+    X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103
+
+def widthDispatch : CC.Stmt := by
+  run_tac cachePart (← `(match tagWriter with
+    | .Ssequence _ rest => rest | _ => .Sskip))
+
+/-- The original tag loop and its exact width-dispatch continuation retain source identity. -/
+theorem tag_source : tagWriter = .Ssequence (.Sloop tagLoop .Sbreak) widthDispatch := rfl
+
+def tagCont (k : CC.Cont) : CC.Cont :=
+  .Kloop1 tagLoop .Sbreak (.Kseq widthDispatch k)
+
+def tagRegTemps (le : CC.TempEnv) (index : Fin 16) : CC.TempEnv :=
+  le.set X86_program_profile_bpf.___x86_tag_reg__2 (.Vlong (BitVec.ofNat 64 index.val))
+
+def tagReadTemps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (tag : BitVec 8) : CC.TempEnv :=
+  (((le.set X86_program_profile_bpf._t'166 (.Vptr block offset)).set
+    X86_program_profile_bpf._t'167 (.Vint (tag.setWidth 32))).set
+    X86_program_profile_bpf._t'107 (.Vint (tag.setWidth 32))).set
+    X86_program_profile_bpf.___x86_wr_cell_tag__2 (.Vint (tag.setWidth 32))
+
+def tagTemps (le : CC.TempEnv) (index : Fin 16) (block : CC.Block)
+    (offset : CC.Integers.Ptrofs) (tag : BitVec 8) : CC.TempEnv :=
+  tagReadTemps (tagRegTemps le index) block offset tag
+
+private def tagTest : CC.Expr := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 with
+    | .Ssequence (.Sifthenelse test _ _) _ => test | _ => .Econst_int (0#32) CC.tint))
+
+private def tagValid : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 with
+    | .Ssequence (.Sifthenelse _ active _) _ => active | _ => .Sskip))
+private def tagInvalid : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 with
+    | .Ssequence (.Sifthenelse _ _ inactive) _ => inactive | _ => .Sskip))
+private def tagAssignment : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 with
+    | .Ssequence _ assignment => assignment | _ => .Sskip))
+
+private theorem tag_body_source : X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 =
+    .Ssequence (.Sifthenelse tagTest tagValid tagInvalid) tagAssignment := rfl
+
+private theorem register_back : ∀ index : Fin 16,
+    CC.Cop.castIntInt .I8 .Unsigned
+      (CC.Integers.Int.repr (CC.Integers.Int64.unsigned (BitVec.ofNat 64 index.val))) =
+        (registerByte index).setWidth 32 := by
+  decide +kernel
+
+/-- Five actual source transitions enter the tag loop and copy the true register index. -/
+theorem tag_enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32))) :
+    InternalRun ge 5 (.State function tagWriter k e le m)
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103
+        (tagCont k) e (tagRegTemps le index) m) := by
+  rw [tag_source]
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, tagLoop, tagCont, tagRegTemps,
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_102, CC.doStep,
+      CC.doEvalExpr, CC.typeof, destination, CC.Cop.semCast, CC.Cop.classifyCast, CC.tuchar, CC.tulong,
+      register_long, CC.Eapp, CC.E0, List.nil_append, true_and]
+
+/-- Three actual skip/break transitions resume the original width dispatch unchanged. -/
+theorem tag_exit (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) :
+    InternalRun ge 3 (.State function .Sskip (tagCont k) e le m)
+      (.State function widthDispatch k e le m) := by
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, tagCont, CC.doStep, CC.Eapp,
+      CC.E0, List.nil_append, true_and]
+
+/-- Eleven actual source transitions test the real tag index, read the current
+tag byte and retain its exact source casts and four writes on the same heap. -/
+theorem tag_body (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (index : Fin 16) (tag : BitVec 8)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+
+    (current : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+        some (.Vint (tag.setWidth 32)))
+    (indexValue : le.get X86_program_profile_bpf.___x86_tag_reg__2 =
+      some (.Vlong (BitVec.ofNat 64 index.val))) :
+    InternalRun ge 11
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_103 k e le m)
+      (.State function .Sskip k e (tagReadTemps le cellsBlock cellsOffset tag) m) := by
+  have addZero (offset : CC.Integers.Ptrofs) :
+      CC.Integers.Ptrofs.add offset (CC.Integers.Ptrofs.repr 0) = offset := by
+    change offset + 0 = offset
+    exact BitVec.add_zero offset
+  have tableAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._cells (.Vptr bindingBlock 0) =
+      some (bindingBlock, 0, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86RegisterLayout.cells_offset ge.genv_cenv, addZero]
+
+  have tagAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr)
+      X86_program_profile_bpf._tag (.Vptr cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8, .Full) := by
+    simp only [CC.lvalOfField, cellLayout, X86RegisterLayout.tag_offset ge.genv_cenv gprLayout]
+    rfl
+  have cellAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr cellsBlock cellsOffset)
+      (.Tpointer (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) CC.noattr)
+      (.Vint ((registerByte index).setWidth 32)) CC.tuchar m =
+        some (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) := by
+    simp only [CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
+      CC.Cop.semAddPtrInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tint,
+      CC.sizeof, cellLayout, X86RegisterLayout.layout.2.2.2.1]
+    change some (CC.Val.Vptr cellsBlock (CC.Integers.Ptrofs.add cellsOffset (cellDelta index))) =
+      some (CC.Val.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))))
+    rw [cell_delta index]
+    rfl
+  have bound64 : index.val < 2 ^ 64 := by have bound := index.isLt; omega
+  have indexNat : (BitVec.ofNat 64 index.val).toNat = index.val := Nat.mod_eq_of_lt bound64
+  have sixteen : CC.Cop.castIntLong .Unsigned (CC.Integers.Int.repr 16) = (16#64) := rfl
+  have evaluated : CC.doEvalExpr ge e le m tagTest = some (.Vint (1#32)) := by
+    simp +decide [tagTest, CC.doEvalExpr, CC.typeof, indexValue,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.typeconv, CC.removeAttributes, CC.tattr,
+      CC.tulong, CC.tuint, sixteen,
+      CC.Integers.Int64.cmpu, CC.Integers.MI.cmpu,
+      CC.Integers.MI.ltu, BitVec.ult, indexNat, index.isLt,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Integers.Int.one, CC.Integers.MI.one]
+
+  have testType : CC.typeof tagTest = CC.tint := rfl
+  dsimp only [CC.typeof] at testType
+  have truth : CC.Cop.boolVal (.Vint (1#32)) CC.tint m = some true := rfl
+  have indexCast : CC.Cop.semCast (.Vlong (BitVec.ofNat 64 index.val)) CC.tulong CC.tuchar m =
+      some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.tuchar, register_back]
+  have uintCast : CC.Cop.semCast (.Vint (tag.setWidth 32)) CC.tuchar CC.tuint m =
+      some (.Vint (tag.setWidth 32)) := rfl
+  have byteCast : CC.Cop.semCast (.Vint (tag.setWidth 32)) CC.tuint CC.tuchar m =
+      some (.Vint (tag.setWidth 32)) := by
+    simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar, CC.tuint,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, writer_byte_cast]
+  have structAccess (name : CC.Ident) :
+      CC.accessMode (.Tstruct name CC.noattr) = .By_copy := rfl
+  have ptrAccess (ty : CC.Ty) : CC.accessMode (.Tpointer ty CC.noattr) = .By_value CC.Mptr := rfl
+  have charAccess : CC.accessMode CC.tuchar = .By_value .Mint8unsigned := rfl
+  have unsigned0 : CC.Integers.Ptrofs.unsigned (0 : CC.Integers.Ptrofs) = 0 := rfl
+  have keptIndex : (le.set X86_program_profile_bpf._t'166 (.Vptr cellsBlock cellsOffset)).get
+      X86_program_profile_bpf.___x86_tag_reg__2 = some (.Vlong (BitVec.ofNat 64 index.val)) := by
+    simp +decide [CC.PTree.gso, indexValue]
+  rw [tag_body_source]
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState,
+      tagValid, tagAssignment, tagReadTemps,
+      CC.doStep, CC.doEvalExpr, CC.doDerefLoc, CC.typeof, CC.tptr, CC.PTree.gss,
+      evaluated, testType, truth, ite_true, structAccess, ptrAccess, charAccess,
+      tableAddress, tagAddress, cellAdd, binding, keptIndex, indexCast, uintCast, byteCast,
+      CC.Mem.loadv, unsigned0, cells, current, CC.Eapp, CC.E0, List.nil_append, true_and]
+
+theorem tag_internal (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (index : Fin 16) (tag : BitVec 8)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+
+    (current : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+        some (.Vint (tag.setWidth 32)))
+    (destination : le.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32))) :
+    InternalRun ge 19 (.State function tagWriter k e le m)
+      (.State function widthDispatch k e (tagTemps le index cellsBlock cellsOffset tag) m) := by
+  have entered := tag_enter ge function e le k m index destination
+  have keptBinding : (tagRegTemps le index).get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    simp +decide [tagRegTemps, CC.PTree.gso, binding]
+  have observedIndex : (tagRegTemps le index).get X86_program_profile_bpf.___x86_tag_reg__2 =
+      some (.Vlong (BitVec.ofNat 64 index.val)) := by simp [tagRegTemps]
+  have body := tag_body ge bindingsLayout gprLayout cellLayout function e (tagRegTemps le index)
+    (tagCont k) m bindingBlock cellsBlock cellsOffset index tag keptBinding cells current observedIndex
+  have exited := tag_exit ge function e
+    (tagReadTemps (tagRegTemps le index) cellsBlock cellsOffset tag) k m
+  exact (entered.trans body).trans exited
+
+theorem tag_temps (le : CC.TempEnv) (index : Fin 16) (block : CC.Block)
+    (offset : CC.Integers.Ptrofs) (tag : BitVec 8) :
+    (tagTemps le index block offset tag).get X86_program_profile_bpf.___x86_tag_reg__2 =
+      some (.Vlong (BitVec.ofNat 64 index.val)) ∧
+    (tagTemps le index block offset tag).get X86_program_profile_bpf._t'166 =
+      some (.Vptr block offset) ∧
+    (tagTemps le index block offset tag).get X86_program_profile_bpf._t'167 =
+      some (.Vint (tag.setWidth 32)) ∧
+    (tagTemps le index block offset tag).get X86_program_profile_bpf._t'107 =
+      some (.Vint (tag.setWidth 32)) ∧
+    (tagTemps le index block offset tag).get X86_program_profile_bpf.___x86_wr_cell_tag__2 =
+      some (.Vint (tag.setWidth 32)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf.___x86_tag_reg__2 →
+      id ≠ X86_program_profile_bpf._t'166 → id ≠ X86_program_profile_bpf._t'167 →
+      id ≠ X86_program_profile_bpf._t'107 → id ≠ X86_program_profile_bpf.___x86_wr_cell_tag__2 →
+      (tagTemps le index block offset tag).get id = le.get id := by
+  refine ⟨by simp +decide [tagTemps, tagReadTemps, tagRegTemps, CC.PTree.gso],
+    by simp +decide [tagTemps, tagReadTemps, CC.PTree.gso],
+    by simp +decide [tagTemps, tagReadTemps, CC.PTree.gso],
+    by simp +decide [tagTemps, tagReadTemps, CC.PTree.gso],
+    by simp [tagTemps, tagReadTemps], ?_⟩
+  intro id neReg ne166 ne167 ne107 neTag
+  simp [tagTemps, tagReadTemps, tagRegTemps, CC.PTree.gso,
+    Ne.symm neReg, Ne.symm ne166, Ne.symm ne167, Ne.symm ne107, Ne.symm neTag]
+
+theorem narrow_tagged (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16) (size : X86.Size) (narrow : size ≠ .q)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (cellValue : CC.Val)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some cellValue)
+    (cellWord : CC.Cop.semCast cellValue (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) m = some cellValue)
+    (localBlock : CC.Block) (after : CC.Mem)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 cellValue = some after)
+    (tag : BitVec 8)
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (tag.setWidth 32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) :
+    InternalRun ge 115 (.State function writer k e le m)
+      (.State function widthDispatch (loadCont k) e
+        (tagTemps
+          (cellReadTemps
+            (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+              (selectTemps le (registerByte index) size))) cellsBlock cellsOffset value)
+              size shift next) cellsBlock cellsOffset cellValue)
+          index cellsBlock cellsOffset tag) after) := by
+  have initialized := narrow_initialized ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index size narrow destination
+    width alu widthBlock widthBinding unshadowed shift next observedShift observedValue
+    cellValue cellCurrent cellWord localBlock after declared stored
+  let reached := cellReadTemps
+    (writerWidthTemps
+      (loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le (registerByte index) size)))
+        cellsBlock cellsOffset value) size shift next) cellsBlock cellsOffset cellValue
+  have keptBinding : reached.get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    simp +decide [reached, cellReadTemps, writerWidthTemps, writerRawTemps, writerEffectiveTemps,
+      loadTemps, narrowSrcTemps, narrowDstTemps, selectTemps, CC.PTree.gso, binding]
+  have keptDestination : reached.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [reached, cellReadTemps, writerWidthTemps, writerRawTemps, writerEffectiveTemps,
+      loadTemps, narrowSrcTemps, narrowDstTemps, selectTemps, CC.PTree.gso, destination]
+  have postCells : CC.Mem.load CC.Mptr after bindingBlock 0 =
+      some (.Vptr cellsBlock cellsOffset) :=
+    (CC.Mem.load_store_other stored CC.Mptr bindingBlock 0 (.inl callerBlocks.1)).trans cells
+  have postTag : CC.Mem.load .Mint8unsigned after cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (tag.setWidth 32)) :=
+    (CC.Mem.load_store_other stored .Mint8unsigned cellsBlock _ (.inl callerBlocks.2)).trans currentTag
+  have tagged := tag_internal ge bindingsLayout gprLayout cellLayout function e reached
+    (loadCont k) after bindingBlock cellsBlock cellsOffset index tag keptBinding postCells
+    postTag keptDestination
+  exact initialized.trans tagged
 
 end KProgFormal.ClightRefinement.X86ShiftWriteback
