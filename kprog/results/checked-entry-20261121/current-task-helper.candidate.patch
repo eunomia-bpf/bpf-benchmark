@@ -1,0 +1,11 @@
+--- a/vendor/bpf/native_compat.h
++++ b/vendor/bpf/native_compat.h
+@@ -621,7 +621,7 @@
+     native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_cgroup_id)()
+ #undef bpf_get_current_task
+ #define bpf_get_current_task() \
+-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_task)()
++    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_task_btf)()
+ #undef bpf_get_current_task_btf
+ #define bpf_get_current_task_btf() \
+     native_bpf_helper0(void *(*)(void), NATIVE_BPF_FUNC_get_current_task_btf)()

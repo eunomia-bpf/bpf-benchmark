@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-22T02:18:21.627595+00:00",
+  "status": "proposal only; production P path is coordinator-owned and remains unchanged",
+  "repository_commit": "0885e2b788598c34a28bb9768baccbf787d5f279",
+  "kernel_commit": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "proposal": "In native_compat.h before P compilation/submission, bind existing bpf_get_current_task macro to existing helper ID158 instead of35; retain unsigned64 native return ABI and unchanged I/B implementations. This is a P-side candidate, not B-only retagging.",
+  "observed_source_facts": [
+    "#35 body returns (long)current; #158 body returns (unsigned long)current.",
+    "#35 prototype RET_INTEGER; #158 RET_PTR_TO_BTF_ID_TRUSTED with task BTF ID; both gpl_only=true.",
+    "Both helper IDs are in the same base dispatcher switch after the same CAP_PERFMON test.",
+    "Existing native header already declares both helper symbols/IDs; native-link names both; I already models158 as a pointer result."
+  ],
+  "inference": "On the supported 64-bit kernel ABI, both helper bodies produce the same machine-word current-task address; selecting158 before submission may expose existing pointer semantics without changing I, B, or the stock verifier. This source reasoning is not a formal equivalence proof or runtime coverage result.",
+  "expected_owner_action": "Coordinator decides P-side integration and uses existing source build/image workflow; V may discharge the generic helper-return correspondence. No direct-native measurements or image changes by C.",
+  "validation_status": "Candidate has not been compiled, loaded or timed; actual source bytes remain unchanged. Preserve current #35 rejection outcomes.",
+  "new_checks": 0,
+  "production_edits": 0,
+  "candidate_patch": "current-task-helper.candidate.patch",
+  "source_archive": "kprog/results/checked-entry-20261121/current-task-helper-source.tar.gz",
+  "source_archive_bytes": 1258,
+  "source_archive_sha256": "8a81b29788f4452d2ebffd531eb68491b30841179cfb70147741a88af16fa414",
+  "source_hashes": {
+    "helper_bodies": "c7d863136047a05744316d41020fc0c00843ae96e2d44031b00c792a7b8ba2c9",
+    "helper_availability": "90d8518feeceea841636f98719889d8afe55fe595009bb873d8b832b39200c0d",
+    "native_header": "77e88a1ad77b639c2e7075443df0fe495f7ef272a5bcf6bd3f1e692b9c844b93",
+    "interpreter": "9fb8eec08484e0f19512d0f5081ee1d079efe7f38d7411e2556c92bdf78e0336",
+    "helper_names": "34f94b39c2ac2485fccd5f4d5900273315ccdc4ac3237f3051862c9fc7509127"
+  }
+}

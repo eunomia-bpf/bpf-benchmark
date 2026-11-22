@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] **Coordinator P-side follow-up** (C2026-11-22): evaluate the unapplied one-token current-task helper35->158 compatibility candidate, whose source bodies return the same current-task address on the supported64bit ABI. I/B/verifier remain unchanged; existing build/load evidence and any generic correspondence remain outstanding. Production P owned by coordinator; current #35 rejections retained. Evidence and patch: kprog/results/checked-entry-20261121/current-task-helper.json.
+
 - [x] **C** checked-loader manifest parity with restored May29 selection (2026-11-22, this commit; follows 1eb5ffc1b): reuse the existing common resolver for type/map/length/helper fields, remove631-line duplicate and retain four checked metadata fields; net625 production lines removed, canonical static/shared/CLI build0. Actual retained-manifest/helper174 routing witness changes wrong single-object selection to multi; positive helper174 case is diagnostic only, runtime same-model whole-app coverage remains open. Evidence: kprog/results/checked-entry-20261121/selector-integration.json.
 
 - [ ] **Coordinator 2026-11-21T19:45Z, the performance path on the 5/29 base** (operator 2026-11-21: "应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化", "都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比."; design and differences in kprog/docs/current-design.md):
