@@ -521,6 +521,19 @@ this stage with the byte writer, the reached local-word representation,
 RSP/pointer-tag branches, other widths and the native entry-world relation
 remain open.
 
+
+The ordinary scalar byte writer now returns to its original continuation in
+169 silent steps, composing local preparation/storage, final table writes
+and the two genuine outer-loop exits. Its caller-table pointer observation
+follows through both local stores using existing memory frames. All four
+actual successful stores, reached local-word read/cast and block separation
+remain explicit premises; the exact final heap and source temporary maps
+are retained. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-final.log.gz)
+records sixty-five public declarations under the default budgets. Deriving
+the local-word representation and entry-world premises, together with
+RSP/pointer-tag branches and other widths, remains open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
