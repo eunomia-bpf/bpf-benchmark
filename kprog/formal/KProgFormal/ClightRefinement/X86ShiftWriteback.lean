@@ -867,4 +867,137 @@ theorem narrow_prepared (ge : CC.CGenv)
     size shift next (loadCont k) m keptWidth keptShift keptValue
   exact loaded.trans prepared
 
+
+private def registerByte (index : Fin 16) : BitVec 8 := BitVec.ofNat 8 index.val
+
+def cellDelta (index : Fin 16) : CC.Integers.Ptrofs :=
+  CC.Integers.Ptrofs.mul (CC.Integers.Ptrofs.repr 16)
+    (CC.Cop.ptrofsOfInt .Signed ((registerByte index).setWidth 32))
+
+/-- The imported pointer arithmetic gives the actual sixteen-byte stride for every GPR slot. -/
+theorem cell_delta : ∀ index : Fin 16,
+    cellDelta index = CC.Integers.Ptrofs.repr (16 * (index.val : Int)) := by
+  decide +kernel
+
+private structure CellPieces where
+  choice : CC.Stmt
+  assignment : CC.Stmt
+  rest : CC.Stmt
+
+private def cellPieces : CellPieces :=
+  match cellWriter with
+  | .Ssequence (.Ssequence choice assignment) rest => ⟨choice, assignment, rest⟩
+  | _ => ⟨.Sskip, .Sskip, .Sskip⟩
+
+private def cellChoice : CC.Stmt := by run_tac cachePart (← `(cellPieces.choice))
+private def cellInitialize : CC.Stmt := by run_tac cachePart (← `(cellPieces.assignment))
+def tagWriter : CC.Stmt := by run_tac cachePart (← `(cellPieces.rest))
+
+/-- The actual destination-cell read, local union initialization and tag suffix retain source identity. -/
+theorem cell_source : cellWriter =
+    .Ssequence (.Ssequence cellChoice cellInitialize) tagWriter := rfl
+
+def cellReadTemps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : CC.Val) : CC.TempEnv :=
+  ((le.set X86_program_profile_bpf._t'168 (.Vptr block offset)).set
+    X86_program_profile_bpf._t'169 value).set X86_program_profile_bpf._t'106 value
+
+/-- Seven actual source transitions read every architectural destination slot
+and preserve the entire heap and caller continuation. -/
+theorem cell_read (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (index : Fin 16) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (current : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) m = some value)
+    (destination : le.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32))) :
+    InternalRun ge 7
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_100 k e le m)
+      (.State function .Sskip k e (cellReadTemps le cellsBlock cellsOffset value) m) := by
+  have addZero (offset : CC.Integers.Ptrofs) :
+      CC.Integers.Ptrofs.add offset (CC.Integers.Ptrofs.repr 0) = offset := by
+    change offset + 0 = offset
+    exact BitVec.add_zero offset
+  have tableAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._cells (.Vptr bindingBlock 0) =
+      some (bindingBlock, 0, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86RegisterLayout.cells_offset ge.genv_cenv, addZero]
+  have valueAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr)
+      X86_program_profile_bpf._value (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)), .Full) := by
+    simp only [CC.lvalOfField, cellLayout, X86RegisterLayout.value_offset ge.genv_cenv gprLayout, addZero]
+  have ptrOffset : CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr
+      X86RegisterLayout.gprRecord.co_members = .OK (0, .Full) := by
+    change CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr gprMembers = .OK (0, .Full)
+    simp +decide [gprMembers, CC.unionFieldOffset, CC.layoutField, CC.bitalignof,
+      CC.alignof, CC.alignAttr, CC.Ty.attr, CC.align, CC.zdiv, CC.tptr, CC.noattr]
+  have pointerAddress : CC.lvalOfField ge
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr)
+      X86_program_profile_bpf._ptr (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)), .Full) := by
+    simp only [CC.lvalOfField, gprLayout, ptrOffset, addZero]
+
+  have cellAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr cellsBlock cellsOffset)
+      (.Tpointer (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) CC.noattr)
+      (.Vint ((registerByte index).setWidth 32)) CC.tuchar m =
+        some (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) := by
+    simp only [CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
+      CC.Cop.semAddPtrInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tint,
+      CC.sizeof, cellLayout, X86RegisterLayout.layout.2.2.2.1]
+    change some (CC.Val.Vptr cellsBlock (CC.Integers.Ptrofs.add cellsOffset (cellDelta index))) =
+      some (CC.Val.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))))
+    rw [cell_delta index]
+    rfl
+  have indexCast : CC.Cop.semCast (.Vint ((registerByte index).setWidth 32))
+      CC.tuchar CC.tuchar m = some (.Vint ((registerByte index).setWidth 32)) := by
+    simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, writer_byte_cast]
+  have structAccess (name : CC.Ident) :
+      CC.accessMode (.Tstruct name CC.noattr) = .By_copy := rfl
+  have unionAccess : CC.accessMode
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
+  have ptrAccess (ty : CC.Ty) : CC.accessMode (.Tpointer ty CC.noattr) = .By_value CC.Mptr := rfl
+  have unsigned0 : CC.Integers.Ptrofs.unsigned (0 : CC.Integers.Ptrofs) = 0 := rfl
+  have wordCast : CC.Cop.semCast value (.Tpointer CC.tvoid CC.noattr)
+      (.Tpointer CC.tvoid CC.noattr) m = some value := word
+  have keptDestination : (le.set X86_program_profile_bpf._t'168 (.Vptr cellsBlock cellsOffset)).get
+      X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [CC.PTree.gso, destination]
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState,
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_100, cellReadTemps,
+      CC.doStep, CC.doEvalExpr, CC.doDerefLoc, CC.typeof, CC.tptr,
+      CC.PTree.gss, structAccess, unionAccess, ptrAccess, tableAddress, valueAddress,
+      pointerAddress, cellAdd, binding, keptDestination, indexCast, wordCast,
+      CC.Mem.loadv, unsigned0, cells, current, CC.Eapp, CC.E0, List.nil_append, true_and]
+
+/-- Both real pointer reads and the admitted source word read back exactly;
+every other temporary retains its incoming value. -/
+theorem cell_read_temps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : CC.Val) :
+    (cellReadTemps le block offset value).get X86_program_profile_bpf._t'168 =
+      some (.Vptr block offset) ∧
+    (cellReadTemps le block offset value).get X86_program_profile_bpf._t'169 = some value ∧
+    (cellReadTemps le block offset value).get X86_program_profile_bpf._t'106 = some value ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'168 → id ≠ X86_program_profile_bpf._t'169 →
+      id ≠ X86_program_profile_bpf._t'106 →
+      (cellReadTemps le block offset value).get id = le.get id := by
+  refine ⟨by simp +decide [cellReadTemps, CC.PTree.gso],
+    by simp +decide [cellReadTemps, CC.PTree.gso], by simp [cellReadTemps], ?_⟩
+  intro id ne168 ne169 ne106
+  simp [cellReadTemps, CC.PTree.gso, Ne.symm ne168, Ne.symm ne169, Ne.symm ne106]
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback

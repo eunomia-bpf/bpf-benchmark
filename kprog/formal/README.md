@@ -419,6 +419,18 @@ layout and preceding current-heap loads/cast remain explicit. The
 records twenty-six public declarations under the default budgets. Destination
 storage, qword tag calls and the entry-world relation remain open.
 
+The original valid-destination read body now executes in seven silent steps
+for every cell index 0--15. It uses the actual C integer promotion and imported
+pointer arithmetic; a kernel-checked sixteen-index law derives the sixteen-byte
+stride. Both pointer loads and the final pointer-word cast retain the genuine
+current-heap/layout/operand observations, with three exact temporary writes and
+every other temporary framed. The original read/initializer/tag source suffix
+is identified directly. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-read.log.gz)
+records thirty public declarations under the default budgets. Connecting the
+range selector and local union store, subsequent tag/width updates, native table
+storage and the entry-world relation remains open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
