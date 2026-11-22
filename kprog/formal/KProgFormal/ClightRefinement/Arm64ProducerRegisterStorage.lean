@@ -26,6 +26,7 @@ structure Storage (m memory : CC.Mem) (entry : HeaderLocal m) where
   flags : (i : Fin 4) → HeaderSourceLocal m (Arm64ProducerEntryView.flagIndex i)
   flagPointers : ∀ i, CC.Mem.load CC.Mptr memory entry.block
     (8 * ((Arm64ProducerEntryView.flagIndex i).val : Int)) = some (.Vptr (flags i).block 0)
+  flagWritable : ∀ i, CC.Mem.validAccess memory .Mint8unsigned (flags i).block 0 .Writable = true
   vectors : VectorLocal m
   vectorPointers : ∀ high (i : Fin 32), CC.Mem.load CC.Mptr memory entry.block
     ((if high then 352 else 96) + 8 * (i.val : Int)) =
@@ -44,6 +45,23 @@ private theorem local_writable (m memory : CC.Mem) (tags : Bool) (i : Fin 31)
   exact (CC.Mem.validAccess_congr (m1 := memory) (m2 := (allocation m).2)
     (chunk := cellChunk tags) (b := table.cellBlock i) (ofs := 0) (p := .Writable)
     (fun o => by simp only [CC.Mem.perm, access])).trans writable
+
+/-- The four real flag locals have writable bytes from the same producer
+allocation; no successful flag read or native value supplies permission. -/
+private theorem flag_local_writable (m memory : CC.Mem) (i : Fin 4)
+    (cell : HeaderSourceLocal m (Arm64ProducerEntryView.flagIndex i))
+    (access : memory.access = (allocation m).2.access) :
+    CC.Mem.validAccess memory .Mint8unsigned cell.block 0 .Writable = true := by
+  have present : ∀ i : Fin 4,
+      (headerSourceName (Arm64ProducerEntryView.flagIndex i),headerSourceType (Arm64ProducerEntryView.flagIndex i)) ∈ producer.fn_vars := by decide +kernel
+  have size : ∀ i : Fin 4, CC.sizeof ge.genv_cenv (headerSourceType (Arm64ProducerEntryView.flagIndex i)) =
+      CC.sizeChunk .Mint8unsigned := by decide +kernel
+  obtain ⟨block,binding,_,writable⟩ := scalar_local m _ _ .Mint8unsigned (present i) (size i) (by decide)
+  have same : block = cell.block := congrArg Prod.fst (Option.some.inj (binding.symm.trans cell.binding))
+  subst block
+  exact (CC.Mem.validAccess_congr (m1 := memory) (m2 := (allocation m).2)
+    (chunk := .Mint8unsigned) (b := cell.block) (ofs := 0) (p := .Writable)
+    (fun o => by simp only [CC.Mem.perm,access])).trans writable
 
 /-- Build storage from the SAME actual header/loop result. Every block identity
 comes from its typed allocation lookup, every permission from imported local
@@ -83,6 +101,7 @@ def of_header (m memory : CC.Mem) (entry : HeaderLocal m)
   spRead := spRead
   flags := fun i => header (Arm64ProducerEntryView.flagIndex i)
   flagPointers := fun i => pointers (Arm64ProducerEntryView.flagIndex i)
+  flagWritable := fun i => flag_local_writable m memory i (header _) access
   vectors := vectors
   vectorPointers := vectorPointers }
 

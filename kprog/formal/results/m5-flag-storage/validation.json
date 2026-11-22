@@ -1,0 +1,151 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterStorage.lean": "91ab3fb51123e423c7fac6c69aca01969d688ab32c8bddc4cd4c8897f88f7cf1",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrame.lean": "4629f593dbca2a09e3c5b245e820855c11248407343d5d14bd90337bccce8674",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean": "61745f77d5eb16b7b10ce350cf971cac723f50adbaac01400bfc10241e0208ba",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteView.lean": "e9e84ac37c0e0302879ee566af449af27cac7913bf5089633d43797c44cc6d74",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWriteFrame.lean": "cc53d67ca42a6f8e28d9feecc05929c07e97dcf5658eaa41128d257f2fb1a782",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCacheFrame.lean": "91d3a025505ea04875f9650834ad425f7f2bcd88796e0d2c1f8cbf1d9c29ce77",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryBodyView.lean": "9777b0202eb3ac25d1aab7fa704226c37cd708ea88465666a72133d942f137c5",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "fb68c6648b10d404b6735ef3f7d602015a84bb169f072fbebfcbb5837772417c",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "6488d083657255f39f4d9753980943eed6a34c63197d1e86e172f1dbcfb469e5"
+  },
+  "before_source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterStorage.lean": "5a043c094991633dd5db02748ad937297a65ee6ccb014800f2a89624f0cb4e58",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrame.lean": "76a1dc26f1237e49ad11eeb40fc7ec4988df3d8841ac59eca207068588ee2f17",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean": "3fe70e011590f1e3f6dfdbee3231c5c1e46c266e08da1d36be61aad6d863e875",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteView.lean": "3587204578955ecf26111b7002c744b46e0572c2c46f4284c6e28b691e25aa4e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWriteFrame.lean": "412d9035a484b8fcc654159ce005f298f6bcb9f805a17a60498d6d5653797ce0",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCacheFrame.lean": "ab07f3cbd48ca02a534495c02f7edbe00eac6051a3f95c07887c9a415dd54733",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryBodyView.lean": "83d9d8024244c0651c920d066f6eb07ccdf9396dd36748151386414dec9731e0",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "c00a5aa5c391a3e37c400b5e7a79821b4c7123f72e07c1f010a3966c4602a2ee",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "822c23b4aa8bd4914552799b2e6ad10cc65e671021810fde5f845ae5f6a83e1f"
+  },
+  "before_snapshots": "/workspaces/kprog-raw/formal/m5-compare/flag-storage-before",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareCall",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative",
+      "KProgFormal.ClightRefinement.Arm64PointerWriteFrame"
+    ],
+    "exit": 0,
+    "seconds": 1318.1986639499664,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 292,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/flag-storage1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/FlagStoragePublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6585280895233154,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-flag-storage1.log",
+  "public_query_sha256": "594e796231796015c326b20b0d4f0cb76d4c22e40063184c698c30ef7b2ee60f",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.of_header": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterStorageFrontier.storage_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.Result.storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCacheFrame.Frame.storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryBodyView.Result.storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.Effect.storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.writable_of_storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.execute_from_storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.execute_caller_from_storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative.entry_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "scope": "actual producer Storage four real flag-cell permissions derived at same typed allocation and retained through real alloc/cache/body/word-tag/pointer/flag stores/bounded free; current original five-call native/source entry checked with stronger storage; CMP413/417 derives permissions internally",
+  "runtime_or_isa_change": false,
+  "input_assumption_change": "no added original entry hypothesis; Storage base constructors derive new fact from actual local allocation, all earlier constructors preserve it. Previous CMP Writable-taking APIs retained, new execute_from_storage/execute_caller_from_storage remove separate permission argument.",
+  "covered_targets": [
+    "KProgFormal.ClightRefinement.Arm64CompareCall",
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryMulPrefixNative",
+    "KProgFormal.ClightRefinement.Arm64PointerWriteFrame"
+  ],
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [],
+  "whole_library_confirmation": "targeted292job ARM closure, not a fresh whole-library/root pass; V source may remain active",
+  "remaining": "native N/V vs C mask formulas, all C byte/native NZCV binding/full Registers and fetched original six-call entry",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

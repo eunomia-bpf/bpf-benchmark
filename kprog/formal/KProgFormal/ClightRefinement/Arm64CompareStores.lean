@@ -203,6 +203,12 @@ def Writable {initial before : CC.Mem} {entry : HeaderLocal initial}
   ∀ i : Fin 4, CC.Mem.validAccess before .Mint8unsigned
     (storage.flags (flagIndex i)).block 0 .Writable = true
 
+/-- Every actual source storage constructor retains these allocation-derived
+permissions, including the original preceding five-call result. -/
+theorem writable_of_storage {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry) : Writable storage :=
+  fun i => storage.flagWritable (flagIndex i)
+
 theorem writable_of_access {initial before : CC.Mem} {entry : HeaderLocal initial}
     (storage : Storage initial before entry)
     (access : before.access = (allocation initial).2.access) : Writable storage := by

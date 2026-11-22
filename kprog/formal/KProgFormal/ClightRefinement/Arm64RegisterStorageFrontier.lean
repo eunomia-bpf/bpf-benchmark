@@ -74,6 +74,11 @@ def storage_frame {initial memory after : CC.Mem} {entry : HeaderLocal initial}
     spPointer := (keep _ _ _ entry.binding CC.Mptr _).trans storage.spPointer
     spRead := (keep _ _ _ storage.sp.binding .Mint64 _).trans storage.spRead
     flagPointers := fun i => (keep _ _ _ entry.binding CC.Mptr _).trans (storage.flagPointers i)
+    flagWritable := fun i =>
+      (CC.Mem.validAccess_congr (m1 := after) (m2 := memory)
+        (chunk := .Mint8unsigned) (b := (storage.flags i).block) (ofs := 0) (p := .Writable)
+        (fun ofs => by simp only [CC.Mem.perm,
+          (frame _ (Nat.lt_of_lt_of_le (storage.flags i).owned bound)).2])).trans (storage.flagWritable i)
     vectorPointers := fun high i => (keep _ _ _ entry.binding CC.Mptr _).trans (storage.vectorPointers high i) }
   intro tags i
   have owned := Nat.lt_of_lt_of_le (local_owned initial _ _ _ ((storage.tables tags).cellBinding i)) bound

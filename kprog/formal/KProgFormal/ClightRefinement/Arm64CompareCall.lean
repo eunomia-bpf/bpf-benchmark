@@ -27,6 +27,10 @@ def Effect.storage {initial before after : CC.Mem} {entry : HeaderLocal initial}
     spPointer := (keepHeader CC.Mptr _).trans storage.spPointer
     spRead := (effect.local_load _ _ _ storage.sp.binding spOther .Mint64 _).trans storage.spRead
     flagPointers := fun i => (keepHeader CC.Mptr _).trans (storage.flagPointers i)
+    flagWritable := fun i =>
+      (CC.Mem.validAccess_congr (m1 := after) (m2 := before)
+        (chunk := .Mint8unsigned) (b := (storage.flags i).block) (ofs := 0) (p := .Writable)
+        (fun ofs => by simp only [CC.Mem.perm,effect.access])).trans (storage.flagWritable i)
     vectorPointers := fun high i => (keepHeader CC.Mptr _).trans (storage.vectorPointers high i)}
   intro tags i
   exact (CC.Mem.validAccess_congr (m1 := after) (m2 := before)
@@ -230,5 +234,41 @@ theorem execute_caller {initial before : CC.Mem} {entry : HeaderLocal initial}
     lhsWord lhsTag rhsWord rhsTag (Arm64ProgramEntryCompareCall.callCont initial le k) rfl
   have left := Arm64ProgramEntryCompareCall.leave initial le k after
   exact ⟨written,after,finalStorage,result,(entered.trans result.run).trans left⟩
+
+
+/-- The same actual execution with flag permissions derived from the source
+storage allocation/frame history, not supplied as another input. -/
+theorem execute_from_storage {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (lhs rhs : BitVec 64)
+    (lhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 4) 0 = some (.Vlong lhs))
+    (lhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 4) 0 = some (.Vint 0))
+    (rhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 1) 0 = some (.Vlong rhs))
+    (rhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 1) 0 = some (.Vint 0))
+    (k : CC.Cont) (valid : CC.isCallCont k = true) :
+    ∃ written after, ∃ finalStorage : Storage initial after entry,
+      Result storage lhs rhs k written after finalStorage :=
+  execute storage (Stores.writable_of_storage storage) bound lhs rhs lhsWord lhsTag rhsWord rhsTag k valid
+
+/-- The same actual execution with flag permissions derived from the source
+storage allocation/frame history, not supplied as another input. -/
+theorem execute_caller_from_storage {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (lhs rhs : BitVec 64)
+    (lhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 4) 0 = some (.Vlong lhs))
+    (lhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 4) 0 = some (.Vint 0))
+    (rhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 1) 0 = some (.Vlong rhs))
+    (rhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 1) 0 = some (.Vint 0))
+    (le : CC.TempEnv) (k : CC.Cont) :
+    ∃ written after, ∃ finalStorage : Storage initial after entry,
+      Result storage lhs rhs (Arm64ProgramEntryCompareCall.callCont initial le k) written after finalStorage ∧
+      InternalRun world 417
+        (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryMulCall.afterMul k
+          (Arm64ProgramEntryAllocation.allocation initial).1 le before)
+        (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryCompareCall.afterCompare k
+          (Arm64ProgramEntryAllocation.allocation initial).1 le after) :=
+  execute_caller storage (Stores.writable_of_storage storage) bound lhs rhs lhsWord lhsTag rhsWord rhsTag le k
 
 end KProgFormal.ClightRefinement.Arm64Compare.Call
