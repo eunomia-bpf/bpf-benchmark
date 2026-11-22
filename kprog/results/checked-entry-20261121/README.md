@@ -41,3 +41,9 @@ The queued incremental canonical loader build started00:46:18Z and completed wit
 The first OTel verification guest entered after the coordinator image rebuild completed00:52:41Z and started its trusted service. Its startup held the shared timing/image leases while the coordinator OTel stats0/1 retest awaited timing. Following the performance-first priority, C preserved this partial startup and terminated only its owned process group2054512. This records an interrupted startup; six-app coverage and acceptance remain pending. startup-handoff-raw.tar.gz contains the original partial logs/service state, all33 raw framework capture files and exact continuation command.
 
 Successor2200510 waits for the existing coordinator chain5 process2151863, then runs the complete six-app checked entry using the already-built canonical loader and current sole image. Its output is /workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest. Current P/B/model/framework code and measurement settings retain their bytes; added runtime checks are0.
+
+## Compiler default, 2026-11-22
+
+Both x86 adapter compiler-selection sites now default to the existing stock-path/bin/clang wrapper, with an explicit CLANG environment setting taking precedence. The wrapper supplies stock_native_input.h at first preprocessing; the existing whole-six guest entry already exports this same wrapper.
+
+Reprocessing the original retained request17 B source with actual production COMPILE_FLAGS succeeds for both compilers. System clang retains the legacy native-input assembly; the stock wrapper expands ordinary simulator inputs. compiler-default.json records exact commands, counts, input/header hashes and the preprocessing archive. Python syntax parsing passes. This verifies compiler input representation; whole-app compilation, stock acceptance and native installation retain their separate queued outcomes. Added checks, guests and native executions are0.

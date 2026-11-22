@@ -140,15 +140,8 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                         '#include ' + json.dumps(str(ROOT / "kprog/x86/x86_sim_local_bpf.h")))
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
-    # `clang` need not be on PATH where the service runs: it re-launches
-    # itself with an explicit environment, and the container image ships the
-    # compiler under /usr/lib/llvm-*/bin. Resolve in this order so the
-    # specializer works without any caller plumbing: CLANG, then PATH, then
-    # the versioned llvm bin directories the build already uses.
-    clang = os.environ.get("CLANG") or shutil.which("clang")
-    if not clang:
-        candidates = sorted(Path("/usr/lib").glob("llvm-*/bin/clang"))
-        clang = str(candidates[-1]) if candidates else "clang"
+    # The stock wrapper supplies the input representation used by B.
+    clang = os.environ.get("CLANG") or str(ROOT / "kprog/stock-path/bin/clang")
     compile_simulator(clang, source, obj, run, bounds_compiler=bounds_compiler)
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
@@ -182,9 +175,7 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         result.check_returncode()
         return result.stdout
 
-    clang = os.environ.get('CLANG') or shutil.which('clang')
-    if not clang:
-        raise RuntimeError('checked simulator compilation requires clang')
+    clang = os.environ.get('CLANG') or str(ROOT / 'kprog/stock-path/bin/clang')
     ir, lowered = directory/'checked-simulator.bc', directory/'checked-simulator.native.bc'
     native, proof = directory/'checked-simulator.native.o', directory/'checked-simulator.proof.o'
     frontend = artifacts.get('simulator_frontend')
