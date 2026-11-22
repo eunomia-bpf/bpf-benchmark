@@ -1,0 +1,28 @@
+{
+  "make-check2": {
+    "command": [
+      "make",
+      "check"
+    ],
+    "exit": 2,
+    "seconds": 222.81992873898707,
+    "source_count": 267,
+    "changed_sources": [],
+    "added_sources": [
+      "KProgFormal/ClightRefinement/Arm64SelectCall.lean"
+    ],
+    "workers": 1,
+    "process_memory_gib": 32,
+    "timing_lock": "shared"
+  },
+  "root-public37": {
+    "command": "lake env lean -j1 results/m5-select-root/Query.lean",
+    "exit": 0,
+    "seconds": 2.143242180987727
+  },
+  "root-decode5": {
+    "command": "lake env lean -j1 results/m5-x86-alu-decode/Query.lean",
+    "exit": 0,
+    "seconds": 2.0531191490008496
+  }
+}
