@@ -544,12 +544,16 @@ X86.Value.writeHigh8. Bit proofs retain all other bits; quotient/remainder
 arithmetic relates the actual Clight byte encoding and decoded word to
 those same functions. The 169-step ordinary scalar writer now reaches its
 original continuation with that native value in the actual register-table
-store and temporary map. Actual primitive store-success and ABI separation
-premises remain explicit. The
+store and temporary map. The final-memory value and scalar tag also read
+back as that native word and zero, derived from the two actual table stores.
+A logical separation proof covers every 64-bit cell offset, including wrap;
+actual primitive store-success and ABI separation premises remain explicit. The
 [low-byte receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-native-low.log.gz)
 and [joint receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-reference.log.gz)
 record sixty-eight and seventy-one public declarations under the default
-budgets; the reference definitions remain in their original ISA module.
+budgets; the reference definitions remain in their original ISA module. The
+[readback receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-result.log.gz)
+records seventy-three public declarations under the same budgets.
 
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's

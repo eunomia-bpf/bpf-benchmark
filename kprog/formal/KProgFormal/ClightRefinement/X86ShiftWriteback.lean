@@ -2818,4 +2818,122 @@ theorem byte_reference (ge : CC.CGenv)
     bindingSeparate middle final actualStored tagStored
   simpa only [byte_memory_native] using source
 
+
+private theorem cell_tag_separate64 (offset : BitVec 64) :
+    (offset.toNat : Int) + 8 ≤ (((offset + (8#64)).toNat) : Int) ∨
+    (((offset + (8#64)).toNat) : Int) + 1 ≤ (offset.toNat : Int) := by
+  simp only [BitVec.toNat_add, BitVec.toNat_ofNat]
+  have bound := offset.isLt
+  omega
+
+private theorem cell_tag_disjoint (offset : CC.Integers.Ptrofs) :
+    CC.Integers.Ptrofs.unsigned offset + CC.sizeChunk CC.Mptr ≤
+        CC.Integers.Ptrofs.unsigned (offset + 8) ∨
+    CC.Integers.Ptrofs.unsigned (offset + 8) + CC.sizeChunk .Mint8unsigned ≤
+        CC.Integers.Ptrofs.unsigned offset :=
+  cell_tag_separate64 offset
+
+theorem cell_write_readback (m middle final : CC.Mem) (block : CC.Block)
+    (offset : CC.Integers.Ptrofs) (value : CC.Val) (tag : BitVec 8)
+    (wordStored : CC.Mem.store CC.Mptr m block
+      (CC.Integers.Ptrofs.unsigned offset) value = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle block
+      (CC.Integers.Ptrofs.unsigned (offset + 8)) (.Vint (tag.setWidth 32)) = some final) :
+    CC.Mem.load CC.Mptr final block (CC.Integers.Ptrofs.unsigned offset) =
+      some (CC.Val.loadResult CC.Mptr value) ∧
+    CC.Mem.load .Mint8unsigned final block (CC.Integers.Ptrofs.unsigned (offset + 8)) =
+      some (.Vint (tag.setWidth 32)) := by
+  have preserved := CC.Mem.load_store_other tagStored CC.Mptr block
+    (CC.Integers.Ptrofs.unsigned offset) (.inr (cell_tag_disjoint offset))
+  have word := CC.Mem.load_store_same wordStored
+  have tagRead := CC.Mem.load_store_same tagStored
+  refine ⟨preserved.trans word, ?_⟩
+  have normalized : CC.Val.loadResult .Mint8unsigned (.Vint (tag.setWidth 32)) =
+      .Vint (tag.setWidth 32) := by
+    simp +decide [CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      writer_byte_cast]
+  exact tagRead.trans (congrArg some normalized)
+
+theorem byte_register_result (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (old : BitVec 64)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong old))
+    (localBlock : CC.Block) (after : CC.Mem)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 (.Vlong old) = some after)
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (0#32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (ordinary : (registerByte index).setWidth 32 ≠ (4#32))
+    (byteMem : CC.Mem)
+    (byteStored : CC.Mem.store .Mint8unsigned after localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some byteMem)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (middle final : CC.Mem)
+    (wordStored : CC.Mem.store CC.Mptr byteMem cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (0#32)) = some final) :
+    InternalRun ge 169 (.State function writer k e le m)
+      (.State function .Sskip k e
+        (tableTemps
+          (byteTemps
+            (classTemps
+              (tagTemps
+                (cellReadTemps
+                  (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+                    (selectTemps le (registerByte index) .b))) cellsBlock cellsOffset value)
+                    .b shift next) cellsBlock cellsOffset (.Vlong old))
+                index cellsBlock cellsOffset (0#8)) .b) next)
+          (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) (0#8) index cellsBlock cellsOffset) final) ∧
+    CC.Mem.load CC.Mptr final cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (.Vlong (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next)) ∧
+    CC.Mem.load .Mint8unsigned final cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) = some (.Vint (0#32)) := by
+  have source := byte_reference ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
+    widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
+    localBlock after declared stored currentTag callerBlocks ordinary byteMem byteStored
+    bindingSeparate middle final wordStored tagStored
+  have reads := cell_write_readback byteMem middle final cellsBlock
+    (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))
+    (.Vlong (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next)) (0#8) wordStored tagStored
+  refine ⟨source, ?_, reads.2⟩
+  simpa only [CC.Val.loadResult, CC.Mptr, CC.Archi.ptr64_eq, ite_true] using reads.1
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
