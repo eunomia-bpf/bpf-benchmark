@@ -560,7 +560,15 @@ reads. Four word/tag field combinations use the actual sixteen-byte stride,
 modular 64-bit addresses and eight-byte separation, covering pointer wrap.
 Existing store frames carry this relation through both local and table stores.
 The [table-frame receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-frame.log.gz)
-records seventy-five public declarations under the same budgets. Full CPU/world
+records seventy-five public declarations under the same budgets.
+[X86RegisterView](KProgFormal/ClightRefinement/X86RegisterView.lean) lifts this
+whole-table relation to the original native Cpu.setReg at byte width, selecting
+the high byte through the actual shift code. Its initial relation uses the
+existing Clight pointer-origin representation and x86 tag materialization;
+every other GPR retains its original raw value, tag and pointer binding.
+The original 169-step writer and its exact final temporary map satisfy this
+native GPR relation. The [native-register receipt](../results/kprog_verification_20261107/x86-byte-register-native.log.gz)
+records both public bridge theorems under the default budgets. Full world
 composition, entry/store premises and the remaining writer branches stay open.
 
 
