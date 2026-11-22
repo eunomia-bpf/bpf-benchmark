@@ -494,6 +494,17 @@ records fifty-three public declarations under the default budgets. RSP and
 pointer-tag byte branches, other widths, final register-table stores, qword tag
 calls and the native entry-world relation remain open.
 
+
+The ordinary scalar byte writer now composes 137 silent steps from the actual
+writer entry through its local byte store and tag assignment. Destination,
+result, shift and scalar-tag observations follow through the preceding source
+temporary maps; both actual local stores retain their exact reached heaps and
+the original final-storage continuation. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-route.log.gz)
+records fifty-four public declarations under the default budgets. Final table
+stores, RSP/pointer-tag branches, other widths and the native entry-world relation
+remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
