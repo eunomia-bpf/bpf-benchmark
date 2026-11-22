@@ -1,0 +1,50 @@
+{
+  "status": "focused proof and public queries passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission"
+    ],
+    "exit": 0,
+    "seconds": 2.1136412620544434,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 271,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-admission/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6096923351287842,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 2,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission": "propext, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next": "propext, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "earlier_attempts": [
+    "admission1 PC/flag simplification diagnostic retained"
+  ],
+  "shared_confirmation": "V owns full/default/make-check; latest full check retains DIV fault regression",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-call/20261122T115647Z",
+  "complete_isa_families": 0
+}

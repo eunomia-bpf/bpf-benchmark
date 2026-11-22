@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission
+
+set_option Elab.async false
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next
