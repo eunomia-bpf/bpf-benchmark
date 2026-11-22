@@ -1,0 +1,432 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectPath.lean": "cbbed6bcf727397656afb6b73adec86af4989d3e87525fe7f932367ec2609fb4"
+  },
+  "source_lines": 94,
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/InternalExecution.lean": "08046c38f730e985d8f1d5ca612cb306c06c5aba600ccc1eba80e45a0d7fe2f1",
+    "kprog/formal/KProgFormal/ClightRefinement/Execution.lean": "01f94fae0303f0050c1c181e52585e0de6232e8829419954a0f0e28b744db2bd",
+    "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean": "3deb6674d3397ac12845ccaf56b6b3067559e5823baaee0c44c915bf4d99f252",
+    "kprog/formal/generated/arm64_csel_ptr.h": "cc3b8d774ea13039869b7d3360974d882a712a554f172a368f3eb33b8d8f16c6",
+    "kprog/formal/external/clean/export/CCLib/ClightExec.lean": "880cf140497cdd7b223e27dd30420fcbb58eb5ace0b310189d03c232de50fa18",
+    "kprog/formal/external/clean/export/CCLib/Cop.lean": "773cc8d2ed06dc4c791f9c3aa8bb12ca3015350f3da93bb7afa75b771793996f",
+    "kprog/formal/external/clean/export/CCLib/Values.lean": "7bd8eacae705994e5c5fafd918c9fbdba3516ebfca29f40dc26a050898801d57"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectPath"
+    ],
+    "exit": 0,
+    "seconds": 11.396156549453735,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 42,
+  "build_log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build19.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/SelectPathPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.0108633041381836,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-public1.log",
+  "public_query_sha256": "6cd75ae302c647c99159b1ba004769998cb49a328135021ce52e4f3b5a987372",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Path.executes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Path.internal": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Path.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "steps": 26,
+  "supported_codes": [
+    28,
+    29,
+    30,
+    52,
+    61,
+    62,
+    68,
+    69
+  ],
+  "scope": "complete actual exported path helper for all eight supported codes, arbitrary 64-bit widths/ge/full memory/continuation; return one iff op28 and width8, else zero; same complete heap and callCont; Kstop finite relational runs are silent prefixes with unique stuck endpoint and no infinite execution",
+  "proof_method": "seven scalar codes by kernel definitional reduction; ordinary CSEL splits only actual width==8 boolean, normalizes goal and hypothesis with kernel-checked cbv and closes actual execution/path; no native oracle/cap increase",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 22.157229900360107,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build1.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build1-source.lean",
+      "source_sha256": "d0ae7d843828c13ba50dffe3b6224ef713dc829c6fe78d2f239c9a80c0670d5c"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 21.793277263641357,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build2.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build2-source.lean",
+      "source_sha256": "c38a1e8bfc86dd763c2b5b79640f03e4618a7550a40a1ab2458e65a5ae2fbd25"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 42.51425647735596,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build3.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build3-source.lean",
+      "source_sha256": "a1b68bd213911744019e7ff727d5ecffebd8158255ad3776e21eefd906ff0541"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 8.2287437915802,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build4.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build4-source.lean",
+      "source_sha256": "a3f7c6cceaea9dce0613df4ac18c967a36a579fcb94c46da85f90509992913c7"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 26.773483753204346,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build5.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build5-source.lean",
+      "source_sha256": "8d5e241cfd90142c94dac4efc4903cec9278bd654301e0184774fd4fa1e8c8f6"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 4.174188137054443,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build6.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build6-source.lean",
+      "source_sha256": "e01a08960ae52b59df587d78144bd4508ce2a719d541ff2c27946358396962a9"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 8.561056137084961,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build7.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build7-source.lean",
+      "source_sha256": "60b0ee3c6ac8c4a845ba6cc00a0ae1b8e30a81ff77bc9310505cccde0602bf8f"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 7.8541576862335205,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build8.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build8-source.lean",
+      "source_sha256": "25389d34e82295396407cf04c38b2f8f123da1566b5cfbc7a47bbcd6bb7b8b80"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 11.487615585327148,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build9.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build9-source.lean",
+      "source_sha256": "1b2d1b224213826c6c62e67a1ec5836d473957111e3383ec172a646435582bdd"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 10.406277418136597,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build10.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build10-source.lean",
+      "source_sha256": "cbf4e0183f4c76cf84c7b2a18d57e8a2f5c6e6fa906d4a5acfd0d375a87f52e1"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 11.49088454246521,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build11.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build11-source.lean",
+      "source_sha256": "2414efd53ecb77f306c53b1a9758ed03d746b671d5d5ed44752d2404f77c435a"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 9.657917499542236,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build12.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build12-source.lean",
+      "source_sha256": "1676a905b42e8aa1305b3eed3cc7f00dd271cb764c2a30830d5376b87c19b5c7"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 9.06020998954773,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build13.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build13-source.lean",
+      "source_sha256": "06e52617cac751b99897cb7350f2c4614ea360d49bcde446b9fd6f7927a8ddb1"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 9.859893798828125,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build14.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build14-source.lean",
+      "source_sha256": "affb67936036c9b0c312195c4b445a968f90ff01e7bee26bb74e7942821ee89c"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 10.657946348190308,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build15.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build15-source.lean",
+      "source_sha256": "80f0d67f1b2599bed0bca04232ae97585af7083c11266442eeb59072b2135d14"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 11.269551277160645,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build16.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build16-source.lean",
+      "source_sha256": "b586e78c4e75a0a9b26e7c98da9d9ae653a89f1846777af9efd4b3bafe2bf648"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 11.86387014389038,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build17.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build17-source.lean",
+      "source_sha256": "5c1de2d60e719814195df94f7024ec95e56c9f0066a7d0f5fe3b2edb726772f8"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 1,
+        "seconds": 10.742797136306763,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build18.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build18-source.lean",
+      "source_sha256": "f4911a39c0257b376f6fc17cef8563a0a0c36363f101312f285c2793c214df2f"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64SelectPath"
+        ],
+        "exit": 0,
+        "seconds": 11.396156549453735,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-path/20261122T025042Z/path-build19.log"
+    }
+  ],
+  "attempt_notes": "1 nonexistent breakCont/initial25 corrected to actual26 including break across Kseq;2-3 simplifier heartbeat;4 indentation;5 cast match;6 recursion;7 seven scalar codes already rfl;8 modifier syntax;9 missing ite simplifications;10 recursion;11 repr numeral mismatch;12-13 recursion;14 whnf insufficient;15 cbv hypothesis not normalized;16-17 residual match after boolean rewrite;18 cbv closed goal and extra rfl rejected;19 removes unused primitive experiments and adds all-behavior theorem; all retained logs/snapshots",
+  "remaining": "real source path-helper callsite/casts/return/resume; selected raw and pointer-tag reads/writes/native CSEL/full dispatcher/seventh call/remaining fixture/complete ISA/O1/O2/O4/M5/M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
