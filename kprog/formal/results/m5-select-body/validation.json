@@ -1,0 +1,48 @@
+{
+  "status": "focused proof and public query passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectBody"
+    ],
+    "exit": 0,
+    "seconds": 2.100078582763672,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 263,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-body/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6726598739624023,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 1,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Body.execute": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "whole_library": {
+    "status": "pending batch-end confirmation"
+  },
+  "complete_isa_families": 0
+}
