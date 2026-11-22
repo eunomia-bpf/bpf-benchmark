@@ -271,8 +271,18 @@ oracle choice. Original layout, binding, payload and genuine heap load/store
 observations remain explicit premises. The
 [seven public audits](../results/kprog_verification_20261107/x86-shift-flag-cf.log.gz)
 record source selection, storage, frames and scalar CF correspondence at existing
-budgets and inherited axioms. The actual count-test/shift calculation, whole-route
-composition, OF/PF stores, writeback and entry/world correspondence remain open.
+budgets and inherited axioms.
+
+The original count test and selected shift now execute in two silent steps for
+every positive count in the existing architectural six-bit range and every operand
+size/value. Source uint32 subtraction agrees with the natural width difference;
+the shift is defined from the same count/width facts. Operation selection,
+calculation and storage compose in eleven steps to the original overflow code,
+deriving the payload and retaining the exact updated heap and two temporary
+writes. The [eleven public audits](../results/kprog_verification_20261107/x86-shift-cf-calculation.log.gz)
+record actual calculation, frames and complete carry-stage execution at existing
+budgets and inherited axioms. Whole-route composition, OF/PF stores, writeback
+and entry/world correspondence remain open.
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked

@@ -122,7 +122,7 @@ theorem select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.Te
       CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
       CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
       CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint,
-         
+
       CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vtrue]
   have type : CC.typeof test = CC.tint := rfl
   have truth : CC.Cop.boolVal (.Vint (1#32)) CC.tint m = some true := rfl
@@ -195,5 +195,149 @@ theorem temps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs)
   refine ⟨by simp [afterTemps], ?_⟩
   intro id different
   simp [afterTemps, CC.PTree.gso, Ne.symm different]
+
+
+def calculationTemps (le : CC.TempEnv) (value : BitVec 64) (size : X86.Size) (n : Fin 64) :
+    CC.TempEnv :=
+  le.set X86_program_profile_bpf._t'67 (.Vlong (payload value size.bits n.val))
+
+/-- The actual unsigned comparison and source shift derive the carry payload,
+including the original zero arm for counts above the operand width. -/
+theorem calculation_internal (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (value : BitVec 64) (size : X86.Size)
+    (n : Fin 64) (positive : 0 < n.val)
+    (count : le.get X86_program_profile_bpf.___x86_sh_count =
+      some (.Vint (BitVec.ofNat 32 n.val)))
+    (bits : le.get X86_program_profile_bpf.___x86_sh_bits =
+      some (.Vint (BitVec.ofNat 32 size.bits)))
+    (left : le.get X86_program_profile_bpf.___x86_sh_a = some (.Vlong value)) :
+    InternalRun ge 2 (.State function calculation k e le m)
+      (.State function .Sskip k e (calculationTemps le value size n) m) := by
+  have count32 : n.val < 4294967296 := by have bound := n.isLt; omega
+  have bits32 : size.bits < 4294967296 := by cases size <;> decide
+  have bits64 : size.bits ≤ 64 := by cases size <;> decide
+  have countNat : (BitVec.ofNat 32 n.val).toNat = n.val := Nat.mod_eq_of_lt count32
+  have bitsNat : (BitVec.ofNat 32 size.bits).toNat = size.bits := Nat.mod_eq_of_lt bits32
+  have signedZero64 : BitVec.ofInt 64 (CC.Integers.Int.signed (0#32)) = (0#64) := rfl
+  have signedOne64 : BitVec.ofInt 64 (CC.Integers.Int.signed (1#32)) = (1#64) := rfl
+  by_cases within : n.val ≤ size.bits
+  · have difference : BitVec.ofNat 32 size.bits - BitVec.ofNat 32 n.val =
+        BitVec.ofNat 32 (size.bits - n.val) :=
+      BitVec.ofNat_sub_ofNat_of_le size.bits n.val count32 within
+    have shiftBound : size.bits - n.val < 64 := by omega
+    have shift32 : size.bits - n.val < 4294967296 := by omega
+    have shift64 : size.bits - n.val < 18446744073709551616 := by omega
+    have shiftNat : (BitVec.ofNat 32 (size.bits - n.val)).toNat = size.bits - n.val :=
+      Nat.mod_eq_of_lt shift32
+    apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, calculation, calculationTemps, payload,
+        CC.doStep, CC.doEvalExpr, CC.typeof, count, bits, left, within,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+        CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+        CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Cop.semSub, CC.Cop.classifySub,
+        CC.Cop.semShr, CC.Cop.semShift, CC.Cop.classifyShift, CC.Cop.semAnd,
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong,
+        CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.ltu, CC.Integers.MI.ltu,
+        CC.Integers.Int.sub, CC.Integers.MI.sub, CC.Integers.Int64.shru, CC.Integers.MI.shru,
+        CC.Integers.Int64.and, CC.Integers.MI.and, CC.Integers.Int.repr,
+        CC.Integers.Int64.repr, CC.Integers.MI.repr, CC.Integers.Int.unsigned,
+         CC.Integers.MI.unsigned, CC.Val.ofBool, CC.Val.Vtrue,
+         CC.Integers.Int.one, CC.Integers.Int.zero, CC.Integers.MI.one,
+        CC.Integers.MI.zero, BitVec.ult, countNat, bitsNat,
+        CC.Cop.boolVal, CC.Cop.classifyBool,  signedOne64, CC.Eapp, CC.E0, difference, shiftNat, shiftBound,  Nat.mod_eq_of_lt shift64]
+  · apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, calculation, calculationTemps, payload,
+        CC.doStep, CC.doEvalExpr, CC.typeof, count, bits,  within,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+        CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+        CC.Cop.castIntInt, CC.Cop.castIntLong,
+
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong,
+        CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,  CC.Integers.MI.ltu,
+
+          CC.Integers.Int.repr,
+        CC.Integers.Int64.repr, CC.Integers.MI.repr,
+          CC.Val.ofBool,
+        CC.Val.Vfalse,  CC.Integers.Int.zero,
+        CC.Integers.MI.zero, BitVec.ult, countNat, bitsNat,
+        CC.Cop.boolVal, CC.Cop.classifyBool, signedZero64,  CC.Eapp, CC.E0]
+
+
+/-- The genuine calculation writes its derived payload and retains every other temporary. -/
+theorem calculation_temps (le : CC.TempEnv) (value : BitVec 64) (size : X86.Size) (n : Fin 64) :
+    (calculationTemps le value size n).get X86_program_profile_bpf._t'67 =
+      some (.Vlong (payload value size.bits n.val)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'67 →
+      (calculationTemps le value size n).get id = le.get id := by
+  refine ⟨by simp [calculationTemps], ?_⟩
+  intro id different
+  simp [calculationTemps, CC.PTree.gso, Ne.symm different]
+
+/-- Original SHL selection, comparison, shift and carry byte storage reach the
+actual overflow code, deriving the payload and exact updated heap. -/
+theorem to_overflow (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : BitVec 64) (size : X86.Size) (n : Fin 64) (positive : 0 < n.val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (left : le.get X86_program_profile_bpf.___x86_sh_a = some (.Vlong value))
+    (count : le.get X86_program_profile_bpf.___x86_sh_count = some (.Vint (BitVec.ofNat 32 n.val)))
+    (bits : le.get X86_program_profile_bpf.___x86_sh_bits = some (.Vint (BitVec.ofNat 32 size.bits)))
+    (alu : le.get X86_program_profile_bpf.___x86_sh_alu = some (.Vint (5#32)))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (stored : CC.Mem.store .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset)
+      (byte (payload value size.bits n.val)) = some after) :
+    InternalRun ge 11 (.State function X86ShiftFlagSF.rest k e le m)
+      (.State function overflow k e
+        (afterTemps (calculationTemps le value size n) cfBlock offset) after) := by
+  have selected := select ge function e le k m alu
+  have calculated := calculation_internal ge function e le (.Kseq cf (.Kseq overflow k)) m
+    value size n positive count bits left
+  have resumed : InternalRun ge 1
+      (.State function .Sskip (.Kseq cf (.Kseq overflow k)) e (calculationTemps le value size n) m)
+      (.State function cf (.Kseq overflow k) e (calculationTemps le value size n) m) :=
+    .step (by trivial) (CC.doStep_sound ge _ _ _ rfl) (.refl _)
+  have keptBinding : (calculationTemps le value size n).get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    rw [(calculation_temps le value size n).2 _ (by decide +kernel)]
+    exact binding
+  have wrote := internal ge bindingsLayout valueLayout function e (calculationTemps le value size n)
+    (.Kseq overflow k) m after bindingBlock cfBlock offset (payload value size.bits n.val)
+    keptBinding (calculation_temps le value size n).1 pointer stored
+  have finished : InternalRun ge 1
+      (.State function .Sskip (.Kseq overflow k) e
+        (afterTemps (calculationTemps le value size n) cfBlock offset) after)
+      (.State function overflow k e (afterTemps (calculationTemps le value size n) cfBlock offset) after) :=
+    .step (by trivial) (CC.doStep_sound ge _ _ _ rfl) (.refl _)
+  exact (((selected.trans calculated).trans resumed).trans wrote).trans finished
+
+/-- The complete source carry stage silently reaches its original overflow continuation. -/
+theorem to_overflow_returns (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : BitVec 64) (size : X86.Size) (n : Fin 64) (positive : 0 < n.val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (left : le.get X86_program_profile_bpf.___x86_sh_a = some (.Vlong value))
+    (count : le.get X86_program_profile_bpf.___x86_sh_count = some (.Vint (BitVec.ofNat 32 n.val)))
+    (bits : le.get X86_program_profile_bpf.___x86_sh_bits = some (.Vint (BitVec.ofNat 32 size.bits)))
+    (alu : le.get X86_program_profile_bpf.___x86_sh_alu = some (.Vint (5#32)))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (.Vptr cfBlock offset))
+    (stored : CC.Mem.store .Mint8unsigned m cfBlock (CC.Integers.Ptrofs.unsigned offset)
+      (byte (payload value size.bits n.val)) = some after) :
+    CC.Star (CC.Step2 ge) (.State function X86ShiftFlagSF.rest k e le m) CC.E0
+      (.State function overflow k e
+        (afterTemps (calculationTemps le value size n) cfBlock offset) after) :=
+  (to_overflow ge bindingsLayout valueLayout function e le k m after bindingBlock cfBlock offset
+    value size n positive binding left count bits alu pointer stored).sound
 
 end KProgFormal.ClightRefinement.X86ShiftFlagCF
