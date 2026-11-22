@@ -2579,4 +2579,103 @@ theorem byte_scalar_final (ge : CC.CGenv)
     (.Vlong (byteMemoryWord old next shift)) produced.1 produced.2 bindingSeparate middle final
     wordStored tagStored
 
+
+private theorem byte_source_unsigned (next : BitVec 64) :
+    CC.Integers.Int.unsigned (byteValue next) = ((next.setWidth 8).toNat : Int) := by
+  rw [byte_value]
+  simp only [CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+    BitVec.toNat_setWidth_of_le (by decide : 8 ≤ 32)]
+
+private theorem byte_cancel_low (x y z : _root_.Int) :
+    (y + z * 256) + x = (x + z * 256) + y := by omega
+
+private theorem byte_cancel_high (a b y z : _root_.Int) :
+    (a + (y + z * 256) * 256) + b * 256 =
+      (a + (b + z * 256) * 256) + y * 256 := by omega
+
+private theorem byte_low_reassemble (x b : Nat) (decoded : _root_.Int)
+    (changed : decoded + (x : Int) % 256 = (x : Int) + (b : Int)) :
+    decoded = ((x / 256 * 256 + b : Nat) : Int) := by omega
+
+private theorem byte_decode_change (old next : BitVec 64) (shift : BitVec 8) :
+    CC.decodeInt (byteMemoryImage old next shift) +
+      (if shift.setWidth 32 = (8#32) then
+        (CC.Integers.Int64.unsigned old / 256 % 256) * 256
+       else CC.Integers.Int64.unsigned old % 256) =
+    CC.Integers.Int64.unsigned old +
+      (if shift.setWidth 32 = (8#32) then
+        ((next.setWidth 8).toNat : Int) * 256
+       else ((next.setWidth 8).toNat : Int)) := by
+  have oldBounds : 0 ≤ CC.Integers.Int64.unsigned old ∧
+      CC.Integers.Int64.unsigned old < 18446744073709551616 := by
+    change 0 ≤ (old.toNat : Int) ∧ (old.toNat : Int) < 18446744073709551616
+    have bound := old.isLt
+    omega
+  have oldDecoded : CC.decodeInt (CC.encodeInt 8 (CC.Integers.Int64.unsigned old)) =
+      CC.Integers.Int64.unsigned old := by
+    rw [CC.decodeInt_encodeInt_8]
+    exact Int.emod_eq_of_lt oldBounds.1 oldBounds.2
+  have small : (next.setWidth 8).toNat < 256 := (next.setWidth 8).isLt
+  have newMod : (((next.setWidth 8).toNat : Int) % 256) =
+      ((next.setWidth 8).toNat : Int) := by omega
+  have changed :
+      CC.decodeInt (byteMemoryImage old next shift) +
+        (if shift.setWidth 32 = (8#32) then
+          (CC.Integers.Int64.unsigned old / 256 % 256) * 256
+         else CC.Integers.Int64.unsigned old % 256) =
+      CC.decodeInt (CC.encodeInt 8 (CC.Integers.Int64.unsigned old)) +
+        (if shift.setWidth 32 = (8#32) then
+          ((next.setWidth 8).toNat : Int) * 256
+         else ((next.setWidth 8).toNat : Int)) := by
+    by_cases high : shift.setWidth 32 = (8#32)
+    all_goals
+      simp only [byteMemoryImage, high, ite_true, ite_false, CC.decodeInt,
+        CC.encodeInt, CC.revIfBe_id, CC.bytesOfInt, List.set, CC.intOfBytes,
+        CC.byte_unsigned_repr, byte_source_unsigned, newMod]
+      first
+      | exact byte_cancel_low _ _ _
+      | exact byte_cancel_high _ _ _ _
+  simpa only [oldDecoded] using changed
+
+private theorem native_byte_low_concat (old next : BitVec 64) :
+    X86.Value.writeView .b old next =
+      ((old >>> 8).setWidth 56 ++ next.setWidth 8) := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  simp only [X86.Value.writeView_getLsbD_b, BitVec.getLsbD_append,
+    BitVec.getLsbD_setWidth, BitVec.getLsbD_ushiftRight]
+  by_cases small : i < 8
+  · simp [small]
+  · have upper : i - 8 < 56 := by omega
+    have restored : 8 + (i - 8) = i := by omega
+    simp [small, upper, restored]
+
+theorem byte_memory_native_low (old next : BitVec 64) (shift : BitVec 8)
+    (low : shift.setWidth 32 ≠ (8#32)) :
+    byteMemoryWord old next shift = X86.Value.writeView .b old next := by
+  have changed := byte_decode_change old next shift
+  simp only [low, ite_false, CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned] at changed
+  have restBound : old.toNat / 256 < 72057594037927936 := by
+    have bound := old.isLt
+    omega
+  have small : (next.setWidth 8).toNat < 256 := (next.setWidth 8).isLt
+  have concatNat : (((old >>> 8).setWidth 56) ++ next.setWidth 8).toNat =
+      old.toNat / 256 * 256 + (next.setWidth 8).toNat := by
+    rw [BitVec.toNat_append, ← Nat.shiftLeft_add_eq_or_of_lt small]
+    simp only [BitVec.toNat_setWidth, BitVec.toNat_ushiftRight, Nat.shiftRight_eq_div_pow,
+      Nat.shiftLeft_eq]
+    simp only [show 2 ^ 8 = 256 from by decide,
+      show 2 ^ 56 = 72057594037927936 from by decide, Nat.mod_eq_of_lt restBound]
+  have decoded : CC.decodeInt (byteMemoryImage old next shift) =
+      (((((old >>> 8).setWidth 56) ++ next.setWidth 8).toNat) : Int) := by
+    rw [concatNat]
+    exact byte_low_reassemble old.toNat (next.setWidth 8).toNat
+      (CC.decodeInt (byteMemoryImage old next shift)) changed
+  rw [native_byte_low_concat]
+  apply BitVec.eq_of_toNat_eq
+  simp only [byteMemoryWord, CC.Integers.Int64.repr, CC.Integers.MI.repr, decoded,
+    BitVec.toNat_ofInt]
+  have bound := ((((old >>> 8).setWidth 56) ++ next.setWidth 8)).isLt
+  omega
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback

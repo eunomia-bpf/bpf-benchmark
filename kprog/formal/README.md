@@ -534,8 +534,20 @@ successes, block separation, the final heap and source temporary maps.
 The [composition receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-final.log.gz)
 and [memory receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-memory.log.gz)
 record sixty-five and sixty-seven public declarations under the default
-budgets. The native-register merge correspondence, entry-world/store
+budgets. The high-byte merge correspondence, entry-world/store
 premises, RSP/pointer-tag branches and other widths remain open.
+
+
+For every original/result word, the low-byte Clight memory image equals
+the existing native reference function X86.Value.writeView at byte width.
+The proof retains the upper 56 bits, relates the decoded byte replacement
+to quotient/remainder arithmetic, and proves the same reference merge
+bit by bit. Integer aliases are bridged through logical arithmetic lemmas
+under the default budgets. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-byte-native-low.log.gz)
+records sixty-eight public declarations; the reference definitions remain
+in their original ISA module.
+
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
