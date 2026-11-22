@@ -44,7 +44,7 @@
 2. **验证一侧。**
    - omp：B 剩下几类被库存 verifier 拒绝（kprog/results/pointer-launder-20261122/remaining-classes.txt；r3 栈帧 520 B 来自 3ffc87abc），做到主配置下在跑的程序全部原生。
    - V：每条指令的证明（kprog-lanes/V/prompt.md）。
-   - formal：证明迁移 M5–M6。 CSEL 选中写回 120 步通过（260 项聚焦构建、2 项查询），EQ 条件至写回 186 步通过（261 项、1 项查询）；记录 formal/results/m5-select-write 和 m5-select-eq-write。原始 23 个 dispatch gate 及 handler 的完整 CSEL64/EQ body 已通过（262/263 项聚焦构建，2/1 项查询；formal/results/m5-select-dispatch、m5-select-body）；真实九参 CSEL 调用的分配、释放与返回已通过（264 项聚焦构建、1 项查询；formal/results/m5-select-generic-call）；原始第七调用点及 98 个 provider 输入到七调用/七原生步的完整前缀已通过（265/316 项聚焦构建、2/1 项查询；formal/results/m5-select-caller、m5-entry-select-prefix-native），第七取指由真实前六步传递（271 项、2 项查询）。下一条是 CNEG/GE；统一 make check 保留 V 报告的 DIV 故障路径回归。
+   - formal：证明迁移 M5–M6。 CSEL 选中写回 120 步通过（260 项聚焦构建、2 项查询），EQ 条件至写回 186 步通过（261 项、1 项查询）；记录 formal/results/m5-select-write 和 m5-select-eq-write。原始 23 个 dispatch gate 及 handler 的完整 CSEL64/EQ body 已通过（262/263 项聚焦构建，2/1 项查询；formal/results/m5-select-dispatch、m5-select-body）；真实九参 CSEL 调用的分配、释放与返回已通过（264 项聚焦构建、1 项查询；formal/results/m5-select-generic-call）；原始第七调用点及 98 个 provider 输入到七调用/七原生步的完整前缀已通过（265/316 项聚焦构建、2/1 项查询；formal/results/m5-select-caller、m5-entry-select-prefix-native），第七取指由真实前六步传递（271 项、2 项查询）。下一条是 CNEG/GE：原始九参调用点与 LNSym CSNEG/LT 别名草稿已保存，7 项查询待聚焦检查（formal/results/m5-cneg-preparation，尚未验证，计时独占锁期间未启动 Lean）。统一 make check 保留 V 报告的 DIV 故障路径回归。
 3. **协调者：x86 完整计时**（chain19 自动跑）。
    - 结果出来后核对每个应用的样本和时长都齐全，缺的补跑。
    - 和 5/29 对比，写进 kprog/results。

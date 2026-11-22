@@ -1,0 +1,32 @@
+{
+  "status": "unverified work in progress",
+  "focused_started": false,
+  "public_queries_started": false,
+  "public_query_count_prepared": 7,
+  "root_import_added": false,
+  "full_check": "prior V make-check3 DIV fault correspondence failure; not rerun",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "next_commands": [
+    [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall",
+      "KProgFormal.ClightRefinement.Arm64CnegNative"
+    ],
+    [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-preparation/Query.lean"
+    ]
+  ],
+  "limits": {
+    "cpu": 17,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "timing_lock": "shared"
+  }
+}
