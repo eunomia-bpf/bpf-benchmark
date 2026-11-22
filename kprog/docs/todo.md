@@ -1,30 +1,79 @@
-# kprog 投稿前待办
+# kprog 待办
 
-运营者 2026-11-22：“说说完整的投稿之前的所有 todo, 并且确保 todo list 里面只写了这些,严格按照 todo 做?”“能不能就把修复最小 bug 之后说说? 剩下做我们设计里面说的最小的必要的优化?”
-原话全文在 kprog/docs/user-instruction.md。按顺序做，每项完成后在这里写结果。
+协调者 2026-11-22T11:4xZ 按运营者原话整理：“arm64 不急, 你去写好 todo, 让 omp 或者 codex 在 workspace 里面继续实现, 也需要 lane 把它拉起来? 这样电脑关机还是可以产出. todo 要整理好. 不允许改动的不让改, 也不要调优, 只要确保实现正确加上功能一致.”
+运营者原话全文在 kprog/docs/user-instruction.md，以原话为准。上一版待办在 git 历史。
 
-## 路径上保留的内容（5/29 之外只留这些）
+## 一、目标（运营者原话）
 
-1. 今天内核的接口：内核模块接收原生代码，装载器先装最小的 eBPF 占位程序再挂原生代码；Tetragon 在今天内核上的编译选项和函数声明。
-2. 修 bug：
+- “只要确保实现正确加上功能一致.”（11-22）
+- “接下来只允许修必要的 bug, 或者通过 profile 找大的性能问题, 框架不改动.”（11-22）
+- “可以 profile 但是不允许做任何设计之外的事情或者细节调优, 必须跑几次确保数据全部都在.”（11-22）
+- “库的特性探测程序无所谓, 但是在运行的必须是原生.”（11-22）
+
+## 二、设计（kprog/docs/design.md）
+
+1. P 从应用源码直接编成原生代码：O3，所有应用一组编译参数，兼容靠头文件。
+2. 验证：可信服务把解释器 I 特化到 P，编成 eBPF B，交库存 verifier；接受即确证 P 内存安全。
+3. 链接时优化：绑定 map 和 helper，就地内联 map 查找和 helper，内核直接执行原生代码。
+4. 两种配置分别报告：主配置（验证加链接时优化）和直接原生（对照）。
+
+## 三、不允许改动的（运营者原话）
+
+- benchmark 框架和设置（runner/、corpus/、micro/、e2e/、kprog/perf/one-image/Makefile）：“整个 benchmark 框架不是说都不允许改动???”（11-20），“不许改 bench 除非我同意”（11-15）。
+- 论文、故事、设计：保持原样（11-09、11-15）。
+- 检查和守卫：“但不能任何额外的 check/guard?”（11-22），“不允许增加新的 check”（11-09）。
+- 调优：“也不要调优”（11-22），“也不需要调参”（11-22）。
+- 上游应用源码：“尽可能禁止改源代码”（11-13），“必要的话改一点是可以接受的”（11-15）。
+- 冻结路径只经 kprog/docs/freeze-open.tsv 开放，钩子始终运行。
+- 一个工作树、一个内核、一个镜像、一个底座；不开 worktree、clone、分支、stash；原始数据保留；用前向提交，不 revert；提交不带 AI 署名。
+
+## 四、现在的状态（2026-11-22T11:4xZ）
+
+- 路径 = 5/29（82ec89cb4）+ 必要修复 + 运营者要的改动，清单在第六节。
+- x86 功能检查（09613661f 的代码，10:51–11:11Z）：六个应用 rc=0，在跑的程序全部原生（OTel 14、BCC 25、Cilium 135、Tetragon 288、Tracee 169、Katran 1）。
+- arm64 功能检查 11:18Z 起在跑：结果写在 /workspaces/kprog-raw/coordinator/restore-529/chain18.done 和 /workspaces/kprog-raw/one-image-arm64-runs/check.log。
+- x86 完整计时排在 arm64 检查之后自动开始（协调者 chain19，冻结入口的 rotate），进度在 /workspaces/kprog-raw/one-image-runs/progress.log，计时期间持有 locks/timing。
+
+## 五、待办（按顺序；做完在行首写 [x] 和提交号）
+
+1. **omp：arm64 功能检查结果。** 六个应用 rc=0、在跑的程序全部原生，即完成。有失败时：
+   - 找原因，只修让程序跑通、结果正确的必要 bug；
+   - 提交；
+   - 用 make -C kprog/perf/one-image-arm64 image 和 check 重查；
+   - 用 make -C kprog/perf/one-image check 确认 x86 照旧通过（等计时结束再跑 x86 检查）。
+2. **验证一侧。**
+   - omp：B 剩下几类被库存 verifier 拒绝（kprog/results/pointer-launder-20261122/remaining-classes.txt；r3 栈帧 520 B 来自 3ffc87abc），做到主配置下在跑的程序全部原生。
+   - V：每条指令的证明（kprog-lanes/V/prompt.md）。
+   - formal：证明迁移 M5–M6。
+3. **协调者：x86 完整计时**（chain19 自动跑）。
+   - 结果出来后核对每个应用的样本和时长都齐全，缺的补跑。
+   - 和 5/29 对比，写进 kprog/results。
+   - 计时期间，lane 耗 CPU 的工作都放在 flock -s /workspaces/.agent-state/kprog-lanes/locks/timing 里。
+4. **协调者：arm64 完整计时**（不急）：在 Spark 上跑，暂停 DeepSeek，测完立即恢复。
+5. **协调者：数字写进论文**（agent 不改论文）。
+
+## 六、路径上保留的内容（5/29 之外只有这些）
+
+1. **今天内核的接口**：
+   - 内核模块接收原生代码，装载器先装最小的 eBPF 占位程序，再挂原生代码；
+   - Tetragon 在今天内核上的编译选项和函数声明。
+2. **修 bug**：
    - helper 绑到这个程序类型对应的内核函数；
-   - Cilium 配置值按程序自己的类型信息定位，装载器拿住找到的数据 map 直到原生程序接手；
+   - Cilium 配置值按程序自己的类型信息定位；装载器拿住找到的数据 map，直到原生程序接手；
    - Tracee 的字符串常量留在原生代码里；
    - OTel 经内核性能事件上下文读采样寄存器；
    - map 查找按 map 名字配到它自己的 map，名字确定不了时调内核通用 helper；
    - 尾调用跳走前恢复寄存器；
    - 测量拦截库在原生替换完成之后开始计数；
    - arm64：编译配置、程序内调用、尾调用、数据地址、代码段合并；按位条件跳转在重新排布后改目标；读内存的位置登记到内核异常表。
-3. 运营者要的：helper 按名字调用并删掉 arm64 按编号的运行时挑选；时钟和 jiffies 用 C 写在头文件里；读内核内存是普通内存读；map 更新、删除在 map 已知时直接调该类型的函数（运营者 11-22：“这个是我要的啊”）；只读数据替换成常量（待办 2）。
+3. **运营者要的**：
+   - helper 按名字调用，删掉 arm64 按编号的运行时挑选；
+   - 时钟和 jiffies 用 C 写在头文件里；
+   - 读内核内存是普通内存读；
+   - map 更新、删除在 map 已知时直接调用该类型的函数（“这个是我要的啊”）。
 
-## 待办
+## 七、lane 和怎么拉起（电脑关机时照常运行）
 
-运营者 11-22：“接下来只允许修必要的 bug, 或者通过 profile 找大的性能问题, 框架不改动. 是不是理论上来说性能能好很多? 路径行数也不是 hard limit, 但不能做任何额外的事情. verify 那部分可以叫 codex 继续干活. 可以 profile 但是不允许做任何设计之外的事情或者细节调优, 必须跑几次确保数据全部都在.”
-
-1. **功能检查**（10:35Z 起，chain18）：按 HEAD 重建两个架构的原生对象和镜像，各跑六个应用的 make check；每个应用的 shim 日志里在跑的程序全部原生（库的特性探测程序除外）。
-2. **修检查发现的必要 bug。**
-3. **计时**：x86 一次完整计时（P 核，主机安静，框架原样：每个应用三次、广度优先、stats 关和开两列）；arm64 同时在 Spark 上完整计时一次（暂停 DeepSeek，测完立即恢复）。每个应用的样本和时长齐全才算数，缺的补跑。和 5/29 对比。
-4. **profile 找大的性能问题**：计时之后做。冻结 x86 测试里每次调用的原生对 eBPF：Tetragon 2.44x、Tracee 1.98x、Katran 1.24x、Cilium 1.11x、BCC 1.00x；OTel 修好上下文之后 0.90x。先查 OTel，再查 Cilium、Katran、BCC。工具：客户机里的 perf（从内核树构建，kprog-ck/perf-tool）。只改设计之内的大问题，不做细节调优。
-5. **改了的应用补测**：只补测受影响的应用，样本和时长齐全。
-6. **验证一侧**：omp 和 Codex lane（V、formal）继续。 FORMAL 11-22：收尾原有根模块构建（474 项通过）及 278 项定理类型/公理查询（通过），包括 X86ShiftWriteback 与 ARM CMP/CSEL 已完成的辅助证明；记录 formal/results/m5-global-20261122。完整 handler、O1/O2/O4 重计及后续迁移仍未完成。 CSEL 选中分支到真实 pointer writer 的 66 步证明已通过（两方向、完整 raw/tag、256 项构建及 2 项定理查询）；记录 formal/results/m5-select-branch。 原生 CSEL64 的真实解码/取指单步证明通过（186 项构建、4 项查询）；Clight writer 及整段组合仍待完成。 已在 writer 调用边界连上同一被选 raw/tag 与真实 CSEL 单步（258 项构建、1 项查询）；记录 formal/results/m5-select-matched。 本批含 V RegisterView 的根模块确认：默认构建 478 项、14 项根接口查询通过，记录 formal/results/m5-select-confirmation。 已推送实际 pointer writer 的 Vlong/Vptr 通用执行与完整寄存器/缓存保持证明（185 项聚焦构建、7 项查询通过；formal/results/m5-pointer-values）。CSEL 选中分支实际写回 120 步及原生对应证明通过（260 项聚焦构建、2 项查询；formal/results/m5-select-write）。EQ 条件至写回 186 步组合正在检查；本批全库确认未开始。
-7. **数字写进论文**：kprog/docs/evaluation.md 和论文的 evaluation 节。
+- **omp**：集群值守 agent-duties/bpf-benchmark-supervisor，每 10 分钟续跑同一会话，prompt 在 /workspaces/.agent-state/bpf-benchmark-supervisor/prompt.md。
+- **V、formal**：集群 Codex，kprog-lanes/<lane>/runner 加 lane-loop.sh；集群守护 kprog-lane-keeper 每 10 分钟拉起停掉的 loop。
+- **纠偏**：写 kprog-lanes/<lane>/resume-msg.md，并在 kprog-lanes/COORDINATION.md 记一行。
