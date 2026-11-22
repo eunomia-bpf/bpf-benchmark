@@ -1,0 +1,1532 @@
+[
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkSourceLayout.lean",
+    "bytes": 5718,
+    "modified_utc": "2026-11-09T06:30:54.539949+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkProducerEdits.lean",
+    "bytes": 13281,
+    "modified_utc": "2026-11-21T19:49:19.503358+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkProducer.lean",
+    "bytes": 10972,
+    "modified_utc": "2026-11-16T19:35:39.178419+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkProducerImage.lean",
+    "bytes": 19055,
+    "modified_utc": "2026-11-16T19:38:20.688062+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkSourceRefinement.lean",
+    "bytes": 21187,
+    "modified_utc": "2026-11-09T06:55:18.020809+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/NativeLinkSourceProducer.lean",
+    "bytes": 4773,
+    "modified_utc": "2026-11-21T20:13:46.071727+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/KernelControl.lean",
+    "bytes": 210,
+    "modified_utc": "2026-11-21T20:23:12.532822+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight.lean",
+    "bytes": 994,
+    "modified_utc": "2026-11-16T18:50:11.632943+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+    "bytes": 8236,
+    "modified_utc": "2026-11-14T14:55:17.979954+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/X86Path.lean",
+    "bytes": 4323,
+    "modified_utc": "2026-11-06T18:21:09.608474+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/ExternalChecks.lean",
+    "bytes": 21112,
+    "modified_utc": "2026-11-14T17:27:25.519963+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/Provenance.lean",
+    "bytes": 3435,
+    "modified_utc": "2026-11-14T17:27:25.520108+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/X86.lean",
+    "bytes": 58799,
+    "modified_utc": "2026-11-14T16:38:36.152457+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Reference/Memory.lean",
+    "bytes": 3740,
+    "modified_utc": "2026-11-08T18:55:55.253636+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/RCUTarget.lean",
+    "bytes": 10004,
+    "modified_utc": "2026-11-21T19:52:45.543635+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/ArmWrapper.lean",
+    "bytes": 2766,
+    "modified_utc": "2026-11-21T20:20:21.957998+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/PrivateFrame.lean",
+    "bytes": 8420,
+    "modified_utc": "2026-11-21T20:07:26.993537+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/NativeFrameWord.lean",
+    "bytes": 4428,
+    "modified_utc": "2026-11-21T21:03:17.875022+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/NativeWrapper.lean",
+    "bytes": 5184,
+    "modified_utc": "2026-11-21T20:23:12.532726+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ControlABI/HelperQuery.lean",
+    "bytes": 11249,
+    "modified_utc": "2026-11-21T20:22:07.999505+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediate.lean",
+    "bytes": 10443,
+    "modified_utc": "2026-11-20T08:48:07.421599+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryComparePrefixNative.lean",
+    "bytes": 18395,
+    "modified_utc": "2026-11-22T02:05:45.076642+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareOperands.lean",
+    "bytes": 8326,
+    "modified_utc": "2026-11-21T23:10:21.023838+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLoop.lean",
+    "bytes": 31510,
+    "modified_utc": "2026-11-19T19:43:34.775666+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediatePointer.lean",
+    "bytes": 9586,
+    "modified_utc": "2026-11-21T19:15:42.775913+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryWarmRead.lean",
+    "bytes": 3688,
+    "modified_utc": "2026-11-20T08:09:42.978944+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWrite.lean",
+    "bytes": 26953,
+    "modified_utc": "2026-11-20T02:44:00.763887+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectorInputs.lean",
+    "bytes": 21802,
+    "modified_utc": "2026-11-19T23:39:31.315533+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepCall.lean",
+    "bytes": 8030,
+    "modified_utc": "2026-11-18T02:55:21.914164+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeft.lean",
+    "bytes": 11435,
+    "modified_utc": "2026-11-21T21:28:49.356592+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepLinkedCall.lean",
+    "bytes": 15430,
+    "modified_utc": "2026-11-20T03:26:09.984622+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64GlobalMemory.lean",
+    "bytes": 18351,
+    "modified_utc": "2026-11-19T06:05:10.995032+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerContext.lean",
+    "bytes": 9922,
+    "modified_utc": "2026-11-19T12:54:48.175017+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryInitialized.lean",
+    "bytes": 15817,
+    "modified_utc": "2026-11-20T01:00:19.002780+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovNative.lean",
+    "bytes": 5560,
+    "modified_utc": "2026-11-21T16:17:24.435261+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateTail.lean",
+    "bytes": 18327,
+    "modified_utc": "2026-11-21T19:13:52.806001+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedModifier.lean",
+    "bytes": 21668,
+    "modified_utc": "2026-11-21T23:52:41.425367+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerVectors.lean",
+    "bytes": 6064,
+    "modified_utc": "2026-11-19T12:54:48.174962+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericMemory.lean",
+    "bytes": 7622,
+    "modified_utc": "2026-11-19T06:22:28.772934+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagArithmetic.lean",
+    "bytes": 6157,
+    "modified_utc": "2026-11-22T01:41:54.338190+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryGprInputs.lean",
+    "bytes": 17292,
+    "modified_utc": "2026-11-19T22:32:44.095903+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64Producer.lean",
+    "bytes": 18485,
+    "modified_utc": "2026-11-19T20:32:35.397077+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerHeaderTail.lean",
+    "bytes": 35196,
+    "modified_utc": "2026-11-19T11:46:19.396751+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulPrefixNative.lean",
+    "bytes": 16840,
+    "modified_utc": "2026-11-21T22:43:37.370703+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86RegisterLayout.lean",
+    "bytes": 6335,
+    "modified_utc": "2026-11-22T01:12:41.853633+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateDispatch.lean",
+    "bytes": 26778,
+    "modified_utc": "2026-11-20T05:59:26.564674+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Deallocation.lean",
+    "bytes": 12260,
+    "modified_utc": "2026-11-17T15:31:03.507951+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWriteFrame.lean",
+    "bytes": 17849,
+    "modified_utc": "2026-11-22T01:07:43.915306+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64LinkedNop.lean",
+    "bytes": 6478,
+    "modified_utc": "2026-11-17T18:11:34.610149+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCacheFrame.lean",
+    "bytes": 19147,
+    "modified_utc": "2026-11-22T01:07:43.915426+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterCall.lean",
+    "bytes": 12786,
+    "modified_utc": "2026-11-21T17:52:45.630311+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionEq.lean",
+    "bytes": 8119,
+    "modified_utc": "2026-11-22T02:26:23.342771+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterModifier.lean",
+    "bytes": 21702,
+    "modified_utc": "2026-11-21T18:03:28.207739+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryTail.lean",
+    "bytes": 29007,
+    "modified_utc": "2026-11-20T02:10:40.841002+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulPrefix.lean",
+    "bytes": 4714,
+    "modified_utc": "2026-11-21T22:05:23.099334+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateNative.lean",
+    "bytes": 7344,
+    "modified_utc": "2026-11-18T00:20:13.052059+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPairNative.lean",
+    "bytes": 6870,
+    "modified_utc": "2026-11-21T16:17:24.435455+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftCount.lean",
+    "bytes": 6968,
+    "modified_utc": "2026-11-21T21:16:20.108239+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagOF.lean",
+    "bytes": 31114,
+    "modified_utc": "2026-11-22T00:30:51.555526+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulBody.lean",
+    "bytes": 10831,
+    "modified_utc": "2026-11-21T22:22:47.577414+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterSource.lean",
+    "bytes": 5158,
+    "modified_utc": "2026-11-19T22:20:48.250050+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerFlags.lean",
+    "bytes": 17435,
+    "modified_utc": "2026-11-19T23:09:46.974028+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerTables.lean",
+    "bytes": 20112,
+    "modified_utc": "2026-11-19T22:48:55.123552+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeftCarry.lean",
+    "bytes": 12579,
+    "modified_utc": "2026-11-21T22:22:39.640301+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerTables.lean",
+    "bytes": 6909,
+    "modified_utc": "2026-11-19T12:54:48.174869+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagCF.lean",
+    "bytes": 30196,
+    "modified_utc": "2026-11-22T00:09:10.328229+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntrySelectCall.lean",
+    "bytes": 11040,
+    "modified_utc": "2026-11-22T02:16:59.981785+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64EntryMemory.lean",
+    "bytes": 10123,
+    "modified_utc": "2026-11-16T17:50:54.722540+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddCall.lean",
+    "bytes": 12343,
+    "modified_utc": "2026-11-21T16:22:00.655267+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterBody.lean",
+    "bytes": 16704,
+    "modified_utc": "2026-11-21T19:20:41.267273+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepRead.lean",
+    "bytes": 14143,
+    "modified_utc": "2026-11-20T07:05:49.230751+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediatePointerCall.lean",
+    "bytes": 11492,
+    "modified_utc": "2026-11-21T15:38:29.447461+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectorView.lean",
+    "bytes": 7097,
+    "modified_utc": "2026-11-17T22:07:01.188480+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAllocation.lean",
+    "bytes": 7306,
+    "modified_utc": "2026-11-20T02:03:48.557338+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean",
+    "bytes": 3529,
+    "modified_utc": "2026-11-22T01:18:32.741126+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateSuffix.lean",
+    "bytes": 17291,
+    "modified_utc": "2026-11-20T05:46:43.881744+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepContext.lean",
+    "bytes": 12530,
+    "modified_utc": "2026-11-20T03:21:13.546201+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerHeader.lean",
+    "bytes": 25035,
+    "modified_utc": "2026-11-19T10:48:28.349960+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedCall.lean",
+    "bytes": 7000,
+    "modified_utc": "2026-11-21T23:53:53.102390+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerPrefix.lean",
+    "bytes": 4390,
+    "modified_utc": "2026-11-19T06:56:15.476333+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64LinkedProgram.lean",
+    "bytes": 11368,
+    "modified_utc": "2026-11-17T16:36:25.027634+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateZr.lean",
+    "bytes": 5257,
+    "modified_utc": "2026-11-18T01:18:01.788294+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryPrefix.lean",
+    "bytes": 8689,
+    "modified_utc": "2026-11-19T20:37:58.186053+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterView.lean",
+    "bytes": 10847,
+    "modified_utc": "2026-11-20T01:19:30.822136+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NopEntry.lean",
+    "bytes": 6153,
+    "modified_utc": "2026-11-16T13:03:27.716227+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateNative.lean",
+    "bytes": 5200,
+    "modified_utc": "2026-11-20T09:01:42.806633+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulAdmission.lean",
+    "bytes": 7817,
+    "modified_utc": "2026-11-21T22:41:45.288963+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateCall.lean",
+    "bytes": 14353,
+    "modified_utc": "2026-11-21T16:22:00.654932+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerInput.lean",
+    "bytes": 4383,
+    "modified_utc": "2026-11-19T07:08:45.126662+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisters.lean",
+    "bytes": 9674,
+    "modified_utc": "2026-11-19T21:54:56.192854+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAssignments.lean",
+    "bytes": 24002,
+    "modified_utc": "2026-11-19T18:57:59.321399+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepOrdinary.lean",
+    "bytes": 20659,
+    "modified_utc": "2026-11-20T07:05:49.230642+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectorLoop.lean",
+    "bytes": 39525,
+    "modified_utc": "2026-11-19T12:04:05.210591+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerStack.lean",
+    "bytes": 20826,
+    "modified_utc": "2026-11-20T00:12:28.866899+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerEntryView.lean",
+    "bytes": 7808,
+    "modified_utc": "2026-11-17T23:32:46.177098+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinkedBindings.lean",
+    "bytes": 3046,
+    "modified_utc": "2026-11-20T05:56:40.027704+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ReadNone.lean",
+    "bytes": 1026,
+    "modified_utc": "2026-11-17T23:28:12.009549+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteView.lean",
+    "bytes": 12999,
+    "modified_utc": "2026-11-22T01:07:43.915178+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRhsCall.lean",
+    "bytes": 9687,
+    "modified_utc": "2026-11-21T23:18:20.167103+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryFields.lean",
+    "bytes": 10389,
+    "modified_utc": "2026-11-19T18:24:55.704567+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerVectorLoop.lean",
+    "bytes": 12136,
+    "modified_utc": "2026-11-19T12:54:48.175221+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagBytes.lean",
+    "bytes": 4983,
+    "modified_utc": "2026-11-22T01:48:50.287177+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareBody.lean",
+    "bytes": 8166,
+    "modified_utc": "2026-11-22T00:53:52.479463+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediate.lean",
+    "bytes": 2239,
+    "modified_utc": "2026-11-17T22:46:09.524426+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryBody.lean",
+    "bytes": 27490,
+    "modified_utc": "2026-11-20T04:00:06.269401+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulNativeCall.lean",
+    "bytes": 7819,
+    "modified_utc": "2026-11-21T22:33:12.412132+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovPairNative.lean",
+    "bytes": 4189,
+    "modified_utc": "2026-11-20T07:31:02.129836+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateOperands.lean",
+    "bytes": 13877,
+    "modified_utc": "2026-11-21T18:29:06.047341+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddPrefixNative.lean",
+    "bytes": 11391,
+    "modified_utc": "2026-11-21T18:09:39.236277+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectors.lean",
+    "bytes": 29043,
+    "modified_utc": "2026-11-19T23:41:50.155706+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerHeaderTail.lean",
+    "bytes": 11462,
+    "modified_utc": "2026-11-19T12:54:48.175171+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryTables.lean",
+    "bytes": 11364,
+    "modified_utc": "2026-11-19T22:48:55.123717+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86Width.lean",
+    "bytes": 5081,
+    "modified_utc": "2026-11-21T20:31:19.274866+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateLinkedRead.lean",
+    "bytes": 8205,
+    "modified_utc": "2026-11-20T05:59:26.564394+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectPath.lean",
+    "bytes": 5049,
+    "modified_utc": "2026-11-22T03:11:35.398045+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerRegisterStorage.lean",
+    "bytes": 11960,
+    "modified_utc": "2026-11-19T13:40:42.231785+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerFlagInputs.lean",
+    "bytes": 23527,
+    "modified_utc": "2026-11-19T23:14:18.252220+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddOperandReads.lean",
+    "bytes": 10670,
+    "modified_utc": "2026-11-20T08:42:00.136863+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateDispatch.lean",
+    "bytes": 15411,
+    "modified_utc": "2026-11-21T18:26:43.045633+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean",
+    "bytes": 15735,
+    "modified_utc": "2026-11-22T01:08:30.804116+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerPrefix.lean",
+    "bytes": 31877,
+    "modified_utc": "2026-11-19T20:38:48.043787+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CacheLocalFrame.lean",
+    "bytes": 8749,
+    "modified_utc": "2026-11-21T18:10:31.421014+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NopCall.lean",
+    "bytes": 11288,
+    "modified_utc": "2026-11-17T18:08:11.037340+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryVectors.lean",
+    "bytes": 20406,
+    "modified_utc": "2026-11-19T19:05:10.894526+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterView.lean",
+    "bytes": 10084,
+    "modified_utc": "2026-11-17T22:07:01.188207+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerInputs.lean",
+    "bytes": 21955,
+    "modified_utc": "2026-11-19T21:18:52.780523+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProgram.lean",
+    "bytes": 2416,
+    "modified_utc": "2026-11-19T06:25:15.442405+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryBodyView.lean",
+    "bytes": 23171,
+    "modified_utc": "2026-11-22T01:07:43.915578+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPrefixNative.lean",
+    "bytes": 8758,
+    "modified_utc": "2026-11-21T16:17:50.694045+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterPrefix.lean",
+    "bytes": 5651,
+    "modified_utc": "2026-11-21T18:30:11.040940+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeftClassify.lean",
+    "bytes": 13138,
+    "modified_utc": "2026-11-21T22:46:32.232484+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/StepEquations.lean",
+    "bytes": 3243,
+    "modified_utc": "2026-11-16T19:31:43.221877+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRegisters.lean",
+    "bytes": 19423,
+    "modified_utc": "2026-11-22T02:01:40.202163+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagSF.lean",
+    "bytes": 21283,
+    "modified_utc": "2026-11-21T23:49:25.865013+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerGprInputs.lean",
+    "bytes": 5425,
+    "modified_utc": "2026-11-19T12:54:48.174765+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediatePrefix.lean",
+    "bytes": 3125,
+    "modified_utc": "2026-11-20T09:07:53.362662+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryFlags.lean",
+    "bytes": 17918,
+    "modified_utc": "2026-11-19T23:20:10.392898+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateLinkedCall.lean",
+    "bytes": 10683,
+    "modified_utc": "2026-11-20T07:47:48.128095+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedRead.lean",
+    "bytes": 13849,
+    "modified_utc": "2026-11-21T23:34:03.168750+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerHeader.lean",
+    "bytes": 9788,
+    "modified_utc": "2026-11-19T12:54:48.175069+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRhs.lean",
+    "bytes": 5467,
+    "modified_utc": "2026-11-22T00:06:07.415145+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterNative.lean",
+    "bytes": 6675,
+    "modified_utc": "2026-11-21T20:41:23.149710+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64Registers.lean",
+    "bytes": 11417,
+    "modified_utc": "2026-11-16T13:13:39.974085+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrame.lean",
+    "bytes": 2357,
+    "modified_utc": "2026-11-22T01:08:30.803630+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean",
+    "bytes": 31356,
+    "modified_utc": "2026-11-22T01:08:30.804765+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulProduct.lean",
+    "bytes": 9894,
+    "modified_utc": "2026-11-21T22:16:10.599335+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerContext.lean",
+    "bytes": 22651,
+    "modified_utc": "2026-11-20T00:18:37.800839+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ComparePrefix.lean",
+    "bytes": 6692,
+    "modified_utc": "2026-11-22T00:13:44.625512+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulDispatch.lean",
+    "bytes": 12408,
+    "modified_utc": "2026-11-21T21:41:24.921474+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64Width.lean",
+    "bytes": 4389,
+    "modified_utc": "2026-11-16T13:00:08.055186+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterOperands.lean",
+    "bytes": 18659,
+    "modified_utc": "2026-11-21T17:32:35.780666+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NopDeclarations.lean",
+    "bytes": 42778,
+    "modified_utc": "2026-11-16T11:11:45.904040+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerConsumer.lean",
+    "bytes": 7428,
+    "modified_utc": "2026-11-19T13:43:35.595701+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Continuation.lean",
+    "bytes": 6704,
+    "modified_utc": "2026-11-19T16:41:03.086962+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Execution.lean",
+    "bytes": 2087,
+    "modified_utc": "2026-11-16T19:33:34.495047+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectReads.lean",
+    "bytes": 3090,
+    "modified_utc": "2026-11-22T03:29:43.069541+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulCall.lean",
+    "bytes": 13503,
+    "modified_utc": "2026-11-21T22:24:49.154211+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterReads.lean",
+    "bytes": 120596,
+    "modified_utc": "2026-11-22T03:26:35.002942+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerTablesToRegisters.lean",
+    "bytes": 8568,
+    "modified_utc": "2026-11-17T21:02:27.838893+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Globalenv.lean",
+    "bytes": 1921,
+    "modified_utc": "2026-11-16T09:57:05.552287+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovCall.lean",
+    "bytes": 29463,
+    "modified_utc": "2026-11-21T16:17:24.434994+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateCall.lean",
+    "bytes": 9656,
+    "modified_utc": "2026-11-20T03:18:25.756969+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerTableSource.lean",
+    "bytes": 3645,
+    "modified_utc": "2026-11-17T10:42:51.188525+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateNativeCall.lean",
+    "bytes": 7979,
+    "modified_utc": "2026-11-21T16:22:00.655130+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPair.lean",
+    "bytes": 7158,
+    "modified_utc": "2026-11-21T16:17:24.435377+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepWordCall.lean",
+    "bytes": 6575,
+    "modified_utc": "2026-11-21T16:17:24.424468+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCall.lean",
+    "bytes": 9810,
+    "modified_utc": "2026-11-20T02:16:21.515714+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Frame.lean",
+    "bytes": 4823,
+    "modified_utc": "2026-11-16T22:21:24.859459+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeftAlu.lean",
+    "bytes": 7491,
+    "modified_utc": "2026-11-21T21:39:20.987632+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/InternalExecution.lean",
+    "bytes": 7988,
+    "modified_utc": "2026-11-16T14:11:41.296532+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntrySource.lean",
+    "bytes": 13275,
+    "modified_utc": "2026-11-20T03:45:03.714871+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareDispatch.lean",
+    "bytes": 16132,
+    "modified_utc": "2026-11-21T23:04:44.477841+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryResources.lean",
+    "bytes": 6436,
+    "modified_utc": "2026-11-19T19:50:28.748480+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeftSite.lean",
+    "bytes": 7698,
+    "modified_utc": "2026-11-21T21:49:10.085992+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterAdmission.lean",
+    "bytes": 6757,
+    "modified_utc": "2026-11-21T21:22:12.415911+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepSuffix.lean",
+    "bytes": 29465,
+    "modified_utc": "2026-11-20T07:05:49.230480+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterPrefixNative.lean",
+    "bytes": 13903,
+    "modified_utc": "2026-11-21T21:24:22.935369+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddImmediateBody.lean",
+    "bytes": 6964,
+    "modified_utc": "2026-11-21T15:45:54.614862+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterCall.lean",
+    "bytes": 14327,
+    "modified_utc": "2026-11-21T19:44:41.027936+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterSource.lean",
+    "bytes": 6957,
+    "modified_utc": "2026-11-16T23:31:06.985622+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterStorage.lean",
+    "bytes": 8196,
+    "modified_utc": "2026-11-22T01:07:43.915025+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagZF.lean",
+    "bytes": 22052,
+    "modified_utc": "2026-11-21T23:39:51.473867+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareAdmission.lean",
+    "bytes": 8866,
+    "modified_utc": "2026-11-22T02:04:44.309173+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepZr.lean",
+    "bytes": 5052,
+    "modified_utc": "2026-11-18T02:01:05.698476+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulCall.lean",
+    "bytes": 11031,
+    "modified_utc": "2026-11-21T21:34:34.110714+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryColdRead.lean",
+    "bytes": 7640,
+    "modified_utc": "2026-11-20T05:12:17.361386+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagInputs.lean",
+    "bytes": 32652,
+    "modified_utc": "2026-11-21T23:22:57.160324+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerGprInputs.lean",
+    "bytes": 28853,
+    "modified_utc": "2026-11-19T22:24:29.204815+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftLeftRoute.lean",
+    "bytes": 8147,
+    "modified_utc": "2026-11-21T22:00:31.769875+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64AddRegisterNativeCall.lean",
+    "bytes": 8029,
+    "modified_utc": "2026-11-21T20:43:09.694596+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectCondition.lean",
+    "bytes": 12588,
+    "modified_utc": "2026-11-22T02:42:46.473627+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftWriteback.lean",
+    "bytes": 193174,
+    "modified_utc": "2026-11-22T03:25:40.934883+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareCall.lean",
+    "bytes": 12765,
+    "modified_utc": "2026-11-21T22:56:51.274372+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteFrame.lean",
+    "bytes": 12230,
+    "modified_utc": "2026-11-20T05:25:14.633968+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryInputs.lean",
+    "bytes": 8968,
+    "modified_utc": "2026-11-19T21:32:48.134474+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64Nop.lean",
+    "bytes": 12367,
+    "modified_utc": "2026-11-16T13:00:08.055364+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagPF.lean",
+    "bytes": 34642,
+    "modified_utc": "2026-11-22T00:45:00.500045+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64SelectPathCall.lean",
+    "bytes": 8794,
+    "modified_utc": "2026-11-22T03:20:15.854970+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerHeaderVectors.lean",
+    "bytes": 19103,
+    "modified_utc": "2026-11-19T11:31:50.245451+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerLifetime.lean",
+    "bytes": 11881,
+    "modified_utc": "2026-11-19T13:40:42.231407+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulNative.lean",
+    "bytes": 6577,
+    "modified_utc": "2026-11-21T22:31:25.662760+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryVectorInputs.lean",
+    "bytes": 14819,
+    "modified_utc": "2026-11-19T23:50:37.070562+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryLinked.lean",
+    "bytes": 5626,
+    "modified_utc": "2026-11-20T05:56:40.027590+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulNative.lean",
+    "bytes": 4643,
+    "modified_utc": "2026-11-21T22:39:42.995117+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRawSetup.lean",
+    "bytes": 18581,
+    "modified_utc": "2026-11-20T00:26:02.218274+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64InitializedNop.lean",
+    "bytes": 6472,
+    "modified_utc": "2026-11-17T20:45:25.906535+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedPrefix.lean",
+    "bytes": 5565,
+    "modified_utc": "2026-11-21T23:37:08.901964+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MulOperands.lean",
+    "bytes": 31734,
+    "modified_utc": "2026-11-21T22:01:48.287825+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepLinked.lean",
+    "bytes": 8783,
+    "modified_utc": "2026-11-20T02:57:39.605886+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateView.lean",
+    "bytes": 6983,
+    "modified_utc": "2026-11-18T02:55:21.914022+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovPath.lean",
+    "bytes": 1105,
+    "modified_utc": "2026-11-17T23:01:40.354430+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovKeepNative.lean",
+    "bytes": 9990,
+    "modified_utc": "2026-11-20T03:20:08.617256+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPrefix.lean",
+    "bytes": 7884,
+    "modified_utc": "2026-11-21T16:17:50.693853+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWriteLinked.lean",
+    "bytes": 4456,
+    "modified_utc": "2026-11-20T08:29:31.620716+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerGprView.lean",
+    "bytes": 8338,
+    "modified_utc": "2026-11-17T19:00:15.170147+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWrite.lean",
+    "bytes": 20808,
+    "modified_utc": "2026-11-20T08:28:05.535616+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryExpressions.lean",
+    "bytes": 4665,
+    "modified_utc": "2026-11-19T17:29:17.156996+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareMath.lean",
+    "bytes": 15054,
+    "modified_utc": "2026-11-22T00:30:41.965303+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerFlags.lean",
+    "bytes": 6017,
+    "modified_utc": "2026-11-19T12:54:48.174919+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64OriginCache.lean",
+    "bytes": 38422,
+    "modified_utc": "2026-11-16T19:31:43.222338+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddAdmission.lean",
+    "bytes": 5509,
+    "modified_utc": "2026-11-21T16:24:19.839041+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86ShiftFlagWidths.lean",
+    "bytes": 27493,
+    "modified_utc": "2026-11-21T23:07:03.878668+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64EntryAdmissibility.lean",
+    "bytes": 13773,
+    "modified_utc": "2026-11-20T01:19:30.822021+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean",
+    "bytes": 19397,
+    "modified_utc": "2026-11-22T01:08:30.804554+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64NumericProducerHeaderVectors.lean",
+    "bytes": 9084,
+    "modified_utc": "2026-11-19T12:54:48.175115+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/X86WidthShape.lean",
+    "bytes": 10803,
+    "modified_utc": "2026-11-21T22:53:14.736724+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisters.lean",
+    "bytes": 22948,
+    "modified_utc": "2026-11-19T21:52:49.847492+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MovImmediateWide.lean",
+    "bytes": 9456,
+    "modified_utc": "2026-11-18T00:50:34.858824+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterNative.lean",
+    "bytes": 4701,
+    "modified_utc": "2026-11-21T21:19:54.759840+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Generated/NativeLinkSource.lean",
+    "bytes": 9687,
+    "modified_utc": "2026-11-09T06:55:18.159702+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Generated/NativeLinkFields.lean",
+    "bytes": 2064,
+    "modified_utc": "2026-11-21T20:10:34.229033+00:00",
+    "comparison": "byte equal to launch revision"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Program.lean",
+    "bytes": 12240016,
+    "modified_utc": "2026-11-21T19:50:02.464311+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Addressing.lean",
+    "bytes": 22636386,
+    "modified_utc": "2026-11-21T19:49:50.266040+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramFixture.lean",
+    "bytes": 688543,
+    "modified_utc": "2026-11-21T19:50:03.225328+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+    "bytes": 21547652,
+    "modified_utc": "2026-11-21T19:50:16.430621+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+    "bytes": 32766266,
+    "modified_utc": "2026-11-21T19:51:01.975633+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Stack.lean",
+    "bytes": 375661,
+    "modified_utc": "2026-11-21T19:50:03.334330+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+    "bytes": 101977,
+    "modified_utc": "2026-11-21T19:50:03.518335+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+    "bytes": 25594782,
+    "modified_utc": "2026-11-21T19:50:45.063257+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+    "bytes": 21633394,
+    "modified_utc": "2026-11-21T19:50:10.004478+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Entry.lean",
+    "bytes": 850142,
+    "modified_utc": "2026-11-21T19:49:50.395043+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Access.lean",
+    "bytes": 36119,
+    "modified_utc": "2026-11-21T19:49:38.569781+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+    "bytes": 1813768,
+    "modified_utc": "2026-11-21T19:50:24.752806+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+    "bytes": 30117927,
+    "modified_utc": "2026-11-21T19:50:53.072435+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+    "bytes": 20034295,
+    "modified_utc": "2026-11-21T19:50:24.368798+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Address.lean",
+    "bytes": 291923,
+    "modified_utc": "2026-11-21T19:49:38.651783+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+    "bytes": 996615,
+    "modified_utc": "2026-11-21T19:50:25.056813+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean",
+    "bytes": 171979,
+    "modified_utc": "2026-11-21T19:49:50.468045+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+    "bytes": 8077199,
+    "modified_utc": "2026-11-21T19:50:17.509645+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+    "bytes": 20611004,
+    "modified_utc": "2026-11-21T19:50:38.060102+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+    "bytes": 21894147,
+    "modified_utc": "2026-11-21T19:50:31.674960+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64PayloadProfile.lean",
+    "bytes": 3049345,
+    "modified_utc": "2026-11-21T19:49:51.354064+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramContext.lean",
+    "bytes": 1901712,
+    "modified_utc": "2026-11-21T19:50:02.976322+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal/Clight/X86Numeric.lean",
+    "bytes": 54217,
+    "modified_utc": "2026-11-20T02:38:42.134782+00:00",
+    "comparison": "generated export timestamp predates launch"
+  },
+  {
+    "path": "kprog/formal/KProgFormal.lean",
+    "bytes": 11024,
+    "modified_utc": "2026-11-22T03:32:35.082052+00:00",
+    "comparison": "byte equal to launch revision plus recorded root import"
+  }
+]
