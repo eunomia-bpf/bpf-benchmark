@@ -353,6 +353,16 @@ register writeback and the entry-world relation remain open.
 The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-exit.log.gz)
 records all three public declarations under the default budgets.
 
+The effective-count-zero SHL route also reaches that same actual writer.
+It takes 189/201/213/213 silent transitions for 64/32/16/8-bit widths, retaining
+the complete incoming heap and every original flag byte. The scalar result is
+the original width view; its architectural destination behavior follows the
+writer. Together with the positive-count route, these laws cover every masked
+count through this boundary. Writer execution and the entry-world relation
+remain open. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-zero-writer.log.gz)
+records five public declarations and ten stable input hashes.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
