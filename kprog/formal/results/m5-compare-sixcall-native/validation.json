@@ -1,0 +1,122 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareAdmission.lean": "4027cd45dae067e17e444a7087e2cc531130a337dc5890757315bcd4f41bd1ea",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryComparePrefixNative.lean": "ab3328cdb33ac5a945ea8bd01fd78a187f31b4b0922073fa73b97417f22f85f5"
+  },
+  "source_lines": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCompareAdmission.lean": 131,
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryComparePrefixNative.lean": 216
+  },
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulPrefixNative.lean": "eec9caa34308608672f7a8710d08b1a18ddc2a290269ff74af6743ad13c33962",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulAdmission.lean": "e791c625d4fdcc35a0490397513de1458ff82b383dfb0a29b6ab4791482caf6e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MulNative.lean": "185a7402d1db6eda2ef2f7f1c2de683632d34d0d5888dc51c11d4b96dc70acfb",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareRegisters.lean": "19fb5feff0559e0e15d4e703d78a4232f18b9324bfb9b237860b509f8cf79281",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareFlagBytes.lean": "58fbec30a973e09a787d324870116b8e6059e68221656ff444ac41d054668c6b",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareNative.lean": "2f88df5be132eaa6a20cd8d342425471907939dce661a363032c25677bb75f49"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryComparePrefixNative"
+    ],
+    "exit": 0,
+    "seconds": 0.7589919567108154,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 298,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/sixcall-native-20261122-build.log",
+  "admission_build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareAdmission"
+    ],
+    "exit": 0,
+    "seconds": 2.098496437072754,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "admission_build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-admission2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/SixCallNativePublic20261122.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6436517238616943,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/sixcall-native-20261122-public.log",
+  "public_query_sha256": "292b3a0f4af29cc541d80b93a94946ab597c210ff7088ddf9e998d92f59306e7",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareAdmission.next_admission": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareAdmission.setup_next": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryComparePrefixNative.entry_corresponds": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "scope": "original98input/provider trace and actual setup/six-call prefix through original CMP caller; all five predecessor call/free/storage observations retained; full GPR/tag/pointer-origin/SP/SIMD/NZCV relation, all12header pointers and warm stack cache after actual CMP413/free/return and417caller; same six actual fetched/decoded mature native steps/events/faults",
+  "admission_derivation": "actual MOV/MOVK/ADD/ADD-register/MUL transitions transport PC/program/noError to sixth original word at PC+20; nativeSetup preserves original resources; no synthetic successor-fetch/error premise",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ProgramEntryCompareAdmission"
+        ],
+        "exit": 1,
+        "seconds": 26.392260551452637,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-admission1.log",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-admission1-source.lean",
+      "source_sha256": "74b0cba35d8b083166dca30dc500113c55a4e4aaada5d38c081aa3c805210067",
+      "note": "initial statement accidentally retained old afterFour/PC+16/fifth conclusion; corrected to afterFive/PC+20/sixth at unchanged default caps"
+    }
+  ],
+  "raw_name_collision": {
+    "date_utc": "2026-11-22T02:08:09Z",
+    "original_commit": "dc79a02c458aa7a43f8f374171acc4d91c923958",
+    "collision": "new sixcall checks reused original scalar operand-prefix compare-prefix1/public-compare-prefix1/ComparePrefixPublic raw names and publish script; original committed source and receipt metadata unchanged, original logs/query bytes overwritten and not recoverable from these paths",
+    "preserved_new_run": "/workspaces/kprog-raw/formal/m5-compare/sixcall-native-20261122",
+    "repair": "new unique sixcall-native phase/receipt, fresh exact-source scalar-prefix reconfirmation with uniquely named logs, original receipt history retained and provenance limitation explicit"
+  },
+  "preserved_initial_successful_checks": "/workspaces/kprog-raw/formal/m5-compare/sixcall-native-20261122",
+  "remaining": "afterCompare conditional/vector/memory/control/return continuation; complete handler generalization across fields/widths/tags/ISA families, physical memory/compiler correspondence and O1/O2/O4 recount; M6 after M5",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

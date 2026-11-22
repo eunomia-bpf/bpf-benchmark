@@ -181,3 +181,4 @@ import KProgFormal.ClightRefinement.Arm64CompareNative
 import KProgFormal.ClightRefinement.Arm64CompareFlagArithmetic
 import KProgFormal.ClightRefinement.Arm64CompareFlagBytes
 import KProgFormal.ClightRefinement.Arm64CompareRegisters
+import KProgFormal.ClightRefinement.Arm64ProgramEntryComparePrefixNative
