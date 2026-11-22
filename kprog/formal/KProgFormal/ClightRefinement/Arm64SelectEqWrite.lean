@@ -16,14 +16,15 @@ private theorem eq_truth (native : Reference.AArch64.State) :
       (if ConditionHolds (0#4) native.machine then 1 else 0) := by
   have bits : ∀ z : BitVec 1, z=0#1 ∨ z=1#1 := by decide +kernel
   rcases bits (read_flag .Z native.machine) with zero|one
-  all_goals simp +decide [ConditionHolds,lsb,*]
+  · simp +decide [ConditionHolds,BitVec.lsb,zero]
+  · simp +decide [ConditionHolds,BitVec.lsb,one]
 
 private theorem eqTemps_original {initial m : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
     (storage : Arm64ProducerRegisterStorage.Storage initial m entry)
     (le : CC.TempEnv) (native : Reference.AArch64.State) (id : CC.Ident)
     (original : id ∈ [Arm64Program._entry,Arm64Program._dst,Arm64Program._src,Arm64Program._src2]) :
     (eqTemps storage le native).get id = le.get id := by
-  simp only [List.mem_cons,List.mem_singleton] at original
+  simp at original
   rcases original with rfl|rfl|rfl|rfl
   all_goals
     rw [eqTemps,PathCall.temps_other _ _ _ _ (by decide +kernel),
@@ -71,7 +72,7 @@ theorem eq_write_matches {initial m : CC.Mem} {entry : Arm64Producer.HeaderLocal
       Reference.AArch64.step native =
         ⟨Arm64Nop.atCursor (read_pc native.machine + 4#64)
           (Arm64PointerWrite.nativeUpdate origins native dst raw tag), [], none⟩ := by
-  have prefix : InternalRun Arm64ProgramEntryLinked.ge 66
+  have conditionRun : InternalRun Arm64ProgramEntryLinked.ge 66
       (.State Arm64Nop.handler Condition.branch k e le m)
       (.State Arm64Nop.handler Branch.source k e (eqTemps storage le native) m) := by
     simpa only [PathCall.csel64_source,Branch.source,eqTemps] using
@@ -92,6 +93,6 @@ theorem eq_write_matches {initial m : CC.Mem} {entry : Arm64Producer.HeaderLocal
     pointerNameFree tagNameFree writerNameFree decision
     ((eqTemps_original storage le native _ (by simp)).trans entryRead) index
     ((eqTemps_original storage le native _ (by simp)).trans destination) decoded noError fetched
-  exact ⟨value,raw,tag,after,read,bits,result,prefix.trans run,registers,kept,step⟩
+  exact ⟨value,raw,tag,after,read,bits,result,conditionRun.trans run,registers,kept,step⟩
 
 end KProgFormal.ClightRefinement.Arm64Select

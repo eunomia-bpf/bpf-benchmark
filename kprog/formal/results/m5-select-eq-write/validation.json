@@ -1,13 +1,49 @@
 {
-  "status": "work in progress; not yet checked",
-  "focused_target": "KProgFormal.ClightRefinement.Arm64SelectEqWrite",
-  "public_query_count_planned": 1,
-  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "status": "focused proof and public query passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectEqWrite"
+    ],
+    "exit": 0,
+    "seconds": 2.7615175247192383,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 261,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-eq-write/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6304247379302979,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 1,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.eq_write_matches": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
   "proof_limits": {
     "maxHeartbeats": 200000,
     "maxRecDepth": 512,
     "Elab.async": false
   },
-  "whole_library": "not started for this batch",
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "earlier_attempts": [
+    "eq1 and eq2 parser, bit-name and list-membership diagnostics retained"
+  ],
+  "whole_library": {
+    "status": "pending batch-end confirmation"
+  },
   "complete_isa_families": 0
 }

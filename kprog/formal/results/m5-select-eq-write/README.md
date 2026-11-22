@@ -1,7 +1,7 @@
 # EQ CSEL condition through actual writeback
 
-Work in progress: the source below is prepared; its focused build and public
-queries are pending. No completed refinement is claimed by this receipt.
+Focused build261 and one public type/axiom query pass at original proof
+limits, CPU17, one worker and32GiB. Full root confirmation follows the batch.
 
 The actual four flag-pointer loads, EQ condition helper, caller normalization
 and path helper now compose with the original selected raw/tag reads, real
