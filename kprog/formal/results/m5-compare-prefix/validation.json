@@ -1,0 +1,67 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ComparePrefix.lean": "b11eec94f74695cf4813fffad25d6fc02da94c5c238fda0ef2a2eeaa3a73b7b4"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ComparePrefix"
+    ],
+    "exit": 0,
+    "seconds": 2.5755856037139893,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 239,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-prefix1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/ComparePrefixPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.649204969406128,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-prefix1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Prefix.rhs_scalar": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Prefix.values": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Prefix.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "steps": 218,
+  "step_decomposition": {
+    "actual_scalar_DST_read": 80,
+    "actual_modified_SRC_RHS_and_caller_selector": 138
+  },
+  "scope": "original CMP branch through both scalar operand reads/modifier/caller restore/switch to untouched original NZCV loop, actual storage typed words/tag0 and temp observations, same wholeheap/e/k/exact5 source writes",
+  "storage_bridge": "source field offsets0/8 kernel-checked; real storage gpr observation decomposed into actual raw table/slot/value/tag loads, no independent helper result/readback/native word admission",
+  "whole_library_confirmation": "pending complete CMP flags/source/native batch and latest stable V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
