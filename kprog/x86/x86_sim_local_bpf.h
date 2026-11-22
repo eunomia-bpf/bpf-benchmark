@@ -996,7 +996,17 @@ static __always_inline void *x86_sim_clight_load_pointer(const void *address)
 }
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) x86_sim_clight_load_pointer(ADDR)
 #elif defined(__BPF__) || defined(__bpf__)
-#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
+/* A pointer-width read is a read of kernel memory, so it calls the kernel's
+ * read rather than forming a load from the computed address (design: 读内核
+ * 内存要调用 bpf_probe_read). The result is a plain 64-bit value either way:
+ * the verifier gives a load off a non-map base no pointer type. */
+static __always_inline void *x86_sim_bpf_load_pointer(const void *address)
+{
+    void *observed;
+    bpf_probe_read_kernel(&observed, sizeof(observed), address);
+    return observed;
+}
+#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) x86_sim_bpf_load_pointer(ADDR)
 #else
 /* x86 permits unaligned pointer-width reads; the host C type must too. */
 typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
