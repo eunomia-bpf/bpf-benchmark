@@ -1984,4 +1984,357 @@ theorem byte_writer (ge : CC.CGenv)
     declared keptShift byteStored
   exact routed.trans written
 
+
+theorem storage_tail_source : storageTail =
+    .Ssequence X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_107
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 := rfl
+
+theorem storage_enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (ordinary : dst.setWidth 32 ≠ (4#32)) :
+    InternalRun ge 4 (.State function .Sskip (.Kseq storageTail k) e le m)
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le m) := by
+  rw [storage_tail_source]
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState,
+      X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_107,
+      CC.doStep, CC.doEvalExpr, CC.typeof, destination, ordinary,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vfalse,
+      CC.Eapp, CC.E0]
+
+private def tableParts : CC.Stmt × CC.Stmt × CC.Stmt × CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 with
+    | .Ssequence ptr (.Ssequence tag (.Ssequence (.Sloop body _) release)) =>
+      (ptr, tag, body, release)
+    | _ => (.Sskip, .Sskip, .Sskip, .Sskip)))
+private def tablePtr : CC.Stmt := by
+  run_tac cachePart (← `(tableParts.1))
+private def tableTag : CC.Stmt := by
+  run_tac cachePart (← `(tableParts.2.1))
+private def tableBody : CC.Stmt := by
+  run_tac cachePart (← `(tableParts.2.2.1))
+private def tableRelease : CC.Stmt := by
+  run_tac cachePart (← `(tableParts.2.2.2))
+private def tableIndex : CC.Stmt := by
+  run_tac cachePart (← `(match tableBody with | .Ssequence index _ => index | _ => .Sskip))
+private def tableChoice : CC.Stmt := by
+  run_tac cachePart (← `(match tableBody with | .Ssequence _ choice => choice | _ => .Sskip))
+def tableStores : CC.Stmt := by
+  run_tac cachePart (← `(match tableChoice with | .Sifthenelse _ stores _ => stores | _ => .Sskip))
+
+theorem table_source : X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 =
+    .Ssequence tablePtr (.Ssequence tableTag
+      (.Ssequence (.Sloop (.Ssequence tableIndex tableChoice) .Sbreak) tableRelease)) := rfl
+
+def tableCont (k : CC.Cont) : CC.Cont :=
+  .Kloop1 tableBody .Sbreak (.Kseq tableRelease k)
+def tableIndexTemps (le : CC.TempEnv) (index : Fin 16) : CC.TempEnv :=
+  le.set X86_program_profile_bpf.___x86_store_reg__5 (.Vlong (BitVec.ofNat 64 index.val))
+def tableLoadTemps (le : CC.TempEnv) (value : CC.Val) (tag : BitVec 8) : CC.TempEnv :=
+  (le.set X86_program_profile_bpf.___x86_wr_next_ptr__5 value).set
+    X86_program_profile_bpf.___x86_wr_next_tag__5 (.Vint (tag.setWidth 32))
+
+theorem table_select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32))) :
+    InternalRun ge 5 (.State function (.Sloop tableBody .Sbreak) (.Kseq tableRelease k) e le m)
+      (.State function tableStores (tableCont k) e (tableIndexTemps le index) m) := by
+  have bound64 : index.val < 2 ^ 64 := by have small := index.isLt; omega
+  have indexNat : (BitVec.ofNat 64 index.val).toNat = index.val :=
+    Nat.mod_eq_of_lt bound64
+  have sixteen : CC.Cop.castIntLong .Unsigned (CC.Integers.Int.repr 16) = (16#64) := rfl
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, tableBody,
+      tableStores, tableCont, tableIndexTemps, CC.doStep, CC.doEvalExpr, CC.typeof, destination,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tulong, CC.tuint, CC.tint,
+      register_long, sixteen, CC.Integers.Int64.cmpu, CC.Integers.MI.cmpu,
+      CC.Integers.MI.ltu, BitVec.ult, indexNat, index.isLt, CC.Val.ofBool, CC.Val.Vtrue,
+      CC.Integers.Int.one, CC.Integers.MI.one, CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Eapp, CC.E0]
+
+theorem table_exit (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (ordinary : dst.setWidth 32 ≠ (4#32)) :
+    InternalRun ge 4 (.State function .Sskip (tableCont k) e le m)
+      (.State function .Sskip k e le m) := by
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, tableCont, tableRelease,
+      CC.doStep, CC.doEvalExpr, CC.typeof, destination, ordinary,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tuint, CC.tint,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vfalse,
+      CC.Eapp, CC.E0]
+
+
+theorem table_prepare (ge : CC.CGenv)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m : CC.Mem) (localBlock : CC.Block) (value : CC.Val) (tag : BitVec 8)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (current : CC.Mem.load CC.Mptr m localBlock 0 = some value)
+    (observedTag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 =
+      some (.Vint (tag.setWidth 32))) :
+    InternalRun ge 7
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le m)
+      (.State function (.Sloop tableBody .Sbreak) (.Kseq tableRelease k) e
+        (tableLoadTemps le value tag) m) := by
+  have localAddress : CC.lvalOfVar ge e X86_program_profile_bpf.___x86_wr_cell__2
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) =
+      some (localBlock, 0, .Full) := by
+    simp only [CC.lvalOfVar, declared]
+    rfl
+  have ptrOffset : CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr
+      X86RegisterLayout.gprRecord.co_members = .OK (0, .Full) := by
+    change CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr gprMembers = .OK (0, .Full)
+    simp +decide [gprMembers, CC.unionFieldOffset, CC.layoutField, CC.bitalignof,
+      CC.alignof, CC.alignAttr, CC.Ty.attr, CC.align, CC.zdiv, CC.tptr, CC.noattr]
+  have pointerAddress (offset : CC.Integers.Ptrofs) : CC.lvalOfField ge
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr)
+      X86_program_profile_bpf._ptr (.Vptr localBlock offset) =
+      some (localBlock, offset, .Full) := by
+    simp only [CC.lvalOfField, gprLayout, ptrOffset]
+    change some (localBlock, offset + 0, CC.Bitfield.Full) = some (localBlock, offset, .Full)
+    exact congrArg (fun n => some (localBlock, n, CC.Bitfield.Full)) (BitVec.add_zero offset)
+  have pointerZero := pointerAddress (0 : CC.Integers.Ptrofs)
+  have unionAccess : CC.accessMode
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
+  have ptrAccess : CC.accessMode (.Tpointer CC.tvoid CC.noattr) = .By_value CC.Mptr := rfl
+  have unsigned0 : CC.Integers.Ptrofs.unsigned (0 : CC.Integers.Ptrofs) = 0 := rfl
+  have tagCast : CC.Cop.semCast (.Vint (tag.setWidth 32)) CC.tuchar CC.tuchar m =
+      some (.Vint (tag.setWidth 32)) := by
+    simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, writer_byte_cast]
+  have keptTag : (le.set X86_program_profile_bpf.___x86_wr_next_ptr__5 value).get
+      X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (tag.setWidth 32)) := by
+    simp +decide [CC.PTree.gso, observedTag]
+  rw [table_source]
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, tablePtr, tableTag, tableBody,
+      tableIndex, tableChoice, tableLoadTemps, CC.doStep, CC.doEvalExpr, CC.doDerefLoc,
+      CC.typeof, CC.tptr, localAddress, pointerZero, unionAccess, ptrAccess, unsigned0,
+      CC.Mem.loadv, current, keptTag, tagCast, CC.Eapp, CC.E0, List.nil_append, true_and]
+
+
+def tableStoreTemps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Ptrofs) : CC.TempEnv :=
+  (le.set X86_program_profile_bpf._t'146 (.Vptr block offset)).set
+    X86_program_profile_bpf._t'145 (.Vptr block offset)
+
+theorem table_body (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m middle final : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+    (cellsOffset : CC.Integers.Ptrofs) (index : Fin 16) (value : CC.Val) (tag : BitVec 8)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (observedIndex : le.get X86_program_profile_bpf.___x86_store_reg__5 =
+      some (.Vlong (BitVec.ofNat 64 index.val)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_wr_next_ptr__5 = some value)
+    (observedTag : le.get X86_program_profile_bpf.___x86_wr_next_tag__5 =
+      some (.Vint (tag.setWidth 32)))
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) m = some value)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (wordStored : CC.Mem.store CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) value = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (tag.setWidth 32)) = some final) :
+    InternalRun ge 10 (.State function tableStores k e le m)
+      (.State function .Sskip k e (tableStoreTemps le cellsBlock cellsOffset) final) := by
+  have addZero (offset : CC.Integers.Ptrofs) :
+      CC.Integers.Ptrofs.add offset (CC.Integers.Ptrofs.repr 0) = offset := by
+    change offset + 0 = offset
+    exact BitVec.add_zero offset
+  have tableAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._cells (.Vptr bindingBlock 0) =
+      some (bindingBlock, 0, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86RegisterLayout.cells_offset ge.genv_cenv, addZero]
+  have tableZero : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._cells (.Vptr bindingBlock (0#64)) =
+      some (bindingBlock, (0#64), .Full) := tableAddress
+  have valueAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr)
+      X86_program_profile_bpf._value (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)), .Full) := by
+    simp only [CC.lvalOfField, cellLayout, X86RegisterLayout.value_offset ge.genv_cenv gprLayout, addZero]
+  have ptrOffset : CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr
+      X86RegisterLayout.gprRecord.co_members = .OK (0, .Full) := by
+    change CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._ptr gprMembers = .OK (0, .Full)
+    simp +decide [gprMembers, CC.unionFieldOffset, CC.layoutField, CC.bitalignof,
+      CC.alignof, CC.alignAttr, CC.Ty.attr, CC.align, CC.zdiv, CC.tptr, CC.noattr]
+  have pointerAddress : CC.lvalOfField ge
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr)
+      X86_program_profile_bpf._ptr (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)), .Full) := by
+    simp only [CC.lvalOfField, gprLayout, ptrOffset, addZero]
+
+  have cellAdd (heap : CC.Mem) : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr cellsBlock cellsOffset)
+      (.Tpointer (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) CC.noattr)
+      (.Vint ((registerByte index).setWidth 32)) CC.tuchar heap =
+        some (.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) := by
+    simp only [CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
+      CC.Cop.semAddPtrInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.tuchar, CC.tint,
+      CC.sizeof, cellLayout, X86RegisterLayout.layout.2.2.2.1]
+    change some (CC.Val.Vptr cellsBlock (CC.Integers.Ptrofs.add cellsOffset (cellDelta index))) =
+      some (CC.Val.Vptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))))
+    rw [cell_delta index]
+    rfl
+
+  have tagAddress : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr)
+      X86_program_profile_bpf._tag (.Vptr cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+      some (cellsBlock, (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8, .Full) := by
+    simp only [CC.lvalOfField, cellLayout, X86RegisterLayout.tag_offset ge.genv_cenv gprLayout]
+    rfl
+  have indexCast (heap : CC.Mem) : CC.Cop.semCast
+      (.Vlong (BitVec.ofNat 64 index.val)) CC.tulong CC.tuchar heap =
+      some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.tuchar, register_back]
+  have tagCast (heap : CC.Mem) : CC.Cop.semCast (.Vint (tag.setWidth 32))
+      CC.tuchar CC.tuchar heap = some (.Vint (tag.setWidth 32)) := by
+    simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, writer_byte_cast]
+  have structAccess (name : CC.Ident) : CC.accessMode (.Tstruct name CC.noattr) = .By_copy := rfl
+  have unionAccess : CC.accessMode
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
+  have ptrAccess (ty : CC.Ty) : CC.accessMode (.Tpointer ty CC.noattr) = .By_value CC.Mptr := rfl
+  have charAccess : CC.accessMode CC.tuchar = .By_value .Mint8unsigned := rfl
+  have unsigned0 : CC.Integers.Ptrofs.unsigned (0#64) = 0 := rfl
+  have wordCast : CC.Cop.semCast value (.Tpointer CC.tvoid CC.noattr)
+      (.Tpointer CC.tvoid CC.noattr) m = some value := word
+  have postCells : CC.Mem.load CC.Mptr middle bindingBlock 0 =
+      some (.Vptr cellsBlock cellsOffset) :=
+    (CC.Mem.load_store_other wordStored CC.Mptr bindingBlock 0 (.inl bindingSeparate)).trans cells
+  simp +decide at tagStored
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, tableStores, tableStoreTemps,
+      CC.doStep, CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc, CC.typeof, CC.tptr,
+      CC.PTree.gso, structAccess, unionAccess, ptrAccess, charAccess, tableZero,
+      valueAddress, pointerAddress, tagAddress, cellAdd, binding, observedIndex, observedValue,
+      observedTag, indexCast, tagCast, wordCast, CC.doAssignLoc, CC.Mem.loadv, CC.Mem.storev,
+      unsigned0, cells, postCells, wordStored, tagStored, CC.Eapp, CC.E0]
+
+
+def tableTemps (le : CC.TempEnv) (value : CC.Val) (tag : BitVec 8) (index : Fin 16)
+    (block : CC.Block) (offset : CC.Integers.Ptrofs) : CC.TempEnv :=
+  tableStoreTemps (tableIndexTemps (tableLoadTemps le value tag) index) block offset
+
+theorem table_internal (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m middle final : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+    (cellsOffset : CC.Integers.Ptrofs) (index : Fin 16) (value : CC.Val) (tag : BitVec 8)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (current : CC.Mem.load CC.Mptr m localBlock 0 = some value)
+    (observedTag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 =
+      some (.Vint (tag.setWidth 32)))
+    (destination : le.get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32)))
+    (ordinary : (registerByte index).setWidth 32 ≠ (4#32))
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) m = some value)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (wordStored : CC.Mem.store CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) value = some middle)
+    (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
+      (.Vint (tag.setWidth 32)) = some final) :
+    InternalRun ge 26
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le m)
+      (.State function .Sskip k e (tableTemps le value tag index cellsBlock cellsOffset) final) := by
+  have prepared := table_prepare ge gprLayout function e le k m localBlock value tag
+    declared current observedTag
+  have loadedDestination : (tableLoadTemps le value tag).get X86_program_profile_bpf._dst =
+      some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [tableLoadTemps, CC.PTree.gso, destination]
+  have selected := table_select ge function e (tableLoadTemps le value tag) k m index loadedDestination
+  let reached := tableIndexTemps (tableLoadTemps le value tag) index
+  have keptBinding : reached.get X86_program_profile_bpf.___x86_bind =
+      some (.Vptr bindingBlock 0) := by
+    simp +decide [reached, tableIndexTemps, tableLoadTemps, CC.PTree.gso, binding]
+  have keptIndex : reached.get X86_program_profile_bpf.___x86_store_reg__5 =
+      some (.Vlong (BitVec.ofNat 64 index.val)) := by simp [reached, tableIndexTemps]
+  have keptValue : reached.get X86_program_profile_bpf.___x86_wr_next_ptr__5 = some value := by
+    simp +decide [reached, tableIndexTemps, tableLoadTemps, CC.PTree.gso]
+  have keptTag : reached.get X86_program_profile_bpf.___x86_wr_next_tag__5 =
+      some (.Vint (tag.setWidth 32)) := by
+    simp +decide [reached, tableIndexTemps, tableLoadTemps, CC.PTree.gso]
+  have written := table_body ge bindingsLayout gprLayout cellLayout function e reached (tableCont k)
+    m middle final bindingBlock cellsBlock cellsOffset index value tag keptBinding cells
+    keptIndex keptValue keptTag word bindingSeparate wordStored tagStored
+  have exitDestination : (tableStoreTemps reached cellsBlock cellsOffset).get
+      X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)) := by
+    simp +decide [tableStoreTemps, reached, tableIndexTemps, tableLoadTemps, CC.PTree.gso, destination]
+  have exited := table_exit ge function e (tableStoreTemps reached cellsBlock cellsOffset) k final
+    (registerByte index) exitDestination ordinary
+  exact ((prepared.trans selected).trans written).trans exited
+
+theorem table_temps (le : CC.TempEnv) (value : CC.Val) (tag : BitVec 8) (index : Fin 16)
+    (block : CC.Block) (offset : CC.Integers.Ptrofs) :
+    (tableTemps le value tag index block offset).get X86_program_profile_bpf.___x86_wr_next_ptr__5 =
+      some value ∧
+    (tableTemps le value tag index block offset).get X86_program_profile_bpf.___x86_wr_next_tag__5 =
+      some (.Vint (tag.setWidth 32)) ∧
+    (tableTemps le value tag index block offset).get X86_program_profile_bpf.___x86_store_reg__5 =
+      some (.Vlong (BitVec.ofNat 64 index.val)) ∧
+    (tableTemps le value tag index block offset).get X86_program_profile_bpf._t'146 =
+      some (.Vptr block offset) ∧
+    (tableTemps le value tag index block offset).get X86_program_profile_bpf._t'145 =
+      some (.Vptr block offset) ∧
+    ∀ id, id ≠ X86_program_profile_bpf.___x86_wr_next_ptr__5 →
+      id ≠ X86_program_profile_bpf.___x86_wr_next_tag__5 →
+      id ≠ X86_program_profile_bpf.___x86_store_reg__5 →
+      id ≠ X86_program_profile_bpf._t'146 → id ≠ X86_program_profile_bpf._t'145 →
+      (tableTemps le value tag index block offset).get id = le.get id := by
+  refine ⟨by simp +decide [tableTemps, tableStoreTemps, tableIndexTemps, tableLoadTemps, CC.PTree.gso],
+    by simp +decide [tableTemps, tableStoreTemps, tableIndexTemps, tableLoadTemps, CC.PTree.gso],
+    by simp +decide [tableTemps, tableStoreTemps, tableIndexTemps, CC.PTree.gso],
+    by simp +decide [tableTemps, tableStoreTemps, CC.PTree.gso],
+    by simp [tableTemps, tableStoreTemps], ?_⟩
+  intro id nePtr neTag neIndex ne146 ne145
+  simp [tableTemps, tableStoreTemps, tableIndexTemps, tableLoadTemps, CC.PTree.gso,
+    Ne.symm nePtr, Ne.symm neTag, Ne.symm neIndex, Ne.symm ne146, Ne.symm ne145]
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback

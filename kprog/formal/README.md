@@ -505,6 +505,22 @@ records fifty-four public declarations under the default budgets. Final table
 stores, RSP/pointer-tag branches, other widths and the native entry-world relation
 remain open.
 
+
+The original final register-table writer now executes 26 silent steps for
+ordinary destinations: seven to read the reached local word/tag, five through
+the real index assignment and range test, ten through both table loads and
+value/tag stores, and four through the loop and ordinary release branch.
+Every valid cell index follows the imported sixteen-byte stride and source
+field offsets zero/eight. Existing memory frames derive the second table-pointer
+load from the first actual store and binding/table block separation. The
+exact final heap and five temporary updates with their frame are retained;
+four preceding transitions select this writer through source statement 107.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-table.log.gz)
+records sixty-three public declarations under the default budgets. Combining
+this stage with the byte writer, the reached local-word representation,
+RSP/pointer-tag branches, other widths and the native entry-world relation
+remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
