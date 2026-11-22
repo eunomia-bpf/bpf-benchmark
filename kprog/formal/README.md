@@ -295,6 +295,20 @@ record this composition at existing budgets and inherited axioms. Current
 layout/callee/heap observations remain explicit. OF/PF stores, destination
 writeback and entry/world correspondence remain open.
 
+The [original SHL overflow code](KProgFormal/ClightRefinement/X86ShiftFlagOF.lean)
+derives the OF pointer field at byte offset 144. Its count-one arm takes
+seventeen silent steps to reload the OF/SF/CF pointers, read both source flag
+bytes, compute integer XOR and store the OF byte. The exact final heap and five
+source temporary writes are retained. Other counts take the actual one-step
+skip arm with all memory, locals and temporaries preserved. The scalar XOR
+agrees with the mature count-one OF definition; for other positive counts the
+retained OF supplies a valid native oracle choice. Actual source layouts,
+binding and current-heap pointer/byte loads and store success remain explicit
+input observations. The [eleven public audits](../results/kprog_verification_20261107/x86-shift-flag-of.log.gz)
+record source identity, offset, both branches, frames and native OF values at
+existing budgets and inherited axioms. Whole-route composition, PF storage,
+writeback and entry/world correspondence remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
