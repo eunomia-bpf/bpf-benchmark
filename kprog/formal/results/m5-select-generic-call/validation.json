@@ -1,0 +1,52 @@
+{
+  "status": "focused proof and public query passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectCall"
+    ],
+    "exit": 0,
+    "seconds": 11.968814373016357,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 264,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5270671844482422,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 1,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Call.execute": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "earlier_attempts": [
+    "call1 hit original heartbeat cap; closed parameter/name facts factored into separate declarations without raising limits"
+  ],
+  "shared_full_confirmation": "owned by V; no second full/default/make-check run started",
+  "root_query": "pending later shared integration",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-call/20261122T115647Z",
+  "complete_isa_families": 0,
+  "query_source_current": "results/m5-select-generic-call/Query.lean",
+  "query_path_note": "The recorded query command ran at the earlier path before this receipt was separated from the historical caller-entry receipt; raw files and the original caller-entry metadata are retained."
+}
