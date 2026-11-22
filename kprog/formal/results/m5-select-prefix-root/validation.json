@@ -1,0 +1,63 @@
+{
+  "status": "focused root module and six new actual-root queries passed",
+  "root_module": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.3051533699035645,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_module_jobs": 393,
+  "root_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-prefix-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.347813844680786,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_query_count": 6,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Call.execute": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64Select.Call.Result.all_behaviors": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64Select.Call.returned": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission": "propext, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next": "propext, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "previous_root_queries_reused": 42,
+  "previous_shared_receipt": "../m5-batch-20261122/README.md",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "full_make_check": "V make-check3 fails at the retained DIV fault marker assertion; no repeat full/default run launched",
+  "source_commits": {
+    "call": "bc80506f8a1ff624e54f7b476842ac46f1850099",
+    "receipt_separation": "f9f8e585064f4989b1567f2241b3d2feff005ae6",
+    "caller": "afb43474292e1996581cdfb0c5bdf9fd4c8132fd",
+    "admission": "d0304d117cecb27e5cf4bfb344b5b260661ba779",
+    "prefix": "49a69720a7d4fb0743cb502cc00299d3785afe41"
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-select-call/20261122T115647Z",
+  "complete_isa_families": 0
+}

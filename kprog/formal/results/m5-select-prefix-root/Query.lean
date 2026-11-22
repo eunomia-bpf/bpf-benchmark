@@ -1,0 +1,16 @@
+import KProgFormal
+
+set_option Elab.async false
+
+#check KProgFormal.ClightRefinement.Arm64Select.Call.execute
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Call.execute
+#check KProgFormal.ClightRefinement.Arm64Select.Call.Result.all_behaviors
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Call.Result.all_behaviors
+#check KProgFormal.ClightRefinement.Arm64Select.Call.returned
+#print axioms KProgFormal.ClightRefinement.Arm64Select.Call.returned
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.next_admission
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectAdmission.setup_next
+#check KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntrySelectPrefixNative.entry_corresponds
