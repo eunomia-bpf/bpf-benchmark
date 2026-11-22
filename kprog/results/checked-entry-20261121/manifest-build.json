@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-11-22T01:38:45.682580+00:00",
+  "source_commit": "1eb5ffc1b",
+  "command": [
+    "make",
+    "-C",
+    "kprog/libnativeloader",
+    "all",
+    "BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader"
+  ],
+  "exit": 0,
+  "artifacts": {
+    "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a": {
+      "bytes": 7244546,
+      "sha256": "401256df65c387fbf95fcd3dd4f48d80d7553491b3d0ab7934bcf74efa182d81"
+    },
+    "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so": {
+      "bytes": 4078880,
+      "sha256": "47409ce41b55355650ec755d2870b2e32b854b8a95d5dc38864cdb3db4fc87e3"
+    },
+    "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader": {
+      "bytes": 2668328,
+      "sha256": "a58de5375e18cd5d0fb970ebc3435d7c5c7e5ae273fd0535e455fc14a1086be6"
+    }
+  },
+  "whole_six_controller": 2200510,
+  "runtime_image": "unchanged by C; all-six uses pre-fix image",
+  "functional_completed": {
+    "otelcol-ebpf-profiler": {
+      "exit": 0,
+      "service_requests": 0,
+      "verified_acceptances": 0,
+      "native_installs_via_checked_service": 0,
+      "run_completed_before_fix_image": true
+    },
+    "bcc": {
+      "exit": 0,
+      "service_requests": 0,
+      "verified_acceptances": 0,
+      "native_installs_via_checked_service": 0,
+      "run_completed_before_fix_image": true
+    },
+    "cilium": {
+      "exit": 0,
+      "service_requests": 0,
+      "verified_acceptances": 0,
+      "native_installs_via_checked_service": 0,
+      "run_completed_before_fix_image": true
+    }
+  },
+  "note": "Component build success is not verified-path coverage. Coordinator owns sole runtime image rebuild and timing.",
+  "archive": {
+    "path": "kprog/results/checked-entry-20261121/manifest-build-raw.tar.gz",
+    "bytes": 3604,
+    "sha256": "4957583a556e69a7c873034f9af158be3e76971275f6c4c77483deef3ffc3740"
+  }
+}
