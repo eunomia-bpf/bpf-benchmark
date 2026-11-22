@@ -4039,7 +4039,7 @@ fn x86_lookup_postprocess_bytes(spec: &LookupSiteSpec) -> Result<Vec<u8>> {
 }
 
 /// The hash shapes the program's own lookups use (the loader's sites and maps), at most four.
-fn x86_guarded_lookup_shapes(
+pub(super) fn x86_guarded_lookup_shapes(
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
 ) -> Vec<(u8, LookupSiteSpec)> {
