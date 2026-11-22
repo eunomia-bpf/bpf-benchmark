@@ -383,6 +383,16 @@ The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-na
 records thirteen public declarations under the default budgets. Qword tag
 calls, default-writer execution and the entry-world relation remain open.
 
+The shared GPR union/cell layouts now derive from their exact definitions in
+the same exported source and the imported C composite builder. The union is
+eight bytes and the tagged cell sixteen bytes, both aligned to eight; their
+array/composite ranks are one and two. The actual cell value/tag offsets are
+zero/eight, and the binding's cell-table pointer offset is zero. Field-layout
+laws retain the genuine union-layout environment premise. The
+[focused receipt](../results/kprog_verification_20261107/x86-register-layout.log.gz)
+records six public declarations with the inherited logical axioms. These
+layouts support the subsequent original writer's pointer reads and stores.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
