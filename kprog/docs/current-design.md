@@ -1,4 +1,62 @@
-的 map 上（perf_unwind_native 缺页） | native-link |
+# 当前设计和与原话的差异（协调者，每小时更新）
+
+更新时间 2026-11-22T06:1x UTC。依据：运营者 2026-11-21“每小时定时任务都需要汇报完整的当前设计以及和设计的差异.”、“停掉所有测试, 你来做, codex 只负责 verify 的部分, 去确保设计完全符合我说的, 做好之前不要测量”、“应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化? 因为之前都跑通了?”、“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”。design.md 保持原样，本文件写按原话定义的设计、实际形态和差异。
+
+## 一、设计（按运营者原话定义）
+
+```text
+target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证的忠实解释器 I → “I 跑 P” 表示成 eBPF
+          │    → stock eBPF verifier 照常分析 → verifier 接受 = 确证 P 内存安全
+          └─ 执行侧（装载后）：链接时优化（LTO），绑定并内联 map 查找和 helper → 直接执行原生代码；eBPF 只被分析
+```
+
+1. **整体**：每个程序都以原生代码运行，安全由库存 verifier 对 simulator 形式的分析给出。
+   - “任何情况下绝对不允许留在 ebpf 上面跑”（11-21）。
+   - “verify 不了的也需要跑 native 先.”（11-16）；“恢复这个, 吧 verify 和运行分开看”（11-19）。
+2. **P 怎么来**：从应用自己的源码直接编成机器码。
+   - “不是直接出机器码吗? 为啥变成这样了”（11-14）。
+   - “我们应该尽可能禁止改源代码吧? 尽可能减少修改?”（11-13）；“必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改”（11-15）。
+   - 兼容靠头文件：“不允许放进编译过程, 不是用头文件兼容吗”（11-15）。
+   - “编译参数所有 app 统一.”（11-15）；“编译参数固定 O3. 不需要调代码大小了. 确保 inline 啥的都正常就好”（11-21）。
+3. **P 怎么执行**：“直接执行 P 其实没错, 不需要改写. LTO 只是内核也做的事情, 算是 design detail?”（11-14）。
+4. **优化（链接时）**：
+   - “应该是先优化, 再验证优化后的那一份, 再优化, 再链接”（11-14）。
+   - “比如 inline map / helper 这个就是链接”；“没有额外的 受信改写, 只有 LTO”（11-14）。
+   - map 查找像 JIT 一样内联：“必须支持, 改 linker 或者或者在源代码的时候内联”（11-14）。
+   - “手写的 helper 例程 是不是应替换成 c 实现的直接编译进去的”（11-19）。
+   - “读内核内存要调用 bpf_probe_read … 不能也直接内联和解引用???”（11-19）。
+   - “helper map 也可以这样内联之后常量消除”（11-11）。
+5. **不要的东西**：“禁止加任何额外的 check”（11-16）；“不允许增加新的 check”（11-09）；return thunk、地址范围检查、私有栈“没必要吧”（11-19）；“代码要显著减少”（11-19）；“旧的会误导的不要关闭, 要拆掉丢掉.”（11-15）。
+6. **verify 侧完整保留**：“verify 和功能的部分完整保留?”（11-21）；“codex 只负责 verify 的部分”（11-21）。
+7. **基准和测量**：框架不改（11-15、11-20）；“做好之前不要测量”“不允许随便测量”（11-21）；“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”（11-21）；“你要用历史上最好的数据作为合理的数据 … 功能正常就可以”（11-18）。
+8. **目标**：“必须继续优化到至少 20%”（11-14）；“你应该无论如何比 kinsn 好得多”（11-18）。
+9. **起点和预算**：“直接 git revert 对应的文件到 ATC rebuttal 结束的时候.”；“应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化”；“Cilium 我们之前 atc 结束之后, 10 月份有一些必要的修复”（均 11-21）。
+
+## 二、现在的实际形态
+
+**基础**：性能路径（P 的构建 vendor/bpf、native-link、加载器、direct-native 模块、shim）是 2026-05-29（82ec89cb4）的内容，3aa496416 换回；verify 侧文件保持原样（可信服务、kprog/x86 的 B 生成、perf_context_lto、形式化）。
+
+**相对 5/29 的修复和优化**（kprog/results/restore-529-20261121/tally.sh 逐文件统计，生成的 vmlinux 头不计）：
+
+| 类别 | 内容 | 位置 |
+|---|---|---|
+| 今天的内核 | 模块把上传的镜像 arm 给装载线程（bpf_native_image_arm），加载器写 callee-saved 掩码后以 BPF_F_NATIVE_IMAGE 装载 B（`r0 = 0; exit`，尾调用程序带尾调用点）；kfunc 查找删掉 | 模块、加载器 |
+| 今天的内核 | Tetragon：-fms-extensions（struct filename 的匿名头）；补 bpf_copy_from_user_str 声明（内核 BTF 不带 kfunc 声明） | vendor/bpf |
+| Cilium 10 月 | 数据符号按程序自己的 BTF datasec 定偏移（端点值是程序 map 里的装载期 CONFIG）、扫描 fd 时固定 fd、skb cb 布局、POLICY_AUDIT_MODE、链接临时文件按线程 | 加载器、vendor/bpf |
+| arm64 | 同一份模块源码编 bpf_arm64_native_lab（目录名、256 字节块） | 模块 |
+| arm64 | 构建按架构参数化（vmlinux 头、__TARGET_ARCH、系统头）；-mno-outline-atomics；pt_regs 参数寄存器；Tetragon regs.h 的 arm64 分支用普通 C；OTel 部分链接带目标；入口函数多处保存（shrink-wrapping）时保留自己的保存 | vendor/bpf、native-link |
+| arm64 | 尾调用内联：P 编译时保留 x26（-ffixed-x26，arm64 所有应用一致），x26 在原生帧里指向尾调用计数；native-link 把 bpf_tail_call 展开成 JIT 同样的序列（界检查、计数、取 prog、回到帧底、弹出五对寄存器、跳到目标序言之后），任何深度的调用点都可用 | native-link、加载器、vendor/bpf |
+| 去掉 | 5/29 构建期对每个符号跑 native-link proof 模式的关卡（产物没有人读；checked 配置在装载时自己跑 proof），90 行 | vendor/bpf |
+| arm64 | 数据重定位按段处理（proof 拷整段、kernel 用段副本加偏移）；调用对象内其它函数（构建时把可执行段合成一个 .text，native-link 跟进 CALL26）；按编号调用的 helper：函数只给这个寄存器写过一个编号时直接调，其余按运行时编号分派（5f1f0cd3a；8294617c9 的按块取编号让 Katran 在来宾里崩溃，已退回）；模块和加载器收 2048 块（arm64 512 KiB，x86 256 KiB） | native-link、模块、加载器、vendor/bpf |
+| 功能修复 | OTel 的 perf_event 入口在原生编译下经内核上下文 bpf_perf_event_data_kern 的 regs 指针读寄存器（95cb987c5，6 行，MICRO_NATIVE 分支）：5/29 的原生入口按公开布局读 ctx+160，找不到用户态寄存器，跳过了栈展开 | vendor/bpf（OTel 源码一处） |
+| arm64 | Tetragon 的尾调用特性探测程序在 arm64 上也认得出（它的指令里带 prog array 的 fd，x86 是 7、arm64 是 6，5/29 的规则按指令哈希认，33989a177 去掉哈希条件） | shim |
+| 功能修复 | helper 绑定到内核对这个程序类型实际调用的函数（模块 helper_targets，按 get_func_proto 查；复用 verify 侧的查询函数） | 模块、加载器 |
+| 功能修复 | 字符串常量（.rodata.str*）留在镜像里，不绑到程序的 map（Tracee）；cilium_snat_v4_external 按类型和 key/value 大小匹配（agent 按内存定大小） | 加载器、manifest |
+| 功能修复 | B 持有 P 引用的全部 map（5/29）；内核因 prog array 主人类型不同拒绝时，去掉原程序没用的 prog array 再装（OTel custom__generic） | 加载器 |
+| 测量修复 | shim 的快照等进行中的原生加载做完（2026-11-12 的 1af32bdae）；测量开始前等原生加载静止 2 秒（最多等 180 秒，fd7b7d5d7）：冻结 runner 看到 100 个程序就开始测，Tetragon 288 个原生加载要跑约 100 秒，之前原生臂只取样到 175 个程序，现在两臂都是 287 个 | shim |
+| 优化 | 读内核内存直接 load：头文件把 bpf_probe_read_kernel(_str) 和 bpf_probe_read(_str) 的内核半区写成普通 load；native-link 给 P 里每条读内存指令记 load site；加载器上传；模块转成内核 extable 项（出错读 0 继续，和 JIT 的 PROBE_MEM 一样） | vendor/bpf、native-link、加载器、模块 |
+| 路径 | native-sim → kprog | vendor/bpf |
+| 功能修复 | map 调用按自己的 map 取形式：查找用参数寄存器里跟踪到的 map 名，名字只在直线代码里有效，两个架构在每个跳转目标处清空（a04e31ae9、847d1028d）。5/29 按调用次序把第 k 个原生查找对到第 k 个 eBPF 查找，在 arm64 OTel 上把 PERCPU 的内联形式用到了别的 map 上（perf_unwind_native 缺页） | native-link |
 | 功能修复 | arm64 TBZ/TBNZ 跳转在展开后重定目标（23844aa67）：6e68d71a7（11-21 07:17）做过，3aa496416 换回 5/29 时丢了，跳转落到 helper 调用序列中间（Tetragon pc 等于 x10、Cilium printk 收到空格式串、OTel 跳到 IRQ 栈）。超出 32 KiB 的改成反条件跳过一条 B，再重新布局 | native-link |
 | 优化 | map 的 update、delete 在 map 已知时直接调 map 类型自己的内核函数（d9262890c），和 verifier 的 fixup 调 ops->map_update_elem 一样；加载器按 map 类型给出 hashtab.c、arraymap.c、lpm_trie.c 的函数 | native-link、加载器 |
 | 优化 | x86 map 名不可知的查找（内层 map 等）按程序自己用到的 hash 形状逐个比 map_type 和取整后的 key 大小，命中走那个形状的内联形式，其余调 helper（56cf40e8e）。Katran 的 per-CPU LRU 表是内层 map，6 个查找由此回到内联形式 | native-link、加载器 |
