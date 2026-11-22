@@ -19,5 +19,5 @@ is reported complete.
 
 Focused258 and one public type/axiom query pass at original limits, CPU17/nice0,
 one worker and32GiB address space. Only standard logic and inherited external/
-assembly relations appear. Whole-library confirmation follows at batch end.
+assembly relations appear. Batch-end default `lake build` passes all 478 jobs; fourteen root type/axiom queries also pass.
 Raw: /workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z.

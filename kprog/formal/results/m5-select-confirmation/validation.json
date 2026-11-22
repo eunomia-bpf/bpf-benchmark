@@ -1,0 +1,134 @@
+{
+  "full": {
+    "command": [
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 14.48236346244812,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "jobs": 478,
+    "status": "passed",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z/full1.log"
+  },
+  "root_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z/RootPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2435309886932373,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368
+  },
+  "query_count": 14,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Branch.source_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Branch.to_writer": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.execute": [
+      "propext",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.native_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.reference_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.Native.pointer_step": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Select.selected_writer_matches": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.byte_table_native": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.byte_writer_native": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.byte_writer_writable": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.writer_entry": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.writer_entry_internal": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.writer_local_storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.X86RegisterView.writer_local_writable": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "source_count": 259,
+  "source_metadata_stable_during_build_and_queries": true,
+  "batch_source_commits": {
+    "branch": "12fc9881dec5dafda4d28a33bf6796a5a377b271",
+    "native": "2f4454df354750841de9cba20fbc615cc708675c",
+    "matched": "f7fedbd147f7c5d661e612fa38084f65151434a9"
+  },
+  "root_added_import": "KProgFormal.ClightRefinement.X86RegisterView",
+  "V_source_revision": "e5c0992cdf95fb44973c9f30aa2ff89727367e2e",
+  "V_source_equal_to_HEAD": true,
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "changed": false
+  },
+  "root_artifact_modified_utc": "2026-11-22T11:02:41.930615+00:00",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z",
+  "complete_isa_families": 0,
+  "M5_complete": false,
+  "M6_complete": false
+}

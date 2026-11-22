@@ -23,7 +23,7 @@ proof factors actual calls through the imported relational call rule, keeping
 the cap unchanged. Diagnostics remain at the raw path. Only standard logic
 and inherited CompCert external/assembly relations appear.
 
-Whole-library confirmation follows at batch end. This certifies reaching the
+Batch-end default `lake build` passes all 478 jobs; fourteen root type/axiom queries also pass. This certifies reaching the
 writer call, not executing it. Writer post-state, generic entry/dispatch/frame
 free, original seventh source call, native CSEL composition and full handlers
 remain open. M5/O1/O2/O4/M6 are incomplete; complete ISA-family count is zero.

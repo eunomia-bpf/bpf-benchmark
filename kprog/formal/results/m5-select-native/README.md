@@ -17,8 +17,8 @@ source writer post-state or store success.
 Focused build186 and four public type/axiom queries pass at the original
 200000-heartbeat/512-depth caps on CPU17/nice0/one worker/32GiB. The public
 native statements use only standard logical axioms. One Bool normalization
-failure is retained in raw; proof limits were unchanged. Whole-library
-confirmation follows at batch end.
+failure is retained in raw; proof limits were unchanged. Batch-end default `lake build` passes all 478 jobs; fourteen root type/axiom
+queries also pass.
 
 The matching Clight writer execution, whole generic call, frame free, original
 seventh source call and full handler correspondence remain open. This native

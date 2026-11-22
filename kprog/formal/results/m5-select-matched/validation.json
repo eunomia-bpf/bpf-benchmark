@@ -44,7 +44,27 @@
     "maxRecDepth": 512,
     "Elab.async": false
   },
-  "whole_library": "pending batch-end confirmation",
+  "whole_library": {
+    "command": [
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 14.48236346244812,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "jobs": 478,
+    "status": "passed",
+    "raw_log": "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z/full1.log"
+  },
   "raw": "/workspaces/kprog-raw/formal/m5-select-branch/20261122T105431Z",
-  "complete_isa_families": 0
+  "complete_isa_families": 0,
+  "source_commit": "f7fedbd147f7c5d661e612fa38084f65151434a9",
+  "batch_source_commits": {
+    "branch": "12fc9881dec5dafda4d28a33bf6796a5a377b271",
+    "native": "2f4454df354750841de9cba20fbc615cc708675c",
+    "matched": "f7fedbd147f7c5d661e612fa38084f65151434a9"
+  }
 }
