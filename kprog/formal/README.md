@@ -320,6 +320,18 @@ preserved. Parity, writeback and the entry-world relation remain open.
 The [focused receipt](../results/kprog_verification_20261107/x86-shift-through-of.log.gz)
 records all twelve public declarations under the default budgets.
 
+The original SHL parity fragment now has a fourteen-step silent Clight run:
+ten transitions through its actual count/opcode short circuit and four through
+the actual PF pointer read and byte store. Its nibble fold, bounded shift and
+38505 lookup equal the mature ISA's low-byte parity for every 64-bit input,
+with the sixteen-entry table reduced by the kernel. The source composite places
+PF at byte offset 152; its actual layout, binding, current-heap pointer load and
+store success remain explicit. Three exact temporary writes and every other
+temporary are framed. Connecting the preceding OF loop, enclosing breaks,
+writeback and the entry-world relation remains open. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-flag-pf.log.gz)
+records nine public declarations under the default budgets.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
