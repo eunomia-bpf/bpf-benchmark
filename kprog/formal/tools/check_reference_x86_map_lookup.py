@@ -42,9 +42,9 @@ def main():
         str(ROOT.parent/'x86/native_lab/native_link/Cargo.toml'),'--bin','native-link'],env=env,check=True)
     linker=ROOT.parent/'x86/native_lab/native_link/target/release/native-link'
     source=out/'lookup.c'
-    source.write_text('typedef void *(*lookup_fn)(void*,const void*);\nextern char fixture_map[];\n'
-        'void *map_lookup(void *m,const void *k){return ((lookup_fn)1)(fixture_map,k); }\n'
-        'void *map_lookup_dynamic(void *m,const void *k){return ((lookup_fn)1)(m,k); }\n')
+    source.write_text('extern void *bpf_map_lookup_elem(void*,const void*);\nextern char fixture_map[];\n'
+        'void *map_lookup(void *m,const void *k){return bpf_map_lookup_elem(fixture_map,k); }\n'
+        'void *map_lookup_dynamic(void *m,const void *k){return bpf_map_lookup_elem(m,k); }\n')
     command(['cc','-O2','-fPIC','-fno-optimize-sibling-calls','-c',source,'-o',out/'lookup.o'])
 
     command([linker,'--mode','proof','--input',out/'lookup.o','--symbol','map_lookup',
@@ -110,17 +110,24 @@ uint64_t imul12(uint64_t a){uint64_t f;__asm__ volatile("imulq $12,%1,%1;pushfq;
             continue
         assert not reloc_path.read_bytes(),(kind,assembly)
         start=next(pc for pc,(_,text) in insns.items() if re.fullmatch(r'mov eax,DWORD PTR \[rsi\]',text))
-        # Selected ARRAY code can be shared as a local routine. The existing
-        # cases observe its load/bounds fragment, ending before RET; wrapper
-        # CALL/RET stack effects are a separate control-flow obligation.
+        # Observe the selected load/bounds fragment up to its common exit.
+        # The entry wrapper's stack effects remain outside this fragment.
         for call in calls:
             target=re.fullmatch(r'call (0x[0-9a-f]+)',insns[call][1])
             assert target is not None and int(target[1],16)==start,(kind,assembly)
 
         zero=next(pc for pc,(_,text) in insns.items() if text=='xor eax,eax')
         null_end=zero+insns[zero][0]
-        value_end=next(pc for pc,(_,text) in insns.items() if start<pc<zero and text=='ret')
-        assert insns[null_end][1]=='ret',(name,assembly)
+        value_exit=[text for pc,(_,text) in insns.items() if start<pc<zero and text.startswith('jmp ')]
+        assert len(value_exit)==1,(name,assembly)
+        join=re.fullmatch(r'jmp (0x[0-9a-f]+)',value_exit[0])
+        assert join is not None,(name,assembly)
+        value_end=int(join[1],16)
+        assert value_end==null_end,(name,value_end,null_end,assembly)
+        if elem_size>8:
+            scale_text={32:'shl rax,0x5',12:'imul rax,rax,0xc'}[elem_size]
+            scale_pc=next(pc for pc,(_,text) in insns.items() if start<pc<zero and text==scale_text)
+            scale_end=scale_pc+insns[scale_pc][0]
         first_pp=next((pc for pc,(_,text) in insns.items() if text=='mov rax,QWORD PTR [rax]'),None)
         gs_read=next((pc for pc,(_,text) in insns.items() if text.startswith('add rax,QWORD PTR gs:')),None)
         for key in (0,1,15,16,17,0xFFFFFFFF):
@@ -157,11 +164,11 @@ uint64_t imul12(uint64_t a){uint64_t f;__asm__ volatile("imulq $12,%1,%1;pushfq;
                         expected['flags']=(expected['flags']&~(STATUS^0x10))|0x44
                         expected['defined_flags']=MASK^0x10
                     elif elem_size>8:
-                        # The shared routine scales with SHL/IMUL, then LEA
-                        # retains those flags. Compare hardware's defined bits;
-                        # path masks retain earlier undefined bits after writes.
-                        scale_flags={32:flags.shl5,12:flags.imul12}[elem_size]
-                        expected['flags']=(expected['flags']&~STATUS)|(scale_flags(key)&STATUS)
+                        # Both ADDs follow scaling; the final ADD defines status
+                        # flags. The path mask retains earlier undefined bits.
+                        scaled=(key*elem_size)&MASK
+                        base=(state['registers'][7]+scaled)&MASK
+                        expected['flags']=(expected['flags']&~STATUS)|(flags.add64(base,128)&STATUS)
                         expected['defined_flags']=MASK^(0x810 if elem_size&(elem_size-1)==0 else 0xD4)
                     if key<16 and kind=='percpu_array':
                         if mode=='slot_fault':fault(slot,8,first_pp)
@@ -185,6 +192,17 @@ uint64_t imul12(uint64_t a){uint64_t f;__asm__ volatile("imulq $12,%1,%1;pushfq;
                 if expected['fault'] is not None and path[-1]['offset']!=expected['pc']:
                     path.append(dict(offset=expected['pc'],length=insns[expected['pc']][0]))
                 cases.append((dict(isa='x86_64',native_bytes=list(blob),native_base=0,native_path=path,state=state),expected))
+                if elem_size>8 and key<16 and mode=='normal':
+                    # Retain the earlier scaling-flag observation before ADD
+                    # overwrites it, in addition to the complete fragment.
+                    scale_flags={32:flags.shl5,12:flags.imul12}[elem_size]
+                    scaled_state=copy.deepcopy(state)
+                    scaled_state.update(pc=scale_end,events=[copy.deepcopy(events[0])],fault=None,
+                        defined_flags=MASK^(0x810 if elem_size&(elem_size-1)==0 else 0xD4))
+                    scaled_state['registers'][0]=(key*elem_size)&MASK
+                    scaled_state['flags']=(state['flags']&~STATUS)|(scale_flags(key)&STATUS)
+                    cases.append((dict(isa='x86_64',native_bytes=list(blob),native_base=0,
+                        native_path=[row for row in path if row['offset']<scale_end],state=state),scaled_state))
     run=subprocess.run([str(ROOT/'.lake/build/bin/reference')],input=''.join(json.dumps(r)+'\n' for r,_ in cases),
         text=True,capture_output=True)
     if run.returncode:
@@ -193,7 +211,7 @@ uint64_t imul12(uint64_t a){uint64_t f;__asm__ volatile("imulq $12,%1,%1;pushfq;
     for (request,expected),actual in zip(cases,results):
         mask=expected['defined_flags'];actual['flags']&=mask;expected['flags']&=mask
         assert actual==expected,(request,actual,expected)
-    print(f'map lowering reference: {len(cases)} actual linked ARRAY/PERCPU_ARRAY load/bounds fragments, full state/ordered reads/faults and no helper event within each fragment; local routine CALL/RET are outside that observation; four named direct-call targets and two opaque-map generic helper targets retained')
+    print(f'map lowering reference: {len(cases)} actual linked ARRAY/PERCPU_ARRAY load/bounds fragments, full state/ordered reads/faults and common exit; entry-wrapper stack effects are outside that observation; four named direct-call targets and two opaque-map generic helper targets retained')
 
 
 if __name__=='__main__':

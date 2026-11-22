@@ -1,0 +1,27 @@
+warning: function `indirect_sites` is never used
+   --> src/x86_readonly_relocs.rs:209:15
+    |
+209 | pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    |               ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+
+warning: fields `target_offset` and `table_offset` are never read
+   --> src/x86_readonly_relocs.rs:335:43
+    |
+335 |     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    |     ------------ fields in this variant   ^^^^^^^^^^^^^       ^^^^^^^^^^^^
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+map lowering reference: 102 actual linked ARRAY/PERCPU_ARRAY load/bounds fragments, full state/ordered reads/faults and common exit; entry-wrapper stack effects are outside that observation; four named direct-call targets and two opaque-map generic helper targets retained
