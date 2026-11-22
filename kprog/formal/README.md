@@ -431,6 +431,18 @@ records thirty public declarations under the default budgets. Connecting the
 range selector and local union store, subsequent tag/width updates, native table
 storage and the entry-world relation remains open.
 
+For every destination index 0--15, the original range selector, cell reads and
+local GPR-union initializer now reach the tag stage in thirteen silent steps.
+The actual local declaration, union-pointer field, pointer-word cast and current
+memory store determine the exact post-heap; the environment and three source
+temporary writes are retained. Composing the preceding narrow writer gives
+ninety-six steps from its actual entry, deriving binding/destination observations
+through the preceding twenty temporary writes. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-cell-init.log.gz)
+records thirty-four public declarations under the default budgets. Post-store
+tag reads, width/local updates, final register-table stores, qword tag calls and
+the native entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
