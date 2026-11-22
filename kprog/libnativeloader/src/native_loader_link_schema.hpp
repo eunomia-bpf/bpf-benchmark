@@ -108,6 +108,10 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
                       K_BPF_PROG_BPF_FUNC_OFFSET);
         add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
+        // struct bpf_map: map_type, key_size, value_size, max_entries are consecutive u32.
+        add_name_addr(out.helpers, "__native_x86_bpf_map_type_offset", K_BPF_MAP_MAX_ENTRIES_OFFSET - 12);
+        add_name_addr(out.helpers, "__native_x86_bpf_map_key_size_offset", K_BPF_MAP_MAX_ENTRIES_OFFSET - 8);
+        add_name_addr(out.helpers, "__native_x86_htab_elem_key_offset", K_HTAB_ELEM_KEY_OFFSET);
     }
 #elif defined(__aarch64__)
     {
