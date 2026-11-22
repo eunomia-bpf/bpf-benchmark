@@ -109,3 +109,8 @@ fail on the stack-pointer subtraction itself (insn 153 and insn 130, both
 `math between fp pointer and register with unbounded min value`) and now
 fail later, at insn 548 and insn 594, on the `bpf_get_current_task`
 scalar-dereference class below.
+
+Across all fourteen OTel requests (`otel-all-requests.txt`), the pass takes
+the workload from 4 accepted to 6: r10 and r9 join r3, r4, r6 and r12.
+r7, r13 and r14 all leave the stack-pointer subtraction behind and now stop
+at the task-pointer class. BCC is unchanged: 18 accepted before and after.

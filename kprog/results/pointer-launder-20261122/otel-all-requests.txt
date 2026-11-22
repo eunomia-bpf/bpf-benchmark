@@ -1,0 +1,30 @@
+All 14 OTel requests from the archive
+(/workspaces/kprog-raw/verified/omp-five-20261120/otel/service.tar.gz),
+each extracted in full, archived B vs launder B under the harness.
+
+Archived accept/reject is the archive's own verify.stdout/verify.stderr.
+Harness column is BPF_PROG_LOAD with prog_type from the request's
+generation.metadata.json. Difference on r3: the archive loads it through
+libbpf with BTF (so its ctx argument is a typed pointer) and accepts; the
+harness has no BTF, so its first ctx dereference reads a scalar and it
+rejects. Every other row agrees.
+
+req  archive   launder   note
+r1   REJECTED  REJECTED  R1 invalid mem access 'scalar' both sides
+r2   REJECTED  REJECTED  R0 invalid mem access 'scalar' both sides
+r3   ACCEPTED  ACCEPTED  harness-only difference, see above
+r4   ACCEPTED  ACCEPTED
+r5   REJECTED  REJECTED  R0 invalid mem access 'scalar' both sides
+r6   ACCEPTED  ACCEPTED
+r7   REJECTED  REJECTED  advances: was the fp-pointer subtraction, now the
+                         task-pointer class
+r8   REJECTED  REJECTED  R0 invalid mem access 'scalar' both sides
+r9   REJECTED  ACCEPTED  fixed by the launder
+r10  REJECTED  ACCEPTED  fixed by the launder
+r11  REJECTED  REJECTED  R1 unbounded memory access both sides
+r12  ACCEPTED  ACCEPTED
+r13  REJECTED  REJECTED  advances past the subtraction to the task-pointer class
+r14  REJECTED  REJECTED  advances past the subtraction to the task-pointer class
+
+Accepted on this workload: 4 of 14 archived. Launder B: r9 and r10 join
+r3, r4, r6, r12 - 6 of 14. No request goes ACCEPTED -> REJECTED.
