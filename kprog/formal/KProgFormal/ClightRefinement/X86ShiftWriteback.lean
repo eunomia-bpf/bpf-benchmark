@@ -616,4 +616,255 @@ theorem narrow_loaded (ge : CC.CGenv)
     bindingBlock cellsBlock cellsOffset value keptBinding cells rsp word
   exact selected.trans loaded
 
+
+private structure WidthPieces where
+  raw : CC.Stmt
+  effective : CC.Stmt
+  shift : CC.Stmt
+  next : CC.Stmt
+  rest : CC.Stmt
+
+private def widthPieces : WidthPieces :=
+  match widthWriter with
+  | .Ssequence raw (.Ssequence effective (.Ssequence shift (.Ssequence next rest))) =>
+      ⟨raw, effective, shift, next, rest⟩
+  | _ => ⟨.Sskip, .Sskip, .Sskip, .Sskip, .Sskip⟩
+
+private def writerRaw : CC.Stmt := by run_tac cachePart (← `(widthPieces.raw))
+private def writerEffective : CC.Stmt := by run_tac cachePart (← `(widthPieces.effective))
+private def writerShift : CC.Stmt := by run_tac cachePart (← `(widthPieces.shift))
+private def writerNext : CC.Stmt := by run_tac cachePart (← `(widthPieces.next))
+def cellWriter : CC.Stmt := by run_tac cachePart (← `(widthPieces.rest))
+
+/-- The original width/helper/shift/result preparation retains the exact destination-cell suffix. -/
+theorem width_source : widthWriter =
+    .Ssequence writerRaw (.Ssequence writerEffective
+      (.Ssequence writerShift (.Ssequence writerNext cellWriter))) := rfl
+
+def writerRawTemps (le : CC.TempEnv) (size : X86.Size) : CC.TempEnv :=
+  le.set X86_program_profile_bpf.___x86_wr_raw_width__2 (X86ShiftLeft.argument size)
+
+def writerEffectiveTemps (le : CC.TempEnv) (size : X86.Size) : CC.TempEnv :=
+  (le.set X86_program_profile_bpf._t'105 (X86ShiftLeft.argument size)).set
+    X86_program_profile_bpf.___x86_wr_width__2 (X86ShiftLeft.argument size)
+
+def writerWidthTemps (le : CC.TempEnv) (size : X86.Size) (shift : BitVec 8)
+    (value : BitVec 64) : CC.TempEnv :=
+  ((writerEffectiveTemps (writerRawTemps le size) size).set
+    X86_program_profile_bpf.___x86_wr_shift__2 (.Vint (shift.setWidth 32))).set
+    X86_program_profile_bpf.___x86_wr_next__2 (.Vlong value)
+
+/-- Four real source transitions record the input width and reach its actual helper call. -/
+theorem width_enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 =
+      some (X86ShiftLeft.argument size)) :
+    InternalRun ge 4 (.State function widthWriter k e le m)
+      (.State function writerEffective
+        (.Kseq (.Ssequence writerShift (.Ssequence writerNext cellWriter)) k) e
+        (writerRawTemps le size) m) := by
+  rw [width_source]
+  cases size <;> apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, writerRaw, writerRawTemps,
+      CC.doStep, CC.doEvalExpr, CC.typeof, width, X86ShiftLeft.argument, X86.Size.bytes,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Eapp, CC.E0]
+
+private def writerEffectiveAssign : CC.Stmt := by
+  run_tac cachePart (← `(match writerEffective with | .Ssequence _ assignment => assignment | _ => .Sskip))
+
+private theorem writer_effective_plumbing (ge : CC.CGenv) (block : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some block ∧
+      CC.Genv.findFunctPtr ge.genv_genv block = some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (size : X86.Size) (k : CC.Cont) (m : CC.Mem)
+    (observed : le.get X86_program_profile_bpf.___x86_wr_raw_width__2 = some (X86ShiftLeft.argument size)) :
+    ∃ callK, InternalRun ge 2 (.State function writerEffective k e le m)
+      (.Callstate (.Internal X86_program_profile_bpf.f_x86_width_effective) [X86ShiftLeft.argument size] callK m) ∧
+    InternalRun ge 3 (.Returnstate (X86ShiftLeft.argument size) (CC.callCont callK) m)
+      (.State function .Sskip k e (writerEffectiveTemps le size) m) := by
+  obtain ⟨symbol, callee⟩ := binding
+  have signature : CC.typeOfFundef (.Internal X86_program_profile_bpf.f_x86_width_effective) =
+      .Tfunction [CC.tuchar] CC.tuchar CC.cc_default := rfl
+  refine ⟨.Kcall (some X86_program_profile_bpf._t'105) function e le
+    (.Kseq writerEffectiveAssign k), ?beforeCall, ?afterCall⟩
+  case beforeCall =>
+    cases size <;> apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, writerEffective, writerEffectiveAssign, CC.typeof,   CC.tuchar, CC.cc_default, CC.doStep, CC.doEvalExpr,
+      CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.Cop.classifyFun,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Genv.findFunct,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero,
+      unshadowed, observed, symbol, callee,  X86ShiftLeft.argument,
+      X86.Size.bytes, CC.Eapp, CC.E0]
+  case afterCall =>
+    cases size <;> apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, writerEffectiveTemps, writerEffectiveAssign, CC.doStep, CC.doEvalExpr,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.typeof,
+        CC.tuchar, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+        CC.callCont, CC.setOpttemp, X86ShiftLeft.argument,
+        X86.Size.bytes,   CC.Eapp, CC.E0]
+
+/-- The actual effective-width call and caller assignments return the mature ISA value. -/
+theorem width_effective (ge : CC.CGenv) (block : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some block ∧
+      CC.Genv.findFunctPtr ge.genv_genv block = some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (size : X86.Size) (k : CC.Cont) (m : CC.Mem)
+    (observed : le.get X86_program_profile_bpf.___x86_wr_raw_width__2 = some (X86ShiftLeft.argument size)) :
+    InternalRun ge (2 + (6) + 3) (.State function writerEffective k e le m)
+      (.State function .Sskip k e (writerEffectiveTemps le size) m) := by
+  obtain ⟨callK, beforeCall, afterCall⟩ :=
+    writer_effective_plumbing ge block binding function e le unshadowed size k m observed
+  have value : X86Width.result (BitVec.ofNat 8 size.bytes) = (X86ShiftLeft.argument size) := by cases size <;> rfl
+  have argument : X86Width.argument (BitVec.ofNat 8 size.bytes) =
+      X86ShiftLeft.argument size := by cases size <;> rfl
+  have body : InternalRun ge (6)
+      (.Callstate (.Internal X86_program_profile_bpf.f_x86_width_effective) [X86ShiftLeft.argument size] callK m)
+      (.Returnstate (X86ShiftLeft.argument size) (CC.callCont callK) m) := by
+    simpa only [argument, value] using
+      X86Width.internal ge (BitVec.ofNat 8 size.bytes) callK m
+  exact (beforeCall.trans body).trans afterCall
+
+
+private theorem writer_byte_cast (value : BitVec 8) :
+    value.setWidth 32 &&& (255#32) = value.setWidth 32 := by
+  change value.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 = value.setWidth 32
+  rw [← BitVec.setWidth_and, BitVec.and_allOnes]
+
+/-- Seven actual caller transitions resume the width call and copy the byte shift
+and complete result word into the original writer temporaries. -/
+theorem width_tail (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (shift : BitVec 8) (value : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift =
+      some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong value)) :
+    InternalRun ge 7
+      (.State function .Sskip
+        (.Kseq (.Ssequence writerShift (.Ssequence writerNext cellWriter)) k) e le m)
+      (.State function cellWriter k e
+        ((le.set X86_program_profile_bpf.___x86_wr_shift__2 (.Vint (shift.setWidth 32))).set
+          X86_program_profile_bpf.___x86_wr_next__2 (.Vlong value)) m) := by
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, writerShift, writerNext,
+      CC.doStep, CC.doEvalExpr, CC.typeof, observedShift, observedValue, CC.PTree.gso,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.tuchar,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, writer_byte_cast, CC.Eapp, CC.E0]
+
+/-- Twenty-two genuine writer transitions call the actual width helper, retain
+the whole heap and prepare the original destination-cell read and initializer. -/
+theorem width_internal (ge : CC.CGenv) (block : CC.Block)
+    (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some block ∧
+      CC.Genv.findFunctPtr ge.genv_genv block =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (size : X86.Size) (shift : BitVec 8) (value : BitVec 64) (k : CC.Cont) (m : CC.Mem)
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift =
+      some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong value)) :
+    InternalRun ge 22 (.State function widthWriter k e le m)
+      (.State function cellWriter k e (writerWidthTemps le size shift value) m) := by
+  have entered := width_enter ge function e le k m size width
+  have raw : (writerRawTemps le size).get X86_program_profile_bpf.___x86_wr_raw_width__2 =
+      some (X86ShiftLeft.argument size) := by simp [writerRawTemps]
+  have called := width_effective ge block binding function e (writerRawTemps le size) unshadowed
+    size (.Kseq (.Ssequence writerShift (.Ssequence writerNext cellWriter)) k) m raw
+  have keptShift :
+      (writerEffectiveTemps (writerRawTemps le size) size).get X86_program_profile_bpf.___x86_l_dst_shift =
+        some (.Vint (shift.setWidth 32)) := by
+    simp +decide [writerEffectiveTemps, writerRawTemps, CC.PTree.gso, observedShift]
+  have keptValue :
+      (writerEffectiveTemps (writerRawTemps le size) size).get X86_program_profile_bpf.___x86_l_result =
+        some (.Vlong value) := by
+    simp +decide [writerEffectiveTemps, writerRawTemps, CC.PTree.gso, observedValue]
+  have copied := width_tail ge function e (writerEffectiveTemps (writerRawTemps le size) size)
+    k m shift value keptShift keptValue
+  exact (entered.trans called).trans copied
+
+
+/-- The actual raw width, call temporary, effective width, shift and result all
+read back their exact source values; every other temporary keeps its input. -/
+theorem width_temps (le : CC.TempEnv) (size : X86.Size) (shift : BitVec 8) (value : BitVec 64) :
+    (writerWidthTemps le size shift value).get X86_program_profile_bpf.___x86_wr_raw_width__2 =
+      some (X86ShiftLeft.argument size) ∧
+    (writerWidthTemps le size shift value).get X86_program_profile_bpf._t'105 =
+      some (X86ShiftLeft.argument size) ∧
+    (writerWidthTemps le size shift value).get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument size) ∧
+    (writerWidthTemps le size shift value).get X86_program_profile_bpf.___x86_wr_shift__2 =
+      some (.Vint (shift.setWidth 32)) ∧
+    (writerWidthTemps le size shift value).get X86_program_profile_bpf.___x86_wr_next__2 =
+      some (.Vlong value) ∧
+    ∀ id, id ≠ X86_program_profile_bpf.___x86_wr_raw_width__2 →
+      id ≠ X86_program_profile_bpf._t'105 → id ≠ X86_program_profile_bpf.___x86_wr_width__2 →
+      id ≠ X86_program_profile_bpf.___x86_wr_shift__2 → id ≠ X86_program_profile_bpf.___x86_wr_next__2 →
+      (writerWidthTemps le size shift value).get id = le.get id := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · simp +decide [writerWidthTemps, writerRawTemps, writerEffectiveTemps, CC.PTree.gso]
+  · simp +decide [writerWidthTemps, writerRawTemps, writerEffectiveTemps, CC.PTree.gso]
+  · simp +decide [writerWidthTemps, writerRawTemps, writerEffectiveTemps, CC.PTree.gso]
+  · simp +decide [writerWidthTemps, writerRawTemps, writerEffectiveTemps, CC.PTree.gso]
+  · simp [writerWidthTemps]
+  · intro id neRaw neCall neWidth neShift neValue
+    simp [writerWidthTemps, writerRawTemps, writerEffectiveTemps, CC.PTree.gso,
+      Ne.symm neRaw, Ne.symm neCall, Ne.symm neWidth, Ne.symm neShift, Ne.symm neValue]
+
+/-- The original narrow SHL writer reaches actual destination-cell preparation
+through its selectors, real RSP read and actual width helper in eighty-three silent steps. -/
+theorem narrow_prepared (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (dst : BitVec 8) (size : X86.Size) (narrow : size ≠ .q)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next)) :
+    InternalRun ge 83 (.State function writer k e le m)
+      (.State function cellWriter (loadCont k) e
+        (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le dst size)))
+          cellsBlock cellsOffset value) size shift next) m) := by
+  have loaded := narrow_loaded ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word dst size narrow destination width alu
+  let reached := loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le dst size)))
+    cellsBlock cellsOffset value
+  have keptWidth : reached.get X86_program_profile_bpf.___x86_l_width__1 =
+      some (X86ShiftLeft.argument size) := by
+    simp +decide [reached, loadTemps, narrowSrcTemps, narrowDstTemps, selectTemps,
+      CC.PTree.gso, width]
+  have keptShift : reached.get X86_program_profile_bpf.___x86_l_dst_shift =
+      some (.Vint (shift.setWidth 32)) := by
+    simp +decide [reached, loadTemps, narrowSrcTemps, narrowDstTemps, selectTemps,
+      CC.PTree.gso, observedShift]
+  have keptValue : reached.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next) := by
+    simp +decide [reached, loadTemps, narrowSrcTemps, narrowDstTemps, selectTemps,
+      CC.PTree.gso, observedValue]
+  have prepared := width_internal ge widthBlock widthBinding function e reached unshadowed
+    size shift next (loadCont k) m keptWidth keptShift keptValue
+  exact loaded.trans prepared
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback

@@ -406,6 +406,19 @@ records nineteen public declarations under the default budgets. Width/value
 preparation, destination storage, qword tag calls and the entry-world relation
 remain open.
 
+The original writer's width and value preparation now has a twenty-two-step
+silent execution for every architectural width, byte shift and result word.
+It executes the real effective-width function through its existing six-step
+body, with the original caller entry/return and byte assignments. All five
+source temporaries read back exactly, and every other temporary and the full
+heap are preserved. Composing the original narrow writer prefix reaches actual
+destination-cell preparation in eighty-three steps, deriving the retained
+width/shift/result observations. The genuine helper binding, local shadowing,
+layout and preceding current-heap loads/cast remain explicit. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-widths.log.gz)
+records twenty-six public declarations under the default budgets. Destination
+storage, qword tag calls and the entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
