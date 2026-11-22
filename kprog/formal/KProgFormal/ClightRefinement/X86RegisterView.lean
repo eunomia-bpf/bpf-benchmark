@@ -410,4 +410,73 @@ theorem writer_local_writable (ce : CC.CompositeEnv)
     (chunk := CC.Mptr) (b := block) (ofs := 0) (p := .Writable)
     (fun offset => by simp only [CC.Mem.perm, access])).trans writable
 
+/-- The actual handler allocation preserves every caller byte and both
+permission maps, independently of the contents of its nine new locals. -/
+theorem writer_caller_frame (ce : CC.CompositeEnv) (caller : CC.Mem) :
+    FrameBelow caller.nextblock caller (writerAllocation ce caller).2 :=
+  (FrameBelow.allocVariables (writer_allocation_valid ce caller)
+    caller.nextblock (Nat.le_refl _)).2
+
+/-- Reached source heaps with the entry permission map retain every old
+caller's typed access, including denied accesses and both permission levels. -/
+theorem writer_caller_access (ce : CC.CompositeEnv) (caller memory : CC.Mem)
+    (block : CC.Block) (old : block.toNat < caller.nextblock.toNat)
+    (access : memory.access = (writerAllocation ce caller).2.access)
+    (chunk : CC.Chunk) (offset : CC.Z) (permission : CC.Permission) :
+    CC.Mem.validAccess memory chunk block offset permission =
+      CC.Mem.validAccess caller chunk block offset permission := by
+  apply CC.Mem.validAccess_congr
+  intro point
+  simp only [CC.Mem.perm, access, (writer_caller_frame ce caller block old).2]
+
+/-- Function entry preserves the entire represented native GPR table,
+including each original pointer origin and tag. -/
+theorem writer_entry_registers (ce : CC.CompositeEnv) (caller : CC.Mem)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.X86.Origins)
+    (block : CC.Block) (base : CC.Integers.Ptrofs) (cpu : X86.Cpu)
+    (old : block.toNat < caller.nextblock.toNat)
+    (represented : RegistersRepresent addresses origins caller block base cpu) :
+    RegistersRepresent addresses origins (writerAllocation ce caller).2 block base cpu := by
+  intro index
+  obtain ⟨value, raw, tag, wordRead, tagRead, valueRep, native⟩ := represented index
+  have frame := writer_caller_frame ce caller
+  exact ⟨value, raw, tag, (frame.load _ _ _ old).trans wordRead,
+    (frame.load _ _ _ old).trans tagRead, valueRep, native⟩
+
+/-- The real entry supplies the local binding, its writable word and its
+separation from both caller blocks. Old table word/tag permissions are carried
+from the caller, rather than supplied as extra intermediate-store premises. -/
+theorem writer_entry_storage (ce : CC.CompositeEnv)
+    (layout : ce.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (caller memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+    (bindingOld : bindingBlock.toNat < caller.nextblock.toNat)
+    (cellsOld : cellsBlock.toNat < caller.nextblock.toNat)
+    (access : memory.access = (writerAllocation ce caller).2.access)
+    (wordOffset tagOffset : CC.Z)
+    (wordWritable : CC.Mem.validAccess caller CC.Mptr cellsBlock wordOffset .Writable = true)
+    (tagWritable : CC.Mem.validAccess caller .Mint8unsigned cellsBlock tagOffset .Writable = true) :
+    ∃ localBlock,
+      (writerAllocation ce caller).1.get X86_program_profile_bpf.___x86_wr_cell__2 =
+        some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) ∧
+      (bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) ∧
+      CC.Mem.validAccess memory CC.Mptr localBlock 0 .Writable = true ∧
+      CC.Mem.validAccess memory CC.Mptr cellsBlock wordOffset .Writable = true ∧
+      CC.Mem.validAccess memory .Mint8unsigned cellsBlock tagOffset .Writable = true := by
+  obtain ⟨localBlock, declared, fresh, _, _⟩ := writer_local_storage ce layout caller
+  have bindingSeparate : bindingBlock ≠ localBlock := by
+    intro same
+    have encoded := congrArg CC.Positive.toNat same
+    omega
+  have cellsSeparate : cellsBlock ≠ localBlock := by
+    intro same
+    have encoded := congrArg CC.Positive.toNat same
+    omega
+  refine ⟨localBlock, declared, ⟨bindingSeparate, cellsSeparate⟩,
+    writer_local_writable ce layout caller memory localBlock declared access, ?_, ?_⟩
+  · exact (writer_caller_access ce caller memory cellsBlock cellsOld access
+      CC.Mptr wordOffset .Writable).trans wordWritable
+  · exact (writer_caller_access ce caller memory cellsBlock cellsOld access
+      .Mint8unsigned tagOffset .Writable).trans tagWritable
+
 end KProgFormal.ClightRefinement.X86RegisterView

@@ -1,0 +1,47 @@
+KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame (ce : CC.CompositeEnv) (caller : CC.Mem) :
+  KProgFormal.ClightRefinement.FrameBelow caller.nextblock caller
+    (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ce caller).snd
+'KProgFormal.ClightRefinement.X86RegisterView.writer_caller_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access (ce : CC.CompositeEnv) (caller memory : CC.Mem)
+  (block : CC.Block) (old : CC.Positive.toNat block < CC.Positive.toNat caller.nextblock)
+  (access : memory.access = (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ce caller).snd.access)
+  (chunk : CC.Chunk) (offset : CC.Z) (permission : CC.Permission) :
+  memory.validAccess chunk block offset permission = caller.validAccess chunk block offset permission
+'KProgFormal.ClightRefinement.X86RegisterView.writer_caller_access' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers (ce : CC.CompositeEnv) (caller : CC.Mem)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (block : CC.Block) (base : CC.Integers.Ptrofs)
+  (cpu : X86.Cpu) (old : CC.Positive.toNat block < CC.Positive.toNat caller.nextblock)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins caller block base cpu) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins
+    (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ce caller).snd block base cpu
+'KProgFormal.ClightRefinement.X86RegisterView.writer_entry_registers' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage (ce : CC.CompositeEnv)
+  (layout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_gpr ce =
+      some KProgFormal.ClightRefinement.X86RegisterLayout.gprRecord)
+  (caller memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+  (bindingOld : CC.Positive.toNat bindingBlock < CC.Positive.toNat caller.nextblock)
+  (cellsOld : CC.Positive.toNat cellsBlock < CC.Positive.toNat caller.nextblock)
+  (access : memory.access = (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ce caller).snd.access)
+  (wordOffset tagOffset : CC.Z)
+  (wordWritable : caller.validAccess CC.Mptr cellsBlock wordOffset CC.Permission.Writable = true)
+  (tagWritable : caller.validAccess CC.Chunk.Mint8unsigned cellsBlock tagOffset CC.Permission.Writable = true) :
+  ∃ localBlock,
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2
+          (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ce caller).fst =
+        some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) ∧
+      (bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) ∧
+        memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true ∧
+          memory.validAccess CC.Mptr cellsBlock wordOffset CC.Permission.Writable = true ∧
+            memory.validAccess CC.Chunk.Mint8unsigned cellsBlock tagOffset CC.Permission.Writable = true
+'KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
