@@ -1,0 +1,48 @@
+{
+  "status": "focused proof and public queries passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectCaller"
+    ],
+    "exit": 0,
+    "seconds": 2.289977788925171,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 265,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-caller/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5932414531707764,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 2,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Call.Result.all_behaviors": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64Select.Call.returned": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "earlier_attempts": [],
+  "shared_confirmation": "V owns full/default/make-check; latest full check retains DIV fault regression",
+  "raw": "/workspaces/kprog-raw/formal/m5-select-call/20261122T115647Z",
+  "complete_isa_families": 0
+}
