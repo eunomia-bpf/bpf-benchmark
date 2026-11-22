@@ -568,8 +568,16 @@ existing Clight pointer-origin representation and x86 tag materialization;
 every other GPR retains its original raw value, tag and pointer binding.
 The original 169-step writer and its exact final temporary map satisfy this
 native GPR relation. The [native-register receipt](../results/kprog_verification_20261107/x86-byte-register-native.log.gz)
-records both public bridge theorems under the default budgets. Full world
-composition, entry/store premises and the remaining writer branches stay open.
+records both public bridge theorems under the default budgets.
+The writable variant constructs all four source-store heaps from the initial
+local-word, table-word and table-tag permissions. The local byte permission
+follows from the original eight-byte union permission; existing memory laws
+carry permissions through each store. Its final heap preserves the original
+permission map and allocation frontier, together with the 169-step/native-GPR
+result. The [permission receipt](../results/kprog_verification_20261107/x86-byte-register-permissions.log.gz)
+records all three public bridge theorems under the same budgets.
+Full world composition, actual function-entry permission premises and the
+remaining writer branches stay open.
 
 
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's

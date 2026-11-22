@@ -173,4 +173,137 @@ theorem byte_writer_native (ge : CC.CGenv)
   exact ⟨actual.1, byte_table_native addresses origins m final cellsBlock cellsOffset cpu
     index old next shift represented cellCurrent currentTag ordinaryIndex actual.2⟩
 
+
+private theorem byte_writable_at (m : CC.Mem) (block : CC.Block)
+    (offset : _root_.Int) (lower : 0 ≤ offset) (upper : offset < 8)
+    (word : CC.Mem.validAccess m CC.Mptr block 0 .Writable = true) :
+    CC.Mem.validAccess m .Mint8unsigned block offset .Writable = true := by
+  have parts := word
+  simp only [CC.Mem.validAccess, Bool.and_eq_true] at parts
+  have range : CC.Mem.rangePerm m block 0 8 .Cur .Writable = true := parts.1
+  change CC.Mem.rangePerm m block offset (offset + 1) .Cur .Writable &&
+    (offset % 1 == 0) = true
+  rw [Bool.and_eq_true]
+  refine ⟨CC.Mem.rangePerm_intro m block offset (offset + 1) .Cur .Writable
+    (fun point lo hi => CC.Mem.rangePerm_perm m block 0 8 .Cur .Writable range point
+      (by omega) (by omega)), ?_⟩
+  simp
+
+private theorem source_store_exists (m : CC.Mem) (chunk : CC.Chunk) (block : CC.Block)
+    (offset : CC.Z) (value : CC.Val)
+    (writable : CC.Mem.validAccess m chunk block offset .Writable = true) :
+    ∃ after, CC.Mem.store chunk m block offset value = some after := by
+  simp only [CC.Mem.store, writable, ite_true]
+  exact ⟨_, rfl⟩
+
+/-- Initial source permissions construct all four intermediate heaps of the
+ordinary scalar byte writer. The native register result shares the original
+permission map and allocation frontier. -/
+theorem byte_writer_writable (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((BitVec.ofNat 8 index.val).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (old : BitVec 64)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong old))
+    (localBlock : CC.Block)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (0#32)))
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (ordinary : (BitVec.ofNat 8 index.val).setWidth 32 ≠ (4#32))
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (localWritable : CC.Mem.validAccess m CC.Mptr localBlock 0 .Writable = true)
+    (cellWritable : CC.Mem.validAccess m CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) .Writable = true)
+    (tagWritable : CC.Mem.validAccess m .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) .Writable = true)
+    (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu) :
+    ∃ final, InternalRun ge 169 (.State function writer k e le m)
+      (.State function .Sskip k e
+        (tableTemps
+          (byteTemps
+            (classTemps
+              (tagTemps
+                (cellReadTemps
+                  (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps
+                    (selectTemps le (BitVec.ofNat 8 index.val) .b))) cellsBlock cellsOffset value)
+                    .b shift next) cellsBlock cellsOffset (.Vlong old))
+                index cellsBlock cellsOffset (0#8)) .b) next)
+          (.Vlong ((if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next else X86.Value.writeView .b old next))) (0#8) index cellsBlock cellsOffset) final) ∧
+      RegistersRepresent addresses origins final cellsBlock cellsOffset
+        (cpu.setReg .b (X86.GPR.ofIndex index) next (decide (shift.setWidth 32 = (8#32)))) ∧
+      final.access = m.access ∧ final.nextblock = m.nextblock := by
+  obtain ⟨after, stored⟩ := source_store_exists m CC.Mptr localBlock 0 (.Vlong old)
+    localWritable
+  have localByte : CC.Mem.validAccess after .Mint8unsigned localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) .Writable = true := by
+    rw [CC.Mem.validAccess_store_eq stored]
+    have atZero := byte_writable_at m localBlock 0 (by omega) (by omega) localWritable
+    have atOne := byte_writable_at m localBlock 1 (by omega) (by omega) localWritable
+    by_cases high : shift.setWidth 32 = (8#32)
+    · simpa +decide [byteOffset, high, CC.Integers.Ptrofs.unsigned, CC.Integers.MI.unsigned] using atOne
+    · simpa +decide [byteOffset, high, CC.Integers.Ptrofs.unsigned, CC.Integers.MI.unsigned] using atZero
+  obtain ⟨byteMem, byteStored⟩ := source_store_exists after .Mint8unsigned localBlock
+    (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) localByte
+  have tableWord : CC.Mem.validAccess byteMem CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) .Writable = true := by
+    rw [CC.Mem.validAccess_store_eq byteStored, CC.Mem.validAccess_store_eq stored]
+    exact cellWritable
+  obtain ⟨middle, wordStored⟩ := source_store_exists byteMem CC.Mptr cellsBlock
+    (CC.Integers.Ptrofs.unsigned (cellsOffset +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int))))
+    (.Vlong (if shift.setWidth 32 = (8#32) then X86.Value.writeHigh8 old next
+      else X86.Value.writeView .b old next)) tableWord
+  have tableTag : CC.Mem.validAccess middle .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) .Writable = true := by
+    rw [CC.Mem.validAccess_store_eq wordStored, CC.Mem.validAccess_store_eq byteStored,
+      CC.Mem.validAccess_store_eq stored]
+    exact tagWritable
+  obtain ⟨final, tagStored⟩ := source_store_exists middle .Mint8unsigned cellsBlock
+    (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+      CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) (.Vint (0#32)) tableTag
+  have actual := byte_writer_native ge bindingsLayout gprLayout cellLayout function e le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
+    widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
+    localBlock after declared stored currentTag callerBlocks ordinary byteMem byteStored
+    bindingSeparate middle final wordStored tagStored addresses origins cpu represented
+  refine ⟨final, actual.1, actual.2, ?_, ?_⟩
+  · exact (CC.Mem.store_access tagStored).trans ((CC.Mem.store_access wordStored).trans
+      ((CC.Mem.store_access byteStored).trans (CC.Mem.store_access stored)))
+  · exact (CC.Mem.store_nextblock tagStored).trans ((CC.Mem.store_nextblock wordStored).trans
+      ((CC.Mem.store_nextblock byteStored).trans (CC.Mem.store_nextblock stored)))
+
 end KProgFormal.ClightRefinement.X86RegisterView
