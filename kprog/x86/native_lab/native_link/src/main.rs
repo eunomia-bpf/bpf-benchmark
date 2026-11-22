@@ -1338,79 +1338,15 @@ fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<V
     Ok(w)
 }
 
-/// A lookup whose map is unknown: the hash shapes the program's lookups use, checked by
-/// the map's type and rounded key size (struct bpf_map offsets from the loader).
-struct Arm64LookupGuard {
-    shapes: Vec<(u8, LookupSiteSpec)>,
-    type_off: u32,
-    key_size_off: u32,
-    key_off: u32,
-}
-
-fn arm64_lookup_guard(lookup_sites: &[LookupSiteSpec], helper_addrs: &HashMap<String, u64>) -> Option<Arm64LookupGuard> {
-    let get = |k: &str| helper_addrs.get(k).and_then(|&v| u32::try_from(v).ok());
-    let shapes = x86::x86_guarded_lookup_shapes(lookup_sites, &HashMap::new());
-    let g = Arm64LookupGuard {
-        shapes,
-        type_off: get("__native_arm64_bpf_map_type_offset")?,
-        key_size_off: get("__native_arm64_bpf_map_key_size_offset")?,
-        key_off: get("__native_arm64_htab_elem_key_offset")?,
-    };
-    let fits = |o: u32| o % 4 == 0 && o / 4 <= 0xfff;
-    (!g.shapes.is_empty() && fits(g.type_off) && fits(g.key_size_off)).then_some(g)
-}
-
-/// Each shape: `ldr w16, [x0, #type]; cmp w16, #t; b.ne next; ldr w16, [x0, #key_size];
-/// add w16, w16, #7; and w16, w16, #~7; cmp w16, #rounded; b.ne next`, the shape's call and
-/// postprocessing, `b done`; after the last, the helper.
-fn build_arm64_guarded_lookup(g: &Arm64LookupGuard, helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {
-    let generic = arm64_helper_call_sequence(resolve_helper_target("bpf_map_lookup_elem", helper_addrs, "arm64 lookup")?)?;
-    let mut blocks = Vec::new();
-    for (t, shape) in &g.shapes {
-        let rounded = shape.key_offset.checked_sub(g.key_off).filter(|&r| r <= 0xfff);
-        let Some(rounded) = rounded else { continue };
-        let mut b = vec![
-            0xb940_0000 | ((g.type_off / 4) << 10) | 16,
-            0x7100_001f | (u32::from(*t) << 10) | (16 << 5),
-            0,
-            0xb940_0000 | ((g.key_size_off / 4) << 10) | 16,
-            0x1100_1e10,
-            0x121d_7210,
-            0x7100_001f | (rounded << 10) | (16 << 5),
-            0,
-        ];
-        b.extend(arm64_helper_call_sequence(resolve_lookup_site_target(shape, "arm64 guarded lookup")?)?);
-        b.extend(build_arm64_lookup_call_postprocess(shape)?);
-        b.push(0);
-        blocks.push(b);
-    }
-    let total = blocks.iter().map(Vec::len).sum::<usize>() + generic.len();
-    let mut words = Vec::new();
-    for mut b in blocks {
-        let (start, last) = (words.len(), b.len() - 1);
-        let next = start + b.len();
-        b[2] = 0x5400_0001 | (((next - (start + 2)) as u32) << 5);
-        b[7] = 0x5400_0001 | (((next - (start + 7)) as u32) << 5);
-        b[last] = 0x1400_0000 | ((total - (start + last)) as u32);
-        words.extend(b);
-    }
-    words.extend(generic);
-    Ok(words)
-}
-
 /// The call for one helper ID: the tail-call sequence for 12, else a call to the helper.
 fn arm64_helper_id_body(
     id: u64,
     map: Option<&str>,
     lookup: Option<&LookupSiteSpec>,
-    guard: Option<&Arm64LookupGuard>,
     helper_addrs: &HashMap<String, u64>,
 ) -> Result<Vec<u32>> {
     if id == 12 {
         return build_arm64_tail_call_inline(helper_addrs);
-    }
-    if let (1, None, Some(g)) = (id, map, guard) {
-        return build_arm64_guarded_lookup(g, helper_addrs);
     }
     // A lookup on a map named in x0 takes its map's form, as a named call does.
     if let (1, Some(spec)) = (id, lookup) {
@@ -1436,7 +1372,6 @@ fn build_arm64_helper_id_call(
     n: u32,
     map: Option<&str>,
     lookup: Option<&LookupSiteSpec>,
-    guard: Option<&Arm64LookupGuard>,
     helper_addrs: &HashMap<String, u64>,
 ) -> Result<Vec<u32>> {
     let movz = |reg: Option<u32>| -> std::collections::BTreeSet<u64> {
@@ -1450,7 +1385,7 @@ fn build_arm64_helper_id_call(
     };
     if movz(Some(n)).len() == 1 {
         if let Some(id) = arm64_helper_id_before(bytes, word_index, n) {
-            return arm64_helper_id_body(id, map, lookup, guard, helper_addrs);
+            return arm64_helper_id_body(id, map, lookup, helper_addrs);
         }
     }
     let ids: Vec<u64> = movz(None)
@@ -1466,7 +1401,7 @@ fn build_arm64_helper_id_call(
         words.push(0xf100_001f | ((id as u32) << 10) | (n << 5)); // cmp xN, #id
         let skip = words.len();
         words.push(0); // b.ne next
-        words.extend(arm64_helper_id_body(id, map, lookup, guard, helper_addrs)?);
+        words.extend(arm64_helper_id_body(id, map, lookup, helper_addrs)?);
         to_done.push(words.len());
         words.push(0); // b done
         words[skip] = 0x5400_0001 | (((words.len() - skip) as u32) << 5);
@@ -2148,7 +2083,6 @@ fn rewrite_arm64_pass(
     let relocs = arm64_text_relocations(elf, included)?;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
-    let lookup_guard = if proof_mode { None } else { arm64_lookup_guard(lookup_sites, helper_addrs) };
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     for sym in included {
         let is_entry = sym.address == entry.address;
@@ -2421,7 +2355,7 @@ fn rewrite_arm64_pass(
                 let lookup = reg_map_names[0].as_ref().filter(|_| is_entry).and_then(|name| {
                     lookup_sites.iter().find(|s| x86::lookup_site_matches_native_map(s, name))
                 });
-                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, reg_map_names[0].as_deref(), lookup, lookup_guard.as_ref(), helper_addrs)
+                for word in build_arm64_helper_id_call(&bytes, local_word_index, n, reg_map_names[0].as_deref(), lookup, helper_addrs)
                     .with_context(|| format!("arm64 indirect call in {} at byte offset {off:#x}", sym.name))?
                 {
                     append_u32(&mut blob, word);

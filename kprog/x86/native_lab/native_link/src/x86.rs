@@ -1518,73 +1518,6 @@ pub(super) fn rewrite_x86(
                             map_lookup_helper_addr,
                         )?;
                         lookup_call_specs.insert(site_key, spec.clone());
-                        // The map is unknown here (an inner map, or a value from another
-                        // path): each hash shape the program uses is tried by the map's type
-                        // and rounded key size, which decide the verifier's inline form for
-                        // that map; any other map calls the helper.
-                        let offsets = [
-                            "__native_x86_bpf_map_type_offset",
-                            "__native_x86_bpf_map_key_size_offset",
-                            "__native_x86_htab_elem_key_offset",
-                        ]
-                        .map(|k| helper_addrs.get(k).and_then(|&v| u8::try_from(v).ok()));
-                        let shapes = x86_guarded_lookup_shapes(lookup_sites, lookup_maps);
-                        if let (None, [Some(type_off), Some(key_size_off), Some(key_off)], false) =
-                            (native_map_name, offsets, shapes.is_empty())
-                        {
-                            let mut blocks = Vec::new();
-                            for (map_type, shape) in &shapes {
-                                let rounded = shape.key_offset.checked_sub(u32::from(key_off)).ok_or_else(
-                                    || anyhow!("x86 lookup shape key offset below the element key"),
-                                )?;
-                                let mut guard = vec![0x83, 0x7F, type_off, *map_type, 0x75, 0]; // cmp dword [rdi+type], t; jne next
-                                guard.extend_from_slice(&[0x44, 0x8B, 0x5F, key_size_off]); // mov r11d, [rdi+key_size]
-                                guard.extend_from_slice(&[0x41, 0x83, 0xC3, 0x07, 0x41, 0x83, 0xE3, 0xF8]); // round up to 8
-                                guard.extend_from_slice(&[0x41, 0x81, 0xFB]); // cmp r11d, rounded
-                                guard.extend_from_slice(&rounded.to_le_bytes());
-                                guard.extend_from_slice(&[0x75, 0]); // jne next
-                                let post = x86_lookup_postprocess_bytes(shape)?;
-                                blocks.push((guard, shape.target_addr, post));
-                            }
-                            let sizes: Vec<usize> =
-                                blocks.iter().map(|(g, _, p)| g.len() + 5 + p.len() + 5).collect();
-                            let total: usize = sizes.iter().sum::<usize>() + 5;
-                            let mut at = 0usize;
-                            let mut first = true;
-                            // The first chunk keeps the call's own IP (a branch to the call lands
-                            // here); the rest are synthetic, the calls carrying their relocation.
-                            let mut emit = |ib: Instruction, call: Option<u64>| -> Result<()> {
-                                if std::mem::take(&mut first) {
-                                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip, local_ip, ib, None);
-                                } else {
-                                    push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip, &mut next_synthetic_ip, ib)?;
-                                }
-                                if let Some(target_addr) = call {
-                                    *kinds.last_mut().unwrap() = Some(PatchKind::HelperCallRel32 { target_addr });
-                                }
-                                Ok(())
-                            };
-                            for ((mut guard, target, mut post), size) in blocks.into_iter().zip(sizes) {
-                                let next = at + size;
-                                let n = guard.len();
-                                guard[5] = u8::try_from(next - (at + 6)).map_err(|_| anyhow!("x86 guarded lookup block too large"))?;
-                                guard[n - 1] = u8::try_from(next - (at + n)).map_err(|_| anyhow!("x86 guarded lookup block too large"))?;
-                                post.push(0xE9); // jmp done
-                                post.extend_from_slice(&i32::try_from(total - next)?.to_le_bytes());
-                                for ib in declared_byte_chunks(&guard)? {
-                                    emit(ib, None)?;
-                                }
-                                emit(build_x86_helper_call_rel32_slot()?, Some(target))?;
-                                for ib in declared_byte_chunks(&post)? {
-                                    emit(ib, None)?;
-                                }
-                                at = next;
-                            }
-                            emit(build_x86_helper_call_rel32_slot()?, Some(map_lookup_helper_addr))?;
-                            resolved_helper_call_sites.insert(site_key);
-                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
-                            continue;
-                        }
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 for ib in build_x86_array_lookup(&spec)? {
@@ -3991,12 +3924,6 @@ fn append_x86_mov_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
 }
 
 fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
-    declared_byte_chunks(&x86_lookup_postprocess_bytes(spec)?)
-}
-
-/// The bytes after a lookup call that turn the element into the value, as the
-/// verifier's inline form of the map type does.
-fn x86_lookup_postprocess_bytes(spec: &LookupSiteSpec) -> Result<Vec<u8>> {
     let mut body = Vec::new();
     match spec.kind {
         LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
@@ -4035,33 +3962,7 @@ fn x86_lookup_postprocess_bytes(spec: &LookupSiteSpec) -> Result<Vec<u8>> {
     bytes.extend_from_slice(&[0x48, 0x85, 0xC0]); // test rax, rax
     bytes.extend_from_slice(&[0x74, body_len]); // je done
     bytes.extend_from_slice(&body);
-    Ok(bytes)
-}
-
-/// The hash shapes the program's own lookups use (the loader's sites and maps), at most four.
-pub(super) fn x86_guarded_lookup_shapes(
-    lookup_sites: &[LookupSiteSpec],
-    lookup_maps: &HashMap<String, LookupSiteSpec>,
-) -> Vec<(u8, LookupSiteSpec)> {
-    let mut out: Vec<(u8, LookupSiteSpec)> = Vec::new();
-    let mut maps: Vec<&LookupSiteSpec> = lookup_maps.values().collect();
-    maps.sort_by(|a, b| a.map_name.cmp(&b.map_name));
-    for spec in lookup_sites.iter().filter(|s| s.map_name.is_none()).chain(lookup_sites).chain(maps) {
-        let map_type = match spec.kind {
-            LookupKind::Hash => 1,         // BPF_MAP_TYPE_HASH
-            LookupKind::PerCpuHash => 5,   // BPF_MAP_TYPE_PERCPU_HASH
-            LookupKind::LruHash => 9,      // BPF_MAP_TYPE_LRU_HASH
-            _ => continue,
-        };
-        let same = |(t, s): &(u8, LookupSiteSpec)| {
-            *t == map_type && s.key_offset == spec.key_offset && s.value_offset == spec.value_offset
-                && s.percpu_base_addr == spec.percpu_base_addr && s.target_addr == spec.target_addr
-        };
-        if spec.target_addr != 0 && !out.iter().any(same) && out.len() < 4 {
-            out.push((map_type, spec.clone()));
-        }
-    }
-    out
+    declared_byte_chunks(&bytes)
 }
 
 fn append_x86_add_rax_imm(bytes: &mut Vec<u8>, key_offset: u32) {
