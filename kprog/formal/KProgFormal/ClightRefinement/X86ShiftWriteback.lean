@@ -319,4 +319,131 @@ theorem select_temps (le : CC.TempEnv) (dst : BitVec 8) (size : X86.Size) :
   intro id ne139 ne140
   simp [selectTemps, CC.PTree.gso, Ne.symm ne139, Ne.symm ne140]
 
+
+private def dstPieces : WriterPieces :=
+  match scalarWriter with
+  | .Ssequence probe (.Sifthenelse gate fast scalar) => ⟨probe, gate, fast, scalar⟩
+  | _ => ⟨.Sskip, .Econst_int (0#32) CC.tint, .Sskip, .Sskip⟩
+
+private def dstProbe : CC.Stmt := by run_tac cachePart (← `(dstPieces.probe))
+private def dstGate : CC.Expr := by run_tac cachePart (← `(dstPieces.gate))
+private def dstFast : CC.Stmt := by run_tac cachePart (← `(dstPieces.fast))
+def sourceWriter : CC.Stmt := by run_tac cachePart (← `(dstPieces.scalar))
+
+private def srcPieces : WriterPieces :=
+  match sourceWriter with
+  | .Ssequence probe (.Sifthenelse gate fast scalar) => ⟨probe, gate, fast, scalar⟩
+  | _ => ⟨.Sskip, .Econst_int (0#32) CC.tint, .Sskip, .Sskip⟩
+
+private def srcProbe : CC.Stmt := by run_tac cachePart (← `(srcPieces.probe))
+private def srcGate : CC.Expr := by run_tac cachePart (← `(srcPieces.gate))
+private def srcFast : CC.Stmt := by run_tac cachePart (← `(srcPieces.fast))
+def defaultWriter : CC.Stmt := by run_tac cachePart (← `(srcPieces.scalar))
+
+/-- Both pointer selectors and the default register writer are exact original source arms. -/
+theorem pointer_source :
+    scalarWriter = .Ssequence dstProbe (.Sifthenelse dstGate dstFast sourceWriter) ∧
+    sourceWriter = .Ssequence srcProbe (.Sifthenelse srcGate srcFast defaultWriter) := by
+  constructor <;> rfl
+
+def narrowDstTemps (le : CC.TempEnv) : CC.TempEnv :=
+  ((((le.set X86_program_profile_bpf._t'129 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'130 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'131 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'136 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'138 (.Vint (0#32))
+
+def narrowSrcTemps (le : CC.TempEnv) : CC.TempEnv :=
+  ((((le.set X86_program_profile_bpf._t'119 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'120 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'121 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'122 (.Vint (0#32))).set
+    X86_program_profile_bpf._t'124 (.Vint (0#32))
+
+/-- Every narrow width takes the genuine short-circuit path with exact
+selector zeroes and the complete incoming memory preserved. -/
+theorem narrow_destination (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (narrow : size ≠ .q)
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size)) :
+    InternalRun ge 21 (.State function scalarWriter k e le m)
+      (.State function sourceWriter k e (narrowDstTemps le) m) := by
+  rw [pointer_source.1]
+  cases size <;> try exact (narrow rfl).elim
+  all_goals apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, dstProbe, dstGate, narrowDstTemps,
+      CC.doStep, CC.doEvalExpr, CC.typeof, width, X86ShiftLeft.argument, X86.Size.bytes,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tbool,
+      CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vfalse,
+      CC.Eapp, CC.E0]
+
+/-- Every narrow width takes the genuine short-circuit path with exact
+selector zeroes and the complete incoming memory preserved. -/
+theorem narrow_source (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (narrow : size ≠ .q)
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size)) :
+    InternalRun ge 21 (.State function sourceWriter k e le m)
+      (.State function defaultWriter k e (narrowSrcTemps le) m) := by
+  rw [pointer_source.2]
+  cases size <;> try exact (narrow rfl).elim
+  all_goals apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, srcProbe, srcGate, narrowSrcTemps,
+      CC.doStep, CC.doEvalExpr, CC.typeof, width, X86ShiftLeft.argument, X86.Size.bytes,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tbool,
+      CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vfalse,
+      CC.Eapp, CC.E0]
+
+/-- The actual narrow-width pointer selectors compose to the default writer
+in forty-two transitions, retaining every incoming byte and local binding. -/
+theorem narrow_default (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (size : X86.Size)
+    (narrow : size ≠ .q)
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size)) :
+    InternalRun ge 42 (.State function scalarWriter k e le m)
+      (.State function defaultWriter k e (narrowSrcTemps (narrowDstTemps le)) m) := by
+  have destination := narrow_destination ge function e le k m size narrow width
+  have kept : (narrowDstTemps le).get X86_program_profile_bpf.___x86_l_width__1 =
+      some (X86ShiftLeft.argument size) := by
+    simp +decide [narrowDstTemps, CC.PTree.gso, width]
+  have source := narrow_source ge function e (narrowDstTemps le) k m size narrow kept
+  exact destination.trans source
+
+
+/-- Every narrow SHL destination reaches the actual default register writer
+through all three original pointer-selection stages in fifty-one silent steps. -/
+theorem narrow_writer (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8) (size : X86.Size)
+    (narrow : size ≠ .q)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    InternalRun ge 51 (.State function writer k e le m)
+      (.State function defaultWriter k e
+        (narrowSrcTemps (narrowDstTemps (selectTemps le dst size))) m) := by
+  have selected := select_scalar ge function e le k m dst size destination width alu
+  have length : selectLength dst size = 9 := by
+    cases size <;> simp_all [selectLength, stackWidth, X86.Size.bytes]
+  rw [length] at selected
+  have kept : (selectTemps le dst size).get X86_program_profile_bpf.___x86_l_width__1 =
+      some (X86ShiftLeft.argument size) := by
+    rw [(select_temps le dst size).2.2 _ (by decide +kernel) (by decide +kernel)]
+    exact width
+  have rest := narrow_default ge function e (selectTemps le dst size) k m size narrow kept
+  exact selected.trans rest
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback

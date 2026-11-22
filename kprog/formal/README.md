@@ -373,6 +373,16 @@ The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-pr
 records eight public declarations under the default budgets. General writer
 selection, register storage and the entry-world relation remain open.
 
+For byte, word and dword SHL, both original general-arm pointer selectors now
+reach the exact default register writer. Each selector takes twenty-one silent
+steps and writes five source zero temporaries. Together with the initial
+SHL selector they take fifty-one steps for every destination byte, retaining
+the entire heap and locals with the precise twelve-write temporary map.
+The source identities cover both pointer arms and their actual fallthrough.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-narrow.log.gz)
+records thirteen public declarations under the default budgets. Qword tag
+calls, default-writer execution and the entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
