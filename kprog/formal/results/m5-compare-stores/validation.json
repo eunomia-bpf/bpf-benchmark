@@ -1,6 +1,26 @@
 {
+  "steps": 73,
+  "step_decomposition": {
+    "actual_arithmetic": 44,
+    "actual_four_pointer_loads_and_byte_stores": 22,
+    "actual_inner_loop_case_break_switch_and_outer_loop_exits": 7
+  },
+  "store_order": [
+    "Z",
+    "N",
+    "C",
+    "V"
+  ],
+  "source_field_offsets": [
+    72,
+    64,
+    80,
+    88
+  ],
+  "m5_complete": false,
+  "complete_isa_families": 0,
   "source_sha256": {
-    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "c75018b680d993e80f0ece5b132cae342df3da13e9a85efce1cef2d28b58eab4"
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "822c23b4aa8bd4914552799b2e6ad10cc65e671021810fde5f845ae5f6a83e1f"
   },
   "build": {
     "command": [
@@ -9,48 +29,59 @@
       "KProgFormal.ClightRefinement.Arm64CompareStores"
     ],
     "exit": 0,
-    "seconds": 9.889347076416016,
+    "seconds": 10.561088800430298,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
   "build_jobs": 241,
-  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores11.log",
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-permissions2.log",
   "public": {
     "command": [
       "lake",
       "env",
       "lean",
       "-j1",
-      "/workspaces/kprog-raw/formal/m5-compare/CompareStoresPublic.lean"
+      "/workspaces/kprog-raw/formal/m5-compare/ComparePermissionsPublic.lean"
     ],
     "exit": 0,
-    "seconds": 1.5324923992156982,
+    "seconds": 1.8027045726776123,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368
   },
-  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-stores1.log",
-  "public_query_sha256": "f2316bf0466a6c48ead9009e99e47f3ef937c88d4948af7312080464eda48788",
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-permissions1.log",
   "axioms": {
-    "KProgFormal.ClightRefinement.Arm64Compare.Stores.source": [
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.writable_of_access": [
       "propext",
       "Classical.choice",
       "Quot.sound"
     ],
-    "KProgFormal.ClightRefinement.Arm64Compare.Stores.write": [
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.Writable.frame": [
       "propext",
       "Classical.choice",
       "Quot.sound"
     ],
-    "KProgFormal.ClightRefinement.Arm64Compare.Stores.Effect.local_load": [
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.Writable.access": [
       "propext",
       "Classical.choice",
       "Quot.sound"
     ],
-    "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute_effect": [
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.write_writable": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute_writable": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute_loop_writable": [
       "propext",
       "CC.externalFunctionsSem",
       "CC.inlineAssemblySem",
@@ -72,231 +103,330 @@
       "Quot.sound"
     ]
   },
-  "steps": 73,
-  "step_decomposition": {
-    "actual_arithmetic": 44,
-    "actual_four_pointer_loads_and_byte_stores": 22,
-    "actual_inner_loop_case_break_switch_and_outer_loop_exits": 7
+  "scope": "same actual22stores/73loop, current real4flag byte permissions suffice through unrelated callee allocation/free; previous whole-access APIs retained as derived convenience wrappers",
+  "permission_transport": "Writable.frame uses actual owned block identity and FrameBelow permissions; Writable.access uses real store access equality; typed allocation supplies base writable_of_access",
+  "previous_confirmation": {
+    "source_sha256": {
+      "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "c75018b680d993e80f0ece5b132cae342df3da13e9a85efce1cef2d28b58eab4"
+    },
+    "build": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CompareStores"
+      ],
+      "exit": 0,
+      "seconds": 9.889347076416016,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "build_jobs": 241,
+    "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores11.log",
+    "public": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "/workspaces/kprog-raw/formal/m5-compare/CompareStoresPublic.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.5324923992156982,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    },
+    "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-stores1.log",
+    "public_query_sha256": "f2316bf0466a6c48ead9009e99e47f3ef937c88d4948af7312080464eda48788",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.write": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.Effect.local_load": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute_effect": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Compare.Stores.execute_loop": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "steps": 73,
+    "step_decomposition": {
+      "actual_arithmetic": 44,
+      "actual_four_pointer_loads_and_byte_stores": 22,
+      "actual_inner_loop_case_break_switch_and_outer_loop_exits": 7
+    },
+    "store_order": [
+      "Z",
+      "N",
+      "C",
+      "V"
+    ],
+    "source_field_offsets": [
+      72,
+      64,
+      80,
+      88
+    ],
+    "scope": "entire original CMP SUB W/X flag loop, exact11 arithmetic+4 pointer temporary writes and current Z/N/C/V bytes; source unsigned comparisons/overflow expression, same original caller/e, exact actual reached heaps",
+    "derived_not_assumed": [
+      "current writable bytes from same typed producer allocation and reached access map",
+      "actual four stores and final byte reads",
+      "separation of all flag cells/header/other differently named actual producer locals",
+      "FrameBelow original producer allocation frontier; all differently named local loads/access/nextblock preserved",
+      "loop-store operands and entry pointer from actual arithmetic temp map"
+    ],
+    "native_correspondence": "pending mature external SUBS-to-ZR flags and fetched original sixth/sixcall composition; source condition definition is imported CompCert unsigned comparison/bit expression, not a local ISA model",
+    "proof_limits": {
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512,
+      "Elab.async": false
+    },
+    "attempt_history": [
+      {
+        "name": "compare-stores1",
+        "source_sha256": "8d4075b39916dcccdba6f8d7248a50d0ed291f99002f57f04f645d34d603afe4",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores1.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 4.5317981243133545,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "list bang indexing required Inhabited; replaced by explicit source fallback"
+      },
+      {
+        "name": "compare-stores2",
+        "source_sha256": "0ec9f348fad2a4ec985215ee54264a688f27fbb4472edea7c87258462c11044d",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores2.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 4.013351917266846,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "source cache elaboration needed expected type and synthetic metavariable synthesis"
+      },
+      {
+        "name": "compare-stores3",
+        "source_sha256": "fe39dd11e65571cc67b9f0a326945c3c091d0524968304e97a0f0e2bdebb8e04",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores3.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 4.022651433944702,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "actual list-indexed expression not simplified"
+      },
+      {
+        "name": "compare-stores4",
+        "source_sha256": "8242dd1b398c62c16b6813f0d5ceb3e6e9f330be1d2f3a7ddd1a2ef9de919a67",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores4.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 4.331804275512695,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "actual list-indexed expression not reduced; cached exact expressions individually"
+      },
+      {
+        "name": "compare-stores5",
+        "source_sha256": "ca94102e9299a4090fdd152569b95dbeee40d66f68c9598f36a8b28ab5654bf0",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores5.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 0,
+          "seconds": 4.6991541385650635,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "intermediate actual source identities/expression evaluations/layout offsets PASS"
+      },
+      {
+        "name": "compare-stores6",
+        "source_sha256": "567774e88e200ddd421fbcc403ed4d40ca43bc86793a244bb3d90ad552e9c1fa",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores6.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 4.828748941421509,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "single-step proof needed explicit source shape and no solved-goal rfl"
+      },
+      {
+        "name": "compare-stores7",
+        "source_sha256": "ed01917ff7a2f794caf8e8c96a013d11815e299e25d87b400ee3b371717623e5",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores7.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 9.366148710250854,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "single assignment needed expression typeof lemma before generic typeof expansion"
+      },
+      {
+        "name": "compare-stores8",
+        "source_sha256": "52d5f4a3b485908bb010dc2f6a251d62e5d981a288f81e9f3bdf1d49c74c3756",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores8.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 9.241416692733765,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "single assignment needed target typeof lemma"
+      },
+      {
+        "name": "compare-stores9",
+        "source_sha256": "0b7ef6108dfa9e6e4d5885e9a0e38baeedfa5bda9b4c6aa190bc17e49f1b3fec",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores9.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 1,
+          "seconds": 9.181142091751099,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "single assignment needed unfolded value in assignment equality"
+      },
+      {
+        "name": "compare-stores10",
+        "source_sha256": "794eb710f10785e1fb8908602a2a4367ed9f3b6f31f511f0a6b5553912555a67",
+        "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores10.log",
+        "result": {
+          "command": [
+            "lake",
+            "build",
+            "KProgFormal.ClightRefinement.Arm64CompareStores"
+          ],
+          "exit": 0,
+          "seconds": 9.479085683822632,
+          "cpu": 17,
+          "workers": 1,
+          "nice": 0,
+          "address_space_bytes": 34359738368
+        },
+        "note": "intermediate real4stores/effect/frame/source22 PASS"
+      }
+    ],
+    "whole_library_confirmation": "pending meaningful completed CMP/source/native batch; V latest PF leaf1ffbe2fc3 reopened for universal composition, preserve WIP",
+    "m5_complete": false,
+    "complete_isa_families": 0
   },
-  "store_order": [
-    "Z",
-    "N",
-    "C",
-    "V"
+  "previous_source_snapshot": "/workspaces/kprog-raw/formal/m5-compare/compare-stores-generalize-before.lean",
+  "current_attempt_history": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CompareStores"
+      ],
+      "exit": 0,
+      "seconds": 10.342155456542969,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368
+    }
   ],
-  "source_field_offsets": [
-    72,
-    64,
-    80,
-    88
-  ],
-  "scope": "entire original CMP SUB W/X flag loop, exact11 arithmetic+4 pointer temporary writes and current Z/N/C/V bytes; source unsigned comparisons/overflow expression, same original caller/e, exact actual reached heaps",
-  "derived_not_assumed": [
-    "current writable bytes from same typed producer allocation and reached access map",
-    "actual four stores and final byte reads",
-    "separation of all flag cells/header/other differently named actual producer locals",
-    "FrameBelow original producer allocation frontier; all differently named local loads/access/nextblock preserved",
-    "loop-store operands and entry pointer from actual arithmetic temp map"
-  ],
-  "native_correspondence": "pending mature external SUBS-to-ZR flags and fetched original sixth/sixcall composition; source condition definition is imported CompCert unsigned comparison/bit expression, not a local ISA model",
   "proof_limits": {
     "maxHeartbeats": 200000,
     "maxRecDepth": 512,
     "Elab.async": false
   },
-  "attempt_history": [
-    {
-      "name": "compare-stores1",
-      "source_sha256": "8d4075b39916dcccdba6f8d7248a50d0ed291f99002f57f04f645d34d603afe4",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores1.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 4.5317981243133545,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "list bang indexing required Inhabited; replaced by explicit source fallback"
-    },
-    {
-      "name": "compare-stores2",
-      "source_sha256": "0ec9f348fad2a4ec985215ee54264a688f27fbb4472edea7c87258462c11044d",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores2.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 4.013351917266846,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "source cache elaboration needed expected type and synthetic metavariable synthesis"
-    },
-    {
-      "name": "compare-stores3",
-      "source_sha256": "fe39dd11e65571cc67b9f0a326945c3c091d0524968304e97a0f0e2bdebb8e04",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores3.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 4.022651433944702,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "actual list-indexed expression not simplified"
-    },
-    {
-      "name": "compare-stores4",
-      "source_sha256": "8242dd1b398c62c16b6813f0d5ceb3e6e9f330be1d2f3a7ddd1a2ef9de919a67",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores4.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 4.331804275512695,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "actual list-indexed expression not reduced; cached exact expressions individually"
-    },
-    {
-      "name": "compare-stores5",
-      "source_sha256": "ca94102e9299a4090fdd152569b95dbeee40d66f68c9598f36a8b28ab5654bf0",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores5.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 0,
-        "seconds": 4.6991541385650635,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "intermediate actual source identities/expression evaluations/layout offsets PASS"
-    },
-    {
-      "name": "compare-stores6",
-      "source_sha256": "567774e88e200ddd421fbcc403ed4d40ca43bc86793a244bb3d90ad552e9c1fa",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores6.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 4.828748941421509,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "single-step proof needed explicit source shape and no solved-goal rfl"
-    },
-    {
-      "name": "compare-stores7",
-      "source_sha256": "ed01917ff7a2f794caf8e8c96a013d11815e299e25d87b400ee3b371717623e5",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores7.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 9.366148710250854,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "single assignment needed expression typeof lemma before generic typeof expansion"
-    },
-    {
-      "name": "compare-stores8",
-      "source_sha256": "52d5f4a3b485908bb010dc2f6a251d62e5d981a288f81e9f3bdf1d49c74c3756",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores8.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 9.241416692733765,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "single assignment needed target typeof lemma"
-    },
-    {
-      "name": "compare-stores9",
-      "source_sha256": "0b7ef6108dfa9e6e4d5885e9a0e38baeedfa5bda9b4c6aa190bc17e49f1b3fec",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores9.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 1,
-        "seconds": 9.181142091751099,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "single assignment needed unfolded value in assignment equality"
-    },
-    {
-      "name": "compare-stores10",
-      "source_sha256": "794eb710f10785e1fb8908602a2a4367ed9f3b6f31f511f0a6b5553912555a67",
-      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-stores10.log",
-      "result": {
-        "command": [
-          "lake",
-          "build",
-          "KProgFormal.ClightRefinement.Arm64CompareStores"
-        ],
-        "exit": 0,
-        "seconds": 9.479085683822632,
-        "cpu": 17,
-        "workers": 1,
-        "nice": 0,
-        "address_space_bytes": 34359738368
-      },
-      "note": "intermediate real4stores/effect/frame/source22 PASS"
-    }
-  ],
-  "whole_library_confirmation": "pending meaningful completed CMP/source/native batch; V latest PF leaf1ffbe2fc3 reopened for universal composition, preserve WIP",
-  "m5_complete": false,
-  "complete_isa_families": 0
+  "whole_library_confirmation": "pending meaningful completed CMP/source/native batch and latest stable V handoff"
 }

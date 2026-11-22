@@ -196,6 +196,21 @@ private theorem flag_names : ∀ i j : Fin 4, i ≠ j →
 private theorem flag_header_names : ∀ i : Fin 4,
     headerSourceName (Arm64ProducerEntryView.flagIndex (flagIndex i)) ≠ Arm64Entry._entry := by decide +kernel
 
+/-- Only the actual four byte-cell permissions are needed; unrelated callee
+allocations and freed blocks may change the rest of the access map. -/
+def Writable {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry) : Prop :=
+  ∀ i : Fin 4, CC.Mem.validAccess before .Mint8unsigned
+    (storage.flags (flagIndex i)).block 0 .Writable = true
+
+theorem writable_of_access {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (access : before.access = (allocation initial).2.access) : Writable storage := by
+  intro i
+  exact (CC.Mem.validAccess_congr (m1 := before) (m2 := (allocation initial).2)
+    (chunk := .Mint8unsigned) (b := (storage.flags (flagIndex i)).block) (ofs := 0) (p := .Writable)
+    (fun o => by simp only [CC.Mem.perm,access])).trans (flag_allocated storage i).2
+
 /-- Successful stores, reached bytes and allocation/caller frames, all produced
 from the original current access map rather than assumed post-state flags. -/
 structure Effect {initial before : CC.Mem} {entry : HeaderLocal initial}
@@ -218,18 +233,24 @@ private theorem load_written {m after : CC.Mem} {block : CC.Block} (b : Bool)
 
 /-- All four store successes and final flag bytes follow from allocation-derived
 byte permissions; the actual source store order is retained. -/
-theorem write {initial before : CC.Mem} {entry : HeaderLocal initial}
+theorem write_writable {initial before : CC.Mem} {entry : HeaderLocal initial}
     (storage : Storage initial before entry) (lhs rhs result sign : BitVec 64)
-    (access : before.access = (allocation initial).2.access) :
+    (writable : Writable storage) :
     ∃ after, Effect storage lhs rhs result sign after := by
-  obtain ⟨m1,s0,a1⟩ := create_store initial before .Mint8unsigned (storage.flags (flagIndex 0)).block
-    (value lhs rhs result sign 0) access (flag_allocated storage 0).2
-  obtain ⟨m2,s1,a2⟩ := create_store initial m1 .Mint8unsigned (storage.flags (flagIndex 1)).block
-    (value lhs rhs result sign 1) a1 (flag_allocated storage 1).2
-  obtain ⟨m3,s2,a3⟩ := create_store initial m2 .Mint8unsigned (storage.flags (flagIndex 2)).block
-    (value lhs rhs result sign 2) a2 (flag_allocated storage 2).2
-  obtain ⟨after,s3,_⟩ := create_store initial m3 .Mint8unsigned (storage.flags (flagIndex 3)).block
-    (value lhs rhs result sign 3) a3 (flag_allocated storage 3).2
+  have create (memory : CC.Mem) (i : Fin 4) (v : CC.Val)
+      (same : memory.access = before.access) :
+      ∃ after, CC.Mem.store .Mint8unsigned memory (storage.flags (flagIndex i)).block 0 v = some after := by
+    have permission := (CC.Mem.validAccess_congr (m1 := memory) (m2 := before)
+      (chunk := .Mint8unsigned) (b := (storage.flags (flagIndex i)).block) (ofs := 0) (p := .Writable)
+      (fun o => by simp only [CC.Mem.perm,same])).trans (writable i)
+    simp only [CC.Mem.store,permission,ite_true]
+    exact ⟨_,rfl⟩
+  obtain ⟨m1,s0⟩ := create before 0 (value lhs rhs result sign 0) rfl
+  obtain ⟨m2,s1⟩ := create m1 1 (value lhs rhs result sign 1) (CC.Mem.store_access s0)
+  obtain ⟨m3,s2⟩ := create m2 2 (value lhs rhs result sign 2)
+    ((CC.Mem.store_access s1).trans (CC.Mem.store_access s0))
+  obtain ⟨after,s3⟩ := create m3 3 (value lhs rhs result sign 3)
+    (((CC.Mem.store_access s2).trans (CC.Mem.store_access s1)).trans (CC.Mem.store_access s0))
   have distinct (i j : Fin 4) (different : i ≠ j) :
       (storage.flags (flagIndex i)).block ≠ (storage.flags (flagIndex j)).block :=
     flag_separate storage i _ _ _ (storage.flags (flagIndex j)).binding (flag_names i j different)
@@ -349,16 +370,16 @@ theorem execute_effect {initial before after : CC.Mem} {entry : HeaderLocal init
 
 /-- Execute all four original source stores with no assumed store success or
 post-state: actual allocation permissions produce the effect and run together. -/
-theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
+theorem execute_writable {initial before : CC.Mem} {entry : HeaderLocal initial}
     (storage : Storage initial before entry) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (lhs rhs result sign : BitVec 64)
     (entryRead : le.get Arm64Program._entry = some (.Vptr entry.block 0))
     (inputs : operands le lhs rhs result sign)
-    (access : before.access = (allocation initial).2.access) :
+    (writable : Writable storage) :
     ∃ after, Effect storage lhs rhs result sign after ∧
       InternalRun Arm64ProgramEntryLinked.ge 22 (.State Arm64Nop.handler Math.stores k e le before)
         (.State Arm64Nop.handler .Sskip k e (temps le (fun i => (storage.flags (flagIndex i)).block)) after) := by
-  obtain ⟨after,effect⟩ := write storage lhs rhs result sign access
+  obtain ⟨after,effect⟩ := write_writable storage lhs rhs result sign writable
   exact ⟨after,effect,execute_effect storage e le k lhs rhs result sign entryRead inputs effect⟩
 
 set_option hygiene false in
@@ -377,14 +398,14 @@ private theorem exit_loop (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Co
 /-- The entire original CMP SUB flag loop: real arithmetic44, real stores22,
 and both original loop/switch exits7. Inputs and resulting flag bytes are
 connected through the exact computed arithmetic map, not a readback premise. -/
-theorem execute_loop {initial before : CC.Mem} {entry : HeaderLocal initial}
+theorem execute_loop_writable {initial before : CC.Mem} {entry : HeaderLocal initial}
     (storage : Storage initial before entry) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (lhs rhs : BitVec 64) (narrow : Bool)
     (entryRead : le.get Arm64Program._entry = some (.Vptr entry.block 0))
     (effective : le.get Arm64Program.___a64_l_width = some (RhsCall.width narrow))
     (lhsRead : le.get Arm64Program.___a64_l_lhs__4 = some (.Vlong lhs))
     (rhsRead : le.get Arm64Program.___a64_l_rhs__4 = some (.Vlong rhs))
-    (access : before.access = (allocation initial).2.access) :
+    (writable : Writable storage) :
     ∃ after, Effect storage (Math.left lhs narrow) (Math.right rhs narrow)
         (Math.result lhs rhs narrow) (Math.sign narrow) after ∧
       InternalRun Arm64ProgramEntryLinked.ge 73 (.State Arm64Nop.handler RhsCall.flags k e le before)
@@ -398,9 +419,76 @@ theorem execute_loop {initial before : CC.Mem} {entry : HeaderLocal initial}
   obtain ⟨_,hs,hl,hr,hv⟩ := Math.values le lhs rhs narrow
   have inputs : operands (Math.temps le lhs rhs narrow) (Math.left lhs narrow) (Math.right rhs narrow)
       (Math.result lhs rhs narrow) (Math.sign narrow) := ⟨hl,hr,hv,hs⟩
-  obtain ⟨after,effect,storeRun⟩ := execute storage e (Math.temps le lhs rhs narrow) (Math.continuation k)
+  obtain ⟨after,effect,storeRun⟩ := execute_writable storage e (Math.temps le lhs rhs narrow) (Math.continuation k)
     (Math.left lhs narrow) (Math.right rhs narrow) (Math.result lhs rhs narrow) (Math.sign narrow)
-    entryAfter inputs access
+    entryAfter inputs writable
   exact ⟨after,effect,(mathRun.trans storeRun).trans (exit_loop e _ after k)⟩
+
+
+/-- Original whole-access convenience specialization, retaining the accepted API. -/
+theorem write {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry) (lhs rhs result sign : BitVec 64)
+    (access : before.access = (allocation initial).2.access) :
+    ∃ after, Effect storage lhs rhs result sign after :=
+  write_writable storage lhs rhs result sign (writable_of_access storage access)
+
+/-- Original whole-access convenience specialization, retaining the accepted API. -/
+theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (lhs rhs result sign : BitVec 64)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr entry.block 0))
+    (inputs : operands le lhs rhs result sign)
+    (access : before.access = (allocation initial).2.access) :
+    ∃ after, Effect storage lhs rhs result sign after ∧
+      InternalRun Arm64ProgramEntryLinked.ge 22 (.State Arm64Nop.handler Math.stores k e le before)
+        (.State Arm64Nop.handler .Sskip k e (temps le (fun i => (storage.flags (flagIndex i)).block)) after) :=
+  execute_writable storage e le k lhs rhs result sign entryRead inputs (writable_of_access storage access)
+
+/-- Original whole-access convenience specialization, retaining the accepted API. -/
+theorem execute_loop {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (lhs rhs : BitVec 64) (narrow : Bool)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr entry.block 0))
+    (effective : le.get Arm64Program.___a64_l_width = some (RhsCall.width narrow))
+    (lhsRead : le.get Arm64Program.___a64_l_lhs__4 = some (.Vlong lhs))
+    (rhsRead : le.get Arm64Program.___a64_l_rhs__4 = some (.Vlong rhs))
+    (access : before.access = (allocation initial).2.access) :
+    ∃ after, Effect storage (Math.left lhs narrow) (Math.right rhs narrow)
+        (Math.result lhs rhs narrow) (Math.sign narrow) after ∧
+      InternalRun Arm64ProgramEntryLinked.ge 73 (.State Arm64Nop.handler RhsCall.flags k e le before)
+        (.State Arm64Nop.handler .Sskip k e
+          (temps (Math.temps le lhs rhs narrow) (fun i => (storage.flags (flagIndex i)).block)) after) :=
+  execute_loop_writable storage e le k lhs rhs narrow entryRead effective lhsRead rhsRead (writable_of_access storage access)
+
+/-- Real caller allocation/free frames preserve exactly the owned flag-cell
+permissions, even when unrelated access-map entries change. -/
+theorem Writable.frame {initial before after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} (writable : Writable storage)
+    (nextStorage : Storage initial after entry) (frontier : CC.Block)
+    (bound : (allocation initial).2.nextblock.toNat ≤ frontier.toNat)
+    (frame : FrameBelow frontier before after) : Writable nextStorage := by
+  intro i
+  have same : (nextStorage.flags (flagIndex i)).block = (storage.flags (flagIndex i)).block :=
+    congrArg Prod.fst (Option.some.inj ((nextStorage.flags (flagIndex i)).binding.symm.trans
+      (storage.flags (flagIndex i)).binding))
+  rw [same]
+  have owned := Nat.lt_of_lt_of_le (storage.flags (flagIndex i)).owned bound
+  exact (CC.Mem.validAccess_congr (m1 := after) (m2 := before)
+    (chunk := .Mint8unsigned) (b := (storage.flags (flagIndex i)).block) (ofs := 0) (p := .Writable)
+    (fun o => by simp only [CC.Mem.perm,(frame _ owned).2])).trans (writable i)
+
+/-- Real stores preserve permissions while changing the reached flag contents. -/
+theorem Writable.access {initial before after : CC.Mem} {entry : HeaderLocal initial}
+    {storage : Storage initial before entry} (writable : Writable storage)
+    (nextStorage : Storage initial after entry) (access : after.access = before.access) :
+    Writable nextStorage := by
+  intro i
+  have same : (nextStorage.flags (flagIndex i)).block = (storage.flags (flagIndex i)).block :=
+    congrArg Prod.fst (Option.some.inj ((nextStorage.flags (flagIndex i)).binding.symm.trans
+      (storage.flags (flagIndex i)).binding))
+  rw [same]
+  exact (CC.Mem.validAccess_congr (m1 := after) (m2 := before)
+    (chunk := .Mint8unsigned) (b := (storage.flags (flagIndex i)).block) (ofs := 0) (p := .Writable)
+    (fun o => by simp only [CC.Mem.perm,access])).trans (writable i)
 
 end KProgFormal.ClightRefinement.Arm64Compare.Stores
