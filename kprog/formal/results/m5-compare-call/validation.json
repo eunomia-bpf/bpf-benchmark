@@ -1,0 +1,121 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean": "c00a5aa5c391a3e37c400b5e7a79821b4c7123f72e07c1f010a3966c4602a2ee",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareBody.lean": "826646bfd9747443e2e96aa0c2777f4a4076591e48f188775bfb0ec065711c16",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "822c23b4aa8bd4914552799b2e6ad10cc65e671021810fde5f845ae5f6a83e1f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareCall"
+    ],
+    "exit": 0,
+    "seconds": 38.06636834144592,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 263,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-call2.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareCallPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2884433269500732,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-call1.log",
+  "public_query_sha256": "65fa4f2b1e9711e56e9331146924bcf4dd4ff77f2145f81e6521d5f8101280d6",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Stores.Effect.storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.gpr_load": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.Result.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Call.execute_caller": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "call_steps": 413,
+  "original_caller_steps": 417,
+  "step_decomposition": {
+    "actual_entry": 1,
+    "actual_body": 411,
+    "actual_release_and_return": 1,
+    "original_call_argument_casts_and_caller_resume": 4
+  },
+  "scope": "actual original sixth CMP call, real own frame allocation/free/return, current flag bytes/storage/current permissions, all nonflag local and GPR/tag loads, caller frame, original afterMul->afterCompare caller continuation",
+  "derived_not_assumed": [
+    "callee flag permissions transported from actual before cells through allocation frame",
+    "real four current flag bytes after genuine frame release",
+    "current storage roots/slots/SP/vector/flag pointers from actual nonflag local loads",
+    "actual freeList/contents/nextblock/released permissions and owned-frame separation",
+    "silent prefixes/unique stuck terminal/no infinite relational runs from exact source execution"
+  ],
+  "remaining_input_obligation": "actual four flag-byte Writable before the sixth call must be derived along original producer/five-call path; no final permission or native flag/result assumption replaces it",
+  "native_correspondence": "pending mature external SUBS-to-ZR NZCV and full native/register sixth/sixcall entry correspondence; this proof is actual Clight source call only",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [
+    {
+      "name": "compare-call1",
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64CompareCall"
+        ],
+        "exit": 0,
+        "seconds": 39.545719385147095,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-compare/compare-call1.log",
+      "source_sha256": "40a373923f02253db1e1cbd14fce0320574e7c019fd059330abf647a7c1c7968",
+      "scope": "intermediate complete413step real call before adding GPR/all-behaviors/original417caller composition"
+    }
+  ],
+  "whole_library_confirmation": "pending meaningful source/native CMP batch and newest stable V handoff; V writer source currently active",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
