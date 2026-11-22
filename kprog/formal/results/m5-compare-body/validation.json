@@ -1,0 +1,80 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareBody.lean": "826646bfd9747443e2e96aa0c2777f4a4076591e48f188775bfb0ec065711c16",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareStores.lean": "822c23b4aa8bd4914552799b2e6ad10cc65e671021810fde5f845ae5f6a83e1f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CompareBody"
+    ],
+    "exit": 0,
+    "seconds": 5.627799034118652,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 242,
+  "build_log": "/workspaces/kprog-raw/formal/m5-compare/compare-body1.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-compare/CompareBodyPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7608261108398438,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-compare/public-compare-body1.log",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Compare.Body.branch_execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Compare.Body.execute": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "branch_steps": 291,
+  "body_steps": 411,
+  "step_decomposition": {
+    "actual_linked_width_helper_and_dispatch": 118,
+    "actual_scalar_operands": 218,
+    "actual_SUB_flag_loop": 73,
+    "actual_enclosing_body_loop_exit": 2
+  },
+  "scope": "complete original ordinary scalar CMP_REG W/X body in actual linked world, with same original e/k and computed memory effect; own generic function frame still live",
+  "input_scope": "ordinary DST/SRC Fin31 typed actual64word/tag0, op23,AUX256,width flags4/8, true four current flag-cell permissions, actual helper unshadowed conditions",
+  "derived_not_assumed": [
+    "post-dispatch entry/dst/src/AUX/effectivewidth/op from exact original temp writes",
+    "captured lhs/rhs/width/entry at flag-loop frontier from actual scalar helper/caller runs and temp maps",
+    "all arithmetic and real flag-store successes/current final bytes from imported semantics and current actual writable cells",
+    "original loop exits to actual caller continuation"
+  ],
+  "retained_source_details": "modified RHS width mask and second original SUB width mask both retained; source values/memory effect are actual CompCert evaluations, no returned helper/native flag/post-state readback premise",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "attempt_history": [],
+  "complete_call_free_register_native_correspondence": "pending real generic entry/free/return and full source/native register state;411 is body only",
+  "whole_library_confirmation": "pending meaningful completed CMP/source/native batch/latest stable V handoff",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}
