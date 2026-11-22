@@ -1,0 +1,166 @@
+{
+  "source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionEq.lean": "2225976378407105c7f1e25a3035f8bad5c5f4c59b13234499686bbc6c9ae305"
+  },
+  "dependency_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64Width.lean": "17dbf7173267c6be4aa0996ab6183fb19d99f878e38f61675dc200ba8b331f7c",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteFrame.lean": "32ad0ee56100a27340920066d6d1365475087658b7cfecd8c0b7be77ad8aeb18",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64Registers.lean": "b49fc2a167dcb24a1989f55179468210f90d6790553c40dc647cd436294fd212",
+    "kprog/formal/external/LNSym/Arm/Insts/Common.lean": "fc139844dfaa9975588473d3dc57beab4cfc990dee9af8905643b4e6e90f0ab9",
+    "kprog/formal/external/clean/export/CCLib/Cop.lean": "773cc8d2ed06dc4c791f9c3aa8bb12ca3015350f3da93bb7afa75b771793996f"
+  },
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ConditionEq"
+    ],
+    "exit": 0,
+    "seconds": 2.673825740814209,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "build_jobs": 176,
+  "build_log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build4.log",
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/ConditionEqPublic.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.604698896408081,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-public1.log",
+  "public_query_sha256": "187950066127ebcd13eb3557d1fdf7a0c578fa0faf4830529d82b47659fa05cb",
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64ConditionEq.internal": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ConditionEq.internal_bit": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ConditionEq.from_storage": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ConditionEq.native_truth": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ConditionEq.all_behaviors": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "steps": 12,
+  "scope": "complete actual exported condition function at EQ0 for all unsigned Zbytes; other argument values arbitrary and not dereferenced; full memory preserved/all Kstop relational behaviors silent prefixes/unique stuck endpoint/no infinite; same Storage plus existing FlagsRepresent derives current Z load and actual native Z scalar; its C bool conversion equals imported ConditionHolds0",
+  "representation_derivation": "actual storage_flag/header pointers, existing FlagsRepresent tuple and Option success inversion derive raw Z load; one-bit specialization matches existing mature scalar view, no new nativepoststate/readback/condition law assumed",
+  "attempt_history": [
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ConditionEq"
+        ],
+        "exit": 1,
+        "seconds": 5.063480615615845,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build1.log",
+      "note": "initial executable proof left Mem.loadv opaque; explicit imported loadv unfolding exposes same actual load premise, no cap change",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build1-source.lean",
+      "source_sha256": "1915de0da877495f64de73f277861dd32b4e29fe1dcfea46fae0be80f2209bce"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ConditionEq"
+        ],
+        "exit": 0,
+        "seconds": 1.4185636043548584,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build2.log",
+      "note": "all-byte EQ12 passed; byte return retained before caller truth conversion",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build2-source.lean",
+      "source_sha256": "0e4a79ed5b9a310e9ecda146e9fd3ed5ab35fc0551fb0992e62b617dad37066e"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ConditionEq"
+        ],
+        "exit": 0,
+        "seconds": 2.1799356937408447,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build3.log",
+      "note": "same-storage/actualFlagsRepresent bridge and one-bit specialization passed",
+      "source_snapshot": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build3-source.lean",
+      "source_sha256": "6969950df2fdf4b9a95726233b5f0828e956d83d7dd8c502e0cac8cfcf56ec85"
+    },
+    {
+      "result": {
+        "command": [
+          "lake",
+          "build",
+          "KProgFormal.ClightRefinement.Arm64ConditionEq"
+        ],
+        "exit": 0,
+        "seconds": 2.673825740814209,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368
+      },
+      "log": "/workspaces/kprog-raw/formal/m5-select-condition/20261122T022326Z/eq-build4.log",
+      "note": "mature ConditionHolds truth binding and all-behavior closure passed"
+    }
+  ],
+  "remaining": "actual CSEL dispatcher and helper callsite/current pointer loads, selected raw/tag pointer writeback/mature CSEL/seventh-call composition, other condition codes/remaining fixture/full handler coverage/O1/O2/O4/M5/M6",
+  "m5_complete": false,
+  "complete_isa_families": 0
+}

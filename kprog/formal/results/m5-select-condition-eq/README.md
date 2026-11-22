@@ -1,0 +1,9 @@
+# Actual EQ condition call and mature truth
+
+`Arm64ConditionEq.internal` executes the actual exported condition function at EQ0 in12 silent Clight transitions for every unsigned Z byte, memory and continuation. It preserves full memory. Other argument values are arbitrary and are not dereferenced on the EQ path. The actual helper returns the original zero-extended Z byte; its caller performs the truth conversion later. `all_behaviors` covers every finite Kstop execution as a silent prefix of that same return, unique stuck endpoints and no infinite execution.
+
+`from_storage` derives the current Z load from the same real allocation-bound Storage/header pointers and existing concrete FlagsRepresent tuple. It returns the actual mature Z scalar without an extra flag-readback or native-poststate premise. `native_truth` proves its actual C bool conversion equals the imported LNSym ConditionHolds0. The one-bit specialization uses finite kernel checking, with no local replacement condition model or native oracle.
+
+Exact130line source passed 176 targeted jobs in 2.673826s and five public type/axiom queries in 1.604699s, CPU17/nice0/j1/32GiB/default200000heartbeats/depth512/async=false. Initial loadv opacity was resolved by unfolding the existing imported memory operation; intermediate byte/storage checks and initial failed source/log are retained in validation.json. Only existing logical/CompCert semantic axioms. Fresh timestamped raw directory and used-name refusal preserve evidence.
+
+The actual CSEL dispatcher/callsite pointer reads, selected raw/tag pointer writeback, mature instruction and original seventh-call composition remain open. Remaining conditions, complete handler/ISA families and O1/O2/O4/M5/M6 remain open; families0. This is a condition-helper component, without a new global/root build or runtime/loader/gate change.
