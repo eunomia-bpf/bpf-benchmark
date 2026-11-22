@@ -480,6 +480,20 @@ records forty-six public declarations under the default budgets. Local value
 updates, final register-table stores, qword tag calls and the native entry-world
 relation remain open.
 
+
+The original byte arm now executes sixteen silent steps for ordinary scalar
+destinations: ten to the actual shift selector, two for its low/high byte
+store, and four for the tag assignment and loop exits. The source-built GPR
+union's byte array has offset zero; its array decay, pointer addition and
+unsigned-byte cast lead to the actual local memory store at offset zero or one.
+The exact post-heap, two source temporary writes and every-other-temp frame
+are retained. A logical bitvector proof identifies the source result mask with
+the low eight bits zero-extended to 32 bits. The
+[focused receipt](../results/kprog_verification_20261107/x86-shift-writer-byte.log.gz)
+records fifty-three public declarations under the default budgets. RSP and
+pointer-tag byte branches, other widths, final register-table stores, qword tag
+calls and the native entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

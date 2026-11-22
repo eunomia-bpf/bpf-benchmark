@@ -1668,4 +1668,234 @@ theorem narrow_storage (ge : CC.CGenv)
   have dispatched := width_dispatch ge function e reached (loadCont k) after size reachedWidth
   exact tagged.trans dispatched
 
+
+private def bytePrelude : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105 with
+    | .Ssequence prelude _ => prelude | _ => .Sskip))
+
+private def byteBody : CC.Stmt := by
+  run_tac cachePart (← `(match X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105 with
+    | .Ssequence _ (.Sloop body _) => body | _ => .Sskip))
+
+private def byteLane : CC.Stmt := by
+  run_tac cachePart (← `(match byteBody with | .Ssequence lane _ => lane | _ => .Sskip))
+
+private def byteChoice : CC.Stmt := by
+  run_tac cachePart (← `(match byteBody with
+    | .Ssequence _ (.Ssequence choice _) => choice | _ => .Sskip))
+
+private def byteTag : CC.Stmt := by
+  run_tac cachePart (← `(match byteBody with
+    | .Ssequence _ (.Ssequence _ tag) => tag | _ => .Sskip))
+
+private def byteScalar : CC.Stmt := by
+  run_tac cachePart (← `(match byteChoice with | .Sifthenelse _ scalar _ => scalar | _ => .Sskip))
+
+theorem byte_source : X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105 =
+    .Ssequence bytePrelude (.Sloop (.Ssequence byteLane (.Ssequence byteChoice byteTag)) .Sbreak) := rfl
+
+def byteCont (k : CC.Cont) : CC.Cont := .Kloop1 byteBody .Sbreak k
+
+def byteValue (next : BitVec 64) : BitVec 32 := next.setWidth 32 &&& (255#32)
+
+def byteLaneTemps (le : CC.TempEnv) (next : BitVec 64) : CC.TempEnv :=
+  le.set X86_program_profile_bpf.___kprog_x86_lane__4 (.Vint (byteValue next))
+
+def byteTemps (le : CC.TempEnv) (next : BitVec 64) : CC.TempEnv :=
+  (byteLaneTemps le next).set X86_program_profile_bpf.___x86_wr_cell_tag__2 (.Vint (0#32))
+
+theorem byte_enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8) (next : BitVec 64)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (ordinary : dst.setWidth 32 ≠ (4#32))
+    (tag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (0#32)))
+    (value : le.get X86_program_profile_bpf.___x86_wr_next__2 = some (.Vlong next)) :
+    InternalRun ge 10
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105 k e le m)
+      (.State function byteScalar (.Kseq byteTag (byteCont k)) e (byteLaneTemps le next) m) := by
+  rw [byte_source]
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, bytePrelude, byteLane, byteChoice,
+      byteCont, byteBody, byteScalar, byteTag, byteLaneTemps, byteValue,
+      CC.doStep, CC.doEvalExpr, CC.typeof, destination, ordinary, tag, value, CC.PTree.gso,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero,
+      CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Eapp, CC.E0]
+
+theorem byte_exit (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) :
+    InternalRun ge 4
+      (.State function .Sskip (.Kseq byteTag (byteCont k)) e le m)
+      (.State function .Sskip k e
+        (le.set X86_program_profile_bpf.___x86_wr_cell_tag__2 (.Vint (0#32))) m) := by
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, byteTag, byteCont, CC.doStep,
+      CC.doEvalExpr, CC.typeof, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.tuchar, CC.tuint, CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Eapp, CC.E0]
+
+
+
+private def byteTest : CC.Expr := by
+  run_tac cachePart (← `(match byteScalar with
+    | .Sifthenelse test _ _ => test
+    | _ => .Econst_int (0#32) CC.tint))
+private def byteHigh : CC.Stmt := by
+  run_tac cachePart (← `(match byteScalar with | .Sifthenelse _ high _ => high | _ => .Sskip))
+private def byteLow : CC.Stmt := by
+  run_tac cachePart (← `(match byteScalar with | .Sifthenelse _ _ low => low | _ => .Sskip))
+private theorem byte_scalar_source : byteScalar = .Sifthenelse byteTest byteHigh byteLow := rfl
+
+def byteOffset (shift : BitVec 8) : CC.Integers.Ptrofs :=
+  if shift.setWidth 32 = (8#32) then 1 else 0
+
+theorem byte_store (ge : CC.CGenv)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (localBlock : CC.Block) (shift : BitVec 8) (next : BitVec 64)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (observedShift : le.get X86_program_profile_bpf.___x86_wr_shift__2 =
+      some (.Vint (shift.setWidth 32)))
+    (observedLane : le.get X86_program_profile_bpf.___kprog_x86_lane__4 =
+      some (.Vint (byteValue next)))
+    (stored : CC.Mem.store .Mint8unsigned m localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some after) :
+    InternalRun ge 2 (.State function byteScalar k e le m)
+      (.State function .Sskip k e le after) := by
+  have localAddress : CC.lvalOfVar ge e X86_program_profile_bpf.___x86_wr_cell__2
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) =
+      some (localBlock, 0, .Full) := by
+    simp only [CC.lvalOfVar, declared]
+    rfl
+  have arrayOffset : CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._b
+      X86RegisterLayout.gprRecord.co_members = .OK (0, .Full) := by
+    change CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._b gprMembers = .OK (0, .Full)
+    simp +decide [gprMembers, CC.unionFieldOffset, CC.layoutField, CC.bitalignof,
+      CC.alignof, CC.alignAttr, CC.Ty.attr, CC.align, CC.zdiv, CC.tptr, CC.tarray, CC.tuchar, CC.noattr]
+  have arrayAddress (offset : CC.Integers.Ptrofs) : CC.lvalOfField ge
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr)
+      X86_program_profile_bpf._b (.Vptr localBlock offset) =
+      some (localBlock, offset, .Full) := by
+    simp only [CC.lvalOfField, gprLayout, arrayOffset]
+    change some (localBlock, offset + 0, CC.Bitfield.Full) = some (localBlock, offset, .Full)
+    exact congrArg (fun n => some (localBlock, n, CC.Bitfield.Full)) (BitVec.add_zero offset)
+  have unionAccess : CC.accessMode
+      (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
+  have arrayAccess : CC.accessMode (.Tarray CC.tuchar 8 CC.noattr) = .By_reference := rfl
+  have byteAccess : CC.accessMode CC.tuchar = .By_value .Mint8unsigned := rfl
+  have pointerAdd (high : Bool) (offset : CC.Integers.Ptrofs) :
+      CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+        (.Vptr localBlock offset) (.Tarray CC.tuchar 8 CC.noattr)
+        (.Vint (if high then (1#32) else (0#32))) CC.tint m =
+      some (.Vptr localBlock (offset + (if high then 1 else 0))) := by
+    cases high <;> rfl
+  have arrayZero := arrayAddress (0#64)
+  have highAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr localBlock (0#64)) (.Tarray CC.tuchar 8 CC.noattr) (.Vint (1#32)) CC.tint m =
+      some (.Vptr localBlock (1#64)) := pointerAdd true (0#64)
+  have lowAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd
+      (.Vptr localBlock (0#64)) (.Tarray CC.tuchar 8 CC.noattr) (.Vint (0#32)) CC.tint m =
+      some (.Vptr localBlock (0#64)) := pointerAdd false (0#64)
+  have offsetUnsigned : CC.Integers.Ptrofs.unsigned (byteOffset shift) =
+      (if shift.setWidth 32 = (8#32) then (1 : Int) else 0) := by
+    by_cases high : shift.setWidth 32 = (8#32)
+    all_goals simp only [byteOffset, high, ite_true, ite_false]
+    all_goals rfl
+  rw [offsetUnsigned] at stored
+  have laneCast : CC.Cop.semCast (.Vint (byteValue next)) CC.tuchar CC.tuchar m =
+      some (.Vint (byteValue next)) := by
+    simp +decide [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.tuchar, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      byteValue, BitVec.and_assoc]
+  have testType : CC.typeof byteTest = CC.tint := rfl
+  dsimp only [CC.typeof] at testType
+  have trueValue : CC.Cop.boolVal (.Vint (1#32)) CC.tint m = some true := rfl
+  have falseValue : CC.Cop.boolVal (.Vint (0#32)) CC.tint m = some false := rfl
+  rw [byte_scalar_source]
+  by_cases high : shift.setWidth 32 = (8#32)
+  all_goals
+    simp only [high, ite_true, ite_false] at stored
+  all_goals
+    have evaluated : CC.doEvalExpr ge e le m byteTest =
+        some (.Vint (if shift.setWidth 32 = (8#32) then (1#32) else (0#32))) := by
+      simp +decide [byteTest, CC.doEvalExpr, CC.typeof, observedShift,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+        CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.typeconv, CC.removeAttributes,
+        CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.Integers.Int.cmpu,
+        CC.Integers.MI.cmpu, CC.Integers.MI.eq,
+        CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, high,
+        CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.one, CC.Integers.MI.one,
+        CC.Integers.Int.zero, CC.Integers.MI.zero]
+    apply internalRun_of_steps
+    all_goals
+      simp +decide [steps, InternalPath, InternalState, byteHigh, byteLow,
+        CC.doStep, CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc, CC.typeof, CC.tarray,
+        evaluated, testType, high, localAddress, arrayZero, unionAccess, arrayAccess,
+        highAdd, lowAdd, observedLane, laneCast,
+        CC.doAssignLoc, byteAccess, CC.Mem.storev, stored, CC.Integers.Ptrofs.unsigned, CC.Integers.MI.unsigned, trueValue, falseValue, CC.Integers.Int.repr, CC.Integers.MI.repr,
+        CC.Eapp, CC.E0]
+
+
+theorem byte_internal (ge : CC.CGenv)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (localBlock : CC.Block) (dst shift : BitVec 8) (next : BitVec 64)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (ordinary : dst.setWidth 32 ≠ (4#32))
+    (tag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (0#32)))
+    (value : le.get X86_program_profile_bpf.___x86_wr_next__2 = some (.Vlong next))
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (observedShift : le.get X86_program_profile_bpf.___x86_wr_shift__2 =
+      some (.Vint (shift.setWidth 32)))
+    (stored : CC.Mem.store .Mint8unsigned m localBlock
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some after) :
+    InternalRun ge 16
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_105 k e le m)
+      (.State function .Sskip k e (byteTemps le next) after) := by
+  have entered := byte_enter ge function e le k m dst next destination ordinary tag value
+  have keptShift : (byteLaneTemps le next).get X86_program_profile_bpf.___x86_wr_shift__2 =
+      some (.Vint (shift.setWidth 32)) := by
+    simp +decide [byteLaneTemps, CC.PTree.gso, observedShift]
+  have lane : (byteLaneTemps le next).get X86_program_profile_bpf.___kprog_x86_lane__4 =
+      some (.Vint (byteValue next)) := by simp [byteLaneTemps]
+  have written := byte_store ge gprLayout function e (byteLaneTemps le next)
+    (.Kseq byteTag (byteCont k)) m after localBlock shift next declared keptShift lane stored
+  have exited := byte_exit ge function e (byteLaneTemps le next) k after
+  exact (entered.trans written).trans exited
+
+theorem byte_temps (le : CC.TempEnv) (next : BitVec 64) :
+    (byteTemps le next).get X86_program_profile_bpf.___kprog_x86_lane__4 =
+      some (.Vint (byteValue next)) ∧
+    (byteTemps le next).get X86_program_profile_bpf.___x86_wr_cell_tag__2 =
+      some (.Vint (0#32)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf.___kprog_x86_lane__4 →
+      id ≠ X86_program_profile_bpf.___x86_wr_cell_tag__2 →
+      (byteTemps le next).get id = le.get id := by
+  refine ⟨by simp +decide [byteTemps, byteLaneTemps, CC.PTree.gso],
+    by simp [byteTemps], ?_⟩
+  intro id neLane neTag
+  simp [byteTemps, byteLaneTemps, CC.PTree.gso, Ne.symm neLane, Ne.symm neTag]
+
+theorem byte_value (next : BitVec 64) :
+    byteValue next = (next.setWidth 8).setWidth 32 := by
+  change next.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 =
+    (next.setWidth 8).setWidth 32
+  rw [BitVec.and_setWidth_allOnes 24 8]
+  rw [BitVec.setWidth_setWidth_of_le next (by decide : 8 ≤ 32)]
+  exact (BitVec.setWidth_eq_append (x := next.setWidth 8) (by decide : 8 ≤ 32)).symm
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
