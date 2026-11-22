@@ -73,9 +73,13 @@ private def body : CC.Stmt := .Ssequence eager (.Ssequence regSet (.Ssequence po
     (.Sifthenelse releaseTest releaseAlternative .Sskip)))))
 private theorem body_eq : procedure.fn_body = .Sloop body .Sbreak := rfl
 
-/-- Raw pointer bits and the original eight-bit provenance tag. No origin is added here. -/
+/-- Actual pointer-typed argument, preserving its abstract Clight identity. -/
+def valueArguments (entry : CC.Block) (i : Fin 31) (value : CC.Val) (tag : BitVec 8) : List CC.Val :=
+  [.Vptr entry 0, .Vlong (BitVec.ofNat 64 i.val), value, .Vint (tag.setWidth 32)]
+
+/-- Existing raw-integer interface is an instance of the same arguments. -/
 def arguments (entry : CC.Block) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8) : List CC.Val :=
-  [.Vptr entry 0, .Vlong (BitVec.ofNat 64 i.val), .Vlong value, .Vint (tag.setWidth 32)]
+  valueArguments entry i (.Vlong value) tag
 
 private def entryComposite : CC.Composite :=
   (ge.genv_cenv.get Arm64Program._kprog_arm64_entry).get (by decide +kernel)
@@ -171,16 +175,19 @@ private theorem ptr_literals :
 
 set_option hygiene false in
 /-- Certify the actual internal transitions of the ordinary tagged-pointer writer. -/
-theorem execute_stores_layout (world : CC.CGenv)
+theorem execute_value_stores_layout (world : CC.CGenv)
     (layout : GprLayout world) (k : CC.Cont)
     (hk : CC.isCallCont k = true) (m before middle after : CC.Mem) (entry : HeaderLocal m)
-    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8)
-    (wordStore : CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0 (.Vlong value) = some middle)
+    (storage : Storage m before entry) (i : Fin 31) (value : CC.Val) (tag : BitVec 8)
+    (valueCast : ∀ memory, CC.Cop.semCast value (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) memory = some value)
+    (wordStore : CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0 value = some middle)
     (tagStore : CC.Mem.store .Mint8unsigned middle ((storage.tables true).cellBlock i) 0 (.Vint (tag.setWidth 32)) = some after) :
     InternalRun world 53
-      (.Callstate (.Internal procedure) (arguments entry.block i value tag) k before)
+      (.Callstate (.Internal procedure) (valueArguments entry.block i value tag) k before)
       (.Returnstate .Vundef k after) := by
-  have pointerStore : CC.Mem.store CC.Mptr before ((storage.tables false).cellBlock i) 0 (.Vlong value) = some middle := wordStore
+  have cast := valueCast before
+  simp only [CC.Cop.semCast,CC.Cop.classifyCast,CC.tptr,CC.tvoid,CC.Archi.ptr64,ite_true,ite_false] at cast
+  have pointerStore : CC.Mem.store CC.Mptr before ((storage.tables false).cellBlock i) 0 value = some middle := wordStore
   have different : ∀ i : Fin 31, tableCellName false i ≠ Arm64Entry._entry ∧
       tableCellName false i ≠ tableName true := by decide +kernel
   have wordHeaderOther := storage.separate_local false i _ _ _ entry.binding (different i).1
@@ -203,7 +210,7 @@ theorem execute_stores_layout (world : CC.CGenv)
   simp only [CC.tptr, CC.tuchar, tableCellType, unionId, eq_self, Bool.false_eq_true, ite_true, ite_false] at addWord addTag
   run_tac do
       let reduce ← `(tactic|
-          simp +decide only [body_eq, body, eager, regSet, pointerSet, tagSet, spTest, ordinary, releaseTest, arguments,
+          simp +decide only [body_eq, body, eager, regSet, pointerSet, tagSet, spTest, ordinary, releaseTest, valueArguments, cast,
       CC.doStep, hk, CC.doFunctionEntry2, names, vars, params, result_type,
       CC.doAllocVariables, CC.bindParameterTemps, CC.emptyEnv, CC.PTree.gss, CC.PTree.gso,
       CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.Mem.loadv, CC.Mem.storev,
@@ -235,24 +242,42 @@ theorem execute_stores_layout (world : CC.CGenv)
       Lean.Elab.Tactic.evalTactic (← `(tactic|
         exact InternalRun.step trivial (.skip_call _ _ _ _ _ _ hk rfl) (InternalRun.refl _)))
 
+/-- Preserve the original raw-bit API through the generalized actual execution. -/
+theorem execute_stores_layout (world : CC.CGenv)
+    (layout : GprLayout world) (k : CC.Cont)
+    (hk : CC.isCallCont k = true) (m before middle after : CC.Mem) (entry : HeaderLocal m)
+    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8)
+    (wordStore : CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0 (.Vlong value) = some middle)
+    (tagStore : CC.Mem.store .Mint8unsigned middle ((storage.tables true).cellBlock i) 0 (.Vint (tag.setWidth 32)) = some after) :
+    InternalRun world 53
+      (.Callstate (.Internal procedure) (arguments entry.block i value tag) k before)
+      (.Returnstate .Vundef k after) :=
+  execute_value_stores_layout world layout k hk m before middle after entry storage i (.Vlong value) tag
+    (fun _ => rfl) wordStore tagStore
+
 /-- The observed effect of the actual tagged-pointer writer, with successful stores
 retained for composing subsequent borrowed-entry and native-register proofs. -/
-structure Result {m before : CC.Mem} {entry : HeaderLocal m}
-    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64)
+structure ValueResult {m before : CC.Mem} {entry : HeaderLocal m}
+    (storage : Storage m before entry) (i : Fin 31) (value : CC.Val)
     (tag : BitVec 8) (after : CC.Mem) : Prop where
   stores : ∃ middle,
     CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0
-      (.Vlong value) = some middle ∧
+      value = some middle ∧
     CC.Mem.store .Mint8unsigned middle ((storage.tables true).cellBlock i) 0 (.Vint (tag.setWidth 32)) = some after
   run : InternalRun ge 53
-    (.Callstate (.Internal procedure) (arguments entry.block i value tag) .Kstop before)
+    (.Callstate (.Internal procedure) (valueArguments entry.block i value tag) .Kstop before)
     (.Returnstate .Vundef .Kstop after)
   word : CC.Mem.load .Mint64 after ((storage.tables false).cellBlock i) 0 =
-    some (.Vlong value)
+    some value
   tag : CC.Mem.load .Mint8unsigned after ((storage.tables true).cellBlock i) 0 = some (.Vint (tag.setWidth 32))
   caller : FrameBelow m.nextblock before after
   access : after.access = before.access
   nextblock : after.nextblock = before.nextblock
+
+/-- The earlier scalar-bit result retains its original contract and constructors. -/
+abbrev Result {m before : CC.Mem} {entry : HeaderLocal m}
+    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8) (after : CC.Mem) : Prop :=
+  ValueResult storage i (.Vlong value) tag after
 
 private theorem store_exists (memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Block) (value : CC.Val)
     (writable : CC.Mem.validAccess memory chunk block 0 .Writable = true) :
@@ -262,11 +287,19 @@ private theorem store_exists (memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Bl
 
 /-- Ordinary destinations use the source-derived writable cells. Raw bits and all eight provenance bits are retained.
 Neither successful stores nor a post-state are caller assumptions. -/
-theorem write {m before : CC.Mem} {entry : HeaderLocal m}
-    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8) :
-    ∃ after, Result storage i value tag after := by
+theorem write_value {m before : CC.Mem} {entry : HeaderLocal m}
+    (storage : Storage m before entry) (i : Fin 31) (value : CC.Val) (tag : BitVec 8)
+    (addresses : Arm64Registers.PointerOrigins) (raw : BitVec 64)
+    (represented : Arm64Registers.ValueRep addresses value raw) :
+    ∃ after, ValueResult storage i value tag after := by
+  have valueCast : ∀ memory, CC.Cop.semCast value (CC.tptr CC.tvoid) (CC.tptr CC.tvoid) memory = some value := by
+    cases value <;> try contradiction
+    all_goals intro memory; rfl
+  have valueLoad : CC.Val.loadResult .Mint64 value = value := by
+    cases value <;> try contradiction
+    all_goals rfl
   obtain ⟨middle, wordStore⟩ := store_exists before .Mint64 ((storage.tables false).cellBlock i)
-    (.Vlong value) (storage.writable false i)
+    value (storage.writable false i)
   have tagWritable : CC.Mem.validAccess middle .Mint8unsigned
       ((storage.tables true).cellBlock i) 0 .Writable = true :=
     (CC.Mem.validAccess_store_eq wordStore _ _ _ _).trans (storage.writable true i)
@@ -274,18 +307,25 @@ theorem write {m before : CC.Mem} {entry : HeaderLocal m}
     ((storage.tables true).cellBlock i) (.Vint (tag.setWidth 32)) tagWritable
   have distinct := storage.cells_distinct false true i i (.inl (by decide))
   have word : CC.Mem.load .Mint64 after ((storage.tables false).cellBlock i) 0 =
-      some (.Vlong value) := by
+      some value := by
     rw [CC.Mem.load_store_other tagStore .Mint64 _ 0 (.inl distinct)]
-    exact CC.Mem.load_store_same wordStore
+    simpa only [valueLoad] using CC.Mem.load_store_same wordStore
   have tagRead : CC.Mem.load .Mint8unsigned after ((storage.tables true).cellBlock i) 0 = some (.Vint (tag.setWidth 32)) :=
     by
       simpa +decide only [CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, tag_mask, ite_false] using CC.Mem.load_store_same tagStore
   exact ⟨after, ⟨⟨middle, wordStore, tagStore⟩,
-    execute_stores_layout ge program_layout .Kstop rfl m before middle after entry storage i value tag wordStore tagStore, word, tagRead,
+    execute_value_stores_layout ge program_layout .Kstop rfl m before middle after entry storage i value tag valueCast wordStore tagStore, word, tagRead,
     (FrameBelow.store (storage.cell_fresh false i) wordStore).trans
       (FrameBelow.store (storage.cell_fresh true i) tagStore),
     (CC.Mem.store_access tagStore).trans (CC.Mem.store_access wordStore),
     (CC.Mem.store_nextblock tagStore).trans (CC.Mem.store_nextblock wordStore)⟩⟩
+
+/-- Raw integer payloads keep the existing API; both stores come from the
+same generalized writer proof, not a second implementation. -/
+theorem write {m before : CC.Mem} {entry : HeaderLocal m}
+    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (tag : BitVec 8) :
+    ∃ after, Result storage i value tag after :=
+  write_value storage i (.Vlong value) tag (fun _ => none) value rfl
 
 /-- Both writes preserve every load from a differently named actual producer
 local. This covers header, pointer tables, SP, flags and vectors through their
@@ -322,6 +362,43 @@ theorem Result.other_cell {m before after : CC.Mem} {entry : HeaderLocal m}
 theorem Result.kept {m before after : CC.Mem} {entry : HeaderLocal m}
     {storage : Storage m before entry} {i : Fin 31} {value : BitVec 64} {tag : BitVec 8}
     (result : Result storage i value tag after) : Arm64CacheLocalFrame.Kept m before after i :=
+  result.local_load
+
+/-- Both writes preserve every load from a differently named actual producer
+local. This covers header, pointer tables, SP, flags and vectors through their
+real allocation bindings, without presuming native physical-address separation. -/
+theorem ValueResult.local_load {m before after : CC.Mem} {entry : HeaderLocal m}
+    {storage : Storage m before entry} {i : Fin 31} {value : CC.Val} {tag : BitVec 8}
+    (result : ValueResult storage i value tag after) (id : CC.Ident) (ty : CC.Ty) (block : CC.Block)
+    (binding : (allocation m).1.get id = some (block, ty))
+    (wordOther : tableCellName false i ≠ id) (tagOther : tableCellName true i ≠ id)
+    (chunk : CC.Chunk) (offset : Int) :
+    CC.Mem.load chunk after block offset = CC.Mem.load chunk before block offset := by
+  obtain ⟨middle, wordStore, tagStore⟩ := result.stores
+  exact (CC.Mem.load_store_other tagStore chunk block offset
+    (.inl (Ne.symm (storage.separate_local true i _ _ _ binding tagOther)))).trans
+      (CC.Mem.load_store_other wordStore chunk block offset
+        (.inl (Ne.symm (storage.separate_local false i _ _ _ binding wordOther))))
+
+/-- Every other register cell retains all successful and unsuccessful loads,
+for any chunk/offset, after the selected word and tag stores. -/
+theorem ValueResult.other_cell {m before after : CC.Mem} {entry : HeaderLocal m}
+    {storage : Storage m before entry} {i : Fin 31} {value : CC.Val} {tag : BitVec 8}
+    (result : ValueResult storage i value tag after) (tags : Bool) (j : Fin 31) (different : j ≠ i)
+    (chunk : CC.Chunk) (offset : Int) :
+    CC.Mem.load chunk after ((storage.tables tags).cellBlock j) offset =
+      CC.Mem.load chunk before ((storage.tables tags).cellBlock j) offset := by
+  obtain ⟨middle, wordStore, tagStore⟩ := result.stores
+  exact (CC.Mem.load_store_other tagStore chunk _ offset
+    (.inl (storage.cells_distinct tags true j i (.inr different)))).trans
+      (CC.Mem.load_store_other wordStore chunk _ offset
+        (.inl (storage.cells_distinct tags false j i (.inr different))))
+
+
+/-- All canonical local observations outside the selected payload and tag survive. -/
+theorem ValueResult.kept {m before after : CC.Mem} {entry : HeaderLocal m}
+    {storage : Storage m before entry} {i : Fin 31} {value : CC.Val} {tag : BitVec 8}
+    (result : ValueResult storage i value tag after) : Arm64CacheLocalFrame.Kept m before after i :=
   result.local_load
 
 end KProgFormal.ClightRefinement.Arm64PointerWrite

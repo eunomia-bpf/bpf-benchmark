@@ -1,0 +1,64 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64PointerValueFrame"
+    ],
+    "exit": 0,
+    "seconds": 53.09787201881409,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "focused_jobs": 185,
+  "core": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64PointerWrite"
+    ],
+    "exit": 0,
+    "seconds": 16.75357747077942,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-pointer-values/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8052420616149902,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368
+  },
+  "public_query_count": 7,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.execute_value_stores_layout": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.write_value": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.execute_stores_layout": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.write": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.gpr_update": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.represents": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64PointerWrite.Linked.write_value": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "whole_library": {
+    "status": "pending batch-end confirmation"
+  },
+  "complete_isa_families": 0
+}

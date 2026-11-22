@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.Arm64PointerValueFrame
+
+set_option Elab.async false
+
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.execute_value_stores_layout
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.execute_value_stores_layout
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.write_value
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.write_value
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.execute_stores_layout
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.execute_stores_layout
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.write
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.write
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.gpr_update
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.gpr_update
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.represents
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.ValueResult.represents
+#check KProgFormal.ClightRefinement.Arm64PointerWrite.Linked.write_value
+#print axioms KProgFormal.ClightRefinement.Arm64PointerWrite.Linked.write_value
