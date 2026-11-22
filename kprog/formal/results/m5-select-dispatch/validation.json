@@ -1,0 +1,51 @@
+{
+  "status": "focused proof and public queries passed",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64SelectDispatch"
+    ],
+    "exit": 0,
+    "seconds": 31.419006824493408,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 262,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-select-dispatch/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5773262977600098,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 2,
+  "axioms": {
+    "KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_source": "propext, Classical.choice, Quot.sound",
+    "KProgFormal.ClightRefinement.Arm64Select.Dispatch.body_dispatch": "propext, CC.externalFunctionsSem, CC.inlineAssemblySem, Classical.choice, Quot.sound"
+  },
+  "after_width_actual_transitions": 155,
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-pointer-values/20261122T110830Z",
+  "earlier_attempts": "dispatch1\u20135 diagnostics retained; no limits raised",
+  "whole_library": {
+    "status": "pending batch-end confirmation"
+  },
+  "complete_isa_families": 0
+}
