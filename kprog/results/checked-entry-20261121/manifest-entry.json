@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-11-22T01:34:59.738830+00:00",
+  "kind": "functional checked-entry regression; no timing claim",
+  "framework_run": "corpus/results/x86_kvm_corpus_20261122_012542_157247",
+  "functional_status": "ok",
+  "functional_exit": 0,
+  "post_rejit_pre_submission_failures": 14,
+  "post_rejit_ebpf_fallbacks": 14,
+  "service_requests": 0,
+  "service_archive_bytes": 608,
+  "first_failure": "[112.234821 pid=1939 tid=1950] native-loader failed prog=read_task_struc manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/workspaces/repository/corpus/results/verified-captures-39yczh9w/bpfrejit_1939_6b2dc94f90220b82.bpf error=native_loader: read_task_struc keeps its eBPF; its closest source  differs at its length",
+  "before": "first_error=native_loader: custom__generic keeps its eBPF; its closest source  differs at its length\nentries=26 resolved=0 failed=26 source_calls=0\n",
+  "after": "entries=26 resolved=26 failed=0 source_calls=0\n",
+  "production_lines_added": 0,
+  "production_lines_removed": 12,
+  "runtime_verification_after_fix": "pending coordinator image rebuild; current running image unchanged",
+  "remaining": "checked resolver optional source ranking still differs from May29 common resolver selection; this step only removes obsolete pre-submission refusal",
+  "archive": "kprog/results/checked-entry-20261121/manifest-entry-raw.tar.gz",
+  "archive_sha256": "107f63755bd2ee3ef85d0b40a2d5816c7e910da834bb68867f470d377bb93265",
+  "archive_bytes": 18887,
+  "raw_files": 10,
+  "stage_entries_observed": {
+    "bcc": 29,
+    "katran": 3,
+    "tracee": 113,
+    "cilium": 89,
+    "tetragon": 93,
+    "otelcol-ebpf-profiler": 26
+  },
+  "manifest_input_retention": "Stage manifests inspected and used by diagnostic, but directory disappeared before archiving; no original manifest bytes retained in this result."
+}
