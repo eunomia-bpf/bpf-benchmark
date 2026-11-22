@@ -363,6 +363,16 @@ remain open. The
 [focused receipt](../results/kprog_verification_20261107/x86-shift-zero-writer.log.gz)
 records five public declarations and ten stable input hashes.
 
+The actual writer's initial stack-ADD/SUB selector now has an exact SHL
+execution for every destination byte and architectural width. The stack/qword
+case takes thirteen silent steps; all other cases take nine. Each reaches the
+original general writer arm with the entire memory and locals preserved,
+deriving both source temporary values and framing every other temporary.
+A structural trie-overwrite lemma accounts for the actual repeated zero write.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-writer-prefix.log.gz)
+records eight public declarations under the default budgets. General writer
+selection, register storage and the entry-world relation remain open.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual

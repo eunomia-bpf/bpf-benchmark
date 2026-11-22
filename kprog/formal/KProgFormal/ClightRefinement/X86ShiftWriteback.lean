@@ -240,4 +240,83 @@ theorem zero_value (lhs rhs : BitVec 64) (size : X86.Size)
     X86ShiftLeft.result lhs rhs size = .Vlong (X86.Value.trunc size lhs) := by
   simp [X86ShiftLeft.result, zero, X86.Value.trunc_trunc]
 
+
+private structure WriterPieces where
+  probe : CC.Stmt
+  gate : CC.Expr
+  fast : CC.Stmt
+  scalar : CC.Stmt
+
+private def writerPieces : WriterPieces :=
+  match writer with
+  | .Ssequence probe (.Sifthenelse gate fast scalar) => ⟨probe, gate, fast, scalar⟩
+  | _ => ⟨.Sskip, .Econst_int (0#32) CC.tint, .Sskip, .Sskip⟩
+
+private def probe : CC.Stmt := by run_tac cachePart (← `(writerPieces.probe))
+private def gate : CC.Expr := by run_tac cachePart (← `(writerPieces.gate))
+private def fast : CC.Stmt := by run_tac cachePart (← `(writerPieces.fast))
+def scalarWriter : CC.Stmt := by run_tac cachePart (← `(writerPieces.scalar))
+
+/-- The original writer contains its actual stack-ADD/SUB selector and general arm. -/
+theorem writer_source : writer = .Ssequence probe (.Sifthenelse gate fast scalarWriter) := rfl
+
+def stackWidth (dst : BitVec 8) (size : X86.Size) : Bool :=
+  (dst.setWidth 32 == (4#32)) && (size.bytes == 8)
+
+def selectLength (dst : BitVec 8) (size : X86.Size) : Nat :=
+  if stackWidth dst size then 13 else 9
+
+def selectTemps (le : CC.TempEnv) (dst : BitVec 8) (size : X86.Size) : CC.TempEnv :=
+  (le.set X86_program_profile_bpf._t'139
+    (.Vint (if stackWidth dst size then 1 else 0))).set
+    X86_program_profile_bpf._t'140 (.Vint (0#32))
+
+private theorem set_twice (id : CC.Ident) (value : CC.Val) (le : CC.TempEnv) :
+    (le.set id value).set id value = le.set id value := by
+  induction id generalizing le with
+  | xH => cases le <;> rfl
+  | xO id ih => cases le <;> simp [CC.PTree.set, ih]
+  | xI id ih => cases le <;> simp [CC.PTree.set, ih]
+
+/-- Every SHL destination and width follows the actual general writer arm,
+retaining the whole heap and deriving the exact two selector temporaries. -/
+theorem select_scalar (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8) (size : X86.Size)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    InternalRun ge (selectLength dst size) (.State function writer k e le m)
+      (.State function scalarWriter k e (selectTemps le dst size) m) := by
+  rw [writer_source]
+  cases size <;> by_cases stack : dst.setWidth 32 = (4#32)
+  all_goals
+    simp +decide only [selectLength, stackWidth, X86.Size.bytes, stack, beq_self_eq_true,
+      ite_true, ite_false, Bool.true_and]
+  all_goals apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, probe, gate, selectTemps,
+      stackWidth, X86.Size.bytes, stack, CC.doStep, CC.doEvalExpr, CC.typeof,
+      CC.PTree.gso, destination, width, alu, X86ShiftLeft.argument,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+      CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tbool,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero,
+      CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+      CC.Eapp, CC.E0, set_twice]
+
+/-- Each selector temporary reads back its source value and all other temporaries are framed. -/
+theorem select_temps (le : CC.TempEnv) (dst : BitVec 8) (size : X86.Size) :
+    (selectTemps le dst size).get X86_program_profile_bpf._t'139 =
+      some (.Vint (if stackWidth dst size then 1 else 0)) ∧
+    (selectTemps le dst size).get X86_program_profile_bpf._t'140 = some (.Vint (0#32)) ∧
+    ∀ id, id ≠ X86_program_profile_bpf._t'139 → id ≠ X86_program_profile_bpf._t'140 →
+      (selectTemps le dst size).get id = le.get id := by
+  refine ⟨by simp +decide [selectTemps, CC.PTree.gso], by simp [selectTemps], ?_⟩
+  intro id ne139 ne140
+  simp [selectTemps, CC.PTree.gso, Ne.symm ne139, Ne.symm ne140]
+
 end KProgFormal.ClightRefinement.X86ShiftWriteback
