@@ -479,4 +479,82 @@ theorem writer_entry_storage (ce : CC.CompositeEnv)
   · exact (writer_caller_access ce caller memory cellsBlock cellsOld access
       .Mint8unsigned tagOffset .Writable).trans tagWritable
 
+/-- At the real allocated handler environment, caller table rights and the
+entry access map suffice to execute the ordinary scalar byte writer. The local
+binding, separation, width-helper scope and four successful stores are derived.
+The preceding handler prefix and its observations remain separate obligations. -/
+theorem byte_writer_allocated (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
+      some X86RegisterLayout.gprRecord)
+    (cellLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr_cell =
+      some X86RegisterLayout.cellRecord)
+    (caller m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (rsp : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some value)
+    (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value)
+    (index : Fin 16)
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((BitVec.ofNat 8 index.val).setWidth 32)))
+    (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (widthBlock : CC.Block)
+    (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      CC.Genv.findFunctPtr ge.genv_genv widthBlock =
+        some (.Internal X86_program_profile_bpf.f_x86_width_effective))
+    (shift : BitVec 8) (next : BitVec 64)
+    (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (old : BitVec 64)
+    (cellCurrent : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong old))
+    (currentTag : CC.Mem.load .Mint8unsigned m cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
+          some (.Vint (0#32)))
+    (ordinary : (BitVec.ofNat 8 index.val).setWidth 32 ≠ (4#32))
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (cellWritable : CC.Mem.validAccess caller CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) .Writable = true)
+    (tagWritable : CC.Mem.validAccess caller .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset +
+        CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) .Writable = true)
+    (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
+    (bindingOld : bindingBlock.toNat < caller.nextblock.toNat)
+    (cellsOld : cellsBlock.toNat < caller.nextblock.toNat)
+    (access : m.access = (writerAllocation ge.genv_cenv caller).2.access) :
+    ∃ final finalTemps, InternalRun ge 169
+      (.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG writer k
+        (writerAllocation ge.genv_cenv caller).1 le m)
+      (.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG .Sskip k
+        (writerAllocation ge.genv_cenv caller).1 finalTemps final) ∧
+      RegistersRepresent addresses origins final cellsBlock cellsOffset
+        (cpu.setReg .b (X86.GPR.ofIndex index) next (decide (shift.setWidth 32 = (8#32)))) ∧
+      final.access = m.access ∧ final.nextblock = m.nextblock := by
+  obtain ⟨localBlock, declared, callerBlocks, localWritable, wordWritable, tagWritable⟩ :=
+    writer_entry_storage ge.genv_cenv gprLayout caller m bindingBlock cellsBlock
+      bindingOld cellsOld access _ _ cellWritable tagWritable
+  have notLocal : X86_program_profile_bpf._x86_width_effective ∉
+      CC.varNames X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_vars := by
+    decide +kernel
+  have unshadowed : (writerAllocation ge.genv_cenv caller).1.get
+      X86_program_profile_bpf._x86_width_effective = none := by
+    simpa only [CC.emptyEnv, CC.PTree.gempty] using
+      CC.allocVariables_env_other (writer_allocation_valid ge.genv_cenv caller) notLocal
+  obtain ⟨final, run, registers, finalAccess, finalNext⟩ := byte_writer_writable
+    ge bindingsLayout gprLayout cellLayout X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+    (writerAllocation ge.genv_cenv caller).1 le k m
+    bindingBlock cellsBlock cellsOffset value binding cells rsp word index destination width alu
+    widthBlock widthBinding unshadowed shift next observedShift observedValue old cellCurrent
+    localBlock declared currentTag callerBlocks ordinary bindingSeparate
+    localWritable wordWritable tagWritable addresses origins cpu represented
+  exact ⟨final, _, run, registers, finalAccess, finalNext⟩
+
 end KProgFormal.ClightRefinement.X86RegisterView

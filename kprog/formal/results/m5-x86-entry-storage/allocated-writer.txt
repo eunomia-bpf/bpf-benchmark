@@ -1,0 +1,67 @@
+KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (gprLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_gpr ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterLayout.gprRecord)
+  (cellLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_gpr_cell ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterLayout.cellRecord)
+  (caller m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) (bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (value : CC.Val)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (rsp : CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + 64).unsigned = some value)
+  (word : CC.Cop.semCast value (CC.tptr CC.tvoid) CC.tlong m = some value) (index : Fin 16)
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.ofNat 8 ↑index))))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.b))
+  (alu : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 5#32)) (widthBlock : CC.Block)
+  (widthBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (shift : BitVec 8) (next : BitVec 64)
+  (observedShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (observedValue : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong next)) (old : BitVec 64)
+  (cellCurrent :
+    CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned =
+      some (CC.Val.Vlong old))
+  (currentTag :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (CC.Val.Vint 0#32))
+  (ordinary : BitVec.setWidth 32 (BitVec.ofNat 8 ↑index) ≠ 4#32) (bindingSeparate : bindingBlock ≠ cellsBlock)
+  (cellWritable :
+    caller.validAccess CC.Mptr cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+        CC.Permission.Writable =
+      true)
+  (tagWritable :
+    caller.validAccess CC.Chunk.Mint8unsigned cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned CC.Permission.Writable =
+      true)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
+  (bindingOld : CC.Positive.toNat bindingBlock < CC.Positive.toNat caller.nextblock)
+  (cellsOld : CC.Positive.toNat cellsBlock < CC.Positive.toNat caller.nextblock)
+  (access : m.access = (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd.access) :
+  ∃ final finalTemps,
+    KProgFormal.ClightRefinement.InternalRun ge 169
+        (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+          KProgFormal.ClightRefinement.X86ShiftWriteback.writer k
+          (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst le m)
+        (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG CC.Stmt.Sskip k
+          (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst finalTemps final) ∧
+      KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cellsBlock cellsOffset
+          (cpu.setReg X86.Size.b (X86.GPR.ofIndex index) next (decide (BitVec.setWidth 32 shift = 8#32))) ∧
+        final.access = m.access ∧ final.nextblock = m.nextblock
+'KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -17,3 +17,18 @@ are under `/workspaces/kprog-raw/V/x86-entry-storage-20261122`.
 The 169-step ordinary scalar byte writer is established separately.
 Connecting these derived permissions to that run is next. Complete handlers,
 dispatcher composition, O1/O2/O4 and M5/M6 remain open.
+
+## Allocated writer composition
+
+`byte_writer_allocated` composes these entry-derived facts with the actual
+169-transition writer run. It constructs the local and all four intermediate
+store heaps internally, derives the width-helper scope from the real local
+list, and updates the complete represented GPR bank via the original
+`X86.Cpu.setReg`. Final permissions and nextblock equal the reached input.
+Caller table rights, linked layouts/callee and the reached source observations
+remain explicit. The prefix from the handler body to this writer is still open.
+
+The exact updated source plus the public type/axiom query passed in 10.52s at
+one worker and the original proof budgets. The inherited CompCert external/asm
+semantic axioms appear in this execution composition; no new axioms were added.
+See [the output](allocated-writer.txt).
