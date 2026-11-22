@@ -332,6 +332,17 @@ writeback and the entry-world relation remains open. The
 [focused receipt](../results/kprog_verification_20261107/x86-shift-flag-pf.log.gz)
 records nine public declarations under the default budgets.
 
+The universal SHL dispatch route now completes all five flag stages through PF.
+Count one takes 231/243/255/255 silent transitions for 64/32/16/8-bit operands;
+other positive counts take 215/227/239/239. Three actual loop-exit transitions
+connect OF to the original parity selector and byte writer. Binding, result,
+opcode and count derive from the preceding exact temporary maps and OF framing;
+the PF load/store use the actual count-selected reached heap. The final heap,
+locals, temporaries and enclosing continuation are explicit. Enclosing switch
+breaks, register writeback and the entry-world relation remain open.
+The [focused receipt](../results/kprog_verification_20261107/x86-shift-through-pf.log.gz)
+records twelve public declarations under the default budgets.
+
 The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
 link of the complete Entry/Program exports as its environment. The linked
 foundation sits below Producer; input and callback bindings use the actual
