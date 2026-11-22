@@ -675,12 +675,6 @@ int native_tracer_entry(struct bpf_perf_event_data *ctx)
   }
 
   u64 ts = bpf_ktime_get_ns();
-#if defined(MICRO_NATIVE)
-  // The kernel passes struct bpf_perf_event_data_kern, whose first field points at the
-  // sampled registers; for the eBPF program the verifier rewrites ctx->regs the same way.
-  return collect_trace(*(struct pt_regs **)ctx, TRACE_SAMPLING, pid, tid, ts, 0);
-#else
   return collect_trace((struct pt_regs *)&ctx->regs, TRACE_SAMPLING, pid, tid, ts, 0);
-#endif
 }
 MULTI_USE_FUNC(unwind_native)
