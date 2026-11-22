@@ -24,3 +24,13 @@ import KProgFormal
 #print axioms KProgFormal.ClightRefinement.X86RegisterView.writer_entry_storage
 #check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
 #print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#check KProgFormal.ClightRefinement.X86AluEntry.source
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.source
+#check KProgFormal.ClightRefinement.X86AluEntry.width_source
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.width_source
+#check KProgFormal.ClightRefinement.X86AluEntry.enter
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.enter
+#check KProgFormal.ClightRefinement.X86AluEntry.effective_width
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.effective_width
+#check KProgFormal.ClightRefinement.X86AluEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.from_call
