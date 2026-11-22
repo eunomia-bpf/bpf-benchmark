@@ -244,30 +244,108 @@ static unsigned anchor_pointer_differences(Module &module) {
   return differences.size();
 }
 // A PTR_TO_STACK operand cannot take part in any subtraction, in either
-// position: the verifier refuses "stack_ptr - scalar", "scalar - stack_ptr"
-// and a bounded scalar alike (guest 7.0.0-rc2+, four hand-assembled objects,
-// kprog/results/otel-ptr-scalar-20261120). Bounding or reordering the scalar
-// cannot help, so the subtraction itself has to go. OTel's shape is
-//   %inner = sub i64 %s, %p        ; %p = ptrtoint (the simulator's own frame)
-//   %outer = sub i64 32, %inner    ; 32 - (s - p)
-//   icmp ult %outer, 8
-// which is integer-identical to
-//   %outer = add i64 (sub i64 32, %s), %p
-// - one subtraction of two scalars plus a pointer add, both verifier-legal.
-// The rewrite preserves the compared value exactly, in the 64-bit domain.
+// position, and bounding the partner scalar does not help: the stock verifier
+// refuses "scalar - stack_ptr", "stack_ptr - scalar" and "0 - stack_ptr"
+// alike (adjust_ptr_min_max_vals and check_reg_sane_offset, verifier.c; every
+// row loaded through the real kernel in
+// kprog/results/otel-ptr-scalar-20261120). Two shapes carry such a
+// subtraction into B.
+//
+// 1. Nested. OTel's is
+//      %inner = sub i64 %s, %p        ; %p = ptrtoint (the simulator's frame)
+//      %outer = sub i64 32, %inner    ; 32 - (s - p)
+//      icmp ult %outer, 8
+//    which is integer-identical to
+//      %outer = add i64 (sub i64 32, %s), %p
+//    - one subtraction of two scalars plus a pointer add, both legal.
+// 2. Direct, %outer = sub i64 A, frame, with the frame as the subtrahend
+//    (%1977 - %1976, OTel request 10 insn 1583). anchor_pointer_differences
+//    keeps these on their own path, so the frame is still the operand there.
+//
+// The direct form leaves the subtraction in place and launders the frame
+// instead, through a stack slot that ends up holding a scalar with the
+// frame's exact bits. Nothing simpler works: a 32-bit store straight from
+// the live stack-pointer register is refused ("invalid size of register
+// spill"), any 32-bit ALU operation on the pointer is refused ("32-bit
+// pointer arithmetic prohibited"), a 64-bit self-move keeps the pointer
+// ("r1 = r1"), and "pointer -= pointer" is not expressible in IR. The one
+// encoding the verifier takes is a 32-bit self-move of a 32-bit register,
+// "w1 = w1" (bc), and that is what frame_scalar emits. Every step is exact
+// in the 64-bit domain.
 static unsigned eliminate_stack_pointer_subtractions(Module &module) {
-  /* The simulator's own frame: ptrtoint of an alloca, through constant adds. */
-  auto stack_pointer=[](Value *value) {
+  /* Decompose a value into the simulator's own frame plus a constant
+   * offset: ptrtoint of an alloca, through constant adds and subtracts. */
+  auto frame_offset=[](Value *value,int64_t &offset,AllocaInst **alloca) {
+    offset=0;
     while (auto *operation=dyn_cast<Operator>(value)) {
       auto opcode=operation->getOpcode();
-      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
-          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
-      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
-        value=operation->getOperand(1);
-      else break;
+      if (opcode!=Instruction::Add && opcode!=Instruction::Sub) break;
+      if (auto *constant=dyn_cast<ConstantInt>(operation->getOperand(1))) {
+        offset+=(opcode==Instruction::Add?1:-1)*constant->getSExtValue();
+        value=operation->getOperand(0);continue;
+      }
+      if (opcode!=Instruction::Add) break;
+      if (auto *constant=dyn_cast<ConstantInt>(operation->getOperand(0))) {
+        offset+=constant->getSExtValue();value=operation->getOperand(1);continue;
+      }
+      break;
     }
     auto *cast=dyn_cast<PtrToIntOperator>(value);
+    if (alloca) *alloca=cast?dyn_cast<AllocaInst>(cast->getOperand(0)):nullptr;
     return cast && isa<AllocaInst>(cast->getOperand(0));
+  };
+  auto stack_pointer=[&](Value *value) { int64_t offset; return frame_offset(value,offset,nullptr); };
+  /* The frame as a scalar, once per frame alloca, materialised in the entry
+   * block so it dominates every use; the frame's own ptrtoint may sit in a
+   * later block.
+   *
+   * The 64-bit store alone leaves the slot a stack-pointer slot, and a
+   * 32-bit store straight from that register is refused ("invalid size of
+   * register spill"), so the register has to stop being a pointer first. A
+   * 32-bit ALU operation is refused on a pointer ("32-bit pointer arithmetic
+   * prohibited"), a 64-bit self-move keeps the pointer, and every 32-bit
+   * reload variant is refused, so the only encoding that drops it is the
+   * 32-bit self-move "w1 = w1" (bc). clang does not emit it for a bare
+   * trunc - it coalesces the value straight into the 32-bit store - and a
+   * one-line form lets the backend pick a different register for the store,
+   * so the move is written as explicit asm that names r1 for input, launder
+   * and output, with r1 declared clobbered. */
+  DenseMap<AllocaInst *,Value *> scalars;
+  auto frame_scalar=[&](AllocaInst *alloca) -> Value * {
+    auto found=scalars.find(alloca);
+    if (found!=scalars.end()) return found->second;
+    Function *function=alloca->getFunction();
+    /* After every alloca of the entry block: the frame's own alloca must be
+     * defined before its ptrtoint, and the new slot must stay in the entry
+     * block. */
+    BasicBlock &entry=function->getEntryBlock();
+    auto position=entry.begin();
+    for (auto iterator=entry.begin();iterator!=entry.end();++iterator)
+      if (isa<AllocaInst>(&*iterator)) position=std::next(iterator);
+    IRBuilder<> builder(&*position);
+    auto *slot=builder.CreateAlloca(builder.getInt64Ty(),nullptr,"frame_scalar_slot");
+    Value *address=builder.CreatePtrToInt(alloca,builder.getInt64Ty(),"frame_address");
+    builder.CreateStore(address,slot,true);
+    /* The asm takes and returns 64 bits. Narrowing the pointer before the
+     * asm is refused ("pointer arithmetic with <<= prohibited"), because a
+     * 32-bit value of a stack pointer is built by shifting it; the asm output
+     * is a scalar, so narrowing it afterwards is ordinary scalar arithmetic. */
+    auto *signature=FunctionType::get(builder.getInt64Ty(),{builder.getInt64Ty()},false);
+    auto *launder=InlineAsm::get(signature,"r1 = $1\012w1 = w1\012$0 = r1","=r,r,~{r1}",true);
+    auto *low=builder.CreateCall(launder,{address});
+    builder.CreateStore(builder.CreateTrunc(low,builder.getInt32Ty()),slot,true);
+    auto *scalar=builder.CreateLoad(builder.getInt64Ty(),slot,true,"frame_scalar");
+    scalars.insert({alloca,scalar});
+    return scalar;
+  };
+  /* The same value's bits without the frame's pointer type. */
+  auto scalar_of_frame=[&](Value *frame,Instruction *site) -> Value * {
+    int64_t offset;AllocaInst *alloca=nullptr;
+    if (!frame_offset(frame,offset,&alloca) || !alloca) return frame;
+    Value *scalar=frame_scalar(alloca);
+    if (!offset) return scalar;
+    IRBuilder<> builder(site);builder.SetCurrentDebugLocation(site->getDebugLoc());
+    return builder.CreateAdd(scalar,ConstantInt::get(scalar->getType(),offset),"frame_scalar_offset");
   };
   SmallVector<BinaryOperator *,16> outers;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
@@ -318,12 +396,45 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
     IRBuilder<> builder(outer);builder.SetCurrentDebugLocation(outer->getDebugLoc());
     /* A - (s - p) = (A - s) + p, integer-identical in the 64-bit domain. */
     Value *scalar_difference=builder.CreateSub(outer->getOperand(0),scalar_value,"scalar_difference");
-    Value *sum=builder.CreateAdd(scalar_difference,pointer_value,"scalar_plus_pointer");
+    Value *sum=builder.CreateAdd(scalar_difference,scalar_of_frame(pointer_value,outer),"scalar_plus_pointer");
     sum->takeName(outer);
     outer->replaceAllUsesWith(sum);outer->eraseFromParent();
     if (dead->use_empty()) dead->eraseFromParent();
   }
-  return outers.size();
+  /* The direct form: the frame is the subtrahend, and
+   * anchor_pointer_differences skipped it because only one side is
+   * pointer-derived. Keep the subtraction, replace its frame operand. */
+  SmallVector<BinaryOperator *,16> directs;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *outer=dyn_cast<BinaryOperator>(&instruction);
+    if (!outer || outer->getOpcode()!=Instruction::Sub ||
+        !outer->getType()->isIntegerTy(64)) continue;
+    if (!stack_pointer(outer->getOperand(1))) continue;
+    directs.push_back(outer);
+  }
+  for (auto *outer:directs) {
+    Value *frame=outer->getOperand(1);
+    Value *scalar=scalar_of_frame(frame,outer);
+    if (scalar!=frame) outer->setOperand(1,scalar);
+  }
+  /* The anchored differences that remain carry their operands as opaque
+   * scalars to the runtime, but the operand list still names the frame, so
+   * the backend emits the register pair the verifier refuses. Launder it. */
+  unsigned anchored=0;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *call=dyn_cast<CallInst>(&instruction);
+    if (!call) continue;
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (!assembly || call->arg_size()!=2 || assembly->getAsmString()!="$0 -= $2") continue;
+    bool changed=false;
+    for (unsigned index=0;index<2;++index) {
+      Value *operand=call->getArgOperand(index);
+      if (!stack_pointer(operand)) continue;
+      call->setArgOperand(index,scalar_of_frame(operand,call));changed=true;
+    }
+    if (changed) ++anchored;
+  }
+  return outers.size()+directs.size()+anchored;
 }
 static Value *origin(Value *value) {
   while (true) {

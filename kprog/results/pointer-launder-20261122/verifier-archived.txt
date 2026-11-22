@@ -1,0 +1,550 @@
+# OTel request 10, archived pre-fix B
+# object: /tmp/ocov/r10/request/generated/trusted_x86.bpf.o
+# section: perf_event prog_type: 1 relocs: 84
+# verdict: REJECTED ret=-1 errno=22
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 0                        ; R0=0
+1: (7b) *(u64 *)(r10 -152) = r0       ; R0=0 R10=fp0 fp-152=0
+2: (bf) r9 = r1                       ; R1=ctx() R9=ctx()
+3: (18) r6 = 0xffffccffcd255000       ; R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+5: (79) r1 = *(u64 *)(r6 +0)          ; R1=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+6: (79) r2 = *(u64 *)(r6 +0)          ; R2=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+7: (79) r3 = *(u64 *)(r6 +0)          ; R3=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+8: (79) r4 = *(u64 *)(r6 +0)          ; R4=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+9: (79) r5 = *(u64 *)(r6 +0)          ; R5=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+10: (79) r0 = *(u64 *)(r6 +0)         ; R0=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+11: (7b) *(u64 *)(r10 -8) = r2        ; R2=scalar(id=1) R10=fp0 fp-8=scalar(id=1)
+12: (7b) *(u64 *)(r10 -16) = r0       ; R0=scalar(id=2) R10=fp0 fp-16=scalar(id=2)
+13: (7b) *(u64 *)(r10 -24) = r5       ; R5=scalar(id=3) R10=fp0 fp-24=scalar(id=3)
+14: (7b) *(u64 *)(r10 -32) = r4       ; R4=scalar(id=4) R10=fp0 fp-32=scalar(id=4)
+15: (7b) *(u64 *)(r10 -40) = r3       ; R3=scalar(id=5) R10=fp0 fp-40=scalar(id=5)
+16: (7b) *(u64 *)(r10 -48) = r1       ; R1=scalar(id=6) R10=fp0 fp-48=scalar(id=6)
+17: (62) *(u32 *)(r10 -104) = 0       ; R10=fp0 fp-104=????0
+18: (79) r1 = *(u64 *)(r6 +0)         ; R1=scalar() R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+19: (7b) *(u64 *)(r10 -144) = r1      ; R1=scalar(id=7) R10=fp0 fp-144=scalar(id=7)
+20: (bf) r7 = r10                     ; R7=fp0 R10=fp0
+21: (07) r7 += -104                   ; R7=fp-104
+22: (18) r1 = 0xffff8b2e6827a400      ; R1=map_ptr(map=per_cpu_records,ks=4,vs=5000)
+24: (bf) r2 = r7                      ; R2=fp-104 R7=fp-104
+25: (85) call bpf_map_lookup_elem#1   ; R0=map_value(map=per_cpu_records,ks=4,vs=5000)
+26: (bf) r8 = r0                      ; R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+27: (15) if r8 == 0x0 goto pc+5507    ; R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+28: (61) r1 = *(u32 *)(r8 +0)         ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+29: (bc) w1 = w1                      ; R1=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+30: (63) *(u32 *)(r10 -52) = r1       ; R1=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-56=mmmmpppp
+31: (bf) r2 = r10                     ; R2=fp0 R10=fp0
+32: (07) r2 += -52                    ; R2=fp-52
+33: (18) r1 = 0xffff8b1495cb8000      ; R1=map_ptr(map=dotnet_procs,ks=4,vs=4)
+35: (85) call bpf_map_lookup_elem#1   ; R0=map_value_or_null(id=9,map=dotnet_procs,ks=4,vs=4)
+36: (7b) *(u64 *)(r10 -136) = r7      ; R7=fp-104 R10=fp0 fp-136=fp-104
+37: (7b) *(u64 *)(r10 -128) = r8      ; R8=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+38: (15) if r0 == 0x0 goto pc+89      ; R0=map_value(id=9,map=dotnet_procs,ks=4,vs=4)
+39: (bf) r1 = r8                      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000) R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+40: (07) r1 += 4997                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=4997)
+41: (b7) r2 = 2                       ; R2=2
+42: (73) *(u8 *)(r1 +0) = r2          ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=4997) R2=2
+43: (62) *(u32 *)(r10 -104) = 90      ; R10=fp0 fp-104=pppp90
+44: (18) r1 = 0xffff8b1635745800      ; R1=map_ptr(map=metrics,ks=4,vs=8)
+46: (bf) r2 = r7                      ; R2=fp-104 R7=fp-104
+47: (85) call bpf_map_lookup_elem#1   ; R0=map_value(map=metrics,ks=4,vs=8)
+48: (15) if r0 == 0x0 goto pc+3       ; R0=map_value(map=metrics,ks=4,vs=8)
+49: (79) r1 = *(u64 *)(r0 +0)         ; R0=map_value(map=metrics,ks=4,vs=8) R1=scalar()
+50: (07) r1 += 1                      ; R1=scalar()
+51: (7b) *(u64 *)(r0 +0) = r1         ;
+52: (79) r3 = *(u64 *)(r8 +3800)      ; R3=scalar() R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+53: (79) r8 = *(u64 *)(r8 +3808)      ; R8=scalar()
+54: (ad) if r8 < r3 goto pc+5416      ; R3=scalar() R8=scalar()
+55: (bf) r1 = r3                      ; R1=scalar(id=10) R3=scalar(id=10)
+56: (07) r1 += 8192                   ; R1=scalar(id=10+8192)
+57: (3d) if r8 >= r1 goto pc+5413     ; R1=scalar(id=10+8192,umin=1) R3=scalar(id=10) R8=scalar(umax=0xfffffffffffffffe)
+58: (7b) *(u64 *)(r10 -80) = r9       ; R9=ctx() R10=fp0 fp-80=ctx()
+59: (79) r6 = *(u64 *)(r10 -128)      ; R6=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+60: (bf) r1 = r6                      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000) R6=map_value(map=per_cpu_records,ks=4,vs=5000)
+61: (07) r1 += 3968                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968)
+62: (7b) *(u64 *)(r10 -64) = r1       ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968) R10=fp0 fp-64=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968)
+63: (79) r1 = *(u64 *)(r6 +3792)      ; R1=scalar() R6=map_value(map=per_cpu_records,ks=4,vs=5000)
+64: (71) r4 = *(u8 *)(r6 +3888)       ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R6=map_value(map=per_cpu_records,ks=4,vs=5000)
+65: (54) w4 &= 255                    ; R4=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+66: (bc) w4 = w4                      ; R4=scalar(id=11,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+67: (7b) *(u64 *)(r10 -168) = r4      ; R4=scalar(id=11,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-168=scalar(id=11,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+68: (79) r7 = *(u64 *)(r6 +3856)      ; R6=map_value(map=per_cpu_records,ks=4,vs=5000) R7=scalar()
+69: (79) r9 = *(u64 *)(r6 +3872)      ; R6=map_value(map=per_cpu_records,ks=4,vs=5000) R9=scalar()
+70: (7b) *(u64 *)(r10 -160) = r1      ; R1=scalar(id=12) R10=fp0 fp-160=scalar(id=12)
+71: (7b) *(u64 *)(r10 -88) = r1       ; R1=scalar(id=12) R10=fp0 fp-88=scalar(id=12)
+72: (bf) r4 = r6                      ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R6=map_value(map=per_cpu_records,ks=4,vs=5000)
+73: (07) r4 += 3888                   ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888)
+74: (b7) r1 = 1                       ; R1=1
+75: (7b) *(u64 *)(r10 -176) = r4      ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888) R10=fp0 fp-176=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888)
+76: (73) *(u8 *)(r4 +0) = r1          ; R1=1 R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888)
+77: (07) r6 += 3792                   ; R6=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+78: (bf) r1 = r7                      ; R1=scalar(id=13) R7=scalar(id=13)
+79: (57) r1 &= -128                   ; R1=scalar(umax=0xffffffffffffff80,umax32=0xffffff80,var_off=(0x0; 0xffffffffffffff80))
+80: (55) if r1 != 0x80 goto pc+172    ; R1=128
+81: (bf) r1 = r6                      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R6=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+82: (b4) w2 = 8                       ; R2=8
+83: (85) call bpf_probe_read_user#112         ; R0=scalar()
+84: (b4) w1 = 1                       ; R1=1
+85: (79) r2 = *(u64 *)(r10 -152)      ; R2=0 R10=fp0 fp-152=0
+86: (77) r2 >>= 32                    ; R2=0
+87: (67) r2 <<= 32                    ; R2=0
+88: (bc) w3 = w1                      ; R1=1 R3=1
+89: (4f) r2 |= r3                     ; R2=1 R3=1
+90: (7b) *(u64 *)(r10 -152) = r2      ; R10=fp0 fp-152=1
+91: (55) if r0 != 0x0 goto pc+174     ; R0=0
+92: (7b) *(u64 *)(r10 -184) = r6      ; R6=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-184=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+93: (7b) *(u64 *)(r10 -72) = r6       ; R6=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+94: (79) r5 = *(u64 *)(r10 -128)      ; R5=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+95: (79) r1 = *(u64 *)(r5 +3800)      ; R1=scalar() R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+96: (bf) r2 = r5                      ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+97: (07) r2 += 3800                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3800)
+98: (07) r1 += 8                      ; R1=scalar()
+99: (7b) *(u64 *)(r2 +0) = r1         ; R1=scalar() R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3800)
+100: (54) w7 &= 127                   ; R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+101: (bc) w7 = w7                     ; R7=scalar(id=14,smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+102: (b4) w8 = 6                      ; R8=6
+103: (b4) w1 = 1                      ; R1=1
+104: (79) r0 = *(u64 *)(r10 -152)     ; R0=1 R10=fp0 fp-152=1
+105: (77) r0 >>= 32                   ; R0=0
+106: (67) r0 <<= 32                   ; R0=0
+107: (bc) w2 = w1                     ; R1=1 R2=1
+108: (4f) r0 |= r2                    ; R0=1 R2=1
+109: (7b) *(u64 *)(r10 -152) = r0     ; R0=1 R10=fp0 fp-152=1
+110: (b4) w2 = 6                      ; R2=6
+111: (18) r6 = 0xffffccffcd255000     ; R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+113: (61) r1 = *(u32 *)(r5 +704)      ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+114: (bc) w1 = w1                     ; R1=scalar(id=15,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+115: (a6) if w1 < 0x7f goto pc+24 140: R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f)) R2=6 R5=map_value(map=per_cpu_records,ks=4,vs=5000) R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8) R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f)) R8=6 R9=scalar() R10=fp0 fp-64=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968) fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) fp-80=ctx() fp-88=scalar(id=12) fp-128=map_value(map=per_cpu_records,ks=4,vs=5000) fp-136=fp-104 fp-144=scalar() fp-152=1 fp-160=scalar(id=12) fp-168=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) fp-176=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888) fp-184=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+140: (63) *(u32 *)(r10 -192) = r2     ; R2=6 R10=fp0 fp-192=????6
+141: (bc) w2 = w1                     ; R1=scalar(id=19,smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f)) R2=scalar(id=19,smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f))
+142: (04) w2 += 1                     ; R2=scalar(id=19+1,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+143: (79) r3 = *(u64 *)(r10 -88)      ; R3=scalar(id=12) R10=fp0 fp-88=scalar(id=12)
+144: (bc) w2 = w2                     ; R2=scalar(id=20,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+145: (bf) r4 = r5                     ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+146: (07) r4 += 704                   ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=704)
+147: (63) *(u32 *)(r4 +0) = r2        ; R2=scalar(id=20,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f)) R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=704)
+148: (67) r3 <<= 5                    ; R3=scalar(smax=0x7fffffffffffffe0,smax32=0x7fffffe0,var_off=(0x0; 0xffffffffffffffe0))
+149: (0f) r3 += r7                    ; R3=scalar() R7=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+150: (24) w1 *= 24                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+151: (bf) r2 = r5                     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+152: (0f) r2 += r1                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+153: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+154: (07) r1 += 720                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=720,smax=umax=smax32=umax32=3744,var_off=(0x0; 0xff8))
+155: (7b) *(u64 *)(r1 +0) = r3        ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=720,smax=umax=smax32=umax32=3744,var_off=(0x0; 0xff8)) R3=scalar()
+156: (79) r3 = *(u64 *)(r10 -160)     ; R3=scalar(id=12) R10=fp0 fp-160=scalar(id=12)
+157: (1f) r3 -= r9                    ; R3=scalar() R9=scalar()
+158: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+159: (07) r1 += 728                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=728,smax=umax=smax32=umax32=3752,var_off=(0x0; 0xff8))
+160: (7b) *(u64 *)(r1 +0) = r3        ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=728,smax=umax=smax32=umax32=3752,var_off=(0x0; 0xff8)) R3=scalar()
+161: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+162: (07) r1 += 736                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=736,smax=umax=smax32=umax32=3760,var_off=(0x0; 0xff8))
+163: (b7) r3 = 10                     ; R3=10
+164: (73) *(u8 *)(r1 +0) = r3         ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=736,smax=umax=smax32=umax32=3760,var_off=(0x0; 0xff8)) R3=10
+165: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+166: (07) r1 += 737                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=737,smax=umax=smax32=umax32=3761,var_off=(0x1; 0xff8))
+167: (79) r3 = *(u64 *)(r10 -168)     ; R3=scalar(id=21,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-168=scalar(id=21,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+168: (73) *(u8 *)(r1 +0) = r3         ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=737,smax=umax=smax32=umax32=3761,var_off=(0x1; 0xff8)) R3=scalar(id=21,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+169: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+170: (07) r1 += 738                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=738,smax=umax=smax32=umax32=3762,var_off=(0x2; 0xff8))
+171: (b7) r3 = 0                      ; R3=0
+172: (63) *(u32 *)(r1 +0) = r3        ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=738,smax=umax=smax32=umax32=3762,var_off=(0x2; 0xff8)) R3=0
+173: (07) r2 += 742                   ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=742,smax=umax=smax32=umax32=3766,var_off=(0x6; 0xff8))
+174: (6b) *(u16 *)(r2 +0) = r3        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=742,smax=umax=smax32=umax32=3766,var_off=(0x6; 0xff8)) R3=0
+175: (62) *(u32 *)(r10 -108) = 91     ; R10=fp0 fp-112=mmmm????
+176: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+177: (07) r2 += -108                  ; R2=fp-108
+178: (18) r1 = 0xffff8b1635745800     ; R1=map_ptr(map=metrics,ks=4,vs=8)
+180: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=22,map=metrics,ks=4,vs=8)
+181: (79) r2 = *(u64 *)(r10 -152)     ; R2=1 R10=fp0 fp-152=1
+182: (67) r2 <<= 32                   ; R2=0x100000000
+183: (77) r2 >>= 32                   ; R2=1
+184: (bc) w5 = w2                     ; R2=1 R5=1
+185: (15) if r0 == 0x0 goto pc+4      ; R0=map_value(id=22,map=metrics,ks=4,vs=8)
+186: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(id=22,map=metrics,ks=4,vs=8) R1=scalar()
+187: (07) r1 += 1                     ; R1=scalar()
+188: (7b) *(u64 *)(r0 +0) = r1        ; R0=map_value(id=22,map=metrics,ks=4,vs=8) R1=scalar()
+189: (bc) w5 = w2                     ; R5=1
+190: (b7) r3 = 0                      ; R3=0
+191: (b4) w2 = 1                      ; R2=1
+192: (79) r1 = *(u64 *)(r10 -72)      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+193: (bc) w4 = w8                     ; R4=6 R8=6
+194: (54) w4 &= 255                   ; R4=6
+195: (16) if w4 == 0x0 goto pc+5      ; R4=6
+196: (16) if w4 == 0x4 goto pc+3      ; R4=6
+197: (b4) w2 = 0                      ; R2=0
+198: (bf) r3 = r1                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+199: (05) goto pc+1
+201: (56) if w2 != 0x0 goto pc+1      ; R2=0
+202: (bf) r1 = r3                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+203: (b4) w0 = 0                      ; R0=0
+204: (56) if w2 != 0x0 goto pc+1      ; R2=0
+205: (bc) w0 = w8                     ; R0=6
+206: (79) r9 = *(u64 *)(r10 -80)      ; R9=ctx() R10=fp0 fp-80=ctx()
+207: (bc) w4 = w0                     ; R0=6 R4=6
+208: (54) w4 &= 255                   ; R4=6
+209: (79) r8 = *(u64 *)(r10 -128)     ; R8=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+210: (56) if w4 != 0x0 goto pc+7      ; R4=6
+218: (79) r2 = *(u64 *)(r1 +0)        ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R2=scalar()
+219: (b7) r7 = 0                      ; R7=0
+220: (b4) w3 = 1                      ; R3=1
+221: (16) if w4 == 0x4 goto pc+4      ; R4=6
+222: (56) if w4 != 0x1 goto pc+17     ; R4=6
+240: (16) if w3 == 0x0 goto pc+1      ; R3=1
+241: (bf) r7 = r2                     ; R7=scalar()
+242: (15) if r7 == 0x0 goto pc+6537   ; R7=scalar(umin=1)
+243: (18) r2 = 0x100000000000000      ; R2=0x100000000000000
+245: (ad) if r7 < r2 goto pc+595 841: R0=6 R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R5=1 R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8) R7=scalar(smin=umin=1,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R8=map_value(map=per_cpu_records,ks=4,vs=5000) R9=ctx() R10=fp0 fp-64=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968) fp-80=ctx() fp-128=map_value(map=per_cpu_records,ks=4,vs=5000) fp-136=fp-104 fp-144=scalar() fp-152=1 fp-176=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888) fp-184=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) fp-192=pppp6
+841: (25) if r7 > 0xfff goto pc+7 849: R0=6 R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R5=1 R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8) R7=scalar(smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R8=map_value(map=per_cpu_records,ks=4,vs=5000) R9=ctx() R10=fp0 fp-64=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3968) fp-80=ctx() fp-128=map_value(map=per_cpu_records,ks=4,vs=5000) fp-136=fp-104 fp-144=scalar() fp-152=1 fp-176=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888) fp-184=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) fp-192=pppp6
+849: (63) *(u32 *)(r10 -160) = r0     ; R0=6 R10=fp0 fp-160=pppp6
+850: (63) *(u32 *)(r10 -168) = r5     ; R5=1 R10=fp0 fp-168=pppp1
+851: (7b) *(u64 *)(r10 -72) = r1      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+852: (61) r1 = *(u32 *)(r8 +0)        ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+853: (bc) w1 = w1                     ; R1=scalar(id=24,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+854: (bf) r2 = r7                     ; R2=scalar(id=25,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R7=scalar(id=25,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+855: (d7) r2 = bswap64 r2             ; R2=scalar(smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00))
+856: (7b) *(u64 *)(r10 -96) = r2      ; R2=scalar(id=26,smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00)) R10=fp0 fp-96=scalar(id=26,smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00))
+857: (d7) r1 = bswap32 r1             ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+858: (63) *(u32 *)(r10 -100) = r1     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-104=mmmmpppp
+859: (62) *(u32 *)(r10 -104) = 96     ; R10=fp0 fp-104=mmmm96
+860: (18) r1 = 0xffff8b148f080a00     ; R1=map_ptr(map=pid_page_to_map,ks=16,vs=16)
+862: (79) r2 = *(u64 *)(r10 -136)     ; R2=fp-104 R10=fp0 fp-136=fp-104
+863: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=27,map=pid_page_to_map,ks=16,vs=16)
+864: (15) if r0 == 0x0 goto pc+5922   ; R0=map_value(id=27,map=pid_page_to_map,ks=16,vs=16)
+865: (bf) r3 = r8                     ; R3=map_value(map=per_cpu_records,ks=4,vs=5000) R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+866: (79) r8 = *(u64 *)(r0 +8)        ; R0=map_value(id=27,map=pid_page_to_map,ks=16,vs=16) R8=scalar()
+867: (18) r1 = 0xffffffffffffff       ; R1=0xffffffffffffff
+869: (bf) r2 = r8                     ; R2=scalar(id=28) R8=scalar(id=28)
+870: (5f) r2 &= r1                    ; R1=0xffffffffffffff R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+871: (bf) r1 = r3                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000) R3=map_value(map=per_cpu_records,ks=4,vs=5000)
+872: (07) r1 += 3872                  ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872)
+873: (7b) *(u64 *)(r10 -208) = r1     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872) R10=fp0 fp-208=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872)
+874: (7b) *(u64 *)(r1 +0) = r2        ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872) R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+875: (1f) r7 -= r2                    ; R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+876: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(id=27,map=pid_page_to_map,ks=16,vs=16) R1=scalar()
+877: (bf) r2 = r3                     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R3=map_value(map=per_cpu_records,ks=4,vs=5000)
+878: (07) r2 += 3856                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856)
+879: (7b) *(u64 *)(r10 -216) = r2     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856) R10=fp0 fp-216=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856)
+880: (7b) *(u64 *)(r2 +0) = r1        ; R1=scalar() R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856)
+881: (07) r3 += 3864                  ; R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3864)
+882: (7b) *(u64 *)(r10 -200) = r3     ; R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3864) R10=fp0 fp-200=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3864)
+883: (7b) *(u64 *)(r3 +0) = r7        ; R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3864) R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+884: (77) r8 >>= 56                   ; R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+885: (55) if r8 != 0x1 goto pc+42     ; R8=1
+886: (7b) *(u64 *)(r10 -104) = r1     ; R1=scalar(id=29) R10=fp0 fp-104=scalar(id=29)
+887: (18) r1 = 0xffff8b167d2f7c00     ; R1=map_ptr(map=interpreter_off,ks=8,vs=40)
+889: (79) r2 = *(u64 *)(r10 -136)     ; R2=fp-104 R10=fp0 fp-136=fp-104
+890: (85) call bpf_map_lookup_elem#1          ; R0=map_value_or_null(id=30,map=interpreter_off,ks=8,vs=40)
+891: (b7) r8 = 1                      ; R8=1
+892: (15) if r0 == 0x0 goto pc+35     ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40)
+893: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R1=scalar()
+894: (2d) if r1 > r7 goto pc+4        ; R1=scalar() R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+895: (79) r1 = *(u64 *)(r0 +8)        ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R1=scalar()
+896: (b4) w2 = 0                      ;
+897: (05) goto pc+0
+898: (3d) if r1 >= r7 goto pc+6       ; R1=scalar(umax=0xfffffffffffffffe) R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+899: (79) r1 = *(u64 *)(r0 +16)       ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R1=scalar()
+900: (2d) if r1 > r7 goto pc+27       ; R1=scalar() R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+901: (79) r1 = *(u64 *)(r0 +24)       ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R1=scalar()
+902: (b4) w2 = 0                      ;
+903: (05) goto pc+0
+904: (ad) if r1 < r7 goto pc+23       ; R1=scalar() R7=scalar(smin=0xff00000000001001,smax=0xffffffffffffff)
+905: (79) r1 = *(u64 *)(r10 -128)     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+906: (61) r1 = *(u32 *)(r1 +4992)     ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+907: (bc) w1 = w1                     ; R1=scalar(id=31,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+908: (61) r2 = *(u32 *)(r0 +32)       ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+909: (bc) w2 = w2                     ; R2=scalar(id=32,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+910: (54) w2 &= 31                    ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=31,var_off=(0x0; 0x1f))
+911: (7f) r1 >>= r2                   ; R1=scalar() R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=31,var_off=(0x0; 0x1f))
+912: (57) r1 &= 1                     ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+913: (55) if r1 != 0x0 goto pc+14     ; R1=0
+914: (bf) r7 = r0                     ; R0=map_value(id=30,map=interpreter_off,ks=8,vs=40) R7=map_value(id=30,map=interpreter_off,ks=8,vs=40)
+915: (62) *(u32 *)(r10 -88) = 0       ; R10=fp0 fp-88=pppp0
+916: (bf) r2 = r10                    ; R2=fp0 R10=fp0
+917: (07) r2 += -88                   ; R2=fp-88
+918: (18) r1 = 0xffff8b1635745800     ; R1=map_ptr(map=metrics,ks=4,vs=8)
+920: (85) call bpf_map_lookup_elem#1          ; R0=map_value(map=metrics,ks=4,vs=8)
+921: (15) if r0 == 0x0 goto pc+3      ; R0=map_value(map=metrics,ks=4,vs=8)
+922: (79) r1 = *(u64 *)(r0 +0)        ; R0=map_value(map=metrics,ks=4,vs=8) R1=scalar()
+923: (07) r1 += 1                     ; R1=scalar()
+924: (7b) *(u64 *)(r0 +0) = r1        ;
+925: (69) r8 = *(u16 *)(r7 +32)       ; R7=map_value(id=30,map=interpreter_off,ks=8,vs=40) R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+926: (54) w8 &= 65535                 ; R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+927: (bc) w8 = w8                     ; R8=scalar(id=33,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))
+928: (b7) r2 = 0                      ; R2=0
+929: (b4) w7 = 1                      ; R7=1
+930: (79) r1 = *(u64 *)(r10 -72)      ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+931: (61) r5 = *(u32 *)(r10 -160)     ; R5=6 R10=fp0 fp-160=pppp6
+932: (bc) w3 = w5                     ; R3=6 R5=6
+933: (54) w3 &= 255                   ; R3=6
+934: (16) if w3 == 0x0 goto pc+5      ; R3=6
+935: (16) if w3 == 0x4 goto pc+3      ; R3=6
+936: (b4) w7 = 0                      ; R7=0
+937: (bf) r2 = r1                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+938: (05) goto pc+1
+940: (56) if w7 != 0x0 goto pc+1      ; R7=0
+941: (bf) r1 = r2                     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+942: (b4) w2 = 0                      ; R2=0
+943: (55) if r8 != 0x8 goto pc+4539   ; R8=8
+944: (79) r2 = *(u64 *)(r10 -128)     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+945: (79) r3 = *(u64 *)(r2 +3800)     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R3=scalar()
+946: (79) r8 = *(u64 *)(r2 +3808)     ; R8=scalar()
+947: (ad) if r8 < r3 goto pc+4523     ; R3=scalar() R8=scalar()
+948: (bf) r2 = r3                     ; R2=scalar(id=34) R3=scalar(id=34)
+949: (07) r2 += 8192                  ; R2=scalar(id=34+8192)
+950: (3d) if r8 >= r2 goto pc+4520    ; R2=scalar(id=34+8192,umin=1) R3=scalar(id=34) R8=scalar(umax=0xfffffffffffffffe)
+951: (79) r4 = *(u64 *)(r10 -128)     ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+952: (79) r6 = *(u64 *)(r4 +3792)     ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R6=scalar()
+953: (71) r2 = *(u8 *)(r4 +3888)      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R4=map_value(map=per_cpu_records,ks=4,vs=5000)
+954: (54) w2 &= 255                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+955: (bc) w2 = w2                     ; R2=scalar(id=35,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+956: (73) *(u8 *)(r10 -109) = r2      ; R2=scalar(id=35,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-112=ppppm???
+957: (79) r9 = *(u64 *)(r4 +3856)     ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R9=scalar()
+958: (79) r2 = *(u64 *)(r4 +3872)     ; R2=scalar() R4=map_value(map=per_cpu_records,ks=4,vs=5000)
+959: (7b) *(u64 *)(r10 -224) = r2     ; R2=scalar(id=36) R10=fp0 fp-224=scalar(id=36)
+960: (7b) *(u64 *)(r10 -88) = r6      ; R6=scalar(id=37) R10=fp0 fp-88=scalar(id=37)
+961: (b7) r2 = 1                      ; R2=1
+962: (79) r4 = *(u64 *)(r10 -176)     ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888) R10=fp0 fp-176=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888)
+963: (73) *(u8 *)(r4 +0) = r2         ; R2=1 R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3888)
+964: (bf) r2 = r9                     ; R2=scalar(id=38) R9=scalar(id=38)
+965: (57) r2 &= -128                  ; R2=scalar(umax=0xffffffffffffff80,umax32=0xffffff80,var_off=(0x0; 0xffffffffffffff80))
+966: (55) if r2 != 0x80 goto pc+59    ; R2=128
+967: (bc) w2 = w5                     ; R2=6 R5=6
+968: (54) w2 &= 255                   ; R2=6
+969: (b4) w4 = 0                      ; R4=0
+970: (79) r0 = *(u64 *)(r10 -152)     ; R0=1 R10=fp0 fp-152=1
+971: (77) r0 >>= 32                   ; R0=0
+972: (67) r0 <<= 32                   ; R0=0
+973: (bc) w5 = w4                     ; R4=0 R5=0
+974: (4f) r0 |= r5                    ; R0=0 R5=0
+975: (7b) *(u64 *)(r10 -152) = r0     ; R0=0 R10=fp0 fp-152=0
+976: (b4) w8 = 1                      ; R8=1
+977: (16) if w2 == 0x0 goto pc+1      ; R2=6
+978: (b4) w8 = 0                      ; R8=0
+979: (b4) w2 = 8                      ; R2=8
+980: (85) call bpf_probe_read_user#112        ; R0=scalar()
+981: (4c) w8 |= w7                    ; R7=0 R8=0
+982: (56) if w8 != 0x0 goto pc+7      ; R8=0
+983: (61) r1 = *(u32 *)(r10 -168)     ; R1=1 R10=fp0 fp-168=pppp1
+984: (79) r2 = *(u64 *)(r10 -152)     ; R2=0 R10=fp0 fp-152=0
+985: (77) r2 >>= 32                   ; R2=0
+986: (67) r2 <<= 32                   ; R2=0
+987: (bc) w3 = w1                     ; R1=1 R3=1
+988: (4f) r2 |= r3                    ; R2=1 R3=1
+989: (7b) *(u64 *)(r10 -152) = r2     ; R10=fp0 fp-152=1
+990: (79) r1 = *(u64 *)(r10 -184)     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0
+991: (55) if r0 != 0x0 goto pc-726    ; R0=0
+992: (7b) *(u64 *)(r10 -232) = r6     ; R6=scalar(id=37) R10=fp0 fp-232=scalar(id=37)
+993: (7b) *(u64 *)(r10 -184) = r1     ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-184=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+994: (79) r2 = *(u64 *)(r10 -128)     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+995: (79) r1 = *(u64 *)(r2 +3800)     ; R1=scalar() R2=map_value(map=per_cpu_records,ks=4,vs=5000)
+996: (07) r2 += 3800                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3800)
+997: (07) r1 += 8                     ; R1=scalar()
+998: (7b) *(u64 *)(r2 +0) = r1        ; R1=scalar() R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3800)
+999: (b4) w1 = 0                      ; R1=0
+1000: (b4) w2 = 0                     ; R2=0
+1001: (79) r0 = *(u64 *)(r10 -152)    ; R0=1 R10=fp0 fp-152=1
+1002: (67) r0 <<= 32                  ; R0=0x100000000
+1003: (77) r0 >>= 32                  ; R0=1
+1004: (bc) w3 = w2                    ; R2=0 R3=0
+1005: (67) r3 <<= 32                  ; R3=0
+1006: (4f) r0 |= r3                   ; R0=1 R3=0
+1007: (7b) *(u64 *)(r10 -152) = r0    ; R10=fp0 fp-152=1
+1008: (56) if w7 != 0x0 goto pc+8     ; R7=0
+1009: (61) r2 = *(u32 *)(r10 -160)    ; R2=6 R10=fp0 fp-160=pppp6
+1010: (79) r0 = *(u64 *)(r10 -152)    ; R0=1 R10=fp0 fp-152=1
+1011: (67) r0 <<= 32                  ; R0=0x100000000
+1012: (77) r0 >>= 32                  ; R0=1
+1013: (bc) w3 = w2                    ; R2=6 R3=6
+1014: (67) r3 <<= 32                  ; R3=0x600000000
+1015: (4f) r0 |= r3                   ; R0=0x600000001 R3=0x600000000
+1016: (7b) *(u64 *)(r10 -152) = r0    ; R10=fp0 fp-152=0x600000001
+1017: (54) w8 &= 1                    ; R8=0
+1018: (18) r6 = 0xffffccffcd255000    ; R6=map_ptr(map=kprog_unspecifi,ks=4,vs=8)
+1020: (56) if w8 != 0x0 goto pc+1     ; R8=0
+1021: (61) r1 = *(u32 *)(r10 -192)    ; R1=6 R10=fp0
+1022: (54) w9 &= 127                  ; R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+1023: (bc) w9 = w9                    ; R9=scalar(id=39,smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+1024: (79) r5 = *(u64 *)(r10 -128)    ; R5=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+1025: (05) goto pc+320
+1346: (63) *(u32 *)(r10 -160) = r1    ; R1=6 R10=fp0 fp-160=pppp6
+1347: (61) r2 = *(u32 *)(r5 +704)     ; R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+1348: (bc) w2 = w2                    ; R2=scalar(id=40,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+1349: (26) if w2 > 0x7e goto pc-1234          ; R2=scalar(id=40,smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f))
+1350: (bc) w1 = w2                    ; R1=scalar(id=40,smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f)) R2=scalar(id=40,smin=smin32=0,smax=umax=smax32=umax32=126,var_off=(0x0; 0x7f))
+1351: (04) w1 += 1                    ; R1=scalar(id=40+1,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+1352: (79) r3 = *(u64 *)(r10 -88)     ; R3=scalar(id=37) R10=fp0 fp-88=scalar(id=37)
+1353: (bc) w1 = w1                    ; R1=scalar(id=41,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+1354: (bf) r4 = r5                    ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+1355: (07) r4 += 704                  ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=704)
+1356: (63) *(u32 *)(r4 +0) = r1       ; R1=scalar(id=41,smin=umin=smin32=umin32=1,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f)) R4=map_value(map=per_cpu_records,ks=4,vs=5000,imm=704)
+1357: (67) r3 <<= 5                   ; R3=scalar(smax=0x7fffffffffffffe0,smax32=0x7fffffe0,var_off=(0x0; 0xffffffffffffffe0))
+1358: (0f) r3 += r9                   ; R3=scalar() R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=127,var_off=(0x0; 0x7f))
+1359: (24) w2 *= 24                   ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1360: (bf) r1 = r5                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000) R5=map_value(map=per_cpu_records,ks=4,vs=5000)
+1361: (0f) r1 += r2                   ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1362: (bf) r2 = r1                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1363: (07) r2 += 720                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=720,smax=umax=smax32=umax32=3744,var_off=(0x0; 0xff8))
+1364: (7b) *(u64 *)(r2 +0) = r3       ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=720,smax=umax=smax32=umax32=3744,var_off=(0x0; 0xff8)) R3=scalar()
+1365: (79) r3 = *(u64 *)(r10 -232)    ; R3=scalar(id=37) R10=fp0 fp-232=scalar(id=37)
+1366: (79) r2 = *(u64 *)(r10 -224)    ; R2=scalar(id=42) R10=fp0 fp-224=scalar(id=42)
+1367: (1f) r3 -= r2                   ; R2=scalar(id=42) R3=scalar()
+1368: (bf) r2 = r1                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1369: (07) r2 += 728                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=728,smax=umax=smax32=umax32=3752,var_off=(0x0; 0xff8))
+1370: (7b) *(u64 *)(r2 +0) = r3       ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=728,smax=umax=smax32=umax32=3752,var_off=(0x0; 0xff8)) R3=scalar()
+1371: (bf) r2 = r1                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1372: (07) r2 += 736                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=736,smax=umax=smax32=umax32=3760,var_off=(0x0; 0xff8))
+1373: (b7) r3 = 10                    ; R3=10
+1374: (73) *(u8 *)(r2 +0) = r3        ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=736,smax=umax=smax32=umax32=3760,var_off=(0x0; 0xff8)) R3=10
+1375: (71) r2 = *(u8 *)(r10 -109)     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-112=ppppm???
+1376: (bc) w2 = w2                    ; R2=scalar(id=43,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+1377: (bf) r3 = r1                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R3=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1378: (07) r3 += 737                  ; R3=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=737,smax=umax=smax32=umax32=3761,var_off=(0x1; 0xff8))
+1379: (73) *(u8 *)(r3 +0) = r2        ; R2=scalar(id=43,smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R3=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=737,smax=umax=smax32=umax32=3761,var_off=(0x1; 0xff8))
+1380: (bf) r2 = r1                    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8)) R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=smin32=0,smax=umax=smax32=umax32=3024,var_off=(0x0; 0xff8))
+1381: (07) r2 += 738                  ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=738,smax=umax=smax32=umax32=3762,var_off=(0x2; 0xff8))
+1382: (b7) r3 = 0                     ; R3=0
+1383: (63) *(u32 *)(r2 +0) = r3       ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=738,smax=umax=smax32=umax32=3762,var_off=(0x2; 0xff8)) R3=0
+1384: (07) r1 += 742                  ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=742,smax=umax=smax32=umax32=3766,var_off=(0x6; 0xff8))
+1385: (6b) *(u16 *)(r1 +0) = r3       ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,smin=umin=smin32=umin32=742,smax=umax=smax32=umax32=3766,var_off=(0x6; 0xff8)) R3=0
+1386: (62) *(u32 *)(r10 -108) = 91    ; R10=fp0 fp-112=mmmmm???
+1387: (bf) r2 = r10                   ; R2=fp0 R10=fp0
+1388: (07) r2 += -108                 ; R2=fp-108
+1389: (18) r1 = 0xffff8b1635745800    ; R1=map_ptr(map=metrics,ks=4,vs=8)
+1391: (85) call bpf_map_lookup_elem#1         ; R0=map_value_or_null(id=44,map=metrics,ks=4,vs=8)
+1392: (15) if r0 == 0x0 goto pc+3     ; R0=map_value(id=44,map=metrics,ks=4,vs=8)
+1393: (79) r1 = *(u64 *)(r0 +0)       ; R0=map_value(id=44,map=metrics,ks=4,vs=8) R1=scalar()
+1394: (07) r1 += 1                    ; R1=scalar()
+1395: (7b) *(u64 *)(r0 +0) = r1       ;
+1396: (b7) r3 = 0                     ; R3=0
+1397: (b4) w1 = 1                     ; R1=1
+1398: (79) r2 = *(u64 *)(r10 -72)     ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R10=fp0 fp-72=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+1399: (79) r4 = *(u64 *)(r10 -152)    ; R4=0x600000001 R10=fp0 fp-152=0x600000001
+1400: (77) r4 >>= 32                  ; R4=6
+1401: (54) w4 &= 255                  ; R4=6
+1402: (16) if w4 == 0x0 goto pc+5     ; R4=6
+1403: (16) if w4 == 0x4 goto pc+3     ; R4=6
+1404: (b4) w1 = 0                     ; R1=0
+1405: (bf) r3 = r2                    ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792) R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+1406: (05) goto pc+1
+1408: (56) if w1 != 0x0 goto pc+1     ; R1=0
+1409: (bf) r2 = r3                    ; R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+1410: (b4) w3 = 0                     ; R3=0
+1411: (56) if w1 != 0x0 goto pc+2     ; R1=0
+1412: (79) r3 = *(u64 *)(r10 -152)    ; R3=0x600000001 R10=fp0 fp-152=0x600000001
+1413: (77) r3 >>= 32                  ; R3=6
+1414: (bc) w4 = w3                    ; R3=6 R4=6
+1415: (54) w4 &= 255                  ; R4=6
+1416: (56) if w4 != 0x0 goto pc+8     ; R4=6
+1425: (79) r1 = *(u64 *)(r2 +0)       ; R1=scalar() R2=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3792)
+1426: (16) if w4 == 0x4 goto pc+5     ; R4=6
+1427: (56) if w4 != 0x1 goto pc+13    ; R4=6
+1441: (b4) w7 = 0                     ; R7=0
+1442: (54) w3 &= 255                  ; R3=6
+1443: (56) if w3 != 0x4 goto pc+27    ; R3=6
+1471: (b7) r5 = 0                     ; R5=0
+1472: (b4) w2 = 1                     ; R2=1
+1473: (bc) w3 = w7                    ; R3=0 R7=0
+1474: (54) w3 &= 255                  ; R3=0
+1475: (16) if w3 == 0x0 goto pc+6     ; R3=0
+1482: (16) if w2 == 0x0 goto pc+2     ; R2=1
+1483: (b4) w7 = 0                     ; R7=0
+1484: (bf) r5 = r1                    ; R5=scalar()
+1485: (bc) w2 = w7                    ; R2=0 R7=0
+1486: (54) w2 &= 255                  ; R2=0
+1487: (bf) r1 = r5                    ; R1=scalar(id=46) R5=scalar(id=46)
+1488: (56) if w2 != 0x4 goto pc+7     ; R2=0
+1496: (79) r9 = *(u64 *)(r10 -80)     ; R9=ctx() R10=fp0 fp-80=ctx()
+1497: (79) r8 = *(u64 *)(r10 -128)    ; R8=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+1498: (15) if r1 == 0x0 goto pc+5281          ; R1=scalar(id=46,umin=1) R5=scalar(id=46,umin=1)
+1499: (bc) w2 = w7                    ; R2=0 R7=0
+1500: (54) w2 &= 255                  ; R2=0
+1501: (bf) r1 = r5                    ; R1=scalar(id=46,umin=1) R5=scalar(id=46,umin=1)
+1502: (56) if w2 != 0x4 goto pc+7     ; R2=0
+1510: (7b) *(u64 *)(r10 -168) = r5    ; R5=scalar(id=46,umin=1) R10=fp0 fp-168=scalar(id=46,umin=1)
+1511: (18) r2 = 0xffffffffffffff      ; R2=0xffffffffffffff
+1513: (2d) if r1 > r2 goto pc-1268    ; R1=scalar(id=46,smin=umin=1,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R2=0xffffffffffffff fp-168=scalar(id=46,smin=umin=1,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1514: (bc) w2 = w7                    ; R2=0 R7=0
+1515: (54) w2 &= 255                  ; R2=0
+1516: (79) r1 = *(u64 *)(r10 -168)    ; R1=scalar(id=46,smin=umin=1,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R10=fp0 fp-168=scalar(id=46,smin=umin=1,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1517: (56) if w2 != 0x4 goto pc+7     ; R2=0
+1525: (79) r8 = *(u64 *)(r10 -128)    ; R8=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+1526: (a5) if r1 < 0x1000 goto pc-685         ; R1=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) fp-168=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1527: (61) r1 = *(u32 *)(r8 +0)       ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R8=map_value(map=per_cpu_records,ks=4,vs=5000)
+1528: (bc) w1 = w1                    ; R1=scalar(id=47,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+1529: (d7) r1 = bswap32 r1            ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+1530: (63) *(u32 *)(r10 -100) = r1    ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-104=mmmmpppp
+1531: (62) *(u32 *)(r10 -104) = 96    ; R10=fp0 fp-104=mmmm96
+1532: (bc) w2 = w7                    ; R2=0 R7=0
+1533: (54) w2 &= 255                  ; R2=0
+1534: (79) r1 = *(u64 *)(r10 -168)    ; R1=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R10=fp0 fp-168=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1535: (56) if w2 != 0x4 goto pc+7     ; R2=0
+1543: (d7) r1 = bswap64 r1            ; R1=scalar(smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00))
+1544: (7b) *(u64 *)(r10 -96) = r1     ; R1=scalar(id=48,smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00)) R10=fp0 fp-96=scalar(id=48,smax=0x7fffffffffffff00,smax32=0x7fffff00,var_off=(0x0; 0xffffffffffffff00))
+1545: (18) r1 = 0xffff8b148f080a00    ; R1=map_ptr(map=pid_page_to_map,ks=16,vs=16)
+1547: (79) r2 = *(u64 *)(r10 -136)    ; R2=fp-104 R10=fp0 fp-136=fp-104
+1548: (85) call bpf_map_lookup_elem#1         ; R0=map_value_or_null(id=49,map=pid_page_to_map,ks=16,vs=16)
+1549: (79) r8 = *(u64 *)(r10 -128)    ; R8=map_value(map=per_cpu_records,ks=4,vs=5000) R10=fp0 fp-128=map_value(map=per_cpu_records,ks=4,vs=5000)
+1550: (15) if r0 == 0x0 goto pc+5236          ; R0=map_value(id=49,map=pid_page_to_map,ks=16,vs=16)
+1551: (79) r8 = *(u64 *)(r0 +8)       ; R0=map_value(id=49,map=pid_page_to_map,ks=16,vs=16) R8=scalar()
+1552: (18) r1 = 0xffffffffffffff      ; R1=0xffffffffffffff
+1554: (bf) r2 = r8                    ; R2=scalar(id=50) R8=scalar(id=50)
+1555: (5f) r2 &= r1                   ; R1=0xffffffffffffff R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1556: (79) r1 = *(u64 *)(r10 -208)    ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872) R10=fp0 fp-208=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872)
+1557: (7b) *(u64 *)(r1 +0) = r2       ; R1=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3872) R2=scalar(smin=0,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1558: (79) r1 = *(u64 *)(r0 +0)       ; R0=map_value(id=49,map=pid_page_to_map,ks=16,vs=16) R1=scalar()
+1559: (79) r3 = *(u64 *)(r10 -216)    ; R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856) R10=fp0 fp-216=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856)
+1560: (7b) *(u64 *)(r3 +0) = r1       ; R1=scalar() R3=map_value(map=per_cpu_records,ks=4,vs=5000,imm=3856)
+1561: (bc) w3 = w7                    ; R3=0 R7=0
+1562: (54) w3 &= 255                  ; R3=0
+1563: (79) r9 = *(u64 *)(r10 -168)    ; R9=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff)) R10=fp0 fp-168=scalar(id=46,smin=umin=4096,smax=umax=0xffffffffffffff,var_off=(0x0; 0xffffffffffffff))
+1564: (56) if w3 != 0x4 goto pc+7     ; R3=0
+1572: (bc) w4 = w3                    ; R3=0 R4=0
+1573: (04) w4 += -1                   ; R4=0xffffffff
+1574: (a6) if w4 < 0x4 goto pc+2      ; R4=0xffffffff
+1575: (b4) w6 = 0                     ; R6=0
+1576: (56) if w3 != 0x6 goto pc+2     ; R3=0
+1579: (77) r8 >>= 56                  ; R8=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))
+1580: (bf) r3 = r10                   ; R3=fp0 R10=fp0
+1581: (07) r3 += -120                 ; R3=fp-120
+1582: (79) r7 = *(u64 *)(r10 -144)    ; R7=scalar(id=51) R10=fp0 fp-144=scalar(id=51)
+1583: (1f) r7 -= r3
+math between fp pointer and register with unbounded min value is not allowed
+
+Verification failed: Register Type Safety: Pointer offset is not safe
+
+Reason:
+  The scalar offset used with R3 is unbounded or outside the verifier's safe pointer-offset range
+  [-536870912, 536870912].
+
+At:
+  insn 1583
+       | ^-- error: pointer offset is not safe
+  Instruction context:
+      1581 | (07) r3 += -120
+      1582 | (79) r7 = *(u64 *)(r10 -144)
+  >>> 1583 | (1f) r7 -= r3
+      1584 | (1f) r9 -= r2
+      1585 | (0f) r7 += r9
+
+Causal path:
+  insn 1580
+       | ^-- update: R3 changed from uninitialized value to stack pointer at offset 0
+  Instruction context:
+      1578 | (79) r9 = *(u64 *)(r10 -168)
+      1579 | (77) r8 >>= 56
+  >>> 1580 | (bf) r3 = r10
+      1581 | (07) r3 += -120
+      1582 | (79) r7 = *(u64 *)(r10 -144)
+
+  insn 1581
+       | ^-- update: R3 changed from stack pointer at offset 0 to stack pointer at offset -120
+  Instruction context:
+      1579 | (77) r8 >>= 56
+      1580 | (bf) r3 = r10
+  >>> 1581 | (07) r3 += -120
+      1582 | (79) r7 = *(u64 *)(r10 -144)
+      1583 | (1f) r7 -= r3
+
+Suggestion:
+  Clamp or bounds-check the scalar offset before applying it to the pointer.
+
+processed 634 insns (limit 1000000) max_states_per_insn 0 total_states 37 peak_states 37 mark_read 0

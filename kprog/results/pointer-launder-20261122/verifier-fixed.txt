@@ -1,0 +1,5 @@
+# OTel request 10, B with the pointer launder
+# object: /tmp/rr10h/trusted_x86.bpf.o
+# section: perf_event prog_type: 1 relocs: 84
+# verdict: ACCEPTED ret=73 errno=0
+processed 7299 insns (limit 1000000) max_states_per_insn 1 total_states 570 peak_states 570 mark_read 0

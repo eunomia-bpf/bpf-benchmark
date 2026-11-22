@@ -1,6 +1,6 @@
 # 当前设计和与原话的差异（协调者，每小时更新）
 
-更新时间 2026-11-22T00:3x UTC。依据：运营者 2026-11-21“每小时定时任务都需要汇报完整的当前设计以及和设计的差异.”、“停掉所有测试, 你来做, codex 只负责 verify 的部分, 去确保设计完全符合我说的, 做好之前不要测量”、“应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化? 因为之前都跑通了?”、“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”。design.md 保持原样，本文件写按原话定义的设计、实际形态和差异。
+更新时间 2026-11-21T19:4x UTC。依据：运营者 2026-11-21“每小时定时任务都需要汇报完整的当前设计以及和设计的差异.”、“停掉所有测试, 你来做, codex 只负责 verify 的部分, 去确保设计完全符合我说的, 做好之前不要测量”、“应该在 5/29 基础上, 除了 verify 的部分以外整个路径 1000 行以内的 fix 和优化? 因为之前都跑通了?”、“都做好之后再完整详细测试性能, 重点是确保符合 design, 不需要调参. 可以和 5/29 对比.”。design.md 保持原样，本文件写按原话定义的设计、实际形态和差异。
 
 ## 一、设计（按运营者原话定义）
 
@@ -47,8 +47,7 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 | arm64 | 构建按架构参数化（vmlinux 头、__TARGET_ARCH、系统头）；-mno-outline-atomics；pt_regs 参数寄存器；Tetragon regs.h 的 arm64 分支用普通 C；OTel 部分链接带目标；入口函数多处保存（shrink-wrapping）时保留自己的保存 | vendor/bpf、native-link |
 | arm64 | 尾调用内联：P 编译时保留 x26（-ffixed-x26，arm64 所有应用一致），x26 在原生帧里指向尾调用计数；native-link 把 bpf_tail_call 展开成 JIT 同样的序列（界检查、计数、取 prog、回到帧底、弹出五对寄存器、跳到目标序言之后），任何深度的调用点都可用 | native-link、加载器、vendor/bpf |
 | 去掉 | 5/29 构建期对每个符号跑 native-link proof 模式的关卡（产物没有人读；checked 配置在装载时自己跑 proof），90 行 | vendor/bpf |
-| arm64 | 数据重定位按段处理（proof 拷整段、kernel 用段副本加偏移）；调用对象内其它函数（构建时把可执行段合成一个 .text，native-link 跟进 CALL26）；按编号调用的 helper：函数只给这个寄存器写过一个编号时直接调，其余按运行时编号分派（5f1f0cd3a；8294617c9 的按块取编号让 Katran 在来宾里崩溃，已退回）；模块和加载器收 2048 块（arm64 512 KiB，x86 256 KiB） | native-link、模块、加载器、vendor/bpf |
-| 功能修复 | OTel 的 perf_event 入口在原生编译下经内核上下文 bpf_perf_event_data_kern 的 regs 指针读寄存器（95cb987c5，6 行，MICRO_NATIVE 分支）：5/29 的原生入口按公开布局读 ctx+160，找不到用户态寄存器，跳过了栈展开 | vendor/bpf（OTel 源码一处） |
+| arm64 | 数据重定位按段处理（proof 拷整段、kernel 用段副本加偏移）；调用对象内其它函数（构建时把可执行段合成一个 .text，native-link 跟进 CALL26）；按编号调用的 helper：调用点所在块里写进寄存器的编号就是这个 helper，直接调（8294617c9）；只有别的路径也能到这个调用点时（-O3 把几个 helper 的调用合成一个 BLR）才按运行时编号分派 | native-link、vendor/bpf |
 | arm64 | Tetragon 的尾调用特性探测程序在 arm64 上也认得出（它的指令里带 prog array 的 fd，x86 是 7、arm64 是 6，5/29 的规则按指令哈希认，33989a177 去掉哈希条件） | shim |
 | 功能修复 | helper 绑定到内核对这个程序类型实际调用的函数（模块 helper_targets，按 get_func_proto 查；复用 verify 侧的查询函数） | 模块、加载器 |
 | 功能修复 | 字符串常量（.rodata.str*）留在镜像里，不绑到程序的 map（Tracee）；cilium_snat_v4_external 按类型和 key/value 大小匹配（agent 按内存定大小） | 加载器、manifest |
@@ -74,7 +73,7 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 
 **两种配置**：direct native（冻结入口计时的）在 5/29 基础上完整；checked（主配置）由 formal 线（Codex，verify 侧）接回：dd6559b54 把可信加载放进单独的 native_loader_trusted.cpp，性能代码里只有一处分派；1cb485711 补回 --preserve-entry-abi。
 
-**行数**：相对 5/29，路径文件合计新增 1326、删除 814（tally.sh，33989a177 时点；之后 5f1f0cd3a 净减 26 行、95cb987c5 加 6 行），其中约 370 行是 checked 配置（verify 侧）落在共用文件里的接入；修复和优化约 950 行，在 1000 行以内。
+**行数**：相对 5/29，路径文件合计新增 1326、删除 814（tally.sh，33989a177 时点），其中约 370 行是 checked 配置（verify 侧）落在共用文件里的接入；修复和优化约 950 行，在 1000 行以内。
 
 **构建**：native-link（7 个测试）、加载器、shim、x86 和 arm64 模块、x86 和 arm64 六应用原生对象都已构建通过（/workspaces/kprog-raw/coordinator/restore-529/）。x86 镜像 19:25Z 用 8430daa81 重建（含 fd7b7d5d7）；arm64 镜像在 arm64 检查跑完后用 33989a177 之后的头重建（chain3.sh）。
 
@@ -82,25 +81,13 @@ target P ─┬─ 验证侧（只在 load / 验证期）：native P + 已验证
 
 | # | 差异 | 原话 |
 |---|---|---|
-| 1 | x86 六应用全部原生（OTel 14、BCC 25、Cilium 135、Tetragon 288、Tracee 169、Katran 1）；库的特性探测程序（libbpf、cilium/ebpf 加载后马上卸载）按 5/29 规则留在 eBPF | “任何情况下绝对不允许留在 ebpf 上面跑” |
-| 2 | arm64 来宾检查（镜像 5f1f0cd3a）：BCC、Tracee、Katran 原生通过；OTel（分派处 brk）、Cilium（printk 收到垃圾参数）、Tetragon（尾调用跳到字符串地址）崩溃，原因在查；按 11-20 原话，这三个应用的 arm64 数用 5/27 的（06-14 矩阵） | 2026-11-20“确保 arm 和 x86 都要弄好, 不然就用 5/27 的数字 … 如果 11/22 之前弄不好就还是 5/27 的” |
-| 5 | OTel 19:29Z 轮换的数作废（原生跳过栈展开），95cb987c5 修复后在新镜像上重测 | 2026-11-18“… 功能正常就可以” |
+| 1 | x86 六应用全部原生（OTel 14、BCC 25、Cilium 135、Tetragon 288、Tracee 169、Katran 1），两臂各程序都在跑；Cilium 按端点的程序按 10 月修复绑定数据 | “任何情况下绝对不允许留在 ebpf 上面跑” |
+| 2 | arm64 来宾第一轮检查：BCC 23 个全部原生；OTel、Cilium、Tracee 各有一个程序超过模块 512 块上限、Tetragon 的特性探测没认出来，四处都已修（离线链接最大 58 KB），新 arm64 镜像复查中；Katran 在跑 | 2026-11-20“确保 arm 和 x86 都要弄好” |
 | 3 | 装载时常量特化（perf_context_lto）只在 checked 配置里用；它要求 P 带 bitcode、运行时带编译器，和 11-11“不需要 构建时多保留一份 LLVM bitcode?”、11-12“运行时镜像里要带源码和编译器? 不需要吧?”相反，所以 direct native 不接 | “helper map 也可以这样内联之后常量消除” |
 | 4 | 读用户内存、current_task 仍是 helper 调用 | “手写的 helper 例程 是不是应替换成 c 实现的直接编译进去的” |
 
 ## 四、进度和下一步
 
 1. x86 功能检查（每应用 10 秒、stats 开）全部通过：OTel、BCC、Cilium、Tracee、Katran 在 18:4x–18:59Z（镜像 6004ea7ac），Tetragon 19:29Z 在新镜像上复查（x86_kvm_corpus_20261121_192644_031303：288 个原生，两臂各取样 287 个程序，3 个活跃程序都跟中位数一致）。
-2. x86 完整性能测试（冻结入口，六应用 × stats 关、开，3 样本 × 180 秒，不调参数）19:29Z 起在镜像 8430daa81 上跑，进度 /workspaces/kprog-raw/one-image-runs/progress.log。截至 00:25Z（may29_ratio.py）：
-
-   | 应用 | 吞吐 stats 关 | 每次调用 stats 开 | 吞吐 stats 开 | 5/29 |
-   |---|---|---|---|---|
-   | OTel | 1.847x（作废） | 19.3x（作废） | 1.850x（作废） | 1.849x |
-   | BCC | 1.014x | 0.999x | 0.999x | 0.985x |
-   | Cilium | 1.026x | 1.108x | 1.048x | 1.319x |
-   | Tetragon | 1.335x | 2.439x | 1.982x | 1.009x |
-   | Tracee | 1.908x | 1.978x | 1.690x | 0.948x |
-   | Katran | 1.106x | 在跑 | 在跑 | 1.113x |
-
-   Cilium 每次调用低于 5/29 的 1.319x。之后 chain5.sh 清掉 x86 原生对象、重建镜像、重跑 OTel 两遍。
-3. arm64：继续查 OTel、Cilium、Tetragon 的崩溃；这三个应用的 arm64 数用 5/27 的（06-14 矩阵）。修好后六应用再检查一遍，然后在 Spark KVM 上计时（暂停 DeepSeek，测完立刻恢复）。
+2. x86 完整性能测试（冻结入口，六应用 × stats 关、开，3 样本 × 180 秒，不调参数）19:29Z 在镜像 8430daa81 上开始，进度 /workspaces/kprog-raw/one-image-runs/progress.log；19:03Z 那一轮用的是旧 shim，19:19Z 停下（OTel 跑到一半，原始数据保留）。跑完后用 kprog/results/flag-tuning-20261117/may29_ratio.py 逐应用算，和 5/29 一列（best-numbers-20261121：Tracee 0.948x、Tetragon 1.009x、Cilium 1.319x、BCC 0.985x、Katran 1.113x、OTel 1.849x）对比。
+3. arm64：新镜像建好后六应用来宾功能检查再跑一遍；通过后在 Spark KVM 上按规矩计时（暂停 DeepSeek，测完立刻恢复）。
