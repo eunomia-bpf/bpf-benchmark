@@ -1,0 +1,143 @@
+{
+  "at": "2026-11-22T02:44:39.970047+00:00",
+  "kind": "read-only observation from ongoing guest; no extra test/app/guest",
+  "memoization_commit": "ee11f8c04",
+  "cases": [
+    {
+      "request_id": 25,
+      "source_archive": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/25.success.tar.gz",
+      "source_archive_sha256": "cc6e9cd341fce43222a470743645767d84c66314c6c9019c0de7e430d027e973",
+      "stages": {
+        "trusted_x86.bpf.before.mir": {
+          "bytes": 89061225,
+          "mtime_epoch": 1795313828.3859572,
+          "mtime_utc": "2026-11-22T02:17:08.385957+00:00",
+          "original_pax_headers": {
+            "mtime": "1795313828.3859572"
+          }
+        },
+        "trusted_x86.bpf.packed.mir": {
+          "bytes": 89440773,
+          "mtime_epoch": 1795314246.665559,
+          "mtime_utc": "2026-11-22T02:24:06.665559+00:00",
+          "original_pax_headers": {
+            "mtime": "1795314246.665559"
+          }
+        },
+        "trusted_x86.bpf.o": {
+          "bytes": 6964312,
+          "mtime_epoch": 1795314254.5987463,
+          "mtime_utc": "2026-11-22T02:24:14.598746+00:00",
+          "original_pax_headers": {
+            "mtime": "1795314254.5987463"
+          }
+        }
+      },
+      "generated_C_sha256": "6b732a703f752d11dd5e698313c4a194a3a7c74a4c6e31352a27eb4301dc1d9d",
+      "B_program_section": {
+        "bytes": 3419184,
+        "instructions": 427398,
+        "sha256": "352859308a277cf40dfe76b2e5904317ce9b1d7f4ac6a91556f579a15462a992"
+      },
+      "generation_metadata_sha256": "95d3d5703c90fbee78b2f7c7a7984de72768e1cfa6323e318dfcaddaf64f9cf6",
+      "packer_in_source_identity_file": false,
+      "pack_stage_interval_seconds": 418.27960181236267,
+      "event": {
+        "request_id": 25,
+        "source_prog_id": 494,
+        "native_sha256": "bae7974ff1dc5f8b3b11e2994d349894a11811f019a5c193a85f8a646f44f7de",
+        "execution_mode": "checked-sim-c",
+        "started": "2026-11-22T02:15:08.975261+00:00",
+        "prog_id": 499,
+        "phase": "load-direct",
+        "status": 0,
+        "execution_path": "direct-native",
+        "b_generated": true,
+        "b_stock_passed": false,
+        "simulator_failure": {
+          "stage": "verification",
+          "error": "Command '['/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/loader-inputs/trusted-native-loader', 'verify', '4', '25', '494', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-pp26yo5y/generated/request.native.o', 'generic_kprobe_filter_arg', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-pp26yo5y/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-pp26yo5y/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'substring_map', '4226', 'null', 'string_prefix_maps_heap', '4239', 'null', 'string_maps_5', '4082', 'null', 'string_maps_2', '4076', 'null', 'string_maps_9', '4090', 'null', 'string_maps_3', '4078', 'null', 'string_maps_0', '4072', 'null', 'string_maps_8', '4088', 'null', 'string_maps_10', '4092', 'null', 'string_maps_4', '4080', 'null', 'string_maps_7', '4086', 'null', 'string_maps_1', '4074', 'null', 'process_call_heap', '4101', 'null', 'string_maps_6', '4084', 'null', 'retprobe_map', '4100', 'null', 'string_maps_heap', '4228', 'null', 'kprobe_calls', '4062', 'null', 'addr4lpm_maps', '4068', 'null', 'string_postfix_maps', '4096', 'null', 'filter_map', '4064', 'null', 'string_postfix_maps_heap', '4244', 'null', 'string_prefix_maps', '4094', 'null', 'argfilter_maps', '4066', 'null', 'addr6lpm_maps', '4070', 'null', 'heap_ro_zero', '4238', 'null']' returned non-zero exit status 2.",
+          "returncode": 2,
+          "stderr": "trusted-native-loader: service simulator verification failed before native compilation: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (7b) *(u64 *)(r10 -1040) = r0\ninvalid write to stack R10 off=-1040 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n"
+        },
+        "artifact_archive": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/25.success.tar.gz",
+        "finished": "2026-11-22T02:24:32.401402+00:00"
+      }
+    },
+    {
+      "request_id": 29,
+      "source_archive": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/29.success.tar.gz",
+      "source_archive_sha256": "dbb3e502f26b8419418437155c57b4023d8476a98cb5b5eb626d2338f4401314",
+      "stages": {
+        "trusted_x86.bpf.before.mir": {
+          "bytes": 89061225,
+          "mtime_epoch": 1795314987.0576985,
+          "mtime_utc": "2026-11-22T02:36:27.057698+00:00",
+          "original_pax_headers": {
+            "mtime": "1795314987.0576985"
+          }
+        },
+        "trusted_x86.bpf.packed.mir": {
+          "bytes": 89440773,
+          "mtime_epoch": 1795315270.4271588,
+          "mtime_utc": "2026-11-22T02:41:10.427159+00:00",
+          "original_pax_headers": {
+            "mtime": "1795315270.4271588"
+          }
+        },
+        "trusted_x86.bpf.o": {
+          "bytes": 6964312,
+          "mtime_epoch": 1795315278.8173497,
+          "mtime_utc": "2026-11-22T02:41:18.817350+00:00",
+          "original_pax_headers": {
+            "mtime": "1795315278.8173497"
+          }
+        }
+      },
+      "generated_C_sha256": "6b732a703f752d11dd5e698313c4a194a3a7c74a4c6e31352a27eb4301dc1d9d",
+      "B_program_section": {
+        "bytes": 3419184,
+        "instructions": 427398,
+        "sha256": "352859308a277cf40dfe76b2e5904317ce9b1d7f4ac6a91556f579a15462a992"
+      },
+      "generation_metadata_sha256": "95d3d5703c90fbee78b2f7c7a7984de72768e1cfa6323e318dfcaddaf64f9cf6",
+      "packer_in_source_identity_file": false,
+      "pack_stage_interval_seconds": 283.3694603443146,
+      "event": {
+        "request_id": 29,
+        "source_prog_id": 519,
+        "native_sha256": "bae7974ff1dc5f8b3b11e2994d349894a11811f019a5c193a85f8a646f44f7de",
+        "execution_mode": "checked-sim-c",
+        "started": "2026-11-22T02:34:21.302222+00:00",
+        "prog_id": 524,
+        "phase": "load-direct",
+        "status": 0,
+        "execution_path": "direct-native",
+        "b_generated": true,
+        "b_stock_passed": false,
+        "simulator_failure": {
+          "stage": "verification",
+          "error": "Command '['/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/loader-inputs/trusted-native-loader', 'verify', '4', '29', '519', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-04ruslam/generated/request.native.o', 'generic_kprobe_filter_arg', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-04ruslam/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/request-04ruslam/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'substring_map', '4313', 'null', 'string_prefix_maps_heap', '4344', 'null', 'string_maps_5', '4163', 'null', 'string_maps_2', '4157', 'null', 'string_maps_9', '4171', 'null', 'string_maps_3', '4159', 'null', 'string_maps_0', '4153', 'null', 'string_maps_8', '4169', 'null', 'string_maps_10', '4173', 'null', 'string_maps_4', '4161', 'null', 'string_maps_7', '4167', 'null', 'string_maps_1', '4155', 'null', 'process_call_heap', '4101', 'null', 'string_maps_6', '4165', 'null', 'retprobe_map', '4320', 'null', 'string_maps_heap', '4319', 'null', 'kprobe_calls', '4143', 'null', 'addr4lpm_maps', '4149', 'null', 'string_postfix_maps', '4177', 'null', 'filter_map', '4145', 'null', 'string_postfix_maps_heap', '4314', 'null', 'string_prefix_maps', '4175', 'null', 'argfilter_maps', '4147', 'null', 'addr6lpm_maps', '4151', 'null', 'heap_ro_zero', '4326', 'null']' returned non-zero exit status 2.",
+          "returncode": 2,
+          "stderr": "trusted-native-loader: service simulator verification failed before native compilation: Permission denied\narg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (7b) *(u64 *)(r10 -1040) = r0\ninvalid write to stack R10 off=-1040 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n"
+        },
+        "artifact_archive": "/workspaces/kprog-raw/C/checked-entry-20261121/whole-apps-after-otel-retest/tetragon/state/session-an6mftfa/requests/29.success.tar.gz",
+        "finished": "2026-11-22T02:41:36.643479+00:00"
+      }
+    }
+  ],
+  "same_generated_C": true,
+  "same_generation_metadata": true,
+  "same_B_program_bytes": true,
+  "same_verifier_stderr": true,
+  "caveats": [
+    "Observed file timestamp intervals in one existing guest, not an isolated experiment or application speed result.",
+    "Per-request source identity files omit the MIR packer; current shared source/install chronology and captured command paths provide context, not a per-process code attestation.",
+    "Both cases fail the stock verifier at R10-1040 and use direct-native fallback; no extra acceptance or whole-app completion claimed."
+  ],
+  "handoff": "parent loop remains stopped until coordinator otel-rerun2.done; running Tetragon unchanged",
+  "archive": "kprog/results/checked-entry-20261121/spill-parse-guest-raw.tar.gz",
+  "archive_bytes": 2477290,
+  "archive_sha256": "4c1f54dfb9751151ff0011266af65588cf3189dcd0b2ae850e70978f7c33727d",
+  "production_changes": 0
+}
