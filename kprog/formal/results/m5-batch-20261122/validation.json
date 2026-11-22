@@ -24,5 +24,21 @@
     "command": "lake env lean -j1 results/m5-x86-alu-decode/Query.lean",
     "exit": 0,
     "seconds": 2.0531191490008496
+  },
+  "make-check3": {
+    "command": [
+      "make",
+      "check"
+    ],
+    "exit": 2,
+    "seconds": 201.85925732803298,
+    "source_count": 269,
+    "changed_sources": [],
+    "added_sources": [
+      "KProgFormal/ClightRefinement/Arm64SelectCaller.lean"
+    ],
+    "workers": 1,
+    "process_memory_gib": 32,
+    "timing_lock": "shared"
   }
 }

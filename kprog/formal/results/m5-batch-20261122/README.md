@@ -19,3 +19,26 @@ in the preceding x86-entry-storage raw directory. The current completed attempt
 records an added peer ARM call module during the run; initial source inputs retain
 their sizes/timestamps. The next complete confirmation includes the current tree.
 Per-instruction/full-dispatcher and O1/O2/O4/M5/M6 work continues.
+
+## Architectural-fault regression
+
+make-check3 completed the current Lean build and native reference suites through
+REP MOVS/STOS (2150 complete-state transitions, including80 CPU restart faults)
+and CALL/RET/LEAVE/UD2 (1659 complete-state transitions). It stopped at
+`check_x86_divide_handler.py:73`, which retains the BPF fault rejection marker.
+The [whole output](make-check3.txt.gz) records exit2 after201.86s.
+
+Runtime commitaaca40148 changed the fault arm to `r0 = 0; exit;` while
+`compile_sim_ir.cpp:208` still converts that arm to `llvm.assume(false)`.
+The new returning B arm can be reachable and accepted. Acceptance alone thus
+supplies insufficient evidence for the native unreachability assumption.
+The constant DIV0 artifact is build/divide-handler/fault_8_False.{c,o,asm};
+zero-divisor, overflow and AX-alias negative cases retain the existing assertion.
+The original native/B fault correspondence requires correction in the runtime
+owner's implementation; the oracle assertion stays intact.
+
+This is a concrete remaining full-check failure. All failure logs stay in raw
+storage and this receipt. The source-size/mtime record also lists the peer
+Arm64SelectCaller addition during this attempt. The accepted source inputs
+retain their initial metadata. Verification continues on the independent
+per-instruction source proofs while the runtime owner corrects this defect.
