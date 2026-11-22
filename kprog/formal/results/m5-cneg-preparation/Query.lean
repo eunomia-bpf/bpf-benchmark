@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
+import KProgFormal.ClightRefinement.Arm64ConditionGe
 
 open KProgFormal.ClightRefinement
 
@@ -17,3 +18,9 @@ open KProgFormal.ClightRefinement
 #print axioms Arm64Cneg.Native.native_step
 #check Arm64Cneg.Native.reference_step
 #print axioms Arm64Cneg.Native.reference_step
+#check Arm64ConditionGe.internal
+#print axioms Arm64ConditionGe.internal
+#check Arm64ConditionGe.from_storage
+#print axioms Arm64ConditionGe.from_storage
+#check Arm64ConditionGe.native_truth
+#print axioms Arm64ConditionGe.native_truth

@@ -8,7 +8,7 @@ The native proof binds the LNSym CSNEG X6,X5,X5,LT alias, including its actual
 condition inversion, register write, PC advance, event history and fault state.
 No independent ISA executor or runtime source is added.
 
-These two modules and the seven public queries are **unverified work in
+These three modules and the ten public queries are **unverified work in
 progress**. The focused command reached only the shared timing-lock waiter;
 no Lake/Lean child started while the frozen rotate held the exclusive lock.
 The lane ended that unstarted waiter for batching and retained its raw log.
@@ -18,7 +18,7 @@ is claimed. The accepted predecessor remains the seven-call CSEL prefix.
 Next, under the shared timing lock, CPU 17, one worker and 32 GiB, run:
 
 ```sh
-lake build KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall KProgFormal.ClightRefinement.Arm64CnegNative
+lake build KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall KProgFormal.ClightRefinement.Arm64CnegNative KProgFormal.ClightRefinement.Arm64ConditionGe
 lake env lean -j1 results/m5-cneg-preparation/Query.lean
 ```
 
@@ -32,3 +32,15 @@ its previously recorded DIV fault/assume(false) failure is unchanged by these
 proof drafts. M5/O1/O2/O4/M6 remain open; completed ISA families: zero.
 
 Raw: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+The next source component, Arm64ConditionGe, is also prepared but unverified.
+It uses the exported condition function's original ten preceding comparisons
+and GE branch, both actual unsigned-byte N/V loads, and the original return.
+The proposed complete call count is 28; this count and all proof terms await
+Lean checking. The storage theorem derives both reads from the existing NZCV
+representation, and native_truth relates the C comparison to LNSym's existing
+ConditionHolds 10. Z/C pointers are retained without being dereferenced on this
+path. The same full memory and original continuation are part of the proposed
+call result. No new runtime implementation or replacement condition semantics
+is introduced. Before acceptance, run all three focused modules followed by
+the ten prepared public queries at the original proof caps.
