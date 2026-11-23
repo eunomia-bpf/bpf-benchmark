@@ -256,4 +256,101 @@ theorem parity_internal (ge : CC.CGenv)
     parityExpr (X86ShiftFlagPF.bit value) (X86ShiftFlagPF.bit value) bindingBlock pfBlock 152 offset
     binding address pointer evaluated cast stored
 
+private def sfExpr : CC.Expr := by
+  run_tac cachePart (← `(match sf with
+    | .Ssequence _ (.Sassign _ rhs) => rhs | _ => .Econst_int (0#32) CC.tint))
+
+theorem sf_source : sf = storeStmt X86_program_profile_bpf._t'204
+    X86_program_profile_bpf._sf sfExpr := rfl
+
+def signPayload (value : BitVec 64) (size : X86.Size) : BitVec 64 :=
+  (value >>> (size.bits - 1)) &&& (1#64)
+
+def signByte (value : BitVec 64) (size : X86.Size) : CC.Val :=
+  .Vint (if X86.Value.msb size value then 1 else 0)
+
+/-- The actual shift/AND payload extracts precisely x86lean's sign bit. -/
+theorem sign_value (value : BitVec 64) (size : X86.Size) :
+    signPayload value size = (BitVec.ofBool (X86.Value.msb size value)).setWidth 64 := by
+  rw [signPayload, BitVec.and_one_eq_setWidth_ofBool_getLsbD]
+  simp only [BitVec.getLsbD_ushiftRight, Nat.add_zero, X86.Value.msb, X86.Size.signBit_eq]
+
+/-- The original logical SF shift, mask, byte cast and store execute for every
+word and native operand width, producing the exact shared native sign flag. -/
+theorem sf_internal (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (bindingBlock sfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : BitVec 64) (size : X86.Size)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (word : le.get X86_program_profile_bpf.___x86_fl_value = some (.Vlong value))
+    (bitsRead : le.get X86_program_profile_bpf.___x86_fl_bits =
+      some (.Vint (BitVec.ofNat 32 size.bits)))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 136 = some (.Vptr sfBlock offset))
+    (stored : CC.Mem.store .Mint8unsigned m sfBlock (CC.Integers.Ptrofs.unsigned offset)
+      (signByte value size) = some after) :
+    InternalRun ge 4 (.State function sf k e le m)
+      (.State function .Sskip k e (le.set X86_program_profile_bpf._t'204 (.Vptr sfBlock offset)) after) := by
+  have address : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._sf (.Vptr bindingBlock 0) = some (bindingBlock, 136, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86ShiftFlagSF.sf_offset ge.genv_cenv valueLayout]
+    rfl
+  have keptWord : (le.set X86_program_profile_bpf._t'204 (.Vptr sfBlock offset)).get
+      X86_program_profile_bpf.___x86_fl_value = some (.Vlong value) := by
+    simp +decide [CC.PTree.gso, word]
+  have keptBits : (le.set X86_program_profile_bpf._t'204 (.Vptr sfBlock offset)).get
+      X86_program_profile_bpf.___x86_fl_bits = some (.Vint (BitVec.ofNat 32 size.bits)) := by
+    simp +decide [CC.PTree.gso, bitsRead]
+  have evaluated : CC.doEvalExpr ge e (le.set X86_program_profile_bpf._t'204 (.Vptr sfBlock offset))
+      m sfExpr = some (.Vlong (signPayload value size)) := by
+    cases size
+    all_goals
+      simp +decide [sfExpr, CC.doEvalExpr, CC.typeof, keptWord, keptBits,
+        signPayload, X86.Size.bits, CC.Cop.semBinaryOperation, CC.Cop.semSub, CC.Cop.classifySub,
+        CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+        CC.Cop.semShr, CC.Cop.semShift, CC.Cop.classifyShift, CC.Cop.semAnd,
+        CC.typeconv, CC.removeAttributes, CC.tattr, CC.tulong, CC.tuint, CC.tint,
+        CC.Integers.Int.sub, CC.Integers.MI.sub,
+        CC.Integers.Int64.shru, CC.Integers.MI.shru, CC.Integers.Int64.and, CC.Integers.MI.and,
+        CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+        CC.Integers.Int.unsigned, CC.Integers.MI.unsigned, CC.Integers.Int.signed, CC.Integers.MI.signed,
+        CC.Integers.Int.ltu, CC.Integers.Int64.ltu, CC.Integers.MI.ltu]
+  have cast : CC.Cop.semCast (.Vlong (signPayload value size)) (CC.typeof sfExpr) CC.tuchar m =
+      some (signByte value size) := by
+    change CC.Cop.semCast (.Vlong (signPayload value size)) CC.tulong CC.tuchar m = _
+    rw [sign_value]
+    unfold signByte
+    cases X86.Value.msb size value <;> rfl
+  rw [sf_source]
+  exact store ge function e le k m after X86_program_profile_bpf._t'204 X86_program_profile_bpf._sf
+    sfExpr (.Vlong (signPayload value size)) (signByte value size) bindingBlock sfBlock 136 offset
+    binding address pointer evaluated cast stored
+
+/-- All five bytes written by the actual logical bodies match the same
+external x86lean logical-flags result, for every undefined-AF oracle choice. -/
+theorem native_values (value : BitVec 64) (size : X86.Size)
+    (af : Bool) (before : X86.Flags) :
+    let word := X86.Value.trunc size value
+    let next := X86.Flags.logic size word af before
+    ((.Vint (0#32) : CC.Val), X86ShiftFlagZF.bit word, signByte word size,
+      (.Vint (0#32) : CC.Val), X86ShiftFlagPF.bit word) =
+    ((.Vint (if next.cf then 1 else 0) : CC.Val), .Vint (if next.zf then 1 else 0),
+      .Vint (if next.sf then 1 else 0), .Vint (if next.of then 1 else 0),
+      .Vint (if next.pf then 1 else 0)) := by
+  dsimp only
+  rw [X86ShiftFlagPF.parity]
+  have truncated : X86.Value.trunc size (X86.Value.trunc size value) =
+      X86.Value.trunc size value := by
+    simp only [X86.Value.trunc, BitVec.and_assoc, BitVec.and_self]
+  by_cases zero : X86.Value.trunc size value = 0
+  all_goals
+    simp [X86.Flags.logic, X86.Flags.fromResult, X86ShiftFlagZF.bit, signByte,
+      X86.Value.isZero, truncated, zero]
+  all_goals simp [X86.Value.trunc]
+
 end KProgFormal.ClightRefinement.X86LogicFlagStores
