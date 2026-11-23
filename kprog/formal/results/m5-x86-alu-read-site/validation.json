@@ -53,6 +53,41 @@
     "memory_limit": 34359738368,
     "shared_timing": true
   },
-  "root_integration": "pending",
-  "scope": "actual non-XOR operand selection and first reader call, not the reader result"
+  "root_integration": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.0127744950004853,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "scope": "actual non-XOR operand selection and first reader call, not the reader result",
+  "root_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-alu-read-site/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.041721088986378,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  }
 }

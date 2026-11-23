@@ -1,0 +1,101 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86RegisterReadEntry"
+    ],
+    "exit": 0,
+    "seconds": 3.230324678996112,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "direct_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-reader-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.504326721013058,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.0127744950004853,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_site_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-alu-read-site/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.041721088986378,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_reader_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-reader-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.0093062089872546,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "complete_instruction_families": 0,
+  "scope": "Actual reader entry and width call; cell reads and return value remain open",
+  "full_make_check": "Existing DIV fault correspondence failure retained"
+}

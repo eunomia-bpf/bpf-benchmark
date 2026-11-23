@@ -1,0 +1,14 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.source
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.source
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.entry
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.entry
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.to_width
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.to_width
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.resume_width
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.resume_width
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.from_call
+#check KProgFormal.ClightRefinement.X86RegisterReadEntry.arguments
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadEntry.arguments

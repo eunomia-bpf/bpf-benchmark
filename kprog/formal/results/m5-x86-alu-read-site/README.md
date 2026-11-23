@@ -12,6 +12,11 @@ reaches the actual reader call; proving its returned value remains next work.
 
 The following paragraphs retain the preparation history from2026-11-22.
 
+Root integration on2026-11-23 uses one transitive reader-entry import. The
+targeted root build passes395 jobs and all eight actual-root queries pass2.04s.
+The query now imports the root. [root-public.txt](root-public.txt) records this
+later check; details are in [the reader-entry receipt](../m5-x86-reader-entry/README.md).
+
 Current canonical source prepares the ten-transition path through the actual
 XOR shortcut gates to the original operand-read sequence, for every other
 operation. It keeps the complete memory and exact temporary/continuation maps.
