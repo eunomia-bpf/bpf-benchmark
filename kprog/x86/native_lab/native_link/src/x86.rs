@@ -1371,6 +1371,7 @@ pub(super) fn rewrite_x86(
                                 continue;
                             }
                             LookupKind::Call
+                            | LookupKind::Lpm12
                             | LookupKind::Hash
                             | LookupKind::LruHash
                             | LookupKind::PerCpuHash
@@ -3778,7 +3779,7 @@ fn append_x86_mov_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
 fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
     let mut body = Vec::new();
     match spec.kind {
-        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
+        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray => {}
         LookupKind::Hash => {
             append_x86_add_rax_imm(&mut body, spec.key_offset);
         }

@@ -131,6 +131,7 @@ enum LinkMode {
 #[derive(Clone, Copy, Debug)]
 enum LookupKind {
     Call,
+    Lpm12,
     Hash,
     LruHash,
     PerCpuHash,
@@ -326,6 +327,7 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
 fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
     match s {
         "call" => Ok(LookupKind::Call),
+        "lpm12" => Ok(LookupKind::Lpm12),
         "hash" => Ok(LookupKind::Hash),
         "lru_hash" => Ok(LookupKind::LruHash),
         "percpu_hash" => Ok(LookupKind::PerCpuHash),
@@ -345,7 +347,7 @@ fn require_call_target(target: u64, context: &str) -> Result<u64> {
 
 fn resolve_lookup_site_target(spec: &LookupSiteSpec, context: &str) -> Result<u64> {
     match spec.kind {
-        LookupKind::Call => require_call_target(spec.target_addr, context),
+        LookupKind::Call | LookupKind::Lpm12 => require_call_target(spec.target_addr, context),
         LookupKind::Hash
         | LookupKind::LruHash
         | LookupKind::PerCpuHash
@@ -1529,7 +1531,7 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
 
     if matches!(
         spec.kind,
-        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray
+        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray
     ) {
         return Ok(Vec::new());
     }
@@ -1561,7 +1563,7 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
             words.push(A64_MRS_X10_TPIDR_EL1);
             words.push(a64_add_shift64(X0, X0, X10, 0)?);
         }
-        LookupKind::Call | LookupKind::Array | LookupKind::PerCpuArray => {}
+        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray => {}
     }
     let done = words.len();
     words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, done)?;
@@ -2295,6 +2297,7 @@ fn rewrite_arm64_pass(
                                     continue;
                                 }
                                 LookupKind::Call
+                                | LookupKind::Lpm12
                                 | LookupKind::Hash
                                 | LookupKind::LruHash
                                 | LookupKind::PerCpuHash
