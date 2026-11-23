@@ -32,13 +32,27 @@ install -d $K/kinsn-x86
 nice -n 5 taskset -c 8-23 make -C $K/build-x86 ARCH=x86_64 M=$R/kinsn/module/x86 MO=$K/kinsn-x86 modules -j16 "obj-m=$KINSN_MODS" > $D/modules.log 2>&1; rc=$?
 echo "kinsn modules start $s end $(date -u +%FT%TZ) rc=$rc modules=$(ls $K/kinsn-x86/*.ko 2>/dev/null | wc -l)" >> $O
 [ $rc = 0 ] || exit 0
+# The image's kernel-dependent parts (micro programs with kernel_offsets.h, stage2 programs, the sim
+# proofs under stage2) are built against the kinsn kernel in kinsn's own directories; kprog's copies
+# under micro/programs/build-x86 are frozen (immutable, 2026-11-23T13:56Z: "Operation not permitted").
+# The kernel-independent parts are kprog's builds as they are (-o: daemon, shim, app sources, runner,
+# bpfopt LLVM, native objects), so no shared build directory is written.
+# `make corpus` takes the image's prerequisites again (2026-11-23T14:12Z check: rc=2 in host-kinsn-x86),
+# so every kinsn make below carries the same -o list and directories.
+KO="-o host-kinsn-x86 -o host-rust-x86 -o host-shim-x86 -o host-source-apps-x86 -o host-runner-x86 -o host-bpfopt-llvm-x86 -o host-native-bpf-x86"
+KV="MICRO_PROGRAM_BUILD_X86=$K/micro-programs-x86 STAGE2_PROGRAM_BUILD_X86=$K/stage2-programs-x86"
 s=$(date -u +%FT%TZ)
-flock $L/image nice -n 5 taskset -c 8-23 make -C $R -o host-kinsn-x86 x86-runner-runtime-image-tar $V IMAGE_BUILD_JOBS=16 JOBS=16 > $D/image.log 2>&1; rc=$?
+flock $L/image nice -n 5 taskset -c 8-23 make -C $R $KO x86-runner-runtime-image-tar $V $KV \
+  IMAGE_BUILD_JOBS=16 JOBS=16 > $D/image.log 2>&1; rc=$?
 echo "image start $s end $(date -u +%FT%TZ) rc=$rc" >> $O
 [ $rc = 0 ] || exit 0
+# The frozen framework (runner/ as of 2026-05-29, 24a2d15aa) has no `kinsn` umbrella pass
+# (runner/config/passes/kinsn/default.yaml is absent: 2026-11-23T14:33Z runs ended in status error);
+# its kinsn group without prefetch is `kinsn-5` (corpus/config/benchmark_config.yaml), the x86 default
+# that kinsn/docs/evaluation.md describes ("on x86, prefetch is disabled in the default kinsn command").
 run() { # app stats samples duration tag
   local log=$D/$(date -u +%Y%m%dT%H%M%SZ)-$(echo $1 | tr / _)-$5.log
-  flock $L/timing taskset -c 0-7 make -C $R corpus PLATFORM=kvm ARCH=x86 $V BPFREJIT_BENCH_PASSES=kinsn \
+  flock $L/timing taskset -c 0-7 make -C $R $KO corpus PLATFORM=kvm ARCH=x86 $V $KV BPFREJIT_BENCH_PASSES=kinsn-5 \
     BPFREJIT_CORPUS_APPS=$1 BPFREJIT_CORPUS_BPF_STATS=$2 SAMPLES=$3 WORKLOAD_DURATION=$4 WARMUPS=1 \
     BPFREJIT_CORPUS_APP_TIMEOUT=3600 BPFREJIT_CORPUS_REJIT_TIMEOUT=1200 TIMEOUT=7200 KEEP_WORKDIRS=1 > $log 2>&1
   local rc=$?

@@ -1,0 +1,10 @@
+cilium/bpf_alignchecker.native.o                   lookups    3  A    3  B    3  C    3  D    3  inner    0
+cilium/bpf_host.native.o                           lookups  171  A  155  B  155  C  155  D  155  inner    0
+cilium/bpf_lxc.native.o                            lookups  189  A  170  B  170  C  170  D  170  inner    0
+cilium/bpf_overlay.native.o                        lookups  106  A   93  B   93  C   93  D   93  inner    2
+cilium/bpf_sock.native.o                           lookups   82  A   82  B   82  C   82  D   82  inner    0
+cilium/bpf_wireguard.native.o                      lookups   96  A   83  B   83  C   83  D   83  inner    0
+cilium/bpf_xdp.native.o                            lookups  102  A   97  B   97  C   97  D   97  inner    0
+cilium/cilium_placeholders.native.o                lookups    0  A    0  B    0  C    0  D    0  inner    0
+TOTAL                                              lookups  749  A  683  B  683  C  683  D  683  inner    2
+   inner site 2 bpf_overlay.native.o tail_handle_ipv4 inner(cilium_lb4_maglev)
