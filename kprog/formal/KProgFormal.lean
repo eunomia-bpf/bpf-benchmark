@@ -198,9 +198,9 @@ import KProgFormal.ClightRefinement.X86AluEntry
 import KProgFormal.ClightRefinement.Arm64SelectBody
 import KProgFormal.ClightRefinement.X86AluDecode
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegPrefixNative
-import KProgFormal.ClightRefinement.X86AluXorOperandsEntry
+import KProgFormal.ClightRefinement.X86AluXorResultEntry
 import KProgFormal.ClightRefinement.X86RegisterReadPointerCall
-import KProgFormal.ClightRefinement.X86LogicSite
+import KProgFormal.ClightRefinement.X86LogicFlagWidths
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
 import KProgFormal.ClightRefinement.Arm64CnegCondition
