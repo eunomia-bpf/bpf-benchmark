@@ -1,0 +1,115 @@
+{
+  "status": "targeted root module and twenty-one actual-root queries passed",
+  "confirmed_utc": "2026-11-23T04:51:58.260165+00:00",
+  "root_module": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.562506675720215,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_module_jobs": 400,
+  "root_public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.104862689971924,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_query_count": 21,
+  "new_root_imports": [
+    "import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall",
+    "import KProgFormal.ClightRefinement.Arm64CnegNative",
+    "import KProgFormal.ClightRefinement.Arm64CnegCondition"
+  ],
+  "prior_root_module": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.160080909729004,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "interrupted_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-root/Query.lean"
+    ],
+    "exit": 1,
+    "seconds": 0.9249942302703857,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_retry_reason": "transient absent X86RegisterReadEntry.olean during peer dependency rebuild; rebuilt targeted root then retried",
+  "default_full_or_make_check_run": false,
+  "full_check_owner": "V",
+  "full_check_status": "previous DIV fault correspondence failure retained; no new whole result",
+  "completed_isa_families": 0,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 11692,
+      "mtime_ns": 1795409427882591145
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCnegCall.lean",
+      "size_bytes": 11014,
+      "mtime_ns": 1795350628903883104
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegNative.lean",
+      "size_bytes": 4063,
+      "mtime_ns": 1795408907862590303
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionGe.lean",
+      "size_bytes": 7369,
+      "mtime_ns": 1795409270413987188
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegReadEntry.lean",
+      "size_bytes": 12698,
+      "mtime_ns": 1795409140994641512
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegCondition.lean",
+      "size_bytes": 12453,
+      "mtime_ns": 1795409270414384469
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
