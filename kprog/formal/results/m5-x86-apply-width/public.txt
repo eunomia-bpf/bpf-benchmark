@@ -1,0 +1,11 @@
+KProgFormal.ClightRefinement.X86ApplyWidth.internal (ge : CC.CGenv) (value : BitVec 64) (size : X86.Size) (k : CC.Cont)
+  (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86ApplyWidth.length size)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_apply_width)
+      [CC.Val.Vlong value, KProgFormal.ClightRefinement.X86ShiftLeft.argument size] k m)
+    (CC.State.Returnstate (CC.Val.Vlong (X86.Value.trunc size value)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86ApplyWidth.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
