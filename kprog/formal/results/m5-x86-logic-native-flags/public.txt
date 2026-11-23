@@ -1,0 +1,48 @@
+KProgFormal.ClightRefinement.X86LogicFlagNative.internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
+  (bindingBlock : CC.Block) (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (value : BitVec 64)
+  (size : X86.Size) (af : Bool) (before : X86.Flags)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_fl_value le = some (CC.Val.Vlong (X86.Value.trunc size value)))
+  (bitsRead : CC.PTree.get X86_program_profile_bpf.___x86_fl_bits le = some (CC.Val.Vint (BitVec.ofNat 32 size.bits)))
+  (headers : KProgFormal.ClightRefinement.X86LogicFlagOrder.HeaderLoads m bindingBlock places)
+  (different : KProgFormal.ClightRefinement.X86LogicFlagMemory.Distinct places)
+  (separate :
+    places.cf.fst ≠ bindingBlock ∧
+      places.zf.fst ≠ bindingBlock ∧
+        places.sf.fst ≠ bindingBlock ∧ places.overflow.fst ≠ bindingBlock ∧ places.pf.fst ≠ bindingBlock)
+  (cfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m places.cf.fst places.cf.snd.unsigned (CC.Val.Vint 0#32) = some cfHeap)
+  (zfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagZF.bit (X86.Value.trunc size value)) =
+      some zfHeap)
+  (sfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagStores.signByte (X86.Value.trunc size value) size) =
+      some sfHeap)
+  (ofStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned (CC.Val.Vint 0#32) =
+      some ofHeap)
+  (pfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagPF.bit (X86.Value.trunc size value)) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 31
+      (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.rest k e le m)
+      (CC.State.State function CC.Stmt.Sskip k e (KProgFormal.ClightRefinement.X86LogicFlagOrder.temps le places)
+        after) ∧
+    KProgFormal.ClightRefinement.X86LogicFlagOrder.HeaderLoads after bindingBlock places ∧
+      KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent after places
+        (X86.Flags.logic size (X86.Value.trunc size value) af before)
+'KProgFormal.ClightRefinement.X86LogicFlagNative.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

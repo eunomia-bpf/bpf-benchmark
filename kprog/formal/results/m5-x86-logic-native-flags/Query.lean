@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.X86LogicFlagNative
+
+#check KProgFormal.ClightRefinement.X86LogicFlagNative.internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagNative.internal
