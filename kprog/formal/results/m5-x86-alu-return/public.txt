@@ -1,0 +1,74 @@
+KProgFormal.ClightRefinement.X86AluEntry.loop_exits :
+  KProgFormal.ClightRefinement.X86AluEntry.innerExit✝ = CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86AluEntry.outerExit✝ = CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86AluEntry.loop_exits' does not depend on any axioms
+KProgFormal.ClightRefinement.X86AluReturn.loops (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86AluEntry.continuation k) e le m)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG CC.Stmt.Sskip k e le m)
+'KProgFormal.ClightRefinement.X86AluReturn.loops' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReturn.fallthrough (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (before after : CC.Mem) (boundary : CC.isCallCont k = true)
+  (freed : before.freeList (CC.blocksOfEnv ge.genv_cenv e) = some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 1
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG CC.Stmt.Sskip k e le before)
+    (CC.State.Returnstate CC.Val.Vundef k after)
+'KProgFormal.ClightRefinement.X86AluReturn.fallthrough' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReturn.finish (ge : CC.CGenv) (caller before : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) (boundary : CC.isCallCont k = true)
+  (access :
+    before.access = (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun ge 5
+        (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG CC.Stmt.Sskip
+          (KProgFormal.ClightRefinement.X86AluEntry.continuation k)
+          (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst le before)
+        (CC.State.Returnstate CC.Val.Vundef k after) ∧
+      KProgFormal.ClightRefinement.FrameBelow caller.nextblock before after ∧
+        after.contents = before.contents ∧
+          after.nextblock = before.nextblock ∧
+            ∀ (row : CC.Block × CC.Z × CC.Z),
+              row ∈
+                  CC.blocksOfEnv ge.genv_cenv
+                    (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst →
+                ∀ (offset : CC.Z),
+                  row.snd.fst ≤ offset →
+                    offset < row.snd.snd →
+                      ∀ (kind : CC.PermKind) (permission : CC.Permission),
+                        after.perm row.fst offset kind permission = false
+'KProgFormal.ClightRefinement.X86AluReturn.finish' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReturn.registers {frontier : CC.Block} {before after : CC.Mem}
+  (frame : KProgFormal.ClightRefinement.FrameBelow frontier before after)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (block : CC.Block) (base : CC.Integers.Ptrofs)
+  (cpu : X86.Cpu) (old : CC.Positive.toNat block < CC.Positive.toNat frontier)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins before block base cpu) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins after block base cpu
+'KProgFormal.ClightRefinement.X86AluReturn.registers' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluReturn.flags {frontier : CC.Block} {before after : CC.Mem}
+  (frame : KProgFormal.ClightRefinement.FrameBelow frontier before after)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (native : X86.Flags)
+  (old :
+    CC.Positive.toNat places.cf.fst < CC.Positive.toNat frontier ∧
+      CC.Positive.toNat places.zf.fst < CC.Positive.toNat frontier ∧
+        CC.Positive.toNat places.sf.fst < CC.Positive.toNat frontier ∧
+          CC.Positive.toNat places.overflow.fst < CC.Positive.toNat frontier ∧
+            CC.Positive.toNat places.pf.fst < CC.Positive.toNat frontier)
+  (represented : KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent before places native) :
+  KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent after places native
+'KProgFormal.ClightRefinement.X86AluReturn.flags' depends on axioms: [propext, Classical.choice, Quot.sound]

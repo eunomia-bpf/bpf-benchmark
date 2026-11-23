@@ -35,6 +35,10 @@ def continuation (k : CC.Cont) : CC.Cont :=
 theorem source : X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_body =
     .Sloop (.Ssequence widthStatement (.Sloop innerBody innerExit)) outerExit := rfl
 
+/-- Both loop exits in the original generic handler are its actual breaks. -/
+theorem loop_exits : innerExit = .Sbreak ∧ outerExit = .Sbreak := by
+  constructor <;> rfl
+
 private theorem byte_cast (value : BitVec 8) :
     value.setWidth 32 &&& (255#32) = value.setWidth 32 := by
   change value.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 = value.setWidth 32
