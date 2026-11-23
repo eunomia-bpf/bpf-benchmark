@@ -1,0 +1,69 @@
+KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.source :
+  KProgFormal.ClightRefinement.X86RegisterReadTag.lanes =
+    KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.tests✝.Ssequence
+      KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.assignment
+'KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.qword_prefix (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (k : CC.Cont) (m : CC.Mem)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_width le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q)) :
+  KProgFormal.ClightRefinement.InternalRun ge 16
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadTag.lanes k e le m)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.assignment k e
+      (KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.prepared le) m)
+'KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.qword_prefix' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_assignment (ge : CC.CGenv) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_rd_value le = some (CC.Val.Vptr block offset)) :
+  CC.doStep ge
+      (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+        KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.assignment k e
+        (KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.prepared le) m) =
+    none
+'KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_no_step (ge : CC.CGenv) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_rd_value le = some (CC.Val.Vptr block offset)) (trace : CC.Trace)
+  (next : CC.State) :
+  ¬CC.Step2 ge
+      (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+        KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.assignment k e
+        (KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.prepared le) m)
+      trace next
+'KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_no_step' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_boundary (ge : CC.CGenv) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (block : CC.Block) (offset : CC.Integers.Ptrofs)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (base : BitVec 64)
+  (origin : addresses block = some base)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_width le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_rd_value le = some (CC.Val.Vptr block offset)) :
+  KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses (CC.Val.Vptr block offset)
+      (base + BitVec.setWidth 64 offset) ∧
+    ∃ stopped,
+      KProgFormal.ClightRefinement.InternalRun ge 16
+          (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+            KProgFormal.ClightRefinement.X86RegisterReadTag.lanes k e le m)
+          stopped ∧
+        CC.doStep ge stopped = none ∧ ∀ (trace : CC.Trace) (next : CC.State), ¬CC.Step2 ge stopped trace next
+'KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary.pointer_boundary' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
