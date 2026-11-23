@@ -237,9 +237,22 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         run([context_compiler, lowered, '--public-layout', public_layout,
              '--physical-layout', physical_layout, '-o', context_ir])
         lowered = context_ir
+    # -fno-jump-tables is a driver flag: compiling a .bc never sees it, and
+    # clang -O3 over the linked module regenerates the width switch of
+    # kprog_x86_mem_load_fixed_into as an in-text jump table (movslq/addq/jmpq),
+    # which native-link refuses as an indirect branch. The attribute survives
+    # the compile, so it is written onto every function the linker can reach.
+    # -force-attribute takes enum attributes only; string ones go through the
+    # CSV form (llvm/lib/Transforms/IPO/ForceFunctionAttrs.cpp).
+    functions = [line.split()[-1] for line in
+                 run(['llvm-nm-18', '--defined-only', lowered]).splitlines()
+                 if len(line.split()) == 3 and line.split()[1] in ('T', 't')]
+    attributes = directory/'checked-simulator.attributes.csv'
+    attributes.write_text(''.join(f'{name},no-jump-tables=true\n' for name in functions))
     run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
          '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
          '-mllvm', '-force-attribute=noredzone',
+         '-mllvm', f'-forceattrs-csv-path={attributes}',
          '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
          '-fno-unwind-tables',
          '-c', lowered, '-o', native])
