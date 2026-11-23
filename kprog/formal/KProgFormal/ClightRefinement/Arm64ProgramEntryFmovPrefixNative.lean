@@ -23,7 +23,7 @@ open Arm64ProgramEntryCnegAdmission (afterSeven)
 open Arm64ProgramEntryOrnAdmission (afterEight)
 open Arm64ProgramEntryFmovAdmission (afterNine)
 
-/-- The original98 provider inputs and complete ten-call prefix refine
+/-- The original 98 provider inputs and complete ten-call prefix refine
 ten fetched mature native words. Actual storage carries vector write
 permissions; prior stores and the pre-relation derive both FMOV reads. All
 previous heap/free contracts are retained. -/

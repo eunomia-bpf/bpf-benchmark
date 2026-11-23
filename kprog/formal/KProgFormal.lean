@@ -197,7 +197,7 @@ import KProgFormal.ClightRefinement.X86RegisterView
 import KProgFormal.ClightRefinement.X86AluEntry
 import KProgFormal.ClightRefinement.Arm64SelectBody
 import KProgFormal.ClightRefinement.X86AluDecode
-import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnPrefixNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryFmovPrefixNative
 import KProgFormal.ClightRefinement.X86AluXorResultEntry
 import KProgFormal.ClightRefinement.X86RegisterReadPointerCall
 import KProgFormal.ClightRefinement.X86LogicReference
@@ -216,3 +216,5 @@ import KProgFormal.ClightRefinement.Arm64FmovStoreEntry
 import KProgFormal.ClightRefinement.Arm64FmovPath
 import KProgFormal.ClightRefinement.Arm64FmovCaller
 import KProgFormal.ClightRefinement.Arm64ProgramEntryFmovAdmission
+import KProgFormal.ClightRefinement.Arm64CntNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCntCall

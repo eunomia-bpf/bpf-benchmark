@@ -10,8 +10,8 @@ theorem writable {initial before : CC.Mem} {entry : Arm64Producer.HeaderLocal in
     (old : Arm64ProducerRegisterStorage.Storage initial before entry) :
     Arm64VectorWritable.Writable old.vectors before := old.vectorWritable
 
-/-- The real vector pointer walk and the pre-representation derive the old
-low half. No successful load is added to the original producer premises. -/
+/-- The real vector pointer walk and pre-representation supply the old low
+half and its successful read within the original producer premises. -/
 theorem old_vector {initial before : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
     (old : Arm64ProducerRegisterStorage.Storage initial before entry)
     (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
