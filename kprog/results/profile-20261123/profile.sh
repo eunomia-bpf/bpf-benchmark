@@ -15,7 +15,7 @@ install -d $V $OUT
 ln -sfn $R/.cache/container-images/x86_64-runner-runtime.image.tar $V/runtime.image.tar
 ln -sfn $R/kinsn/module/x86/build/bpf_x86_native_lab.ko $V/bpf_x86_native_lab.ko
 make -C $R kvm-host-cpu
-G="sysctl -w net.core.bpf_jit_kallsyms=1 >/dev/null; $PERF record -a -F 999 -o /var/tmp/perf.data -- make -f $M guest APPS=$APP SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_STATS=0 NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/$D/manifest.json BENCH_PASSES= SKIP_REJIT_MODE=norejit NATIVE_LOADER_MODE=post; cp /proc/kallsyms /var/tmp/kallsyms.txt"
+G="sysctl -w net.core.bpf_jit_kallsyms=1 >/dev/null; $PERF record -a -F 999 --no-buildid --no-buildid-cache -o /var/tmp/perf.data -- make -f $M guest APPS=$APP SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_STATS=0 NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/$D/manifest.json BENCH_PASSES= SKIP_REJIT_MODE=norejit NATIVE_LOADER_MODE=post; cp /proc/kallsyms /var/tmp/kallsyms.txt"
 taskset -c 0-7 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd $R --rwdir $R \
   --rwdir /var/tmp=$V --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor \
   --cpus 8 --memory 64G --append 'loglevel=4 panic=30 oops=panic' --exec "$G" > $OUT/guest.log 2>&1
