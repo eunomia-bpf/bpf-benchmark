@@ -1,0 +1,45 @@
+{
+  "confirmed_utc": "2026-11-23T06:23:50.479312+00:00",
+  "targeted_root": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 171.79347276687622,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_jobs": 430,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-orn-components-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.198699951171875,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 10,
+  "root_metadata": {
+    "size_bytes": 11976,
+    "mtime_ns": 1795414763901114748
+  },
+  "scope": "three additive ARM imports for original ORN caller/native and LSL1 helper, old LSL0 retained",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

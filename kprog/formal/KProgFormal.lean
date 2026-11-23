@@ -204,3 +204,6 @@ import KProgFormal.ClightRefinement.X86LogicSite
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
 import KProgFormal.ClightRefinement.Arm64CnegCondition
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall
+import KProgFormal.ClightRefinement.Arm64OrnNative
+import KProgFormal.ClightRefinement.Arm64ModifiedLslOneCall
