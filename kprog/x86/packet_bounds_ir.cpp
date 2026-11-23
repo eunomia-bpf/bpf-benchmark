@@ -358,6 +358,57 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
     IRBuilder<> builder(site);builder.SetCurrentDebugLocation(site->getDebugLoc());
     return builder.CreateAdd(scalar,ConstantInt::get(scalar->getType(),offset),"frame_scalar_offset");
   };
+  /* The verifier merges a PHI's register class over its arms, so a PHI is a
+   * pointer when some arm is one; the arms that are still being merged
+   * contribute nothing new (r11's minuend is the loop induction value
+   * "%6214 = phi i64 [ %6209 = add i64 map_bits, 3992 ], [ %6476 = ... %6214 ]",
+   * i.e. its own second arm). The simulator's lanes are the frame's
+   * ptrtoint or a helper's returned pointer plus constant offsets, so every
+   * minuend that reaches the subtraction as map_value is found this way (r5:
+   * "%10122 = phi i64 [ %10119 = add i64 %10100, ptrtoint(ptr %10051) ], ..."). */
+  SmallPtrSet<Value *,16> visiting;
+  std::function<bool(Value *)> pointer_lane=[&](Value *value) {
+    if (pointer_bits(value)) return true;
+    if (!visiting.insert(value).second) return false;
+    bool found=false;
+    if (auto *phi=dyn_cast<PHINode>(value)) {
+      for (Value *incoming:phi->incoming_values())
+        if (pointer_lane(incoming)) { found=true; break; }
+    } else if (auto *select=dyn_cast<SelectInst>(value)) {
+      found=pointer_lane(select->getTrueValue()) || pointer_lane(select->getFalseValue());
+    } else if (auto *operation=dyn_cast<Operator>(value)) {
+      auto opcode=operation->getOpcode();
+      if (opcode==Instruction::Add || opcode==Instruction::Sub)
+        for (Value *operand:operation->operands())
+          if (!isa<ConstantInt>(operand) && pointer_lane(operand)) { found=true; break; }
+    }
+    visiting.erase(value);
+    return found;
+  };
+  /* A pointer-typed minuend is refused just as a frame operand is:
+   * "math between map_value pointer and register with unbounded min value is
+   * not allowed" (check_reg_sane_offset, verifier.c), and neither masking
+   * nor bounding the partner helps, because the kernel reads the laundered
+   * partner back as a full-width value (rows in
+   * kprog/results/pointer-launder-20261122). What it accepts is the
+   * minuend's own bits after the same borrow-the-frame-word round trip
+   * frame_scalar uses: 64-bit store, "w1 = w1", 32-bit store, 64-bit load
+   * (probe /tmp/ptrsub3.py "launder", loaded through the real kernel).
+   * The word is saved and restored because, unlike the entry-block launder,
+   * the emulated stack may already hold live bytes at the site. */
+  auto launder_bits=[&](Value *value,Instruction *site,AllocaInst *alloca) -> Value * {
+    IRBuilder<> builder(site);builder.SetCurrentDebugLocation(site->getDebugLoc());
+    auto *i64=builder.getInt64Ty();
+    auto *saved=builder.CreateLoad(i64,alloca,true,"launder_saved");
+    builder.CreateStore(value,alloca,true);
+    auto *signature=FunctionType::get(i64,{i64},false);
+    auto *launder=InlineAsm::get(signature,"r1 = $1\012w1 = w1\012$0 = r1","=r,r,~{r1}",true);
+    auto *low=builder.CreateCall(launder,{value});
+    builder.CreateStore(builder.CreateTrunc(low,builder.getInt32Ty()),alloca,true);
+    auto *bits=builder.CreateLoad(i64,alloca,true,"pointer_bits_scalar");
+    builder.CreateStore(saved,alloca,true);
+    return bits;
+  };
   SmallVector<BinaryOperator *,16> outers;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
     auto *outer=dyn_cast<BinaryOperator>(&instruction);
@@ -425,8 +476,15 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
   }
   for (auto *outer:directs) {
     Value *frame=outer->getOperand(1);
+    int64_t offset;AllocaInst *alloca=nullptr;
+    frame_offset(frame,offset,&alloca);
     Value *scalar=scalar_of_frame(frame,outer);
     if (scalar!=frame) outer->setOperand(1,scalar);
+    /* The minuend keeps map_value bits through the pass; laundering the
+     * frame alone still asks the verifier to subtract from a pointer. */
+    Value *minuend=outer->getOperand(0);
+    if (alloca && pointer_lane(minuend) && !stack_pointer(minuend))
+      outer->setOperand(0,launder_bits(minuend,outer,alloca));
   }
   /* The anchored differences that remain carry their operands as opaque
    * scalars to the runtime, but the operand list still names the frame, so
@@ -438,10 +496,16 @@ static unsigned eliminate_stack_pointer_subtractions(Module &module) {
     auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
     if (!assembly || call->arg_size()!=2 || assembly->getAsmString()!="$0 -= $2") continue;
     bool changed=false;
+    int64_t offset;AllocaInst *alloca=nullptr;
+    frame_offset(call->getArgOperand(1),offset,&alloca);
     for (unsigned index=0;index<2;++index) {
       Value *operand=call->getArgOperand(index);
       if (!stack_pointer(operand)) continue;
       call->setArgOperand(index,scalar_of_frame(operand,call));changed=true;
+    }
+    Value *minuend=call->getArgOperand(0);
+    if (alloca && pointer_lane(minuend) && !stack_pointer(minuend)) {
+      call->setArgOperand(0,launder_bits(minuend,call,alloca));changed=true;
     }
     if (changed) ++anchored;
   }

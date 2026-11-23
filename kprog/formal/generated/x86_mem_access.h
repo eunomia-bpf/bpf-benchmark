@@ -69,44 +69,53 @@ kprog_x86_mem_load(const void *address, __u8 width)
 #if defined(__COMPCERT__)
 #undef KPROG_X86_CLIGHT_LOAD_RETURN
 #endif
-/* Preserve the context register itself: the verifier distinguishes a fixed
- * LDX offset from adding the same offset to a context pointer first.
- * Other displacements use the equivalent computed-address encoding. */
+/* Every fixed displacement takes the helper route, so reading kernel memory
+ * never dereferences a computed address. The address is formed inside the
+ * body, because the verifier tracks the base register and its displacement
+ * separately from a pointer the caller has already advanced.
+ *
+ * The body is a real BPF subprogram and writes through a caller slot. A
+ * callee-local destination gives the subprogram its own 8-byte frame, which
+ * the verifier adds to the caller's frame rounded up to 16 inside
+ * MAX_BPF_STACK when private stacks are unavailable, and a program with a
+ * tail call has none: r3's 508-byte program then needs 512 + 16. The
+ * caller's slot is coalesced to one for every site, so the callee adds 0.
+ *
+ * The C arms keep the value-returning signature the Clight export records. */
+#if defined(__bpf__) || defined(__BPF__)
+static __attribute__((noinline)) __u64
+kprog_x86_mem_load_fixed_into(__u64 *value, const void *base,
+                               long long displacement, __u8 width)
+{
+    const void *address=(const __u8 *)base + displacement;
+    switch (width ? width : X86_WIDTH_64) {
+    case X86_WIDTH_8:
+        bpf_probe_read_kernel(value, sizeof(__u8), address);
+        return (__u8)*value;
+    case X86_WIDTH_16:
+        bpf_probe_read_kernel(value, sizeof(__u16), address);
+        return (__u16)*value;
+    case X86_WIDTH_32:
+        bpf_probe_read_kernel(value, sizeof(__u32), address);
+        return (__u32)*value;
+    case X86_WIDTH_64:
+        bpf_probe_read_kernel(value, sizeof(__u64), address);
+        return *value;
+    default:
+        /* KPROG_C_TRAP is illegal in BPF; this arm is unreachable for a
+         * width the emitter produced. */
+        __asm__ volatile("r0 = 0; exit;" ::: "r0", "memory");
+        __builtin_unreachable();
+    }
+}
+#define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) \
+    ({ __u64 __kprog_fixed_value; \
+       kprog_x86_mem_load_fixed_into(&__kprog_fixed_value, (BASE), (DISP), (WIDTH)); })
+#else
 static __attribute__((always_inline)) inline __u64
 kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
 {
-#if defined(__bpf__) || defined(__BPF__)
-    if (!__builtin_constant_p(displacement) || displacement < -32768 || displacement > 32767)
-        return kprog_x86_mem_load((const __u8 *)base + displacement, width);
-    __u64 value;
-    switch (width ? width : X86_WIDTH_64) {
-    case X86_WIDTH_8:
-        if (displacement < 0)
-            asm volatile("%0 = *(u8 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
-        else
-            asm volatile("%0 = *(u8 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return (__u8)value;
-    case X86_WIDTH_16:
-        if (displacement < 0)
-            asm volatile("%0 = *(u16 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
-        else
-            asm volatile("%0 = *(u16 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return (__u16)value;
-    case X86_WIDTH_32:
-        if (displacement < 0)
-            asm volatile("%0 = *(u32 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
-        else
-            asm volatile("%0 = *(u32 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return (__u32)value;
-    case X86_WIDTH_64:
-        if (displacement < 0)
-            asm volatile("%0 = *(u64 *)(%1 - %2)" : "=r"(value) : "r"(base), "i"(-displacement) : "memory");
-        else
-            asm volatile("%0 = *(u64 *)(%1 + %2)" : "=r"(value) : "r"(base), "i"(displacement) : "memory");
-        return value;
-    default: KPROG_C_TRAP();
-    }
-#elif defined(__COMPCERT__)
+#if defined(__COMPCERT__)
     return kprog_x86_mem_load((const __u8 *)base + displacement, width);
 #else
     /* RIP-relative host fixtures carry the symbol address in displacement
@@ -116,6 +125,8 @@ kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
                                           (unsigned long)displacement), width);
 #endif
 }
+#define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
+#endif
 static __attribute__((always_inline)) inline void
 kprog_x86_mem_store(void *address, __u8 width, __u64 value)
 {
@@ -160,6 +171,5 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     }
 }
 #define KPROG_X86_MEM_LOAD(ADDR, WIDTH) kprog_x86_mem_load((ADDR), (WIDTH))
-#define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) kprog_x86_mem_load_fixed((BASE), (DISP), (WIDTH))
 #define KPROG_X86_MEM_STORE(ADDR, WIDTH, VALUE) kprog_x86_mem_store((ADDR), (WIDTH), (VALUE))
 #endif
