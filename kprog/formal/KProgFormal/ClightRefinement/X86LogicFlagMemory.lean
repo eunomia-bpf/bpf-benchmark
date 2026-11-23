@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.X86LogicFlagOrder
+import KProgFormal.ClightRefinement.X86RegisterView
 
 namespace KProgFormal.ClightRefinement.X86LogicFlagMemory
 open X86LogicFlagOrder
@@ -112,5 +113,57 @@ theorem stores (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
     pfStored different.overflow_pf).trans overflowRead0
   have pfRead0 := read_flag places.pf flags.pf pfStored
   exact ⟨cfRead4, zfRead3, sfRead2, overflowRead1, pfRead0⟩
+
+/-- All caller loads outside the flag data blocks retain their original
+values through the exact five stores, for every memory chunk and offset. -/
+theorem frame (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem) (places : Locations)
+    (cfByte zfByte sfByte ofByte pfByte : CC.Val)
+    (cfStored : CC.Mem.store .Mint8unsigned m places.cf.1
+      (CC.Integers.Ptrofs.unsigned places.cf.2) cfByte = some cfHeap)
+    (zfStored : CC.Mem.store .Mint8unsigned cfHeap places.zf.1
+      (CC.Integers.Ptrofs.unsigned places.zf.2) zfByte = some zfHeap)
+    (sfStored : CC.Mem.store .Mint8unsigned zfHeap places.sf.1
+      (CC.Integers.Ptrofs.unsigned places.sf.2) sfByte = some sfHeap)
+    (overflowStored : CC.Mem.store .Mint8unsigned sfHeap places.overflow.1
+      (CC.Integers.Ptrofs.unsigned places.overflow.2) ofByte = some ofHeap)
+    (pfStored : CC.Mem.store .Mint8unsigned ofHeap places.pf.1
+      (CC.Integers.Ptrofs.unsigned places.pf.2) pfByte = some after)
+    (chunk : CC.Chunk) (block : CC.Block) (offset : Int)
+    (outside : block ≠ places.cf.1 ∧ block ≠ places.zf.1 ∧ block ≠ places.sf.1 ∧
+      block ≠ places.overflow.1 ∧ block ≠ places.pf.1) :
+    CC.Mem.load chunk after block offset = CC.Mem.load chunk m block offset := by
+  exact (CC.Mem.load_store_other pfStored chunk block offset (.inl outside.2.2.2.2)).trans
+    ((CC.Mem.load_store_other overflowStored chunk block offset (.inl outside.2.2.2.1)).trans
+      ((CC.Mem.load_store_other sfStored chunk block offset (.inl outside.2.2.1)).trans
+        ((CC.Mem.load_store_other zfStored chunk block offset (.inl outside.2.1)).trans
+          (CC.Mem.load_store_other cfStored chunk block offset (.inl outside.1)))))
+
+/-- The complete represented x86 GPR bank retains every raw word, pointer
+origin, tag and native value across the actual flag-only heap changes. -/
+theorem registers (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem) (places : Locations)
+    (cfByte zfByte sfByte ofByte pfByte : CC.Val)
+    (cfStored : CC.Mem.store .Mint8unsigned m places.cf.1
+      (CC.Integers.Ptrofs.unsigned places.cf.2) cfByte = some cfHeap)
+    (zfStored : CC.Mem.store .Mint8unsigned cfHeap places.zf.1
+      (CC.Integers.Ptrofs.unsigned places.zf.2) zfByte = some zfHeap)
+    (sfStored : CC.Mem.store .Mint8unsigned zfHeap places.sf.1
+      (CC.Integers.Ptrofs.unsigned places.sf.2) sfByte = some sfHeap)
+    (overflowStored : CC.Mem.store .Mint8unsigned sfHeap places.overflow.1
+      (CC.Integers.Ptrofs.unsigned places.overflow.2) ofByte = some ofHeap)
+    (pfStored : CC.Mem.store .Mint8unsigned ofHeap places.pf.1
+      (CC.Integers.Ptrofs.unsigned places.pf.2) pfByte = some after)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.X86.Origins)
+    (block : CC.Block) (base : CC.Integers.Ptrofs) (cpu : X86.Cpu)
+    (represented : X86RegisterView.RegistersRepresent addresses origins m block base cpu)
+    (outside : block ≠ places.cf.1 ∧ block ≠ places.zf.1 ∧ block ≠ places.sf.1 ∧
+      block ≠ places.overflow.1 ∧ block ≠ places.pf.1) :
+    X86RegisterView.RegistersRepresent addresses origins after block base cpu := by
+  intro index
+  obtain ⟨value, raw, tag, wordRead, tagRead, valueRep, native⟩ := represented index
+  refine ⟨value, raw, tag, ?_, ?_, valueRep, native⟩
+  · exact (frame m cfHeap zfHeap sfHeap ofHeap after places cfByte zfByte sfByte ofByte pfByte
+      cfStored zfStored sfStored overflowStored pfStored CC.Mptr block _ outside).trans wordRead
+  · exact (frame m cfHeap zfHeap sfHeap ofHeap after places cfByte zfByte sfByte ofByte pfByte
+      cfStored zfStored sfStored overflowStored pfStored .Mint8unsigned block _ outside).trans tagRead
 
 end KProgFormal.ClightRefinement.X86LogicFlagMemory

@@ -1,0 +1,31 @@
+KProgFormal.ClightRefinement.X86LogicFlagMemory.frame (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (cfByte zfByte sfByte ofByte pfByte : CC.Val)
+  (cfStored : CC.Mem.store CC.Chunk.Mint8unsigned m places.cf.fst places.cf.snd.unsigned cfByte = some cfHeap)
+  (zfStored : CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned zfByte = some zfHeap)
+  (sfStored : CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned sfByte = some sfHeap)
+  (overflowStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned ofByte = some ofHeap)
+  (pfStored : CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned pfByte = some after)
+  (chunk : CC.Chunk) (block : CC.Block) (offset : Int)
+  (outside :
+    block ≠ places.cf.fst ∧
+      block ≠ places.zf.fst ∧ block ≠ places.sf.fst ∧ block ≠ places.overflow.fst ∧ block ≠ places.pf.fst) :
+  CC.Mem.load chunk after block offset = CC.Mem.load chunk m block offset
+'KProgFormal.ClightRefinement.X86LogicFlagMemory.frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagMemory.registers (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (cfByte zfByte sfByte ofByte pfByte : CC.Val)
+  (cfStored : CC.Mem.store CC.Chunk.Mint8unsigned m places.cf.fst places.cf.snd.unsigned cfByte = some cfHeap)
+  (zfStored : CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned zfByte = some zfHeap)
+  (sfStored : CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned sfByte = some sfHeap)
+  (overflowStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned ofByte = some ofHeap)
+  (pfStored : CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned pfByte = some after)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (block : CC.Block) (base : CC.Integers.Ptrofs)
+  (cpu : X86.Cpu)
+  (represented : KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins m block base cpu)
+  (outside :
+    block ≠ places.cf.fst ∧
+      block ≠ places.zf.fst ∧ block ≠ places.sf.fst ∧ block ≠ places.overflow.fst ∧ block ≠ places.pf.fst) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins after block base cpu
+'KProgFormal.ClightRefinement.X86LogicFlagMemory.registers' depends on axioms: [propext, Classical.choice, Quot.sound]

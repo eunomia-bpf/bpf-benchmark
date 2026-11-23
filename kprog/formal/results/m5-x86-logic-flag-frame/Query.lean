@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicFlagMemory
+
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.frame
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.frame
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
