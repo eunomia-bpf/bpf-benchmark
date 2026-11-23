@@ -1,0 +1,26 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.X86LogicNative.register_step
+#print axioms KProgFormal.ClightRefinement.X86LogicNative.register_step
+#check KProgFormal.ClightRefinement.X86LogicChecked.reads
+#print axioms KProgFormal.ClightRefinement.X86LogicChecked.reads
+#check KProgFormal.ClightRefinement.X86LogicChecked.represented
+#print axioms KProgFormal.ClightRefinement.X86LogicChecked.represented
+#check KProgFormal.ClightRefinement.X86LogicFlagWritable.frame
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWritable.frame
+#check KProgFormal.ClightRefinement.X86LogicFlagWritable.stores
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWritable.stores
+#check KProgFormal.ClightRefinement.X86LogicByteTail.execute
+#print axioms KProgFormal.ClightRefinement.X86LogicByteTail.execute
+#check KProgFormal.ClightRefinement.X86LogicReference.input_register
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.input_register
+#check KProgFormal.ClightRefinement.X86LogicReference.native_step
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.native_step
+#check KProgFormal.ClightRefinement.X86LogicReference.step
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.step
+#check KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#check KProgFormal.ClightRefinement.X86AluXorResultEntry.shortcut_from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorResultEntry.shortcut_from_call
+#check KProgFormal.ClightRefinement.X86AluReturn.finish
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.finish

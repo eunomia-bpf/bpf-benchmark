@@ -58,6 +58,12 @@ genuine pointer-cell reader call reaches the imported Clight model's numeric
 shift boundary. Extending this domain requires concrete-address correspondence;
 this obligation remains part of full handler composition.
 
+The [logical byte tail](results/m5-x86-logic-byte-tail/README.md) derives real
+flag stores, register writeback and local release from initial permissions.
+The [canonical byte step](results/m5-x86-canonical-byte-logic/README.md) gives
+the same reference ISA's full-state logical-register result, including oracle
+and PC updates. Their genuine caller and dispatcher composition continues.
+
 ## Trust boundary
 
 Lean's kernel checks proof terms against the pinned definitions, with the
