@@ -62,7 +62,7 @@ theorem entry (ge : CC.CGenv) (m : CC.Mem) (k : CC.Cont)
       CC.listDisjoint, CC.varNames, CC.doAllocVariables, CC.bindParameterTemps,
       initialTemps, CC.Eapp, CC.E0]
 
-private theorem byte_long_cast (m : CC.Mem) (code : BitVec 8) :
+theorem byte_long_cast (m : CC.Mem) (code : BitVec 8) :
     CC.Cop.semCast (.Vlong (code.setWidth 64)) CC.tulong
       (.Tint .I8 .Unsigned CC.noattr) m =
       some (X86Width.argument code) := by
@@ -72,7 +72,7 @@ private theorem byte_long_cast (m : CC.Mem) (code : BitVec 8) :
   rw [← BitVec.setWidth_and, BitVec.and_allOnes]
   rfl
 
-private theorem byte_cast (m : CC.Mem) (code : BitVec 8) :
+theorem byte_cast (m : CC.Mem) (code : BitVec 8) :
     CC.Cop.semCast (X86Width.argument code) (.Tint .I8 .Unsigned CC.noattr)
       (.Tint .I8 .Unsigned CC.noattr) m =
       some (X86Width.argument code) := by
@@ -208,7 +208,7 @@ theorem from_call (ge : CC.CGenv) (m : CC.Mem) (k : CC.Cont)
           (X86Width.internal ge width (callContinuation CC.emptyEnv (prefixTemps le reg width) k) m)).trans
             (resume_width ge CC.emptyEnv (prefixTemps le reg width) m k width)
 
-private theorem unsigned_byte (code : BitVec 8) :
+theorem unsigned_byte (code : BitVec 8) :
     CC.Cop.castIntLong .Unsigned (code.setWidth 32) = code.setWidth 64 := by
   change BitVec.ofInt 64 ((code.setWidth 32).toNat : Int) = _
   rw [BitVec.toNat_setWidth_of_le (by decide), BitVec.ofInt_natCast]

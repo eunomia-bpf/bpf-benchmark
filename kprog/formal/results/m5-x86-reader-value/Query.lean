@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.X86RegisterReadValue
+
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.source
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.source
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.table_address
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.table_address
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.value_address
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.value_address
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.pointer_address
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.pointer_address
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.cell_add
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.cell_add
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.read_value
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.read_value
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.from_call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.from_call
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.native_word
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.native_word
