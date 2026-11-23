@@ -40,7 +40,159 @@
     "maxRecDepth": 512
   },
   "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
-  "root_integration": "pending",
+  "root_integration": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.2201366139925085,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
   "complete_instruction_families": 0,
-  "scope": "Complete non-RSP ordinary scalar reader call and shared native register view, including legal high byte"
+  "scope": "Complete non-RSP ordinary scalar reader call and shared native register view, including legal high byte",
+  "root_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-reader-scalar/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.055669767956715,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_public_queries_total": 31,
+  "shared_root_queries": {
+    "m5-x86-alu-read-site": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-alu-read-site/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.240495975012891,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    },
+    "m5-x86-reader-entry": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-reader-entry/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2204305399791338,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    },
+    "m5-x86-reader-value": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-reader-value/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0741037050029263,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    },
+    "m5-x86-reader-tag": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-reader-tag/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0262559929979034,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    },
+    "m5-x86-reader-lanes": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-reader-lanes/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.055359738995321,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    },
+    "m5-x86-reader-scalar": {
+      "command": [
+        "taskset",
+        "-c",
+        "12-15",
+        "nice",
+        "-n",
+        "19",
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-reader-scalar/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.055669767956715,
+      "memory_limit": 34359738368,
+      "shared_timing": true
+    }
+  }
 }

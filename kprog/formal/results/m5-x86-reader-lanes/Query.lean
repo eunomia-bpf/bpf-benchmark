@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86RegisterReadLanes
+import KProgFormal
 
 #check KProgFormal.ClightRefinement.X86RegisterReadLanes.scalar
 #print axioms KProgFormal.ClightRefinement.X86RegisterReadLanes.scalar

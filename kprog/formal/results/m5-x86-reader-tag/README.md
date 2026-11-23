@@ -15,3 +15,9 @@ import. All diagnostic attempts remain under
 `/workspaces/kprog-raw/V/x86-alu-read-site-20261122`. Full handler/dispatcher
 composition and the recorded full-check DIV fault correspondence defect remain
 open.
+
+Root integration2026-11-23: one transitive Scalar import exposes this module.
+The targeted root build passes404 jobs in3.22s and all31 owned actual-root
+queries pass. This receipt’s query now imports `KProgFormal`;
+[root-public.txt](root-public.txt) records its root output. The scalar-reader
+validation receipt retains the shared invocation details.

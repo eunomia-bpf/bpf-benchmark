@@ -40,7 +40,43 @@
     "maxRecDepth": 512
   },
   "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
-  "root_integration": "pending",
+  "root_integration": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.2201366139925085,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
   "complete_instruction_families": 0,
-  "scope": "Actual non-RSP non-stack tag loop and scalar-load composition, before lane/return"
+  "scope": "Actual non-RSP non-stack tag loop and scalar-load composition, before lane/return",
+  "root_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-reader-tag/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.0262559929979034,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_public_queries_total": 31
 }

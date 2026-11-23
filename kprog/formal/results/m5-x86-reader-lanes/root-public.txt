@@ -1,0 +1,31 @@
+KProgFormal.ClightRefinement.X86RegisterReadLanes.scalar (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (m : CC.Mem) (value : BitVec 64) (size : X86.Size) (shift : BitVec 8)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_width le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (shiftRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_shift le =
+      some (KProgFormal.ClightRefinement.X86Width.argument shift))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_rd_value le = some (CC.Val.Vlong value))
+  (bound : shift.toNat < 64) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86RegisterReadLanes.length size)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadTag.lanes k e le m)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86RegisterReadLanes.temps le value size shift) m)
+'KProgFormal.ClightRefinement.X86RegisterReadLanes.scalar' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadEntry.finish (ge : CC.CGenv) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+  (value : BitVec 64) (observed : CC.PTree.get X86_program_profile_bpf._value le = some (CC.Val.Vlong value)) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86RegisterReadEntry.continuation k) CC.emptyEnv le m)
+    (CC.State.Returnstate (CC.Val.Vlong value) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86RegisterReadEntry.finish' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

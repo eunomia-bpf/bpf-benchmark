@@ -1,0 +1,85 @@
+KProgFormal.ClightRefinement.X86RegisterReadTag.source :
+  KProgFormal.ClightRefinement.X86RegisterReadValue.afterValue =
+    KProgFormal.ClightRefinement.X86RegisterReadTag.materialize✝.Ssequence
+      KProgFormal.ClightRefinement.X86RegisterReadTag.lanes
+'KProgFormal.ClightRefinement.X86RegisterReadTag.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadTag.tag_address (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (block : CC.Block)
+  (offset : CC.Integers.Ptrofs) :
+  CC.lvalOfField ge (CC.Ty.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) X86_program_profile_bpf._tag
+      (CC.Val.Vptr block offset) =
+    some (block, offset + 8, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86RegisterReadTag.tag_address' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadTag.ordinary (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (m : CC.Mem) (index : Fin 16) (bindingBlock cellsBlock : CC.Block) (bindingOffset cellsOffset : CC.Integers.Ptrofs)
+  (tag : BitVec 8) (notSp : index ≠ 4) (notStack : tag ≠ 4#8)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (reg :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_reg le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge 23
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadValue.afterValue k e le m)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadTag.lanes k e
+      (KProgFormal.ClightRefinement.X86RegisterReadTag.tagTemps le index cellsBlock cellsOffset tag) m)
+'KProgFormal.ClightRefinement.X86RegisterReadTag.ordinary' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadTag.observations (le : CC.TempEnv) (index : Fin 16) (block : CC.Block)
+  (offset : CC.Integers.Ptrofs) (tag : BitVec 8) :
+  CC.PTree.get X86_program_profile_bpf.___x86_rd_value
+        (KProgFormal.ClightRefinement.X86RegisterReadTag.tagTemps le index block offset tag) =
+      CC.PTree.get X86_program_profile_bpf.___x86_rd_value le ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_width
+          (KProgFormal.ClightRefinement.X86RegisterReadTag.tagTemps le index block offset tag) =
+        CC.PTree.get X86_program_profile_bpf.___x86_rd_width le ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_rd_shift
+          (KProgFormal.ClightRefinement.X86RegisterReadTag.tagTemps le index block offset tag) =
+        CC.PTree.get X86_program_profile_bpf.___x86_rd_shift le
+'KProgFormal.ClightRefinement.X86RegisterReadTag.observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadTag.from_value (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (m : CC.Mem) (index : Fin 16) (shift tag : BitVec 8) (value : BitVec 64) (bindingBlock cellsBlock : CC.Block)
+  (bindingOffset cellsOffset : CC.Integers.Ptrofs) (notSp : index ≠ 4) (notStack : tag ≠ 4#8)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (reg :
+    CC.PTree.get X86_program_profile_bpf.___x86_rd_reg le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (shiftRead : CC.PTree.get X86_program_profile_bpf._shift le = some (CC.Val.Vlong (BitVec.setWidth 64 shift)))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current :
+    CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned =
+      some (CC.Val.Vlong value))
+  (tagRead :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge 42
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadEntry.afterWidth k e le m)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_read_reg
+      KProgFormal.ClightRefinement.X86RegisterReadTag.lanes k e
+      (KProgFormal.ClightRefinement.X86RegisterReadTag.tagTemps
+        (KProgFormal.ClightRefinement.X86RegisterReadValue.valueTemps le shift cellsBlock cellsOffset value) index
+        cellsBlock cellsOffset tag)
+      m)
+'KProgFormal.ClightRefinement.X86RegisterReadTag.from_value' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

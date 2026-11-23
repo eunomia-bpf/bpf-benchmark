@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86RegisterReadTag
+import KProgFormal
 
 #check KProgFormal.ClightRefinement.X86RegisterReadTag.source
 #print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.source

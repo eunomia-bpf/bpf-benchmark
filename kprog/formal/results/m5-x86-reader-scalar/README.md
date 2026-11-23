@@ -24,3 +24,9 @@ component batch. Raw attempts remain under
 This is a complete reader call within its stated domain. Whole instruction
 handlers and dispatcher composition remain open, and the recorded whole-check
 DIV fault correspondence defect remains unresolved.
+
+Root integration2026-11-23: one transitive Scalar import exposes this module.
+The targeted root build passes404 jobs in3.22s and all31 owned actual-root
+queries pass. This receipt’s query now imports `KProgFormal`;
+[root-public.txt](root-public.txt) records its root output. The scalar-reader
+validation receipt retains the shared invocation details.

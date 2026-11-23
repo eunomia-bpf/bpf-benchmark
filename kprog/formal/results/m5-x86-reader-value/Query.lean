@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86RegisterReadValue
+import KProgFormal
 
 #check KProgFormal.ClightRefinement.X86RegisterReadValue.source
 #print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.source
