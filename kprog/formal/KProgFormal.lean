@@ -210,3 +210,5 @@ import KProgFormal.ClightRefinement.Arm64ModifiedLslOneCall
 import KProgFormal.ClightRefinement.Arm64OrnBodyNative
 import KProgFormal.ClightRefinement.Arm64FmovNative
 import KProgFormal.ClightRefinement.Arm64FmovDestinationSite
+import KProgFormal.ClightRefinement.Arm64VectorWritable
+import KProgFormal.ClightRefinement.Arm64FmovStoreEntry
