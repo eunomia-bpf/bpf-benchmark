@@ -202,3 +202,5 @@ import KProgFormal.ClightRefinement.X86AluReadSelfXor
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
 import KProgFormal.ClightRefinement.Arm64CnegCondition
+import KProgFormal.ClightRefinement.Arm64CnegNumeric
+import KProgFormal.ClightRefinement.Arm64CnegWrite

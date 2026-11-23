@@ -1,0 +1,45 @@
+{
+  "confirmed_utc": "2026-11-23T05:36:50.264688+00:00",
+  "targeted_root": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.0301575660705566,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_jobs": 411,
+  "root_queries": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-body-components-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.0312345027923584,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "root_metadata": {
+    "size_bytes": 11793,
+    "mtime_ns": 1795412160734219420
+  },
+  "scope": "two additive ARM imports; targeted root module and three APIs",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
