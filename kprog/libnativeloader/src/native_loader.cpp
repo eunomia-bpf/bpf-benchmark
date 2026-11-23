@@ -37,6 +37,7 @@ std::vector<std::pair<std::string, uint64_t>> query_program_helper_targets(int p
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <map>
 #include <memory>
 #include <optional>
 #include <stdexcept>
@@ -1969,6 +1970,11 @@ struct NativeLinkArgs {
     std::vector<LookupSite> lookup_sites;
     std::vector<LookupMap> lookup_maps;
     std::vector<UpdateSite> update_sites;
+    struct ConstValue {
+        std::string name;
+        std::string hex;
+    };
+    std::vector<ConstValue> const_values;
 };
 
 struct LinkedBlob {
@@ -1993,6 +1999,8 @@ struct CompanionLoad {
     bool has_tail_call = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
+    /* Bytes of the data symbols whose map is read-only to programs and frozen, by symbol name. */
+    std::map<std::string, std::string> const_values;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
@@ -2298,6 +2306,53 @@ const MapMeta *find_array_data_map(CompanionLoad &load,
         }
     }
     fail("internal error: added native data map disappeared from metadata");
+}
+
+/* The kernel treats a map value as constant for programs when the map is read-only to programs and
+ * frozen (bpf_map_is_rdonly()); such a data symbol's bytes go to native-link, which loads them as
+ * immediates. The frozen state is the map fd's fdinfo "frozen" field. */
+bool map_fd_frozen(int fd)
+{
+    std::ifstream in("/proc/self/fdinfo/" + std::to_string(fd));
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.rfind("frozen:", 0) == 0) {
+            return line.find('1') != std::string::npos;
+        }
+    }
+    return false;
+}
+
+void add_frozen_const_value(CompanionLoad &load,
+                            const MapMeta &map,
+                            const std::string &name,
+                            uint64_t off,
+                            uint64_t size)
+{
+    if (size == 0 || off + size > map.value_size) {
+        return;
+    }
+    ScopedFd fd(bpf_map_get_fd_by_id(map.kernel_id));
+    if (fd.get() < 0) {
+        return;
+    }
+    const bpf_map_info info = load_map_info(fd.get());
+    if (!(info.map_flags & BPF_F_RDONLY_PROG) || !map_fd_frozen(fd.get())) {
+        return;
+    }
+    std::vector<uint8_t> value(info.value_size);
+    const uint32_t key = 0;
+    if (bpf_map_lookup_elem(fd.get(), &key, value.data()) != 0) {
+        return;
+    }
+    static const char digits[] = "0123456789abcdef";
+    std::string hex;
+    hex.reserve(size * 2);
+    for (uint64_t i = off; i < off + size; i++) {
+        hex.push_back(digits[value[i] >> 4]);
+        hex.push_back(digits[value[i] & 15]);
+    }
+    load.const_values[name] = std::move(hex);
 }
 
 const MapMeta *find_singleton_kconfig_map(const CompanionLoad &load)
@@ -2750,6 +2805,7 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             load.map_addrs[std::string(name)] =
                 map->value_addr + off;
             load.map_addr_ids[std::string(name)] = map->kernel_id;
+            add_frozen_const_value(load, *map, name, off, sym.st_size);
         }
     }
     elf_end(elf);
@@ -2960,6 +3016,11 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.site.index_mask);
         hash.add_u64(arg.site.value_offset);
         hash.add_u64(arg.site.percpu_base_addr);
+    }
+    for (const NativeLinkArgs::ConstValue &arg : link_args.const_values) {
+        hash.add_string("const");
+        hash.add_string(arg.name);
+        hash.add_string(arg.hex);
     }
     for (const NativeLinkArgs::UpdateSite &arg : link_args.update_sites) {
         hash.add_string("update");

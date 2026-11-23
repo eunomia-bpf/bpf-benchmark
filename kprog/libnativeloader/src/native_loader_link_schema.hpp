@@ -203,6 +203,9 @@ NativeLinkArgs build_native_link_args(
             make_link_lookup_site(site),
         });
     }
+    for (const auto &[name, hex] : companion.const_values) {
+        out.const_values.push_back(NativeLinkArgs::ConstValue{name, hex});
+    }
     for (size_t i = 0; i < companion.update_sites.size(); i++) {
         out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
     }

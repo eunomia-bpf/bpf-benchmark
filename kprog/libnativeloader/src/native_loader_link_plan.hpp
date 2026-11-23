@@ -141,6 +141,15 @@ inline std::filesystem::path write_native_link_plan(
     write_json_array(out, link_args.lookup_maps, write_json_lookup_map);
     out << ",\"update_sites\":";
     write_json_array(out, link_args.update_sites, write_json_update_site);
+    out << ",\"const_values\":[";
+    for (size_t i = 0; i < link_args.const_values.size(); i++) {
+        out << (i == 0 ? "{\"name\":" : ",{\"name\":");
+        write_json_string(out, link_args.const_values[i].name);
+        out << ",\"hex\":";
+        write_json_string(out, link_args.const_values[i].hex);
+        out << "}";
+    }
+    out << "]";
     out << "}\n";
     out.close();
     if (!out) {

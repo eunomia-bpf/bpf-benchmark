@@ -160,6 +160,8 @@ struct LookupSiteSpec {
 struct LinkSideInputs {
     helper_addrs: HashMap<String, u64>,
     map_addrs: HashMap<String, u64>,
+    /// Bytes of data symbols whose map is read-only to programs and frozen (the loader reads them).
+    const_values: HashMap<String, Vec<u8>>,
     lookup_sites: Vec<LookupSiteSpec>,
     lookup_maps: HashMap<String, LookupSiteSpec>,
 }
@@ -175,6 +177,30 @@ struct LinkPlan {
     lookup_sites: Vec<LinkPlanLookupSite>,
     #[serde(default)]
     lookup_maps: Vec<LinkPlanLookupMap>,
+    #[serde(default)]
+    const_values: Vec<LinkPlanConstValue>,
+}
+
+#[derive(Deserialize)]
+struct LinkPlanConstValue {
+    name: String,
+    hex: String,
+}
+
+fn const_values_from_plan(items: Vec<LinkPlanConstValue>) -> Result<HashMap<String, Vec<u8>>> {
+    let mut out = HashMap::new();
+    for item in items {
+        if item.hex.len() % 2 != 0 {
+            bail!("link-plan const value {:?} has an odd hex length", item.name);
+        }
+        let bytes = (0..item.hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&item.hex[i..i + 2], 16))
+            .collect::<std::result::Result<Vec<u8>, _>>()
+            .with_context(|| format!("link-plan const value {:?}", item.name))?;
+        out.insert(item.name, bytes);
+    }
+    Ok(out)
 }
 
 #[derive(Deserialize)]
@@ -274,6 +300,7 @@ fn load_link_plan(path: &PathBuf) -> Result<LinkSideInputs> {
     Ok(LinkSideInputs {
         helper_addrs: name_addr_vec_to_map(plan.helpers, "helpers")?,
         map_addrs: name_addr_vec_to_map(plan.maps, "maps")?,
+        const_values: const_values_from_plan(plan.const_values)?,
         lookup_sites: plan
             .lookup_sites
             .into_iter()
@@ -290,6 +317,7 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
     Ok(LinkSideInputs {
         helper_addrs: HashMap::new(),
         map_addrs: HashMap::new(),
+        const_values: HashMap::new(),
         lookup_sites: Vec::new(),
         lookup_maps: HashMap::new(),
     })
@@ -395,6 +423,7 @@ fn main() -> Result<()> {
     let LinkSideInputs {
         helper_addrs,
         map_addrs,
+        const_values,
         lookup_sites,
         lookup_maps,
     } = load_link_side_inputs(&args)?;
@@ -438,6 +467,7 @@ fn main() -> Result<()> {
                 &included,
                 &helper_addrs,
                 &map_addrs,
+                &const_values,
                 &lookup_sites,
                 &lookup_maps,
                 proof_mode,
@@ -473,6 +503,7 @@ fn main() -> Result<()> {
                 &included,
                 &helper_addrs,
                 &map_addrs,
+                &const_values,
                 &lookup_sites,
                 proof_mode,
                 args.preserve_entry_abi,
@@ -1191,6 +1222,105 @@ fn a64_madd64(rd: u32, rn: u32, rm: u32, ra: u32) -> Result<u32> {
         bail!("arm64 MADD register out of range: x{rd}, x{rn}, x{rm}, x{ra}");
     }
     Ok(0x9b00_0000 | (rm << 16) | (ra << 10) | (rn << 5) | rd)
+}
+
+/// The general registers an instruction writes (Rd/Rt in bits 0-4, Rt2 of a load pair, Rn of a
+/// pre/post-indexed access). Branches write only x30 (calls clear the call-clobbered registers).
+fn a64_written_regs(insn: u32) -> Vec<usize> {
+    let rd = (insn & 0x1f) as usize;
+    let rn = ((insn >> 5) & 0x1f) as usize;
+    let rt2 = ((insn >> 10) & 0x1f) as usize;
+    if insn & 0xfff0_0000 == 0xd530_0000 {
+        return vec![rd]; // MRS
+    }
+    if (insn >> 26) & 0x7 == 0b101 {
+        return Vec::new();
+    }
+    if (insn >> 25) & 0b0101 == 0b0100 {
+        let mut out = Vec::new();
+        if (insn >> 27) & 0x7 == 0b101 {
+            // load/store pair: L is bit 22; pre/post index in bits 23-24
+            if insn & (1 << 22) != 0 {
+                out.push(rd);
+                out.push(rt2);
+            }
+            if matches!((insn >> 23) & 0x3, 0b01 | 0b11) {
+                out.push(rn);
+            }
+            return out;
+        }
+        // single register: opc (bits 22-23) other than 00 loads
+        if (insn >> 22) & 0x3 != 0 {
+            out.push(rd);
+        }
+        if (insn >> 24) & 0x3 == 0 && insn & (1 << 21) == 0 && matches!((insn >> 10) & 0x3, 0b01 | 0b11) {
+            out.push(rn);
+        }
+        return out;
+    }
+    vec![rd]
+}
+
+/// A load from a data symbol whose map is read-only to programs and frozen reads a constant (the
+/// kernel's bpf_map_is_rdonly()); the unsigned-offset LDR/LDRB/LDRH/LDRSB/LDRSH/LDRSW from the
+/// register holding the symbol's address becomes MOVZ/MOVK of that value.
+fn a64_fold_frozen_load(
+    insn: u32,
+    reg_map_names: &[Option<String>; 32],
+    const_values: &HashMap<String, Vec<u8>>,
+) -> Result<Option<Vec<u32>>> {
+    // (mask, value, access bytes, sign-extend, 64-bit destination)
+    const FORMS: [(u32, u32, usize, bool, bool); 9] = [
+        (0xffc0_0000, 0xb940_0000, 4, false, false), // LDR Wt
+        (0xffc0_0000, 0xf940_0000, 8, false, true),  // LDR Xt
+        (0xffc0_0000, 0x3940_0000, 1, false, false), // LDRB Wt
+        (0xffc0_0000, 0x7940_0000, 2, false, false), // LDRH Wt
+        (0xffc0_0000, 0x39c0_0000, 1, true, false),  // LDRSB Wt
+        (0xffc0_0000, 0x3980_0000, 1, true, true),   // LDRSB Xt
+        (0xffc0_0000, 0x79c0_0000, 2, true, false),  // LDRSH Wt
+        (0xffc0_0000, 0x7980_0000, 2, true, true),   // LDRSH Xt
+        (0xffc0_0000, 0xb980_0000, 4, true, true),   // LDRSW Xt
+    ];
+    let Some(&(_, _, width, signed, x_dest)) =
+        FORMS.iter().find(|(mask, value, ..)| insn & mask == *value)
+    else {
+        return Ok(None);
+    };
+    let rt = insn & 0x1f;
+    let rn = ((insn >> 5) & 0x1f) as usize;
+    if rt == 31 || rn == 31 {
+        return Ok(None);
+    }
+    let Some(value) = reg_map_names[rn].as_ref().and_then(|name| const_values.get(name)) else {
+        return Ok(None);
+    };
+    let off = (((insn >> 10) & 0xfff) as usize) * width;
+    let Some(bytes) = value.get(off..off + width) else {
+        return Ok(None);
+    };
+    let mut raw = [0u8; 8];
+    raw[..width].copy_from_slice(bytes);
+    let mut v = u64::from_le_bytes(raw);
+    if signed {
+        let shift = 64 - 8 * width as u32;
+        v = (((v << shift) as i64) >> shift) as u64;
+    }
+    if !x_dest {
+        v &= 0xffff_ffff; // a W destination zero-extends, as the load does
+    }
+    let (movz, movk, chunks) = if x_dest {
+        (0xd280_0000u32, 0xf280_0000u32, 4)
+    } else {
+        (0x5280_0000u32, 0x7280_0000u32, 2)
+    };
+    let mut words = vec![movz | (((v & 0xffff) as u32) << 5) | rt];
+    for hw in 1..chunks {
+        let part = ((v >> (16 * hw)) & 0xffff) as u32;
+        if part != 0 {
+            words.push(movk | ((hw as u32) << 21) | (part << 5) | rt);
+        }
+    }
+    Ok(Some(words))
 }
 
 fn a64_movz(reg: u32, imm16: u16, shift: u32) -> Result<u32> {
@@ -1940,6 +2070,7 @@ fn rewrite_arm64(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    const_values: &HashMap<String, Vec<u8>>,
     lookup_sites: &[LookupSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
@@ -1948,7 +2079,7 @@ fn rewrite_arm64(
     let mut long_tbz: HashSet<u64> = HashSet::new();
     loop {
         let result = rewrite_arm64_pass(
-            elf, entry, included, helper_addrs, map_addrs, lookup_sites,
+            elf, entry, included, helper_addrs, map_addrs, const_values, lookup_sites,
             proof_mode, preserve_entry_abi, show, &long_tbz,
         );
         let far = match &result {
@@ -1972,6 +2103,7 @@ fn rewrite_arm64_pass(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    const_values: &HashMap<String, Vec<u8>>,
     lookup_sites: &[LookupSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
@@ -2026,8 +2158,20 @@ fn rewrite_arm64_pass(
             }
             let reloc = relocs.get(&(sym.section_index, sym.address, off as u64));
             if !proof_mode {
-                if let Some((dst, src)) = a64_mov_reg64(insn) {
-                    reg_map_names[dst] = reg_map_names[src].clone();
+                let copied = a64_mov_reg64(insn).map(|(dst, src)| (dst, reg_map_names[src].clone()));
+                for reg in a64_written_regs(insn) {
+                    reg_map_names[reg] = None;
+                }
+                if let Some((dst, name)) = copied {
+                    reg_map_names[dst] = name;
+                }
+                if reloc.is_none() {
+                    if let Some(words) = a64_fold_frozen_load(insn, &reg_map_names, const_values)? {
+                        for w in words {
+                            blob.extend_from_slice(&w.to_le_bytes());
+                        }
+                        continue;
+                    }
                 }
             }
 

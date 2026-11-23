@@ -545,6 +545,69 @@ fn push_x86_synthetic(
     Ok(())
 }
 
+/// A plain load from a data symbol whose map is read-only to programs and frozen reads a constant
+/// (the kernel's bpf_map_is_rdonly()); it becomes a move of that value. The base register holds the
+/// symbol's address along straight-line code (`map_symbol_registers`); other forms keep the load.
+fn x86_fold_frozen_load(
+    insn: &Instruction,
+    map_symbol_registers: &HashMap<Register, String>,
+    const_values: &HashMap<String, Vec<u8>>,
+) -> Result<Option<Instruction>> {
+    if insn.op_count() != 2
+        || insn.op0_kind() != OpKind::Register
+        || insn.op1_kind() != OpKind::Memory
+        || insn.memory_index() != Register::None
+        || insn.segment_prefix() != Register::None
+    {
+        return Ok(None);
+    }
+    let Some(base) = x86_gpr64_family(insn.memory_base()) else {
+        return Ok(None);
+    };
+    let Some(value) = map_symbol_registers
+        .get(&base)
+        .and_then(|name| const_values.get(name))
+    else {
+        return Ok(None);
+    };
+    let (width, signed) = match insn.code() {
+        Code::Mov_r32_rm32 => (4usize, false),
+        Code::Mov_r64_rm64 => (8, false),
+        Code::Movzx_r32_rm8 | Code::Movzx_r64_rm8 => (1, false),
+        Code::Movzx_r32_rm16 | Code::Movzx_r64_rm16 => (2, false),
+        Code::Movsx_r32_rm8 | Code::Movsx_r64_rm8 => (1, true),
+        Code::Movsx_r32_rm16 | Code::Movsx_r64_rm16 => (2, true),
+        Code::Movsxd_r64_rm32 => (4, true),
+        _ => return Ok(None),
+    };
+    let disp = insn.memory_displacement64() as i64;
+    if disp < 0 {
+        return Ok(None);
+    }
+    let off = disp as usize;
+    let Some(bytes) = value.get(off..off + width) else {
+        return Ok(None);
+    };
+    let mut raw = [0u8; 8];
+    raw[..width].copy_from_slice(bytes);
+    let mut v = u64::from_le_bytes(raw);
+    if signed {
+        let shift = 64 - 8 * width as u32;
+        v = (((v << shift) as i64) >> shift) as u64;
+    }
+    let dst = insn.op0_register();
+    let folded = match dst.size() {
+        // A 32-bit destination is zero-extended into the full register, as the load does.
+        4 => Instruction::with2(Code::Mov_r32_imm32, dst, v as u32)?,
+        8 if (v as i64) >= i32::MIN as i64 && (v as i64) <= i32::MAX as i64 => {
+            Instruction::with2(Code::Mov_rm64_imm32, dst, v as i64 as i32)?
+        }
+        8 => Instruction::with2(Code::Mov_r64_imm64, dst, v)?,
+        _ => return Ok(None),
+    };
+    Ok(Some(folded))
+}
+
 fn push_x86_replacement(
     local: &mut Vec<Instruction>,
     kinds: &mut Vec<Option<PatchKind>>,
@@ -898,6 +961,7 @@ pub(super) fn rewrite_x86(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
+    const_values: &HashMap<String, Vec<u8>>,
     lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     proof_mode: bool,
@@ -1079,6 +1143,19 @@ pub(super) fn rewrite_x86(
                             map_symbol_registers.remove(&dst_family);
                             if !proof_mode {
                                 resolved_got_relocations.insert(patch_key);
+                                // The register holds the symbol's kernel address: a call through it
+                                // becomes a direct call below, and a data symbol (jiffies_64, read by
+                                // the C body of bpf_jiffies64) is read through it.
+                                if let Some(&addr) = helper_addrs.get(target_name) {
+                                    push_x86_replacement(
+                                        &mut local,
+                                        &mut kinds,
+                                        &mut insn_local_ip,
+                                        local_ip,
+                                        build_x86_movabs_reg(dst, addr)?,
+                                        None,
+                                    );
+                                }
                                 continue;
                             }
                         }
@@ -1373,6 +1450,25 @@ pub(super) fn rewrite_x86(
                     .map(|name| (dst, name))
             });
             let written_reg = x86_written_gpr_family(&insn);
+            if !proof_mode {
+                if let Some(folded) =
+                    x86_fold_frozen_load(&insn, &map_symbol_registers, const_values)?
+                {
+                    push_x86_replacement(
+                        &mut local,
+                        &mut kinds,
+                        &mut insn_local_ip,
+                        local_ip,
+                        folded,
+                        None,
+                    );
+                    if let Some(reg) = written_reg {
+                        map_symbol_registers.remove(&reg);
+                        helper_got_registers.remove(&reg);
+                    }
+                    continue;
+                }
+            }
             local.push(insn);
             kinds.push(None);
             insn_local_ip.push(local_ip);
@@ -3805,6 +3901,7 @@ mod tests {
                 &elf,
                 &entry,
                 &[entry.clone()],
+                &HashMap::new(),
                 &HashMap::new(),
                 &HashMap::new(),
                 &[],
