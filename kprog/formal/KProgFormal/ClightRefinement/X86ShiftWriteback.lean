@@ -294,11 +294,12 @@ private theorem set_twice (id : CC.Ident) (value : CC.Val) (le : CC.TempEnv) :
 
 /-- Every SHL destination and width follows the actual general writer arm,
 retaining the whole heap and deriving the exact two selector temporaries. -/
-theorem select_scalar (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+theorem select_scalar (ge : CC.CGenv) {code : BitVec 32} (function : CC.Function) (e : CC.Env)
     (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8) (size : X86.Size)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge (selectLength dst size) (.State function writer k e le m)
       (.State function scalarWriter k e (selectTemps le dst size) m) := by
   rw [writer_source]
@@ -309,7 +310,7 @@ theorem select_scalar (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
   all_goals apply internalRun_of_steps
   all_goals
     simp +decide [steps, InternalPath, InternalState, probe, gate, selectTemps,
-      stackWidth, X86.Size.bytes, stack, CC.doStep, CC.doEvalExpr, CC.typeof,
+      stackWidth, X86.Size.bytes, stack, scalarCode.1, scalarCode.2, CC.doStep, CC.doEvalExpr, CC.typeof,
       CC.PTree.gso, destination, width, alu, X86ShiftLeft.argument,
       CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
       CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
@@ -440,12 +441,13 @@ theorem narrow_default (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
 
 /-- Every narrow SHL destination reaches the actual default register writer
 through all three original pointer-selection stages in fifty-one silent steps. -/
-theorem narrow_writer (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+theorem narrow_writer (ge : CC.CGenv) {code : BitVec 32} (function : CC.Function) (e : CC.Env)
     (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst : BitVec 8) (size : X86.Size)
     (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 51 (.State function writer k e le m)
       (.State function defaultWriter k e
         (narrowSrcTemps (narrowDstTemps (selectTemps le dst size))) m) := by
@@ -597,7 +599,7 @@ theorem load_temps (le : CC.TempEnv) (block : CC.Block) (offset : CC.Integers.Pt
 
 /-- The original narrow SHL writer executes all selectors and real pointer reads,
 reaching width preparation in sixty-one silent transitions on the same heap. -/
-theorem narrow_loaded (ge : CC.CGenv)
+theorem narrow_loaded (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -614,7 +616,8 @@ theorem narrow_loaded (ge : CC.CGenv)
     (dst : BitVec 8) (size : X86.Size) (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 61 (.State function writer k e le m)
       (.State function widthWriter (loadCont k) e
         (loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le dst size)))
@@ -831,7 +834,7 @@ theorem width_temps (le : CC.TempEnv) (size : X86.Size) (shift : BitVec 8) (valu
 
 /-- The original narrow SHL writer reaches actual destination-cell preparation
 through its selectors, real RSP read and actual width helper in eighty-three silent steps. -/
-theorem narrow_prepared (ge : CC.CGenv)
+theorem narrow_prepared (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -848,7 +851,7 @@ theorem narrow_prepared (ge : CC.CGenv)
     (dst : BitVec 8) (size : X86.Size) (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint (dst.setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -856,7 +859,8 @@ theorem narrow_prepared (ge : CC.CGenv)
     (unshadowed : e.get X86_program_profile_bpf._x86_width_effective = none)
     (shift : BitVec 8) (next : BitVec 64)
     (observedShift : le.get X86_program_profile_bpf.___x86_l_dst_shift = some (.Vint (shift.setWidth 32)))
-    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next)) :
+    (observedValue : le.get X86_program_profile_bpf.___x86_l_result = some (.Vlong next))
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 83 (.State function writer k e le m)
       (.State function cellWriter (loadCont k) e
         (writerWidthTemps (loadTemps (narrowSrcTemps (narrowDstTemps (selectTemps le dst size)))
@@ -1151,7 +1155,7 @@ theorem cell_initialized (ge : CC.CGenv)
 
 /-- Every narrow architectural SHL destination follows the original writer
 through its actual local union store, reaching the tag stage in ninety-six silent transitions. -/
-theorem narrow_initialized (ge : CC.CGenv)
+theorem narrow_initialized (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -1168,7 +1172,7 @@ theorem narrow_initialized (ge : CC.CGenv)
     (index : Fin 16) (size : X86.Size) (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -1185,7 +1189,8 @@ theorem narrow_initialized (ge : CC.CGenv)
     (localBlock : CC.Block) (after : CC.Mem)
     (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
       some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
-    (stored : CC.Mem.store CC.Mptr m localBlock 0 cellValue = some after) :
+    (stored : CC.Mem.store CC.Mptr m localBlock 0 cellValue = some after)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 96 (.State function writer k e le m)
       (.State function tagWriter (loadCont k) e
         (cellReadTemps
@@ -1439,7 +1444,7 @@ theorem tag_temps (le : CC.TempEnv) (index : Fin 16) (block : CC.Block)
   simp [tagTemps, tagReadTemps, tagRegTemps, CC.PTree.gso,
     Ne.symm neReg, Ne.symm ne166, Ne.symm ne167, Ne.symm ne107, Ne.symm neTag]
 
-theorem narrow_tagged (ge : CC.CGenv)
+theorem narrow_tagged (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -1456,7 +1461,7 @@ theorem narrow_tagged (ge : CC.CGenv)
     (index : Fin 16) (size : X86.Size) (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -1479,7 +1484,8 @@ theorem narrow_tagged (ge : CC.CGenv)
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
           some (.Vint (tag.setWidth 32)))
-    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) :
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 115 (.State function writer k e le m)
       (.State function widthDispatch (loadCont k) e
         (tagTemps
@@ -1613,7 +1619,7 @@ theorem width_dispatch (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
   rw [← counts]
   exact (entered.trans classified).trans selected
 
-theorem narrow_storage (ge : CC.CGenv)
+theorem narrow_storage (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -1630,7 +1636,7 @@ theorem narrow_storage (ge : CC.CGenv)
     (index : Fin 16) (size : X86.Size) (narrow : size ≠ .q)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -1653,7 +1659,8 @@ theorem narrow_storage (ge : CC.CGenv)
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) =
           some (.Vint (tag.setWidth 32)))
-    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock) :
+    (callerBlocks : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge (115 + (classifyLength size + 4)) (.State function writer k e le m)
       (.State function (storageArm size) (.Kseq storageTail (loadCont k)) e
         (classTemps
@@ -1910,7 +1917,7 @@ theorem byte_value (next : BitVec 64) :
   rw [BitVec.setWidth_setWidth_of_le next (by decide : 8 ≤ 32)]
   exact (BitVec.setWidth_eq_append (x := next.setWidth 8) (by decide : 8 ≤ 32)).symm
 
-theorem byte_writer (ge : CC.CGenv)
+theorem byte_writer (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -1927,7 +1934,7 @@ theorem byte_writer (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -1953,7 +1960,8 @@ theorem byte_writer (ge : CC.CGenv)
     (ordinary : (registerByte index).setWidth 32 ≠ (4#32))
     (final : CC.Mem)
     (byteStored : CC.Mem.store .Mint8unsigned after localBlock
-      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some final) :
+      (CC.Integers.Ptrofs.unsigned (byteOffset shift)) (.Vint (byteValue next)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 137 (.State function writer k e le m)
       (.State function .Sskip (.Kseq storageTail (loadCont k)) e
         (byteTemps
@@ -2359,7 +2367,7 @@ theorem load_exit (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
     simp only [steps, InternalPath, InternalState, loadCont, loadExit,
       CC.doStep, CC.Eapp, CC.E0, List.nil_append, true_and]
 
-theorem byte_final (ge : CC.CGenv)
+theorem byte_final (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -2376,7 +2384,7 @@ theorem byte_final (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -2414,7 +2422,8 @@ theorem byte_final (ge : CC.CGenv)
     (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
-      (.Vint (0#32)) = some final) :
+      (.Vint (0#32)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -2517,7 +2526,7 @@ theorem byte_memory (m after final : CC.Mem) (block : CC.Block)
       byteMemoryWord]
   · rfl
 
-theorem byte_scalar_final (ge : CC.CGenv)
+theorem byte_scalar_final (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -2534,7 +2543,7 @@ theorem byte_scalar_final (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -2568,7 +2577,8 @@ theorem byte_scalar_final (ge : CC.CGenv)
     (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
-      (.Vint (0#32)) = some final) :
+      (.Vint (0#32)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -2753,7 +2763,7 @@ theorem byte_memory_native (old next : BitVec 64) (shift : BitVec 8) :
   · simpa only [high, ite_true] using byte_memory_native_high old next shift high
   · simpa only [high, ite_false] using byte_memory_native_low old next shift high
 
-theorem byte_reference (ge : CC.CGenv)
+theorem byte_reference (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -2770,7 +2780,7 @@ theorem byte_reference (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -2804,7 +2814,8 @@ theorem byte_reference (ge : CC.CGenv)
     (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
-      (.Vint (0#32)) = some final) :
+      (.Vint (0#32)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -2866,7 +2877,7 @@ theorem cell_write_readback (m middle final : CC.Mem) (block : CC.Block)
       writer_byte_cast]
   exact tagRead.trans (congrArg some normalized)
 
-theorem byte_register_result (ge : CC.CGenv)
+theorem byte_register_result (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -2883,7 +2894,7 @@ theorem byte_register_result (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -2917,7 +2928,8 @@ theorem byte_register_result (ge : CC.CGenv)
     (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
-      (.Vint (0#32)) = some final) :
+      (.Vint (0#32)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -3054,7 +3066,7 @@ theorem cell_write_other (m middle final : CC.Mem) (block : CC.Block)
     (.inr (cell_range_subset _ _ _ _ (by decide) (by decide) ranges.2.2.2))
   exact ⟨wordLast.trans wordFirst, tagLast.trans tagFirst⟩
 
-theorem byte_register_table (ge : CC.CGenv)
+theorem byte_register_table (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -3071,7 +3083,7 @@ theorem byte_register_table (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((registerByte index).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -3105,7 +3117,8 @@ theorem byte_register_table (ge : CC.CGenv)
     (tagStored : CC.Mem.store .Mint8unsigned middle cellsBlock
       (CC.Integers.Ptrofs.unsigned ((cellsOffset +
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8))
-      (.Vint (0#32)) = some final) :
+      (.Vint (0#32)) = some final)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps

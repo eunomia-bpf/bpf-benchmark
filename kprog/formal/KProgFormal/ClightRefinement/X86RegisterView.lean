@@ -93,7 +93,7 @@ theorem byte_table_native (addresses : Arm64Registers.PointerOrigins)
 /-- The original Clight byte writer reaches its original continuation in169
 internal steps and updates the represented native GPR bank through Cpu.setReg.
 Successful source stores and the entry layout/separation premises stay explicit. -/
-theorem byte_writer_native (ge : CC.CGenv)
+theorem byte_writer_native (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -110,7 +110,7 @@ theorem byte_writer_native (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((BitVec.ofNat 8 index.val).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -147,7 +147,8 @@ theorem byte_writer_native (ge : CC.CGenv)
       (.Vint (0#32)) = some final)
     (addresses : Arm64Registers.PointerOrigins)
     (origins : Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
-    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu) :
+    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -200,7 +201,7 @@ private theorem source_store_exists (m : CC.Mem) (chunk : CC.Chunk) (block : CC.
 /-- Initial source permissions construct all four intermediate heaps of the
 ordinary scalar byte writer. The native register result shares the original
 permission map and allocation frontier. -/
-theorem byte_writer_writable (ge : CC.CGenv)
+theorem byte_writer_writable (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -217,7 +218,7 @@ theorem byte_writer_writable (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((BitVec.ofNat 8 index.val).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -249,7 +250,8 @@ theorem byte_writer_writable (ge : CC.CGenv)
         CC.Integers.Ptrofs.repr (16 * (index.val : Int))) + 8)) .Writable = true)
     (addresses : Arm64Registers.PointerOrigins)
     (origins : Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
-    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu) :
+    (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     ∃ final, InternalRun ge 169 (.State function writer k e le m)
       (.State function .Sskip k e
         (tableTemps
@@ -489,7 +491,7 @@ theorem writer_entry_storage (ce : CC.CompositeEnv)
 entry access map suffice to execute the ordinary scalar byte writer. The local
 binding, separation, width-helper scope and four successful stores are derived.
 The preceding handler prefix and its observations remain separate obligations. -/
-theorem byte_writer_allocated (ge : CC.CGenv)
+theorem byte_writer_allocated (ge : CC.CGenv) {code : BitVec 32}
     (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
       some X86ShiftLeftCarry.bindingsRecord)
     (gprLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_gpr =
@@ -506,7 +508,7 @@ theorem byte_writer_allocated (ge : CC.CGenv)
     (index : Fin 16)
     (destination : le.get X86_program_profile_bpf._dst = some (.Vint ((BitVec.ofNat 8 index.val).setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument .b))
-    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (alu : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint code))
     (widthBlock : CC.Block)
     (widthBinding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv widthBlock =
@@ -535,7 +537,8 @@ theorem byte_writer_allocated (ge : CC.CGenv)
     (represented : RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
     (bindingOld : bindingBlock.toNat < caller.nextblock.toNat)
     (cellsOld : cellsBlock.toNat < caller.nextblock.toNat)
-    (access : m.access = (writerAllocation ge.genv_cenv caller).2.access) :
+    (access : m.access = (writerAllocation ge.genv_cenv caller).2.access)
+    (scalarCode : code ≠ (0#32) ∧ code ≠ (1#32) := by first | assumption | decide +kernel) :
     ∃ final finalTemps, InternalRun ge 169
       (.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG writer k
         (writerAllocation ge.genv_cenv caller).1 le m)
