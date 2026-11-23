@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ModifiedModifier
+open KProgFormal.ClightRefinement
+#check Arm64Modified.Modifier.execute_lsl_zero
+#print axioms Arm64Modified.Modifier.execute_lsl_zero
+#check Arm64Modified.Modifier.execute_lsl_one
+#print axioms Arm64Modified.Modifier.execute_lsl_one

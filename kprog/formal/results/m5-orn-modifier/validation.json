@@ -1,0 +1,44 @@
+{
+  "confirmed_utc": "2026-11-23T06:17:47.662054+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedModifier"
+    ],
+    "exit": 0,
+    "seconds": 11.558411359786987,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 236,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-orn-modifier/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.539309024810791,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": 41,
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedModifier.lean",
+    "size_bytes": 28560,
+    "mtime_ns": 1795414419308702536
+  },
+  "scope": "original LSL1 width4 modifier and prior LSL0 API preservation",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

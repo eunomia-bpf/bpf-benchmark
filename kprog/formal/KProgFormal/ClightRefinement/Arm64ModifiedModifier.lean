@@ -330,4 +330,111 @@ theorem execute_lsl_zero (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
       (case_tail world e le m k value narrow hwidth))).trans
     (modifier_exit world e le m k value narrow)
 
+
+private def prefixTempsOne (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  ((((le.set Arm64Program.___kprog_a64_mod_value (.Vlong value)).set
+    Arm64Program.___kprog_a64_mod (.Vint (1#32))).set Arm64Program.___kprog_a64_mod_shift (.Vint (1#32))).set
+    Arm64Program._t'5 (.Vint (31#32))).set Arm64Program.___kprog_a64_mod_amount (.Vint (1#32))
+private def readyTempsOne (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  (((prefixTempsOne le value).set Arm64Program._t'6 (.Vlong (4294967295#64))).set
+    Arm64Program._t'6 (.Vlong (4294967295#64))).set Arm64Program._t'6 (.Vlong (4294967295#64))
+private def maskTempsOne (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  (readyTempsOne le value).set Arm64Program.___kprog_a64_mod_value (.Vlong ((value <<< 1) &&& (4294967295#64)))
+private def finalTempsOne (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  (maskTempsOne le value).set Arm64Program._result (.Vlong ((value <<< 1) &&& (4294967295#64)))
+
+private theorem ready_one_reads (le : CC.TempEnv) (value : BitVec 64) :
+    (readyTempsOne le value).get Arm64Program.___kprog_a64_mod_value = some (.Vlong value) ∧
+    (readyTempsOne le value).get Arm64Program.___kprog_a64_mod_amount = some (.Vint (1#32)) ∧
+    (readyTempsOne le value).get Arm64Program._t'6 = some (.Vlong (4294967295#64)) := by
+  dsimp only [readyTempsOne, prefixTempsOne]
+  refine ⟨?_, ?_, ?_⟩
+  all_goals
+    repeat first
+      | rw [CC.PTree.gss]
+      | rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
+
+private theorem shift_one (world : CC.CGenv) (m : CC.Mem) (value : BitVec 64) :
+    CC.Cop.semBinaryOperation world.genv_cenv .Oshl (.Vlong value) CC.tulong
+      (.Vint (1#32)) CC.tuchar m = some (.Vlong (value <<< 1)) := rfl
+
+private theorem value_step_one {world : CC.CGenv} {e : CC.Env} {le : CC.TempEnv}
+    {m : CC.Mem} {k : CC.Cont} (value : BitVec 64)
+    (hv : le.get Arm64Program.___kprog_a64_mod_value = some (.Vlong value))
+    (ha : le.get Arm64Program.___kprog_a64_mod_amount = some (.Vint (1#32)))
+    (hm : le.get Arm64Program._t'6 = some (.Vlong (4294967295#64))) :
+    CC.Step2 world (.State handler (.Sset Arm64Program.___kprog_a64_mod_value valueExpr) k e le m)
+      CC.E0 (.State handler .Sskip k e (le.set Arm64Program.___kprog_a64_mod_value
+        (.Vlong ((value <<< 1) &&& (4294967295#64)))) m) := by
+  apply CC.Step.set
+  apply CC.doEvalExpr_sound
+  simp only [valueExpr, CC.doEvalExpr, hv, ha, hm, CC.typeof, shift_one, mask_and]
+
+private theorem case_enter_one (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+    (m : CC.Mem) (k : CC.Cont) (value : BitVec 64) :
+    CC.Step2 world
+      (.State handler modSwitch (.Kseq modOutput (continuation k)) e (prefixTempsOne le value) m) CC.E0
+      (.State handler (.Ssequence caseOne deadCases) (.Kswitch (.Kseq modOutput (continuation k)))
+        e (prefixTempsOne le value) m) := by
+  rw [switch_source, ← case_one]
+  apply CC.Step.switch (v := .Vint (1#32)) (n := 1)
+  · apply CC.doEvalExpr_sound
+    simp +decide only [switchExpr, CC.doEvalExpr, prefixTempsOne, CC.PTree.gss, CC.PTree.gso]
+  · rfl
+
+set_option hygiene false in
+private theorem run_lsl_one (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+    (m : CC.Mem) (k : CC.Cont) (value : BitVec 64)
+    (hinput : le.get Arm64Program.___a64_modified_input = some (.Vlong value))
+    (hkind : le.get Arm64Program._mod = some (.Vint (1#32)))
+    (hshift : le.get Arm64Program._shift = some (.Vint (1#32)))
+    (hwidth : le.get Arm64Program._width = some (width true)) :
+    InternalRun world 41 (.State handler modify k e le m)
+      (.State handler .Sskip k e (finalTempsOne le value) m) := by
+  run_tac do
+    for i in [:41] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      if i == 18 then
+        Lean.Elab.Tactic.evalTactic (← `(tactic| exact case_enter_one world e le m k value))
+      else if i == 33 then
+        Lean.Elab.Tactic.evalTactic (← `(tactic| exact value_step_one value
+          (ready_one_reads le value).1 (ready_one_reads le value).2.1 (ready_one_reads le value).2.2))
+      else
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [continuation, body,
+          modInput, modKind, modShift, modMask, modAmount, modOutput, modify_source,
+          prefixTempsOne, readyTempsOne, maskTempsOne, finalTempsOne, width,
+          Arm64Compare.Dispatch.flags, Arm64Width.argument, case_shape, caseMask,
+          Arm64Program.s_kprog_arm64_program_modified_5, Arm64Program.s_kprog_arm64_program_modified_6,
+          Arm64Program.s_kprog_arm64_program_modified_7, CC.doStep, hinput, hkind, hshift, hwidth,
+          CC.setOpttemp, CC.PTree.gss, CC.PTree.gso, CC.doEvalExpr, CC.typeof,
+          CC.Cop.semSwitchArg, CC.Cop.classifySwitch, CC.Cop.semBinaryOperation, CC.Cop.semAnd,
+          CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+          CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+          CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+          CC.tattr, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong, CC.Val.ofBool,
+          CC.Val.Vtrue, CC.Val.Vfalse, CC.Val.and, CC.Integers.Int.cmpu, CC.Integers.Int.eq,
+          CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.Int.repr, CC.Integers.Int64.repr,
+          CC.Integers.Int.unsigned, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+          CC.Integers.MI.repr, CC.Integers.Int64.and, CC.Integers.MI.and, CC.Integers.MI.unsigned,
+          CC.Integers.MI.cmpu, CC.Integers.MI.eq, CC.Integers.MI.zero, CC.Integers.MI.one,
+          CC.E0, CC.Eapp, List.nil_append, List.append_nil, ite_true, ite_false, eq_self,
+          Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- Execute the original width-four LSL1 modifier through its true output and
+loop exit, deriving the returned word and preserving the complete heap/e/k. -/
+theorem execute_lsl_one (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+    (m : CC.Mem) (k : CC.Cont) (value : BitVec 64)
+    (hinput : le.get Arm64Program.___a64_modified_input = some (.Vlong value))
+    (hkind : le.get Arm64Program._mod = some (.Vint (1#32)))
+    (hshift : le.get Arm64Program._shift = some (.Vint (1#32)))
+    (hwidth : le.get Arm64Program._width = some (width true)) :
+    ∃ le', InternalRun world 41 (.State handler modify k e le m)
+      (.State handler .Sskip k e le' m) ∧
+      le'.get Arm64Program._result = some (.Vlong ((value <<< 1) &&& (4294967295#64))) :=
+  ⟨finalTempsOne le value, run_lsl_one world e le m k value hinput hkind hshift hwidth,
+    by simp only [finalTempsOne, CC.PTree.gss]⟩
+
 end KProgFormal.ClightRefinement.Arm64Modified.Modifier
