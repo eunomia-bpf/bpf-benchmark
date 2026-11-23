@@ -20,9 +20,11 @@ LLC ?= llc-18
 BPF_LINK ?= llvm-link-18
 LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
+LLVM_OBJCOPY ?= llvm-objcopy-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 VMLINUX_BTF ?= /sys/kernel/btf/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
+NATIVE_IR_LINK ?= /workspaces/.agent-state/kprog-ck/verified-compiler/link-embedded-ir
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
 VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h
@@ -43,6 +45,8 @@ BCC_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/bcc
 OTEL_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/otelcol-ebpf-profiler
 CILIUM_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/cilium
 TRACEE_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tracee
+OTEL_NATIVE_IR_DIR := $(NATIVE_OUT)/otel/ir
+OTEL_NATIVE_IR := $(OTEL_NATIVE_IR_DIR)/otelcol-ebpf-profiler.llvmbc
 TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
@@ -52,11 +56,13 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-fno-optimize-sibling-calls \
+	-Xclang -fembed-bitcode=all \
 	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
 KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
 	-fno-optimize-sibling-calls \
+	-Xclang -fembed-bitcode=all \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types \
 	-mllvm -switch-to-lookup=false
 KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS))
@@ -228,9 +234,21 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
 		-I"$(CURDIR)/$(OTEL_EBPF_DIR)" \
 		-o "$@" "$<"
 
-$(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
+# clang -r concatenates each unit's .llvmbc into one section, which is two
+# modules in a row, not one module: llvm-link can read the section but not the
+# program. The runtime context compiler needs a single module, so extract the
+# unit bitcode, retain its section entry roots, and embed the linked module.
+$(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_TARGET_FLAGS) -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
+	install -d "$(OTEL_NATIVE_IR_DIR)"
+	rm -f "$(OTEL_NATIVE_IR_DIR)"/*.bc
+	for o in $(OTEL_NATIVE_UNIT_OBJS); do \
+		"$(LLVM_OBJCOPY)" --dump-section .llvmbc="$(OTEL_NATIVE_IR_DIR)/$$(basename $$o .native.o).bc" "$$o"; \
+	done
+	"$(NATIVE_IR_LINK)" $(OTEL_NATIVE_IR_DIR)/*.bc -o "$(OTEL_NATIVE_IR)"
+	"$(LLVM_OBJCOPY)" --remove-section .llvmbc --remove-section .llvmcmd "$@"
+	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 
 $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h native-helpers.h
 	install -d "$(dir $@)"
