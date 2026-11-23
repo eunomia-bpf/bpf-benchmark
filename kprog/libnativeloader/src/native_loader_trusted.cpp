@@ -2541,10 +2541,19 @@ void relocate_vmlinux_proof_function_address(const btf *local, const btf *kernel
     high.imm = 0; // vmlinux BTF, as opposed to a module BTF FD.
 }
 
+/* A proof that calls a BPF-to-BPF subprogram carries one executable section
+ * per subprogram (the emitter gives each function its own section), so the
+ * kernel needs their bytes appended after the entry and one func_info record
+ * per subprogram. Both are built here, where the ELF is already open. */
+struct ProofSubprogram {
+    uint32_t start;
+    uint32_t type_id;
+};
 void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &path,
     const std::string &entry, const CompanionLoad &companion,
     std::vector<bpf_insn> &proof, std::vector<std::unique_ptr<ScopedFd>> &pins,
-    const std::vector<native_loader::TrustedMapBinding> &trusted)
+    const std::vector<native_loader::TrustedMapBinding> &trusted,
+    std::vector<ProofSubprogram> &subprograms, ScopedFd &proof_btf)
 {
     auto bytes = read_binary_file(path);
     std::unique_ptr<Elf, decltype(&elf_end)> elf(
@@ -2553,6 +2562,12 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
     if (!elf || !gelf_getehdr(elf.get(), &header) || header.e_machine != EM_BPF ||
         header.e_type != ET_REL || header.e_ident[EI_DATA] != ELFDATA2LSB)
         fail("proof source maps require a little-endian relocatable BPF ELF");
+    struct ProofFunction {
+        std::string name;
+        size_t section;
+        uint64_t address, size;
+    };
+    std::vector<ProofFunction> functions;
     std::optional<GElf_Sym> selected;
     Elf_Scn *section = nullptr;
     while ((section = elf_nextscn(elf.get(), section))) {
@@ -2566,6 +2581,9 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
             if (!gelf_getsym(data, i, &symbol)) fail("read source proof symbol");
             const char *name = elf_strptr(elf.get(), table.sh_link, symbol.st_name);
             if (!name) fail("read source proof symbol name");
+            if (GELF_ST_TYPE(symbol.st_info) == STT_FUNC && symbol.st_size &&
+                symbol.st_shndx != SHN_UNDEF && symbol.st_shndx < SHN_LORESERVE)
+                functions.push_back({name, symbol.st_shndx, symbol.st_value, symbol.st_size});
             if (entry != name) continue;
             if (selected || GELF_ST_TYPE(symbol.st_info) != STT_FUNC || !symbol.st_size ||
                 symbol.st_shndx == SHN_UNDEF || symbol.st_shndx >= SHN_LORESERVE)
@@ -2585,6 +2603,46 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
         selected->st_size > code_data->d_size - begin ||
         std::memcmp(proof.data(), static_cast<const char *>(code_data->d_buf) + begin, selected->st_size))
         fail("source proof entry bytes differ from selected BPF program");
+    // One executable section per BPF-to-BPF subprogram: the entry section is
+    // the selected program, every other one holds a function the entry calls.
+    struct Placement {
+        std::string name;
+        size_t section;
+        uint64_t address, skip, extent;
+        uint32_t start, type_id;
+    };
+    std::vector<Placement> placed{{entry, static_cast<size_t>(selected->st_shndx), code.sh_addr,
+        begin, selected->st_size, 0, 0}};
+    section = nullptr;
+    while ((section = elf_nextscn(elf.get(), section))) {
+        GElf_Shdr table{};
+        if (!gelf_getshdr(section, &table)) fail("read source proof section header");
+        const size_t index = elf_ndxscn(section);
+        if (!(table.sh_flags & SHF_EXECINSTR) || index == static_cast<size_t>(selected->st_shndx) ||
+            !table.sh_size) continue;
+        if (table.sh_size % sizeof(bpf_insn) ||
+            proof.size() + table.sh_size / sizeof(bpf_insn) > (1u << 20))
+            fail("source proof subprogram section is not whole instructions");
+        const ProofFunction *function = nullptr;
+        for (const auto &candidate : functions) {
+            if (candidate.section != index) continue;
+            if (function) fail("source proof subprogram section holds several functions");
+            function = &candidate;
+        }
+        if (!function || function->address != table.sh_addr || function->size != table.sh_size)
+            fail("source proof subprogram section is not one whole function");
+        Elf_Data *data = elf_getdata(section, nullptr);
+        if (!data || data->d_off || data->d_size != table.sh_size)
+            fail("source proof subprogram bytes are not contiguous");
+        placed.push_back({function->name, index, table.sh_addr, 0, table.sh_size,
+            static_cast<uint32_t>(proof.size()), 0});
+        const char *source = static_cast<const char *>(data->d_buf);
+        for (size_t i = 0; i < table.sh_size; i += sizeof(bpf_insn)) {
+            bpf_insn insn{};
+            std::memcpy(&insn, source + i, sizeof(insn));
+            proof.push_back(insn);
+        }
+    }
     std::set<uint64_t> patched;
     std::unique_ptr<btf, decltype(&btf__free)> kernel_btf(nullptr, btf__free);
     std::unique_ptr<btf, decltype(&btf__free)> declaration_btf(nullptr, btf__free);
@@ -2601,8 +2659,10 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
     while ((section = elf_nextscn(elf.get(), section))) {
         GElf_Shdr relocations{};
         if (!gelf_getshdr(section, &relocations)) fail("read source proof relocations");
-        if ((relocations.sh_type != SHT_REL && relocations.sh_type != SHT_RELA) ||
-            relocations.sh_info != selected->st_shndx) continue;
+        if (relocations.sh_type != SHT_REL && relocations.sh_type != SHT_RELA) continue;
+        const auto placement = std::find_if(placed.begin(), placed.end(),
+            [&](const auto &item) { return item.section == relocations.sh_info; });
+        if (placement == placed.end()) continue;
         Elf_Data *data = elf_getdata(section, nullptr);
         Elf_Scn *symbols = elf_getscn(elf.get(), relocations.sh_link);
         GElf_Shdr symbol_table{};
@@ -2619,14 +2679,39 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
                 if (!gelf_getrel(data, i, &rel)) fail("read source proof REL");
                 relocation.r_offset = rel.r_offset; relocation.r_info = rel.r_info;
             }
-            if (relocation.r_offset < begin || relocation.r_offset - begin >= selected->st_size) continue;
-            const uint64_t offset = relocation.r_offset - begin;
-            if (offset % sizeof(bpf_insn) || !patched.insert(offset).second)
-                fail("invalid source proof relocation site");
+            if (relocation.r_offset < placement->skip ||
+                relocation.r_offset - placement->skip >= placement->extent) continue;
+            const uint64_t within = relocation.r_offset - placement->skip;
+            if (within % sizeof(bpf_insn)) fail("invalid source proof relocation site");
+            const uint64_t offset = (placement->start + within / sizeof(bpf_insn)) * sizeof(bpf_insn);
+            if (!patched.insert(offset).second) fail("invalid source proof relocation site");
             GElf_Sym symbol{};
             if (!gelf_getsym(symbol_data, GELF_R_SYM(relocation.r_info), &symbol)) fail("read source proof relocation symbol");
             const char *name = elf_strptr(elf.get(), symbol_table.sh_link, symbol.st_name);
             if (GELF_R_TYPE(relocation.r_info) == R_BPF_64_32) {
+                // A call into an appended subprogram: the ELF carries imm = -1
+                // and relocation against the callee's section (the section
+                // symbol for a static function), so the kernel needs the
+                // relative displacement libbpf would compute.
+                const auto callee = symbol.st_shndx != SHN_UNDEF
+                    ? std::find_if(placed.begin(), placed.end(), [&](const auto &item) {
+                        return item.section == static_cast<size_t>(symbol.st_shndx); })
+                    : placed.end();
+                if (callee != placed.end()) {
+                    bpf_insn &call = proof[offset / sizeof(bpf_insn)];
+                    if (symbol.st_value < callee->address ||
+                        (symbol.st_value - callee->address) % sizeof(bpf_insn) ||
+                        call.code != (BPF_JMP | BPF_CALL) || call.dst_reg ||
+                        call.src_reg != BPF_PSEUDO_CALL || call.off)
+                        fail("invalid source proof local call relocation");
+                    const int64_t head = static_cast<int64_t>(callee->start) +
+                        static_cast<int64_t>((symbol.st_value - callee->address) / sizeof(bpf_insn));
+                    if (head + call.imm + 1 != static_cast<int64_t>(callee->start))
+                        fail("source proof local call targets the middle of a subprogram");
+                    call.imm = static_cast<int32_t>(callee->start) -
+                        static_cast<int32_t>(offset / sizeof(bpf_insn)) - 1;
+                    continue;
+                }
                 if (!declaration_btf) declaration_btf = source_proof_btf(elf.get());
                 relocate_vmlinux_proof_call(declaration_btf.get(), kernel_types(), name,
                     symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)]);
@@ -2738,6 +2823,28 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
             high.imm = static_cast<int32_t>(addend);
         }
     }
+    // The kernel maps func_info[i] onto subprog_info[i], so a proof with
+    // appended subprograms needs one record per subprogram, located by name in
+    // the object's own BTF. Its BTF must then be the program's BTF.
+    std::sort(placed.begin(), placed.end(), [](const auto &left, const auto &right) {
+        return left.start < right.start; });
+    // Its datasec fixup is what the kernel accepts: the raw .BTF section
+    // still carries `linkage=GLOBAL_EXTERN` for extern VARs, which the kernel
+    // rejects ("Linkage not supported").
+    btf *loaded_btf = bpf_object__btf(object);
+    if (!loaded_btf) fail("source proof object carries no BTF");
+    for (auto &item : placed) {
+        const int id = btf__find_by_name_kind(loaded_btf, item.name.c_str(), BTF_KIND_FUNC);
+        if (id <= 0) fail("source proof subprogram lacks a BTF function: " + item.name);
+        item.type_id = static_cast<uint32_t>(id);
+    }
+    if (btf__fd(loaded_btf) < 0) {
+        const int err = btf__load_into_kernel(loaded_btf);
+        if (err) fail("load source proof BTF: " + libbpf_error_string(err));
+    }
+    proof_btf.fd = dup(btf__fd(loaded_btf));
+    if (proof_btf.fd < 0) fail("duplicate source proof BTF: " + std::string(std::strerror(errno)));
+    for (const auto &item : placed) subprograms.push_back({item.start, item.type_id});
 }
 
 native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOptions &options)
@@ -2782,6 +2889,8 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         pins.push_back(std::move(fd));
     }
     std::vector<bpf_insn> proof;
+    std::vector<ProofSubprogram> subprograms;
+    ScopedFd proof_btf;
     if (!options.trusted_direct_native) {
         // These aliases come from kernel-pinned identities, not process-wide map names.
         using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
@@ -2797,7 +2906,7 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         if (!instructions || !count) fail("service simulator is empty");
         proof.assign(instructions, instructions + count);
         relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
-                               companion, proof, pins, bindings);
+                               companion, proof, pins, bindings, subprograms, proof_btf);
         // B's typed declarations are generated from the running target BTF. Use
         // those same declarations to resolve the matching calls/addresses in P.
         const auto *loaded_types = bpf_object__btf(raw);
@@ -2833,9 +2942,23 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         source_btf_id = detail.btf_id;
     } else if (options.native_entry_function) entry = *options.native_entry_function;
     ScopedFd source_btf(open_btf_fd_by_id_required(source_btf_id, "source_btf_id"));
-    if (source_btf.get() >= 0) {
+    std::vector<bpf_func_info> records;
+    if (subprograms.size() > 1) {
+        // Appended subprograms carry the proof object's own BTF type ids, so
+        // the program BTF must be the proof BTF and not the source one.
+        for (const auto &subprogram : subprograms) {
+            bpf_func_info record{};
+            record.insn_off = subprogram.start; record.type_id = subprogram.type_id;
+            records.push_back(record);
+        }
+        opts.prog_btf_fd = proof_btf.get();
+        opts.func_info = records.data(); opts.func_info_cnt = records.size();
+        opts.func_info_rec_size = sizeof(bpf_func_info);
+    } else if (source_btf.get() >= 0) {
+        records.assign(1, entry);
         opts.prog_btf_fd = source_btf.get();
-        opts.func_info = &entry; opts.func_info_cnt = 1; opts.func_info_rec_size = sizeof(entry);
+        opts.func_info = records.data(); opts.func_info_cnt = 1;
+        opts.func_info_rec_size = sizeof(bpf_func_info);
     }
     std::vector<char> log(16 * 1024 * 1024, '\0');
     opts.log_buf = log.data(); opts.log_size = log.size(); opts.log_level = 1;
@@ -2867,6 +2990,12 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         if (tail_call_reachable)
             tail_call_marker.fd = create_tail_call_marker_map();
         proof = native_stub_program(tail_call_marker.get());
+        // The stub is one subprogram, so the appended layout no longer applies.
+        if (records.size() > 1) {
+            records.assign(1, entry);
+            opts.prog_btf_fd = source_btf.get();
+            opts.func_info = records.data(); opts.func_info_cnt = records.size();
+        }
     }
     // P retains its relocated maps; B's LDDW references retain B's maps.
     std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
