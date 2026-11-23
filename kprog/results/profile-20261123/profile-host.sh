@@ -11,6 +11,8 @@
 # verifier-rewritten instructions, JITed code and function addresses (dump-prog.py; bpftool from the image
 # wrote nothing for the eBPF ones, 2026-11-23T16:17Z). The guest command goes through a file on the
 # shared /var/tmp (2026-11-23T15:58Z: a longer --exec string left the guest without a command).
+# EVENT in the environment samples that guest-mode PMU event every PERIOD (default 2000) events instead
+# of cycles at 1999 Hz.
 # Usage: profile-host.sh APP OUTDIR [PROG_NAME]
 set -u
 APP=$1 OUT=$2 XLATED=${3:-}
@@ -44,7 +46,8 @@ make -f $M guest APPS=$APP SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_ST
 EOF
 exec 9>$L/timing; flock 9
 make -C $R kvm-host-cpu
-(taskset -c 8-23 $PERF kvm --guest record -a -C 0-7 -e cpu_core/cycles/ -F 1999 \
+if [ -n "${EVENT:-}" ]; then SAMPLING="-e $EVENT -c ${PERIOD:-2000}"; else SAMPLING="-e cpu_core/cycles/ -F 1999"; fi
+(taskset -c 8-23 $PERF kvm --guest record -a -C 0-7 $SAMPLING \
    -o $OUT/host-perf.data -- sleep 600 > $OUT/perf.log 2>&1) &
 P=$!
 timeout 900 taskset -c 0-7 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd $R --rwdir $R \
