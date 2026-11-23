@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.X86AluReadSelfXor
+
+#check KProgFormal.ClightRefinement.X86AluReadSelfXor.source
+#print axioms KProgFormal.ClightRefinement.X86AluReadSelfXor.source
+#check KProgFormal.ClightRefinement.X86AluReadSelfXor.choose
+#print axioms KProgFormal.ClightRefinement.X86AluReadSelfXor.choose
+#check KProgFormal.ClightRefinement.X86AluReadSelfXor.zeroes
+#print axioms KProgFormal.ClightRefinement.X86AluReadSelfXor.zeroes
+#check KProgFormal.ClightRefinement.X86AluReadSelfXor.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluReadSelfXor.from_call
