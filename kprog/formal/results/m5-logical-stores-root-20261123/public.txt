@@ -1,0 +1,221 @@
+KProgFormal.ClightRefinement.X86LogicFlagStores.source :
+  KProgFormal.ClightRefinement.X86LogicFlagWidths.rest =
+    ((KProgFormal.ClightRefinement.X86LogicFlagStores.cf.Ssequence
+              (KProgFormal.ClightRefinement.X86LogicFlagStores.zf.Ssequence
+                (KProgFormal.ClightRefinement.X86LogicFlagStores.sf.Ssequence
+                  KProgFormal.ClightRefinement.X86LogicFlagStores.ofStmt))).Sloop
+          (KProgFormal.ClightRefinement.X86LogicFlagStores.Pieces.loopExit✝
+            KProgFormal.ClightRefinement.X86LogicFlagStores.pieces✝)).Ssequence
+      KProgFormal.ClightRefinement.X86LogicFlagStores.parity
+'KProgFormal.ClightRefinement.X86LogicFlagStores.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.cf_source :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.cf =
+    KProgFormal.ClightRefinement.X86LogicFlagStores.storeStmt✝ X86_program_profile_bpf._t'206
+      X86_program_profile_bpf._cf (CC.Expr.Econst_int (0#32) CC.tint)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.cf_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.of_source :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.ofStmt =
+    KProgFormal.ClightRefinement.X86LogicFlagStores.storeStmt✝ X86_program_profile_bpf._t'203
+      X86_program_profile_bpf._of (CC.Expr.Econst_int (0#32) CC.tint)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.of_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.cf_internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m after : CC.Mem)
+  (bindingBlock cfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (pointer : CC.Mem.load CC.Mptr m bindingBlock 120 = some (CC.Val.Vptr cfBlock offset))
+  (stored : CC.Mem.store CC.Chunk.Mint8unsigned m cfBlock offset.unsigned (CC.Val.Vint 0#32) = some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagStores.cf k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf._t'206 (CC.Val.Vptr cfBlock offset) le) after)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.cf_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.of_internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m after : CC.Mem)
+  (bindingBlock ofBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (pointer : CC.Mem.load CC.Mptr m bindingBlock 144 = some (CC.Val.Vptr ofBlock offset))
+  (stored : CC.Mem.store CC.Chunk.Mint8unsigned m ofBlock offset.unsigned (CC.Val.Vint 0#32) = some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagStores.ofStmt k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf._t'203 (CC.Val.Vptr ofBlock offset) le) after)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.of_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.zf_source :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.zf =
+    KProgFormal.ClightRefinement.X86LogicFlagStores.storeStmt✝ X86_program_profile_bpf._t'205
+      X86_program_profile_bpf._zf KProgFormal.ClightRefinement.X86LogicFlagStores.zfExpr✝
+'KProgFormal.ClightRefinement.X86LogicFlagStores.zf_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.parity_source :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.parity =
+    KProgFormal.ClightRefinement.X86LogicFlagStores.storeStmt✝ X86_program_profile_bpf._t'202
+      X86_program_profile_bpf._pf KProgFormal.ClightRefinement.X86LogicFlagStores.parityExpr✝
+'KProgFormal.ClightRefinement.X86LogicFlagStores.parity_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.zf_internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m after : CC.Mem)
+  (bindingBlock zfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (value : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_fl_value le = some (CC.Val.Vlong value))
+  (pointer : CC.Mem.load CC.Mptr m bindingBlock 128 = some (CC.Val.Vptr zfBlock offset))
+  (stored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m zfBlock offset.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagZF.bit value) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagStores.zf k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf._t'205 (CC.Val.Vptr zfBlock offset) le) after)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.zf_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.parity_internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m after : CC.Mem)
+  (bindingBlock pfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (value : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_fl_value le = some (CC.Val.Vlong value))
+  (pointer : CC.Mem.load CC.Mptr m bindingBlock 152 = some (CC.Val.Vptr pfBlock offset))
+  (stored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m pfBlock offset.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagPF.bit value) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagStores.parity k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf._t'202 (CC.Val.Vptr pfBlock offset) le) after)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.parity_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.sf_source :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.sf =
+    KProgFormal.ClightRefinement.X86LogicFlagStores.storeStmt✝ X86_program_profile_bpf._t'204
+      X86_program_profile_bpf._sf KProgFormal.ClightRefinement.X86LogicFlagStores.sfExpr✝
+'KProgFormal.ClightRefinement.X86LogicFlagStores.sf_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.sign_value (value : BitVec 64) (size : X86.Size) :
+  KProgFormal.ClightRefinement.X86LogicFlagStores.signPayload value size =
+    BitVec.setWidth 64 (BitVec.ofBool (X86.Value.msb size value))
+'KProgFormal.ClightRefinement.X86LogicFlagStores.sign_value' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.sf_internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m after : CC.Mem)
+  (bindingBlock sfBlock : CC.Block) (offset : CC.Integers.Ptrofs) (value : BitVec 64) (size : X86.Size)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_fl_value le = some (CC.Val.Vlong value))
+  (bitsRead : CC.PTree.get X86_program_profile_bpf.___x86_fl_bits le = some (CC.Val.Vint (BitVec.ofNat 32 size.bits)))
+  (pointer : CC.Mem.load CC.Mptr m bindingBlock 136 = some (CC.Val.Vptr sfBlock offset))
+  (stored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m sfBlock offset.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagStores.signByte value size) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagStores.sf k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf._t'204 (CC.Val.Vptr sfBlock offset) le) after)
+'KProgFormal.ClightRefinement.X86LogicFlagStores.sf_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagStores.native_values (value : BitVec 64) (size : X86.Size) (af : Bool)
+  (before : X86.Flags) :
+  have word := X86.Value.trunc size value;
+  have next := X86.Flags.logic size word af before;
+  (CC.Val.Vint 0#32, KProgFormal.ClightRefinement.X86ShiftFlagZF.bit word,
+      KProgFormal.ClightRefinement.X86LogicFlagStores.signByte word size, CC.Val.Vint 0#32,
+      KProgFormal.ClightRefinement.X86ShiftFlagPF.bit word) =
+    (CC.Val.Vint (if next.cf = true then 1 else 0), CC.Val.Vint (if next.zf = true then 1 else 0),
+      CC.Val.Vint (if next.sf = true then 1 else 0), CC.Val.Vint (if next.of = true then 1 else 0),
+      CC.Val.Vint (if next.pf = true then 1 else 0))
+'KProgFormal.ClightRefinement.X86LogicFlagStores.native_values' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagOrder.source :
+  KProgFormal.ClightRefinement.X86LogicFlagWidths.rest =
+    (KProgFormal.ClightRefinement.X86LogicFlagOrder.body✝.Sloop CC.Stmt.Sbreak).Ssequence
+      KProgFormal.ClightRefinement.X86LogicFlagStores.parity
+'KProgFormal.ClightRefinement.X86LogicFlagOrder.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagOrder.internal (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
+  (bindingBlock : CC.Block) (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (value : BitVec 64)
+  (size : X86.Size) (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_fl_value le = some (CC.Val.Vlong value))
+  (bitsRead : CC.PTree.get X86_program_profile_bpf.___x86_fl_bits le = some (CC.Val.Vint (BitVec.ofNat 32 size.bits)))
+  (headers : KProgFormal.ClightRefinement.X86LogicFlagOrder.HeaderLoads m bindingBlock places)
+  (separate :
+    places.cf.fst ≠ bindingBlock ∧
+      places.zf.fst ≠ bindingBlock ∧
+        places.sf.fst ≠ bindingBlock ∧ places.overflow.fst ≠ bindingBlock ∧ places.pf.fst ≠ bindingBlock)
+  (cfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m places.cf.fst places.cf.snd.unsigned (CC.Val.Vint 0#32) = some cfHeap)
+  (zfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagZF.bit value) =
+      some zfHeap)
+  (sfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagStores.signByte value size) =
+      some sfHeap)
+  (ofStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned (CC.Val.Vint 0#32) =
+      some ofHeap)
+  (pfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86ShiftFlagPF.bit value) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge 31
+      (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.rest k e le m)
+      (CC.State.State function CC.Stmt.Sskip k e (KProgFormal.ClightRefinement.X86LogicFlagOrder.temps le places)
+        after) ∧
+    KProgFormal.ClightRefinement.X86LogicFlagOrder.HeaderLoads after bindingBlock places
+'KProgFormal.ClightRefinement.X86LogicFlagOrder.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
