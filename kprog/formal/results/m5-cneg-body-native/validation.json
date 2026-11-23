@@ -1,0 +1,43 @@
+{
+  "confirmed_utc": "2026-11-23T05:46:41.609781+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegBodyNative"
+    ],
+    "exit": 0,
+    "seconds": 1.8513152599334717,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 262,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-body-native/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6531593799591064,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegBodyNative.lean",
+    "size_bytes": 5300,
+    "mtime_ns": 1795412732803977063
+  },
+  "scope": "actual full CNEG body and fetched LNSym alias; full register relation, PC/events/fault, local frame",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
