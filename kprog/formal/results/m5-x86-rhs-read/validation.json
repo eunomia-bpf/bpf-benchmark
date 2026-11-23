@@ -1,0 +1,46 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluReadRhs"
+    ],
+    "exit": 0,
+    "seconds": 2.1568427229649387,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-rhs-read/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6842133449972607,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0,
+  "scope": "Actual RHS call2, return-to-dispatch4, LHS preservation"
+}
