@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86RegisterReadPointerCall.call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (m : CC.Mem) (k : CC.Cont) (index : Fin 16)
+  (shift tag : BitVec 8) (helperBlock bindingBlock cellsBlock pointerBlock : CC.Block)
+  (bindingOffset cellsOffset pointerOffset : CC.Integers.Ptrofs) (notSp : index ≠ 4) (notStack : tag ≠ 4#8)
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current :
+    CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned =
+      some (CC.Val.Vptr pointerBlock pointerOffset))
+  (tagRead :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  ∃ stopped,
+    KProgFormal.ClightRefinement.InternalRun ge 80
+        (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+          (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset)
+            (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index) (8#8) shift)
+          k m)
+        stopped ∧
+      CC.doStep ge stopped = none ∧ ∀ (trace : CC.Trace) (next : CC.State), ¬CC.Step2 ge stopped trace next
+'KProgFormal.ClightRefinement.X86RegisterReadPointerCall.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

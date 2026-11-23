@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.X86RegisterReadPointerCall
+
+#check KProgFormal.ClightRefinement.X86RegisterReadPointerCall.call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadPointerCall.call
