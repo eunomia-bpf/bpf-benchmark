@@ -1,0 +1,20 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "12-15",
+    "nice",
+    "-n",
+    "19",
+    "make",
+    "check"
+  ],
+  "exit": 2,
+  "seconds": 9.852446320990566,
+  "head": "d9846481e2d654661c79482e840467d97507091b",
+  "memory_limit": 34359738368,
+  "shared_timing": true,
+  "changed_inputs": [],
+  "added_inputs": [],
+  "removed_inputs": []
+}
