@@ -1,0 +1,46 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluReadOperands"
+    ],
+    "exit": 0,
+    "seconds": 2.4254170089843683,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-operands/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5222892200108618,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0,
+  "scope": "Original non-XOR gates and both actual scalar reader calls through the arithmetic dispatcher"
+}
