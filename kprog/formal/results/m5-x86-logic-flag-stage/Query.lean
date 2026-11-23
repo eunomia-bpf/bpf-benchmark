@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.X86LogicFlagStage
+
+#check KProgFormal.ClightRefinement.X86ShiftWriteback.resume_loops
+#print axioms KProgFormal.ClightRefinement.X86ShiftWriteback.resume_loops
+#check KProgFormal.ClightRefinement.X86ShiftWriteback.resume_writer
+#print axioms KProgFormal.ClightRefinement.X86ShiftWriteback.resume_writer
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.continuation_source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.continuation_source
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.resume_writer
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.resume_writer
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.to_writer
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.to_writer

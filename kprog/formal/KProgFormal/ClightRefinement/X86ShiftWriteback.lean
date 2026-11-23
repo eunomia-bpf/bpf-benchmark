@@ -31,6 +31,21 @@ theorem continuation_source (k : CC.Cont) :
       .Kloop1 flagBody .Sbreak (.Kseq writer k) := by
   constructor <;> rfl
 
+/-- These eight skip/break transitions depend only on the original loop and
+switch continuation shape; every body and skipped tail stays arbitrary. -/
+theorem resume_loops (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (widthBody widthTail flagBody nextWriter : CC.Stmt) :
+    InternalRun ge 8
+      (.State function .Sskip
+        (.Kloop1 widthBody .Sbreak (.Kseq .Sbreak (.Kseq widthTail
+          (.Kswitch (.Kloop1 flagBody .Sbreak (.Kseq nextWriter k)))))) e le m)
+      (.State function nextWriter k e le m) := by
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, CC.doStep, CC.Eapp, CC.E0,
+      List.nil_append, true_and]
+
 /-- Eight genuine skip/break transitions leave the original nested loops and switch,
 reaching the unchanged writer with the whole heap, locals and temporaries preserved. -/
 theorem resume_writer (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
@@ -41,10 +56,7 @@ theorem resume_writer (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
       (.State function writer k e le m) := by
   rw [(continuation_source (.Kswitch (X86ShiftLeftCarry.continuation k))).1,
     (continuation_source k).2]
-  apply internalRun_of_steps
-  all_goals
-    simp only [steps, InternalPath, InternalState, CC.doStep, CC.Eapp, CC.E0,
-      List.nil_append, true_and]
+  exact resume_loops ge function e le k m widthBody widthTail flagBody writer
 
 private theorem count_bound (rhs : BitVec 64) (size : X86.Size) :
     X86.Flags.shiftCount size (rhs.setWidth 8) < 64 := by
