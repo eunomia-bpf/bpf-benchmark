@@ -450,6 +450,7 @@ constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
     "htab_lru_percpu_map_lookup_elem";
+constexpr const char *kTrieLookupElemSymbol = "trie_lookup_elem";
 constexpr int kLibbpfCoreBadRelocPoison = 195896080; // 0xbad2310
 
 #ifndef BPF_PSEUDO_KINSN_SIDECAR
@@ -1231,6 +1232,7 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kHtabLookupElemSymbol);
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.push_back(kTrieLookupElemSymbol);
     const size_t wanted_count = wanted.size();
 
     FILE *f = std::fopen("/proc/kallsyms", "re");
@@ -1300,6 +1302,16 @@ uint64_t array_of_map_lookup_elem_kernel_addr()
     uint64_t addr = kallsyms_lookup(kArrayOfMapLookupElemSymbol);
     if (addr == 0) {
         fail(std::string("native_kernel: ") + kArrayOfMapLookupElemSymbol +
+             " is missing from /proc/kallsyms");
+    }
+    return addr;
+}
+
+uint64_t trie_lookup_elem_kernel_addr()
+{
+    uint64_t addr = kallsyms_lookup(kTrieLookupElemSymbol);
+    if (addr == 0) {
+        fail(std::string("native_kernel: ") + kTrieLookupElemSymbol +
              " is missing from /proc/kallsyms");
     }
     return addr;
@@ -2616,6 +2628,13 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
     if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
         site.kind = CompanionLoad::LookupSite::Kind::Call;
         site.target_addr = array_of_map_lookup_elem_kernel_addr();
+        return true;
+    }
+    // An LPM trie has no inline lookup; the verifier's fixup calls the map type's own function
+    // (ops->map_lookup_elem), so a lookup on a known trie calls trie_lookup_elem, not the helper.
+    if (t == BPF_MAP_TYPE_LPM_TRIE) {
+        site.kind = CompanionLoad::LookupSite::Kind::Call;
+        site.target_addr = trie_lookup_elem_kernel_addr();
         return true;
     }
 

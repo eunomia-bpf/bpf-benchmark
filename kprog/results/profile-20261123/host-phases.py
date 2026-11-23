@@ -1,53 +1,63 @@
 #!/usr/bin/env python3
-"""Flat guest profile of one profile-host.sh run: eBPF phase and native phase side by side.
-The guest symbol table is the boot kallsyms plus every BPF program the 30 s snapshots listed. A phase's
-window is the time span of the samples that land in that phase's programs: the baseline programs are the
-ones listed while the first snapshots ran, the native ones appear later. Usage: host-phases.py OUTDIR [TOP]"""
-import glob, os, re, subprocess, sys
-out = sys.argv[1]
-top = int(sys.argv[2]) if len(sys.argv) > 2 else 40
+"""Guest-kernel profile of one profile-host.sh run, eBPF phase against native phase.
+Samples: the host PMU's guest-mode samples from the raw dump (perf script leaves guest samples out).
+Symbols: the guest's boot kallsyms plus the BPF programs a phase's own snapshots list (the native
+programs reuse addresses the eBPF phase had, so each phase resolves with the snapshots taken in it; a
+symbol ends where the next one starts). Windows: given in guest uptime seconds, as
+EBPF_START,EBPF_END NATIVE_START,NATIVE_END (the native programs load in the quiet gap between the
+two workloads). Output: samples per second per symbol in each window.
+Usage: host-phases.py OUTDIR EBPF_WINDOW NATIVE_WINDOW NATIVE_FIRST_SNAPSHOT_UPTIME [TOP]"""
+import bisect, collections, glob, os, re, subprocess, sys
+out, we, wn, cut = sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4])
+top = int(sys.argv[5]) if len(sys.argv) > 5 else 45
 PERF = '/workspaces/.agent-state/kprog-ck/perf-tool/perf'
 snaps = sorted(glob.glob(os.path.join(out, 'kallsyms-bpf-*.txt')), key=lambda p: float(p.rsplit('-', 1)[1][:-4]))
-seen = {}
-for p in snaps:
-    for line in open(p):
-        a, t, name = line.split()[:3]
-        seen.setdefault(name, (a, t, name))
-ks = os.path.join(out, 'kallsyms-all.txt')
-with open(ks, 'w') as f:
-    f.write(open(os.path.join(out, 'kallsyms.txt')).read())
-    for a, t, name in seen.values():
-        f.write('%s %s %s\n' % (a, t, name))
-base = [PERF, 'kvm', '--guest', '--guestkallsyms=' + ks, '--guestmodules=' + os.path.join(out, 'modules.txt')]
-script = subprocess.run(base + ['script', '-i', os.path.join(out, 'host-perf.data'), '-F', 'time,sym'],
-                        capture_output=True, text=True).stdout
-def span(pred):
-    ts = []
-    for line in script.splitlines():
-        m = re.match(r'^\s*([\d.]+):\s+(\S+)', line)
-        if m and pred(m.group(2)):
-            ts.append(float(m.group(1)))
-    return (min(ts), max(ts), len(ts)) if ts else None
-app = sys.argv[3] if len(sys.argv) > 3 else None
-progs = [n for n in seen if n.startswith('bpf_prog_')]
-# a program present in every snapshot from the first one is a baseline (eBPF) program; native ones come later
-first = {l.split()[2] for l in open(snaps[0])} if snaps else set()
-later = [n for n in progs if n not in first]
-w_ebpf = span(lambda s: s in first and s.startswith('bpf_prog_'))
-w_nat = span(lambda s: s in later)
-print('eBPF window', w_ebpf, 'native window', w_nat)
-def profile(w):
-    r = subprocess.run(base + ['report', '-i', os.path.join(out, 'host-perf.data'), '--stdio', '--no-children',
-                               '--sort', 'sym', '--time', '%.6f,%.6f' % (w[0], w[1]), '--percent-limit', '0.05'],
-                       capture_output=True, text=True).stdout
-    rows = {}
-    for line in r.splitlines():
-        m = re.match(r'^\s+([\d.]+)%\s+\[([kgu.H])\]\s+(.+?)\s*$', line)
-        if m:
-            rows[m.group(3)] = float(m.group(1))
-    return rows
-a, b = profile(w_ebpf), profile(w_nat)
-names = sorted(set(a) | set(b), key=lambda n: -max(a.get(n, 0), b.get(n, 0)))
-print('%7s %7s  %s' % ('eBPF%', 'native%', 'symbol'))
+boot = {}
+for line in open(os.path.join(out, 'kallsyms.txt')):
+    p = line.split()
+    if len(p) >= 3 and p[1] in 'tTwW':
+        boot[int(p[0], 16)] = p[2]
+def table(paths):
+    s = dict(boot)
+    for path in paths:
+        for line in open(path):
+            a, t, name = line.split()[:3]
+            s[int(a, 16)] = name
+    return s, sorted(s)
+up = lambda p: float(p.rsplit('-', 1)[1][:-4])
+tables = {'eBPF': table([p for p in snaps if up(p) < cut]), 'native': table([p for p in snaps if up(p) >= cut])}
+def sym(tab, ip):
+    if ip < 0xffff800000000000:
+        return '[user]'
+    s, a = tab
+    k = bisect.bisect_right(a, ip) - 1
+    return s[a[k]] if k >= 0 else '?'
+proc = subprocess.Popen([PERF, 'report', '-D', '-i', os.path.join(out, 'host-perf.data')],
+                        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+SAMPLE = re.compile(r'^\d+ (\d+) \S+ \[\S+\]: PERF_RECORD_SAMPLE\(IP, 0x([45])\): \S+ 0x([0-9a-f]+) ')
+raw = []
+for line in proc.stdout:
+    m = SAMPLE.match(line)
+    if m:
+        raw.append((int(m.group(1)) / 1e9, int(m.group(3), 16)))
+# windows are in guest uptime: sample time (host uptime) + host realtime-minus-uptime (HOST_RT_MINUS_UPTIME
+# in the environment) - guest realtime + guest uptime, both from clock.txt
+g_rt, g_up = map(float, open(os.path.join(out, 'clock.txt')).read().split())
+host_off = float(os.environ['HOST_RT_MINUS_UPTIME'])
+up_of = lambda t: t + host_off - g_rt + g_up
+win = {}
+for k, w in (('eBPF', we), ('native', wn)):
+    a, b = map(float, w.split(','))
+    win[k] = (a, b)
+prof = {}
+for k, (a, b) in win.items():
+    c = collections.Counter(sym(tables[k], ip) for t, ip in raw if a <= up_of(t) < b)
+    prof[k] = {s: v / (b - a) for s, v in c.items()}
+progs = lambda d: sum(v for s, v in d.items() if s.startswith('bpf_prog_'))
+print('windows (guest uptime): %s; samples/s: eBPF %.0f, native %.0f' % (
+    win, sum(prof['eBPF'].values()), sum(prof['native'].values())))
+print('samples/s in BPF programs: eBPF %.0f, native %.0f' % (progs(prof['eBPF']), progs(prof['native'])))
+names = sorted(set(prof['eBPF']) | set(prof['native']), key=lambda n: -max(prof['eBPF'].get(n, 0), prof['native'].get(n, 0)))
+print('%8s %8s  %s' % ('eBPF/s', 'native/s', 'symbol'))
 for n in names[:top]:
-    print('%7.2f %7.2f  %s' % (a.get(n, 0), b.get(n, 0), n[:90]))
+    print('%8.0f %8.0f  %s' % (prof['eBPF'].get(n, 0), prof['native'].get(n, 0), n[:90]))
