@@ -1,0 +1,28 @@
+{
+  "command": [
+    "taskset",
+    "-c",
+    "12-15",
+    "nice",
+    "-n",
+    "19",
+    "make",
+    "check"
+  ],
+  "exit": 2,
+  "seconds": 204.10028035804862,
+  "head": "8736192aff8c9fead9fbf6c8e92bf04af4b17a79",
+  "memory_limit": 34359738368,
+  "shared_timing": true,
+  "changed_inputs": [],
+  "added_inputs": [],
+  "removed_inputs": [],
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "complete_instruction_families": 0,
+  "failure": "tools/check_x86_divide_handler.py:73 original native-fault marker assertion",
+  "default_lean_jobs": 518
+}
