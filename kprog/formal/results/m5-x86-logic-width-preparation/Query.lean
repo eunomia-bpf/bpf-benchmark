@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.X86LogicFlagWidths
+
+#check KProgFormal.ClightRefinement.X86LogicFlagWidths.apply_internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWidths.apply_internal
+#check KProgFormal.ClightRefinement.X86LogicFlagWidths.bits_internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWidths.bits_internal
+#check KProgFormal.ClightRefinement.X86LogicFlagWidths.prepare
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWidths.prepare
+#check KProgFormal.ClightRefinement.X86LogicFlagWidths.observations
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWidths.observations

@@ -1,0 +1,92 @@
+KProgFormal.ClightRefinement.X86LogicFlagWidths.apply_internal (ge : CC.CGenv) (block : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_apply_width = some block ∧
+      ge.genv_genv.findFunctPtr block = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_apply_width))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_apply_width e = none) (value : BitVec 64) (size : X86.Size)
+  (k : CC.Cont) (m : CC.Mem)
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong value))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_fl_width le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size)) :
+  KProgFormal.ClightRefinement.InternalRun ge (2 + KProgFormal.ClightRefinement.X86ApplyWidth.length size + 3)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.applyWidth k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86LogicFlagWidths.appliedTemps le value size) m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.apply_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.bits_internal (ge : CC.CGenv) (block : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_bits = some block ∧
+      ge.genv_genv.findFunctPtr block = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_bits))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_width_bits e = none) (size : X86.Size) (k : CC.Cont)
+  (m : CC.Mem)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_fl_width le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size)) :
+  KProgFormal.ClightRefinement.InternalRun ge
+    (2 + KProgFormal.ClightRefinement.X86WidthShape.length (BitVec.ofNat 8 size.bytes) + 3)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.bits k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e (KProgFormal.ClightRefinement.X86LogicFlagWidths.bitsTemps le size) m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.bits_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.prepare (ge : CC.CGenv) (effectiveBlock applyBlock bitsBlock : CC.Block)
+  (effectiveBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some effectiveBlock ∧
+      ge.genv_genv.findFunctPtr effectiveBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (applyBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_apply_width = some applyBlock ∧
+      ge.genv_genv.findFunctPtr applyBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_apply_width))
+  (bitsBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_bits = some bitsBlock ∧
+      ge.genv_genv.findFunctPtr bitsBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_bits))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed :
+    CC.PTree.get X86_program_profile_bpf._x86_width_effective e = none ∧
+      CC.PTree.get X86_program_profile_bpf._x86_apply_width e = none ∧
+        CC.PTree.get X86_program_profile_bpf._x86_width_bits e = none)
+  (value : BitVec 64) (size : X86.Size) (k : CC.Cont) (m : CC.Mem)
+  (word : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong value))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size)) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86LogicFlagWidths.length size)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagClassify.branch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.rest
+      (KProgFormal.ClightRefinement.X86LogicFlagWidths.continuation k) e
+      (KProgFormal.ClightRefinement.X86LogicFlagWidths.preparedTemps le value size) m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.prepare' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.observations (le : CC.TempEnv) (value : BitVec 64) (size : X86.Size) :
+  CC.PTree.get X86_program_profile_bpf.___x86_fl_width
+        (KProgFormal.ClightRefinement.X86LogicFlagWidths.preparedTemps le value size) =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_fl_value
+          (KProgFormal.ClightRefinement.X86LogicFlagWidths.preparedTemps le value size) =
+        some (CC.Val.Vlong (X86.Value.trunc size value)) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_fl_bits
+            (KProgFormal.ClightRefinement.X86LogicFlagWidths.preparedTemps le value size) =
+          some (CC.Val.Vint (BitVec.ofNat 32 size.bits)) ∧
+        ∀ (id : CC.Ident),
+          id ≠ X86_program_profile_bpf._t'78 →
+            id ≠ X86_program_profile_bpf.___x86_fl_width →
+              id ≠ X86_program_profile_bpf._t'79 →
+                id ≠ X86_program_profile_bpf.___x86_fl_value →
+                  id ≠ X86_program_profile_bpf._t'80 →
+                    id ≠ X86_program_profile_bpf.___x86_fl_bits →
+                      CC.PTree.get id (KProgFormal.ClightRefinement.X86LogicFlagWidths.preparedTemps le value size) =
+                        CC.PTree.get id le
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

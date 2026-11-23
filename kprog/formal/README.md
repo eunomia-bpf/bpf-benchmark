@@ -50,6 +50,14 @@ and [selected-operand matching](results/m5-select-matched/README.md) record the
 parallel ARM work. Each receipt records the checked behavior and next
 composition steps.
 
+The [scalar reader](results/m5-x86-reader-scalar/README.md) and
+[XOR entry](results/m5-x86-xor-result-entry/README.md) receipts establish real
+calls within their explicit value domains. The
+[pointer-call receipt](results/m5-x86-pointer-call/README.md) proves that a
+genuine pointer-cell reader call reaches the imported Clight model's numeric
+shift boundary. Extending this domain requires concrete-address correspondence;
+this obligation remains part of full handler composition.
+
 ## Trust boundary
 
 Lean's kernel checks proof terms against the pinned definitions, with the
