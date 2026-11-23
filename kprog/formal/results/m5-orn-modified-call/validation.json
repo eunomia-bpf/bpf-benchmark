@@ -1,0 +1,44 @@
+{
+  "confirmed_utc": "2026-11-23T06:19:10.766082+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ModifiedLslOneCall"
+    ],
+    "exit": 0,
+    "seconds": 6.924669981002808,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 238,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-orn-modified-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.654869794845581,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": 119,
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ModifiedLslOneCall.lean",
+    "size_bytes": 7286,
+    "mtime_ns": 1795414592914945262
+  },
+  "scope": "actual five-argument LSL1 helper entry, scalar loads, modifier and return",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
