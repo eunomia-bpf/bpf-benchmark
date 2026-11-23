@@ -1,0 +1,58 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluReadSite"
+    ],
+    "exit": 0,
+    "seconds": 3.853468585992232,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-alu-read-site/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.617679301998578,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "previous_attempt": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluReadSite"
+    ],
+    "exit": 1,
+    "seconds": 31.384819487982895,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_integration": "pending",
+  "scope": "actual non-XOR operand selection and first reader call, not the reader result"
+}

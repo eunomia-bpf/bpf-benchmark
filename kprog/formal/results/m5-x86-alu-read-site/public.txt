@@ -1,0 +1,156 @@
+KProgFormal.ClightRefinement.X86AluReadSite.source :
+  KProgFormal.ClightRefinement.X86AluDecode.operandReads =
+    ((KProgFormal.ClightRefinement.X86AluReadSite.operationGate✝.Ssequence
+              KProgFormal.ClightRefinement.X86AluReadSite.laneGate✝).Ssequence
+          KProgFormal.ClightRefinement.X86AluReadSite.selectReads✝).Ssequence
+      KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch
+'KProgFormal.ClightRefinement.X86AluReadSite.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.select_reads (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (operation : BitVec 8) (different : BitVec.setWidth 32 operation ≠ 2#32)
+  (opRead : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 operation))) :
+  KProgFormal.ClightRefinement.InternalRun ge 10
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k) e
+      (KProgFormal.ClightRefinement.X86AluReadSite.selectedTemps le) m)
+'KProgFormal.ClightRefinement.X86AluReadSite.select_reads' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.lhs_source :
+  KProgFormal.ClightRefinement.X86AluReadSite.readCall✝ =
+    CC.Stmt.Scall (some X86_program_profile_bpf._t'2) KProgFormal.ClightRefinement.X86AluReadSite.readerExpression✝
+      KProgFormal.ClightRefinement.X86AluReadSite.lhsExpressions✝
+'KProgFormal.ClightRefinement.X86AluReadSite.lhs_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.lhs_call (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (bindingBlock helperBlock : CC.Block)
+  (bindingOffset : CC.Integers.Ptrofs) (reg width shift : BitVec 8)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (regRead : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint (BitVec.setWidth 32 reg)))
+  (widthRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le = some (CC.Val.Vint (BitVec.setWidth 32 width)))
+  (shiftRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_read_reg e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 1
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readCall✝ k e le m)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset) reg width shift)
+      (CC.Cont.Kcall (some X86_program_profile_bpf._t'2) function e le k) m)
+'KProgFormal.ClightRefinement.X86AluReadSite.lhs_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.first_read (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (bindingBlock helperBlock : CC.Block)
+  (bindingOffset : CC.Integers.Ptrofs) (reg width shift : BitVec 8)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (regRead : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint (BitVec.setWidth 32 reg)))
+  (widthRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le = some (CC.Val.Vint (BitVec.setWidth 32 width)))
+  (shiftRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_read_reg e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 3
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements k e le m)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset) reg width shift)
+      (KProgFormal.ClightRefinement.X86AluReadSite.callContinuation function e le k) m)
+'KProgFormal.ClightRefinement.X86AluReadSite.first_read' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.to_first_read (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (operation reg width shift : BitVec 8)
+  (bindingBlock helperBlock : CC.Block) (bindingOffset : CC.Integers.Ptrofs)
+  (different : BitVec.setWidth 32 operation ≠ 2#32)
+  (opRead : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 operation)))
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (regRead : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint (BitVec.setWidth 32 reg)))
+  (widthRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le = some (CC.Val.Vint (BitVec.setWidth 32 width)))
+  (shiftRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_read_reg e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 13
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset) reg width shift)
+      (KProgFormal.ClightRefinement.X86AluReadSite.callContinuation function e
+        (KProgFormal.ClightRefinement.X86AluReadSite.selectedTemps le)
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k))
+      m)
+'KProgFormal.ClightRefinement.X86AluReadSite.to_first_read' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.resume_lhs (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (value : CC.Val) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.Returnstate value
+      (CC.callCont (KProgFormal.ClightRefinement.X86AluReadSite.callContinuation function e le k)) m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.rhsRead k e
+      (KProgFormal.ClightRefinement.X86AluReadSite.lhsTemps le value) m)
+'KProgFormal.ClightRefinement.X86AluReadSite.resume_lhs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadSite.from_call (ge : CC.CGenv) (caller : CC.Mem) (k : CC.Cont)
+  (bindingBlock : CC.Block) (bindingOffset : CC.Integers.Ptrofs) (op imm : CC.Val) (dst src flags width : BitVec 8)
+  (aux : BitVec 32) (widthBlock readerBlock : CC.Block) (different : BitVec.setWidth 32 (BitVec.setWidth 8 aux) ≠ 2#32)
+  (widthHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (readerHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some readerBlock ∧
+      ge.genv_genv.findFunctPtr readerBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)) :
+  have initial :=
+    KProgFormal.ClightRefinement.X86RegisterView.writerInitialTemps (CC.Val.Vptr bindingBlock bindingOffset) op
+      (KProgFormal.ClightRefinement.X86Width.argument dst) (KProgFormal.ClightRefinement.X86Width.argument src)
+      (KProgFormal.ClightRefinement.X86Width.argument flags) (CC.Val.Vint aux) imm
+      (KProgFormal.ClightRefinement.X86Width.argument width);
+  have ready :=
+    KProgFormal.ClightRefinement.X86AluDecode.temps
+      (KProgFormal.ClightRefinement.X86AluEntry.widthTemps
+        (CC.PTree.set X86_program_profile_bpf.___x86_l_width (KProgFormal.ClightRefinement.X86Width.argument width)
+          initial)
+        flags)
+      aux;
+  KProgFormal.ClightRefinement.InternalRun ge 50
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG)
+      [CC.Val.Vptr bindingBlock bindingOffset, op, KProgFormal.ClightRefinement.X86Width.argument dst,
+        KProgFormal.ClightRefinement.X86Width.argument src, KProgFormal.ClightRefinement.X86Width.argument flags,
+        CC.Val.Vint aux, imm, KProgFormal.ClightRefinement.X86Width.argument width]
+      k caller)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset) dst
+        (if (flags == 0) = true then 8 else flags) (BitVec.setWidth 8 (aux >>> 8)))
+      (KProgFormal.ClightRefinement.X86AluReadSite.callContinuation X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+        (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst
+        (KProgFormal.ClightRefinement.X86AluReadSite.selectedTemps ready)
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch
+          (KProgFormal.ClightRefinement.X86AluEntry.continuation k)))
+      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd)
+'KProgFormal.ClightRefinement.X86AluReadSite.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

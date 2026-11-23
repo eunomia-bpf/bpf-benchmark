@@ -148,6 +148,7 @@ theorem lhs_call (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
       some (.Vptr helperBlock 0) := by
     simp only [readerExpression, CC.doEvalExpr, CC.lvalOfVar, unshadowed, helper.1,
       CC.doDerefLoc, CC.accessMode]
+    rfl
   have callee : CC.Genv.findFunct ge.genv_genv (.Vptr helperBlock 0) =
       some (.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg) := by
     change CC.Genv.findFunctPtr ge.genv_genv helperBlock = _

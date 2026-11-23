@@ -1,5 +1,17 @@
 # Operand-read selection checkpoint
 
+Accepted 2026-11-23 after timing release: the focused build passed162 jobs in
+3.85s and all eight direct-import type/axiom queries passed in1.62s. This checks
+the actual gates10, reader call1, sequences/call3, combined prefix13, return/LHS4
+and genuine handler-entry50 statements below. The initial run retained one
+pointer-zero definitional equality; an explicit `rfl` closes it. Original proof
+caps and the32GiB/one-worker/shared-timing limits were retained. See
+[public.txt](public.txt), [validation.json](validation.json) and the compressed
+focused log. No root import has been added at this checkpoint. The50-step result
+reaches the actual reader call; proving its returned value remains next work.
+
+The following paragraphs retain the preparation history from2026-11-22.
+
 Current canonical source prepares the ten-transition path through the actual
 XOR shortcut gates to the original operand-read sequence, for every other
 operation. It keeps the complete memory and exact temporary/continuation maps.
