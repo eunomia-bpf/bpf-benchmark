@@ -1,0 +1,57 @@
+{
+  "status": "focused and public query passed",
+  "confirmed_utc": "2026-11-23T05:16:02.211219+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegWrite"
+    ],
+    "exit": 0,
+    "seconds": 2.1443874835968018,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 254,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-writer/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5535929203033447,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 1,
+  "source_steps": 69,
+  "scope": "original CNEG scalar writer call, actual stores and caller return, W/X widths",
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegWrite.lean",
+    "size_bytes": 4942,
+    "mtime_ns": 1795410860954464222
+  },
+  "axioms": {
+    "logical": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "inherited": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ]
+  },
+  "root_integration": "next component batch",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
