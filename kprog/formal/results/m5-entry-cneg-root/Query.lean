@@ -1,0 +1,6 @@
+import KProgFormal
+open KProgFormal.ClightRefinement
+#check Arm64Cneg.selected_source
+#print axioms Arm64Cneg.selected_source
+#check Arm64ProgramEntryCnegPrefixNative.entry_corresponds
+#print axioms Arm64ProgramEntryCnegPrefixNative.entry_corresponds
