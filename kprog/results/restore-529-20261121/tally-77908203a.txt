@@ -1,0 +1,48 @@
+   648    356 path   kprog/x86/native_lab/native_link/src/main.rs
+   397    438 path   kprog/x86/native_lab/native_link/src/x86.rs
+     5      0 path   kprog/libnativeloader/CMakeLists.txt
+    37      1 path   kprog/libnativeloader/Makefile
+    39      0 path   kprog/libnativeloader/include/native_loader.hpp
+   314    359 path   kprog/libnativeloader/src/native_loader.cpp
+    72      0 verify kprog/libnativeloader/src/native_loader_context_lto.hpp
+    35      0 verify kprog/libnativeloader/src/native_loader_data_layout.hpp
+    84      0 verify kprog/libnativeloader/src/native_loader_entry_data.hpp
+    84      0 verify kprog/libnativeloader/src/native_loader_function_bodies.hpp
+    41      0 verify kprog/libnativeloader/src/native_loader_helper_query.hpp
+   157      0 verify kprog/libnativeloader/src/native_loader_internal.hpp
+    49      0 verify kprog/libnativeloader/src/native_loader_kfunc.hpp
+     9      0 path   kprog/libnativeloader/src/native_loader_link_plan.hpp
+    33      0 path   kprog/libnativeloader/src/native_loader_link_schema.hpp
+   144      0 verify kprog/libnativeloader/src/native_loader_lto.hpp
+    11      0 path   kprog/libnativeloader/src/native_loader_manifest.hpp
+   291      0 verify kprog/libnativeloader/src/native_loader_source_maps.hpp
+    62      0 verify kprog/libnativeloader/src/native_loader_subprocess.hpp
+    57      0 verify kprog/libnativeloader/src/native_loader_timings.hpp
+  3230      0 verify kprog/libnativeloader/src/native_loader_trusted.cpp
+   194      0 verify kprog/libnativeloader/src/native_loader_trusted_link_plan.hpp
+   183      0 verify kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp
+   203    279 path   kprog/perf/direct-native/bpf_x86_native_lab.c
+    10      0 path   bpfopt/shim/libbpfrejit_shim.c
+     6      0 path   bpfopt/shim/shim_measure.h
+    50      1 path   bpfopt/shim/shim_native_loader.h
+    93    139 path   vendor/bpf/Makefile
+     0    115 path   vendor/bpf/cilium/bpf/include/bpf/helpers.h
+     5      1 path   vendor/bpf/cilium/bpf/include/linux/bpf.h
+    39      0 path   vendor/bpf/katran-helpers.h
+     5      0 path   vendor/bpf/merge-text.ld
+   279      0 path   vendor/bpf/native-helpers.h
+     2      0 verify vendor/bpf/native-lpm.h
+    20    361 path   vendor/bpf/native_compat.h
+     1    137 path   vendor/bpf/otel/support/ebpf/bpfdefs.h
+     9      0 path   vendor/bpf/otel/support/ebpf/tracemgmt.h
+     1      1 path   vendor/bpf/tetragon/bpf/include/api.h
+    40      0 path   vendor/bpf/tetragon/bpf/process/regs.h
+     3      1 path   vendor/bpf/write_native_manifest.py
+PATH TOTAL added=2257 removed=2189   (verify-side files: added=4685 removed=0)
+-- checked-path lines inside path files (verify side, subtract from PATH):
+   shim_native_loader.h REQUIRE_BOUND_PROOF: 50
+   vendor/bpf/Makefile kprog-perf-context-lto rule: 6
+   native_loader.cpp hand-off and moved declarations (dd6559b54): 7/75
+-- generated from the one kernel's BTF (not hand-written):
+ 46415  69572 vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h
+ 46415  69572 vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h
