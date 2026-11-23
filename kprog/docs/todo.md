@@ -41,6 +41,8 @@
    - [x] Katran：05-29 和 8430daa81 的原生 142–146 ns 来自旧链接器按调用顺序配查找点，三处 LRU 连接表查找拿到 stats 的 PERCPU_ARRAY 内联形式，每个包都返回 NULL，LRU 查找没做（kprog/results/katran-callorder-20261123，5c8423561）。Katran 的 05-29 底线和 OTel 的一样作废；现在原生和 eBPF 都是 180 ns。
    - Cilium：stats 关吞吐 1.169x，低于 05-29 的 1.319x。热点程序 cil_from_container 的 eBPF 臂本身 05-29 是 486 ns、11-21 是 619 ns、11-23 是 726 ns，基线阶段的程序数 11-21 是 53、11-22 起是 90–92。先查这两个变化从哪里来，再判断 05-29 的 Cilium 底线能否对比。
    - OTel：每次调用 0.930x。宿主 PMU 采样（kprog/results/profile-20261123/profile-host.sh）显示：72 处多 map 查找 eBPF 也走通用 helper（kprog/results/lookup-binding-20261123）；差别在 LPM trie 查找，原生走通用 helper，eBPF 直调 trie_lookup_elem，通用 helper 里那一个间接调用的目标来回换（array_map_lookup_elem+0x7 原生 15204 样本、eBPF 1128）。77908203a 让已知的 LPM trie 直调 trie_lookup_elem；镜像、检查、OTel profile、四个有 LPM trie 的应用（OTel、Cilium、Tetragon、Tracee）重测由 kprog/results/trie-direct-20261123/chain.sh 进行。
+   - map-in-map 的内层表：verifier 按外层表的内层模板内联，原生原来调通用 helper（Tracee 直线代码上 1404 处，Cilium、Katran 各 2 处；kprog/results/lookup-binding-20261123）。30e401e37：shim 在 BPF_MAP_CREATE 时记下 inner_map_fd 的模板，加载器给出“<map>#inner”形式，x86、arm64 链接器把外层查找的结果记成“<map>#inner”。
+   - 重测：trie 那一轮在 OTel stats 关之后停（STOP），inner-20261123/chain.sh 用 30e401e37 重建 x86 镜像、检查，再对 OTel、Cilium、Tetragon、Tracee、Katran 完整计时；arm64 镜像和检查由 trie-direct-20261123/arm64-chain.sh 进行，之后在 Spark 上补测受影响的应用。
    - 只修设计之内的必要问题，修好后只补测受影响的应用。
 1. [x] **omp：arm64 功能检查结果**（11-22 11:18–12:22Z，六个应用 rc=0，在跑的程序全部原生：OTel 13、BCC 23、Cilium 102、Tetragon 91、Tracee 73、Katran 1）。 六个应用 rc=0、在跑的程序全部原生，即完成。有失败时：
    - 找原因，只修让程序跑通、结果正确的必要 bug；
