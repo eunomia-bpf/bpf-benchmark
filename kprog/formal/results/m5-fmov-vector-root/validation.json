@@ -1,0 +1,47 @@
+{
+  "confirmed_utc": "2026-11-23T07:55:32.657516+00:00",
+  "targeted_root": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.3315789699554443,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "targeted_root_jobs": 466,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-fmov-vector-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.241288185119629,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 16,
+  "additive_root_imports": [
+    "Arm64FmovPath"
+  ],
+  "actual_fmov_branch_transitions": 157,
+  "actual_vector_write_transitions": 14,
+  "complete_program_calls": 9,
+  "complete_isa_families": 0,
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
