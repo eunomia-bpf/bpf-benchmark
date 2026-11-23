@@ -1,0 +1,95 @@
+KProgFormal.ClightRefinement.X86LogicReference.input : KProgFormal.Reference.X86.State → X86.Cpu
+'KProgFormal.ClightRefinement.X86LogicReference.input' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86LogicReference.flagsWord : BitVec 64 → X86.Flags → BitVec 64
+'KProgFormal.ClightRefinement.X86LogicReference.flagsWord' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicReference.input_register (state : KProgFormal.Reference.X86.State)
+  (reg : X86.GPR) : (KProgFormal.ClightRefinement.X86LogicReference.input state).regs.get reg = state.gpr reg.index
+'KProgFormal.ClightRefinement.X86LogicReference.input_register' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86LogicReference.native_step (state : KProgFormal.Reference.X86.State) (dst src : Fin 16)
+  (highDst highSrc : Bool) (kind : X86.BinKind) (value nextPc : BitVec 64) (running : state.modelError = none)
+  (selected :
+    kind = X86.BinKind.xor ∧
+        value =
+          (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst)
+              highDst ^^^
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src)
+              highSrc ∨
+      kind = X86.BinKind.or ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst)
+                highDst |||
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src)
+                highSrc ∨
+        kind = X86.BinKind.and ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst)
+                highDst &&&
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src)
+                highSrc) :
+  KProgFormal.Reference.X86.nativeStep
+      (X86.Op.bin kind X86.Size.b (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+        (X86.Operand.reg (X86.GPR.ofIndex src) highSrc))
+      nextPc state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.b (X86.GPR.ofIndex dst) value
+                    highDst).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.logic X86.Size.b (X86.Value.trunc X86.Size.b value) (state.oracle.bits state.oracle.cursor)
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth,
+          oracle :=
+            have __src := state.oracle;
+            { bits := __src.bits, cursor := state.oracle.cursor + 1 } },
+      events := [] }
+'KProgFormal.ClightRefinement.X86LogicReference.native_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicReference.step (state : KProgFormal.Reference.X86.State)
+  (dst src : KProgFormal.Reference.X86.RegisterSlice) (kind : KProgFormal.Reference.X86.LogicKind)
+  (value nextPc : BitVec 64) (running : state.modelError = none)
+  (selected :
+    kind = KProgFormal.Reference.X86.LogicKind.xor ∧
+        value =
+          (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst.reg)
+              (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8) ^^^
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src.reg)
+              (src.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8) ∨
+      kind = KProgFormal.Reference.X86.LogicKind.or ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst.reg)
+                (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8) |||
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src.reg)
+                (src.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8) ∨
+        kind = KProgFormal.Reference.X86.LogicKind.and ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex dst.reg)
+                (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8) &&&
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg X86.Size.b (X86.GPR.ofIndex src.reg)
+                (src.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8)) :
+  KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.logic KProgFormal.Reference.X86.ScalarWidth.w8 kind
+        (KProgFormal.Reference.X86.ScalarDestination.register dst) (KProgFormal.Reference.X86.ScalarSource.register src)
+        nextPc)
+      state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.b (X86.GPR.ofIndex dst.reg)
+                    value (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8)).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.logic X86.Size.b (X86.Value.trunc X86.Size.b value) (state.oracle.bits state.oracle.cursor)
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth,
+          oracle :=
+            have __src := state.oracle;
+            { bits := __src.bits, cursor := state.oracle.cursor + 1 } },
+      events := [] }
+'KProgFormal.ClightRefinement.X86LogicReference.step' depends on axioms: [propext, Classical.choice, Quot.sound]

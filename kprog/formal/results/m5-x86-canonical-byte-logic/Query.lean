@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.X86LogicReference
+
+#check KProgFormal.ClightRefinement.X86LogicReference.input
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.input
+#check KProgFormal.ClightRefinement.X86LogicReference.flagsWord
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.flagsWord
+#check KProgFormal.ClightRefinement.X86LogicReference.input_register
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.input_register
+#check KProgFormal.ClightRefinement.X86LogicReference.native_step
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.native_step
+#check KProgFormal.ClightRefinement.X86LogicReference.step
+#print axioms KProgFormal.ClightRefinement.X86LogicReference.step
