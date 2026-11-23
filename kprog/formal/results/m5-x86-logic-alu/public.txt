@@ -1,0 +1,33 @@
+KProgFormal.ClightRefinement.X86LogicAlu.xor_internal (ge : CC.CGenv) (lhs rhs : BitVec 64) (width : BitVec 8)
+  (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 20
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)
+      [CC.Val.Vlong lhs, CC.Val.Vlong rhs, CC.Val.Vint 2#32, CC.Val.Vint (BitVec.setWidth 32 width)] k m)
+    (CC.State.Returnstate (CC.Val.Vlong (lhs ^^^ rhs)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86LogicAlu.xor_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicAlu.or_internal (ge : CC.CGenv) (lhs rhs : BitVec 64) (width : BitVec 8)
+  (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 20
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)
+      [CC.Val.Vlong lhs, CC.Val.Vlong rhs, CC.Val.Vint 3#32, CC.Val.Vint (BitVec.setWidth 32 width)] k m)
+    (CC.State.Returnstate (CC.Val.Vlong (lhs ||| rhs)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86LogicAlu.or_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicAlu.and_internal (ge : CC.CGenv) (lhs rhs : BitVec 64) (width : BitVec 8)
+  (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 20
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)
+      [CC.Val.Vlong lhs, CC.Val.Vlong rhs, CC.Val.Vint 4#32, CC.Val.Vint (BitVec.setWidth 32 width)] k m)
+    (CC.State.Returnstate (CC.Val.Vlong (lhs &&& rhs)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86LogicAlu.and_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
