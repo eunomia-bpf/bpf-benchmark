@@ -208,3 +208,5 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall
 import KProgFormal.ClightRefinement.Arm64OrnNative
 import KProgFormal.ClightRefinement.Arm64ModifiedLslOneCall
 import KProgFormal.ClightRefinement.Arm64OrnBodyNative
+import KProgFormal.ClightRefinement.Arm64FmovNative
+import KProgFormal.ClightRefinement.Arm64FmovDestinationSite
