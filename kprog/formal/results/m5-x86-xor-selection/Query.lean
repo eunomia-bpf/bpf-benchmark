@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86AluReadXorSelect
+
+#check KProgFormal.ClightRefinement.X86AluReadXorSelect.different_registers
+#print axioms KProgFormal.ClightRefinement.X86AluReadXorSelect.different_registers
+#check KProgFormal.ClightRefinement.X86AluReadXorSelect.different_lanes
+#print axioms KProgFormal.ClightRefinement.X86AluReadXorSelect.different_lanes
+#check KProgFormal.ClightRefinement.X86AluReadXorSelect.all_cases
+#print axioms KProgFormal.ClightRefinement.X86AluReadXorSelect.all_cases

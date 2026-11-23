@@ -19,9 +19,9 @@ private def cachePart (source : Lean.Syntax) : Lean.Elab.Tactic.TacticM Unit := 
   Lean.Elab.Tactic.closeMainGoal `actual_x86_alu_self_xor_part
     (← Lean.Meta.withTransparency .all (Lean.Meta.whnf (← Lean.instantiateMVars term)))
 
-private def operationGate : CC.Stmt := by run_tac cachePart (← `(pieces.operation))
-private def laneGate : CC.Stmt := by run_tac cachePart (← `(pieces.lane))
-private def selection : CC.Stmt := by run_tac cachePart (← `(pieces.selection))
+def operationGate : CC.Stmt := by run_tac cachePart (← `(pieces.operation))
+def laneGate : CC.Stmt := by run_tac cachePart (← `(pieces.lane))
+def selection : CC.Stmt := by run_tac cachePart (← `(pieces.selection))
 
 theorem source : X86AluDecode.operandReads =
     .Ssequence (.Ssequence (.Ssequence operationGate laneGate) selection)

@@ -1,0 +1,74 @@
+KProgFormal.ClightRefinement.X86AluReadXorSelect.different_registers (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst src : BitVec 8) (different : dst ≠ src)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 2#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le = some (KProgFormal.ClightRefinement.X86Width.argument dst))
+  (sourceReg :
+    CC.PTree.get X86_program_profile_bpf._src le = some (KProgFormal.ClightRefinement.X86Width.argument src)) :
+  KProgFormal.ClightRefinement.InternalRun ge 10
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k) e
+      (KProgFormal.ClightRefinement.X86AluReadSite.selectedTemps le) m)
+'KProgFormal.ClightRefinement.X86AluReadXorSelect.different_registers' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadXorSelect.different_lanes (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (reg dstShift srcShift : BitVec 8) (different : dstShift ≠ srcShift)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 2#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le = some (KProgFormal.ClightRefinement.X86Width.argument reg))
+  (sourceReg : CC.PTree.get X86_program_profile_bpf._src le = some (KProgFormal.ClightRefinement.X86Width.argument reg))
+  (leftShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le =
+      some (KProgFormal.ClightRefinement.X86Width.argument dstShift))
+  (rightShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le =
+      some (KProgFormal.ClightRefinement.X86Width.argument srcShift)) :
+  KProgFormal.ClightRefinement.InternalRun ge 10
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k) e
+      (KProgFormal.ClightRefinement.X86AluReadXorSelect.differentLaneTemps le) m)
+'KProgFormal.ClightRefinement.X86AluReadXorSelect.different_lanes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadXorSelect.all_cases (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (dst src dstShift srcShift : BitVec 8)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 2#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le = some (KProgFormal.ClightRefinement.X86Width.argument dst))
+  (sourceReg : CC.PTree.get X86_program_profile_bpf._src le = some (KProgFormal.ClightRefinement.X86Width.argument src))
+  (leftShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le =
+      some (KProgFormal.ClightRefinement.X86Width.argument dstShift))
+  (rightShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le =
+      some (KProgFormal.ClightRefinement.X86Width.argument srcShift)) :
+  if dst = src then
+    if dstShift = srcShift then
+      KProgFormal.ClightRefinement.InternalRun ge 11
+        (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+        (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e
+          (KProgFormal.ClightRefinement.X86AluReadSelfXor.temps le) m)
+    else
+      KProgFormal.ClightRefinement.InternalRun ge 10
+        (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+        (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k) e
+          (KProgFormal.ClightRefinement.X86AluReadXorSelect.differentLaneTemps le) m)
+  else
+    KProgFormal.ClightRefinement.InternalRun ge 10
+      (CC.State.State function KProgFormal.ClightRefinement.X86AluDecode.operandReads k e le m)
+      (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.readStatements
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k) e
+        (KProgFormal.ClightRefinement.X86AluReadSite.selectedTemps le) m)
+'KProgFormal.ClightRefinement.X86AluReadXorSelect.all_cases' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
