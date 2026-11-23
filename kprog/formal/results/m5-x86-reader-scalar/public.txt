@@ -1,0 +1,62 @@
+KProgFormal.ClightRefinement.X86RegisterReadScalar.call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (m : CC.Mem) (k : CC.Cont) (index : Fin 16)
+  (width shift tag : BitVec 8) (size : X86.Size) (value : BitVec 64) (helperBlock bindingBlock cellsBlock : CC.Block)
+  (bindingOffset cellsOffset : CC.Integers.Ptrofs) (notSp : index ≠ 4) (notStack : tag ≠ 4#8) (bound : shift.toNat < 64)
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result width = KProgFormal.ClightRefinement.X86ShiftLeft.argument size)
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current :
+    CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned =
+      some (CC.Val.Vlong value))
+  (tagRead :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86RegisterReadScalar.length size)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset)
+        (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index) width shift)
+      k m)
+    (CC.State.Returnstate (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterReadLanes.result value size shift))
+      (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86RegisterReadScalar.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (m : CC.Mem) (k : CC.Cont) (cpu : X86.Cpu) (index : Fin 16)
+  (size : X86.Size) (width : BitVec 8) (high : Bool) (value : BitVec 64)
+  (helperBlock bindingBlock cellsBlock : CC.Block) (bindingOffset cellsOffset : CC.Integers.Ptrofs)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins m cellsBlock cellsOffset cpu)
+  (notSp : index ≠ 4) (legalHigh : high = true → size = X86.Size.b ∧ ↑index < 4)
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result width = KProgFormal.ClightRefinement.X86ShiftLeft.argument size)
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (cells : CC.Mem.load CC.Mptr m bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current :
+    CC.Mem.load CC.Mptr m cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned =
+      some (CC.Val.Vlong value))
+  (scalar :
+    CC.Mem.load CC.Chunk.Mint8unsigned m cellsBlock
+        (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (CC.Val.Vint 0#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86RegisterReadScalar.length size)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset)
+        (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index) width (if high = true then 8 else 0))
+      k m)
+    (CC.State.Returnstate (CC.Val.Vlong (cpu.getReg size (X86.GPR.ofIndex index) high)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

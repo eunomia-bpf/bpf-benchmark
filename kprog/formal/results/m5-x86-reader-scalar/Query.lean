@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86RegisterReadScalar
+
+#check KProgFormal.ClightRefinement.X86RegisterReadScalar.call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadScalar.call
+#check KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call
