@@ -52,8 +52,5 @@ cil_to_container, cil_lxc_policy, tail_handle_ipv4, tail_ipv4_to_endpoint, tail_
 plans), tail_handle_arp. 64 lookups: 60 take their own map's site by name, four call the generic helper,
 none takes another map's form. Cilium's gap to its 05-29 number has another source.
 
-Cilium's eBPF arm itself (cil_from_container per call, baseline phase) varies from 558 to 1109 ns over
-the 40 Cilium runs of 2026-11-17 to 11-23 on this host, with 53 to 92 programs loaded in the baseline
-phase; the 05-29 run (another checkout, /home/yunwei37/workspace/bpf-benchmark) has 486 ns with 53. On
-the same host the native/eBPF ratio of one run is the comparison that holds: 1.205x per call on
-dcf4a1aef.
+Cilium on dcf4a1aef: 1.205x per call, 1.169x throughput (stats off); the 05-29 run has 1.319x
+throughput.

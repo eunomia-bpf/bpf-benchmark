@@ -12,8 +12,10 @@ resolved with its own snapshots); `host-annotate.py` counts samples per instruct
 
 Runs in /workspaces/kprog-raw/coordinator/profile-20261123: otel-host4-dcf4a1aef, otel-host-77908203a.
 
-Samples per second, eBPF window (guest uptime 110-190 s) and native window (220-310 s) of the run on
-77908203a; the work matches (LPM trie lookups 1925/s and 1938/s, user-memory reads 1266/s and 1244/s):
+Samples per second (cycle samples: the time the CPUs spent in each symbol), eBPF window (guest uptime
+110-190 s) and native window (220-310 s) of the run on 77908203a. A cycle sample counts time, so more
+samples in a program body means more time spent there; the profile counts no calls (bpf stats off). The
+per-call measurement is the stats-on run: OTel 0.930x on dcf4a1aef (eBPF 3161 ns, native 3400 ns).
 
 | Symbol | eBPF | native |
 |---|---|---|
@@ -42,5 +44,5 @@ Samples per second, eBPF window (guest uptime 110-190 s) and native window (220-
 
 Branch misses (EVENT=cpu_core/branch-misses/, one sample per 500, run otel-host-brmiss-77908203a,
 2026-11-23T17:59Z): the eBPF unwinder takes about 43000 samples per 10 s in its phase, the native one
-about 40000 in its phase. Mispredicted branches do not explain the native body's 1.7x cycles; a run
+about 40000 in its phase. Mispredicted branches do not explain the native body's larger cycle share; a run
 sampling retired instructions (EVENT=cpu_core/instructions/, one per 20000) is queued.
