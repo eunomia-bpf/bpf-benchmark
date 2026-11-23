@@ -1,5 +1,5 @@
 import KProgFormal.ClightRefinement.X86LogicFlagWidths
-import KProgFormal.ClightRefinement.X86ShiftFlagOF
+import KProgFormal.ClightRefinement.X86ShiftFlagPF
 
 namespace KProgFormal.ClightRefinement.X86LogicFlagStores
 
@@ -132,5 +132,128 @@ theorem of_internal (ge : CC.CGenv)
   exact store ge function e le k m after X86_program_profile_bpf._t'203 X86_program_profile_bpf._of
     (.Econst_int (0#32) CC.tint) (.Vint (0#32)) (.Vint (0#32)) bindingBlock ofBlock 144 offset
     binding address pointer rfl rfl stored
+
+private def zfExpr : CC.Expr := by
+  run_tac cachePart (← `(match zf with
+    | .Ssequence _ (.Sassign _ rhs) => rhs | _ => .Econst_int (0#32) CC.tint))
+private def parityExpr : CC.Expr := by
+  run_tac cachePart (← `(match parity with
+    | .Ssequence _ (.Sassign _ rhs) => rhs | _ => .Econst_int (0#32) CC.tint))
+
+theorem zf_source : zf = storeStmt X86_program_profile_bpf._t'205
+    X86_program_profile_bpf._zf zfExpr := rfl
+
+theorem parity_source : parity = storeStmt X86_program_profile_bpf._t'202
+    X86_program_profile_bpf._pf parityExpr := rfl
+
+/-- The original logical ZF comparison and actual byte store produce the
+shared checked zero predicate for every input word. -/
+theorem zf_internal (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (bindingBlock zfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : BitVec 64)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (word : le.get X86_program_profile_bpf.___x86_fl_value = some (.Vlong value))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 128 = some (.Vptr zfBlock offset))
+    (stored : CC.Mem.store .Mint8unsigned m zfBlock (CC.Integers.Ptrofs.unsigned offset)
+      (X86ShiftFlagZF.bit value) = some after) :
+    InternalRun ge 4 (.State function zf k e le m)
+      (.State function .Sskip k e (le.set X86_program_profile_bpf._t'205 (.Vptr zfBlock offset)) after) := by
+  have address : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._zf (.Vptr bindingBlock 0) = some (bindingBlock, 128, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86ShiftFlagZF.zf_offset ge.genv_cenv valueLayout]
+    rfl
+  have kept : (le.set X86_program_profile_bpf._t'205 (.Vptr zfBlock offset)).get
+      X86_program_profile_bpf.___x86_fl_value = some (.Vlong value) := by
+    simp +decide [CC.PTree.gso, word]
+  have signedZero64 : BitVec.ofInt 64 (CC.Integers.Int.signed (0#32)) = (0#64) := rfl
+  have evaluated : CC.doEvalExpr ge e (le.set X86_program_profile_bpf._t'205 (.Vptr zfBlock offset))
+      m zfExpr = some (X86ShiftFlagZF.bit value) := by
+    by_cases zero : value = 0
+    all_goals
+      simp +decide [zfExpr, CC.doEvalExpr, CC.typeof, kept,
+        CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+        CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+        CC.Cop.castIntLong, CC.tulong, CC.tint, CC.typeconv,
+        CC.removeAttributes, CC.tattr, CC.Integers.Int64.cmpu, CC.Integers.MI.cmpu,
+        CC.Integers.MI.eq, CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+        CC.Integers.MI.zero, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.zero,
+        CC.Integers.Int.one, CC.Integers.MI.one, signedZero64, X86ShiftFlagZF.bit, zero, apply_ite]
+  have cast : CC.Cop.semCast (X86ShiftFlagZF.bit value) (CC.typeof zfExpr) CC.tuchar m =
+      some (X86ShiftFlagZF.bit value) := by
+    change CC.Cop.semCast (X86ShiftFlagZF.bit value) CC.tint CC.tuchar m = _
+    unfold X86ShiftFlagZF.bit
+    split <;> rfl
+  rw [zf_source]
+  exact store ge function e le k m after X86_program_profile_bpf._t'205 X86_program_profile_bpf._zf
+    zfExpr (X86ShiftFlagZF.bit value) (X86ShiftFlagZF.bit value) bindingBlock zfBlock 128 offset
+    binding address pointer evaluated cast stored
+
+/-- The original nibble-fold/table expression and actual PF byte store
+produce the existing x86lean-corresponding parity value for every word. -/
+theorem parity_internal (ge : CC.CGenv)
+    (bindingsLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_bindings =
+      some X86ShiftLeftCarry.bindingsRecord)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (m after : CC.Mem) (bindingBlock pfBlock : CC.Block) (offset : CC.Integers.Ptrofs)
+    (value : BitVec 64)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (word : le.get X86_program_profile_bpf.___x86_fl_value = some (.Vlong value))
+    (pointer : CC.Mem.load CC.Mptr m bindingBlock 152 = some (.Vptr pfBlock offset))
+    (stored : CC.Mem.store .Mint8unsigned m pfBlock (CC.Integers.Ptrofs.unsigned offset)
+      (X86ShiftFlagPF.bit value) = some after) :
+    InternalRun ge 4 (.State function parity k e le m)
+      (.State function .Sskip k e (le.set X86_program_profile_bpf._t'202 (.Vptr pfBlock offset)) after) := by
+  have address : CC.lvalOfField ge
+      (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)
+      X86_program_profile_bpf._pf (.Vptr bindingBlock 0) = some (bindingBlock, 152, .Full) := by
+    simp only [CC.lvalOfField, bindingsLayout, X86ShiftFlagPF.pf_offset ge.genv_cenv valueLayout]
+    rfl
+  have kept : (le.set X86_program_profile_bpf._t'202 (.Vptr pfBlock offset)).get
+      X86_program_profile_bpf.___x86_fl_value = some (.Vlong value) := by
+    simp +decide [CC.PTree.gso, word]
+  have bound : (X86ShiftFlagPF.index value).toNat < 16 := by
+    simp only [X86ShiftFlagPF.index, BitVec.toNat_and]
+    change (value ^^^ (value >>> 4)).toNat &&& 15 < 16
+    have lower : (value ^^^ (value >>> 4)).toNat &&& 15 ≤ 15 := Nat.and_le_right
+    omega
+  have lowNat : (CC.Integers.Int64.loword (X86ShiftFlagPF.index value)).toNat =
+      (X86ShiftFlagPF.index value).toNat := by
+    change ((X86ShiftFlagPF.index value).setWidth 32).toNat = _
+    simp only [BitVec.toNat_setWidth]
+    exact Nat.mod_eq_of_lt (by omega)
+  have shiftNat : (value.toNat ^^^ (value.toNat >>> 4)) &&& 15 < 32 := by
+    have b : (X86ShiftFlagPF.index value).toNat < 32 := by omega
+    simpa [X86ShiftFlagPF.index] using b
+  dsimp only [X86ShiftFlagPF.index] at lowNat
+  have evaluated : CC.doEvalExpr ge e (le.set X86_program_profile_bpf._t'202 (.Vptr pfBlock offset))
+      m parityExpr = some (X86ShiftFlagPF.bit value) := by
+    simp +decide [parityExpr, CC.doEvalExpr, CC.typeof, kept,
+      CC.Cop.semBinaryOperation, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+      CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntLong,
+      CC.Cop.semShr, CC.Cop.semShift, CC.Cop.classifyShift, CC.Cop.semAnd, CC.Cop.semXor,
+      CC.typeconv, CC.removeAttributes, CC.tattr, CC.tulong, CC.tuint,
+      CC.Integers.Int64.shru, CC.Integers.Int.shru, CC.Integers.MI.shru,
+      CC.Integers.Int64.xor, CC.Integers.Int64.and, CC.Integers.Int.and,
+      CC.Integers.MI.xor, CC.Integers.MI.and, CC.Integers.Int.repr, CC.Integers.Int64.repr,
+      CC.Integers.MI.repr, CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+      CC.Integers.Int64.ltu, CC.Integers.MI.ltu, BitVec.ult,
+      X86ShiftFlagPF.bit, X86ShiftFlagPF.index, shiftNat, lowNat]
+  have cast : CC.Cop.semCast (X86ShiftFlagPF.bit value) (CC.typeof parityExpr) CC.tuchar m =
+      some (X86ShiftFlagPF.bit value) := by
+    change CC.Cop.semCast (X86ShiftFlagPF.bit value) CC.tuint CC.tuchar m = _
+    rw [X86ShiftFlagPF.parity]
+    cases X86.Value.parity8 value <;> rfl
+  rw [parity_source]
+  exact store ge function e le k m after X86_program_profile_bpf._t'202 X86_program_profile_bpf._pf
+    parityExpr (X86ShiftFlagPF.bit value) (X86ShiftFlagPF.bit value) bindingBlock pfBlock 152 offset
+    binding address pointer evaluated cast stored
 
 end KProgFormal.ClightRefinement.X86LogicFlagStores
