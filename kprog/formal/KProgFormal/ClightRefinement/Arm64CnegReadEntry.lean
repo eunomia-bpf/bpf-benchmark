@@ -143,4 +143,79 @@ theorem enter (world : CC.CGenv) (block b : CC.Block) (ofs : CC.Integers.Ptrofs)
   exact .step trivial (read_step world block b ofs e (opTemps le) m
     (.Kseq valueSet (.Kseq tail (tailCont k))) sourceWord binding unshadowed entry' source') (.refl _)
 
+private theorem value_source : valueSet = .Sset Arm64Program.___kprog_a64_cneg_value
+    (.Etempvar Arm64Program._t'54 CC.tulong) := rfl
+
+def valueTemps (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
+  ((opTemps le).set Arm64Program._t'54 (.Vlong value)).set
+    Arm64Program.___kprog_a64_cneg_value (.Vlong value)
+
+set_option hygiene false in
+/-- The actual reader return is copied into the original CNEG operand before
+resuming the untouched condition and numeric suffix. Full memory is unchanged. -/
+theorem returned (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
+    (k : CC.Cont) (value : BitVec 64) :
+    InternalRun world 4
+      (.Returnstate (.Vlong value) (callCont k e le) m)
+      (.State Arm64Nop.handler tail (tailCont k) e (valueTemps le value) m) := by
+  run_tac do
+    for _ in [:4] do
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+      Lean.Elab.Tactic.evalTactic (← `(tactic| simp only [CC.doStep,callCont,tailCont,
+        value_source,valueTemps,CC.setOpttemp,CC.PTree.gss,CC.doEvalExpr,CC.typeof,
+        CC.Cop.semCast,CC.Cop.classifyCast,CC.typeconv,CC.removeAttributes,CC.tattr,CC.tulong,
+        CC.E0,CC.Eapp,List.nil_append,List.append_nil] <;> try rfl))
+    Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+
+/-- Run the actual scalar or warm-stack reader between its real CNEG entry
+and return. The observations are pre-memory loads; no read result or updated
+heap is supplied. Relative pointers use the existing M3 materialization. -/
+theorem scalar (origins : Reference.Provenance.AArch64.Origins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (raw : BitVec 64) (tag : BitVec 8)
+    (tags : tag = 0 ∨ tag = 4)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (.Vlong raw,.Vint (tag.setWidth 32)))
+    (cache : tag = 4 → Arm64RegisterReads.WarmEntryCache false frontier m (.Vptr b ofs) origins.stack)
+    (unshadowed : e.get Arm64Program._kprog_arm64_program_read = none)
+    (entry : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (source : le.get Arm64Program._src = some (.Vlong (BitVec.ofNat 64 i.val)))
+    (op : le.get Arm64Program._op = some (.Vint (65#32))) :
+    InternalRun Arm64ProgramEntryLinked.ge (if tag = 4 then 103 else 85)
+      (.State Arm64Nop.handler branch k e le m)
+      (.State Arm64Nop.handler tail (tailCont k) e
+        (valueTemps le (Reference.Provenance.AArch64.materialize origins raw tag)) m) := by
+  have start := enter Arm64ProgramEntryLinked.ge (CC.Positive.ofNat 66) b ofs e le m k
+    (BitVec.ofNat 64 i.val) Arm64AddOperandReads.Linked.bindings.2.2 unshadowed entry source op
+  rcases tags with rfl|rfl
+  · have read := Arm64RegisterReads.gpr_read_nonrelative_bound Arm64ProgramEntryLinked.ge
+      Arm64MovKeep.Linked.reader_layout (fun _ => none) frontier b ofs i m
+      (callCont k e le) (.Vlong raw) raw (0#8) observed rfl (by decide) (by decide)
+    have finish := returned Arm64ProgramEntryLinked.ge e le m k raw
+    simpa +decide only [CC.callCont,callCont,Reference.Provenance.AArch64.materialize,ite_false,ite_true]
+      using (start.trans read).trans finish
+  · have read := Arm64RegisterReads.gpr_read_stack_bound Arm64ProgramEntryLinked.ge
+      Arm64MovKeep.Linked.reader_layout Arm64ProgramEntryColdRead.stack_layout frontier b ofs i m
+      (callCont k e le) raw origins.stack observed (cache rfl)
+    have finish := returned Arm64ProgramEntryLinked.ge e le m k (raw + origins.stack)
+    simpa +decide only [CC.callCont,callCont,Reference.Provenance.AArch64.materialize,ite_true]
+      using (start.trans read).trans finish
+
+/-- The next real condition/numeric suffix reads the actual materialized word;
+all original input temporaries and the computed width survive this prefix. -/
+theorem ready (le : CC.TempEnv) (value : BitVec 64) :
+    (valueTemps le value).get Arm64Program.___kprog_a64_cneg_value = some (.Vlong value) ∧
+    ∀ id ∈ [Arm64Program._entry,Arm64Program._dst,Arm64Program._src,Arm64Program._src2,
+      Arm64Program._src3,Arm64Program._flags,Arm64Program._aux,Arm64Program._op,
+      Arm64Program.___a64_l_width], (valueTemps le value).get id = le.get id := by
+  constructor
+  · simp only [valueTemps,CC.PTree.gss]
+  · intro id original
+    simp at original
+    rcases original with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl
+    all_goals simp +decide only [valueTemps,opTemps,CC.PTree.gso]
+
 end KProgFormal.ClightRefinement.Arm64Cneg.ReadEntry
