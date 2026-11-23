@@ -1,0 +1,18 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.stores
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.stores
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.frame
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.frame
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
+#check KProgFormal.ClightRefinement.X86LogicFlagNative.internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagNative.internal
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.continuation_source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.continuation_source
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.resume_writer
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.resume_writer
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.to_writer
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.to_writer
