@@ -166,6 +166,20 @@ NativeLinkArgs build_native_link_args(
     for (size_t i = 0; i < companion.lookup_sites.size(); i++) {
         out.lookup_sites.push_back(make_link_lookup_site(companion.lookup_sites[i]));
     }
+    // Inner templates the shim recorded at BPF_MAP_CREATE in this process, by outer map id.
+    std::unordered_map<uint32_t, std::pair<NativeMapShape, uint32_t>> inner_templates;
+    {
+        std::ifstream in("/tmp/native_kernel_inner_maps." + std::to_string(getpid()) + ".tsv");
+        uint32_t id, type, key, value, max, flags;
+        while (in >> id >> type >> key >> value >> max >> flags) {
+            NativeMapShape shape;
+            shape.type = static_cast<int>(type);
+            shape.key_size = key;
+            shape.value_size = value;
+            shape.max_entries = max;
+            inner_templates[id] = {shape, flags};
+        }
+    }
     std::vector<std::pair<std::string, std::string>> native_map_symbols(
         companion.native_map_symbols.begin(), companion.native_map_symbols.end());
     std::sort(native_map_symbols.begin(), native_map_symbols.end(),
@@ -202,6 +216,36 @@ NativeLinkArgs build_native_link_args(
             kv.first,
             make_link_lookup_site(site),
         });
+        // A lookup on the value of a map-in-map lookup reaches an inner map: the verifier gives
+        // it the form of the outer map's inner template; native-link names it `<map>#inner`.
+        if (auto inner = inner_templates.find(meta->kernel_id); inner != inner_templates.end()) {
+            const auto &[shape, flags] = inner->second;
+            const bool array = shape.type == BPF_MAP_TYPE_ARRAY ||
+                               shape.type == BPF_MAP_TYPE_PERCPU_ARRAY;
+            CompanionLoad::LookupSite inner_site{
+                CompanionLoad::LookupSite::Kind::Call,
+                helper_kernel_addr(BPF_FUNC_map_lookup_elem), 0, 0, 0, 0, 0, 0,
+            };
+            // BPF_F_INNER_MAP lets inner arrays differ in size, so they keep the helper.
+            if (!(array && (flags & BPF_F_INNER_MAP)) &&
+                configure_lookup_site_for_shape(inner_site, shape, array_offsets, htab_offsets,
+                                                this_cpu_off_addr)) {
+                const std::string inner_name = kv.first + "#inner";
+                inner_site.map_name = inner_name;
+                if (auto ops = kMapUpdateDelete.find(shape.type); ops != kMapUpdateDelete.end()) {
+                    uint64_t update = kallsyms_lookup(ops->second.first);
+                    uint64_t del = kallsyms_lookup(ops->second.second);
+                    if (update != 0 && del != 0) {
+                        add_name_addr(out.helpers, "bpf_map_update_elem@" + inner_name, update);
+                        add_name_addr(out.helpers, "bpf_map_delete_elem@" + inner_name, del);
+                    }
+                }
+                out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
+                    inner_name,
+                    make_link_lookup_site(inner_site),
+                });
+            }
+        }
     }
     for (const auto &[name, hex] : companion.const_values) {
         out.const_values.push_back(NativeLinkArgs::ConstValue{name, hex});

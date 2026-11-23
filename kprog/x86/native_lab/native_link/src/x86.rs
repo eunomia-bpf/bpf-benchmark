@@ -40,8 +40,11 @@ pub(super) fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_n
     let Some(source_map_name) = spec.map_name.as_deref() else {
         return false;
     };
+    // `<map>#inner` names an inner map: only an exact name matches it (its truncation may be the
+    // outer map's kernel name).
     source_map_name == native_map_name
-        || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
+        || (!native_map_name.contains('#')
+            && truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name))
 }
 
 #[path = "x86_effects.rs"]
@@ -1343,8 +1346,14 @@ pub(super) fn rewrite_x86(
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
                         lookup_call_counter += 1;
-                        let native_map_name =
-                            map_symbol_registers.get(&Register::RDI).map(String::as_str);
+                        let native_map_name = map_symbol_registers.get(&Register::RDI).cloned();
+                        // A map-in-map lookup returns an inner map, which takes the outer map's
+                        // inner-template form (`<map>#inner` in the plan), as the verifier does.
+                        let inner_name = native_map_name
+                            .as_ref()
+                            .map(|m| format!("{m}#inner"))
+                            .filter(|n| lookup_maps.contains_key(n));
+                        let native_map_name = native_map_name.as_deref();
                         let (site_label, _site_index, spec) = select_lookup_site(
                             lookup_sites,
                             lookup_maps,
@@ -1368,6 +1377,9 @@ pub(super) fn rewrite_x86(
                                 }
                                 resolved_helper_call_sites.insert(site_key);
                                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                                if let Some(inner) = inner_name {
+                                    map_symbol_registers.insert(Register::RAX, inner);
+                                }
                                 continue;
                             }
                             LookupKind::Call
@@ -1398,6 +1410,9 @@ pub(super) fn rewrite_x86(
                                 }
                                 resolved_helper_call_sites.insert(site_key);
                                 clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                                if let Some(inner) = inner_name {
+                                    map_symbol_registers.insert(Register::RAX, inner);
+                                }
                                 continue;
                             }
                         }

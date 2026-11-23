@@ -114,6 +114,9 @@ struct map_entry {
     uint32_t max_entries;
     uint32_t kernel_map_id;
     char name[17];
+    /* A map-in-map's inner template (attr->inner_map_fd), as the kernel keeps it for the verifier. */
+    int has_inner;
+    uint32_t inner_type, inner_key_size, inner_value_size, inner_max_entries, inner_flags;
 };
 static struct map_entry *map_table[BPF_STATE_BUCKETS];
 
@@ -654,7 +657,43 @@ static struct map_entry *capture_map_create(const union bpf_attr *attr) {
              "name=%s",
              attr->map_type, attr->key_size, attr->value_size,
              attr->max_entries, e->name);
+    if ((attr->map_type == BPF_MAP_TYPE_HASH_OF_MAPS ||
+         attr->map_type == BPF_MAP_TYPE_ARRAY_OF_MAPS) && attr->inner_map_fd) {
+        struct bpf_map_info mi = {0};
+        union bpf_attr ia = {0};
+        ia.info.bpf_fd = attr->inner_map_fd;
+        ia.info.info_len = sizeof(mi);
+        ia.info.info = (uintptr_t)&mi;
+        if (real_syscall(SYS_bpf, BPF_OBJ_GET_INFO_BY_FD, &ia, sizeof(ia)) >= 0) {
+            e->has_inner = 1;
+            e->inner_type = mi.type;
+            e->inner_key_size = mi.key_size;
+            e->inner_value_size = mi.value_size;
+            e->inner_max_entries = mi.max_entries;
+            e->inner_flags = mi.map_flags;
+        }
+    }
     return e;
+}
+
+/* The native loader runs in this process and gives a lookup on an inner map the form of its
+ * template, as the verifier does (inner_map_meta): one line per map-in-map,
+ * "<kernel map id> <type> <key_size> <value_size> <max_entries> <map_flags>". */
+static void record_inner_map_template(const struct map_entry *e) {
+    char path[96], line[128];
+    snprintf(path, sizeof(path), "/tmp/native_kernel_inner_maps.%d.tsv", (int)getpid());
+    int n = snprintf(line, sizeof(line), "%u %u %u %u %u %u\n", e->kernel_map_id,
+                     e->inner_type, e->inner_key_size, e->inner_value_size,
+                     e->inner_max_entries, e->inner_flags);
+    int fd = open(path, O_WRONLY | O_CREAT | O_APPEND | O_CLOEXEC, 0644);
+    if (fd < 0)
+        return;
+    if (write(fd, line, (size_t)n) != n)
+        log_line("inner map template write failed map_id=%u", e->kernel_map_id);
+    if (real_close)
+        real_close(fd);
+    else
+        close(fd);
 }
 
 static struct link_entry *capture_link_create(const union bpf_attr *attr) {

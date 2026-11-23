@@ -701,6 +701,8 @@ long syscall(long number, ...) {
             link_remove(pending_map->fd);
             raw_tp_remove(pending_map->fd);
             perf_remove(pending_map->fd);
+            if (pending_map->has_inner && resolved_id)
+                record_inner_map_template(pending_map);
             map_insert(pending_map);
             pthread_mutex_unlock(&state_mutex);
         } else {

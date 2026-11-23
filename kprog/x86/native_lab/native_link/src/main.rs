@@ -507,6 +507,7 @@ fn main() -> Result<()> {
                 &map_addrs,
                 &const_values,
                 &lookup_sites,
+                &lookup_maps,
                 proof_mode,
                 args.preserve_entry_abi,
                 args.show,
@@ -2074,6 +2075,7 @@ fn rewrite_arm64(
     map_addrs: &HashMap<String, u64>,
     const_values: &HashMap<String, Vec<u8>>,
     lookup_sites: &[LookupSiteSpec],
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
@@ -2082,7 +2084,7 @@ fn rewrite_arm64(
     loop {
         let result = rewrite_arm64_pass(
             elf, entry, included, helper_addrs, map_addrs, const_values, lookup_sites,
-            proof_mode, preserve_entry_abi, show, &long_tbz,
+            lookup_maps, proof_mode, preserve_entry_abi, show, &long_tbz,
         );
         let far = match &result {
             Err(e) => match e.downcast_ref::<TbzOutOfRange>() {
@@ -2107,6 +2109,7 @@ fn rewrite_arm64_pass(
     map_addrs: &HashMap<String, u64>,
     const_values: &HashMap<String, Vec<u8>>,
     lookup_sites: &[LookupSiteSpec],
+    lookup_maps: &HashMap<String, LookupSiteSpec>,
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
@@ -2282,8 +2285,21 @@ fn rewrite_arm64_pass(
                         // the helper, which dispatches on the map.
                         let lookup_site = if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
                             reg_map_names[0].as_ref().and_then(|name| {
-                                lookup_sites.iter().find(|s| x86::lookup_site_matches_native_map(s, name))
+                                lookup_sites
+                                    .iter()
+                                    .find(|s| x86::lookup_site_matches_native_map(s, name))
+                                    .or_else(|| name.ends_with("#inner").then(|| lookup_maps.get(name)).flatten())
                             })
+                        } else {
+                            None
+                        };
+                        // A map-in-map lookup returns an inner map, which takes the outer map's
+                        // inner-template form (`<map>#inner` in the plan), as the verifier does.
+                        let inner_name = if reloc.target_name == "bpf_map_lookup_elem" && is_entry {
+                            reg_map_names[0]
+                                .as_ref()
+                                .map(|m| format!("{m}#inner"))
+                                .filter(|n| lookup_maps.contains_key(n))
                         } else {
                             None
                         };
@@ -2294,6 +2310,7 @@ fn rewrite_arm64_pass(
                                         append_u32(&mut blob, word);
                                     }
                                     arm64_call_clobber_map_regs(&mut reg_map_names);
+                                    reg_map_names[0] = inner_name;
                                     continue;
                                 }
                                 LookupKind::Call
@@ -2336,6 +2353,7 @@ fn rewrite_arm64_pass(
                             }
                         }
                         arm64_call_clobber_map_regs(&mut reg_map_names);
+                        reg_map_names[0] = inner_name;
                         continue;
                     }
                     R_AARCH64_ADR_GOT_PAGE => {
