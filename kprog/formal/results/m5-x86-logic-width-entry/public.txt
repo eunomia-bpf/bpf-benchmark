@@ -1,0 +1,68 @@
+KProgFormal.ClightRefinement.X86LogicFlagWidths.source :
+  KProgFormal.ClightRefinement.X86LogicFlagClassify.branch =
+    ((KProgFormal.ClightRefinement.X86LogicFlagWidths.body✝.Sloop
+              (KProgFormal.ClightRefinement.X86LogicFlagWidths.Pieces.loopExit✝
+                KProgFormal.ClightRefinement.X86LogicFlagWidths.pieces✝)).Ssequence
+          (KProgFormal.ClightRefinement.X86LogicFlagWidths.Pieces.branchExit✝
+            KProgFormal.ClightRefinement.X86LogicFlagWidths.pieces✝)).Ssequence
+      (KProgFormal.ClightRefinement.X86LogicFlagWidths.Pieces.tail✝
+        KProgFormal.ClightRefinement.X86LogicFlagWidths.pieces✝)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagClassify.branch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.effective
+      (CC.Cont.Kseq
+        (KProgFormal.ClightRefinement.X86LogicFlagWidths.applyWidth.Ssequence
+          (KProgFormal.ClightRefinement.X86LogicFlagWidths.bits.Ssequence
+            KProgFormal.ClightRefinement.X86LogicFlagWidths.rest))
+        (KProgFormal.ClightRefinement.X86LogicFlagWidths.continuation k))
+      e le m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.effective_internal (ge : CC.CGenv) (block : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some block ∧
+      ge.genv_genv.findFunctPtr block = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_width_effective e = none) (size : X86.Size) (k : CC.Cont)
+  (m : CC.Mem)
+  (observed :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size)) :
+  KProgFormal.ClightRefinement.InternalRun ge 11
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.effective k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e (KProgFormal.ClightRefinement.X86LogicFlagWidths.effectiveTemps le size)
+      m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.effective_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWidths.to_apply (ge : CC.CGenv) (block : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some block ∧
+      ge.genv_genv.findFunctPtr block = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_width_effective e = none) (size : X86.Size) (k : CC.Cont)
+  (m : CC.Mem)
+  (observed :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size)) :
+  KProgFormal.ClightRefinement.InternalRun ge 17
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagClassify.branch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86LogicFlagWidths.applyWidth
+      (CC.Cont.Kseq
+        (KProgFormal.ClightRefinement.X86LogicFlagWidths.bits.Ssequence
+          KProgFormal.ClightRefinement.X86LogicFlagWidths.rest)
+        (KProgFormal.ClightRefinement.X86LogicFlagWidths.continuation k))
+      e (KProgFormal.ClightRefinement.X86LogicFlagWidths.effectiveTemps le size) m)
+'KProgFormal.ClightRefinement.X86LogicFlagWidths.to_apply' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
