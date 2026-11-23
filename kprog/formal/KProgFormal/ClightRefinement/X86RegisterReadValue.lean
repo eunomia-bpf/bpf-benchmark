@@ -95,6 +95,15 @@ private theorem below_sixteen (index : Fin 16) :
     decide_eq_true_eq]
   omega
 
+def rawTemps (le : CC.TempEnv) (shift : BitVec 8) (block : CC.Block)
+    (offset : CC.Integers.Ptrofs) (value : CC.Val) : CC.TempEnv :=
+  (((((le.set X86_program_profile_bpf.___x86_rd_shift (X86Width.argument shift)).set
+    X86_program_profile_bpf._t'13 (.Vptr block offset)).set
+    X86_program_profile_bpf._t'14 value).set
+    X86_program_profile_bpf._t'2 value).set
+    X86_program_profile_bpf.___x86_rd_ptr value).set
+    X86_program_profile_bpf.___x86_rd_value value
+
 def valueTemps (le : CC.TempEnv) (shift : BitVec 8) (block : CC.Block)
     (offset : CC.Integers.Ptrofs) (value : BitVec 64) : CC.TempEnv :=
   (((((le.set X86_program_profile_bpf.___x86_rd_shift (X86Width.argument shift)).set
@@ -105,11 +114,11 @@ def valueTemps (le : CC.TempEnv) (shift : BitVec 8) (block : CC.Block)
     X86_program_profile_bpf.___x86_rd_value (.Vlong value)
 
 /-- The actual nineteen source steps load any of the sixteen GPR cells and
-retain its scalar word and the entire memory, before SP/tag materialization. -/
-theorem read_value (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.TempEnv)
+retain its raw word and the entire memory, before SP/tag materialization. -/
+theorem read_raw (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.TempEnv)
     (k : CC.Cont) (m : CC.Mem) (index : Fin 16) (shift : BitVec 8)
     (bindingBlock cellsBlock : CC.Block) (bindingOffset cellsOffset : CC.Integers.Ptrofs)
-    (value : BitVec 64)
+    (value : CC.Val)
     (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock bindingOffset))
     (reg : le.get X86_program_profile_bpf.___x86_rd_reg =
       some (X86Width.argument (registerByte index)))
@@ -118,16 +127,16 @@ theorem read_value (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.Te
       some (.Vptr cellsBlock cellsOffset))
     (current : CC.Mem.load CC.Mptr m cellsBlock
       (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
-        some (.Vlong value)) :
+        some value)
+    (longPointer : CC.Cop.semCast value (.Tpointer CC.tvoid CC.noattr)
+      (.Tpointer CC.tvoid CC.noattr) m = some value)
+    (pointerLong : CC.Cop.semCast value (.Tpointer CC.tvoid CC.noattr)
+      CC.tlong m = some value)
+    (longLong : CC.Cop.semCast value CC.tlong CC.tulong m = some value) :
     InternalRun ge 19
       (.State X86_program_profile_bpf.f_x86_sim_inline_read_reg X86RegisterReadEntry.afterWidth k e le m)
       (.State X86_program_profile_bpf.f_x86_sim_inline_read_reg afterValue k e
-        (valueTemps le shift cellsBlock cellsOffset value) m) := by
-  have longPointer : CC.Cop.semCast (.Vlong value) (.Tpointer CC.tvoid CC.noattr)
-      (.Tpointer CC.tvoid CC.noattr) m = some (.Vlong value) := rfl
-  have pointerLong : CC.Cop.semCast (.Vlong value) (.Tpointer CC.tvoid CC.noattr)
-      CC.tlong m = some (.Vlong value) := rfl
-  have longLong : CC.Cop.semCast (.Vlong value) CC.tlong CC.tulong m = some (.Vlong value) := rfl
+        (rawTemps le shift cellsBlock cellsOffset value) m) := by
   have sixteen : CC.Cop.castIntLong .Unsigned (16#32) = (16#64) := rfl
   have indexAdd : CC.Cop.semBinaryOperation ge.genv_cenv .Oadd (.Vptr cellsBlock cellsOffset)
       (.Tpointer (.Tstruct X86_program_profile_bpf._x86_sim_gpr_cell CC.noattr) CC.noattr)
@@ -153,7 +162,7 @@ theorem read_value (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.Te
   apply internalRun_of_steps
   all_goals
     simp +decide [steps, InternalPath, InternalState, CC.doStep, shiftSet, pointerRead,
-      pointerSave, valueSet, valueTemps, CC.doEvalExpr, CC.doDerefLoc, CC.typeof, CC.tptr,
+      pointerSave, valueSet, rawTemps, CC.doEvalExpr, CC.doDerefLoc, CC.typeof, CC.tptr,
       CC.PTree.gss, CC.PTree.gso, binding, reg, shiftRead,
       X86RegisterReadEntry.byte_long_cast, X86RegisterReadEntry.byte_cast,
       table_address ge layout, value_address ge layout, pointer_address ge layout,
@@ -164,6 +173,28 @@ theorem read_value (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.Te
       CC.Integers.Int.zero, CC.Integers.MI.zero, CC.Integers.Int.one, CC.Integers.MI.one,
       CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
       longPointer, pointerLong, longLong, CC.Eapp, CC.E0]
+
+/-- The actual nineteen source steps load any of the sixteen GPR cells and
+retain its scalar word and the entire memory, before SP/tag materialization. -/
+theorem read_value (ge : CC.CGenv) (layout : Layout ge) (e : CC.Env) (le : CC.TempEnv)
+    (k : CC.Cont) (m : CC.Mem) (index : Fin 16) (shift : BitVec 8)
+    (bindingBlock cellsBlock : CC.Block) (bindingOffset cellsOffset : CC.Integers.Ptrofs)
+    (value : BitVec 64)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock bindingOffset))
+    (reg : le.get X86_program_profile_bpf.___x86_rd_reg =
+      some (X86Width.argument (registerByte index)))
+    (shiftRead : le.get X86_program_profile_bpf._shift = some (.Vlong (shift.setWidth 64)))
+    (cells : CC.Mem.load CC.Mptr m bindingBlock (CC.Integers.Ptrofs.unsigned bindingOffset) =
+      some (.Vptr cellsBlock cellsOffset))
+    (current : CC.Mem.load CC.Mptr m cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + CC.Integers.Ptrofs.repr (16 * (index.val : Int)))) =
+        some (.Vlong value)) :
+    InternalRun ge 19
+      (.State X86_program_profile_bpf.f_x86_sim_inline_read_reg X86RegisterReadEntry.afterWidth k e le m)
+      (.State X86_program_profile_bpf.f_x86_sim_inline_read_reg afterValue k e
+        (valueTemps le shift cellsBlock cellsOffset value) m) := by
+  exact read_raw ge layout e le k m index shift bindingBlock cellsBlock
+    bindingOffset cellsOffset (.Vlong value) binding reg shiftRead cells current rfl rfl rfl
 
 /-- Actual caller entry, width helper and selected scalar-cell loads compose
 without allocating or changing any caller memory. -/

@@ -1,0 +1,62 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86RegisterReadValue"
+    ],
+    "exit": 0,
+    "seconds": 3.1234106210176833,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-reader-raw/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7031857459805906,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "composition": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluXorOperandsEntry"
+    ],
+    "exit": 0,
+    "seconds": 22.27927051798906,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "complete_instruction_families": 0,
+  "root_integration": "existing scalar APIs retained transitively"
+}

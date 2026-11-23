@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.X86AluXorOperandsEntry
+
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.read_raw
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.read_raw
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.read_value
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.read_value
+#check KProgFormal.ClightRefinement.X86RegisterReadValue.from_call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadValue.from_call
+#check KProgFormal.ClightRefinement.X86RegisterReadScalar.call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadScalar.call
+#check KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadScalar.native_call
+#check KProgFormal.ClightRefinement.X86AluXorOperandsEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorOperandsEntry.from_call
