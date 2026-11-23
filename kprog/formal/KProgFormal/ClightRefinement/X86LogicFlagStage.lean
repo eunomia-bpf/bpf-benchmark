@@ -55,6 +55,31 @@ private theorem selected_get (le : CC.TempEnv) (places : Locations) (old : BitVe
     (X86ShiftLeftCarry.afterTemps le places.cf.1 places.cf.2 old)).2 id kind).trans
       ((X86ShiftLeftCarry.temps le places.cf.1 places.cf.2 old).2.2.2 id carry byte pointer)
 
+/-- The six original writer inputs retain their preceding values across
+old-CF sampling, classifier, width helpers and all five flag stores. -/
+theorem writer_observations (le : CC.TempEnv) (places : Locations) (old : BitVec 8)
+    (value : BitVec 64) (size : X86.Size) :
+    (temps le places old value size).get X86_program_profile_bpf.___x86_bind =
+      le.get X86_program_profile_bpf.___x86_bind ∧
+    (temps le places old value size).get X86_program_profile_bpf._dst =
+      le.get X86_program_profile_bpf._dst ∧
+    (temps le places old value size).get X86_program_profile_bpf.___x86_l_alu =
+      le.get X86_program_profile_bpf.___x86_l_alu ∧
+    (temps le places old value size).get X86_program_profile_bpf.___x86_l_width__1 =
+      le.get X86_program_profile_bpf.___x86_l_width__1 ∧
+    (temps le places old value size).get X86_program_profile_bpf.___x86_l_result =
+      le.get X86_program_profile_bpf.___x86_l_result ∧
+    (temps le places old value size).get X86_program_profile_bpf.___x86_l_dst_shift =
+      le.get X86_program_profile_bpf.___x86_l_dst_shift := by
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  all_goals
+    simp +decide only [temps, X86LogicFlagOrder.temps, CC.PTree.gso]
+    rw [(X86LogicFlagWidths.observations _ value size).2.2.2 _
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel) (by decide +kernel)]
+    exact selected_get le places old _ (by decide +kernel) (by decide +kernel)
+      (by decide +kernel) (by decide +kernel)
+
 /-- The complete actual logical flags stage executes from its original old-CF
 load through classifier, three real width helpers, all five original stores
 and loop exits to the unchanged writer, with native final bytes and header. -/
