@@ -14,8 +14,8 @@ accepted CNEG caller and source observations derived from the seven-call
 prefix. The current complete program theorem reaches seven calls.
 
 Focused build 274 and two public type/axiom queries pass at original proof
-caps, CPU 17, one worker, 32 GiB and shared timing lock. Standard logic and
-inherited external-function/assembly assumptions appear in the queries.
+caps, CPU 17, one worker, 32 GiB and shared timing lock. The axiom queries
+report standard logic for this native fetch transport.
 The receipt retains the initial missing-target run: a preparation assertion
 stopped before source creation; the completed source then passed its actual
 check. V coordinates whole confirmation. Raw evidence:

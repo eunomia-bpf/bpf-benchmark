@@ -203,5 +203,5 @@ import KProgFormal.ClightRefinement.X86RegisterReadPointerBoundary
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
 import KProgFormal.ClightRefinement.Arm64CnegCondition
-import KProgFormal.ClightRefinement.Arm64CnegNumeric
-import KProgFormal.ClightRefinement.Arm64CnegWrite
+import KProgFormal.ClightRefinement.Arm64CnegCaller
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegAdmission
