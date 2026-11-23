@@ -1,0 +1,33 @@
+KProgFormal.ClightRefinement.X86LogicFlagWritable.frame {frontier : CC.Block} {before after : CC.Mem}
+  (kept : KProgFormal.ClightRefinement.FrameBelow frontier before after)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations)
+  (old :
+    CC.Positive.toNat places.cf.fst < CC.Positive.toNat frontier ∧
+      CC.Positive.toNat places.zf.fst < CC.Positive.toNat frontier ∧
+        CC.Positive.toNat places.sf.fst < CC.Positive.toNat frontier ∧
+          CC.Positive.toNat places.overflow.fst < CC.Positive.toNat frontier ∧
+            CC.Positive.toNat places.pf.fst < CC.Positive.toNat frontier)
+  (permissions : KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable before places) :
+  KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable after places
+'KProgFormal.ClightRefinement.X86LogicFlagWritable.frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable.store {before after : CC.Mem}
+  {places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations}
+  (permissions : KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable before places)
+  (address : KProgFormal.ClightRefinement.X86LogicFlagMemory.Address) (value : CC.Val)
+  (stored : CC.Mem.store CC.Chunk.Mint8unsigned before address.fst address.snd.unsigned value = some after) :
+  KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable after places
+'KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable.store' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagWritable.stores (memory : CC.Mem)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations)
+  (permissions : KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable memory places)
+  (cfByte zfByte sfByte ofByte pfByte : CC.Val) :
+  ∃ cfHeap zfHeap sfHeap ofHeap after,
+    CC.Mem.store CC.Chunk.Mint8unsigned memory places.cf.fst places.cf.snd.unsigned cfByte = some cfHeap ∧
+      CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned zfByte = some zfHeap ∧
+        CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned sfByte = some sfHeap ∧
+          CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned ofByte =
+              some ofHeap ∧
+            CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned pfByte = some after
+'KProgFormal.ClightRefinement.X86LogicFlagWritable.stores' depends on axioms: [propext, Classical.choice, Quot.sound]

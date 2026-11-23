@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86LogicFlagWritable
+
+#check KProgFormal.ClightRefinement.X86LogicFlagWritable.frame
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWritable.frame
+#check KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable.store
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWritable.Writable.store
+#check KProgFormal.ClightRefinement.X86LogicFlagWritable.stores
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagWritable.stores
