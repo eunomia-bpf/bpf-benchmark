@@ -57,13 +57,14 @@ theorem represented (cpu : X86.Cpu) (dst src : Fin 16) (highDst highSrc : Bool)
       (cpu.setReg .b (X86.GPR.ofIndex dst) value highDst))
     (places : X86LogicFlagOrder.Locations)
     (flags : X86LogicFlagMemory.FlagsRepresent memory places
-      (X86.Flags.logic .b (X86.Value.trunc .b value) (cpu.oracle.bits cpu.oracle.cursor) cpu.flags)) :
+      (X86.Flags.logic .b (X86.Value.trunc .b value) (cpu.oracle.bits cpu.oracle.cursor) cpu.flags))
+    (addressWidth : X86.LinearAddressWidth := .la48) :
     let next := X86.step ⟨.bin kind .b (.reg (X86.GPR.ofIndex dst) highDst)
-      (.reg (X86.GPR.ofIndex src) highSrc), length⟩ cpu
+      (.reg (X86.GPR.ofIndex src) highSrc), length⟩ cpu addressWidth
     X86RegisterView.RegistersRepresent addresses origins memory block base next ∧
       X86LogicFlagMemory.FlagsRepresent memory places next.flags := by
   dsimp only
-  rw [register_step cpu dst src highDst highSrc kind value length live selected]
+  rw [register_step cpu dst src highDst highSrc kind value length live selected addressWidth]
   exact ⟨registers, flags⟩
 
 end KProgFormal.ClightRefinement.X86LogicNative

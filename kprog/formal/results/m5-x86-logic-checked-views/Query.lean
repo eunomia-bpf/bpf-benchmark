@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86LogicChecked
+
+#check KProgFormal.ClightRefinement.X86LogicNative.represented
+#print axioms KProgFormal.ClightRefinement.X86LogicNative.represented
+#check KProgFormal.ClightRefinement.X86LogicChecked.reads
+#print axioms KProgFormal.ClightRefinement.X86LogicChecked.reads
+#check KProgFormal.ClightRefinement.X86LogicChecked.represented
+#print axioms KProgFormal.ClightRefinement.X86LogicChecked.represented
