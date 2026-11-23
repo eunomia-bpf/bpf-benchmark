@@ -197,7 +197,7 @@ import KProgFormal.ClightRefinement.X86RegisterView
 import KProgFormal.ClightRefinement.X86AluEntry
 import KProgFormal.ClightRefinement.Arm64SelectBody
 import KProgFormal.ClightRefinement.X86AluDecode
-import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegPrefixNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnPrefixNative
 import KProgFormal.ClightRefinement.X86AluXorResultEntry
 import KProgFormal.ClightRefinement.X86RegisterReadPointerCall
 import KProgFormal.ClightRefinement.X86LogicFlagWidths
