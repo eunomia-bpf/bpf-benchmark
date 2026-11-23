@@ -1,0 +1,46 @@
+{
+  "confirmed_utc": "2026-11-23T07:37:53.983118+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64FmovNumeric"
+    ],
+    "exit": 0,
+    "seconds": 3.434126377105713,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 258,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-fmov-read-operands/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5230281352996826,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "read_prefix": 99,
+    "retained_inputs": 10
+  },
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64FmovReadOperands.lean",
+    "size_bytes": 4523,
+    "mtime_ns": 1795419333409218972
+  },
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
