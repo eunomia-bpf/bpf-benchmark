@@ -43,3 +43,17 @@ in both are the loads right after two lookups into large arrays: the consistent-
 division for the ring index (`% 65537`), which native code does with a multiply. Both arms perform the
 same table reads and the same kernel hash lookups (htab_map_hash 0.89% / 0.82%, lookup_nulls_elem_raw
 0.60% / 0.57% of all samples), so per call they meet at 180 ns.
+
+## Cilium on the same linker
+
+`cilium-replay.sh` compiles bpf_lxc.c with the 8430daa81 headers and links each bpf_lxc program that has
+a saved 2026-11-16 plan with the same 8430daa81 linker (`cilium-replay.out`): cil_from_container,
+cil_to_container, cil_lxc_policy, tail_handle_ipv4, tail_ipv4_to_endpoint, tail_no_service_ipv4 (two
+plans), tail_handle_arp. 64 lookups: 60 take their own map's site by name, four call the generic helper,
+none takes another map's form. Cilium's gap to its 05-29 number has another source.
+
+Cilium's eBPF arm itself (cil_from_container per call, baseline phase) varies from 558 to 1109 ns over
+the 40 Cilium runs of 2026-11-17 to 11-23 on this host, with 53 to 92 programs loaded in the baseline
+phase; the 05-29 run (another checkout, /home/yunwei37/workspace/bpf-benchmark) has 486 ns with 53. On
+the same host the native/eBPF ratio of one run is the comparison that holds: 1.205x per call on
+dcf4a1aef.
