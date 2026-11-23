@@ -1,0 +1,69 @@
+{
+  "status": "focused and five direct queries passed",
+  "confirmed_utc": "2026-11-23T04:50:04.639437+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegCondition"
+    ],
+    "exit": 0,
+    "seconds": 48.97272181510925,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 253,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-condition-site/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5891697406768799,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 5,
+  "counts": {
+    "header_and_call": 16,
+    "GE_function": 28,
+    "caller_return_normalization": 7,
+    "condition_site": 51
+  },
+  "axioms": {
+    "new": false,
+    "logical": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "inherited": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ]
+  },
+  "root_import_added": false,
+  "full_check": "V owns next whole confirmation; prior DIV failure retained; not rerun by FORMAL",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionGe.lean",
+      "size_bytes": 7369,
+      "mtime_ns": 1795409270413987188
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegCondition.lean",
+      "size_bytes": 12453,
+      "mtime_ns": 1795409270414384469
+    }
+  ]
+}

@@ -110,4 +110,14 @@ theorem native_truth (m : CC.Mem) (s : Reference.AArch64.State) :
     CC.Integers.Int.eq,CC.Integers.MI.eq,CC.Integers.Int.zero,CC.Integers.Int.one,
     CC.Integers.MI.zero,CC.Integers.MI.one]
 
+/-- The actual helper result itself is the normalized imported GE Boolean. -/
+theorem native_result (s : Reference.AArch64.State) :
+    result ((read_flag .N s.machine).setWidth 8) ((read_flag .V s.machine).setWidth 8) =
+      CC.Val.ofBool (ConditionHolds (10#4) s.machine) := by
+  have comparison : ∀ n v : BitVec 1,
+      ((n.setWidth 8).setWidth 32 == (v.setWidth 8).setWidth 32) = decide (n = v) := by
+    decide +kernel
+  simp only [result,comparison]
+  simp +decide [ConditionHolds]
+
 end KProgFormal.ClightRefinement.Arm64ConditionGe
