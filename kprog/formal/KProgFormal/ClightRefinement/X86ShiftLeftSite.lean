@@ -14,22 +14,22 @@ private theorem signature : CC.typeOfFundef (.Internal X86_program_profile_bpf.f
 
 /-- The real ALU_REG arithmetic site enters its genuine ALU callee and resumes
 to the same caller, locals and continuation with the exact two temporary writes. -/
-private theorem plumbing (ge : CC.CGenv) (aluBlock : CC.Block)
+theorem call_and_resume (ge : CC.CGenv) (aluBlock : CC.Block)
     (binding : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
       CC.Genv.findFunctPtr ge.genv_genv aluBlock =
         some (.Internal X86_program_profile_bpf.f_x86_alu_result))
     (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
     (unshadowed : e.get X86_program_profile_bpf._x86_alu_result = none)
-    (lhs rhs : BitVec 64) (size : X86.Size)
+    (lhs rhs : BitVec 64) (size : X86.Size) (code : BitVec 8)
     (left : le.get X86_program_profile_bpf.___x86_l_lhs = some (.Vlong lhs))
     (right : le.get X86_program_profile_bpf.___x86_l_rhs = some (.Vlong rhs))
-    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32)))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (code.setWidth 32)))
     (width : le.get X86_program_profile_bpf.___x86_l_width__1 = some (X86ShiftLeft.argument size))
     (k : CC.Cont) (m : CC.Mem) :
     ∃ callK,
       InternalRun ge 2 (.State function statement k e le m)
         (.Callstate (.Internal X86_program_profile_bpf.f_x86_alu_result)
-          (X86ShiftLeftAlu.arguments lhs rhs size) callK m) ∧
+          [.Vlong lhs, .Vlong rhs, .Vint (code.setWidth 32), X86ShiftLeft.argument size] callK m) ∧
       ∀ value : CC.Val, InternalRun ge 3
         (.Returnstate value (CC.callCont callK) m)
         (.State function .Sskip k e (afterTemps le value) m) := by
@@ -78,7 +78,7 @@ theorem internal (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
     InternalRun ge (length size) (.State function statement k e le m)
       (.State function .Sskip k e (afterTemps le (X86ShiftLeft.result lhs rhs size)) m) := by
   obtain ⟨callK, beforeCall, afterCall⟩ :=
-    plumbing ge aluBlock binding function e le unshadowed lhs rhs size left right operation width k m
+    call_and_resume ge aluBlock binding function e le unshadowed lhs rhs size (5#8) left right operation width k m
   have arithmetic := X86ShiftLeftAlu.internal ge shiftBlock shiftBinding lhs rhs size callK m
   exact (beforeCall.trans arithmetic).trans (afterCall (X86ShiftLeft.result lhs rhs size))
 

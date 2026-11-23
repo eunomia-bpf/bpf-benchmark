@@ -1,0 +1,193 @@
+KProgFormal.ClightRefinement.X86ShiftLeftSite.call_and_resume (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (code : BitVec 8) (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 code)))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem) :
+  ∃ callK,
+    KProgFormal.ClightRefinement.InternalRun ge 2
+        (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftSite.statement k e le m)
+        (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)
+          [CC.Val.Vlong lhs, CC.Val.Vlong rhs, CC.Val.Vint (BitVec.setWidth 32 code),
+            KProgFormal.ClightRefinement.X86ShiftLeft.argument size]
+          callK m) ∧
+      ∀ (value : CC.Val),
+        KProgFormal.ClightRefinement.InternalRun ge 3 (CC.State.Returnstate value (CC.callCont callK) m)
+          (CC.State.State function CC.Stmt.Sskip k e (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le value)
+            m)
+'KProgFormal.ClightRefinement.X86ShiftLeftSite.call_and_resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ShiftLeftRoute.select_arithmetic (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (code : BitVec 8)
+  (supported : code = 2#8 ∨ code = 3#8 ∨ code = 4#8 ∨ code = 5#8)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 code))) :
+  KProgFormal.ClightRefinement.InternalRun ge 3
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftSite.statement
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k) e le m)
+'KProgFormal.ClightRefinement.X86ShiftLeftRoute.select_arithmetic' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ShiftLeftRoute.select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 5#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge 3
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftSite.statement
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k) e le m)
+'KProgFormal.ClightRefinement.X86ShiftLeftRoute.select' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ShiftLeftRoute.to_flags (ge : CC.CGenv) (aluBlock shiftBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (shiftBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._kprog_x86_shl_result = some shiftBlock ∧
+      ge.genv_genv.findFunctPtr shiftBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_kprog_x86_shl_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 5#32))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge (3 + KProgFormal.ClightRefinement.X86ShiftLeftSite.length size + 1)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le
+        (KProgFormal.ClightRefinement.X86ShiftLeft.result lhs rhs size))
+      m)
+'KProgFormal.ClightRefinement.X86ShiftLeftRoute.to_flags' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicSite.internal (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem) (code : BitVec 8) (value : BitVec 64)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 code)))
+  (selected : code = 2#8 ∧ value = lhs ^^^ rhs ∨ code = 3#8 ∧ value = lhs ||| rhs ∨ code = 4#8 ∧ value = lhs &&& rhs) :
+  KProgFormal.ClightRefinement.InternalRun ge 25
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftSite.statement k e le m)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le (CC.Val.Vlong value)) m)
+'KProgFormal.ClightRefinement.X86LogicSite.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicSite.to_flags (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem) (code : BitVec 8) (value : BitVec 64)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint (BitVec.setWidth 32 code)))
+  (selected : code = 2#8 ∧ value = lhs ^^^ rhs ∨ code = 3#8 ∧ value = lhs ||| rhs ∨ code = 4#8 ∧ value = lhs &&& rhs) :
+  KProgFormal.ClightRefinement.InternalRun ge 29
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le (CC.Val.Vlong value)) m)
+'KProgFormal.ClightRefinement.X86LogicSite.to_flags' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicSite.xor_to_flags (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 2#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge 29
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le (CC.Val.Vlong (lhs ^^^ rhs))) m)
+'KProgFormal.ClightRefinement.X86LogicSite.xor_to_flags' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicSite.or_to_flags (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 3#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge 29
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le (CC.Val.Vlong (lhs ||| rhs))) m)
+'KProgFormal.ClightRefinement.X86LogicSite.or_to_flags' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicSite.and_to_flags (ge : CC.CGenv) (aluBlock : CC.Block)
+  (binding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_alu_result e = none) (lhs rhs : BitVec 64) (size : X86.Size)
+  (left : CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le = some (CC.Val.Vlong lhs))
+  (right : CC.PTree.get X86_program_profile_bpf.___x86_l_rhs le = some (CC.Val.Vlong rhs))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument size))
+  (k : CC.Cont) (m : CC.Mem)
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint 4#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge 29
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e le m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags k e
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps le (CC.Val.Vlong (lhs &&& rhs))) m)
+'KProgFormal.ClightRefinement.X86LogicSite.and_to_flags' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

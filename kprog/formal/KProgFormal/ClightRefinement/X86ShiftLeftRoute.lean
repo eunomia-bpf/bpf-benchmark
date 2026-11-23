@@ -59,16 +59,18 @@ def body : CC.Stmt :=
 /-- The routed statement is extracted from the actual complete ALU_REG body. -/
 theorem body_source : X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG.fn_body = body := rfl
 
-/-- SHL passes the real SBB and ADC gates and selects the original arithmetic
-fragment with its original flag stage as the continuation. -/
-theorem select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
-    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
-    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+/-- Logical operations and SHL pass the actual SBB/ADC gates and reach
+the original shared arithmetic statement with its real flag continuation. -/
+theorem select_arithmetic (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (code : BitVec 8)
+    (supported : code = (2#8) ∨ code = (3#8) ∨ code = (4#8) ∨ code = (5#8))
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (code.setWidth 32))) :
     InternalRun ge 3 (.State function dispatch k e le m)
       (.State function X86ShiftLeftSite.statement (.Kseq flags k) e le m) := by
   have tested : CC.doEvalExpr ge e le m sbbTest = some (.Vint (0#32)) ∧
       CC.doEvalExpr ge e le m adcTest = some (.Vint (0#32)) := by
-    constructor <;> simp +decide [sbbTest, adcTest, CC.doEvalExpr, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr,
+    constructor <;> rcases supported with rfl | rfl | rfl | rfl
+    all_goals simp +decide [sbbTest, adcTest, CC.doEvalExpr, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr,
       CC.tuchar, CC.tuint, CC.tint, CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
       CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast,
       CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Val.ofBool, CC.Integers.Int.repr,
@@ -91,6 +93,14 @@ theorem select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
   exact .step (by trivial) (CC.doStep_sound ge _ _ _ first)
     (.step (by trivial) (CC.doStep_sound ge _ _ _ second)
       (.step (by trivial) (CC.doStep_sound ge _ _ _ third) (.refl _)))
+
+/-- SHL uses the shared checked source route. -/
+theorem select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem)
+    (operation : le.get X86_program_profile_bpf.___x86_l_alu = some (.Vint (5#32))) :
+    InternalRun ge 3 (.State function dispatch k e le m)
+      (.State function X86ShiftLeftSite.statement (.Kseq flags k) e le m) :=
+  select_arithmetic ge function e le k m (5#8) (.inr (.inr (.inr rfl))) operation
 
 /-- Actual routing, arithmetic call and resume reach the untouched flag stage
 with the mature SHL result in the exact source temporary map. -/
