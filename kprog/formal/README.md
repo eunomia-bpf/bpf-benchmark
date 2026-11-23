@@ -2,10 +2,11 @@
 
 This directory proves components of the kprog C simulators against external
 Lean ISA models. The current route executes the actual exported C in Clight
-and relates its state to the native model. Per-instruction handler refinement,
-dispatcher composition, and the complete O1/O2/O4 obligations remain unfinished
-(M5/M6 open). Earlier generated-contract counts do not measure current coverage.
-Current work is tracked in the [verification worklist](../docs/todo.md).
+and relates its state to the native model. The M5/M6 work combines these
+components into per-instruction handler refinement, dispatcher composition,
+and the complete O1/O2/O4 arguments. Current coverage comes from the Clight
+proof receipts, and the [verification worklist](../docs/todo.md) tracks the
+next composition steps.
 
 ## Specification and layout
 
@@ -30,37 +31,41 @@ Current work is tracked in the [verification worklist](../docs/todo.md).
 The obsolete JSON/generated-contract proof route and its generators were
 retired under the coordinator's 2026-11-16 instruction; the
 [retirement inventory](results/legacy-retirement/README.md) records that change.
-No second ISA specification is maintained in generated contracts.
+Current proofs use the pinned external ISA specifications described above.
 
-## Established components and remaining scope
+## Checked components and composition work
 
 The checked components include actual x86 width/count/shift helpers,
 ALU/flag calls and scalar byte-register writeback; AArch64 register readers,
 writers, condition/select and MOVK components; and shared allocation,
 framing, deallocation, entry and caller composition laws. Every theorem's
-premises define its exact scope. These components do not establish all
-simulator operations or one complete dispatcher-step theorem per ISA.
+premises and result receipt define its exact scope. The worklist organizes
+their composition into instruction handlers and dispatcher-step theorems
+for each ISA.
 
 The [x86 entry-storage receipt](results/m5-x86-entry-storage/README.md)
 connects the real handler allocation and caller permissions to the 169-step
 ordinary scalar byte writer. [ARM pointer-value execution](results/m5-pointer-values/README.md)
 and [selected-operand matching](results/m5-select-matched/README.md) record the
-parallel ARM work. Consult each receipt for pending composition obligations.
+parallel ARM work. Each receipt records the checked behavior and next
+composition steps.
 
 ## Trust boundary
 
 Lean's kernel checks proof terms against the pinned definitions, with the
 standard logical axioms. Executing imported Clight additionally uses the
 existing `CC.externalFunctionsSem` and `CC.inlineAssemblySem` assumptions;
-scoped `#print axioms` output records their occurrence. The C front end,
-C-to-Lean exporter, imported semantics and their correspondence to the
-production simulator remain part of the trust argument. External models are
-specifications, not proofs of physical hardware. Hardware/oracle comparisons
-provide sampled fidelity evidence rather than universal refinement.
+scoped `#print axioms` output records their occurrence. The trust argument
+includes the C front end, C-to-Lean exporter, imported semantics and their
+correspondence to the production simulator. The pinned ISA models supply
+architectural specifications; hardware/oracle comparisons check instruction
+results on the sampled cases. Lean refinement statements express universal
+correspondence within their stated premises.
 
-The end-to-end argument also needs specialization, native linking/LTO,
-artifact binding, platform memory/provider assumptions and verifier execution.
-The current component proofs do not discharge all of these obligations.
+The worklist extends the end-to-end argument across specialization, native
+linking/LTO, artifact binding, platform memory/provider assumptions and
+verifier execution. Component receipts record the established executions
+and the next composition steps for that argument.
 
 ## Run
 
@@ -71,7 +76,9 @@ make -C kprog/formal check
 ```
 
 This builds the proof library and executable reference and runs the semantic
-oracles. It does not modify benchmark workloads or settings. Use the existing
-`clight-sources` Make target only when inspecting the generated C imports;
-`make check` is the complete verification entry point. Focused development
-builds and public queries are recorded in the corresponding result receipts.
+oracles. The checks compare instruction values, registers, flags, memory
+effects and fault behavior, including division faults and memory permissions.
+Benchmark workloads and settings retain their frozen definition. The existing
+`clight-sources` Make target generates C imports for inspection; `make check`
+is the complete verification entry point. Focused development builds and
+public queries are recorded in the corresponding result receipts.
