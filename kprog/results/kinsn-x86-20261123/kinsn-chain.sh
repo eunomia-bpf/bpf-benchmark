@@ -17,12 +17,23 @@ if [ ! -f $K/src/Makefile ]; then
 fi
 echo "src $(date -u +%FT%TZ) $(du -sh $K/src | cut -f1) from 24cd6e63ce91" > $O
 V="KERNEL_DIR=$K/src HOST_KERNEL_BUILD_DIR_X86=$K/build-x86 X86_RUNTIME_KERNEL_IMAGE=$K/build-x86/arch/x86/boot/bzImage HOST_KINSN_DIR_X86=$K/kinsn-x86 X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kinsn:current X86_RUNNER_RUNTIME_IMAGE_TAR=$R/.cache/container-images/x86_64-kinsn-runtime.image.tar"
+# kinsn/module/x86 also holds kprog's bpf_x86_native_lab.c, which reads the kprog kernel's bpf_prog_aux
+# fields (native_trusted_*), absent from the kinsn kernel (2026-11-23T13:40Z build: rc=2 on that file
+# alone). The kinsn kernel takes the fourteen kinsn modules of that directory: the recipe's own kbuild
+# command (runner/mk/build.mk host-kinsn-x86) with obj-m naming them, and the image target treats
+# host-kinsn-x86 as made (-o).
+KINSN_MODS=$(grep 'obj-m' $R/kinsn/module/x86/Makefile | sed 's/.*+= //' | grep -v native_lab | tr '\n' ' ')
 s=$(date -u +%FT%TZ)
-nice -n 5 taskset -c 8-23 make -C $R host-kinsn-x86 $V IMAGE_BUILD_JOBS=16 > $D/kernel.log 2>&1; rc=$?
-echo "kernel+kinsn modules start $s end $(date -u +%FT%TZ) rc=$rc modules=$(ls $K/kinsn-x86/*.ko 2>/dev/null | wc -l)" >> $O
+nice -n 5 taskset -c 8-23 make -C $R host-kernel-x86 $V IMAGE_BUILD_JOBS=16 > $D/kernel.log 2>&1; rc=$?
+echo "kernel start $s end $(date -u +%FT%TZ) rc=$rc" >> $O
 [ $rc = 0 ] || exit 0
 s=$(date -u +%FT%TZ)
-flock $L/image nice -n 5 taskset -c 8-23 make -C $R x86-runner-runtime-image-tar $V IMAGE_BUILD_JOBS=16 JOBS=16 > $D/image.log 2>&1; rc=$?
+install -d $K/kinsn-x86
+nice -n 5 taskset -c 8-23 make -C $K/build-x86 ARCH=x86_64 M=$R/kinsn/module/x86 MO=$K/kinsn-x86 modules -j16 "obj-m=$KINSN_MODS" > $D/modules.log 2>&1; rc=$?
+echo "kinsn modules start $s end $(date -u +%FT%TZ) rc=$rc modules=$(ls $K/kinsn-x86/*.ko 2>/dev/null | wc -l)" >> $O
+[ $rc = 0 ] || exit 0
+s=$(date -u +%FT%TZ)
+flock $L/image nice -n 5 taskset -c 8-23 make -C $R -o host-kinsn-x86 x86-runner-runtime-image-tar $V IMAGE_BUILD_JOBS=16 JOBS=16 > $D/image.log 2>&1; rc=$?
 echo "image start $s end $(date -u +%FT%TZ) rc=$rc" >> $O
 [ $rc = 0 ] || exit 0
 run() { # app stats samples duration tag

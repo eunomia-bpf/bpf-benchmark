@@ -1,0 +1,10 @@
+lookup call=21 sym=balancer_ingress off=0xe9f native_map=None site=20 kind=Call site_map=None
+lookup call=24 sym=balancer_ingress off=0xf84 native_map=Some("vip_to_down_reals_map") site=23 kind=HashOfMaps site_map=Some("vip_to_down_rea")
+lookup call=25 sym=balancer_ingress off=0xf94 native_map=None site=24 kind=Call site_map=None
+lookup call=38 sym=balancer_ingress off=0x14b8 native_map=None site=32 kind=PerCpuArray site_map=Some("stats")
+lookup call=43 sym=balancer_ingress off=0x166f native_map=None site=37 kind=PerCpuArray site_map=Some("stats")
+lookup call=44 sym=balancer_ingress off=0x16c7 native_map=None site=40 kind=PerCpuArray site_map=Some("stats")
+lookup call=47 sym=balancer_ingress off=0x17b5 native_map=Some("vip_to_down_reals_map") site=50 kind=HashOfMaps site_map=Some("vip_to_down_rea")
+lookup call=48 sym=balancer_ingress off=0x17c5 native_map=None site=41 kind=Call site_map=None
+lookups 66 matched by map name 58
+blob 10164 bytes
