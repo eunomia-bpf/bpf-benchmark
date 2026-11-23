@@ -17,7 +17,7 @@ private def pieces : Pieces :=
   | .Ssequence dispatch switch => ⟨dispatch, switch⟩
   | _ => ⟨.Sskip, .Sskip⟩
 
-private def dispatch : CC.Stmt := by run_tac cachePart (← `(pieces.dispatch))
+def dispatch : CC.Stmt := by run_tac cachePart (← `(pieces.dispatch))
 def flagSwitch : CC.Stmt := by run_tac cachePart (← `(pieces.switch))
 
 /-- The complete classifier and following switch are the original source statements. -/
@@ -126,7 +126,7 @@ theorem temps (le : CC.TempEnv) :
   intro id different
   simp [afterTemps, List.replicate, List.foldl, CC.PTree.gso, Ne.symm different]
 
-private def cases : CC.LStmts := by
+def cases : CC.LStmts := by
   run_tac cachePart (← `(match flagSwitch with
     | .Sswitch _ cases => cases
     | _ => .LSnil))

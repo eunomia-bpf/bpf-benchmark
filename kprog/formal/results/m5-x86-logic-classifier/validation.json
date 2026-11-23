@@ -1,0 +1,45 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86LogicFlagClassify"
+    ],
+    "exit": 0,
+    "seconds": 3.7818904779851437,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-logic-classifier/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4097592040197924,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0
+}

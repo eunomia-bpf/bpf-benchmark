@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.X86LogicFlagClassify
+
+#check KProgFormal.ClightRefinement.X86LogicFlagClassify.branch_source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagClassify.branch_source
+#check KProgFormal.ClightRefinement.X86LogicFlagClassify.internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagClassify.internal
+#check KProgFormal.ClightRefinement.X86LogicFlagClassify.to_logic
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagClassify.to_logic
+#check KProgFormal.ClightRefinement.X86LogicFlagClassify.from_flags
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagClassify.from_flags
+#check KProgFormal.ClightRefinement.X86LogicFlagClassify.observations
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagClassify.observations
