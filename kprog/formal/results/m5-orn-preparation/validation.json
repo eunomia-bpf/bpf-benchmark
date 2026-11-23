@@ -1,0 +1,98 @@
+{
+  "confirmed_utc": "2026-11-23T06:17:07.873650+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall",
+      "KProgFormal.ClightRefinement.Arm64OrnNative"
+    ],
+    "exit": 0,
+    "seconds": 1.8489325046539307,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 256,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-orn-preparation/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9276134967803955,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 7,
+  "attempts": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall",
+        "KProgFormal.ClightRefinement.Arm64OrnNative"
+      ],
+      "exit": 1,
+      "seconds": 50.67577505111694,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall",
+        "KProgFormal.ClightRefinement.Arm64OrnNative"
+      ],
+      "exit": 1,
+      "seconds": 1.8410069942474365,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryOrnCall",
+        "KProgFormal.ClightRefinement.Arm64OrnNative"
+      ],
+      "exit": 1,
+      "seconds": 1.8506042957305908,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  ],
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryOrnCall.lean",
+      "size_bytes": 12691,
+      "mtime_ns": 1795414226872964951
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64OrnNative.lean",
+      "size_bytes": 3517,
+      "mtime_ns": 1795414481995515103
+    }
+  ],
+  "scope": "original ninth nine-argument call binding and fetched mature ORN32 native execution",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
