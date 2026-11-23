@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.X86RegisterReadTag
+
+#check KProgFormal.ClightRefinement.X86RegisterReadTag.source
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.source
+#check KProgFormal.ClightRefinement.X86RegisterReadTag.tag_address
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.tag_address
+#check KProgFormal.ClightRefinement.X86RegisterReadTag.ordinary
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.ordinary
+#check KProgFormal.ClightRefinement.X86RegisterReadTag.observations
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.observations
+#check KProgFormal.ClightRefinement.X86RegisterReadTag.from_value
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadTag.from_value
