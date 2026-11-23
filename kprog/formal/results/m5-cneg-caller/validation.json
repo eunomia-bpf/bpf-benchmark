@@ -1,0 +1,43 @@
+{
+  "confirmed_utc": "2026-11-23T05:51:01.162261+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegCaller"
+    ],
+    "exit": 0,
+    "seconds": 1.755147933959961,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 265,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-caller/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5087661743164062,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegCaller.lean",
+    "size_bytes": 4717,
+    "mtime_ns": 1795412977535097284
+  },
+  "scope": "true eighth caller and original continuation; silent finite prefixes, unique endpoint and no infinite execution",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
