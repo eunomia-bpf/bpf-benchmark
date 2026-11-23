@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.X86LogicByteWriteback
+
+#check KProgFormal.ClightRefinement.X86LogicByteWriteback.from_flags
+#print axioms KProgFormal.ClightRefinement.X86LogicByteWriteback.from_flags
