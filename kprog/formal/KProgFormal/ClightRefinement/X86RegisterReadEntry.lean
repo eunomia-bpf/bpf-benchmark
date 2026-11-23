@@ -222,4 +222,22 @@ theorem arguments (binding : CC.Val) (reg width shift : BitVec 8) :
         .Vlong (shift.setWidth 64)] := by
   simp only [X86AluReadSite.arguments, unsigned_byte]
 
+/-- The actual reader's loop exit and return free its empty local frame and
+return the selected scalar word in four transitions. -/
+theorem finish (ge : CC.CGenv) (m : CC.Mem) (k : CC.Cont)
+    (le : CC.TempEnv) (value : BitVec 64)
+    (observed : le.get X86_program_profile_bpf._value = some (.Vlong value)) :
+    InternalRun ge 4
+      (.State X86_program_profile_bpf.f_x86_sim_inline_read_reg .Sskip
+        (continuation k) CC.emptyEnv le m)
+      (.Returnstate (.Vlong value) (CC.callCont k) m) := by
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have resultCast : CC.Cop.semCast (.Vlong value) CC.tulong CC.tulong m = some (.Vlong value) := rfl
+  apply internalRun_of_steps
+  all_goals
+    simp only [steps, InternalPath, InternalState, CC.doStep, continuation, returnStatement,
+      CC.doEvalExpr, CC.typeof, observed, X86_program_profile_bpf.f_x86_sim_inline_read_reg,
+      resultCast, CC.blocksOfEnv, CC.emptyEnv, empty, CC.Mem.freeList,
+      List.map_nil, CC.Eapp, CC.E0, List.nil_append, true_and]
+
 end KProgFormal.ClightRefinement.X86RegisterReadEntry
