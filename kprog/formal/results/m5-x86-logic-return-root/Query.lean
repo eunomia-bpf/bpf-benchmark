@@ -1,0 +1,28 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.registers
+#check KProgFormal.ClightRefinement.X86LogicFlagStage.writer_observations
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStage.writer_observations
+#check KProgFormal.ClightRefinement.X86ShiftWriteback.select_scalar
+#print axioms KProgFormal.ClightRefinement.X86ShiftWriteback.select_scalar
+#check KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#print axioms KProgFormal.ClightRefinement.X86RegisterView.byte_writer_allocated
+#check KProgFormal.ClightRefinement.X86LogicByteWriteback.from_writer
+#print axioms KProgFormal.ClightRefinement.X86LogicByteWriteback.from_writer
+#check KProgFormal.ClightRefinement.X86LogicByteWriteback.from_flags
+#print axioms KProgFormal.ClightRefinement.X86LogicByteWriteback.from_flags
+#check KProgFormal.ClightRefinement.X86AluEntry.loop_exits
+#print axioms KProgFormal.ClightRefinement.X86AluEntry.loop_exits
+#check KProgFormal.ClightRefinement.X86AluReturn.loops
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.loops
+#check KProgFormal.ClightRefinement.X86AluReturn.fallthrough
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.fallthrough
+#check KProgFormal.ClightRefinement.X86AluReturn.finish
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.finish
+#check KProgFormal.ClightRefinement.X86AluReturn.registers
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.registers
+#check KProgFormal.ClightRefinement.X86AluReturn.flags
+#print axioms KProgFormal.ClightRefinement.X86AluReturn.flags

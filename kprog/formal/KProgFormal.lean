@@ -200,7 +200,7 @@ import KProgFormal.ClightRefinement.X86AluDecode
 import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnPrefixNative
 import KProgFormal.ClightRefinement.X86AluXorResultEntry
 import KProgFormal.ClightRefinement.X86RegisterReadPointerCall
-import KProgFormal.ClightRefinement.X86LogicFlagStage
+import KProgFormal.ClightRefinement.X86AluReturn
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall
 import KProgFormal.ClightRefinement.Arm64CnegNative
 import KProgFormal.ClightRefinement.Arm64CnegCondition
