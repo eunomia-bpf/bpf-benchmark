@@ -27,18 +27,21 @@
 - 冻结路径只经 kprog/docs/freeze-open.tsv 开放，钩子始终运行。
 - 一个工作树、一个内核、一个镜像、一个底座；不开 worktree、clone、分支、stash；原始数据保留；用前向提交，不 revert；提交不带 AI 署名。
 
-## 四、现在的状态（2026-11-22T11:4xZ）
+## 四、现在的状态（2026-11-23T14:1xZ）
 
-- 路径 = 5/29（82ec89cb4）+ 必要修复 + 运营者要的改动，清单在第六节。
-- x86 功能检查（09613661f 的代码，10:51–11:11Z）：六个应用 rc=0，在跑的程序全部原生（OTel 14、BCC 25、Cilium 135、Tetragon 288、Tracee 169、Katran 1）。
-- arm64 功能检查 11:18Z 起在跑：结果写在 /workspaces/kprog-raw/coordinator/restore-529/chain18.done 和 /workspaces/kprog-raw/one-image-arm64-runs/check.log。
-- x86 完整计时排在 arm64 检查之后自动开始（协调者 chain19，冻结入口的 rotate），进度在 /workspaces/kprog-raw/one-image-runs/progress.log，计时期间持有 locks/timing。
+- 路径 = 5/29（82ec89cb4）+ 必要修复 + 运营者要的改动，清单在第六节；在跑的代码是 dcf4a1aef（jiffies_64 地址保留，冻结 .rodata 读成常量）。
+- 两边功能检查（dcf4a1aef）：六个应用 rc=0，在跑的程序全部原生（x86 OTel 14、BCC 25、Cilium 135、Tetragon 288、Tracee 169、Katran 1；arm64 13/23/102/91/73/1）。
+- 两边完整计时：x86 kprog/results/x86-rotate-20261123（几何平均吞吐 1.206x、每次调用 1.292x），arm64 kprog/results/arm64-spark-run5-20261123（1.116x、1.126x）。
+- kinsn x86：kinsn 内核（24cd6e63ce91）、14 个 kinsn 模块和 kinsn 镜像按 kprog/results/kinsn-x86-20261123/kinsn-chain.sh 构建，之后六个应用功能检查和完整计时，进度在 /workspaces/kprog-raw/coordinator/kinsn-20261123/{chain.done,progress.log}。
 
 ## 五、待办（按顺序；做完在行首写 [x] 和提交号）
 
-0. **协调者：Cilium、Katran 退步**（x86 计时 11-22 12:22–17:40Z，kprog/results/x86-rotate-20261122）：Cilium 每次调用 0.461x（8430daa81 是 1.108x），Katran 1.007x（1.239x）。
-   - 先查 map 查找走内核通用 helper 的位置：map 名字经寄存器拷贝、栈溢出就丢了。对照内核对同一程序的绑定。
-   - 只修设计之内的必要问题，修好后只补测 Cilium、Katran。
+0. **协调者：性能排查**（运营者 11-23：“性能是不是不够好? 为啥?”）。
+   - [x] Cilium 11-22 的 0.461x：x86 链接器丢了 jiffies_64 的 GOT 读，时钟读到旧寄存器（dcf4a1aef 修好，11-23 每次调用 1.205x）。
+   - [x] Katran：05-29 和 8430daa81 的原生 142–146 ns 来自旧链接器按调用顺序配查找点，三处 LRU 连接表查找拿到 stats 的 PERCPU_ARRAY 内联形式，每个包都返回 NULL，LRU 查找没做（kprog/results/katran-callorder-20261123，5c8423561）。Katran 的 05-29 底线和 OTel 的一样作废；现在原生和 eBPF 都是 180 ns。
+   - Cilium：stats 关吞吐 1.169x，低于 05-29 的 1.319x。热点程序 cil_from_container 的 eBPF 臂本身 05-29 是 486 ns、11-21 是 619 ns、11-23 是 726 ns，基线阶段的程序数 11-21 是 53、11-22 起是 90–92。先查这两个变化从哪里来，再判断 05-29 的 Cilium 底线能否对比。
+   - OTel：热点展开函数 110 处查找里 72 处走内核通用 helper（map 名字经寄存器拷贝、栈存取丢了），按设计“就地内联 map 查找”处理。客户机里的 cpu-clock 采样看不到 OTel 的程序（它在关中断的 perf 事件上下文里跑）。
+   - 只修设计之内的必要问题，修好后只补测受影响的应用。
 1. [x] **omp：arm64 功能检查结果**（11-22 11:18–12:22Z，六个应用 rc=0，在跑的程序全部原生：OTel 13、BCC 23、Cilium 102、Tetragon 91、Tracee 73、Katran 1）。 六个应用 rc=0、在跑的程序全部原生，即完成。有失败时：
    - 找原因，只修让程序跑通、结果正确的必要 bug；
    - 提交；
