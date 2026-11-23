@@ -17,7 +17,6 @@
     "shared_timing": true
   },
   "public": {
-    "status": "not_started",
     "command": [
       "taskset",
       "-c",
@@ -31,7 +30,10 @@
       "-j1",
       "results/m5-x86-logic-native-checked/Query.lean"
     ],
-    "reason": "shared nonblocking timing acquisition refused while frozen rotate holds exclusive lock"
+    "exit": 0,
+    "seconds": 1.5226922440342605,
+    "memory_limit": 34359738368,
+    "shared_timing": true
   },
   "proof_limits": {
     "maxHeartbeats": 200000,

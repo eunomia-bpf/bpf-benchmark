@@ -12,7 +12,6 @@ in the original imported specification. The canonical reference wrapper and
 genuine source caller composition continue next.
 
 Focused173 jobs pass at original200000/512 budgets,j1,32GiB with shared timing.
-The three public type/axiom queries are prepared in Query.lean. Their command
-has yet to execute: the timing lock is held exclusively by the new frozen
-rotate run. Public queries and root integration resume after timing release.
+All three public type/axiom queries pass after the frozen timing run released
+the resource lock. Root integration remains the next shared-entry batch.
 Raw diagnostics retain private-definition visibility/elaboration attempts.
