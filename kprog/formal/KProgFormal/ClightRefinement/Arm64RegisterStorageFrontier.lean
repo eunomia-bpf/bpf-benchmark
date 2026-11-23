@@ -67,7 +67,10 @@ def storage_frame {initial memory after : CC.Mem} {entry : HeaderLocal initial}
       (chunk : CC.Chunk) (offset : Int) :
       CC.Mem.load chunk after block offset = CC.Mem.load chunk memory block offset :=
     frame.load chunk block offset (Nat.lt_of_lt_of_le (local_owned initial id ty block binding) bound)
+  have vectorOwned := Nat.lt_of_lt_of_le (local_owned initial _ _ _ storage.vectors.binding) bound
   refine { storage with
+    vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := memory)
+      (fun offset => by simp only [CC.Mem.perm,(frame _ vectorOwned).2])).trans storage.vectorWritable
     roots := fun tags => (keep _ _ _ entry.binding CC.Mptr _).trans (storage.roots tags)
     slots := fun tags i => (keep _ _ _ (storage.tables tags).binding CC.Mptr _).trans (storage.slots tags i)
     writable := ?_

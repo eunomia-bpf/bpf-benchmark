@@ -47,6 +47,8 @@ def Result.storage {m before after : CC.Mem} {entry : HeaderLocal m}
       (chunk := .Mint8unsigned) (b := (storage.flags flag).block) (ofs := 0) (p := .Writable)
       (fun ofs => by simp only [CC.Mem.perm, result.access])).trans (storage.flagWritable flag)
   vectors := storage.vectors
+  vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
+    (fun offset => by simp only [CC.Mem.perm,result.access])).trans storage.vectorWritable
   vectorPointers := fun high j =>
     (result.local_load _ _ _ entry.binding (cell_header false i) (cell_header true i)
       CC.Mptr _).trans (storage.vectorPointers high j)

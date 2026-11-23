@@ -24,7 +24,12 @@ def Storage.frame {m before after : CC.Mem} {entry : Arm64Producer.HeaderLocal m
     exact (CC.Mem.validAccess_congr (m1 := after) (m2 := before)
       (chunk := chunk) (b := block) (ofs := 0) (p := .Writable)
       (fun ofs => by simp only [CC.Mem.perm,(frame _ below).2])).trans writable
+  have vectorOwned := CC.Mem.perm_valid_block before storage.vectors.block 0 .Cur .Writable
+    (CC.Mem.rangePerm_perm before storage.vectors.block 0 512 .Cur .Writable
+      storage.vectorWritable 0 (by decide) (by decide))
   refine {storage with
+    vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
+      (fun offset => by simp only [CC.Mem.perm,(frame _ vectorOwned).2])).trans storage.vectorWritable
     roots := fun tags => keep (storage.roots tags)
     slots := fun tags i => keep (storage.slots tags i)
     writable := fun tags i => keepWritable (cellChunk tags) ((storage.tables tags).cellBlock i)

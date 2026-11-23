@@ -56,6 +56,8 @@ def storage {initial before after : CC.Mem} {entry : HeaderLocal initial}
     (by decide +kernel) _ _).trans (old.flagPointers i)
   flagWritable := fun i => (access effect _ _ _).trans (old.flagWritable i)
   vectors := old.vectors
+  vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
+    (fun offset => by simp only [CC.Mem.perm,effect.access])).trans old.vectorWritable
   vectorPointers := fun high i => (local_load old.vectors value effect _ _ _ entry.binding
     (by decide +kernel) _ _).trans (old.vectorPointers high i)
 

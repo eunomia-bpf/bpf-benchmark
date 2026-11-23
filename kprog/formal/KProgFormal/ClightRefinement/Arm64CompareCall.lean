@@ -23,6 +23,8 @@ def Effect.storage {initial before after : CC.Mem} {entry : HeaderLocal initial}
   refine {storage with
     roots := fun tags => (keepHeader CC.Mptr _).trans (storage.roots tags)
     slots := fun tags i => (effect.local_load _ _ _ (storage.tables tags).binding (tableOther tags) CC.Mptr _).trans (storage.slots tags i)
+    vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
+      (fun offset => by simp only [CC.Mem.perm,effect.access])).trans storage.vectorWritable
     writable := ?_
     spPointer := (keepHeader CC.Mptr _).trans storage.spPointer
     spRead := (effect.local_load _ _ _ storage.sp.binding spOther .Mint64 _).trans storage.spRead

@@ -1,0 +1,100 @@
+{
+  "confirmed_utc": "2026-11-23T14:13:38.335726+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64FmovInputs"
+    ],
+    "exit": 0,
+    "seconds": 3.684288263320923,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 277,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-fmov-inputs/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 11.802273511886597,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "vector_allocation_bytes": 512,
+    "vector_index": 3,
+    "low_offset": 48,
+    "high_offset": 56
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisterStorage.lean",
+      "size_bytes": 8520,
+      "mtime_ns": 1795441589493705257
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterWriteView.lean",
+      "size_bytes": 13163,
+      "mtime_ns": 1795441589493883435
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerWriteFrame.lean",
+      "size_bytes": 18013,
+      "mtime_ns": 1795441589494024452
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64PointerValueFrame.lean",
+      "size_bytes": 15840,
+      "mtime_ns": 1795441589494143402
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryBodyView.lean",
+      "size_bytes": 23335,
+      "mtime_ns": 1795441589494309423
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCacheFrame.lean",
+      "size_bytes": 19310,
+      "mtime_ns": 1795441589494417852
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64FmovVectorStorage.lean",
+      "size_bytes": 5104,
+      "mtime_ns": 1795441589494499705
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CompareCall.lean",
+      "size_bytes": 19565,
+      "mtime_ns": 1795441589494593878
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrame.lean",
+      "size_bytes": 2760,
+      "mtime_ns": 1795441589494664808
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64RegisterStorageFrontier.lean",
+      "size_bytes": 16012,
+      "mtime_ns": 1795441589494751712
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64FmovInputs.lean",
+      "size_bytes": 2102,
+      "mtime_ns": 1795443181062428888
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

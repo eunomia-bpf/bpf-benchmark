@@ -65,6 +65,8 @@ def Frame.storage {initial before after : CC.Mem} {returns : Bool} {entry : Head
       (chunk := .Mint8unsigned) (b := (storage.flags flag).block) (ofs := 0) (p := .Writable)
       (fun ofs => by simp only [CC.Mem.perm, frame.access])).trans (storage.flagWritable flag)
   vectors := storage.vectors
+  vectorWritable := (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
+    (fun offset => by simp only [CC.Mem.perm,frame.access])).trans storage.vectorWritable
   vectorPointers := fun high i => (frame.local_load _ _ _ entry.binding
     (header_other returns).1 (header_other returns).2 CC.Mptr _).trans (storage.vectorPointers high i)
 

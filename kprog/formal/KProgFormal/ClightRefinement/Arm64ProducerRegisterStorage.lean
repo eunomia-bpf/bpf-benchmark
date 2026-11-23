@@ -32,6 +32,9 @@ structure Storage (m memory : CC.Mem) (entry : HeaderLocal m) where
     ((if high then 352 else 96) + 8 * (i.val : Int)) =
       some (.Vptr vectors.block (vectorLoopSourceOffset high i))
 
+  /-- Actual vector allocation remains writable in the reached source heap. -/
+  vectorWritable : CC.Mem.rangePerm memory vectors.block 0 512 .Cur .Writable = true
+
 private theorem local_writable (m memory : CC.Mem) (tags : Bool) (i : Fin 31)
     (table : TableLocals tags m) (access : memory.access = (allocation m).2.access) :
     CC.Mem.validAccess memory (cellChunk tags) (table.cellBlock i) 0 .Writable = true := by
@@ -103,7 +106,9 @@ def of_header (m memory : CC.Mem) (entry : HeaderLocal m)
   flagPointers := fun i => pointers (Arm64ProducerEntryView.flagIndex i)
   flagWritable := fun i => flag_local_writable m memory i (header _) access
   vectors := vectors
-  vectorPointers := vectorPointers }
+  vectorPointers := vectorPointers
+  vectorWritable := (CC.Mem.rangePerm_congr (m1 := memory) (m2 := (allocation m).2)
+    (fun offset => by simp only [CC.Mem.perm,access])).trans vectors.range }
 
 /-- Any cell is separate from every differently named actual producer local,
 including header/tables/SP/flags/vectors; no numeric-address guess is used. -/
