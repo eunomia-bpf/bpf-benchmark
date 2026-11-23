@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCnegAdmission
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryCnegAdmission.next_admission
+#print axioms Arm64ProgramEntryCnegAdmission.next_admission
+#check Arm64ProgramEntryCnegAdmission.setup_next
+#print axioms Arm64ProgramEntryCnegAdmission.setup_next
