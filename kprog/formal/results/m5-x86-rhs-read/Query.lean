@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86AluReadRhs
+import KProgFormal
 
 #check KProgFormal.ClightRefinement.X86AluReadRhs.source
 #print axioms KProgFormal.ClightRefinement.X86AluReadRhs.source

@@ -40,7 +40,43 @@
     "maxRecDepth": 512
   },
   "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
-  "root_integration": "pending",
+  "root_integration": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 2.9343620110303164,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
   "complete_instruction_families": 0,
-  "scope": "Genuine handler entry and allocation through both scalar operand reads; all post-entry loads follow from caller frame"
+  "scope": "Genuine handler entry and allocation through both scalar operand reads; all post-entry loads follow from caller frame",
+  "root_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-operands-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.0153512510005385,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_public_queries_total": 42
 }

@@ -40,7 +40,43 @@
     "maxRecDepth": 512
   },
   "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
-  "root_integration": "pending",
+  "root_integration": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 2.9343620110303164,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
   "complete_instruction_families": 0,
-  "scope": "Original non-XOR gates and both actual scalar reader calls through the arithmetic dispatcher"
+  "scope": "Original non-XOR gates and both actual scalar reader calls through the arithmetic dispatcher",
+  "root_public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-operands/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.01018403400667,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "root_public_queries_total": 42
 }

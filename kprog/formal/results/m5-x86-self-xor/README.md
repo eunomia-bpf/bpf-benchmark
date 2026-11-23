@@ -20,3 +20,9 @@ its retained diagnostic identified that dispatch was already reached. Original
 Root integration follows this accepted batch. All raw diagnostics remain under
 `/workspaces/kprog-raw/V/x86-alu-read-site-20261122`. The existing whole-check DIV
 fault correspondence defect remains open.
+
+Root integration2026-11-23: one transitive SelfXor import exposes this module.
+The targeted root build passes408 jobs in2.93s and all42 owned actual-root
+queries pass. This receipt’s query now imports `KProgFormal`;
+[root-public.txt](root-public.txt) records its output. Shared invocation details
+are in the same-register XOR validation receipt.

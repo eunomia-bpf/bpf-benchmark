@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86AluReadOperands
+import KProgFormal
 
 #check KProgFormal.ClightRefinement.X86AluReadOperands.read
 #print axioms KProgFormal.ClightRefinement.X86AluReadOperands.read

@@ -1,0 +1,49 @@
+KProgFormal.ClightRefinement.X86AluReadRhs.source :
+  KProgFormal.ClightRefinement.X86AluReadSite.rhsRead =
+    (CC.Stmt.Scall (some X86_program_profile_bpf._t'3) KProgFormal.ClightRefinement.X86AluReadRhs.readerExpression✝
+          KProgFormal.ClightRefinement.X86AluReadRhs.expressions✝).Ssequence
+      KProgFormal.ClightRefinement.X86AluReadRhs.assignRhs✝
+'KProgFormal.ClightRefinement.X86AluReadRhs.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadRhs.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+  (k : CC.Cont) (m : CC.Mem) (bindingBlock helperBlock : CC.Block) (bindingOffset : CC.Integers.Ptrofs)
+  (reg width shift : BitVec 8)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock bindingOffset))
+  (sourceReg : CC.PTree.get X86_program_profile_bpf._src le = some (CC.Val.Vint (BitVec.setWidth 32 reg)))
+  (effectiveWidth :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le = some (CC.Val.Vint (BitVec.setWidth 32 width)))
+  (sourceShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_read_reg e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 2
+    (CC.State.State function KProgFormal.ClightRefinement.X86AluReadSite.rhsRead k e le m)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock bindingOffset) reg width shift)
+      (KProgFormal.ClightRefinement.X86AluReadRhs.continuation function e le k) m)
+'KProgFormal.ClightRefinement.X86AluReadRhs.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadRhs.resume (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (m : CC.Mem) (value : CC.Val) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.Returnstate value
+      (CC.callCont
+        (KProgFormal.ClightRefinement.X86AluReadRhs.continuation function e le
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k)))
+      m)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftLeftRoute.dispatch k e
+      (KProgFormal.ClightRefinement.X86AluReadRhs.temps le value) m)
+'KProgFormal.ClightRefinement.X86AluReadRhs.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluReadRhs.lhs_kept (le : CC.TempEnv) (value : CC.Val) :
+  CC.PTree.get X86_program_profile_bpf.___x86_l_lhs (KProgFormal.ClightRefinement.X86AluReadRhs.temps le value) =
+    CC.PTree.get X86_program_profile_bpf.___x86_l_lhs le
+'KProgFormal.ClightRefinement.X86AluReadRhs.lhs_kept' depends on axioms: [propext, Classical.choice, Quot.sound]
