@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86AluXorInputs
+
+#check KProgFormal.ClightRefinement.X86AluXorInputs.observations
+#print axioms KProgFormal.ClightRefinement.X86AluXorInputs.observations
+#check KProgFormal.ClightRefinement.X86AluXorInputs.entry
+#print axioms KProgFormal.ClightRefinement.X86AluXorInputs.entry
