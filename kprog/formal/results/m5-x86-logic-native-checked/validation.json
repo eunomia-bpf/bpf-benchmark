@@ -1,0 +1,43 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86LogicChecked"
+    ],
+    "exit": 0,
+    "seconds": 3.3433986250311136,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "status": "not_started",
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-logic-native-checked/Query.lean"
+    ],
+    "reason": "shared nonblocking timing acquisition refused while frozen rotate holds exclusive lock"
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0
+}

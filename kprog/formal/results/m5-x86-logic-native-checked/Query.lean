@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86LogicChecked
+
+#check KProgFormal.ClightRefinement.X86LogicNative.register_step
+#print axioms KProgFormal.ClightRefinement.X86LogicNative.register_step
+#check KProgFormal.ClightRefinement.X86LogicNative.represented
+#print axioms KProgFormal.ClightRefinement.X86LogicNative.represented
+#check KProgFormal.ClightRefinement.X86LogicChecked.register
+#print axioms KProgFormal.ClightRefinement.X86LogicChecked.register
