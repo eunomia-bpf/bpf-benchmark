@@ -1,0 +1,302 @@
+{
+  "status": "focused and public queries passed",
+  "confirmed_utc": "2026-11-23T05:35:46.215206+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+    ],
+    "exit": 0,
+    "seconds": 8.862258911132812,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 254,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-numeric/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.55619478225708,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query_count": 2,
+  "constructed_steps": {
+    "prepare": 18,
+    "compute": 20,
+    "total": 38
+  },
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegNumeric.lean",
+    "size_bytes": 21610,
+    "mtime_ns": 1795411877199014981
+  },
+  "attempts": {
+    "numeric1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 23.55624794960022,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 3.29575514793396,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 62.745519399642944,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 80.62697100639343,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "KProgFormal/ClightRefinement/Arm64CnegNumeric.lean"
+      ],
+      "exit": 1,
+      "seconds": 61.12040400505066,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric6": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 60.03838038444519,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric7": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 14.890610456466675,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric8": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 14.85146689414978,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric9": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 4.658732891082764,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric10": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 5.038730144500732,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric11": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 15.240632772445679,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric12": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 18.53992772102356,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric13": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 9.359989643096924,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric14": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 9.356547355651855,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric15": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 9.046274662017822,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric16": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 1,
+      "seconds": 5.065901517868042,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "numeric17": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegNumeric"
+      ],
+      "exit": 0,
+      "seconds": 8.862258911132812,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "axioms": {
+    "logical": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "inherited": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ]
+  },
+  "root_integration": "next component batch",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
