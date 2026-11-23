@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86AluReadTail
+import KProgFormal.ClightRefinement.X86AluOperandsEntry
+
+#check KProgFormal.ClightRefinement.X86AluReadTail.read
+#print axioms KProgFormal.ClightRefinement.X86AluReadTail.read
+#check KProgFormal.ClightRefinement.X86AluReadOperands.read
+#print axioms KProgFormal.ClightRefinement.X86AluReadOperands.read
+#check KProgFormal.ClightRefinement.X86AluReadOperands.observations
+#print axioms KProgFormal.ClightRefinement.X86AluReadOperands.observations
+#check KProgFormal.ClightRefinement.X86AluOperandsEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluOperandsEntry.from_call

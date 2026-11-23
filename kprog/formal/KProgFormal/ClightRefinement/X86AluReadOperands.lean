@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.X86AluReadRhs
+import KProgFormal.ClightRefinement.X86AluReadTail
 
 namespace KProgFormal.ClightRefinement.X86AluReadOperands
 
@@ -6,8 +6,7 @@ def length (size : X86.Size) : Nat :=
   13 + X86RegisterReadScalar.length size + 4 + 2 + X86RegisterReadScalar.length size + 4
 
 def temps (le : CC.TempEnv) (left right : BitVec 64) : CC.TempEnv :=
-  X86AluReadRhs.temps
-    (X86AluReadSite.lhsTemps (X86AluReadSite.selectedTemps le) (.Vlong left)) (.Vlong right)
+  X86AluReadTail.temps (X86AluReadSite.selectedTemps le) left right
 
 /-- The original non-XOR operand selector executes both real reader calls,
 their complete scalar bodies and original assignments to reach the arithmetic
@@ -61,43 +60,32 @@ theorem read (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
         (temps le (X86RegisterReadLanes.result left size shiftDst)
           (X86RegisterReadLanes.result right size shiftSrc)) m) := by
   let selected := X86AluReadSite.selectedTemps le
-  let leftValue := X86RegisterReadLanes.result left size shiftDst
-  let rightValue := X86RegisterReadLanes.result right size shiftSrc
-  let ready := X86AluReadSite.lhsTemps selected (.Vlong leftValue)
-  have bindingReady : ready.get X86_program_profile_bpf.___x86_bind =
+  have bindingReady : selected.get X86_program_profile_bpf.___x86_bind =
       some (.Vptr bindingBlock bindingOffset) := by
-    simp +decide [ready, selected, X86AluReadSite.lhsTemps, X86AluReadSite.selectedTemps,
+    simp +decide [selected, X86AluReadSite.selectedTemps,
       CC.PTree.gso, binding]
-  have sourceReady : ready.get X86_program_profile_bpf._src =
+  have sourceReady : selected.get X86_program_profile_bpf._src =
       some (X86Width.argument (X86RegisterReadValue.registerByte src)) := by
-    simp +decide [ready, selected, X86AluReadSite.lhsTemps, X86AluReadSite.selectedTemps,
+    simp +decide [selected, X86AluReadSite.selectedTemps,
       CC.PTree.gso, sourceReg]
-  have widthReady : ready.get X86_program_profile_bpf.___x86_l_width__1 =
+  have widthReady : selected.get X86_program_profile_bpf.___x86_l_width__1 =
       some (X86Width.argument width) := by
-    simp +decide [ready, selected, X86AluReadSite.lhsTemps, X86AluReadSite.selectedTemps,
+    simp +decide [selected, X86AluReadSite.selectedTemps,
       CC.PTree.gso, widthRead]
-  have shiftReady : ready.get X86_program_profile_bpf.___x86_l_src_shift =
+  have shiftReady : selected.get X86_program_profile_bpf.___x86_l_src_shift =
       some (X86Width.argument shiftSrc) := by
-    simp +decide [ready, selected, X86AluReadSite.lhsTemps, X86AluReadSite.selectedTemps,
+    simp +decide [selected, X86AluReadSite.selectedTemps,
       CC.PTree.gso, srcShift]
   have first := X86AluReadSite.to_first_read ge function e le k m operation
     (X86RegisterReadValue.registerByte dst) width shiftDst bindingBlock readerBlock bindingOffset
       different opRead binding destination widthRead dstShift readerHelper unshadowed
-  have readLeft := X86RegisterReadScalar.call ge layout m
-    (X86AluReadSite.callContinuation function e selected (.Kseq X86ShiftLeftRoute.dispatch k))
-      dst width shiftDst tagDst size left widthBlock bindingBlock cellsBlock bindingOffset cellsOffset
-        ordinaryDst notStackDst boundDst effective widthHelper cells leftRead leftTag
-  have leftResume := X86AluReadSite.resume_lhs ge function e selected
-    (.Kseq X86ShiftLeftRoute.dispatch k) m (.Vlong leftValue)
-  have second := X86AluReadRhs.enter ge function e ready (.Kseq X86ShiftLeftRoute.dispatch k)
-    m bindingBlock readerBlock bindingOffset (X86RegisterReadValue.registerByte src) width shiftSrc
-      bindingReady sourceReady widthReady shiftReady readerHelper unshadowed
-  have readRight := X86RegisterReadScalar.call ge layout m
-    (X86AluReadRhs.continuation function e ready (.Kseq X86ShiftLeftRoute.dispatch k))
-      src width shiftSrc tagSrc size right widthBlock bindingBlock cellsBlock bindingOffset cellsOffset
-        ordinarySrc notStackSrc boundSrc effective widthHelper cells rightRead rightTag
-  have rightResume := X86AluReadRhs.resume ge function e ready k m (.Vlong rightValue)
-  exact ((((first.trans readLeft).trans leftResume).trans second).trans readRight).trans rightResume
+  have rest := X86AluReadTail.read ge layout function e selected k m
+    width shiftDst shiftSrc tagDst tagSrc size dst src left right
+    widthBlock readerBlock bindingBlock cellsBlock bindingOffset cellsOffset
+    ordinaryDst ordinarySrc notStackDst notStackSrc boundDst boundSrc effective
+    widthHelper readerHelper unshadowed bindingReady sourceReady widthReady shiftReady
+    cells leftRead rightRead leftTag rightTag
+  simpa only [length, X86AluReadTail.length, temps, Nat.add_assoc] using first.trans rest
 
 /-- Both dispatcher inputs are actual reader results. Decoded operation and
 effective width remain available for the existing arithmetic/flag proofs. -/
@@ -108,7 +96,8 @@ theorem observations (le : CC.TempEnv) (left right : BitVec 64) :
       le.get X86_program_profile_bpf.___x86_l_alu ∧
     (temps le left right).get X86_program_profile_bpf.___x86_l_width__1 =
       le.get X86_program_profile_bpf.___x86_l_width__1 := by
-  simp +decide [temps, X86AluReadRhs.temps, X86AluReadSite.lhsTemps, X86AluReadSite.selectedTemps,
+  simp +decide [temps, X86AluReadTail.temps, X86AluReadRhs.temps, X86AluReadSite.lhsTemps,
+    X86AluReadSite.selectedTemps,
     CC.PTree.gss, CC.PTree.gso]
 
 end KProgFormal.ClightRefinement.X86AluReadOperands

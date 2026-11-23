@@ -1,0 +1,64 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluReadTail"
+    ],
+    "exit": 0,
+    "seconds": 2.0784079910372384,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "composition": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluOperandsEntry",
+      "KProgFormal.ClightRefinement.X86AluReadXorSelect"
+    ],
+    "exit": 0,
+    "seconds": 8.055460980976932,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-read-tail/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.519385369028896,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0,
+  "scope": "Shared actual LHS-to-dispatch scalar tail; prior non-XOR entry statements unchanged"
+}
