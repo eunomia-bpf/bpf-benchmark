@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicFlagOrder
+
+#check KProgFormal.ClightRefinement.X86LogicFlagOrder.source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagOrder.source
+#check KProgFormal.ClightRefinement.X86LogicFlagOrder.internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagOrder.internal
