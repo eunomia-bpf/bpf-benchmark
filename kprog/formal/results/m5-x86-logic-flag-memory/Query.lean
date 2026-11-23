@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicFlagMemory
+
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other
+#check KProgFormal.ClightRefinement.X86LogicFlagMemory.stores
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagMemory.stores

@@ -1,0 +1,34 @@
+KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other {m after : CC.Mem}
+  (written read : KProgFormal.ClightRefinement.X86LogicFlagMemory.Address) (byte : CC.Val)
+  (stored : CC.Mem.store CC.Chunk.Mint8unsigned m written.fst written.snd.unsigned byte = some after)
+  (distinct : read ≠ written) :
+  CC.Mem.load CC.Chunk.Mint8unsigned after read.fst read.snd.unsigned =
+    CC.Mem.load CC.Chunk.Mint8unsigned m read.fst read.snd.unsigned
+'KProgFormal.ClightRefinement.X86LogicFlagMemory.byte_store_other' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicFlagMemory.stores (m cfHeap zfHeap sfHeap ofHeap after : CC.Mem)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (flags : X86.Flags)
+  (different : KProgFormal.ClightRefinement.X86LogicFlagMemory.Distinct places)
+  (cfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned m places.cf.fst places.cf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagMemory.flag flags.cf) =
+      some cfHeap)
+  (zfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned cfHeap places.zf.fst places.zf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagMemory.flag flags.zf) =
+      some zfHeap)
+  (sfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned zfHeap places.sf.fst places.sf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagMemory.flag flags.sf) =
+      some sfHeap)
+  (overflowStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned sfHeap places.overflow.fst places.overflow.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagMemory.flag flags.of) =
+      some ofHeap)
+  (pfStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned ofHeap places.pf.fst places.pf.snd.unsigned
+        (KProgFormal.ClightRefinement.X86LogicFlagMemory.flag flags.pf) =
+      some after) :
+  KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent after places flags
+'KProgFormal.ClightRefinement.X86LogicFlagMemory.stores' depends on axioms: [propext, Classical.choice, Quot.sound]
