@@ -1,0 +1,46 @@
+{
+  "focused": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluXorResultEntry"
+    ],
+    "exit": 0,
+    "seconds": 3.3378261729958467,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "public": {
+    "command": [
+      "taskset",
+      "-c",
+      "12-15",
+      "nice",
+      "-n",
+      "19",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-xor-result-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9341354129719548,
+    "memory_limit": 34359738368,
+    "shared_timing": true
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/x86-alu-read-site-20261122",
+  "root_integration": "pending",
+  "complete_instruction_families": 0,
+  "scope": "Genuine XOR entry through exact numeric result at original flags stage; ordinary243/251/259/259 and shortcut77"
+}

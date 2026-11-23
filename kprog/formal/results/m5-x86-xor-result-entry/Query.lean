@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86AluXorResultEntry
+
+#check KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorResultEntry.from_call
+#check KProgFormal.ClightRefinement.X86AluXorResultEntry.shortcut_from_call
+#print axioms KProgFormal.ClightRefinement.X86AluXorResultEntry.shortcut_from_call
