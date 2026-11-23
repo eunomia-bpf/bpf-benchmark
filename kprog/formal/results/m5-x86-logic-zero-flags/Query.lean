@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.X86LogicFlagStores
+
+#check KProgFormal.ClightRefinement.X86LogicFlagStores.source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStores.source
+#check KProgFormal.ClightRefinement.X86LogicFlagStores.cf_source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStores.cf_source
+#check KProgFormal.ClightRefinement.X86LogicFlagStores.of_source
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStores.of_source
+#check KProgFormal.ClightRefinement.X86LogicFlagStores.cf_internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStores.cf_internal
+#check KProgFormal.ClightRefinement.X86LogicFlagStores.of_internal
+#print axioms KProgFormal.ClightRefinement.X86LogicFlagStores.of_internal
