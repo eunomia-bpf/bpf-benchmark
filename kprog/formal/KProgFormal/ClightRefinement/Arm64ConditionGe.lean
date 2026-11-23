@@ -103,8 +103,11 @@ theorem native_truth (m : CC.Mem) (s : Reference.AArch64.State) :
   have comparison : ∀ n v : BitVec 1,
       ((n.setWidth 8).setWidth 32 == (v.setWidth 8).setWidth 32) = decide (n = v) := by
     decide +kernel
+  simp only [result,comparison]
   by_cases equal : read_flag .N s.machine = read_flag .V s.machine
-  all_goals simp +decide [result,comparison,ConditionHolds,equal,CC.Val.ofBool,CC.Val.Vtrue,CC.Val.Vfalse,
-    CC.Cop.boolVal,CC.Cop.classifyBool,CC.tint,CC.Integers.Int.eq,CC.Integers.MI.eq]
+  all_goals simp +decide [ConditionHolds,equal,CC.Val.ofBool,CC.Val.Vtrue,CC.Val.Vfalse,
+    CC.Cop.boolVal,CC.Cop.classifyBool,CC.typeconv,CC.removeAttributes,CC.tattr,CC.tint,
+    CC.Integers.Int.eq,CC.Integers.MI.eq,CC.Integers.Int.zero,CC.Integers.Int.one,
+    CC.Integers.MI.zero,CC.Integers.MI.one]
 
 end KProgFormal.ClightRefinement.Arm64ConditionGe

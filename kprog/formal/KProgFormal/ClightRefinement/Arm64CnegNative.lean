@@ -28,7 +28,7 @@ theorem execute (s : Reference.AArch64.State) :
     simp +decide [fields, DPR.exec_conditional_select, inverted, taken,
       read_gpr_zr, read_gpr, write_gpr_zr, write_gpr, Reference.AArch64.gpr,
       Arm64Nop.atCursor, Arm64RegisterWrite.nativeUpdate, Arm64RegisterWrite.written,
-      write_pc, w, write_base_pc, write_base_gpr, BitVec.neg_eq_not_add]
+      write_pc, w, write_base_pc, write_base_gpr, BitVec.neg_eq_not_add] <;> rfl
 
 /-- Admit only the fetched word carrying the external decoder certificate. -/
 theorem native_step (s : Reference.AArch64.State) (instruction : Reference.AArch64.Instruction)

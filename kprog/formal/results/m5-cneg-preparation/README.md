@@ -1,4 +1,35 @@
-# CNEG/GE preparation — not yet checked
+# CNEG/GE components
+
+Current confirmation (2026-11-23): the four modules below pass the focused
+256-job build and all thirteen direct-import type/axiom queries. The original
+200000-heartbeat/512-depth limits, one worker, CPU17 and 32 GiB are unchanged;
+every CPU check holds the shared timing lock. The caller entry binds all nine
+original arguments; the imported native alias retains its actual fetch/decode
+certificate, histories and fault state; GE executes its full 28-step call from
+actual N/V loads; and the CNEG branch reaches its genuine scalar-reader call
+in eight steps with the untouched continuation and memory.
+
+The first focused attempt passed the caller and reader entry and exposed two
+normalization goals: fixed Fin register indices in the native state update,
+and comparison of widened one-bit flags. The accepted proof adds a final
+reflexivity step for the former and rewrites the narrow comparison before
+normalizing C truth for the latter. No limits, premises or semantic definitions
+changed. Both attempts and the thirteen-query output are retained in compressed
+logs here and full raw logs at the path below.
+
+Public queries use standard logical axioms and, for imported Clight execution,
+the existing CC.externalFunctionsSem and CC.inlineAssemblySem only. No new
+axiom or local ISA implementation was introduced. This is component coverage:
+top-level CNEG dispatch, scalar-reader return/materialization, numeric body,
+writer, generic allocation/free and eighth source/native prefix composition
+remain open. The accepted complete program prefix remains seven CSEL calls.
+No root import or duplicate whole confirmation was added; V owns the shared
+whole-build/make-check run. M5/O1/O2/O4/M6 remain open, completed ISA families0.
+
+## Preparation notes retained from 2026-11-22
+
+The following records describe the unverified preparation state before the
+confirmation above; their pending labels are historical.
 
 The next operation in the original fixture is CNEG X6,X5,GE. The proposed
 caller proof extracts the actual successor of afterSelect, binds all nine

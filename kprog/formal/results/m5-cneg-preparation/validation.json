@@ -1,10 +1,10 @@
 {
-  "status": "unverified work in progress",
-  "focused_started": false,
-  "public_queries_started": false,
+  "status": "four focused modules and thirteen public queries passed",
+  "focused_started": true,
+  "public_queries_started": true,
   "public_query_count_prepared": 13,
   "root_import_added": false,
-  "full_check": "prior V make-check3 DIV fault correspondence failure; not rerun",
+  "full_check": "previous V make-check3 DIV fault correspondence failure retained; not rerun by FORMAL",
   "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
   "next_commands": [
     [
@@ -32,19 +32,108 @@
     "timing_lock": "shared"
   },
   "condition_helper": {
-    "status": "unverified draft",
+    "status": "passed",
     "proposed_call_steps": 28,
     "source": "actual exported f_kprog_arm64_program_condition, condition10 GE",
     "existing_storage": "both N/V loads from FlagsRepresent",
-    "new_cpu_jobs_started_this_turn": 0
+    "actual_call_steps": 28,
+    "preparation_cpu_jobs_started": 0
   },
   "read_entry": {
-    "status": "unverified draft",
+    "status": "passed",
     "proposed_prefix_steps": 8,
     "actual_dispatch_branch_index_zero_based": 8,
     "source_call": "kprog_arm64_program_read",
     "register_argument": "original source register index; no read value supplied",
     "preserved": "full memory and original pending copy/condition/numeric/writer continuations",
-    "new_cpu_jobs_started_this_turn": 0
-  }
+    "actual_prefix_steps": 8,
+    "preparation_cpu_jobs_started": 0
+  },
+  "confirmed_utc": "2026-11-23T04:43:25.184724+00:00",
+  "public_query_count": 13,
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall",
+      "KProgFormal.ClightRefinement.Arm64CnegNative",
+      "KProgFormal.ClightRefinement.Arm64ConditionGe",
+      "KProgFormal.ClightRefinement.Arm64CnegReadEntry"
+    ],
+    "exit": 0,
+    "seconds": 3.952669382095337,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 256,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-preparation/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5385596752166748,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "failed_first_attempt": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCnegCall",
+      "KProgFormal.ClightRefinement.Arm64CnegNative",
+      "KProgFormal.ClightRefinement.Arm64ConditionGe",
+      "KProgFormal.ClightRefinement.Arm64CnegReadEntry"
+    ],
+    "exit": 1,
+    "seconds": 85.01257944107056,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "axioms": {
+    "new_axioms": false,
+    "logical": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "inherited_Clight": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ]
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCnegCall.lean",
+      "size_bytes": 11014,
+      "mtime_ns": 1795350628903883104
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegNative.lean",
+      "size_bytes": 4063,
+      "mtime_ns": 1795408907862590303
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ConditionGe.lean",
+      "size_bytes": 6876,
+      "mtime_ns": 1795408907862735197
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegReadEntry.lean",
+      "size_bytes": 8061,
+      "mtime_ns": 1795351903448361257
+    }
+  ]
 }
