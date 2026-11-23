@@ -39,3 +39,8 @@ Samples per second, eBPF window (guest uptime 110-190 s) and native window (220-
 - During the run on dcf4a1aef, 3% of the samples on CPUs 0-7 (42269 in 90 s) came from a guest with
   another kernel base (0xffffffff87000000) while this run held the timing lock; the lab node also hosts
   other Workspaces and CI runners.
+
+Branch misses (EVENT=cpu_core/branch-misses/, one sample per 500, run otel-host-brmiss-77908203a,
+2026-11-23T17:59Z): the eBPF unwinder takes about 43000 samples per 10 s in its phase, the native one
+about 40000 in its phase. Mispredicted branches do not explain the native body's 1.7x cycles; a run
+sampling retired instructions (EVENT=cpu_core/instructions/, one per 20000) is queued.
