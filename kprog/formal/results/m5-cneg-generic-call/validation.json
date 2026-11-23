@@ -1,0 +1,73 @@
+{
+  "confirmed_utc": "2026-11-23T05:50:01.418070+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CnegCall"
+    ],
+    "exit": 0,
+    "seconds": 11.461904048919678,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 264,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cneg-generic-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5391132831573486,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "initial_attempts": [
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegCall"
+      ],
+      "exit": 1,
+      "seconds": 11.460802555084229,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64CnegCall"
+      ],
+      "exit": 1,
+      "seconds": 11.378204107284546,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  ],
+  "source_metadata": {
+    "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CnegCall.lean",
+    "size_bytes": 12331,
+    "mtime_ns": 1795412925403082350
+  },
+  "scope": "original nine-argument generic call, actual allocation/free/return and fetched native correspondence",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
