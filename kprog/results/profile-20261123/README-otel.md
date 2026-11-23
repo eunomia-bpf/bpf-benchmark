@@ -46,3 +46,11 @@ Branch misses (EVENT=cpu_core/branch-misses/, one sample per 500, run otel-host-
 2026-11-23T17:59Z): the eBPF unwinder takes about 43000 samples per 10 s in its phase, the native one
 about 40000 in its phase. Mispredicted branches do not explain the native body's larger cycle share; a run
 sampling retired instructions (EVENT=cpu_core/instructions/, one per 20000) is queued.
+
+Retired instructions (EVENT=cpu_core/instructions/, one sample per 20000, run otel-host-insn,
+2026-11-23T18:29Z): the eBPF unwinder's code retires about 295000 samples per 10 s through its phase
+(guest uptime 90-200 s); the native unwinder's code about 295000 per 10 s from 210 to 270 s and about
+240000 from 270 to 320 s. The native body retires about as many or fewer instructions per second while
+it takes more cycle samples: its instructions take more cycles each (stalls), it executes no extra code.
+A run sampling last-level cache misses (EVENT=cpu_core/cache-misses/, one per 2000) is queued after the
+x86 timing of 30e401e37.
