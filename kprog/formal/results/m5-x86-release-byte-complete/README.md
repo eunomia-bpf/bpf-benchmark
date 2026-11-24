@@ -1,0 +1,3 @@
+The original byte fallback executes all8 actual lane guards, kind6 provider/cast/store or skip paths, lane increments and real exit. Core/index/offset/old/new/binding observations, lane8 endpoint, cache View, access/frontier and outside-cache frame are derived through every real source step. Exact provider traces and full supplied memories compose in order. Provider availability/access/frontier/frame remain explicit ABI premises, not new axioms or imported determinacy consequences. Six outer slots/helper/native composition follows.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
