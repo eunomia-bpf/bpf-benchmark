@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderViews
+#check KProgFormal.ClightRefinement.X86ProducerHeaderViews.initialized_views
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderViews.initialized_views
