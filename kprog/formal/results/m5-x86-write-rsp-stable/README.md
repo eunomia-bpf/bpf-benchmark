@@ -1,0 +1,3 @@
+From initial local/table permissions, the actual36-step reverse/table run and20-step non-increasing signed raw-SP release branch compose into56 Clight transitions to the original continuation. Exact new-SP readback, every retained release input, the native GPR view and memory frame are derived from the SAME execution. Increasing-SP release/clobber, initial width-writer composition and whole handlers remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
