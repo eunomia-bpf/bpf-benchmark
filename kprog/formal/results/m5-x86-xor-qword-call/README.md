@@ -1,0 +1,3 @@
+The genuine eight-argument scalar/tag0 XOR qword call executes both original readers, numerical helper, both real writer tag calls, five flag stores, complete252-step writer, local release and actual void return. Every intermediate input and successful store/free derives from initial caller observations, representation and permissions; legal zero lanes derive their bounds and the seventh source-shift field. Distinct register/lane route only; matching and canonical-output composition follow.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
