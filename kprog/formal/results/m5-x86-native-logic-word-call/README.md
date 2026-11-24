@@ -1,0 +1,3 @@
+Actual word16 OR/AND calls now admit RSP as source, along with every ordinary scalar source and aliasing route. Native-view operands feed the real numerical helper, flag stores,181-step partial writer, frame release and true void return. The original destination remains ordinary scalar/tag0, preserving48 upper bits. All source and native-base observations derive from initial memory; RSP destinations remain a separate writer obligation.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
