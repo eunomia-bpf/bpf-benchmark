@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovNative
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovNative.pointer_control
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovNative.pointer_control
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovNative.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovNative.execute
