@@ -1,0 +1,3 @@
+The SAME original producer call and actual provider trace compose all initialization/header statements, real PUSH wrapper/effective-width/dispatch/local allocation, original register-mode selectors, actual RBX reader call and three-step return/operand assignment. Actual current cache/ghost resources and caller frame accompany the same complete allocated heap. Only explicit existing kind6/kind1 provider ABIs remain; this endpoint precedes RSP decrement and PUSH stack effects, native-memory/oracle/trace correspondence and complete149 refinement.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

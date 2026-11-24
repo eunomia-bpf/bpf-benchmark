@@ -1,0 +1,48 @@
+KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_ready {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) :
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer)
+      [CC.Val.Vptr ctxBlock ctxOffset] k before)
+    ready.trace
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after (ready.values 3))
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_ready' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_call (before : CC.Mem) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
+  (inputs6 : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (inputs1 : KProgFormal.ClightRefinement.X86ProducerStackBaseProvider.Inputs before) :
+  ∃ ready,
+    CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+        (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer)
+          [CC.Val.Vptr ctxBlock ctxOffset] k before)
+        ready.trace
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following ready.entry.block
+            (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after)
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block
+            (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after (ready.values 3))
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd) ∧
+      KProgFormal.ClightRefinement.FrameBelow ready.after.nextblock ready.after
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ∧
+        KProgFormal.ClightRefinement.X86ReleaseProvider.View
+            (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.entry.block
+            (ready.sources 1).block 0 ∧
+          KProgFormal.ClightRefinement.X86CallFrameComplete.View
+            (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.entry.block
+            (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources)
+'KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

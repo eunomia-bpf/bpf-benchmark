@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushReadPrefix
+#check KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_ready
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_ready
+#check KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadPrefix.from_call
