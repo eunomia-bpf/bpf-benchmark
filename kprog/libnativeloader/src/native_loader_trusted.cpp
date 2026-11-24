@@ -3010,10 +3010,46 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     image.reserved = linked.callee_saved_mask;
     image.load_sites_user = ptr_to_u64(linked.load_sites.data());
     image.load_site_count = linked.load_sites.size();
-    if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_CHUNK, &image))
-        fail("arm kernel native image: " + std::string(std::strerror(errno)));
-    ScopedFd verified(bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
-        info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts));
+    // A prog array P names that its own program does not use can belong to
+    // programs of another type (OTel's uprobe custom__generic names
+    // perf_progs, owned by perf_event programs): process_fd_array adds every
+    // fd to used_maps, and bpf_check_tail_call then refuses this program
+    // with a bare -EINVAL after a clean verify, with no log line. Load again
+    // without those arrays, which the application itself holds.
+    const std::vector<uint32_t> original_ids = options.original_prog_fd >= 0
+        ? load_prog_map_ids(options.original_prog_fd) : std::vector<uint32_t>{};
+    const std::unordered_set<uint32_t> used(original_ids.begin(), original_ids.end());
+    const auto foreign_prog_array = [&](uint32_t id) {
+        if (used.count(id)) return false;
+        ScopedFd fd(bpf_map_get_fd_by_id(id));
+        if (fd.get() < 0) return false;
+        const bpf_map_info info = load_map_info(fd.get());
+        return info.type == BPF_MAP_TYPE_PROG_ARRAY;
+    };
+    std::vector<std::pair<int, uint32_t>> load_fds;
+    std::unordered_set<uint32_t> opened;
+    for (size_t i = 0; i < fd_array.size(); i++) {
+        if (opened.insert(linked.relocated_map_ids[i]).second)
+            load_fds.emplace_back(fd_array[i], linked.relocated_map_ids[i]);
+    }
+    const auto arm_and_load = [&](const std::vector<std::pair<int, uint32_t>> &pairs) {
+        std::vector<int> fds;
+        for (const auto &pair : pairs) fds.push_back(pair.first);
+        opts.fd_array = fds.data(); opts.fd_array_cnt = fds.size();
+        if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_CHUNK, &image))
+            fail("arm kernel native image: " + std::string(std::strerror(errno)));
+        return bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
+            info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts);
+    };
+    int verified_fd = arm_and_load(load_fds);
+    if (verified_fd < 0 && options.original_prog_fd >= 0) {
+        std::vector<std::pair<int, uint32_t>> own_fds;
+        for (const auto &pair : load_fds) {
+            if (!foreign_prog_array(pair.second)) own_fds.push_back(pair);
+        }
+        if (own_fds.size() != load_fds.size()) verified_fd = arm_and_load(own_fds);
+    }
+    ScopedFd verified(verified_fd);
     if (verified.get() < 0)
         fail("service simulator verification failed: " + libbpf_error_string(verified.get()) +
              "\n" + std::string(log.data(), strnlen(log.data(), log.size())));
