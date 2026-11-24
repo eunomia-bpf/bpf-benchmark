@@ -1,0 +1,45 @@
+{
+  "confirmed_utc": "2026-11-24T08:15:48.539017+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64UaddlvReadReduction"
+    ],
+    "exit": 0,
+    "seconds": 4.144287347793579,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 198,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-uaddlv-read-reduction/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.5661182403564453,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {},
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64UaddlvReadReduction.lean",
+      "size_bytes": 4894,
+      "mtime_ns": 1795504360997943071
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
