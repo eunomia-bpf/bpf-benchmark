@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerInputReturn
+#check KProgFormal.ClightRefinement.X86ProducerInputReturn.source_continuation
+#print axioms KProgFormal.ClightRefinement.X86ProducerInputReturn.source_continuation
+#check KProgFormal.ClightRefinement.X86ProducerInputReturn.source_saved
+#print axioms KProgFormal.ClightRefinement.X86ProducerInputReturn.source_saved
+#check KProgFormal.ClightRefinement.X86ProducerInputReturn.to_destination
+#print axioms KProgFormal.ClightRefinement.X86ProducerInputReturn.to_destination

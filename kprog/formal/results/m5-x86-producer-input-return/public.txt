@@ -1,0 +1,29 @@
+KProgFormal.ClightRefinement.X86ProducerInputReturn.source_continuation (k : CC.Cont) :
+  KProgFormal.ClightRefinement.X86ProducerFirstInput.callCont k =
+    CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerInputReturn.savedPointer
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerInputReturn.destination
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerInputReturn.following k))
+'KProgFormal.ClightRefinement.X86ProducerInputReturn.source_continuation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerInputReturn.source_saved :
+  KProgFormal.ClightRefinement.X86ProducerInputReturn.savedPointer =
+    CC.Stmt.Sset X86_program_profile_bpf._t'1
+      (((CC.Expr.Etempvar X86_program_profile_bpf._t'2 CC.tulong).Ecast (CC.tptr CC.tvoid)).Ecast (CC.tptr CC.tvoid))
+'KProgFormal.ClightRefinement.X86ProducerInputReturn.source_saved' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerInputReturn.to_destination (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (k : CC.Cont) (word : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.Returnstate (CC.Val.Vlong word) (KProgFormal.ClightRefinement.X86ProducerFirstInput.continuation e le k)
+      memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerInputReturn.destination
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerInputReturn.following k) e
+      (KProgFormal.ClightRefinement.X86ProducerInputReturn.temps le word) memory)
+'KProgFormal.ClightRefinement.X86ProducerInputReturn.to_destination' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

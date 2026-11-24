@@ -1,0 +1,3 @@
+The actual public first-input continuation retains the original saved-pointer assignment, destination and following statements. Four real internal transitions save the supplied64-bit word in t2, execute both original pointer casts into t1 and reach the original RAX assignment with the complete supplied heap unchanged. Original environment/continuation are retained; no provider outcome, heap frame, cast premise or output state is fabricated. Existing source APIs remain unchanged.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
