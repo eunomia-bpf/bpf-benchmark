@@ -1,0 +1,3 @@
+Actual OR/AND word16 handler calls now execute both real readers, selected numerical helper, five flag stores,181-step partial writer, local release and true return. All register aliasing routes are included without an aliasing premise. Initial caller data and permissions derive intermediate source observations; untouched upper48 bits, native GPR/flag views and the caller frame remain explicit.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
