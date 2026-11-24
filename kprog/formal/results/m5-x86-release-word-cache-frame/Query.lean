@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame
+#check KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.whole_disjoint
+#print axioms KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.whole_disjoint
+#check KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.store_frame
+#print axioms KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.store_frame
+#check KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.selected
+#print axioms KProgFormal.ClightRefinement.X86ReleaseWordCacheFrame.selected
