@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateLinkedRights
+
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRights.entry_call
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.LinkedRights.entry_call
