@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackWrite
+#check KProgFormal.ClightRefinement.Arm64MemsetStackWrite.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackWrite.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStackWrite.execute_local
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackWrite.execute_local

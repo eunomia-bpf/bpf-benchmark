@@ -1,0 +1,54 @@
+{
+  "confirmed_utc": "2026-11-24T12:34:18.872533+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStackWrite"
+    ],
+    "exit": 0,
+    "seconds": 5.500557899475098,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 306,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-stack-write/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7786478996276855,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "outer_sequence": 1,
+    "tag_loop": 22,
+    "tag_sequence_exit": 1,
+    "width_crossing": 11,
+    "lane0": 25,
+    "byte_sequence_exit": 1,
+    "remaining_lane_gates": 47,
+    "component_transition_sum": 107
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStackWrite.lean",
+      "size_bytes": 12173,
+      "mtime_ns": 1795523606740048311
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
