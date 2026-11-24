@@ -1,0 +1,16 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-xor-dword-release-all/Draft.lean"
+  ],
+  "exit": 0,
+  "seconds": 1.71614758198848,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512
+}
