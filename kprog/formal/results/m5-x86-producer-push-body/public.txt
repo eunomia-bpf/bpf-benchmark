@@ -1,0 +1,59 @@
+KProgFormal.ClightRefinement.X86ProducerPushBody.handler_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol
+        X86_program_profile_bpf._x86_sim_inline_arm_DISP_PUSH =
+      some KProgFormal.ClightRefinement.X86ProducerPushBody.handlerBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerPushBody.handlerBlock =
+      some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushBody.handler)
+'KProgFormal.ClightRefinement.X86ProducerPushBody.handler_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushBody.call (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushDispatch.targetCall
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).continuation CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).output memory)
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushBody.handler)
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.values binding)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.continuation binding k memory) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushBody.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushBody.allocation_valid (memory : CC.Mem) :
+  CC.AllocVariables KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv CC.emptyEnv memory
+    KProgFormal.ClightRefinement.X86ProducerPushBody.handler.fn_vars
+    (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+    (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd
+'KProgFormal.ClightRefinement.X86ProducerPushBody.allocation_valid' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushBody.entry (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushBody.handler)
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.values binding) k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushBody.handler.fn_body k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.initialTemps binding)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushBody.entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushBody.entry_frame (memory : CC.Mem) :
+  CC.Positive.toNat memory.nextblock ≤
+      CC.Positive.toNat (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd.nextblock ∧
+    KProgFormal.ClightRefinement.FrameBelow memory.nextblock memory
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd
+'KProgFormal.ClightRefinement.X86ProducerPushBody.entry_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushBody.local_storage (memory : CC.Mem) (i : Fin 3) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerPushBody.Local memory i)
+'KProgFormal.ClightRefinement.X86ProducerPushBody.local_storage' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

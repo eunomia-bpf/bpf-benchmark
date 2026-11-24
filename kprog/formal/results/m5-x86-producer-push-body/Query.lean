@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.X86ProducerPushBody
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.handler_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.handler_binding
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.call
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.allocation_valid
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.allocation_valid
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.entry
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.entry
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.entry_frame
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.entry_frame
+#check KProgFormal.ClightRefinement.X86ProducerPushBody.local_storage
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushBody.local_storage
