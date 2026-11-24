@@ -1,0 +1,3 @@
+The true RSP byte/word add-base and scalar partial stores compose with reverse-base, both table stores, non-increasing signed raw-SP release and writer-loop exit in83/82 source transitions from the actual leaf. Native upper56/48 bits come from the SAME initial RSP cell/native-base reads and the existing register relation; native setReg and every outside-block load follow from real stores. Scalar temporary tag0 and low RSP byte lane are explicit. Initial width/handler entry, volatile alternatives and increasing release remain proof work.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

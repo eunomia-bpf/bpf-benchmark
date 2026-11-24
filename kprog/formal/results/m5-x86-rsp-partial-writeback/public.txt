@@ -1,0 +1,59 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspPartialWriteback.from_leaf (isWord : Bool) (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (localBlock bindingBlock cellsBlock baseBlock : CC.Block) (cellsOffset baseOffset : CC.Integers.Ptrofs)
+  (old next : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (CC.Val.Vlong old))
+  (scalarTag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (observed : CC.PTree.get X86_program_profile_bpf.___x86_wr_next__2 le = some (CC.Val.Vlong next))
+  (low : isWord = false → CC.PTree.get X86_program_profile_bpf.___x86_wr_shift__2 le = some (CC.Val.Vint 0#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (rspRead : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong old))
+  (header : CC.Mem.load CC.Mptr memory bindingBlock 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (bindingSeparate : bindingBlock ≠ cellsBlock)
+  (localSeparate : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock ∧ baseBlock ≠ localBlock)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins)
+  (nativeBase : CC.Mem.load CC.Chunk.Mint64 memory baseBlock baseOffset.unsigned = some (CC.Val.Vlong origins.stack))
+  (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cellsBlock cellsOffset cpu)
+  (nonIncreasing :
+    CC.Integers.Int64.cmp CC.Comparison.Cgt
+        (X86.Value.writeView (if isWord = true then X86.Size.w else X86.Size.b) (old + origins.stack) next -
+          origins.stack)
+        old =
+      false)
+  (localPermission : memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true)
+  (wordPermission : memory.validAccess CC.Mptr cellsBlock (cellsOffset + 64).unsigned CC.Permission.Writable = true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned cellsBlock (cellsOffset + 64 + 8).unsigned CC.Permission.Writable =
+      true) :
+  ∃ final finalTemps,
+    KProgFormal.ClightRefinement.InternalRun ge ((13 + if isWord = true then 11 else 12) + 56 + 2)
+        (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.leaf isWord)
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftWriteback.storageTail
+            (KProgFormal.ClightRefinement.X86ShiftWriteback.loadCont k))
+          e le memory)
+        (CC.State.State function CC.Stmt.Sskip k e finalTemps final) ∧
+      KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cellsBlock cellsOffset
+          (cpu.setReg (if isWord = true then X86.Size.w else X86.Size.b) (X86.GPR.ofIndex 4) next) ∧
+        final.access = memory.access ∧
+          final.nextblock = memory.nextblock ∧
+            ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+              other ≠ localBlock →
+                other ≠ cellsBlock → CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspPartialWriteback.from_leaf' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
