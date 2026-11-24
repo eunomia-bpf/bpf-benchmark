@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86LogicDwordRspTail
+#check KProgFormal.ClightRefinement.X86LogicDwordRspTail.execute
+#print axioms KProgFormal.ClightRefinement.X86LogicDwordRspTail.execute

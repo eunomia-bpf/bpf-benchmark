@@ -1,0 +1,3 @@
+Initial permissions derive all true logical flag stores,223-step RSP dword writer, real local free and void return for non-increasing signed raw SP. The initial RSP tag is arbitrary: actual dword overwrite clears it. Native-base protection, exact readback, native GPR/flag views, revoked locals and caller loads all derive from the SAME source heap. One draft source was checked directly then moved into the canonical path before canonical build/public acceptance; no duplicate source/build was kept.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
