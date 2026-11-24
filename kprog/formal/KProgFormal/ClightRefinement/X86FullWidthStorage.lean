@@ -39,6 +39,41 @@ theorem source : X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106 =
     .Ssequence first (.Sifthenelse firstTest word
       (.Ssequence second (.Sifthenelse secondTest dword qword))) := rfl
 
+private theorem set_twice (id : CC.Ident) (value : CC.Val) (le : CC.TempEnv) :
+    (le.set id value).set id value = le.set id value := by
+  induction id generalizing le with
+  | xH => cases le <;> rfl
+  | xO id ih => cases le <;> simp [CC.PTree.set, ih]
+  | xI id ih => cases le <;> simp [CC.PTree.set, ih]
+
+def selectionTemps (le : CC.TempEnv) (narrow : Bool) : CC.TempEnv :=
+  let code := X86ShiftWriteback.widthClass (if narrow then .d else .q)
+  (le.set X86_program_profile_bpf._t'111 (.Vint code)).set
+    X86_program_profile_bpf._t'110 (.Vint code)
+
+/-- Both original repeated width classifiers and their actual branches
+select the32/64-bit storage leaf in26 transitions without changing memory. -/
+theorem select (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (narrow : Bool)
+    (width : le.get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument (if narrow then .d else .q))) :
+    InternalRun ge 26
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106 k e le memory)
+      (.State function (if narrow then dword else qword) k e (selectionTemps le narrow) memory) := by
+  rw [source]
+  cases narrow <;> apply internalRun_of_steps
+  all_goals simp +decide [steps, InternalPath, InternalState, CC.doStep,
+    first, firstTest, second, secondTest, selectionTemps, X86ShiftWriteback.widthClass,
+    CC.doEvalExpr, CC.typeof, width, X86ShiftLeft.argument, X86.Size.bytes,
+    CC.PTree.gss, CC.PTree.gso, CC.Cop.semBinaryOperation, CC.Cop.semCmp,
+    CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+    CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+    CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.Integers.Int.eq, CC.Integers.MI.eq,
+    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+    CC.Eapp, CC.E0, set_twice]
+
 def result (narrow : Bool) (value : BitVec 64) : BitVec 64 :=
   if narrow then X86.Value.trunc .d value else value
 
