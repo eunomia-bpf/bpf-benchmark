@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovRights
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryMovRights.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryMovRights.execute
