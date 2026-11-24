@@ -1,0 +1,3 @@
+Every ordinary scalar/tag0 qword XOR register aliasing route refines the SAME canonical ISA output through its genuine eight-argument call, original branch selection, helpers,252-step writer, flag stores, local release and return. Simultaneous equal-register inputs take the proved shortcut; distinct registers take the proved reader path. Full native state views, PC/oracle/events/fault, caller loads and revoked locals are explicit.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
