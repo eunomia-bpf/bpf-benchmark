@@ -1,0 +1,101 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.source :
+  X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_111 =
+      KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.initial✝.Ssequence
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body.Sloop
+          KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.increment✝) ∧
+    KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body =
+      KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.guard✝.Ssequence
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.decisions✝.Ssequence
+          (CC.Stmt.Sifthenelse KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.test✝
+            KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.providerArm CC.Stmt.Sskip))
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.enter (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_111 k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e
+      (CC.PTree.set X86_program_profile_bpf.___x86_release_lane__5 (CC.Val.Vint 0#32) le) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.choose (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) (lane : Fin 8) (old next : BitVec 64)
+  (observedLane :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_lane__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.laneArg lane)))
+  (observedIndex :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (observedOffset :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_off__5 le =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.offset slot)))
+  (observedOld : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (observedNext : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next)) :
+  KProgFormal.ClightRefinement.InternalRun ge 12
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e le memory)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.arm slot lane old next)
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.temps le slot lane old next) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.choose' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.advance (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (lane : Fin 8)
+  (observedLane :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_lane__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.laneArg lane))) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e
+      (CC.PTree.set X86_program_profile_bpf.___x86_release_lane__5 (CC.Val.Vint (BitVec.ofNat 32 (↑lane + 1))) le)
+      memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.advance' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.exit (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (observedLane : CC.PTree.get X86_program_profile_bpf.___x86_release_lane__5 le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e le memory)
+    (CC.State.State function CC.Stmt.Sskip k e le memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.exit' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.fallback (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) (old next : BitVec 64)
+  (observedIndex :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (observedOffset :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_off__5 le =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.offset slot)))
+  (observedOld : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (observedNext : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next))
+  (whole : KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.whole slot old next = false) :
+  KProgFormal.ClightRefinement.InternalRun ge 13
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e
+      (CC.PTree.set X86_program_profile_bpf.___x86_release_lane__5 (CC.Val.Vint 0#32)
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.temps le slot old next))
+      memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.fallback' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

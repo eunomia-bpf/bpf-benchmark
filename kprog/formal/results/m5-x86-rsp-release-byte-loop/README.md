@@ -1,0 +1,3 @@
+The actual growing-SP byte fallback initializes lane0, checks all48 original slot/lane positions with unsigned bounds and arbitrary signed old/new SP, selects the unchanged provider/skip arms, advances every lane including7 to8, and exits through the original false guard/breaks. Actual internal lengths are4 entry,12 selection,4 backedge,4 exit; original whole-word false selection composes to13-step byte-loop entry. Heap and full source bodies are retained. Provider/store and outer release/frame composition remain separate obligations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
