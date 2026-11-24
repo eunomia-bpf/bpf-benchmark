@@ -1,0 +1,30 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspStore.write {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) :
+  ∃ after,
+    CC.Mem.store CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+          64 (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) =
+        some after ∧
+      CC.Mem.load CC.Mptr after ready.gprs.block 64 =
+          some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) ∧
+        (∀ (row : Fin 32),
+            row ≠ 8 →
+              CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after ready.gprs.block
+                  (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row)
+                  (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+                  (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+              b ≠ ready.gprs.block →
+                CC.Mem.load c after b ofs =
+                  CC.Mem.load c (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd b ofs) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock
+                (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd after ∧
+              after.access = (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.access ∧
+                after.nextblock =
+                  (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerPushRspStore.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

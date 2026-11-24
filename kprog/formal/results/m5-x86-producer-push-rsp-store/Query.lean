@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspStore
+#check KProgFormal.ClightRefinement.X86ProducerPushRspStore.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspStore.write

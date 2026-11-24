@@ -1,0 +1,3 @@
+The SAME producer GPR allocation, real provider-preserved rights and actual PUSH local allocation construct the Mptr RSP store at byte64, without a successful-store or permission premise. Actual store readback, all31 disjoint GPR/tag rows, all other blocks, old caller frame and access/frontier preservation follow the genuine memory operation. This is store construction; execution of its original source assignment is composed separately.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
