@@ -1,0 +1,7 @@
+KProgFormal.ClightRefinement.X86ProducerAbiSource.source_abi :
+  KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer.fn_body =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerAbiSource.afterAbi
+      (List.ofFn KProgFormal.ClightRefinement.X86ProducerAbiSource.assignment)
+'KProgFormal.ClightRefinement.X86ProducerAbiSource.source_abi' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
