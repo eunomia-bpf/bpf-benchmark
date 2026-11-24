@@ -1,0 +1,19 @@
+KProgFormal.ClightRefinement.X86StackCacheView.address (origin : BitVec 64) (byte : Fin 48) : BitVec 64
+'KProgFormal.ClightRefinement.X86StackCacheView.address' does not depend on any axioms
+KProgFormal.ClightRefinement.X86StackCacheView.Represents (source : CC.Mem) (block : CC.Block)
+  (native : KProgFormal.Reference.Memory) (origin : BitVec 64) : Prop
+'KProgFormal.ClightRefinement.X86StackCacheView.Represents' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86StackCacheView.displacement (origin : BitVec 64) (byte : Fin 48) :
+  KProgFormal.ClightRefinement.X86StackCacheView.address origin byte - (origin - 8) = BitVec.ofInt 64 (↑↑byte - 40)
+'KProgFormal.ClightRefinement.X86StackCacheView.displacement' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86StackCacheView.store (source after : CC.Mem) (block : CC.Block)
+  (native : KProgFormal.Reference.Memory) (origin value : BitVec 64)
+  (represented : KProgFormal.ClightRefinement.X86StackCacheView.Represents source block native origin)
+  (table :
+    ∀ (byte : Fin 48),
+      CC.Mem.load CC.Chunk.Mint8unsigned after block ↑↑byte =
+        if ↑byte < 40 then CC.Mem.load CC.Chunk.Mint8unsigned source block ↑↑byte
+        else some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 (value >>> (8 * (↑byte - 40))))))) :
+  KProgFormal.ClightRefinement.X86StackCacheView.Represents after block
+    (KProgFormal.Reference.storeMemory native (origin - 8) value 8) origin
+'KProgFormal.ClightRefinement.X86StackCacheView.store' depends on axioms: [propext, Classical.choice, Quot.sound]

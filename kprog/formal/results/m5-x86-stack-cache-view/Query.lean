@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86StackCacheView
+#check KProgFormal.ClightRefinement.X86StackCacheView.address
+#print axioms KProgFormal.ClightRefinement.X86StackCacheView.address
+#check KProgFormal.ClightRefinement.X86StackCacheView.Represents
+#print axioms KProgFormal.ClightRefinement.X86StackCacheView.Represents
+#check KProgFormal.ClightRefinement.X86StackCacheView.displacement
+#print axioms KProgFormal.ClightRefinement.X86StackCacheView.displacement
+#check KProgFormal.ClightRefinement.X86StackCacheView.store
+#print axioms KProgFormal.ClightRefinement.X86StackCacheView.store
