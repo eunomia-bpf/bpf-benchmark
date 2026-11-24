@@ -1,0 +1,67 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspSource.source :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.update =
+    KProgFormal.ClightRefinement.X86ProducerPushRspSource.first.Ssequence
+      (KProgFormal.ClightRefinement.X86ProducerPushRspSource.second.Ssequence
+        (KProgFormal.ClightRefinement.X86ProducerPushRspSource.third.Ssequence
+          KProgFormal.ClightRefinement.X86ProducerPushRspSource.store))
+'KProgFormal.ClightRefinement.X86ProducerPushRspSource.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspSource.reads :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.first =
+      CC.Stmt.Sset X86_program_profile_bpf._t'228 KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead ∧
+    KProgFormal.ClightRefinement.X86ProducerPushRspSource.second =
+        CC.Stmt.Sset X86_program_profile_bpf._t'229 KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead ∧
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.third =
+          CC.Stmt.Sset X86_program_profile_bpf._t'230
+            KProgFormal.ClightRefinement.X86ProducerPushRspSource.currentRead ∧
+        KProgFormal.ClightRefinement.X86ProducerPushRspSource.store =
+          CC.Stmt.Sassign KProgFormal.ClightRefinement.X86ProducerPushRspSource.target
+            KProgFormal.ClightRefinement.X86ProducerPushRspSource.rhs
+'KProgFormal.ClightRefinement.X86ProducerPushRspSource.reads' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspSource.following_source (binding : CC.Block) (k : CC.Cont)
+  (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following binding k memory =
+    CC.Cont.Kseq
+      (KProgFormal.ClightRefinement.X86ProducerPushRspSource.update.Ssequence
+        KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop)
+      (KProgFormal.ClightRefinement.X86ProducerPushRspSource.control binding k memory)
+'KProgFormal.ClightRefinement.X86ProducerPushRspSource.following_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspSource.enter (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (value : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following binding k memory)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.update
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop
+        (KProgFormal.ClightRefinement.X86ProducerPushRspSource.control binding k memory))
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushRspSource.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspSource.inputs (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (value : BitVec 64) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+        (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value) =
+      some (CC.Val.Vptr binding 0) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_l_pp_step
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value) =
+        some (CC.Val.Vlong 8#64) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value) =
+        some (CC.Val.Vlong value)
+'KProgFormal.ClightRefinement.X86ProducerPushRspSource.inputs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

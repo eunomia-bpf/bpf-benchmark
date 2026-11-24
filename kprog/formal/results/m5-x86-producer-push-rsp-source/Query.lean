@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspSource
+#check KProgFormal.ClightRefinement.X86ProducerPushRspSource.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspSource.source
+#check KProgFormal.ClightRefinement.X86ProducerPushRspSource.reads
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspSource.reads
+#check KProgFormal.ClightRefinement.X86ProducerPushRspSource.following_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspSource.following_source
+#check KProgFormal.ClightRefinement.X86ProducerPushRspSource.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspSource.enter
+#check KProgFormal.ClightRefinement.X86ProducerPushRspSource.inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspSource.inputs
