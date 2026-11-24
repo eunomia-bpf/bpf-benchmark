@@ -395,3 +395,14 @@ capture did not recur in this boot: the B fixes of 11-23 changed their
 shape, and the remaining question is how much of that is the fixes and
 how much is boot-to-boot workload drift, which only a paired run on the
 same boot decides.
+
+## The classfg tracee rerun, 2026-11-24 (169 requests)
+
+Tracee on the same batch, with the fixed compile-sim-ir in place from
+the start: all 169 requests status 0, against 3 of 35 in the 11-20
+capture and 14 class-G plus 13 class-F failures there. No class F, no
+class G, no llc failure, no E2BIG. The 11-23 B fixes and the compile-
+sim-ir matcher fix together cover every shape the archive recorded for
+Tracee. The Tetragon side of the same conclusion sits in the rerun
+section above (81 of 85, with the three pre-fix compiler failures and
+one new largest class-F instance at -1448).
