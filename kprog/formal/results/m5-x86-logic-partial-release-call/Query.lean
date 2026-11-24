@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluLogicPartialReleaseCall
+#check KProgFormal.ClightRefinement.X86AluLogicPartialReleaseCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluLogicPartialReleaseCall.execute
