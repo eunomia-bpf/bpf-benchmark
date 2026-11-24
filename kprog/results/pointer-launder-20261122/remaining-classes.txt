@@ -281,3 +281,34 @@ in a guest is that line plus the request's status, in one run whose
 perf_progs has a foreign owner at load time.
 
 Recorded here because the class stays open until that run exists.
+
+## Complete Tetragon session classification (2026-11-24, from the
+## omp-five-20261120 raw; 86 requests, session-6f0mwwi2)
+
+Every request's simulator-failure.json was read and classified by its
+stderr/error text; the 12 with no failure file are the checked-sim-c
+successes. The split by owner follows the 11-23 operator words ("不要
+omp 做了. 你来开发"): B generation and the simulator's BPF arms are the
+verify side; native-link is the coordinator's.
+
+  12  ok (checked-sim-c)
+  25  class G, R* invalid mem access 'scalar' (verify side)
+  23  class F, invalid write to stack R10 off -856 x10, -888 and -800
+      bands below (verify side)
+   1  class H, "The sequence of 8193 jumps is too complex" at insn 53
+      after 87404 processed (request 8) -- B emits a jump chain past the
+      verifier's 8192-jump sequence limit (verify side; new class)
+  14  native-link: "relative table computation has live register or flag
+      results" (requests 12, 16, 23, 33, 38, 39, 41, 49, 58, 62, 64, 71
+      and two more) -- generation stage, the native-link command is the
+      last command in commands.jsonl (coordinator's)
+  10  native-link: "unresolved finite indirect target at 0x3580: jmp
+      rax" (requests 9, 20, 25, 32, 47, 50, 55, 72, 77, 83) (coordinator's)
+   1  llc-18 exit 1 with empty stderr on request 4's
+      trusted_x86.bpf.packed.mir, -start-before=prologepilog (verify
+      side; needs the MIR kept to diagnose)
+
+The classes A-G above were measured on the pointer-launder captures;
+this is the first full-session count and it shows the two native-link
+refusals block 24 of the 74 failed requests -- more than class F alone
+-- so full Tetragon coverage needs both sides.
