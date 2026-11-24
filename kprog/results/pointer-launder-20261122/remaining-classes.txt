@@ -325,9 +325,9 @@ refusals block 24 of the 74 failed requests -- more than class F alone
       empty-stderr llc exit is its own defect class, not a one-off
       (verify side)
    1  trusted-native-loader verify command failed with E2BIG, "Argument
-      list too long" (request 34) -- the verify argv itself exceeds the
-      limit, so the map-triple list has outgrown the exec boundary
-      (verify side)
+      list too long" (request 34) -- reclassified below: the errno is
+      from bpf_prog_load, 1,427,000 insns over the 1M limit (verify
+      side)
 
 Together with the Tetragon count above, the two apps' 121 requests hold
 six distinct failure shapes: F, G, the jump-chain limit, the llc-18
