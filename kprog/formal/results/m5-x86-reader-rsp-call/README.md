@@ -1,0 +1,3 @@
+The actual four-argument RSP reader call executes its original entry22, cell loads19, native-base materialization10, width/lane suffix and empty-frame release/return4. Total source lengths are64/68/72/72 for byte/word/dword/qword. Both base reads and the complete returned value derive from the initial memory and real helper binding. The entire memory is returned unchanged; no initial tag observation or intermediate execution assumption is added. Native register correspondence is the next component.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

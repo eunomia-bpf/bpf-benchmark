@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86RegisterReadRspCall.call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (memory : CC.Mem) (k : CC.Cont) (width shift : BitVec 8) (size : X86.Size) (offset nativeBase : BitVec 64)
+  (helperBlock bindingBlock cellsBlock baseBlock : CC.Block) (cellsOffset baseOffset : CC.Integers.Ptrofs)
+  (bound : shift.toNat < 64)
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result width = KProgFormal.ClightRefinement.X86ShiftLeft.argument size)
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (current : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong offset))
+  (header : CC.Mem.load CC.Mptr memory bindingBlock 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (native : CC.Mem.load CC.Chunk.Mint64 memory baseBlock baseOffset.unsigned = some (CC.Val.Vlong nativeBase)) :
+  KProgFormal.ClightRefinement.InternalRun ge (KProgFormal.ClightRefinement.X86RegisterReadRspCall.length size)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      (KProgFormal.ClightRefinement.X86AluReadSite.arguments (CC.Val.Vptr bindingBlock 0) (4#8) width shift) k memory)
+    (CC.State.Returnstate
+      (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterReadLanes.result (offset + nativeBase) size shift))
+      (CC.callCont k) memory)
+'KProgFormal.ClightRefinement.X86RegisterReadRspCall.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
