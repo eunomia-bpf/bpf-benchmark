@@ -1,0 +1,67 @@
+KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.payload {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu) :
+  CC.Mem.load CC.Chunk.Mint64 complete.after (ready.sources 1).block 40 =
+    some (CC.Val.Vlong (cpu.regs.get (X86.GPR.ofIndex 3)))
+'KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.payload' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.delta {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu) :
+  KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp + origins.stack = cpu.regs.get (X86.GPR.ofIndex 4) - 8#64
+'KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.delta' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu) :
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output ready.after)
+      CC.E0
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output complete.after) ∧
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins complete.after ready.gprs.block 0
+        (cpu.setReg X86.Size.q (X86.GPR.ofIndex 4) (cpu.regs.get (X86.GPR.ofIndex 4) - 8#64)) ∧
+      CC.Mem.load CC.Chunk.Mint64 complete.after (ready.sources 1).block 40 =
+        some (CC.Val.Vlong (cpu.regs.get (X86.GPR.ofIndex 3)))
+'KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

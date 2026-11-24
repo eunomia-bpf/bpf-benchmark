@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters
+#check KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.payload
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.payload
+#check KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.delta
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.delta
+#check KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNativeRegisters.execute
