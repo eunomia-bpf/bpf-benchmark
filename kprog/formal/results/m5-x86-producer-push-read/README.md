@@ -1,0 +1,3 @@
+The SAME original DISP_PUSH body executes its actual selector prefix, resolves read_reg in the full producer global environment, evaluates the actual arguments and completes the original RBX scalar reader. Actual caller environment/continuation and complete allocated memory are retained. All memory loads and helper/layout bindings derive the same entry result; no lookup/source-run/permission premise is added. Endpoint is the nested reader return, not completion of PUSH.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

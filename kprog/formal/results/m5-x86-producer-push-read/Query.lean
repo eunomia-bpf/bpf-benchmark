@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRead
+#check KProgFormal.ClightRefinement.X86ProducerPushRead.reader_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRead.reader_binding
+#check KProgFormal.ClightRefinement.X86ProducerPushRead.call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRead.call
+#check KProgFormal.ClightRefinement.X86ProducerPushRead.from_body
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRead.from_body
