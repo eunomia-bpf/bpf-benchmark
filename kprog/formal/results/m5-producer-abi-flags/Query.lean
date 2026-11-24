@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiFlags
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiFlags.entry_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiFlags.entry_initialized
