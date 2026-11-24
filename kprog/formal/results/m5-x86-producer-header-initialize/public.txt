@@ -1,0 +1,34 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderInitialize.header_initialized (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (registers : CC.Composite)
+  (registersLayout : CC.PTree.get X86_program_profile_bpf._x86_sim_register_cells ge.genv_cenv = some registers)
+  (cellsOffset :
+    CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._gpr_cells registers.co_members =
+      CC.Res.OK (0, CC.Bitfield.Full))
+  (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).snd.access) :
+  ∃ entry sources after,
+    KProgFormal.ClightRefinement.InternalRun ge 72
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerHeaderSource.afterHeader k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst le after) ∧
+      (∀ (i : Fin 24), CC.Mem.load CC.Mptr after entry.block (8 * ↑↑i) = some (CC.Val.Vptr (sources i).block 0)) ∧
+        (∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+            block ≠ entry.block → CC.Mem.load chunk after block offset = CC.Mem.load chunk memory block offset) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+            after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerHeaderInitialize.header_initialized' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

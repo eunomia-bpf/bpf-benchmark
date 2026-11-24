@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderInitialize
+#check KProgFormal.ClightRefinement.X86ProducerHeaderInitialize.header_initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderInitialize.header_initialized
