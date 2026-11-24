@@ -27,7 +27,7 @@ def afterTen (s : Reference.AArch64.State) : Reference.AArch64.State :=
 
 /-- Transport PC, error and eleventh fetch through ten genuine preceding
 steps, retaining the original program and decoder admission premises. -/
-theorem next_admission (s : Reference.AArch64.State)
+theorem admission_with_program (s : Reference.AArch64.State)
     (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh : Reference.AArch64.Instruction) (mark priority : BitVec 32)
     (imm : BitVec 16) (column : Fin 4) (negate : Bool)
     (literal : mark.setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
@@ -56,7 +56,8 @@ theorem next_admission (s : Reference.AArch64.State)
     (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding) :
     read_pc (afterTen s).machine = read_pc s.machine + 40#64 ∧
     read_err (afterTen s).machine = .None ∧
-    fetch_inst (read_pc (afterTen s).machine) (afterTen s).machine = some eleventh.encoding := by
+    fetch_inst (read_pc (afterTen s).machine) (afterTen s).machine = some eleventh.encoding ∧
+    (afterTen s).machine.program = s.machine.program := by
   have admitted := Arm64ProgramEntryMulAdmission.next_admission s first keep third fourth fifth
     mark priority imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded noError
     firstFetched keepFetched thirdFetched fourthFetched fifthFetched
@@ -178,7 +179,43 @@ theorem next_admission (s : Reference.AArch64.State)
     unfold afterTen
     rw [tenthStep]
     simpa [Arm64Fmov.Native.after,Arm64Nop.atCursor,write_pc,write_sfp,w,write_base_pc,write_base_sfp] using tenthProgram
-  exact ⟨eleventhPc,eleventhError,by simpa only [fetch_inst,eleventhPc,eleventhProgram] using eleventhFetched⟩
+  exact ⟨eleventhPc,eleventhError,(by simpa only [fetch_inst,eleventhPc,eleventhProgram] using eleventhFetched),eleventhProgram⟩
+
+/-- Retain the established eleventh-word admission interface. -/
+theorem next_admission (s : Reference.AArch64.State)
+    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh : Reference.AArch64.Instruction) (mark priority : BitVec 32)
+    (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (literal : mark.setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
+    (firstDecoded : first.decoded = .DPI (.Move_wide_imm (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
+      (Arm64MovKeep.Native.fields 1 ((priority.setWidth 64).setWidth 16) 1 false)))
+    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
+    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
+    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
+    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
+    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
+    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
+    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
+    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
+    (noError : read_err s.machine = .None)
+    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
+    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
+    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
+    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
+    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
+    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
+    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
+    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
+    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
+    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
+    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding) :
+    read_pc (afterTen s).machine = read_pc s.machine + 40#64 ∧
+    read_err (afterTen s).machine = .None ∧
+    fetch_inst (read_pc (afterTen s).machine) (afterTen s).machine = some eleventh.encoding := by
+  have result := admission_with_program s first keep third fourth fifth sixth seventh eighth ninth tenth eleventh mark priority imm column negate
+    literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded ninthDecoded tenthDecoded noError
+    firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched eleventhFetched
+  exact ⟨result.1,result.2.1,result.2.2.1⟩
 
 /-- Architectural input-view setup preserves original eleventh-word admission. -/
 theorem setup_next (s : Reference.AArch64.State) (origins : Reference.Provenance.AArch64.Origins)

@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-24T08:39:17.259396+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64UaddlvCacheFrame",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission"
+    ],
+    "exit": 0,
+    "seconds": 41.16171622276306,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 327,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-uaddlv-admission/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.012592315673828,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {},
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCntAdmission.lean",
+      "size_bytes": 20420,
+      "mtime_ns": 1795508863723430860
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryUaddlvAdmission.lean",
+      "size_bytes": 11150,
+      "mtime_ns": 1795508863723666978
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

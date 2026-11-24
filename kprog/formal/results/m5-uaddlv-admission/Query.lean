@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission.next_admission
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission.next_admission
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission.setup_next
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission.setup_next
