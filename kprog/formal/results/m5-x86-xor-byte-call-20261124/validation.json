@@ -1,0 +1,37 @@
+{
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluXorByteCall"
+    ],
+    "exit": 0,
+    "seconds": 6.485419965989422,
+    "memory_limit": 34359738368,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "lean_num_threads": 1
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-xor-byte-call-20261124/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.589669646054972,
+    "memory_limit": 34359738368,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "lean_num_threads": 1
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-byte-call02-20261124T070803Z",
+  "root_integration": "pending",
+  "complete_instruction_families": 0
+}
