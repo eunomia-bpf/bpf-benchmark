@@ -1,0 +1,15 @@
+KProgFormal.ClightRefinement.X86ProducerContextSource.source_context :
+  KProgFormal.ClightRefinement.X86ProducerHeaderSource.afterHeader =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerContextSource.afterContext
+      (List.ofFn KProgFormal.ClightRefinement.X86ProducerContextSource.assignment)
+'KProgFormal.ClightRefinement.X86ProducerContextSource.source_context' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSource.source_loop :
+  KProgFormal.ClightRefinement.X86ProducerContextSource.afterContext =
+    KProgFormal.ClightRefinement.X86ProducerContextSource.bindLoop.Ssequence
+      (KProgFormal.ClightRefinement.X86ProducerContextSource.firstLabel.Ssequence
+        KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls)
+'KProgFormal.ClightRefinement.X86ProducerContextSource.source_loop' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

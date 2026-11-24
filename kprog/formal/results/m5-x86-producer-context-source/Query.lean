@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerContextSource
+#check KProgFormal.ClightRefinement.X86ProducerContextSource.source_context
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSource.source_context
+#check KProgFormal.ClightRefinement.X86ProducerContextSource.source_loop
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSource.source_loop
