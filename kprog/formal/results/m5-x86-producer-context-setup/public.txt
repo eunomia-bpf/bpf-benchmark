@@ -1,0 +1,204 @@
+KProgFormal.ClightRefinement.X86ProducerContextSetup.source_setup :
+  KProgFormal.ClightRefinement.X86ProducerStackBaseSource.finalSetup =
+    KProgFormal.ClightRefinement.X86ProducerContextSetup.helperCtx.Ssequence
+      (KProgFormal.ClightRefinement.X86ProducerContextSetup.helperAbi.Ssequence
+        KProgFormal.ClightRefinement.X86ProducerContextSetup.pointerStart)
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.source_setup' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.helpers (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (k : CC.Cont) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
+  (read : CC.PTree.get X86_program_profile_bpf._ctx le = some (CC.Val.Vptr ctxBlock ctxOffset)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 6
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerStackBaseSource.finalSetup k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerContextSetup.pointerStart k e
+      (KProgFormal.ClightRefinement.X86ProducerContextSetup.temps le ctxBlock ctxOffset) memory)
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.helpers' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.write (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (i : Fin 2)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
+  (read : CC.PTree.get X86_program_profile_bpf._ctx le = some (CC.Val.Vptr ctxBlock ctxOffset))
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          ((KProgFormal.ClightRefinement.X86ProducerContextSetup.assignment i).Ssequence
+            (KProgFormal.ClightRefinement.X86ProducerContextSetup.following i))
+          k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerContextSetup.following i) k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store (KProgFormal.ClightRefinement.X86ProducerContextSetup.chunk i) memory gprs.block
+            (KProgFormal.ClightRefinement.X86ProducerContextSetup.offset i)
+            (KProgFormal.ClightRefinement.X86ProducerContextSetup.value i ctxBlock ctxOffset) =
+          some after ∧
+        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSetup.chunk i) after gprs.block
+              (KProgFormal.ClightRefinement.X86ProducerContextSetup.offset i) =
+            some (KProgFormal.ClightRefinement.X86ProducerContextSetup.value i ctxBlock ctxOffset) ∧
+          (∀ (row : Fin 32),
+              ↑row ≠ 14 + ↑i →
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after gprs.block
+                    (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) memory gprs.block
+                    (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+            (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.context_preserved (le : CC.TempEnv) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs) :
+  CC.PTree.get X86_program_profile_bpf._ctx
+      (KProgFormal.ClightRefinement.X86ProducerContextSetup.temps le ctxBlock ctxOffset) =
+    CC.PTree.get X86_program_profile_bpf._ctx le
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.context_preserved' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.initialized (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
+  (read : CC.PTree.get X86_program_profile_bpf._ctx le = some (CC.Val.Vptr ctxBlock ctxOffset))
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ middle after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 12
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerStackBaseSource.finalSetup k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (KProgFormal.ClightRefinement.X86ProducerContextSetup.temps le ctxBlock ctxOffset) after) ∧
+      CC.Mem.store CC.Mptr memory gprs.block 112 (CC.Val.Vptr ctxBlock ctxOffset) = some middle ∧
+        CC.Mem.store CC.Chunk.Mint8unsigned middle gprs.block 120 (CC.Val.Vint 1#32) = some after ∧
+          CC.Mem.load CC.Mptr after gprs.block 112 = some (CC.Val.Vptr ctxBlock ctxOffset) ∧
+            CC.Mem.load CC.Chunk.Mint8unsigned after gprs.block 120 = some (CC.Val.Vint 1#32) ∧
+              (∀ (row : Fin 32),
+                  row ≠ 14 →
+                    row ≠ 15 →
+                      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after gprs.block
+                          (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) memory gprs.block
+                          (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+                (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                    b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+                  KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                    after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.initialized' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.context_inputs (le : CC.TempEnv) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs)
+  (inputs :
+    ∀ (i : Fin 5),
+      CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i) le =
+        some (KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues i)) :
+  KProgFormal.ClightRefinement.X86ProducerContextSource.Typed
+      (KProgFormal.ClightRefinement.X86ProducerContextSetup.contextValues ctxBlock ctxOffset) ∧
+    ∀ (i : Fin 5),
+      CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i)
+          (KProgFormal.ClightRefinement.X86ProducerContextSetup.temps le ctxBlock ctxOffset) =
+        some (KProgFormal.ClightRefinement.X86ProducerContextSetup.contextValues ctxBlock ctxOffset i)
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.context_inputs' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextSetup.to_first_call (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
+  (read : CC.PTree.get X86_program_profile_bpf._ctx le = some (CC.Val.Vptr ctxBlock ctxOffset))
+  (inputs :
+    ∀ (i : Fin 5),
+      CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i) le =
+        some (KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues i))
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ entry sources after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 106
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerStackBaseSource.finalSetup k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls k)
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (KProgFormal.ClightRefinement.X86ProducerContextSetup.temps le ctxBlock ctxOffset) after) ∧
+      KProgFormal.ClightRefinement.X86ReleaseProvider.View after entry.block (sources 1).block 0 ∧
+        KProgFormal.ClightRefinement.X86CallFrameComplete.View after entry.block
+            (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) ∧
+          CC.Mem.load CC.Mptr after entry.block 0 = some (CC.Val.Vptr (sources 0).block 0) ∧
+            (∀ (i : Fin 5),
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk i) after entry.block
+                    (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i) =
+                  some (KProgFormal.ClightRefinement.X86ProducerContextSetup.contextValues ctxBlock ctxOffset i)) ∧
+              entry.block ≠ (sources 1).block ∧
+                KProgFormal.ClightRefinement.X86CallFrameComplete.Outside
+                    (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) (sources 1).block ∧
+                  KProgFormal.ClightRefinement.X86CallFrameComplete.Separated entry.block
+                      (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) ∧
+                    CC.Positive.toNat (sources 1).block < CC.Positive.toNat after.nextblock ∧
+                      (∀ (slot : Fin 6),
+                          CC.Positive.toNat
+                                ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources).tag slot).fst <
+                              CC.Positive.toNat after.nextblock ∧
+                            CC.Positive.toNat
+                                ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources).pointer
+                                    slot).fst <
+                              CC.Positive.toNat after.nextblock) ∧
+                        CC.Mem.load CC.Mptr after gprs.block 112 = some (CC.Val.Vptr ctxBlock ctxOffset) ∧
+                          CC.Mem.load CC.Chunk.Mint8unsigned after gprs.block 120 = some (CC.Val.Vint 1#32) ∧
+                            (∀ (row : Fin 32),
+                                row ≠ 14 →
+                                  row ≠ 15 →
+                                    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after
+                                        gprs.block (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                                      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) memory
+                                        gprs.block (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+                              (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                                  b ≠ entry.block →
+                                    b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+                                KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                                  after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerContextSetup.to_first_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

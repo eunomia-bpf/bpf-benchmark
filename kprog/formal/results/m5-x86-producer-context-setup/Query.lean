@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.X86ProducerContextSetup
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.source_setup
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.source_setup
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.helpers
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.helpers
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.write
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.context_preserved
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.context_preserved
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.initialized
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.context_inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.context_inputs
+#check KProgFormal.ClightRefinement.X86ProducerContextSetup.to_first_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextSetup.to_first_call
