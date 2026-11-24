@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64MemsetSource
+
+#check KProgFormal.ClightRefinement.Arm64MemsetSource.body_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetSource.body_source
+#check KProgFormal.ClightRefinement.Arm64MemsetSource.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetSource.entry_valid
+#check KProgFormal.ClightRefinement.Arm64MemsetSource.entry_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetSource.entry_frame
+#check KProgFormal.ClightRefinement.Arm64MemsetSource.scalar_read
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetSource.scalar_read
+#check KProgFormal.ClightRefinement.Arm64MemsetSource.enter_reads
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetSource.enter_reads
