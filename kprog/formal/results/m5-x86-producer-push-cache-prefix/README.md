@@ -1,0 +1,3 @@
+The SAME original producer/provider trace now executes all initialization, real PUSH dispatch/RSP decrement, every metadata selector/store, both remaining width calls and actual aligned qword cache assignment. Word40 readback equals the actual initialized RBX; relative RSPminus8/tag0, cleared slot5 metadata, current header-GPR-cache-ghost resources and old caller typed/raw frames accompany the same run/heap. Existing kind6/kind1 platform ABIs remain explicit; actual exit/free/return/native-memory/input-oracle/trace/canonical full149 work remains open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
