@@ -73,14 +73,17 @@ cover the same ordinary scalar/tag0 aliasing domain through the original
 selectors, repeated tag calls, 252-step writer and actual return. The
 [word-width calls](results/m5-x86-xor-word-all/README.md) cover that same
 scalar/tag0 aliasing domain through the actual 181-step partial writer,
-preserving 48 upper bits. RSP/pointer arithmetic inputs and dispatcher
+preserving 48 upper bits. General pointer arithmetic and dispatcher
 composition remain proof work. The actual OR/AND calls now cover the same
 ordinary scalar/tag0 register domain at all four widths, including legal
 low/high-byte slices and all aliasing, through the
 [canonical outputs](results/m5-x86-logic-register-root/README.md).
 The [RSP-aware logical calls](results/m5-x86-rsp-logic-root/README.md) extend
 OR/AND at all four widths to RSP sources through the genuine native-base
-reader calls and the same canonical full-state outputs. Their destination
+reader calls and the same canonical full-state outputs. The
+[RSP-source XOR calls](results/m5-x86-native-xor-byte-all/README.md) now
+provide the same all-width extension, including every ordinary register
+alias, with the original shortcuts and reader-dependent execution lengths. Their destination
 remains an ordinary scalar/tag0 register; legal byte slices are explicit.
 The [RSP storage prefix](results/m5-x86-write-rsp-storage/README.md) executes
 reverse materialization and both table stores to the exact stack-release
@@ -99,6 +102,14 @@ source-register alias at all four widths within those destination tag and
 non-increasing raw-SP conditions. They retain the original 77-step zero
 shortcut for the same RSP/lane and both real native reader calls for distinct
 registers, then refine the same canonical full-state step through return.
+
+The [increasing-RSP prefixes](results/m5-x86-rsp-release-select/README.md)
+execute the actual growing-SP branch, loop entry and all six word/byte
+selectors. Provider calls, stores, backedges and frame clobbers remain open.
+The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
+same canonical checked step for arbitrary heaps, tags and ignored operands,
+preserving the entire native state except PC. Generic dispatcher selection
+remains a separate composition obligation.
 
 ## Trust boundary
 
