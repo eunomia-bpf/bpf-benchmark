@@ -1,0 +1,6 @@
+KProgFormal.ClightRefinement.X86PushNativeBytes.table (memory : X86.Mem) (origin value : BitVec 64) (byte : Fin 48) :
+  (memory.writeSize X86.Size.q (origin - 8#64) value).read
+      (KProgFormal.ClightRefinement.X86StackCacheView.address origin byte) =
+    if ↑byte < 40 then memory.read (KProgFormal.ClightRefinement.X86StackCacheView.address origin byte)
+    else BitVec.setWidth 8 (value >>> (8 * (↑byte - 40)))
+'KProgFormal.ClightRefinement.X86PushNativeBytes.table' depends on axioms: [propext, Quot.sound]

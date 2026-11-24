@@ -1,0 +1,3 @@
+The original external x86lean Mem.writeN/writeSize/read definitions yield the exact8 written bytes and preserve all40 lower cache-window byte values at arbitrary wrapping native origins. Actual cache/native coordinate equalities exclude aliasing, without a copied store interpreter or extra byte result premise. This complements the actual C cache byte table and checked access characterization. Native platform relation/permissions/fault/PC/oracle/trace/full149 universal refinement remain open; original proof caps and all prior interfaces retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

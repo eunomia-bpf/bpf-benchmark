@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86PushNativeBytes
+#check KProgFormal.ClightRefinement.X86PushNativeBytes.table
+#print axioms KProgFormal.ClightRefinement.X86PushNativeBytes.table
