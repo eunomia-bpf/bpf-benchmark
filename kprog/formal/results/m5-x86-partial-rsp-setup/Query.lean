@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86PartialRspSetup
+#check KProgFormal.ClightRefinement.X86PartialRspSetup.to_leaf
+#print axioms KProgFormal.ClightRefinement.X86PartialRspSetup.to_leaf
