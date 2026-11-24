@@ -1,0 +1,35 @@
+KProgFormal.ClightRefinement.X86QwordTagStage.first (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (index : Fin 16) (tag : BitVec 8)
+  (bindingBlock cellsBlock helperBlock : CC.Block) (offset base : CC.Integers.Ptrofs)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (dstShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (srcShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock offset))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none)
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock offset.unsigned = some (CC.Val.Vptr cellsBlock base))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge 37
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.scalarWriter k e le memory)
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86QwordSelection.continuation k) e
+      (CC.PTree.set X86_program_profile_bpf._t'132 (KProgFormal.ClightRefinement.X86Width.argument tag)
+        (KProgFormal.ClightRefinement.X86QwordSelection.temps le))
+      memory)
+'KProgFormal.ClightRefinement.X86QwordTagStage.first' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,3 @@
+Original aligned qword destination selection, real21-step reg_tag execution and its genuine caller return compose in37 Clight transitions. Every architectural index and tag byte are covered; initial cells/tag loads determine the result. The exact reached temporary map and original continuation are retained and the whole heap is unchanged.
+
+Focused build168 and first type/axiom query pass at original200000/512,j1,32GiB inside shared timing. The source external assumptions stay explicit. Next is the actual scalar-tag compare and second reg_tag call, then both full pointer selectors and the existing qword local/table suffix. No whole-qword call or dispatcher completion is claimed.
