@@ -1,0 +1,3 @@
+The twelve original ghost assignments target the same actual tag/pointer locals used by the later header. The original two context assignments execute six real transitions before these writes; the original XDP/helper temporary assignments execute nine after them, retaining original environment/heap/continuation and exact temporary updates. The original provider/setup suffix is untouched and not asserted to execute. Source identities and concrete zero/null/ABI-kind casts are kernel checked without a new axiom or runtime/imported-semantics edit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

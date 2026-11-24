@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerGhostSource
+#check KProgFormal.ClightRefinement.X86ProducerGhostSource.source_ghosts
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostSource.source_ghosts
+#check KProgFormal.ClightRefinement.X86ProducerGhostSource.to_ghosts
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostSource.to_ghosts
+#check KProgFormal.ClightRefinement.X86ProducerGhostSource.after_ghosts
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostSource.after_ghosts

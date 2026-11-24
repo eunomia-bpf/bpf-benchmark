@@ -1,0 +1,33 @@
+KProgFormal.ClightRefinement.X86ProducerGhostSource.source_ghosts :
+  KProgFormal.ClightRefinement.X86ProducerGhostSource.ghostStart =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerGhostSource.afterGhosts
+      (List.ofFn KProgFormal.ClightRefinement.X86ProducerGhostSource.assignment)
+'KProgFormal.ClightRefinement.X86ProducerGhostSource.source_ghosts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGhostSource.to_ghosts (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun ge 6
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerAbiSource.afterAbi k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerGhostSource.ghostStart k e
+      (KProgFormal.ClightRefinement.X86ProducerGhostSource.contextTemps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerGhostSource.to_ghosts' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGhostSource.after_ghosts (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun ge 9
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerGhostSource.afterGhosts k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerGhostSource.beforeProvider k e
+      (KProgFormal.ClightRefinement.X86ProducerGhostSource.finalTemps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerGhostSource.after_ghosts' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
