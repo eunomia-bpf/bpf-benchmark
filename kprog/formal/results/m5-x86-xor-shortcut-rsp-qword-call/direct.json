@@ -1,0 +1,16 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-xor-shortcut-rsp-qword-call/Draft.lean"
+  ],
+  "exit": 0,
+  "seconds": 2.4983870229916647,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512
+}
