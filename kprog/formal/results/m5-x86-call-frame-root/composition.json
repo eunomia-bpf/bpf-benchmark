@@ -1,0 +1,30 @@
+{
+  "prior_receipt": "kprog/formal/results/m5-x86-rsp-release-byte-root",
+  "prior_interfaces": 287,
+  "current_interfaces": 300,
+  "prior_query_text_preserved_verbatim": true,
+  "added_names": [
+    "X86CallFrameStages.source",
+    "X86CallFrameStages.choose",
+    "X86CallFrameStages.finish",
+    "X86CallFrameStages.skipped",
+    "X86CallFrameClear.source",
+    "X86CallFrameClear.header_offset",
+    "X86CallFrameClear.execute",
+    "X86CallFrameClear.stable_temps",
+    "X86CallFrameClear.selected",
+    "X86CallFrameComplete.body",
+    "X86CallFrameComplete.call",
+    "X86CallFrameComplete.from_site",
+    "X86CallFrameComplete.after_last"
+  ],
+  "missing_prior_interfaces": [],
+  "root_jobs": 701,
+  "public_interfaces": 300,
+  "formal_full_check_lock": true,
+  "scope": "Complete actual6-slot frame helper, real stores, empty local release/return and caller restoration. Initial header/rights and explicit target separation derive every later helper read/store. Full growing release/provider ABI/native/dispatcher remain open.",
+  "full_semantic_check_receipt": "kprog/formal/results/m5-full-check-rsp-20261124",
+  "full_semantic_check_commit": "833d3f2dd3fe5af10d66e4b7e45b2b218760ba46",
+  "full_semantic_check_scope": "Earlier full semantic PASS849.622537s finished12:40:07Z; later proof-only focused/root checks are separate. No V runtime, shared C, pinned ISA or oracle edit; no new whole-suite PASS claimed.",
+  "provider_boundary": "CCLib/Events.lean451-478 provides determinacy/traceLength only; private-memory frame laws are not ported. Provider post-header/rights/frame ABI premises remain explicit, not derived from current determinacy laws."
+}

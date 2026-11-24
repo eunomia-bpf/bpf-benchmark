@@ -110,9 +110,12 @@ cache stores, retaining arbitrary provider traces and memory effects. The
 frame-values call through the original backedges. Its
 [entry](results/m5-x86-call-frame-entry/README.md) derives raw SP from the real
 table read; the [caller proof](results/m5-x86-call-frame-caller/README.md)
-connects it to the actual last-slot backedge and call site. Full loop assembly,
-provider ABI/frame transport and the helper's six metadata-clearing arms remain
-open.
+connects it to the actual last-slot backedge and call site. The
+[complete frame helper](results/m5-x86-call-frame-complete/README.md) now
+executes all six clearing-or-skip paths, real stores, local release and caller
+return from initial header/permission and target-separation premises. It
+preserves permissions, allocation frontier and the frame outside ghost targets.
+Full release-loop assembly and provider ABI/frame transport remain open.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
 preserving the entire native state except PC. Generic dispatcher selection
@@ -123,7 +126,9 @@ remains a separate composition obligation.
 Lean's kernel checks proof terms against the pinned definitions, with the
 standard logical axioms. Executing imported Clight additionally uses the
 existing `CC.externalFunctionsSem` and `CC.inlineAssemblySem` assumptions;
-scoped `#print axioms` output records their occurrence. The trust argument
+scoped `#print axioms` output records their occurrence. Provider memory frames
+remain explicit ABI premises: the imported external-call interface supplies
+determinacy and trace-length laws, without memory-frame laws. The trust argument
 includes the C front end, C-to-Lean exporter, imported semantics and their
 correspondence to the production simulator. The pinned ISA models supply
 architectural specifications; hardware/oracle comparisons check instruction
