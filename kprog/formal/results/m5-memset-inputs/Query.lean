@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetInputs
+
+#check KProgFormal.ClightRefinement.Arm64MemsetInputs.selected
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetInputs.selected
+#check KProgFormal.ClightRefinement.Arm64MemsetInputs.other
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetInputs.other
+#check KProgFormal.ClightRefinement.Arm64MemsetInputs.bound_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetInputs.bound_after
+#check KProgFormal.ClightRefinement.Arm64MemsetInputs.original_reads
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetInputs.original_reads
