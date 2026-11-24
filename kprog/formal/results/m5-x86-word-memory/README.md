@@ -1,0 +1,3 @@
+Actual64-bit local initialization followed by the real Mint16unsigned store reads back exactly the imported ISA low16-bit writeView. The proof covers the complete byte encoding/decoding, replacement of the two low bytes, preservation of all48 upper bits and the actual pointer-copy cast. Three public memory/native/readback queries passed with standard logical axioms.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

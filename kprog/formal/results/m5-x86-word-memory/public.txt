@@ -1,0 +1,22 @@
+KProgFormal.ClightRefinement.X86WordMemory.load (before copied after : CC.Mem) (block : CC.Block) (old next : BitVec 64)
+  (initialized : CC.Mem.store CC.Mptr before block 0 (CC.Val.Vlong old) = some copied)
+  (stored :
+    CC.Mem.store CC.Chunk.Mint16unsigned copied block 0
+        (CC.Val.Vint (KProgFormal.ClightRefinement.X86WordMemory.lane next)) =
+      some after) :
+  CC.Mem.load CC.Mptr after block 0 = some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86WordMemory.word old next)) ∧
+    CC.Cop.semCast (CC.Val.Vlong (KProgFormal.ClightRefinement.X86WordMemory.word old next)) (CC.tptr CC.tvoid)
+        (CC.tptr CC.tvoid) after =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86WordMemory.word old next))
+'KProgFormal.ClightRefinement.X86WordMemory.load' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86WordMemory.native (old next : BitVec 64) :
+  KProgFormal.ClightRefinement.X86WordMemory.word old next = X86.Value.writeView X86.Size.w old next
+'KProgFormal.ClightRefinement.X86WordMemory.native' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86WordMemory.readback (before copied after : CC.Mem) (block : CC.Block)
+  (old next : BitVec 64) (initialized : CC.Mem.store CC.Mptr before block 0 (CC.Val.Vlong old) = some copied)
+  (stored :
+    CC.Mem.store CC.Chunk.Mint16unsigned copied block 0
+        (CC.Val.Vint (KProgFormal.ClightRefinement.X86WordMemory.lane next)) =
+      some after) :
+  CC.Mem.load CC.Mptr after block 0 = some (CC.Val.Vlong (X86.Value.writeView X86.Size.w old next))
+'KProgFormal.ClightRefinement.X86WordMemory.readback' depends on axioms: [propext, Classical.choice, Quot.sound]
