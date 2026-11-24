@@ -1,0 +1,3 @@
+The actual exported context-header successor runs the original sequence, Sloop Sskip Sbreak body/increment/break, loop exit, next sequence and first label in seven source transitions to the original PUSH Scall with the genuine following-call continuation. Heap/environment/temporaries are unchanged by these actual transitions. No loop, label or continuation is elided, and this theorem does not assume or claim that the PUSH call itself executed. Earlier header/source interfaces are retained; provider/setup/caller refinement remains open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

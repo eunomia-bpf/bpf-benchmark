@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerBindLoop
+#check KProgFormal.ClightRefinement.X86ProducerBindLoop.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerBindLoop.source_call
+#check KProgFormal.ClightRefinement.X86ProducerBindLoop.to_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerBindLoop.to_call

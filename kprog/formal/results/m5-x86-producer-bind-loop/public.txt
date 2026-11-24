@@ -1,0 +1,19 @@
+KProgFormal.ClightRefinement.X86ProducerBindLoop.source_call :
+  KProgFormal.ClightRefinement.X86ProducerContextSource.firstLabel =
+    CC.Stmt.Slabel X86_program_profile_bpf._x86_l_0 KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+'KProgFormal.ClightRefinement.X86ProducerBindLoop.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerBindLoop.to_call (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun ge 7
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerContextSource.afterContext k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls k) e le memory)
+'KProgFormal.ClightRefinement.X86ProducerBindLoop.to_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
