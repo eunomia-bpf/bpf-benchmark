@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.X86ReleaseProvider
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.access_rights
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.access_rights
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.outcome_view
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.outcome_view
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.view_transport
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.view_transport
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.core_byte
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.core_byte
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.core_control
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.core_control
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.core_lane
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.core_lane
+#check KProgFormal.ClightRefinement.X86ReleaseProvider.core_word
+#print axioms KProgFormal.ClightRefinement.X86ReleaseProvider.core_word

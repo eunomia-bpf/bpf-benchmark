@@ -1,0 +1,3 @@
+Actual kind6 outcomes retain their externalCall/value/trace/full supplied memory. Access/frontier equality and frame outside the cache are explicit ABI fields; total availability is an explicit premise, not a new axiom or a consequence of determinacy. Initial cache headers/typed byte-word rights derive each supplied/source-store view. Exact original Core observations persist through actual byte/word selector, return and lane temporaries. This supports source-loop assembly; validating the real provider ABI and complete ISA refinement remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

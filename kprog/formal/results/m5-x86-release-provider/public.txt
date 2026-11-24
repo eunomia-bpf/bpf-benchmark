@@ -1,0 +1,57 @@
+KProgFormal.ClightRefinement.X86ReleaseProvider.access_rights (before after : CC.Mem)
+  (same : after.access = before.access) (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z)
+  (permission : CC.Permission) :
+  after.validAccess chunk block offset permission = before.validAccess chunk block offset permission
+'KProgFormal.ClightRefinement.X86ReleaseProvider.access_rights' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.outcome_view (ge : CC.CGenv) (binding stack : CC.Block)
+  (base : CC.Integers.Ptrofs) (memory : CC.Mem)
+  (view : KProgFormal.ClightRefinement.X86ReleaseProvider.View memory binding stack base) (separate : binding ≠ stack)
+  (outcome : KProgFormal.ClightRefinement.X86ReleaseProvider.Outcome ge stack memory) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.View outcome.supplied binding stack base
+'KProgFormal.ClightRefinement.X86ReleaseProvider.outcome_view' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.view_transport (binding stack : CC.Block) (base : CC.Integers.Ptrofs)
+  (before after : CC.Mem) (view : KProgFormal.ClightRefinement.X86ReleaseProvider.View before binding stack base)
+  (separate : binding ≠ stack) (same : after.access = before.access)
+  (frame : KProgFormal.ClightRefinement.X86ReleaseProvider.Frame stack before after) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.View after binding stack base
+'KProgFormal.ClightRefinement.X86ReleaseProvider.view_transport' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.core_byte (le : CC.TempEnv) (binding stack : CC.Block)
+  (base : CC.Integers.Ptrofs) (slot : Fin 6) (lane : Fin 8) (old next value : BitVec 64)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding slot old next) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.Core
+    (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.temps
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.temps le slot lane old next) value stack base)
+    binding slot old next
+'KProgFormal.ClightRefinement.X86ReleaseProvider.core_byte' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.core_control (le : CC.TempEnv) (binding : CC.Block) (slot : Fin 6)
+  (lane : Fin 8) (old next : BitVec 64) (value : BitVec 32)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding slot old next) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.Core
+    (CC.PTree.set X86_program_profile_bpf.___x86_release_lane__5 (CC.Val.Vint value)
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.temps le slot lane old next))
+    binding slot old next
+'KProgFormal.ClightRefinement.X86ReleaseProvider.core_control' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.core_lane (le : CC.TempEnv) (binding : CC.Block) (slot : Fin 6)
+  (old next : BitVec 64) (value : BitVec 32)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding slot old next) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.Core
+    (CC.PTree.set X86_program_profile_bpf.___x86_release_lane__5 (CC.Val.Vint value) le) binding slot old next
+'KProgFormal.ClightRefinement.X86ReleaseProvider.core_lane' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseProvider.core_word (le : CC.TempEnv) (binding stack : CC.Block)
+  (base : CC.Integers.Ptrofs) (slot : Fin 6) (old next value : BitVec 64)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding slot old next) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.Core
+    (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.temps
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.temps le slot old next) value stack base)
+    binding slot old next
+'KProgFormal.ClightRefinement.X86ReleaseProvider.core_word' depends on axioms: [propext, Classical.choice, Quot.sound]
