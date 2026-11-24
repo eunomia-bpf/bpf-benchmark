@@ -1,0 +1,46 @@
+KProgFormal.ClightRefinement.X86AluXorShortcutInputs.observations (binding op imm : CC.Val) (reg : Fin 16)
+  (flags width : BitVec 8) (aux : BitVec 32) (size : X86.Size)
+  (xorCode : BitVec.setWidth 32 (BitVec.setWidth 8 aux) = 2#32)
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result flags = KProgFormal.ClightRefinement.X86ShiftLeft.argument size) :
+  KProgFormal.ClightRefinement.X86AluXorInputs.Observed
+    (KProgFormal.ClightRefinement.X86AluXorShortcutInputs.temps binding op imm reg flags width aux) binding reg size
+    (BitVec.setWidth 8 (aux >>> 8)) 0#64
+'KProgFormal.ClightRefinement.X86AluXorShortcutInputs.observations' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86AluXorShortcutInputs.entry (ge : CC.CGenv) (caller : CC.Mem) (k : CC.Cont)
+  (binding op imm : CC.Val) (reg : Fin 16) (flags width : BitVec 8) (aux : BitVec 32) (size : X86.Size)
+  (widthBlock aluBlock : CC.Block) (xorCode : BitVec.setWidth 32 (BitVec.setWidth 8 aux) = 2#32)
+  (sameLane : BitVec.setWidth 8 (aux >>> 16) = BitVec.setWidth 8 (aux >>> 8))
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result flags = KProgFormal.ClightRefinement.X86ShiftLeft.argument size)
+  (widthHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (aluHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)) :
+  KProgFormal.ClightRefinement.InternalRun ge 77
+      (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG)
+        [binding, op,
+          KProgFormal.ClightRefinement.X86Width.argument
+            (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte reg),
+          KProgFormal.ClightRefinement.X86Width.argument
+            (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte reg),
+          KProgFormal.ClightRefinement.X86Width.argument flags, CC.Val.Vint aux, imm,
+          KProgFormal.ClightRefinement.X86Width.argument width]
+        k caller)
+      (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+        KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags (KProgFormal.ClightRefinement.X86AluEntry.continuation k)
+        (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst
+        (KProgFormal.ClightRefinement.X86AluXorShortcutInputs.temps binding op imm reg flags width aux)
+        (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd) ∧
+    KProgFormal.ClightRefinement.X86AluXorInputs.Observed
+      (KProgFormal.ClightRefinement.X86AluXorShortcutInputs.temps binding op imm reg flags width aux) binding reg size
+      (BitVec.setWidth 8 (aux >>> 8)) 0#64
+'KProgFormal.ClightRefinement.X86AluXorShortcutInputs.entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
