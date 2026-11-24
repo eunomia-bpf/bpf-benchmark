@@ -1,0 +1,5 @@
+Complete `make -C kprog/formal check` passed with exit0 in 807.6922881499631 seconds, finishing 2026-11-24T22:29:29.176597+00:00. Starting commit 399fcaf6e9b9bfa010736932450b5b12d6f6ddef integrated the complete scoped original first PUSH C call (root868/public687). Its full Lean build passed1034 jobs, followed by every existing reference/hardware comparison, semantic/frame/fault host oracle and BPF compile check.
+
+Original200000 heartbeats/512 depth/j1/32GiB, nice19 CPUs12–15 inside shared timing and exclusive formal-full-check. No ISA, C/export, oracle, runtime or benchmark setting was changed by lane V. Peer WIP and all raw results retained.
+
+After the full Lean phase, Local/GprView/NativeRegisters/CacheFrame leaves were direct/focused/public-validated separately. Their aggregate integration is recorded in ../m5-x86-producer-push-native-registers-root/; they are not represented as part of the earlier1034-job Lean phase. Native-memory/input-oracle/trace/fault/fetch-PC and full149 universal refinement remain open; provider memory ABIs are explicit premises.

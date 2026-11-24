@@ -1,0 +1,21 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/stack-20261124T212338Z",
+  "full_lean_jobs": 1034,
+  "command": [
+    "make",
+    "-C",
+    "kprog/formal",
+    "check"
+  ],
+  "started": "2026-11-24T22:16:01.482789+00:00",
+  "head": "399fcaf6e9b9bfa010736932450b5b12d6f6ddef",
+  "cpus": "12-15",
+  "shared_timing": true,
+  "formal_full_check_lock": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512,
+  "exit": 0,
+  "seconds": 807.6922881499631,
+  "finished": "2026-11-24T22:29:29.176597+00:00"
+}
