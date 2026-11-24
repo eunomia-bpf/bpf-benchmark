@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackSetup
+#check KProgFormal.ClightRefinement.Arm64MemsetStackSetup.selection
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackSetup.selection
