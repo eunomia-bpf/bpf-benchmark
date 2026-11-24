@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerPushCacheExecute
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.continuation_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.continuation_source
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.load_header
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.load_header
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.assignment
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.assignment
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.from_metadata
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.from_metadata

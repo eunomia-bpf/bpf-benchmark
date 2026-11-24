@@ -1,0 +1,3 @@
+The SAME current metadata result now executes storage reloads, both width calls and all selectors, actual header.stack load/sequence and original Mint64 payload assignment. Saved RBX is written/read back at cache byte40; every disjoint typed range/block and old caller raw/access/frontier frame is retained. Store success derives original cache rights; no source-run/store/address/View/output-memory premise remains in from_metadata. Actual exit/free/return/native-memory/canonical full149 work remains separate.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
