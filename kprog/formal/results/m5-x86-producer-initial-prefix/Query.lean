@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerInitialPrefix
+#check KProgFormal.ClightRefinement.X86ProducerInitialPrefix.context_inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerInitialPrefix.context_inputs
+#check KProgFormal.ClightRefinement.X86ProducerInitialPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerInitialPrefix.from_call
