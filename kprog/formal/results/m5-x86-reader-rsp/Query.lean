@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86RegisterReadRsp
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadRsp.base_offset
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadRsp.materialize_rsp

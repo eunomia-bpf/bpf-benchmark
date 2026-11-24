@@ -1,0 +1,3 @@
+The real reader RSP branch performs its original binding-header native-stack-base pointer read and base-word read, then materializes offset+nativeBase in10 source transitions with unchanged heap. The actual composite layout proves header offset112 after six inline-value records. Earlier attempts exposed overly broad layout simplification and cast/condition normalization boundaries; the staged source/layout proof passes at unchanged200000/512 limits. This is the first RSP component, not a complete RSP reader call or handler.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

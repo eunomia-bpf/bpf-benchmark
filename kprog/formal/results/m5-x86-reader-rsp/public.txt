@@ -1,0 +1,6 @@
+'KProgFormal.ClightRefinement.X86RegisterReadRsp.base_offset' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.X86RegisterReadRsp.materialize_rsp' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
