@@ -1,0 +1,41 @@
+{
+  "commands": {
+    "xor-native-build2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.X86AluXorByteNative"
+      ],
+      "exit": 0,
+      "seconds": 1.9661562919500284,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    },
+    "xor-native-public2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-xor-byte-native/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.665993252012413,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-native-20261124T081051Z",
+  "retained_failures": [
+    "xor-native-build1"
+  ],
+  "source_transitions": 562,
+  "complete_instruction_families": 0,
+  "root_integration": "pending"
+}
