@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemsetLossSetup
+
+#check KProgFormal.ClightRefinement.Arm64MemsetLossSetup.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetLossSetup.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetLossSetup.inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetLossSetup.inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetLossSetup.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetLossSetup.original
