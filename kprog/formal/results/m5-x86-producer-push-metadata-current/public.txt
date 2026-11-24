@@ -1,0 +1,26 @@
+KProgFormal.ClightRefinement.X86ProducerPushMetadataCurrent.preserve {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) {middle after : CC.Mem}
+  (tagStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned result.after (ready.sources 12).block 0 (CC.Val.Vint 0) = some middle)
+  (pointerStored : CC.Mem.store CC.Mptr middle (ready.sources 13).block 0 (CC.Val.Vlong 0) = some after) :
+  (∀ (c : CC.Chunk) (ofs : CC.Z),
+      CC.Mem.load c after ready.entry.block ofs = CC.Mem.load c result.after ready.entry.block ofs) ∧
+    (∀ (c : CC.Chunk) (ofs : CC.Z),
+        CC.Mem.load c after ready.gprs.block ofs = CC.Mem.load c result.after ready.gprs.block ofs) ∧
+      (∀ (c : CC.Chunk) (ofs : CC.Z),
+          CC.Mem.load c after (ready.sources 1).block ofs = CC.Mem.load c result.after (ready.sources 1).block ofs) ∧
+        KProgFormal.ClightRefinement.X86ReleaseProvider.View after ready.entry.block (ready.sources 1).block 0 ∧
+          KProgFormal.ClightRefinement.X86CallFrameComplete.View after ready.entry.block
+              (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock ready.stackOutcome.supplied after ∧
+              (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                  CC.Positive.toNat b < CC.Positive.toNat before.nextblock →
+                    CC.Mem.load c after b ofs = CC.Mem.load c before b ofs) ∧
+                after.access = result.after.access ∧ after.nextblock = result.after.nextblock
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataCurrent.preserve' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

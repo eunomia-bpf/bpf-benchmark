@@ -1,0 +1,3 @@
+Actual slot5 tag/null-pointer stores preserve every typed header/GPR/cache load, all current cache/ghost permissions/views, access/frontier and exact last-provider raw caller frame. Source local allocation derives all block separation/freshness; no post-store View/frame premise is supplied. This resource theorem is applied to the actual two stores constructed by original clearing execution.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

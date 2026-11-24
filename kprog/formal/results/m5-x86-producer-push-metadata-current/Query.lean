@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataCurrent
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataCurrent.preserve
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataCurrent.preserve
