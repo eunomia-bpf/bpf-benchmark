@@ -1,0 +1,7 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderProgramSource.program_source :
+  KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer.fn_body =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart
+      KProgFormal.ClightRefinement.X86ProducerHeaderProgramSource.programPrefix
+'KProgFormal.ClightRefinement.X86ProducerHeaderProgramSource.program_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
