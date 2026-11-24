@@ -1,0 +1,33 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/xor-source-20261124T131558Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86AluNativeXorByteAll"
+    ],
+    "exit": 0,
+    "seconds": 1.9802505919942632,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-native-xor-byte-all/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6396578359999694,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}
