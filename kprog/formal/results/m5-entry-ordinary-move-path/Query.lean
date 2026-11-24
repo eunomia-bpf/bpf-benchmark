@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMovePath
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMovePath.first
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMovePath.first
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMovePath.constant
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMovePath.constant
