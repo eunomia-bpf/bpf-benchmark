@@ -1,0 +1,17 @@
+KProgFormal.ClightRefinement.X86NopCall.entry (ge : CC.CGenv) (memory : CC.Mem)
+  (binding op dst src flags aux imm width : CC.Val) :
+  CC.FunctionEntry2 ge KProgFormal.ClightRefinement.X86NopCall.handler [binding, op, dst, src, flags, aux, imm, width]
+    memory CC.emptyEnv (KProgFormal.ClightRefinement.X86NopCall.initialTemps binding op dst src flags aux imm width)
+    memory
+'KProgFormal.ClightRefinement.X86NopCall.entry' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86NopCall.execute (ge : CC.CGenv) (memory : CC.Mem) (k : CC.Cont)
+  (binding op dst src flags aux imm : CC.Val) (width : BitVec 8) (boundary : CC.isCallCont k = true) :
+  KProgFormal.ClightRefinement.InternalRun ge 6
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86NopCall.handler)
+      [binding, op, dst, src, flags, aux, imm, CC.Val.Vint (BitVec.setWidth 32 width)] k memory)
+    (CC.State.Returnstate CC.Val.Vundef k memory)
+'KProgFormal.ClightRefinement.X86NopCall.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

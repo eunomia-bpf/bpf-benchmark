@@ -1,0 +1,3 @@
+The original exported DISP_NOP handler enters and binds all eight actual parameters, executes its real width assignment/loop and returns in6 Clight transitions with the IDENTICAL whole heap. Every unused argument may be any Clight value including pointers or undefined values; register and tag domains are unrestricted. No intermediate allocation/free/body-run result is assumed. This establishes the handler call; canonical ISA and dispatcher composition are separate obligations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
