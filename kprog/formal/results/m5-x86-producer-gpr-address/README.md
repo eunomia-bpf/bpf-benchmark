@@ -1,0 +1,3 @@
+Pending proof draft for actual nested GPR pointer/tag addresses and the original RAX value/tag source identities. This file is not imported by the proof root and has not been validated.
+
+The queued direct Lean command never launched because the coordinator holds exclusive timing; it was cancelled without running alongside the measurement. Resume with a fresh phase name under shared timing, correct the actual source boundary if needed, and move this same file to the canonical module only after acceptance. The prerequisite GPR layout has passed direct/focused kernel builds; its public query is also pending.

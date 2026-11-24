@@ -1,0 +1,15 @@
+{
+  "status": "not_started",
+  "raw_directory": "/workspaces/kprog-raw/V/input-return-20261124T183812Z",
+  "reason": "coordinator exclusive timing lock; queued direct Lean command cancelled before launch",
+  "queued_phase": "gpr-address-draft1",
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-producer-gpr-address/Draft.lean"
+  ],
+  "canonical_module": "X86ProducerGprAddress",
+  "next_phase": "gpr-address-draft2"
+}
