@@ -1,0 +1,3 @@
+True local/global callee resolution, actual argument evaluation, existing full six-step helper and original return/save compose11 transitions. Together with actual stack preparation25 steps reach the six genuine overlap stages on the SAME complete memory, with source-established index40/width8/header/saved RBX. No binding/helper-run/load/View/source-run premise is added in from_rsp; source semantics/ISA/runtime unchanged.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

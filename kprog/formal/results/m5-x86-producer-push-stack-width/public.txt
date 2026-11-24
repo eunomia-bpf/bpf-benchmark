@@ -1,0 +1,97 @@
+KProgFormal.ClightRefinement.X86ProducerPushStackWidth.call (frame memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (read : CC.PTree.get X86_program_profile_bpf.___x86_l_pp_width le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCall
+      (KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst le memory)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective) [CC.Val.Vint 8#32]
+      (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.continuation
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerPushStackWidth.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackWidth.resume (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.Returnstate (CC.Val.Vint 8#32)
+      (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.continuation e le k) memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.stages
+      (KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepareCont k) e
+      (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushStackWidth.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackWidth.execute (frame memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (read : CC.PTree.get X86_program_profile_bpf.___x86_l_pp_width le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 11
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCall
+      (KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.stages
+      (KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepareCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushStackWidth.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackWidth.from_rsp {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 25
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.stages
+      (KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepareCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushStackSetup.temps
+          (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) ready.gprs.block))
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushStackWidth.from_rsp' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackWidth.inputs {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) :
+  CC.PTree.get X86_program_profile_bpf.___x86_sv_index
+        (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps
+          (KProgFormal.ClightRefinement.X86ProducerPushStackSetup.temps
+            (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) ready.gprs.block)) =
+      some (CC.Val.Vlong 40#64) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_sv_width
+          (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps
+            (KProgFormal.ClightRefinement.X86ProducerPushStackSetup.temps
+              (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) ready.gprs.block)) =
+        some (CC.Val.Vlong 8#64) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_bind
+            (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps
+              (KProgFormal.ClightRefinement.X86ProducerPushStackSetup.temps
+                (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) ready.gprs.block)) =
+          some (CC.Val.Vptr ready.entry.block 0) ∧
+        CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value
+            (KProgFormal.ClightRefinement.X86ProducerPushStackWidth.temps
+              (KProgFormal.ClightRefinement.X86ProducerPushStackSetup.temps
+                (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) ready.gprs.block)) =
+          some (CC.Val.Vlong (ready.values 3))
+'KProgFormal.ClightRefinement.X86ProducerPushStackWidth.inputs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
