@@ -1,0 +1,46 @@
+KProgFormal.ClightRefinement.X86FullWidthTable.native
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory middle final : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs) (cpu : X86.Cpu) (index : Fin 16) (value : BitVec 64) (narrow : Bool)
+  (ordinary : index ≠ 4)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base cpu)
+  (wordStored :
+    CC.Mem.store CC.Mptr memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+        (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) =
+      some middle)
+  (tagStored :
+    CC.Mem.store CC.Chunk.Mint8unsigned middle block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned
+        (CC.Val.Vint 0#32) =
+      some final) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final block base
+    (cpu.setReg (if narrow = true then X86.Size.d else X86.Size.q) (X86.GPR.ofIndex index) value)
+'KProgFormal.ClightRefinement.X86FullWidthTable.native' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86FullWidthTable.writable
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs) (cpu : X86.Cpu) (index : Fin 16) (value : BitVec 64) (narrow : Bool)
+  (ordinary : index ≠ 4)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base cpu)
+  (wordPermission :
+    memory.validAccess CC.Mptr block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned CC.Permission.Writable =
+      true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ middle final,
+    CC.Mem.store CC.Mptr memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+          (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) =
+        some middle ∧
+      CC.Mem.store CC.Chunk.Mint8unsigned middle block (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned
+            (CC.Val.Vint 0#32) =
+          some final ∧
+        KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final block base
+            (cpu.setReg (if narrow = true then X86.Size.d else X86.Size.q) (X86.GPR.ofIndex index) value) ∧
+          final.access = memory.access ∧
+            final.nextblock = memory.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ block → CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86FullWidthTable.writable' depends on axioms: [propext, Classical.choice, Quot.sound]

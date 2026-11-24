@@ -1,0 +1,37 @@
+{
+  "commands": {
+    "full-width-table-build1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.X86FullWidthTable"
+      ],
+      "exit": 0,
+      "seconds": 1.9871284189866856,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    },
+    "full-width-table-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-full-width-table/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.633188973995857,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-native-20261124T081051Z",
+  "complete_instruction_families": 0,
+  "root_integration": "pending"
+}

@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86FullWidthTable
+
+#check KProgFormal.ClightRefinement.X86FullWidthTable.native
+#print axioms KProgFormal.ClightRefinement.X86FullWidthTable.native
+#check KProgFormal.ClightRefinement.X86FullWidthTable.writable
+#print axioms KProgFormal.ClightRefinement.X86FullWidthTable.writable
