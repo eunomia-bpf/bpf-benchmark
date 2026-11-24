@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerGprStage
+#check KProgFormal.ClightRefinement.X86ProducerGprStage.local_separate
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprStage.local_separate
+#check KProgFormal.ClightRefinement.X86ProducerGprStage.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprStage.execute

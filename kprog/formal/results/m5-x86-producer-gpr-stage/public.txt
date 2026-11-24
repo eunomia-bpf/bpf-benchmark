@@ -1,0 +1,34 @@
+KProgFormal.ClightRefinement.X86ProducerGprStage.local_separate (before : CC.Mem) {name other : CC.Ident}
+  {ty otherTy : CC.Ty}
+  (left :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name ty)
+  (right :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before other otherTy)
+  (different : name ≠ other) : left.block ≠ right.block
+'KProgFormal.ClightRefinement.X86ProducerGprStage.local_separate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprStage.execute (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (i : Fin 16) (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerGprStage.Result before memory le k gprs cache i)
+'KProgFormal.ClightRefinement.X86ProducerGprStage.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,3 @@
+Each original GPR source stage constructs its real execution, value/tag readbacks, other rows and protected typed-load frame from the existing explicit initial provider availability ABI. Actual allocator bindings identify the same cache throughout; name separation derives GPR/cache disjointness. Access/frontier and untouched temporary observations are preserved. RSP takes the genuine zero branch and invokes no external provider. No raw-content frame is inferred across providers, and no new axiom or platform binding is asserted.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
