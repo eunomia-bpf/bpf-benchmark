@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerGprPrefix
+#check KProgFormal.ClightRefinement.X86ProducerGprPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprPrefix.from_call
