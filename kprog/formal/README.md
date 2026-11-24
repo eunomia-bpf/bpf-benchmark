@@ -33,7 +33,7 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-producer-push-complete-root/README.md)
+[integrated public queries](results/m5-x86-producer-push-native-registers-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
@@ -77,6 +77,10 @@ header views, old caller frames and actual input traces; freed local rights
 are revoked. Both kind-6 and kind-1 availability/memory ABIs remain explicit
 premises. Protected typed loads across providers do not imply raw contents
 equality; the raw caller frame begins at the last complete supplied heap.
+The same first call also has an instruction-local silent execution, a native
+RSP-minus-eight register projection, native RBX payload and unchanged
+observations for the forty untouched cache bytes. These use the existing
+register relation and the same actual final heap.
 This scoped C execution does not close canonical fetched-ISA, native-memory/
 input-oracle/trace correspondence or the remaining universal instruction goals.
 
