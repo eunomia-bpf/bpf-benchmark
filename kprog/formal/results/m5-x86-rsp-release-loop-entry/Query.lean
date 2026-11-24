@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.source
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.source
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.enter
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.enter
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.from_table
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.from_table

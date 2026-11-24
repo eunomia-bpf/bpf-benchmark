@@ -1,0 +1,45 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.source :
+  KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing =
+    (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.initial✝.Ssequence
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.body✝.Sloop
+            KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.advance✝)).Ssequence
+      KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.frame✝
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 11
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.loopContinuation k) e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.temps le) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.from_table (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (old next : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (newSp : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong next))
+  (increasingOffset : CC.Integers.Int64.cmp CC.Comparison.Cgt next old = true) :
+  KProgFormal.ClightRefinement.InternalRun ge 29
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.loopContinuation
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.releaseContinuation k))
+      e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.temps
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.temps le cellsBlock cellsOffset old next))
+      memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.from_table' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

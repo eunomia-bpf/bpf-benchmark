@@ -1,0 +1,3 @@
+The original48-byte export initializes its release index, evaluates the unsigned0<48 guard and computes the signed-48 offset in11 actual source transitions. Composed with genuine saved/new-SP reads and increasing signed comparison,29 transitions from the original table-write frontier reach the first unchanged word/byte decision. Both release arms, loop backedge and following real call-frame-values call remain present. No provider, memory-write or final-loop success is assumed; full growing release remains open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
