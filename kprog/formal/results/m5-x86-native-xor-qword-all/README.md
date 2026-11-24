@@ -1,0 +1,3 @@
+Every ordinary scalar/tag0 qword destination XOR alias admits the actual RSP source reader with any initial RSP tag, or the accepted ordinary-source reader/shortcut paths. No distinct-register or ordinary-source premise remains. All legal byte/high slices and true source-path lengths are retained through real flags, writer, free and return to the SAME canonical full native-state output. The old all-alias proof is reused unchanged; only the RSP-source branch is added.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
