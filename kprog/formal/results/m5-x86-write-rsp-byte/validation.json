@@ -1,0 +1,33 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/rsp-20261124T110008Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86RegisterWriteRspByte"
+    ],
+    "exit": 0,
+    "seconds": 7.080282659037039,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/V/rsp-20261124T110008Z/write-rsp-byte-query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5922126160003245,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}
