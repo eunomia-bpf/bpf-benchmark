@@ -1,0 +1,54 @@
+KProgFormal.ClightRefinement.X86ProducerScalarStore.write (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (rest : CC.Stmt) (i : Fin 10)
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before
+      (KProgFormal.ClightRefinement.X86ProducerScalarStore.row i))
+  (rhs : CC.Expr) (input value : CC.Val)
+  (evaluated :
+    CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le memory rhs =
+      some input)
+  (cast :
+    CC.Cop.semCast input (CC.typeof rhs)
+        (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localType
+          (KProgFormal.ClightRefinement.X86ProducerScalarStore.row i))
+        memory =
+      some value)
+  (canonical : CC.Val.loadResult (KProgFormal.ClightRefinement.X86ProducerScalarStore.chunk i) value = value)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (CC.Stmt.Sassign
+            (CC.Expr.Evar
+              (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName
+                (KProgFormal.ClightRefinement.X86ProducerScalarStore.row i))
+              (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localType
+                (KProgFormal.ClightRefinement.X86ProducerScalarStore.row i)))
+            rhs)
+          (CC.Cont.Kseq rest k)
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer rest k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store (KProgFormal.ClightRefinement.X86ProducerScalarStore.chunk i) memory object.block 0 value =
+          some after ∧
+        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarStore.chunk i) after object.block 0 = some value ∧
+          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+              b ≠ object.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+              after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerScalarStore.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,3 @@
+Actual producer scalar-local ownership and current access construct source assignments, stores/readbacks, protected loads, raw caller frame and access/frontier for native base, six flags, XMM and return-address locals. Source-expression/cast/normalization observations are explicit generic inputs, derived by actual-site value proofs; no successful store or output heap/frame is assumed. Original two-transition assign/pop route and declared sizes are used. No new axiom or shared semantics change.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
