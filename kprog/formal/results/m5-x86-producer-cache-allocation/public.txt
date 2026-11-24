@@ -1,0 +1,38 @@
+KProgFormal.ClightRefinement.X86ProducerCacheAllocation.owned (ce : CC.CompositeEnv) (before : CC.Mem) :
+  ∃ cache binding places,
+    CC.PTree.get X86_program_profile_bpf.___x86_stack_mem
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).fst =
+        some (cache, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_stack_mem CC.noattr) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_inline_bindings
+            (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).fst =
+          some (binding, CC.Ty.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr) ∧
+        (∀ (slot : Fin 6),
+            CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.tagName slot)
+                  (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).fst =
+                some ((places.tag slot).fst, CC.tuchar) ∧
+              CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.pointerName slot)
+                  (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).fst =
+                some ((places.pointer slot).fst, CC.tptr CC.tvoid)) ∧
+          (∀ (slot : Fin 6), (places.tag slot).snd = 0 ∧ (places.pointer slot).snd = 0) ∧
+            binding ≠ cache ∧
+              KProgFormal.ClightRefinement.X86CallFrameComplete.Outside places cache ∧
+                KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places ∧
+                  CC.Positive.toNat cache <
+                      CC.Positive.toNat
+                        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).snd.nextblock ∧
+                    (∀ (slot : Fin 6),
+                        CC.Positive.toNat (places.tag slot).fst <
+                            CC.Positive.toNat
+                              (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce
+                                    before).snd.nextblock ∧
+                          CC.Positive.toNat (places.pointer slot).fst <
+                            CC.Positive.toNat
+                              (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce
+                                    before).snd.nextblock) ∧
+                      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ce before).snd.rangePerm cache
+                          0 (CC.sizeof ce (CC.Ty.Tunion X86_program_profile_bpf._x86_sim_stack_mem CC.noattr))
+                          CC.PermKind.Cur CC.Permission.Freeable =
+                        true
+'KProgFormal.ClightRefinement.X86ProducerCacheAllocation.owned' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

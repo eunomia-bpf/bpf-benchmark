@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerCacheAllocation
+#check KProgFormal.ClightRefinement.X86ProducerCacheAllocation.owned
+#print axioms KProgFormal.ClightRefinement.X86ProducerCacheAllocation.owned
