@@ -1,0 +1,3 @@
+The real eight-argument OR/AND handler call composes actual RSP-aware reader bodies, numeric helper, five flag stores,282-step RSP writer, local free and true void return. Initial scalar/tag0 RSP destination and non-increasing signed raw result remain explicit, along with native-base protection through flag stores. Every intermediate execution/read/store/free derives from the same caller heap; native GPR/flag views and caller frames are retained.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
