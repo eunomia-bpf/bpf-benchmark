@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushExit
+#check KProgFormal.ClightRefinement.X86ProducerPushExit.following_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushExit.following_source
+#check KProgFormal.ClightRefinement.X86ProducerPushExit.leave_storage
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushExit.leave_storage
+#check KProgFormal.ClightRefinement.X86ProducerPushExit.from_cache
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushExit.from_cache

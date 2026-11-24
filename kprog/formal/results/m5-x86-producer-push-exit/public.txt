@@ -1,0 +1,61 @@
+KProgFormal.ClightRefinement.X86ProducerPushExit.following_source {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.following rsp k memory =
+    CC.Cont.Kloop1 KProgFormal.ClightRefinement.X86ProducerPushStorageSource.fastBody CC.Stmt.Sbreak
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossCheck
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.loopCont k))
+'KProgFormal.ClightRefinement.X86ProducerPushExit.following_source' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushExit.leave_storage {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 12
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.following rsp k metadata.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushLossCheck.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) ready.gprs.block)
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushExit.leave_storage' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushExit.from_cache {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (14 +
+      2 *
+        (KProgFormal.ClightRefinement.X86ProducerPushExitSource.bodies ready.entry.block
+            (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after).length)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.following rsp
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.control ready) metadata.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushLossCheck.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) ready.gprs.block)
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushExit.from_cache' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
