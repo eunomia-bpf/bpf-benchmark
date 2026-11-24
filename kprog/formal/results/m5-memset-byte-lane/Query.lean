@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetByteLane
+
+#check KProgFormal.ClightRefinement.Arm64MemsetByteLane.to_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteLane.to_store
+#check KProgFormal.ClightRefinement.Arm64MemsetByteLane.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteLane.execute
