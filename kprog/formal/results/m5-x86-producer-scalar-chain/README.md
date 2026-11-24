@@ -1,0 +1,3 @@
+All six original masked flag assignments and both original full-word XMM assignments compose in source order with genuine provider calls/outcomes/traces. Every prior flag/XMM readback survives later provider frames and actual source stores using actual allocated-name separation; protected typed loads/untouched temporaries/current access/frontier are retained. Existing explicit provider ABI remains; no raw byte frame or native-oracle binding is inferred. Every earlier accepted API/source step remains.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

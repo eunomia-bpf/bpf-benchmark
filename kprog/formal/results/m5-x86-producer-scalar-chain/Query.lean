@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarChain
+#check KProgFormal.ClightRefinement.X86ProducerScalarChain.initialized_prefix
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarChain.initialized_prefix
+#check KProgFormal.ClightRefinement.X86ProducerScalarChain.complete
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarChain.complete

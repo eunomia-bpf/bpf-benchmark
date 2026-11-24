@@ -1,0 +1,41 @@
+KProgFormal.ClightRefinement.X86ProducerScalarChain.initialized_prefix (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) (objects : KProgFormal.ClightRefinement.X86ProducerScalarStage.Locals before)
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock)
+  (count : Nat) (bound : count ≤ 8) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerScalarChain.Result before memory le k objects cache count)
+'KProgFormal.ClightRefinement.X86ProducerScalarChain.initialized_prefix' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarChain.complete (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (objects : KProgFormal.ClightRefinement.X86ProducerScalarStage.Locals before)
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerScalarChain.Result before memory le k objects cache 8)
+'KProgFormal.ClightRefinement.X86ProducerScalarChain.complete' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
