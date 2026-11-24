@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.X86RegisterTagCall
+
+#check KProgFormal.ClightRefinement.X86RegisterTagCall.execute
+#print axioms KProgFormal.ClightRefinement.X86RegisterTagCall.execute

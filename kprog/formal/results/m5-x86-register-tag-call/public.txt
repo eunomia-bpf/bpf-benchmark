@@ -1,0 +1,18 @@
+KProgFormal.ClightRefinement.X86RegisterTagCall.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (memory : CC.Mem) (k : CC.Cont)
+  (index : Fin 16) (tag : BitVec 8) (bindingBlock cellsBlock : CC.Block) (bindingOffset base : CC.Integers.Ptrofs)
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock bindingOffset.unsigned = some (CC.Val.Vptr cellsBlock base))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge 21
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag)
+      [CC.Val.Vptr bindingBlock bindingOffset,
+        CC.Val.Vlong (BitVec.setWidth 64 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index))]
+      k memory)
+    (CC.State.Returnstate (KProgFormal.ClightRefinement.X86Width.argument tag) (CC.callCont k) memory)
+'KProgFormal.ClightRefinement.X86RegisterTagCall.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

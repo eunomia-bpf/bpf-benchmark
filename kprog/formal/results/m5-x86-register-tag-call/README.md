@@ -1,0 +1,3 @@
+The actual two-argument x86_sim_inline_reg_tag helper executes21 Clight transitions through its real void-local release and byte return. Every architectural register index, including register4, and all256 possible tag bytes are covered. The original cells/tag loads determine the returned byte; the entire caller memory and call continuation are preserved. No scalar/tag0 restriction is imposed.
+
+Focused build166 and execute type/axiom query pass at original200000/512,j1,32GiB inside shared timing. The source external assumptions remain explicit. This helper is required by both original qword pointer selectors; their actual call-site/control composition is next.
