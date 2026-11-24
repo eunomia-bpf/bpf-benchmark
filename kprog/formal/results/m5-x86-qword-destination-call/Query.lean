@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86QwordDestination
+
+#check KProgFormal.ClightRefinement.X86QwordDestination.source
+#print axioms KProgFormal.ClightRefinement.X86QwordDestination.source
+#check KProgFormal.ClightRefinement.X86QwordDestination.enter
+#print axioms KProgFormal.ClightRefinement.X86QwordDestination.enter

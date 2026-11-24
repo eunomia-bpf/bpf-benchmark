@@ -1,0 +1,3 @@
+The original qword destination selector still performs its second actual reg_tag call for scalar tag0. Its first comparison and fallback execute in eight transitions to the real helper call, with exact arguments, temporary map, continuation and unchanged heap. The previously private selector tail statements are exposed for downstream composition; no source statement or ISA specification changes.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
