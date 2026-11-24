@@ -1,0 +1,16 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-dword-rsp-setup/Draft.lean"
+  ],
+  "exit": 0,
+  "seconds": 3.033187124005053,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512
+}

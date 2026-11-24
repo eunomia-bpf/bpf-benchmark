@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86DwordRspSetup
+#check KProgFormal.ClightRefinement.X86DwordRspSetup.to_storage
+#print axioms KProgFormal.ClightRefinement.X86DwordRspSetup.to_storage
