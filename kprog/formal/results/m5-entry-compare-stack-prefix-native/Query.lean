@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCompareStackPrefixNative
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCompareStackPrefixNative.entry_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCompareStackPrefixNative.entry_corresponds
