@@ -367,3 +367,31 @@ foreign owner present is still the only thing that settles the retry.
 Also recorded: the wrapper ran all its load-direct calls for requests
 2-13 through the fixed loader (`exec "$FIXED"`) with status 0 each, so
 the fixed loader's non-retry path is clean end to end in a guest.
+
+## The classfg tetragon rerun, 2026-11-24T07:08-11:29Z (85 requests)
+
+The same Tetragon workload on the current tree, session-no20hg9v
+(exit-code 0, /workspaces/kprog-raw/omp/classfg-20261124T070800Z):
+81 of 85 requests are status 0, against 12 of 86 in the 11-20 capture.
+The four failures:
+  - requests 27, 36, 40: compile-sim-ir "untranslated simulator BPF
+    assembly: r0 = 0; exit;" -- the 443dac009 matcher narrowed to the
+    new null-store spelling while x86_mem_access.h:107 still emits the
+    short one. Fixed in 439b53c92 (both spellings accepted, same
+    llvm.assume(false)); these three ran before the fixed binary was
+    installed at 09:59Z. The compiler is verified on their archived .bc.
+  - request 85 (generic_kprobe_process_event): a new largest class-F
+    instance, "invalid write to stack R10 off=-1448 size=8" at insn 1
+    (0: r0 = 0; 1: *(u64*)(r10-1448) = r0). The frame range in class F
+    now reaches 1448; the -1736 objects of the archive are the same
+    shape. The load-direct that followed reports "arm kernel native
+    image: No such file or directory" -- an arm64 artifact reference in
+    an x86 run, to look at after the F/G fixes.
+
+Against the archive's classes, the rerun's non-compiler failures are one
+request (85), and every request that reached the verifier with the
+current B passed. The two big classes F (23) and G (25) from the 11-20
+capture did not recur in this boot: the B fixes of 11-23 changed their
+shape, and the remaining question is how much of that is the fixes and
+how much is boot-to-boot workload drift, which only a paired run on the
+same boot decides.
