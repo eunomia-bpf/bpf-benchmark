@@ -1,0 +1,3 @@
+Both genuine slot5 pointer loads and tag/null-pointer assignments execute in13 original loop/sequence/store transitions. Current writable rights construct each store, including second-store rights after the first actual heap update. Typed readbacks, outside-target frame, access/frontier and stable header/index/width/RBX temporaries remain; no successful-store/post-heap premise is supplied. Original limits and imported semantics unchanged.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

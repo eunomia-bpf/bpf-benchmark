@@ -1,0 +1,50 @@
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.execute (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory : CC.Mem) (binding tagBlock pointerBlock : CC.Block) (tagOffset pointerOffset : CC.Integers.Ptrofs)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (tagReadValue : CC.Mem.load CC.Mptr memory binding 96 = some (CC.Val.Vptr tagBlock tagOffset))
+  (pointerReadValue : CC.Mem.load CC.Mptr memory binding 104 = some (CC.Val.Vptr pointerBlock pointerOffset))
+  (notHeader : tagBlock ≠ binding) (different : tagBlock ≠ pointerBlock)
+  (tagWritable : memory.validAccess CC.Chunk.Mint8unsigned tagBlock tagOffset.unsigned CC.Permission.Writable = true)
+  (pointerWritable : memory.validAccess CC.Mptr pointerBlock pointerOffset.unsigned CC.Permission.Writable = true) :
+  ∃ middle after,
+    CC.Mem.store CC.Chunk.Mint8unsigned memory tagBlock tagOffset.unsigned (CC.Val.Vint 0) = some middle ∧
+      CC.Mem.store CC.Mptr middle pointerBlock pointerOffset.unsigned (CC.Val.Vlong 0) = some after ∧
+        KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 13
+            (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+              (KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.clear 5) k e le memory)
+            (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k e
+              (KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.temps le tagBlock pointerBlock tagOffset
+                pointerOffset)
+              after) ∧
+          CC.Mem.load CC.Chunk.Mint8unsigned after tagBlock tagOffset.unsigned = some (CC.Val.Vint 0) ∧
+            CC.Mem.load CC.Mptr after pointerBlock pointerOffset.unsigned = some (CC.Val.Vlong 0) ∧
+              after.access = memory.access ∧
+                after.nextblock = memory.nextblock ∧
+                  ∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                    b ≠ tagBlock → b ≠ pointerBlock → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.stable (le : CC.TempEnv) (tagBlock pointerBlock : CC.Block)
+  (tagOffset pointerOffset : CC.Integers.Ptrofs) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+        (KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.temps le tagBlock pointerBlock tagOffset
+          pointerOffset) =
+      CC.PTree.get X86_program_profile_bpf.___x86_bind le ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_sv_index
+          (KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.temps le tagBlock pointerBlock tagOffset
+            pointerOffset) =
+        CC.PTree.get X86_program_profile_bpf.___x86_sv_index le ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_sv_width
+            (KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.temps le tagBlock pointerBlock tagOffset
+              pointerOffset) =
+          CC.PTree.get X86_program_profile_bpf.___x86_sv_width le ∧
+        CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value
+            (KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.temps le tagBlock pointerBlock tagOffset
+              pointerOffset) =
+          CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value le
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClear.stable' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
