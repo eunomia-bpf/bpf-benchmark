@@ -1,0 +1,3 @@
+Actual storage reloads, both real t18/t32 width Scalls/helper returns, original value copy/index setup and every genuine width/alignment/flag branch reach the original qword cache pointer read. Current index40, width8, binding and saved RBX derive the SAME metadata result and complete unchanged heap. Both fallback arms remain in original source; no source-run/guard/binding/load/View premise is supplied.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

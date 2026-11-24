@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushStorageSelect
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.guard_inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.guard_inputs
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.cache_inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.cache_inputs
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.from_metadata
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.from_metadata

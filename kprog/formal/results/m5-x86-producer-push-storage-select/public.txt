@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.guard_inputs {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (k : CC.Cont) (memory : CC.Mem) :
+  CC.PTree.get X86_program_profile_bpf.___x86_loss_width
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.firstCertificate rsp k memory).output =
+      some (CC.Val.Vint 8#32) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_stw_index
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.firstCertificate rsp k memory).output =
+        some (CC.Val.Vlong 40#64) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_loss_value
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.firstCertificate rsp k memory).output =
+        some (CC.Val.Vlong (ready.values 3))
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.guard_inputs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.cache_inputs {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (k : CC.Cont) (memory : CC.Mem) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k memory).output =
+      some (CC.Val.Vptr ready.entry.block 0) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_stw_index
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k memory).output =
+        some (CC.Val.Vlong 40#64) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_loss_value
+            (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k memory).output =
+          some (CC.Val.Vlong (ready.values 3)) ∧
+        CC.PTree.get X86_program_profile_bpf._t'33
+              (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k memory).output =
+            some (CC.Val.Vint 1#32) ∧
+          CC.PTree.get X86_program_profile_bpf._t'34
+              (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k memory).output =
+            some (CC.Val.Vint 1#32)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.cache_inputs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.from_metadata {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (12 + 8 + (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.firstCertificate rsp k result.after).count +
+        8 +
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k result.after).count)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.cacheRead
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k result.after).continuation
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.secondCertificate rsp k result.after).output
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSelect.from_metadata' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
