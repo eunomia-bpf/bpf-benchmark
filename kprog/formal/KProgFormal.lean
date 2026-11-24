@@ -293,3 +293,5 @@ import KProgFormal.ClightRefinement.X86ProducerHeaderBound
 import KProgFormal.ClightRefinement.X86ProducerEntry
 import KProgFormal.ClightRefinement.X86ProducerFirstInputPrefix
 import KProgFormal.ClightRefinement.X86ProducerGprPrefix
+import KProgFormal.ClightRefinement.X86ProducerStackBasePrefix
+import KProgFormal.ClightRefinement.X86ProducerStackBaseReturn

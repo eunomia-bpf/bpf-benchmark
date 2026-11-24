@@ -33,7 +33,7 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-producer-gpr-root/README.md)
+[integrated public queries](results/m5-x86-producer-scalar-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
@@ -64,18 +64,18 @@ The complete logical-register calls additionally preserve actual cache reads
 at or above new SP, from caller allocation through flag stores, whole writers,
 release and free/return. This uses explicit stronger provider preservation,
 cache/ghost separation and initial cache lifetime premises. The actual
-producer's complete exported program supplies its layouts and provider
-binding. Its 613-transition entry, 187 ABI stores, twelve ghost stores and
-context setup now compose all sixteen GPR initializers in source order.
-Fifteen real provider outcomes supply values and traces; RSP takes its
-zero branch. All value/tag, ABI and ghost readbacks, protected caller loads,
-context inputs and current rights follow the same run. Provider availability
-and its memory ABI remain explicit: typed-load preservation does not imply
-raw contents equality. A separate 94-transition suffix executes all 29 header
-assignments, the real bind loop and label, constructing cache/ghost views,
-separation and lifetime bounds at the first PUSH call. Flag/XMM/stack-base
-inputs and final context setup connecting these prefixes, PUSH execution
-and real provider ABI binding remain open.
+producer's complete exported program supplies its layouts and input symbol.
+Its entry, ABI/ghost/context setup and sixteen GPR initializers now compose
+the intervening base-zero store, six masked flag/two XMM inputs, return-address
+zero and real kind-1 Callstate, retaining earlier readbacks, context, caller
+loads and rights. Kind-6 availability and its memory ABI remain explicit;
+typed-load preservation does not imply raw contents equality. The kind-1
+return/base store is separately proved for an actual outcome and supplied-heap
+permissions; kind-6 guarantees are not reused for it. A separate 94-transition
+suffix executes all 29 header assignments, the real bind loop and label,
+constructing cache/ghost views, separation and lifetime bounds at the first
+PUSH call. Kind-1 ABI binding, final context/RDI pointer and tag setup connecting
+these prefixes, and PUSH execution remain open.
 
 The argument also trusts the C front end/exporter, imported semantics and
 their correspondence to production C, artifact binding and platform memory
