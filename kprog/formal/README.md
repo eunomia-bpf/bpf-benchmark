@@ -30,68 +30,49 @@ theorem per ISA. That complete argument is still in progress; the
 
 ## What is proved
 
-The library proves actual helper/handler executions, typed loads and stores,
-allocation and deallocation, memory frames, register/tag/provenance and flag
-views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-producer-push-checked-root/README.md)
-retain the prior interfaces and expose each theorem's precise premises.
-AArch64 source/caller/native fixture prefixes are also integrated in that
-library; they do not establish all AArch64 operations.
+The library proves actual C helper/handler executions, typed memory effects,
+allocation/freeing, caller frames and native register/scalar/cache views.
+[Public type and axiom queries](results/m5-x86-producer-push-boundary-root/README.md)
+expose every theorem's precise premises and retain prior interfaces.
 
-The complete x86 NOP handler and its actual generic dispatcher case refine
-the same checked ISA step on arbitrary heaps. Scoped logical-register calls
-cover all widths and aliases. RSP OR/AND/XOR calls at all four widths additionally
-execute both signed-SP release branches, all real cache/metadata updates,
-loops and free/return, yielding GPR and flag views of the same canonical
-output. The dword writer zero-extends for arbitrary initial RSP tags; qword, byte
-and word calls retain their scalar/tag0 destination domain. Byte/word writes
-preserve the upper 56/48 bits. Initial source domains,
-legal slices, cache/ghost ownership and
-provider ABI remain explicit. Native-memory/provider-trace correspondence,
-remaining operand domains and operations, fetched call-site correspondence,
-and complete universal dispatcher-step theorems remain open.
+The complete NOP handler and its actual generic dispatcher case refine the
+checked ISA on arbitrary heaps. Scoped logical-register calls cover widths,
+aliases and real RSP release/store/free paths within their stated domains.
+AArch64 source/caller/native fixture prefixes are also integrated.
+
+The original producer's first PUSH executes initialization, dispatch, real
+stores/freeing and entry into the next source label. Its same final heap
+represents GPRs, six flag bytes, XMM0 and initialized cache bytes of the exact
+canonical PUSH step on its explicit successful-access domain. The proof binds
+the actual kind-1 stack origin, original byte-fold memory effects, real cache
+assignment observation and concrete byte53 decoding/one-byte fall-through.
+Input native memory remains arbitrary. Native ELF/code-storage binding,
+general source/guest trace simulation, platform/input-oracle correspondence,
+remaining operand/fault domains and all149 universal handler/dispatcher-step
+goals remain unfinished.
 
 ## What is trusted
 
-Lean's kernel checks the proof terms against the pinned definitions, with
-standard logical axioms. Imported Clight execution also uses the existing
+Lean's kernel checks terms against the pinned definitions, with standard
+logical axioms. Imported Clight execution uses the existing
 `CC.externalFunctionsSem` and `CC.inlineAssemblySem` assumptions; public
-`#print axioms` output records their occurrence. Growing-SP release requires
-explicit provider availability, permission/frontier preservation and memory
-frame premises. The imported external-call interface supplies determinacy
-and trace-length laws; those laws do not establish the provider memory ABI.
-The complete logical-register calls additionally preserve actual cache reads
-at or above new SP, from caller allocation through flag stores, whole writers,
-release and free/return. This uses explicit stronger provider preservation,
-cache/ghost separation and initial cache lifetime premises. The actual
-producer's complete exported world supplies its layouts and input binding.
-One source execution now composes its entry/ABI/ghost/context setup, sixteen
-GPR initializers, base-zero/six-flag/two-XMM inputs, return zero/kind-1 base
-input, final context/RDI pointer and tag1, and all 29 header assignments/bind
-loop/label through the complete actual first PUSH call: genuine wrapper,
-width helpers, dispatch, register read/RSP decrement, all six overlap guards,
-selected metadata and aligned qword cache stores, signed loss check, loop
-exits, local freeing and wrapper/producer return to the next source statement.
-It retains actual RBX payload/RSP/tag/metadata readbacks, current cache/ghost/
-header views, old caller frames and actual input traces; freed local rights
-are revoked. Both kind-6 and kind-1 availability/memory ABIs remain explicit
-premises. Protected typed loads across providers do not imply raw contents
-equality; the raw caller frame begins at the last complete supplied heap.
-The same first call has an instruction-local silent execution and conditional
-GPR/initialized-cache-byte correspondence with the pinned checked PUSH step.
-Actual source and native stores supply all eight RBX bytes and preserve the
-forty other observations, including wrapping native addresses. Initial
-register/cache correspondence and native writable/canonical span remain
-explicit premises; private cache access does not establish them.
-This scoped C execution does not close canonical fetched-ISA, native-memory/
-input-oracle/trace correspondence or the remaining universal instruction goals.
+`#print axioms` output records their occurrence. The argument also trusts the
+C front end/exporter, imported semantics, production-artifact binding and
+platform memory assumptions.
 
-The argument also trusts the C front end/exporter, imported semantics and
-their correspondence to production C, artifact binding and platform memory
-assumptions. Hardware/oracle comparisons check sampled instruction results;
-they complement the universal statements within each theorem's premises.
-The full specialization, linking/LTO and verifier argument remains work in
-progress.
+Initial register/scalar/cache relations, operand/tag/provenance domains,
+ownership, permissions and provider availability/frame guarantees remain
+explicit premises. Growing-SP release requires stronger cache preservation
+than the basic provider frame. External-call determinacy and trace-length
+laws do not establish these memory ABIs. Protected typed loads across
+providers do not imply raw byte equality. PUSH's private Clight cache write
+is silent; its proved logical guest-write observation is a separate view,
+not equality of the two external traces.
+
+Hardware/oracle comparisons check sampled instruction values, registers,
+flags, memory effects and faults. They complement universal statements within
+their premises. Full specialization, linking/LTO and verifier correctness
+also remain work in progress.
 
 ## Run
 
@@ -101,7 +82,6 @@ From this checkout, with the recorded toolchain and submodules:
 make -C kprog/formal check
 ```
 
-This builds the proof library and executable reference, then runs semantic
-oracles covering values, registers, flags, memory effects and faults,
-including division faults and permissions. Focused development builds and
-public queries are recorded in receipts. Benchmark settings remain frozen.
+This builds the proof library and executable reference and runs semantic
+oracles, including division faults and permissions. Focused commands and
+validation output are retained in receipts. Benchmark settings stay frozen.
