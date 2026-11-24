@@ -1,0 +1,45 @@
+KProgFormal.ClightRefinement.X86QwordWriterSelectors.destination_get (le : CC.TempEnv) (index : Fin 16) (id : CC.Ident)
+  (input : id ∈ KProgFormal.ClightRefinement.X86QwordWriterSelectors.inputs) :
+  CC.PTree.get id (KProgFormal.ClightRefinement.X86QwordWriterSelectors.destinationTemps le index) = CC.PTree.get id le
+'KProgFormal.ClightRefinement.X86QwordWriterSelectors.destination_get' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86QwordWriterSelectors.get (le : CC.TempEnv) (index : Fin 16) (id : CC.Ident)
+  (input : id ∈ KProgFormal.ClightRefinement.X86QwordWriterSelectors.inputs) :
+  CC.PTree.get id (KProgFormal.ClightRefinement.X86QwordWriterSelectors.temps le index) = CC.PTree.get id le
+'KProgFormal.ClightRefinement.X86QwordWriterSelectors.get' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86QwordWriterSelectors.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (index : Fin 16) (code : BitVec 32) (ordinary : index ≠ 4)
+  (bindingBlock cellsBlock helperBlock : CC.Block) (base : CC.Integers.Ptrofs)
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (dstShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (srcShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint code))
+  (scalarCode : code ≠ 0#32 ∧ code ≠ 1#32)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none)
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock base))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument 0#8)) :
+  KProgFormal.ClightRefinement.InternalRun ge 109
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.writer k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.defaultWriter k e
+      (KProgFormal.ClightRefinement.X86QwordWriterSelectors.temps le index) memory)
+'KProgFormal.ClightRefinement.X86QwordWriterSelectors.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,3 @@
+The original stack/general selector, complete79-step destination selector and actual non-ADD source short circuit compose in109 transitions to the real default writer. Both real destination tag calls occur. The full heap and all seven caller inputs, including source shift, binding, result, destination, operation and effective width, are preserved. No intermediate call success or selected-value premise replaces execution.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86QwordWriterSelectors
+
+#check KProgFormal.ClightRefinement.X86QwordWriterSelectors.destination_get
+#print axioms KProgFormal.ClightRefinement.X86QwordWriterSelectors.destination_get
+#check KProgFormal.ClightRefinement.X86QwordWriterSelectors.get
+#print axioms KProgFormal.ClightRefinement.X86QwordWriterSelectors.get
+#check KProgFormal.ClightRefinement.X86QwordWriterSelectors.execute
+#print axioms KProgFormal.ClightRefinement.X86QwordWriterSelectors.execute
