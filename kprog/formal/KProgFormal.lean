@@ -289,3 +289,5 @@ import KProgFormal.ClightRefinement.X86AluXorShortcutPartialCacheCall
 import KProgFormal.ClightRefinement.X86ProducerCacheAllocation
 import KProgFormal.ClightRefinement.X86ProducerHeaderViews
 import KProgFormal.ClightRefinement.X86ProducerHeaderProgramSource
+import KProgFormal.ClightRefinement.X86ProducerHeaderBound
+import KProgFormal.ClightRefinement.X86ProducerEntry
