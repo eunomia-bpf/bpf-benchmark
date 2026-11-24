@@ -1,0 +1,3 @@
+Nine genuine source transitions perform both header-cell loads and the pointer-typed RSP union load, including every sequence pop. Actual initialized entry resources establish header binding, complete source layout, current cell pointer and rawRSP0. The original body and immediate continuations are retained separately; complete memory is unchanged until the pending store. No independent load/source-run/temporary-environment premise remains in from_ready.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
