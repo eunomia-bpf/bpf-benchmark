@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderSource
+#check KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_prefix
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_prefix
+#check KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_header
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_header

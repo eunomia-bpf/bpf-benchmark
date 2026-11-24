@@ -1,0 +1,14 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_prefix :
+  X86_program_profile_bpf.s_x86_program_profile_x86_sim_xdp_30 =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart
+      KProgFormal.ClightRefinement.X86ProducerHeaderSource.beforeHeader
+'KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_prefix' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_header :
+  KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart =
+    List.foldr CC.Stmt.Ssequence KProgFormal.ClightRefinement.X86ProducerHeaderSource.afterHeader
+      (List.ofFn KProgFormal.ClightRefinement.X86ProducerHeaderSource.assignment)
+'KProgFormal.ClightRefinement.X86ProducerHeaderSource.source_header' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
