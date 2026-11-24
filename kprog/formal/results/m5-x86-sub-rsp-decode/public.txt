@@ -1,0 +1,8 @@
+KProgFormal.ClightRefinement.X86SubRspDecode.decode (state : KProgFormal.Reference.X86.State) :
+  KProgFormal.Reference.X86.decode #[72, 131, 236, 32] state =
+    Except.ok
+      (KProgFormal.Reference.X86.Instruction.arithmetic KProgFormal.Reference.X86.ScalarWidth.w64
+        KProgFormal.Reference.X86.ArithmeticKind.sub
+        (KProgFormal.Reference.X86.ScalarDestination.register (KProgFormal.Reference.X86.RegisterSlice.low 4))
+        (KProgFormal.Reference.X86.ScalarSource.immediate 32) (state.pc + 4))
+'KProgFormal.ClightRefinement.X86SubRspDecode.decode' depends on axioms: [propext, Classical.choice, Quot.sound]
