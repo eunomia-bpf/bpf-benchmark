@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushDecode
+#check KProgFormal.ClightRefinement.X86ProducerPushDecode.decode
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDecode.decode
+#check KProgFormal.ClightRefinement.X86ProducerPushDecode.step
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDecode.step
+#check KProgFormal.ClightRefinement.X86ProducerPushDecode.source_successor
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDecode.source_successor

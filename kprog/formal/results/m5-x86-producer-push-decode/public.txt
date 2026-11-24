@@ -1,0 +1,41 @@
+KProgFormal.ClightRefinement.X86ProducerPushDecode.decode (state : KProgFormal.Reference.X86.State) :
+  KProgFormal.Reference.X86.decode #[83] state =
+    Except.ok (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 (state.pc + 1))
+'KProgFormal.ClightRefinement.X86ProducerPushDecode.decode' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushDecode.step (state : KProgFormal.Reference.X86.State)
+  (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable :
+    ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true) :
+  (do
+      let instruction ← KProgFormal.Reference.X86.decode #[83] state
+      pure (KProgFormal.Reference.X86.step instruction state)) =
+    Except.ok
+      {
+        state :=
+          {
+            gpr := fun reg =>
+              ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.q X86.GPR.rsp
+                      (state.gpr 4 - 8#64)).regs.get
+                (X86.GPR.ofIndex reg),
+            rflags := state.rflags, xmm0 := state.xmm0,
+            memory := KProgFormal.Reference.storeMemory state.memory (state.gpr 4 - 8#64) (state.gpr 3) 8,
+            pc := state.pc + 1, fsBase := state.fsBase, gsBase := state.gsBase, addressWidth := state.addressWidth,
+            oracle := state.oracle, modelError := state.modelError },
+        events :=
+          [KProgFormal.Reference.Event.memory KProgFormal.Reference.AccessKind.write (state.gpr 4 - 8#64)
+              (KProgFormal.Reference.valueBytes (state.gpr 3) 8) true] }
+'KProgFormal.ClightRefinement.X86ProducerPushDecode.step' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushDecode.source_successor :
+  ∃ call tail,
+    KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls =
+      (CC.Stmt.Slabel X86_program_profile_bpf._x86_l_1 call).Ssequence tail
+'KProgFormal.ClightRefinement.X86ProducerPushDecode.source_successor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
