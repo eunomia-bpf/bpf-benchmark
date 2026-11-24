@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetHeaderView
+
+#check KProgFormal.ClightRefinement.Arm64MemsetHeaderView.of_header
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetHeaderView.of_header
+#check KProgFormal.ClightRefinement.Arm64MemsetHeaderView.of_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetHeaderView.of_frame
+#check KProgFormal.ClightRefinement.Arm64MemsetHeaderView.through_inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetHeaderView.through_inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetHeaderView.entry_setup_represents
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetHeaderView.entry_setup_represents
