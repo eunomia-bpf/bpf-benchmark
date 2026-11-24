@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemsetLaneGates
+#check KProgFormal.ClightRefinement.Arm64MemsetLaneGates.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetLaneGates.source
+#check KProgFormal.ClightRefinement.Arm64MemsetLaneGates.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetLaneGates.execute
