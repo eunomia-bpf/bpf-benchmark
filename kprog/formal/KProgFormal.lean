@@ -271,3 +271,5 @@ import KProgFormal.ClightRefinement.X86QwordReleaseReturn
 import KProgFormal.ClightRefinement.X86NopDispatch
 import KProgFormal.ClightRefinement.X86AluLogicQwordReleaseNative
 import KProgFormal.ClightRefinement.X86AluXorQwordReleaseAll
+import KProgFormal.ClightRefinement.X86AluLogicDwordReleaseNative
+import KProgFormal.ClightRefinement.X86AluXorDwordReleaseAll

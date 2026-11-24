@@ -33,17 +33,19 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-logic-qword-release-root/README.md)
+[integrated public queries](results/m5-x86-logic-dword-release-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
 
 The complete x86 NOP handler and its actual generic dispatcher case refine
 the same checked ISA step on arbitrary heaps. Scoped logical-register calls
-cover all widths and aliases. RSP qword OR/AND/XOR calls additionally execute
-both signed-SP release branches, all real cache/metadata updates, loops and
-free/return, yielding GPR and flag views of the same canonical output.
-Their initial tag/value domains, legal slices, cache/ghost ownership and
+cover all widths and aliases. RSP qword/dword OR/AND/XOR calls additionally
+execute both signed-SP release branches, all real cache/metadata updates,
+loops and free/return, yielding GPR and flag views of the same canonical
+output. The dword writer zero-extends for arbitrary initial RSP tags; qword
+calls retain their scalar/tag0 destination domain. Initial source domains,
+legal slices, cache/ghost ownership and
 provider ABI remain explicit. Native-memory/provider-trace correspondence,
 remaining operand domains and operations, fetched call-site correspondence,
 and complete universal dispatcher-step theorems remain open.
