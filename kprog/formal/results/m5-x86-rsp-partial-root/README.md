@@ -1,0 +1,3 @@
+The shared proof root preserves every181 accepted ARM/x86 public declaration and adds5 byte/word RSP materialization interfaces. Both actual13-step prelude runs and initial-permission-derived stores/readbacks/frames are checked for arbitrary RSP tags. Later scalar or volatile partial stores, increasing-SP release/clobber effects, whole RSP handlers and complete149-operation dispatcher composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
