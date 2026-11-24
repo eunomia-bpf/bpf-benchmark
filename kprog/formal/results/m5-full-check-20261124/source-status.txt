@@ -1,0 +1,292 @@
+ M CLAUDE.md
+ M corpus/results/tet-manifest-ab-20261116/manifest.json
+ ? docs/ebpf27-bpfoptbench
+ ? docs/paper
+ M kprog/arm64/arm64_sim_direct.h
+ M kprog/arm64/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c
+ M kprog/arm64/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c
+ M kprog/arm64/micro-prog/bitmap_popcount_scan.bpf.c
+ M kprog/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_string_search_prefix_scan.bpf.c
+ M kprog/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c
+ M kprog/arm64/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c
+ M kprog/arm64/micro-prog/cilium_policy_guard_tree_filter.bpf.c
+ M kprog/arm64/micro-prog/cilium_socket_lb_service_select.bpf.c
+ M kprog/arm64/micro-prog/flow_5tuple_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/flow_record_field_scan.bpf.c
+ M kprog/arm64/micro-prog/katran_lb_consistent_hash_select.bpf.c
+ M kprog/arm64/micro-prog/otel_stack_frame_unwind_scan.bpf.c
+ M kprog/arm64/micro-prog/packed_header_bitfield_decode.bpf.c
+ M kprog/arm64/micro-prog/packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/packet_record_bounds_window.bpf.c
+ M kprog/arm64/micro-prog/packet_toeplitz_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/packet_vlan_tcpopt_parser.bpf.c
+ M kprog/arm64/micro-prog/payload_prefix_memcmp_scan.bpf.c
+ M kprog/arm64/micro-prog/simple.bpf.c
+ M kprog/arm64/micro-prog/simple_packet.bpf.c
+ M kprog/arm64/micro-prog/siphash_rotate64_mixer.bpf.c
+ M kprog/arm64/micro-prog/sorted_rule_binary_search.bpf.c
+ M kprog/arm64/micro-prog/tc_packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c
+ M kprog/arm64/micro-prog/trace_event_type_switch_dispatch.bpf.c
+ M kprog/arm64/micro-prog/tracee_http_method_prefix_detect.bpf.c
+ M kprog/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c
+ M kprog/arm64/micro-prog/unchecked_packet_read.bpf.c
+ M kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryResultPrefix.lean
+ M kprog/test/native_load_fault/Makefile
+ M kprog/test/native_load_fault/guest.py
+ M kprog/test/native_load_fault/native.c
+ M kprog/test/native_load_fault/native_load_fault_module.c
+ M kprog/test/native_load_fault/probe.cpp
+ M kprog/test/native_load_fault/recovery_host.c
+ M vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h
+ M vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h
+?? corpus/results/arm64_qemu_corpus_19700101_000013_077630/
+?? corpus/results/arm64_qemu_corpus_19700101_000013_095798/
+?? corpus/results/arm64_qemu_corpus_19700101_000013_649396/
+?? corpus/results/arm64_qemu_corpus_19700101_000013_883491/
+?? corpus/results/arm64_qemu_corpus_19700101_000014_036905/
+?? corpus/results/arm64_qemu_corpus_19700101_000014_724271/
+?? corpus/results/arm64_qemu_corpus_19700101_000014_935330/
+?? corpus/results/arm64_qemu_corpus_19700101_000014_940884/
+?? corpus/results/arm64_qemu_corpus_19700101_000014_995867/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_029981/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_058655/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_158066/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_158082/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_192803/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_218934/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_253144/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_295194/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_456758/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_560962/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_566345/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_566878/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_608731/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_625054/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_754602/
+?? corpus/results/arm64_qemu_corpus_19700101_000015_944336/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_130791/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_166620/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_173945/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_254129/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_256459/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_309706/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_440940/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_502239/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_568932/
+?? corpus/results/arm64_qemu_corpus_19700101_000016_649772/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_041931/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_046225/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_057327/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_106453/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_143870/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_524836/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_528786/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_625689/
+?? corpus/results/arm64_qemu_corpus_19700101_000017_740594/
+?? corpus/results/arm64_qemu_corpus_19700101_000018_353420/
+?? corpus/results/arm64_qemu_corpus_19700101_000018_390372/
+?? corpus/results/arm64_qemu_corpus_19700101_000018_444763/
+?? corpus/results/arm64_qemu_corpus_19700101_000018_729422/
+?? corpus/results/arm64_qemu_corpus_19700101_000018_895187/
+?? corpus/results/arm64_qemu_corpus_19700101_000019_194398/
+?? corpus/results/arm64_qemu_corpus_19700101_000019_348406/
+?? corpus/results/arm64_qemu_corpus_19700101_000019_400251/
+?? corpus/results/arm64_qemu_corpus_19700101_000019_420410/
+?? corpus/results/arm64_qemu_corpus_19700101_000019_446497/
+?? corpus/results/arm64_qemu_corpus_19700101_000020_396977/
+?? corpus/results/arm64_qemu_corpus_19700101_000020_570589/
+?? corpus/results/arm64_qemu_corpus_19700101_000020_582023/
+?? corpus/results/arm64_qemu_corpus_19700101_000021_145293/
+?? corpus/results/arm64_qemu_corpus_19700101_000021_152722/
+?? corpus/results/kprog_arm64_app_coverage_20261121/
+?? corpus/results/verified-captures-0psl4xw_/
+?? corpus/results/verified-captures-39yczh9w/
+?? corpus/results/verified-captures-9anpwjew/
+?? corpus/results/verified-captures-_e2fj7_m/
+?? corpus/results/verified-captures-af2j0lbn/
+?? corpus/results/verified-captures-c77heiw6/
+?? corpus/results/verified-captures-cjrmkgvv/
+?? corpus/results/verified-captures-fv3y0q0_/
+?? corpus/results/verified-captures-l3nae43z/
+?? corpus/results/verified-captures-mqd63brc/
+?? corpus/results/verified-captures-o7el_vto/
+?? corpus/results/verified-captures-rq0pro_u/
+?? corpus/results/verified-captures-rs1gac9v/
+?? corpus/results/verified-captures-thhtwbkz/
+?? corpus/results/verified-captures-v75zrv9t/
+?? corpus/results/verified-captures-wj341jrz/
+?? corpus/results/verified-captures-y58nmj9x/
+?? corpus/results/verified-captures-z75fqopd/
+?? corpus/results/x86_kvm_corpus_20261121_185814_526565/
+?? corpus/results/x86_kvm_corpus_20261121_190452_844257/
+?? corpus/results/x86_kvm_corpus_20261121_192644_031303/
+?? corpus/results/x86_kvm_corpus_20261121_193050_298896/
+?? corpus/results/x86_kvm_corpus_20261121_195641_894034/
+?? corpus/results/x86_kvm_corpus_20261121_202317_608573/
+?? corpus/results/x86_kvm_corpus_20261121_204946_269647/
+?? corpus/results/x86_kvm_corpus_20261121_211614_205339/
+?? corpus/results/x86_kvm_corpus_20261121_214332_861707/
+?? corpus/results/x86_kvm_corpus_20261121_220928_845260/
+?? corpus/results/x86_kvm_corpus_20261121_223519_562751/
+?? corpus/results/x86_kvm_corpus_20261121_230201_437776/
+?? corpus/results/x86_kvm_corpus_20261121_232809_620956/
+?? corpus/results/x86_kvm_corpus_20261121_235426_537178/
+?? corpus/results/x86_kvm_corpus_20261122_002150_663253/
+?? corpus/results/x86_kvm_corpus_20261122_005404_807695/
+?? corpus/results/x86_kvm_corpus_20261122_005632_555492/
+?? corpus/results/x86_kvm_corpus_20261122_011136_097028/
+?? corpus/results/x86_kvm_corpus_20261122_012542_157247/
+?? corpus/results/x86_kvm_corpus_20261122_012827_543063/
+?? corpus/results/x86_kvm_corpus_20261122_013042_207209/
+?? corpus/results/x86_kvm_corpus_20261122_013331_146167/
+?? corpus/results/x86_kvm_corpus_20261122_014145_568137/
+?? corpus/results/x86_kvm_corpus_20261122_025149_558974/
+?? corpus/results/x86_kvm_corpus_20261122_031324_021051/
+?? corpus/results/x86_kvm_corpus_20261122_031610_056264/
+?? corpus/results/x86_kvm_corpus_20261122_034202_999325/
+?? corpus/results/x86_kvm_corpus_20261122_040823_452811/
+?? corpus/results/x86_kvm_corpus_20261122_043440_979444/
+?? corpus/results/x86_kvm_corpus_20261122_050054_187017/
+?? corpus/results/x86_kvm_corpus_20261122_052750_633856/
+?? corpus/results/x86_kvm_corpus_20261122_055926_852208/
+?? corpus/results/x86_kvm_corpus_20261122_060159_507050/
+?? corpus/results/x86_kvm_corpus_20261122_061111_420965/
+?? corpus/results/x86_kvm_corpus_20261122_061401_197077/
+?? corpus/results/x86_kvm_corpus_20261122_061637_541965/
+?? corpus/results/x86_kvm_corpus_20261122_061948_404477/
+?? corpus/results/x86_kvm_corpus_20261122_062253_505249/
+?? corpus/results/x86_kvm_corpus_20261122_062711_957178/
+?? corpus/results/x86_kvm_corpus_20261122_063054_516590/
+?? corpus/results/x86_kvm_corpus_20261122_065658_832233/
+?? corpus/results/x86_kvm_corpus_20261122_072326_022271/
+?? corpus/results/x86_kvm_corpus_20261122_074956_369323/
+?? corpus/results/x86_kvm_corpus_20261122_081616_603144/
+?? corpus/results/x86_kvm_corpus_20261122_105303_174462/
+?? corpus/results/x86_kvm_corpus_20261122_105557_812007/
+?? corpus/results/x86_kvm_corpus_20261122_105901_379955/
+?? corpus/results/x86_kvm_corpus_20261122_110218_636519/
+?? corpus/results/x86_kvm_corpus_20261122_110629_760107/
+?? corpus/results/x86_kvm_corpus_20261122_111017_667220/
+?? corpus/results/x86_kvm_corpus_20261122_122355_899601/
+?? corpus/results/x86_kvm_corpus_20261122_124949_242263/
+?? corpus/results/x86_kvm_corpus_20261122_131621_631047/
+?? corpus/results/x86_kvm_corpus_20261122_134250_130700/
+?? corpus/results/x86_kvm_corpus_20261122_140920_477520/
+?? corpus/results/x86_kvm_corpus_20261122_143640_457375/
+?? corpus/results/x86_kvm_corpus_20261122_150245_285011/
+?? corpus/results/x86_kvm_corpus_20261122_152855_732291/
+?? corpus/results/x86_kvm_corpus_20261122_155511_408865/
+?? corpus/results/x86_kvm_corpus_20261122_162144_505539/
+?? corpus/results/x86_kvm_corpus_20261122_164820_504768/
+?? corpus/results/x86_kvm_corpus_20261122_171542_684932/
+?? corpus/results/x86_kvm_corpus_20261123_044905_915636/
+?? corpus/results/x86_kvm_corpus_20261123_051506_244384/
+?? corpus/results/x86_kvm_corpus_20261123_052940_749155/
+?? corpus/results/x86_kvm_corpus_20261123_054526_250036/
+?? corpus/results/x86_kvm_corpus_20261123_061236_789414/
+?? corpus/results/x86_kvm_corpus_20261123_061521_124017/
+?? corpus/results/x86_kvm_corpus_20261123_061858_924587/
+?? corpus/results/x86_kvm_corpus_20261123_062214_442680/
+?? corpus/results/x86_kvm_corpus_20261123_062701_271594/
+?? corpus/results/x86_kvm_corpus_20261123_063116_166922/
+?? corpus/results/x86_kvm_corpus_20261123_074959_901602/
+?? corpus/results/x86_kvm_corpus_20261123_075718_648562/
+?? corpus/results/x86_kvm_corpus_20261123_080423_940699/
+?? corpus/results/x86_kvm_corpus_20261123_083036_509601/
+?? corpus/results/x86_kvm_corpus_20261123_085723_497058/
+?? corpus/results/x86_kvm_corpus_20261123_092400_737974/
+?? corpus/results/x86_kvm_corpus_20261123_095043_770328/
+?? corpus/results/x86_kvm_corpus_20261123_101811_087803/
+?? corpus/results/x86_kvm_corpus_20261123_104425_910099/
+?? corpus/results/x86_kvm_corpus_20261123_111038_481045/
+?? corpus/results/x86_kvm_corpus_20261123_113701_916596/
+?? corpus/results/x86_kvm_corpus_20261123_120320_002937/
+?? corpus/results/x86_kvm_corpus_20261123_122951_540329/
+?? corpus/results/x86_kvm_corpus_20261123_125701_042461/
+?? corpus/results/x86_kvm_corpus_20261123_131227_019524/
+?? corpus/results/x86_kvm_corpus_20261123_133616_099577/
+?? corpus/results/x86_kvm_corpus_20261123_140933_100448/
+?? corpus/results/x86_kvm_corpus_20261123_141916_708863/
+?? corpus/results/x86_kvm_corpus_20261123_142101_778097/
+?? corpus/results/x86_kvm_corpus_20261123_142307_021399/
+?? corpus/results/x86_kvm_corpus_20261123_142546_638251/
+?? corpus/results/x86_kvm_corpus_20261123_142822_187666/
+?? corpus/results/x86_kvm_corpus_20261123_143121_497754/
+?? corpus/results/x86_kvm_corpus_20261123_143340_244771/
+?? corpus/results/x86_kvm_corpus_20261123_144735_428944/
+?? corpus/results/x86_kvm_corpus_20261123_145534_119569/
+?? corpus/results/x86_kvm_corpus_20261123_150132_772307/
+?? corpus/results/x86_kvm_corpus_20261123_150322_968473/
+?? corpus/results/x86_kvm_corpus_20261123_150543_564909/
+?? corpus/results/x86_kvm_corpus_20261123_150633_730078/
+?? corpus/results/x86_kvm_corpus_20261123_151017_848699/
+?? corpus/results/x86_kvm_corpus_20261123_151216_776353/
+?? corpus/results/x86_kvm_corpus_20261123_151519_131417/
+?? corpus/results/x86_kvm_corpus_20261123_151717_599487/
+?? corpus/results/x86_kvm_corpus_20261123_153205_130921/
+?? corpus/results/x86_kvm_corpus_20261123_154216_698742/
+?? corpus/results/x86_kvm_corpus_20261123_154334_609411/
+?? corpus/results/x86_kvm_corpus_20261123_155153_957842/
+?? corpus/results/x86_kvm_corpus_20261123_160831_687273/
+?? corpus/results/x86_kvm_corpus_20261123_161347_866368/
+?? corpus/results/x86_kvm_corpus_20261123_161726_750151/
+?? corpus/results/x86_kvm_corpus_20261123_162412_766945/
+?? corpus/results/x86_kvm_corpus_20261123_162707_991543/
+?? corpus/results/x86_kvm_corpus_20261123_162826_991797/
+?? corpus/results/x86_kvm_corpus_20261123_163155_904164/
+?? corpus/results/x86_kvm_corpus_20261123_163425_703179/
+?? corpus/results/x86_kvm_corpus_20261123_164012_618607/
+?? corpus/results/x86_kvm_corpus_20261123_164458_307500/
+?? corpus/results/x86_kvm_corpus_20261123_164746_016712/
+?? corpus/results/x86_kvm_corpus_20261123_170400_672946/
+?? corpus/results/x86_kvm_corpus_20261123_170627_878845/
+?? corpus/results/x86_kvm_corpus_20261123_170926_695833/
+?? corpus/results/x86_kvm_corpus_20261123_171234_645242/
+?? corpus/results/x86_kvm_corpus_20261123_171807_095571/
+?? corpus/results/x86_kvm_corpus_20261123_172147_595691/
+?? corpus/results/x86_kvm_corpus_20261123_172747_910678/
+?? corpus/results/x86_kvm_corpus_20261123_173408_129808/
+?? corpus/results/x86_kvm_corpus_20261123_180002_439141/
+?? corpus/results/x86_kvm_corpus_20261123_181035_710758/
+?? corpus/results/x86_kvm_corpus_20261123_181303_388628/
+?? corpus/results/x86_kvm_corpus_20261123_181555_049182/
+?? corpus/results/x86_kvm_corpus_20261123_181829_210680/
+?? corpus/results/x86_kvm_corpus_20261123_182432_604873/
+?? corpus/results/x86_kvm_corpus_20261123_182815_197877/
+?? corpus/results/x86_kvm_corpus_20261123_183051_161583/
+?? corpus/results/x86_kvm_corpus_20261123_193825_780358/
+?? corpus/results/x86_kvm_corpus_20261123_200406_895086/
+?? corpus/results/x86_kvm_corpus_20261123_203039_674011/
+?? corpus/results/x86_kvm_corpus_20261123_205722_709198/
+?? corpus/results/x86_kvm_corpus_20261123_212448_593127/
+?? corpus/results/x86_kvm_corpus_20261123_215059_132597/
+?? corpus/results/x86_kvm_corpus_20261123_221708_962433/
+?? corpus/results/x86_kvm_corpus_20261123_224344_726413/
+?? corpus/results/x86_kvm_corpus_20261123_231055_765801/
+?? corpus/results/x86_kvm_corpus_20261123_233751_015523/
+?? corpus/results/x86_kvm_corpus_20261124_000450_334635/
+?? corpus/results/x86_kvm_corpus_20261124_033459_862810/
+?? corpus/results/x86_kvm_corpus_20261124_040204_909589/
+?? corpus/results/x86_kvm_corpus_20261124_042825_469442/
+?? corpus/results/x86_kvm_corpus_20261124_045419_458512/
+?? corpus/results/x86_kvm_corpus_20261124_052119_515978/
+?? corpus/results/x86_kvm_corpus_20261124_054725_460151/
+?? corpus/results/x86_kvm_corpus_20261124_055018_362972/
+?? corpus/results/x86_kvm_corpus_20261124_060907_211998/
+?? corpus/results/x86_kvm_corpus_20261124_061344_709703/
+?? corpus/results/x86_kvm_corpus_20261124_062150_168558/
+?? corpus/results/x86_kvm_corpus_20261124_063937_100806/
+?? corpus/results/x86_kvm_corpus_20261124_070639_994165/
+?? corpus/results/x86_kvm_corpus_20261124_073447_416791/
+?? corpus/results/x86_kvm_corpus_20261124_080103_397696/
+?? corpus/results/x86_kvm_corpus_20261124_081212_794411/
+?? corpus/results/x86_kvm_corpus_20261124_082018_436106/
+?? kprog/formal/KProgFormal/ClightRefinement/X86AluLogicInputs.lean
+?? kprog/formal/KProgFormal/ClightRefinement/X86AluLogicResultEntry.lean
+?? kprog/formal/results/m5-x86-logic-inputs/
+?? kprog/formal/results/m5-x86-logic-result-entry/
+?? kprog/results/tet-canonical-retest-20261116/
+?? kprog/test/native_load_fault/path_probe.bpf.c

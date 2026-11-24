@@ -1,0 +1,19 @@
+{
+  "command": [
+    "make",
+    "-C",
+    "kprog/formal",
+    "check"
+  ],
+  "started": "2026-11-24T10:39:46.275589+00:00",
+  "head": "c3fbe5cbbb90101ef965239deafbfd9e7da5fb11",
+  "cpus": "12-15",
+  "shared_timing": true,
+  "formal_full_check_lock": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512,
+  "exit": 0,
+  "seconds": 856.2588522779988,
+  "finished": "2026-11-24T10:54:04.916320+00:00"
+}

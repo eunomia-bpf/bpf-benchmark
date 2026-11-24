@@ -1,0 +1,5 @@
+The complete make -C kprog/formal check passed on2026-11-24 at10:54:04Z, exit0 after856.26 seconds. This includes the default Lean library/reference build and every semantic oracle in the Makefile. The earlier DIV correction and repaired rotate/high-load/POPCNT/memory-width tools pass in the complete entry point. All earlier failures remain in their own receipts and raw directory.
+
+The run used shared timing plus exclusive formal-full-check, CPUs12–15/nice19, one Lean thread, original200000-heartbeat/512-recursion limits and32GiB address-space limit. Its initial source/status and complete raw log are retained. The common checkout continued accepted proof work: subsequent OR/AND component proofs have their own focused build/public records; this complete run does not purport to include later newly introduced leaf modules in its initial Lean phase. Native runtime and benchmark settings are unchanged by V.
+
+A passing oracle/build suite does not complete universal per-instruction refinement. Ordinary scalar/tag0 logical-register calls are covered within their explicit premises; RSP/pointer domains, other operation families and dispatcher composition remain open.
