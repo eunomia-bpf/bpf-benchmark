@@ -194,9 +194,19 @@ Class F: B's frame exceeds the verifier's 512-byte stack.
 
   What remains to decide is the frame layout in B (spilling less around
   the emulated stack, or moving that union to a map value or a global),
-  rather than the bound itself.
+  rather than the bound itself. The pointer words are load-bearing, not
+  dead weight: a TAG_STACK word recovers its provenance only through them
+  (X86_SIM_L_SV_READ_ONE, :368-371), so shrinking them means enumerating
+  fewer words, which the sparse-stack-cache result already did for the
+  arena cells -- a retained Tetragon render dropped from 53 cells to 16
+  with the same 424-byte arena
+  (kprog/results/sparse-stack-cache-20261119/README.md, PERF
+  2026-11-19T18:45:59Z). That render's full B was never compiled, so
+  carrying the same enumeration into the frame's side arrays is the open
+  continuation.
 
   Scope, measured on the archived Tetragon capture: 23 of the 61 B
+  objects that carry both the generated C and the object reach past 512
   bytes of frame. The frames cluster: ten objects reach 1736 (requests
   15, 18, 28, 30, 43, 48, 59, 70, 79 and 82, each with 304 bytes of
   emulated stack), ten reach 1408 with 224 (request 10 among them), two
