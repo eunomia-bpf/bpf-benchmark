@@ -1,0 +1,27 @@
+KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.stages =
+    (KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 0).Ssequence
+      ((KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 1).Ssequence
+        ((KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 2).Ssequence
+          ((KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 3).Ssequence
+            ((KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 4).Ssequence
+              (KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage 5)))))
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage_source (i : Fin 6) :
+  KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage i =
+    (KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.body i).Sloop CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag_names :
+  KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 0 = X86_program_profile_bpf._t'12 ∧
+    KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 1 = X86_program_profile_bpf._t'13 ∧
+      KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 2 = X86_program_profile_bpf._t'14 ∧
+        KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 3 = X86_program_profile_bpf._t'15 ∧
+          KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 4 = X86_program_profile_bpf._t'16 ∧
+            KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag 5 = X86_program_profile_bpf._t'17
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag_names' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

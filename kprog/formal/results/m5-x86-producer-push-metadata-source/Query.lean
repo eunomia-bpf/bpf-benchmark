@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataSource
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.source
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.stage_source
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag_names
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.flag_names
