@@ -1,0 +1,98 @@
+KProgFormal.ClightRefinement.X86CallFrameClear.source (slot : Fin 6) :
+  KProgFormal.ClightRefinement.X86CallFrameStages.clear slot =
+    (KProgFormal.ClightRefinement.X86CallFrameClear.clearBody✝ slot).Sloop CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86CallFrameClear.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameClear.header_offset (slot : Fin 6) :
+  KProgFormal.ClightRefinement.X86CallFrameClear.headerOffset slot = CC.Integers.Ptrofs.repr (16 + 16 * ↑↑slot)
+'KProgFormal.ClightRefinement.X86CallFrameClear.header_offset' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86CallFrameClear.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6)
+  (binding tagBlock pointerBlock : CC.Block) (tagOffset pointerOffset : CC.Integers.Ptrofs)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (tagRead :
+    CC.Mem.load CC.Mptr memory binding (KProgFormal.ClightRefinement.X86CallFrameClear.headerOffset slot).unsigned =
+      some (CC.Val.Vptr tagBlock tagOffset))
+  (pointerRead :
+    CC.Mem.load CC.Mptr memory binding
+        ((KProgFormal.ClightRefinement.X86CallFrameClear.headerOffset slot).add (CC.Integers.Ptrofs.repr 8)).unsigned =
+      some (CC.Val.Vptr pointerBlock pointerOffset))
+  (notHeader : tagBlock ≠ binding) (different : tagBlock ≠ pointerBlock)
+  (tagWritable : memory.validAccess CC.Chunk.Mint8unsigned tagBlock tagOffset.unsigned CC.Permission.Writable = true)
+  (pointerWritable : memory.validAccess CC.Mptr pointerBlock pointerOffset.unsigned CC.Permission.Writable = true) :
+  ∃ middle after,
+    CC.Mem.store CC.Chunk.Mint8unsigned memory tagBlock tagOffset.unsigned (CC.Val.Vint 0#32) = some middle ∧
+      CC.Mem.store CC.Mptr middle pointerBlock pointerOffset.unsigned (CC.Val.Vlong 0#64) = some after ∧
+        KProgFormal.ClightRefinement.InternalRun ge 13
+            (CC.State.State function (KProgFormal.ClightRefinement.X86CallFrameStages.clear slot) k e le memory)
+            (CC.State.State function CC.Stmt.Sskip k e
+              (KProgFormal.ClightRefinement.X86CallFrameClear.temps le slot tagBlock pointerBlock tagOffset
+                pointerOffset)
+              after) ∧
+          CC.Mem.load CC.Chunk.Mint8unsigned after tagBlock tagOffset.unsigned = some (CC.Val.Vint 0#32) ∧
+            CC.Mem.load CC.Mptr after pointerBlock pointerOffset.unsigned = some (CC.Val.Vlong 0#64) ∧
+              after.access = memory.access ∧
+                after.nextblock = memory.nextblock ∧
+                  ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                    other ≠ tagBlock →
+                      other ≠ pointerBlock →
+                        CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86CallFrameClear.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameClear.stable_temps (le : CC.TempEnv) (slot : Fin 6)
+  (tagBlock pointerBlock : CC.Block) (tagOffset pointerOffset : CC.Integers.Ptrofs) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+        (KProgFormal.ClightRefinement.X86CallFrameClear.temps le slot tagBlock pointerBlock tagOffset pointerOffset) =
+      CC.PTree.get X86_program_profile_bpf.___x86_bind le ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_sv_sp
+        (KProgFormal.ClightRefinement.X86CallFrameClear.temps le slot tagBlock pointerBlock tagOffset pointerOffset) =
+      CC.PTree.get X86_program_profile_bpf.___x86_sv_sp le
+'KProgFormal.ClightRefinement.X86CallFrameClear.stable_temps' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameClear.selected (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6)
+  (binding tagBlock pointerBlock : CC.Block) (tagOffset pointerOffset : CC.Integers.Ptrofs) (sp : BitVec 64)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (observedSp : CC.PTree.get X86_program_profile_bpf.___x86_sv_sp le = some (CC.Val.Vlong sp))
+  (decision : KProgFormal.ClightRefinement.X86CallFrameStages.selected slot sp = true)
+  (tagRead :
+    CC.Mem.load CC.Mptr memory binding (KProgFormal.ClightRefinement.X86CallFrameClear.headerOffset slot).unsigned =
+      some (CC.Val.Vptr tagBlock tagOffset))
+  (pointerRead :
+    CC.Mem.load CC.Mptr memory binding
+        ((KProgFormal.ClightRefinement.X86CallFrameClear.headerOffset slot).add (CC.Integers.Ptrofs.repr 8)).unsigned =
+      some (CC.Val.Vptr pointerBlock pointerOffset))
+  (notHeader : tagBlock ≠ binding) (different : tagBlock ≠ pointerBlock)
+  (tagWritable : memory.validAccess CC.Chunk.Mint8unsigned tagBlock tagOffset.unsigned CC.Permission.Writable = true)
+  (pointerWritable : memory.validAccess CC.Mptr pointerBlock pointerOffset.unsigned CC.Permission.Writable = true) :
+  ∃ middle after,
+    CC.Mem.store CC.Chunk.Mint8unsigned memory tagBlock tagOffset.unsigned (CC.Val.Vint 0#32) = some middle ∧
+      CC.Mem.store CC.Mptr middle pointerBlock pointerOffset.unsigned (CC.Val.Vlong 0#64) = some after ∧
+        KProgFormal.ClightRefinement.InternalRun ge 17
+            (CC.State.State function (KProgFormal.ClightRefinement.X86CallFrameStages.stage slot) k e le memory)
+            (CC.State.State function CC.Stmt.Sskip k e
+              (KProgFormal.ClightRefinement.X86CallFrameClear.temps le slot tagBlock pointerBlock tagOffset
+                pointerOffset)
+              after) ∧
+          CC.Mem.load CC.Chunk.Mint8unsigned after tagBlock tagOffset.unsigned = some (CC.Val.Vint 0#32) ∧
+            CC.Mem.load CC.Mptr after pointerBlock pointerOffset.unsigned = some (CC.Val.Vlong 0#64) ∧
+              after.access = memory.access ∧
+                after.nextblock = memory.nextblock ∧
+                  ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                    other ≠ tagBlock →
+                      other ≠ pointerBlock →
+                        CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86CallFrameClear.selected' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86CallFrameClear
+#check KProgFormal.ClightRefinement.X86CallFrameClear.source
+#print axioms KProgFormal.ClightRefinement.X86CallFrameClear.source
+#check KProgFormal.ClightRefinement.X86CallFrameClear.header_offset
+#print axioms KProgFormal.ClightRefinement.X86CallFrameClear.header_offset
+#check KProgFormal.ClightRefinement.X86CallFrameClear.execute
+#print axioms KProgFormal.ClightRefinement.X86CallFrameClear.execute
+#check KProgFormal.ClightRefinement.X86CallFrameClear.stable_temps
+#print axioms KProgFormal.ClightRefinement.X86CallFrameClear.stable_temps
+#check KProgFormal.ClightRefinement.X86CallFrameClear.selected
+#print axioms KProgFormal.ClightRefinement.X86CallFrameClear.selected
