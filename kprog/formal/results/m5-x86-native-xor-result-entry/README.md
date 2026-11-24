@@ -1,0 +1,3 @@
+Original handler entry and complete distinct-register native readers compose with the actual29-step XOR numerical helper and caller resume to the true flags stage. All native numerical operands and exact XOR result are derived from caller heap/representation, real decode and reader execution at every width, including RSP and legal high-byte slices. This is the arithmetic prefix; writeback/free/return remain downstream obligations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
