@@ -228,3 +228,8 @@ import KProgFormal.ClightRefinement.X86AluXorDwordAll
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultPrefix
 import KProgFormal.ClightRefinement.X86AluXorQwordAll
 import KProgFormal.ClightRefinement.X86AluXorWordAll
+import KProgFormal.ClightRefinement.X86AluLogicByteNative
+import KProgFormal.ClightRefinement.X86AluLogicWordNative
+import KProgFormal.ClightRefinement.X86AluLogicDwordNative
+import KProgFormal.ClightRefinement.X86AluLogicQwordNative
+import KProgFormal.ClightRefinement.X86RegisterReadRsp

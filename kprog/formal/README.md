@@ -72,9 +72,14 @@ covers old represented pointer/tag cells. The [qword calls](results/m5-x86-xor-q
 cover the same ordinary scalar/tag0 aliasing domain through the original
 selectors, repeated tag calls, 252-step writer and actual return. The
 [word-width calls](results/m5-x86-xor-word-all/README.md) cover that same
-scalar/tag0 aliasing domain through the actual181-step partial writer,
-preserving48 upper bits. RSP/pointer arithmetic inputs and dispatcher
-composition remain proof work.
+scalar/tag0 aliasing domain through the actual 181-step partial writer,
+preserving 48 upper bits. RSP/pointer arithmetic inputs and dispatcher
+composition remain proof work. The actual OR/AND calls now cover the same
+ordinary scalar/tag0 register domain at all four widths, including legal
+low/high-byte slices and all aliasing, through the
+[canonical outputs](results/m5-x86-logic-register-root/README.md).
+The [RSP reader component](results/m5-x86-reader-rsp/README.md) executes its
+real native-base reads; complete RSP call/writeback composition remains open.
 
 ## Trust boundary
 

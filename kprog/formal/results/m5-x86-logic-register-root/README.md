@@ -1,0 +1,5 @@
+The formal root now exposes ordinary scalar/tag0 XOR, OR and AND register calls across byte, word16, dword and qword widths. Actual readers, helper calls, width-specific stores, flags, release and return refine the SAME canonical ISA outputs within their stated premises. Word16 preserves48 upper bits and legal low/high-byte slices are retained. The first genuine10-step RSP materialization component is included without claiming complete RSP calls.
+
+All134 latest ARM/V declarations, including the actual thirteen-call ARM source/native prefix, are preserved in the153-declaration public type/axiom query union. Every import and peer source contract is retained. The complete make check passed separately after the memory-oracle repair in results/m5-full-check-20261124; later proof leaves and this final root have focused validation at original limits. Full universal instruction-family and dispatcher refinement remains unfinished.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
