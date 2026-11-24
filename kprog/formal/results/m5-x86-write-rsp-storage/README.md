@@ -1,0 +1,3 @@
+The actual14-transition reverse-materialization gate composes with the actual22-transition table writer from initial heap and permissions. The three stores, native GPR view, unchanged access/frontier and every load outside local/table blocks are derived. Exact stack-release continuation remains the final source state; release/clobber effects and complete RSP handler return remain proof work.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

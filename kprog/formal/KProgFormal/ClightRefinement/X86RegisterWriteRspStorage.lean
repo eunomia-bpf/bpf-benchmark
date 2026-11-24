@@ -1,0 +1,78 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspWritable
+import KProgFormal.ClightRefinement.X86RegisterWriteRspPrefix
+
+namespace KProgFormal.ClightRefinement.X86RegisterWriteRspStorage
+open X86RegisterView
+
+/-- The actual reverse-materialization gate and table writer compose from
+initial heap/permissions to the real RSP release frontier. Both numerical
+reads, all three stores and the final native GPR view are derived. -/
+theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (valueLayout : ge.genv_cenv.get X86_program_profile_bpf._x86_sim_inline_value =
+      some X86ShiftLeftCarry.valueRecord)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (memory : CC.Mem) (bindingBlock localBlock baseBlock cellsBlock : CC.Block)
+    (baseOffset cellsOffset : CC.Integers.Ptrofs) (value : BitVec 64)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.X86.Origins)
+    (cpu : X86.Cpu)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (4#32)))
+    (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (.Vlong value))
+    (header : CC.Mem.load CC.Mptr memory bindingBlock 112 = some (.Vptr baseBlock baseOffset))
+    (native : CC.Mem.load .Mint64 memory baseBlock (CC.Integers.Ptrofs.unsigned baseOffset) =
+      some (.Vlong origins.stack))
+    (permission : CC.Mem.validAccess memory CC.Mptr localBlock 0 .Writable = true)
+    (localSeparate : localBlock ≠ bindingBlock ∧ localBlock ≠ cellsBlock)
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (tag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (0#32)))
+    (represented : RegistersRepresent addresses origins memory cellsBlock cellsOffset cpu)
+    (wordPermission : CC.Mem.validAccess memory CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) .Writable = true)
+    (tagPermission : CC.Mem.validAccess memory .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + 64) + 8)) .Writable = true) :
+    ∃ final, InternalRun ge 36
+      (.State function .Sskip (.Kseq X86ShiftWriteback.storageTail k) e le memory)
+      (.State function .Sskip (X86ShiftWriteback.tableCont k) e
+        (X86ShiftWriteback.tableTemps
+          (X86RegisterWriteRsp.temps le baseBlock baseOffset value origins.stack)
+          (.Vlong (value - origins.stack)) (0#8) 4 cellsBlock cellsOffset) final) ∧
+      RegistersRepresent addresses origins final cellsBlock cellsOffset
+        (cpu.setReg .q (X86.GPR.ofIndex 4) value) ∧
+      final.access = memory.access ∧ final.nextblock = memory.nextblock ∧
+      (∀ chunk other offset, other ≠ localBlock → other ≠ cellsBlock →
+        CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset) := by
+  obtain ⟨middle, stored, reversed, currentRaw, access, next, frame⟩ :=
+    X86RegisterWriteRspWritable.execute ge layout valueLayout function e le k memory
+      bindingBlock localBlock baseBlock baseOffset value origins.stack
+      declared binding destination current header native permission
+  let reached := X86RegisterWriteRsp.temps le baseBlock baseOffset value origins.stack
+  have keptBinding : reached.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0) := by
+    simp +decide [reached, X86RegisterWriteRsp.temps, CC.PTree.gso, binding]
+  have keptDestination : reached.get X86_program_profile_bpf._dst = some (.Vint (4#32)) := by
+    simp +decide [reached, X86RegisterWriteRsp.temps, CC.PTree.gso, destination]
+  have keptTag : reached.get X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (0#32)) := by
+    simp +decide [reached, X86RegisterWriteRsp.temps, CC.PTree.gso, tag]
+  have keptCells := (frame CC.Mptr bindingBlock 0 (Ne.symm localSeparate.1)).trans cells
+  have keptRegisters : RegistersRepresent addresses origins middle cellsBlock cellsOffset cpu := by
+    intro index
+    obtain ⟨rawValue, raw, cellTag, wordRead, tagRead, valueRep, native⟩ := represented index
+    exact ⟨rawValue, raw, cellTag,
+      (frame CC.Mptr cellsBlock _ (Ne.symm localSeparate.2)).trans wordRead,
+      (frame .Mint8unsigned cellsBlock _ (Ne.symm localSeparate.2)).trans tagRead,
+      valueRep, native⟩
+  have keptWord := (CC.Mem.validAccess_store_eq stored CC.Mptr cellsBlock
+    (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) .Writable).trans wordPermission
+  have keptTagPermission := (CC.Mem.validAccess_store_eq stored .Mint8unsigned cellsBlock
+    (CC.Integers.Ptrofs.unsigned ((cellsOffset + 64) + 8)) .Writable).trans tagPermission
+  obtain ⟨final, written, registers, finalAccess, finalNext, finalFrame⟩ :=
+    X86RegisterWriteRspPrefix.execute ge layout function e reached k middle localBlock bindingBlock cellsBlock
+      cellsOffset value addresses origins cpu declared currentRaw keptTag keptDestination keptBinding keptCells
+      bindingSeparate keptRegisters keptWord keptTagPermission
+  refine ⟨final, reversed.trans written, registers, finalAccess.trans access, finalNext.trans next, ?_⟩
+  intro chunk other offset notLocal notCells
+  exact (finalFrame chunk other offset notCells).trans (frame chunk other offset notLocal)
+
+end KProgFormal.ClightRefinement.X86RegisterWriteRspStorage
