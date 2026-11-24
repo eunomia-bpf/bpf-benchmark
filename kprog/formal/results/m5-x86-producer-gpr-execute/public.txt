@@ -1,0 +1,83 @@
+KProgFormal.ClightRefinement.X86ProducerGprExecute.ordinary (before memory supplied : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) (i : Fin 16) (notRsp : i ≠ 4) (word : BitVec 64) (trace : CC.Trace)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (provider :
+    CC.externalCall KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputEF
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.toSenv [CC.Val.Vint 6#32] memory trace
+      (CC.Val.Vlong word) supplied)
+  (access :
+    supplied.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).whole k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        trace
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (KProgFormal.ClightRefinement.X86ProducerGprEnter.temps i le word) after) ∧
+      CC.Mem.load CC.Mptr after gprs.block (16 * ↑↑i) = some (CC.Val.Vlong word) ∧
+        CC.Mem.load CC.Chunk.Mint8unsigned after gprs.block (16 * ↑↑i + 8) = some (CC.Val.Vint 0) ∧
+          (∀ (row : Fin 32),
+              row ≠ KProgFormal.ClightRefinement.X86ProducerGprSites.valueRow i →
+                row ≠ KProgFormal.ClightRefinement.X86ProducerGprSites.tagRow i →
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after gprs.block
+                      (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) supplied gprs.block
+                      (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+            (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c supplied b ofs) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock supplied after ∧
+                after.access = supplied.access ∧ after.nextblock = supplied.nextblock
+'KProgFormal.ClightRefinement.X86ProducerGprExecute.ordinary' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprExecute.rsp (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 10
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).whole k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (CC.PTree.set (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).savedName (CC.Val.Vlong 0) le)
+          after) ∧
+      CC.Mem.load CC.Mptr after gprs.block 64 = some (CC.Val.Vlong 0) ∧
+        CC.Mem.load CC.Chunk.Mint8unsigned after gprs.block 72 = some (CC.Val.Vint 0) ∧
+          (∀ (row : Fin 32),
+              row ≠ KProgFormal.ClightRefinement.X86ProducerGprSites.valueRow 4 →
+                row ≠ KProgFormal.ClightRefinement.X86ProducerGprSites.tagRow 4 →
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after gprs.block
+                      (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) memory gprs.block
+                      (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+            (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerGprExecute.rsp' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
