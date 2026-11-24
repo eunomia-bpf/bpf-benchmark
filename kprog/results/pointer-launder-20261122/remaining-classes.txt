@@ -417,3 +417,16 @@ register/ABI state and spills. The verifier refused at insn 1 writing
 The 2.125x structural ratio holds here: 488 touched bytes is past the
 241-byte ceiling on its own, before any spill, and the object reaches
 2144 -- the largest measured so far, above the archive's 1736.
+
+Tracee request 34's E2BIG is reclassified, 2026-11-24T18:5xZ: the
+"Argument list too long" text is strerror(E2BIG) on the errno from
+bpf_prog_load, and its argv (62 entries, ~1.3 KB) and environment
+(~1 KB) are far under the exec limits. The kernel returns -E2BIG at
+kernel/bpf/syscall.c:2935 when insn_cnt exceeds
+BPF_COMPLEXITY_LIMIT_INSNS (1,000,000 with bpf_cap), and request 34's
+kprobe/trusted section is 0xae31c0 bytes = 1,427,000 insns. The class
+is therefore B-programs over the 1M-insn load limit, not an argv
+problem: the verify call at native_loader_trusted.cpp:2964 refuses
+before native compilation, exactly as recorded. The verify-side lever
+is B's own size (the same frame/spill work as class F), and the
+correct label for the failure is the insn-count limit.
