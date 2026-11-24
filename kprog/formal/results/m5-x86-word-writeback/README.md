@@ -1,0 +1,3 @@
+The actual word16 width selector, union-field store, ordinary destination route, table word/tag stores and writer-loop exit now compose in56 Clight transitions. The initial local64 initialization constructs partial-store rights. The represented native table supplies its original scalar word/tag, yielding the SAME native word update while preserving other registers, other block loads, permissions and allocation frontier. No standalone handler or complete family is claimed.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

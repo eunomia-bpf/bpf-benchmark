@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86WordWriteback
+#print axioms KProgFormal.ClightRefinement.X86WordWriteback.table
+#print axioms KProgFormal.ClightRefinement.X86WordWriteback.from_storage
