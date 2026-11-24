@@ -1,0 +1,34 @@
+KProgFormal.ClightRefinement.X86ProducerGprLayout.source_layouts :
+  CC.PTree.get X86_program_profile_bpf.__3130 KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ProducerGprLayout.namedRecord ∧
+    CC.PTree.get X86_program_profile_bpf._x86_sim_gpr KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+        some KProgFormal.ClightRefinement.X86RegisterLayout.gprRecord ∧
+      CC.PTree.get X86_program_profile_bpf._x86_sim_gpr_cell
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+        some KProgFormal.ClightRefinement.X86RegisterLayout.cellRecord
+'KProgFormal.ClightRefinement.X86ProducerGprLayout.source_layouts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprLayout.field_offsets (i : Fin 16) :
+  CC.fieldOffset KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+        (KProgFormal.ClightRefinement.X86ProducerGprLayout.fieldName i)
+        KProgFormal.ClightRefinement.X86ProducerGprLayout.namedRecord.co_members =
+      CC.Res.OK (16 * ↑↑i, CC.Bitfield.Full) ∧
+    CC.fieldOffset KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+        (KProgFormal.ClightRefinement.X86ProducerGprLayout.tagName i)
+        KProgFormal.ClightRefinement.X86ProducerGprLayout.namedRecord.co_members =
+      CC.Res.OK (16 * ↑↑i + 8, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerGprLayout.field_offsets' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprLayout.nested_offsets :
+  CC.unionFieldOffset KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+        (CC.Positive.ofNat 18727075383868559167)
+        KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord.co_members =
+      CC.Res.OK (0, CC.Bitfield.Full) ∧
+    CC.unionFieldOffset KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv X86_program_profile_bpf._ptr
+        KProgFormal.ClightRefinement.X86RegisterLayout.gprRecord.co_members =
+      CC.Res.OK (0, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerGprLayout.nested_offsets' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

@@ -15,6 +15,22 @@
     "maxRecDepth": 512
   },
   "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-gpr-layout/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5774440369568765,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "deferred_public_history": {
     "status": "not_started",
     "reason": "coordinator exclusive timing lock; queued command cancelled before Lean launch",
     "command": [
@@ -24,5 +40,6 @@
       "-j1",
       "results/m5-x86-producer-gpr-layout/Query.lean"
     ]
-  }
+  },
+  "public_raw_directory": "/workspaces/kprog-raw/V/gpr-stores-20261124T191025Z"
 }
