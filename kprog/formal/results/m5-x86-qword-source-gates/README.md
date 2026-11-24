@@ -1,0 +1,3 @@
+For aligned qword XOR/OR/AND, the original ALU0 check precedes the tag-dependent source-pointer gates. Twenty-one actual Clight transitions short-circuit those gates and reach the original default writer with exact temporary values and the complete heap unchanged. This corrects the unaccepted draft that incorrectly tried to enter the ADD-only tag calls; all raw failed attempts remain. No tag-call or selected-result premise is introduced.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

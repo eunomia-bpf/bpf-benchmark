@@ -1,0 +1,25 @@
+KProgFormal.ClightRefinement.X86QwordSource.source :
+  KProgFormal.ClightRefinement.X86ShiftWriteback.sourceWriter =
+    (((KProgFormal.ClightRefinement.X86QwordSource.first✝.Ssequence
+                  KProgFormal.ClightRefinement.X86QwordSource.second✝).Ssequence
+              KProgFormal.ClightRefinement.X86QwordSource.destination✝).Ssequence
+          KProgFormal.ClightRefinement.X86QwordSource.sourcePart✝).Ssequence
+      KProgFormal.ClightRefinement.X86QwordSource.gate✝
+'KProgFormal.ClightRefinement.X86QwordSource.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86QwordSource.execute (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (code : BitVec 32)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (dstShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (srcShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (operation : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint code)) (notAdd : code ≠ 0#32) :
+  KProgFormal.ClightRefinement.InternalRun ge 21
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.sourceWriter k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.defaultWriter k e
+      (KProgFormal.ClightRefinement.X86QwordSource.temps le) memory)
+'KProgFormal.ClightRefinement.X86QwordSource.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
