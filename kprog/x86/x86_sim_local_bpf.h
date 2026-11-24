@@ -3035,18 +3035,17 @@ do { \
 				__x86_l_pw_tag);                          \
 	} while (0)
 
-/* Native architectural faults reach the existing verifier-visible fault
- * arm. Native #DE and UD2/#UD retain their faulting control paths. The BPF
- * arm returns instead of storing through the null value it computed: a
- * "*(u64 *)(r0 + 0) = r0" with r0 = 0 is a scalar store and the stock
- * verifier rejects the whole program for it ("R0 invalid mem access
- * 'scalar'"), however unreachable the arm is. "r0 = 0; exit;" is accepted on
- * prog_types 2, 7 and 17 and is the only measured-accepted non-returning
- * spelling; native compilation assumes the arm false
- * (kprog/x86/compile_sim_ir.cpp), so no path reaches it. */
+/* Native architectural faults reach the verifier-visible fault arm. Native
+ * #DE and UD2/#UD keep their faulting control paths. In B the arm stores
+ * through the null value it computes, so the stock verifier rejects every B
+ * whose native program can reach a processor fault (a divide by zero or a
+ * quotient overflow, an invalid opcode, a faulting RSP): B simulates P
+ * faithfully, and P faults there. An arm the verifier proves unreachable stays
+ * out of its analysis. Native compilation assumes the arm false only after
+ * stock B acceptance (kprog/x86/compile_sim_ir.cpp). */
 #if defined(__bpf__)
 #define X86_SIM_L_ARCHITECTURAL_FAULT() do {                                    \
-    __asm__ volatile("r0 = 0; exit;" ::: "r0", "memory");                   \
+    __asm__ volatile("r0 = 0; *(u64 *)(r0 + 0) = r0; exit;" ::: "r0", "memory");                   \
     __builtin_unreachable();                                             \
 } while (0)
 #else
