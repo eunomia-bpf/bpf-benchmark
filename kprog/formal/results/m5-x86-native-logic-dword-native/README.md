@@ -1,0 +1,3 @@
+The genuine dword OR/AND call now refines the SAME canonical .logic.w32 full-state output with an RSP or ordinary scalar source. Both real reader paths, the helper, flags,197-step zero-extending writer, frame release and return remain explicit. The native/source width boundary is the existing reference projection, proved equal by kernel reduction. RSP destinations remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
