@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagRead
+#check KProgFormal.ClightRefinement.Arm64MemsetTagRead.read
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagRead.read
+#check KProgFormal.ClightRefinement.Arm64MemsetTagRead.of_storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagRead.of_storage
+#check KProgFormal.ClightRefinement.Arm64MemsetTagRead.complete
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagRead.complete
+#check KProgFormal.ClightRefinement.Arm64MemsetTagRead.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagRead.original
