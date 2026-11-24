@@ -3044,10 +3044,17 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     int verified_fd = arm_and_load(load_fds);
     if (verified_fd < 0 && options.original_prog_fd >= 0) {
         std::vector<std::pair<int, uint32_t>> own_fds;
+        std::vector<uint32_t> dropped;
         for (const auto &pair : load_fds) {
-            if (!foreign_prog_array(pair.second)) own_fds.push_back(pair);
+            if (foreign_prog_array(pair.second)) dropped.push_back(pair.second);
+            else own_fds.push_back(pair);
         }
-        if (own_fds.size() != load_fds.size()) verified_fd = arm_and_load(own_fds);
+        if (!dropped.empty()) {
+            std::string ids;
+            for (uint32_t id : dropped) ids += " " + std::to_string(id);
+            std::fprintf(stderr, "native: reloading without foreign PROG_ARRAY map(s)%s\n", ids.c_str());
+            verified_fd = arm_and_load(own_fds);
+        }
     }
     ScopedFd verified(verified_fd);
     if (verified.get() < 0)
