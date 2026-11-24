@@ -1,0 +1,29 @@
+KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.source :
+  KProgFormal.ClightRefinement.X86ProducerPushStorageSource.cacheRead =
+      CC.Stmt.Sset X86_program_profile_bpf._t'211
+        KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.readExpression ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStorageSource.cacheStore =
+      CC.Stmt.Sassign KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.target
+        KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.rhs
+'KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.read_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (binding cache : CC.Block)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (read : CC.Mem.load CC.Mptr memory binding 8 = some (CC.Val.Vptr cache 0)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.readExpression =
+    some (CC.Val.Vptr cache 0)
+'KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.read_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.address (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (cache : CC.Block) (read : CC.PTree.get X86_program_profile_bpf._t'211 le = some (CC.Val.Vptr cache 0))
+  (at40 : CC.PTree.get X86_program_profile_bpf.___x86_stw_index le = some (CC.Val.Vlong 40#64)) :
+  CC.doEvalLvalue KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.target =
+    some (cache, 40#64, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.address' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

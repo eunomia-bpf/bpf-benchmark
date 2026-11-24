@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushCacheAddress
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.source
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.read_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.read_value
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.address
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheAddress.address
