@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackRoute
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStackRoute.select
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackRoute.select
+#check KProgFormal.ClightRefinement.Arm64MemsetStackRoute.sp
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackRoute.sp
+#check KProgFormal.ClightRefinement.Arm64MemsetStackRoute.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackRoute.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStackRoute.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackRoute.original
