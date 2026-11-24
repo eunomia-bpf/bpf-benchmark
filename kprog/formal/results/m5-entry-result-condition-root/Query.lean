@@ -1,0 +1,22 @@
+import KProgFormal
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryResultPrefix.entry_corresponds
+#print axioms Arm64ProgramEntryResultPrefix.entry_corresponds
+#check Arm64ProgramEntryResultRead.both
+#print axioms Arm64ProgramEntryResultRead.both
+#check Arm64ProgramEntryResultVector.execute
+#print axioms Arm64ProgramEntryResultVector.execute
+#check Arm64ProgramEntryResultCondition.execute
+#print axioms Arm64ProgramEntryResultCondition.execute
+#check Arm64ProgramEntryResultCondition.invoke
+#print axioms Arm64ProgramEntryResultCondition.invoke
+#check Arm64ProgramEntryResultCondition.call_step
+#print axioms Arm64ProgramEntryResultCondition.call_step
+#check Arm64ProgramEntryResultCondition.remainder_cast
+#print axioms Arm64ProgramEntryResultCondition.remainder_cast
+#check Arm64ConditionAll.internal
+#print axioms Arm64ConditionAll.internal
+#check Arm64ConditionAll.from_storage
+#print axioms Arm64ConditionAll.from_storage
+#check Arm64ProgramEntryUaddlvPrefixNative.entry_corresponds
+#print axioms Arm64ProgramEntryUaddlvPrefixNative.entry_corresponds
