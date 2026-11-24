@@ -1,0 +1,7 @@
+# Actual memset tag-word and byte stores at every original offset
+
+For each of the16 original stack offsets, the actual source Header View, real allocation Resources and24 zero tag byte observations construct the complete bias/index/action route and BOTH real s77 stores. Actual source declaration bindings and target sizes derive tag24/stack160 writable ranges and block separation. Imported byte observations derive the genuine word8 load; zero tag clearing and the real byte store are constructed, with both store equations and both readbacks retained. The actual continuation, old-block frame, access map, allocation frontier and outside-stack/tag loads are preserved, and the same header View survives in the reached heap. This component handles each original offset under its explicit current source View/Resources; threading those same-invocation packets through the earlier14 calls and assembling the sequential16 iterations/post-store source loop follows. Original full-call resource prefix353, instruction/native fixture14 and complete ISA families0 retain their scopes. Final tag transfer/clobber/free/caller precedes one related root batch.
+
+Focused build 330 and 2 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.

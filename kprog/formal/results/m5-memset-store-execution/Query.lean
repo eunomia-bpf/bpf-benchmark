@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStoreExecution
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreExecution.ranges
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreExecution.ranges
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreExecution.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreExecution.execute
