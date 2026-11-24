@@ -209,25 +209,34 @@ Class G: dereference of a value read out of memory.
   scalar base, the RIP-relative absolute-address form the load macro
   comments on, which the verifier refuses as a scalar store.
   The x86 really loads through the address the application computed, and
-  B reads that slot with kprog_x86_mem_load_fixed_into, whose body is
-  bpf_probe_read_kernel (kprog/formal/generated/x86_mem_access.h:100-111):
-  the result is a plain scalar, so the pointer provenance is gone before
-  the second load. This is the same root as class A (a helper's integer
-  result dereferenced) but reached through B's own load path rather than
+  B reads that slot with kprog_x86_mem_load_fixed_into
+  (kprog/formal/generated/x86_mem_access.h:86-104), whose BPF arm per
+  width is bpf_probe_read_kernel at :93, :96, :99 and :102 followed by a
+  re-read of the destination, and whose exported entry is
+  KPROG_X86_MEM_LOAD (:173). The helper leaves a scalar, so the loaded 8
+  bytes arrive at B with no provenance; the emulated pointer tag survives
+  in the simulator's tags, and the verifier cannot see it. A store
+  through such a value is the zero-base case above; a load through it is
+  class G.
+  This is the same root as class A (a helper's integer result
+  dereferenced), but reached through B's own load path rather than
   through bpf_get_current_task, so the class-A fix does not cover it.
   The pointer-launder pass (kprog/x86/packet_bounds_ir.cpp:370-500)
   rewrites frame-pointer differences and a pointer-typed minuend; it does
   not give a loaded scalar pointer provenance.
 
-  Mechanism, checked in the header. Every B memory read takes the helper:
-  KPROG_X86_MEM_LOAD is kprog_x86_mem_load (:173), and the fixed-
-  displacement form B uses for these sites is
-  kprog_x86_mem_load_fixed_into (:86-104), whose BPF arm per width is
-  bpf_probe_read_kernel at :93, :96, :99 and :102 followed by a re-read
-  of the destination. The helper leaves a scalar, so the loaded 8 bytes
-  arrive at B with no provenance; the emulated pointer tag survives in
-  the simulator's tags, and the verifier cannot see it. A store through
-  such a value is the zero-base case above; a load through it is class G.
+  The simulator already knows the provenance it loses here. A 64-bit
+  store into the emulated stack records the tag and the pointer
+  (X86_SIM_L_STACK_VALUES_SAVE, x86_sim_local_bpf.h:360-364, into the
+  side arrays at :326-346), and a load consults them
+  (X86_SIM_L_STACK_VALUES_READ, :372-375). Both preserve the tag, so a
+  pointer stored into the emulated stack and read back keeps its
+  provenance. The failing sites read memory outside that stack (the
+  kprog_unspec region and the zero-base RIP-relative slot), where the
+  only read path is the probe-read helper. A fix therefore has to carry
+  the tag across the same helper: read the value and its tag as the save
+  and read pair do, and re-materialize the pointer with
+  KPROG_PTR_ADD64_BITS instead of handing the verifier a scalar.
 
 Both classes predate the 2026-11-23 B fixes (7db7ddc23, c3c89a8d3,
 e3ce00476, aaca40148, 25d4ae58b, 3ffc87abc), so this capture cannot say
