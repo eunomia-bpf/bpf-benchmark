@@ -1,0 +1,40 @@
+KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer)
+  (arena : BitVec 64) : KProgFormal.Reference.Provenance.X86.Origins
+'KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.base {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (arena : BitVec 64) :
+  CC.Mem.load CC.Chunk.Mint64 ready.after ready.base.block 0 =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena).stack) ∧
+    CC.Mem.load CC.Chunk.Mint64 complete.after ready.base.block 0 =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena).stack)
+'KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.base' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.native_stack {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (arena : BitVec 64) (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (state : KProgFormal.Reference.X86.State)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) ready.after ready.gprs.block 0
+      (KProgFormal.ClightRefinement.X86LogicReference.input state)) :
+  state.gpr 4 = ready.stackOutcome.value
+'KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.native_stack' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

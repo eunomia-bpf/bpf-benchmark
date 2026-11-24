@@ -1,0 +1,3 @@
+Construct origins.stack from the SAME ready.stackOutcome.value returned by the actual original kind1 input; private arena remains explicit. True store/free frames preserve the original native-base object and exact value. Existing initial GPR relation then derives native initial RSP equals that actual input, without an independent origin/result equality or native origin0 assumption. Full platform invocation/oracle/initial-memory/trace/fetched/full149 goals remain open; no provider law/specification/ISA/C/runtime/oracle/ARM/paper edit or new axiom.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

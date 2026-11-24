@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushInputOrigin
+#check KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins
+#check KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.base
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.base
+#check KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.native_stack
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.native_stack
