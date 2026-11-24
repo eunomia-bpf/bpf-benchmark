@@ -1,0 +1,3 @@
+The proof root now exposes ordinary scalar/tag0 XOR calls across byte, word16, dword and qword widths. Word16 includes both real aliasing routes, actual181-step partial writeback, original upper48-bit preservation, flags, frame release and true return. The125-public-declaration union preserves all previous V/ARM interfaces and adds22 word16 component declarations. Whole confirmation follows the lane-formal correction of the check2 draft boundary. RSP/pointer arithmetic, full instruction families and dispatcher composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

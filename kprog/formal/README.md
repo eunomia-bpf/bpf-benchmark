@@ -70,9 +70,11 @@ also cover all ordinary scalar/tag0 register aliasing, using the real
 197-step writer and actual return. Their matched shortcut additionally
 covers old represented pointer/tag cells. The [qword calls](results/m5-x86-xor-qword-all/README.md)
 cover the same ordinary scalar/tag0 aliasing domain through the original
-selectors, repeated tag calls, 252-step writer and actual return. Word-width
-callers, RSP/pointer arithmetic inputs and dispatcher composition are the next
-proof work.
+selectors, repeated tag calls, 252-step writer and actual return. The
+[word-width calls](results/m5-x86-xor-word-all/README.md) cover that same
+scalar/tag0 aliasing domain through the actual181-step partial writer,
+preserving48 upper bits. RSP/pointer arithmetic inputs and dispatcher
+composition remain proof work.
 
 ## Trust boundary
 
