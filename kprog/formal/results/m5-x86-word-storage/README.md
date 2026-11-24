@@ -1,0 +1,3 @@
+The original ALU writer width classifier selects its actual word16 leaf in9 transitions. Its ordinary scalar/tag0 prelude and real narrowing cast then execute in10 transitions, preserving the exact heap and other temporaries. All statement identities come from the production Clight export; this step does not yet claim complete word16 writeback or an instruction family.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

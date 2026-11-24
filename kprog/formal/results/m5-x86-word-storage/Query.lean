@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86WordStorage
+#print axioms KProgFormal.ClightRefinement.X86WordStorage.select
+#print axioms KProgFormal.ClightRefinement.X86WordStorage.enter
