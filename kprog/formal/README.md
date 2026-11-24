@@ -33,7 +33,7 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-producer-cache-allocation-root/README.md)
+[integrated public queries](results/m5-x86-producer-header-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
@@ -64,9 +64,10 @@ The complete logical-register calls additionally preserve actual cache reads
 at or above new SP, from caller allocation through flag stores, whole writers,
 release and free/return. This uses explicit stronger provider preservation,
 cache/ghost separation and initial cache lifetime premises. The actual
-producer allocator establishes the relevant block separation and lifetime
-bounds. Header initialization, current-memory resource transport and the
-real provider ABI binding remain open.
+producer allocator and 24-pointer header initializer derive cache/ghost
+views, separation, current permissions and lifetime bounds at the genuine
+source cut. Preceding input/setup execution, the remaining context-header
+stores, transport to the caller and real provider ABI binding remain open.
 
 The argument also trusts the C front end/exporter, imported semantics and
 their correspondence to production C, artifact binding and platform memory
