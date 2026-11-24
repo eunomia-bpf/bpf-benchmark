@@ -1,0 +1,38 @@
+{
+  "commands": {
+    "shortcut-byte-build1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.X86AluXorShortcutByteCall"
+      ],
+      "exit": 0,
+      "seconds": 3.924182098999154,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    },
+    "shortcut-byte-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-xor-shortcut-byte-call/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7723629379761405,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-native-20261124T081051Z",
+  "source_transitions": 396,
+  "complete_instruction_families": 0,
+  "root_integration": "pending"
+}
