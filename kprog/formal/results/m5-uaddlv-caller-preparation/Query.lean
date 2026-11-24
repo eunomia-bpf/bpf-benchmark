@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvCall
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryUaddlvCall.entry_valid
+#print axioms Arm64ProgramEntryUaddlvCall.entry_valid
+#check Arm64ProgramEntryUaddlvCall.source
+#print axioms Arm64ProgramEntryUaddlvCall.source
+#check Arm64ProgramEntryUaddlvCall.enter
+#print axioms Arm64ProgramEntryUaddlvCall.enter
+#check Arm64ProgramEntryUaddlvCall.leave
+#print axioms Arm64ProgramEntryUaddlvCall.leave
