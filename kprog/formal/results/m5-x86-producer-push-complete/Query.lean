@@ -1,0 +1,31 @@
+import KProgFormal.ClightRefinement.X86ProducerPushComplete
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.from_cache
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.from_cache
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.from_call
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.run
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.run
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.freed
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.freed
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.released
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.released
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.old_frame
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.old_frame
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.word_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.word_read
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.rsp_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.rsp_read
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.rsp_tag
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.rsp_tag
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.tag_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.tag_read
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.pointer_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.pointer_read
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.cache_view
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.cache_view
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.ghost_view
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.ghost_view
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.caller_loads
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.caller_loads
+#check KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.post_provider_frame
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushComplete.Result.post_provider_frame
