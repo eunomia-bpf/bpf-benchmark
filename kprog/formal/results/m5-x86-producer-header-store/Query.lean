@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderStore
+#check KProgFormal.ClightRefinement.X86ProducerHeaderStore.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderStore.write
