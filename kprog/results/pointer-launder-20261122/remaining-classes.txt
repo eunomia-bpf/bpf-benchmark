@@ -312,3 +312,24 @@ The classes A-G above were measured on the pointer-launder captures;
 this is the first full-session count and it shows the two native-link
 refusals block 24 of the 74 failed requests -- more than class F alone
 -- so full Tetragon coverage needs both sides.
+
+## Complete Tracee session classification (2026-11-24, from the
+## omp-five-20261120 raw; 35 requests, session-z4ygdq85)
+
+   3  ok (checked-sim-c)
+  14  class G, R* invalid mem access 'scalar' (verify side)
+  13  class F, invalid write to stack R10 (verify side)
+   4  llc-18 exit 1 with empty stderr on trusted_x86.bpf.packed.mir
+      (requests 23, 24, 25, 26; same -start-before=prologepilog form as
+      Tetragon request 4) -- five of these across the two apps, so the
+      empty-stderr llc exit is its own defect class, not a one-off
+      (verify side)
+   1  trusted-native-loader verify command failed with E2BIG, "Argument
+      list too long" (request 34) -- the verify argv itself exceeds the
+      limit, so the map-triple list has outgrown the exec boundary
+      (verify side)
+
+Together with the Tetragon count above, the two apps' 121 requests hold
+six distinct failure shapes: F, G, the jump-chain limit, the llc-18
+empty-stderr exit, the E2BIG verify argv, and the two native-link
+refusals.
