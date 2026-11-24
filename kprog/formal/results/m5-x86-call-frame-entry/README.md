@@ -1,0 +1,3 @@
+The actual x86_sim_inline_call_frame_values function binds its sole original argument without local allocations. Real cell-table/RSP reads and the original pointer/long casts derive the exact raw SP in10 body transitions, or11 from the actual Callstate, preserving the entire heap and all6 original guarded metadata-clearing arms. No frame/clobber result is assumed. The clearing stores, complete release-loop composition and provider ABI/frame transport remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

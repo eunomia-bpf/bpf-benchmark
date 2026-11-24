@@ -1,0 +1,47 @@
+KProgFormal.ClightRefinement.X86CallFrameEntry.source :
+  KProgFormal.ClightRefinement.X86CallFrameEntry.handler.fn_body =
+    (KProgFormal.ClightRefinement.X86CallFrameEntry.reads✝.Ssequence
+          KProgFormal.ClightRefinement.X86CallFrameEntry.afterSp).Sloop
+      CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86CallFrameEntry.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameEntry.entry (ge : CC.CGenv) (memory : CC.Mem) (binding : CC.Val) :
+  CC.FunctionEntry2 ge KProgFormal.ClightRefinement.X86CallFrameEntry.handler [binding] memory CC.emptyEnv
+    (KProgFormal.ClightRefinement.X86CallFrameEntry.initialTemps binding) memory
+'KProgFormal.ClightRefinement.X86CallFrameEntry.entry' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameEntry.prefix_run (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory : CC.Mem) (binding cells : CC.Block) (base : CC.Integers.Ptrofs) (sp : BitVec 64)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (header : CC.Mem.load CC.Mptr memory binding 0 = some (CC.Val.Vptr cells base))
+  (stackPointer : CC.Mem.load CC.Mptr memory cells (base.add 64#64).unsigned = some (CC.Val.Vlong sp)) :
+  KProgFormal.ClightRefinement.InternalRun ge 10
+    (CC.State.State KProgFormal.ClightRefinement.X86CallFrameEntry.handler
+      KProgFormal.ClightRefinement.X86CallFrameEntry.handler.fn_body k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86CallFrameEntry.handler
+      KProgFormal.ClightRefinement.X86CallFrameEntry.afterSp
+      (KProgFormal.ClightRefinement.X86CallFrameEntry.continuation k) e
+      (KProgFormal.ClightRefinement.X86CallFrameEntry.temps le cells base sp) memory)
+'KProgFormal.ClightRefinement.X86CallFrameEntry.prefix_run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameEntry.call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (k : CC.Cont) (memory : CC.Mem)
+  (binding cells : CC.Block) (base : CC.Integers.Ptrofs) (sp : BitVec 64)
+  (header : CC.Mem.load CC.Mptr memory binding 0 = some (CC.Val.Vptr cells base))
+  (stackPointer : CC.Mem.load CC.Mptr memory cells (base.add 64#64).unsigned = some (CC.Val.Vlong sp)) :
+  KProgFormal.ClightRefinement.InternalRun ge 11
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler)
+      [CC.Val.Vptr binding 0] k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86CallFrameEntry.handler
+      KProgFormal.ClightRefinement.X86CallFrameEntry.afterSp
+      (KProgFormal.ClightRefinement.X86CallFrameEntry.continuation k) CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86CallFrameEntry.temps
+        (KProgFormal.ClightRefinement.X86CallFrameEntry.initialTemps (CC.Val.Vptr binding 0)) cells base sp)
+      memory)
+'KProgFormal.ClightRefinement.X86CallFrameEntry.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

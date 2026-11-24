@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86CallFrameEntry
+#check KProgFormal.ClightRefinement.X86CallFrameEntry.source
+#print axioms KProgFormal.ClightRefinement.X86CallFrameEntry.source
+#check KProgFormal.ClightRefinement.X86CallFrameEntry.entry
+#print axioms KProgFormal.ClightRefinement.X86CallFrameEntry.entry
+#check KProgFormal.ClightRefinement.X86CallFrameEntry.prefix_run
+#print axioms KProgFormal.ClightRefinement.X86CallFrameEntry.prefix_run
+#check KProgFormal.ClightRefinement.X86CallFrameEntry.call
+#print axioms KProgFormal.ClightRefinement.X86CallFrameEntry.call
