@@ -1,0 +1,41 @@
+KProgFormal.ClightRefinement.X86ProducerFirstInputPrefix.from_call (before : CC.Mem) (ctx : CC.Val) (k : CC.Cont) :
+  ∃ abi locals after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 618
+        (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer) [ctx] k
+          before)
+        (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 6#32]
+          (KProgFormal.ClightRefinement.X86ProducerFirstInput.continuation
+            (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+            (KProgFormal.ClightRefinement.X86ProducerGhostSource.finalTemps
+              (KProgFormal.ClightRefinement.X86ProducerGhostSource.contextTemps
+                (KProgFormal.ClightRefinement.X86ProducerEntry.initialTemps ctx)))
+            k)
+          after) ∧
+      (∀ (i : Fin 187),
+          CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerAbiSource.chunk i) after abi.block
+              (KProgFormal.ClightRefinement.X86ProducerAbiSource.offset i) =
+            some (KProgFormal.ClightRefinement.X86ProducerAbiSource.value i)) ∧
+        (∀ (i : Fin 12),
+            CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk i) after (locals i).block 0 =
+              some (KProgFormal.ClightRefinement.X86ProducerGhostSource.value i)) ∧
+          KProgFormal.ClightRefinement.X86ProducerContextSource.Typed
+              KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues ∧
+            (∀ (i : Fin 5),
+                CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i)
+                    (KProgFormal.ClightRefinement.X86ProducerGhostSource.finalTemps
+                      (KProgFormal.ClightRefinement.X86ProducerGhostSource.contextTemps
+                        (KProgFormal.ClightRefinement.X86ProducerEntry.initialTemps ctx))) =
+                  some (KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues i)) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock before after ∧
+                after.access =
+                    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access ∧
+                  after.nextblock =
+                    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerFirstInputPrefix.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
