@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemsetAbiRead
+#check KProgFormal.ClightRefinement.Arm64MemsetAbiRead.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetAbiRead.source
+#check KProgFormal.ClightRefinement.Arm64MemsetAbiRead.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetAbiRead.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetAbiRead.transport
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetAbiRead.transport
