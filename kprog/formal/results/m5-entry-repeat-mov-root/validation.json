@@ -1,0 +1,60 @@
+{
+  "confirmed_utc": "2026-11-24T10:54:11.746376+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.1971917152404785,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 595,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-repeat-mov-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.4607760906219482,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 134,
+  "query_union": {
+    "retained_source": "kprog/formal/results/m5-x86-xor-word-root/Query.lean",
+    "retained_count": 125,
+    "added": [
+      "Arm64ProgramEntryRepeatMovNative.pointer_control",
+      "Arm64ProgramEntryRepeatMovNative.execute",
+      "Arm64ProgramEntryRepeatMovAdmission.admission",
+      "Arm64MovImmediate.OrdinaryCall.corresponds",
+      "Arm64ProgramEntryOrdinaryMoveNative.first",
+      "Arm64ProgramEntryOrdinaryMoveNative.constant",
+      "Arm64ProgramEntryOrdinaryMovePath.first",
+      "Arm64ProgramEntryOrdinaryMovePath.constant",
+      "Arm64ProgramEntryPointerWrites.execute"
+    ],
+    "root_import": "existing Arm64ProgramEntryResultPrefix import; every current import retained"
+  },
+  "complete_original_call_prefix": 13,
+  "complete_isa_families": 0,
+  "root_metadata": {
+    "path": "kprog/formal/KProgFormal.lean",
+    "size_bytes": 13173,
+    "mtime_ns": 1795516431169439597
+  },
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
