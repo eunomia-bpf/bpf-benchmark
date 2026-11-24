@@ -1,0 +1,3 @@
+The genuine distinct-register word XOR call through actual native readers, helper, flags, scalar writer, free and return refines the SAME canonical imported X86.step. RSP source rows of any tag use original native-base loads; ordinary destination/source rows are scalar/tag0, with legal byte/high slices. All native GPR/flags/PC/oracle outputs and unchanged architectural fields, actual released locals and caller frame are proved.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
