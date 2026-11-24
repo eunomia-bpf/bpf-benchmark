@@ -1,0 +1,3 @@
+The full genuine distinct-register RSP dword XOR call refines the SAME canonical imported X86.step, including every native GPR/flag/PC/oracle output and preservation of memory, vector, FS/GS, address-width and error fields. Actual local release and caller frame are retained. Non-increasing signed raw SP and native-base protection are explicit. Dword admits ANY initial RSP tag with actual zero-extension. Same-RSP shortcuts and increasing release remain separate source paths.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
