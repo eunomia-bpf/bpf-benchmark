@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerPushLocal
+#check KProgFormal.ClightRefinement.X86ProducerPushLocal.rsp_run
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocal.rsp_run
+#check KProgFormal.ClightRefinement.X86ProducerPushLocal.metadata_run
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocal.metadata_run
+#check KProgFormal.ClightRefinement.X86ProducerPushLocal.cache_run
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocal.cache_run
+#check KProgFormal.ClightRefinement.X86ProducerPushLocal.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocal.execute
+#check KProgFormal.ClightRefinement.X86ProducerPushLocal.silent
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocal.silent

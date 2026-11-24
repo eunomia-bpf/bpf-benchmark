@@ -1,0 +1,117 @@
+KProgFormal.ClightRefinement.X86ProducerPushLocal.rsp_run {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 13
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after (ready.values 3))
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop
+      (KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.control ready)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) rsp.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLocal.rsp_run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLocal.metadata_run {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  (metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp) :
+  ∃ n,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge n
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+        KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop
+        (KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.control ready)
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+        (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) rsp.after)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+        KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.control ready)
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) metadata.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLocal.metadata_run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLocal.cache_run {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) :
+  ∃ n,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge n
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+        KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.control ready)
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) metadata.after)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+        (KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.following rsp
+          (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.control ready) metadata.after)
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) cache.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLocal.cache_run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLocal.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) :
+  ∃ n,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge n
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output ready.after)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output complete.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLocal.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLocal.silent {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) :
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      ready.output ready.after)
+    CC.E0
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      ready.output complete.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLocal.silent' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
