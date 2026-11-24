@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackSetup
+#check KProgFormal.ClightRefinement.Arm64MemsetStackSetup.to_address
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackSetup.to_address
+#check KProgFormal.ClightRefinement.Arm64MemsetStackSetup.to_tag
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackSetup.to_tag
+#check KProgFormal.ClightRefinement.Arm64MemsetStackSetup.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackSetup.original

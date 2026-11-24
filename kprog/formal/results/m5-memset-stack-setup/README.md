@@ -1,0 +1,7 @@
+# Original memset offset and R0 tag-reader setup
+
+The actual original write body executes its index/immediate metadata selectors, both real offset loops, original unsigned offset calculation and R0 selection. All original alternative bodies remain in the source. The73-transition constant offset prefix and13-transition iteration/tag-reader setup reach exactly s_kprog_arm64_program_memset_11, retaining the real continuation and complete source temporary environment without memory effects. Composing the accepted170-transition original entry/read/guard prefix gives256 transitions from the actual memset Callstate with its eight real locals. The same original pointer write and two complete ordinary MOV effects derive R0 raw/tag4 and the original SP pointer/payload at this reached heap; no independent successful source-read premise is added. The source was authored once under results and moved after direct acceptance. Complete original instruction/native prefix remains14 and complete ISA families0. Next execute the actual tag/ABI/pointer/address/action route, all16 actual stack stores, tag transfer/release/clobber/free/caller, then one related root batch.
+
+Focused build 308 and 3 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
