@@ -1,0 +1,54 @@
+KProgFormal.ClightRefinement.X86QwordRspSetup.to_storage (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+  (base : CC.Integers.Ptrofs) (value old : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some (CC.Val.Vint (BitVec.setWidth 32 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte 4))))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (code : BitVec 32) (alu : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint code))
+  (scalarCode : code ≠ 0#32 ∧ code ≠ 1#32)
+  (observedShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (sourceShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (observedValue : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong value))
+  (widthBlock : CC.Block)
+  (widthBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_width_effective e = none) (tagHelper : CC.Block)
+  (tagBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some tagHelper ∧
+      ge.genv_genv.findFunctPtr tagHelper = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (tagUnshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock base))
+  (scalarTag :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑4) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument 0#8))
+  (localSeparate : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cellsBlock base cpu)
+  (rspRead : CC.Mem.load CC.Mptr memory cellsBlock (base + 64).unsigned = some (CC.Val.Vlong old))
+  (localPermission : memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true) :
+  ∃ copied reached,
+    KProgFormal.ClightRefinement.InternalRun ge 191
+        (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.writer k e le memory)
+        (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftWriteback.storageTail
+            (KProgFormal.ClightRefinement.X86ShiftWriteback.loadCont k))
+          e reached copied) ∧
+      CC.Mem.store CC.Mptr memory localBlock 0 (CC.Val.Vlong old) = some copied ∧
+        KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins copied cellsBlock base cpu ∧
+          KProgFormal.ClightRefinement.X86QwordRspSetup.Ready reached bindingBlock value old
+'KProgFormal.ClightRefinement.X86QwordRspSetup.to_storage' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
