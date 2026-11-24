@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackAction
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStackAction.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackAction.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStackAction.result
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackAction.result
