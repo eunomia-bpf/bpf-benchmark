@@ -72,6 +72,7 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         traces.flatten (.State Arm64ProgramFixture.f_arm64_execute_compile afterSetup k
           (Arm64ProgramEntryAllocation.allocation initial).1 (setupTemps temps fields) ready) ∧
+      (setupTemps temps fields).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
       ∀ (supplied : CC.Mem) (trace : CC.Trace),
         CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
           [.Vint 1] (Arm64Nop.allocation world ready).2 trace (.Vlong origins.stack) supplied →
@@ -267,14 +268,14 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
   have admitted := Arm64ProgramEntryFmovAdmission.setup_next s origins fields first keep third fourth fifth sixth seventh eighth ninth tenth
     imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded ninthDecoded noError
     firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched
-  obtain ⟨entry,header,ready,temps,traces,length,readyNext,entryRun,continuation⟩ :=
+  obtain ⟨entry,header,ready,temps,traces,length,readyNext,entryRun, ctxRead, continuation⟩ :=
     Arm64ProgramEntryOrnPrefixNative.entry_corresponds initial ctxBlock ctxOfs k addresses ctxWord context
       values provider flags flagProvider vectors vectorProvider origins s native fields old reads
       first keep third fourth fifth sixth seventh eighth ninth imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded
       fifthDecoded sixthDecoded seventhDecoded eighthDecoded ninthDecoded noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched
   have readyBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ ready.nextblock.toNat :=
     Nat.le_of_eq (congrArg (fun block : CC.Block => block.toNat) readyNext.symm)
-  refine ⟨entry,header,ready,temps,traces,length,readyNext,entryRun,?_⟩
+  refine ⟨entry,header,ready,temps,traces,length,readyNext,entryRun, ctxRead, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten,middle,secondWritten,pairAfter,pairStorage,
       thirdWritten,thirdAfter,thirdStorage,facts3,

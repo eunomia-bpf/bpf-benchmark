@@ -43,6 +43,7 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         traces.flatten (.State Arm64ProgramFixture.f_arm64_execute_compile afterSetup k
           (Arm64ProgramEntryAllocation.allocation initial).1 (setupTemps temps fields) ready) ∧
+      (setupTemps temps fields).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
       ∀ (supplied : CC.Mem) (trace : CC.Trace),
         CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
           [.Vint 1] (Arm64Nop.allocation world ready).2 trace (.Vlong origins.stack) supplied →
@@ -93,10 +94,10 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     simpa only [fetch_inst, program] using keepFetched
   have checked := Arm64MovPairNative.steps (nativeSetup s origins fields) first keep (fields 0) (fields 1)
     imm column negate literal firstDecoded keepDecoded setupError setupFirst setupKeep
-  obtain ⟨entry, header, ready, temps, traces, length, readyNext, entryRun, continuation⟩ :=
+  obtain ⟨entry, header, ready, temps, traces, length, readyNext, entryRun, ctxRead, continuation⟩ :=
     Arm64ProgramEntryMovPrefix.entry_pair initial ctxBlock ctxOfs k addresses ctxWord context values provider
       flags flagProvider vectors vectorProvider origins s native fields old reads
-  refine ⟨entry, header, ready, temps, traces, length, readyNext, entryRun, ?_⟩
+  refine ⟨entry, header, ready, temps, traces, length, readyNext, entryRun, ctxRead, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, word, tag, run, registers,
       frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,

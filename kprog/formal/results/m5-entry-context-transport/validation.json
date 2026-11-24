@@ -1,0 +1,110 @@
+{
+  "confirmed_utc": "2026-11-24T09:20:58.758741+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResultPrefix"
+    ],
+    "exit": 0,
+    "seconds": 111.39288878440857,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 420,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-context-transport/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.237069606781006,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 14,
+  "source_steps": {},
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPrefix.lean",
+      "size_bytes": 7992,
+      "mtime_ns": 1795511553417954277
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddPrefixNative.lean",
+      "size_bytes": 11505,
+      "mtime_ns": 1795511553418245346
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterPrefixNative.lean",
+      "size_bytes": 14017,
+      "mtime_ns": 1795511553418397647
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCnegPrefixNative.lean",
+      "size_bytes": 23569,
+      "mtime_ns": 1795511553418641584
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCntPrefixNative.lean",
+      "size_bytes": 28888,
+      "mtime_ns": 1795511553419534392
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryComparePrefixNative.lean",
+      "size_bytes": 18511,
+      "mtime_ns": 1795511553419719163
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryFmovPrefixNative.lean",
+      "size_bytes": 27255,
+      "mtime_ns": 1795511553420470511
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovPrefixNative.lean",
+      "size_bytes": 8872,
+      "mtime_ns": 1795511553420590130
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMulPrefixNative.lean",
+      "size_bytes": 16954,
+      "mtime_ns": 1795511553420715891
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryOrnPrefixNative.lean",
+      "size_bytes": 26137,
+      "mtime_ns": 1795511553420889887
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntrySelectPrefixNative.lean",
+      "size_bytes": 20299,
+      "mtime_ns": 1795511553421044338
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryUaddlvPrefixNative.lean",
+      "size_bytes": 30952,
+      "mtime_ns": 1795511553421278709
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryResultPrefix.lean",
+      "size_bytes": 36490,
+      "mtime_ns": 1795511591165521304
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryResultVector.lean",
+      "size_bytes": 11630,
+      "mtime_ns": 1795511591165129433
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

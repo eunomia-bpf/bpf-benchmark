@@ -32,6 +32,7 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
         (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
         traces.flatten (.State Arm64ProgramFixture.f_arm64_execute_compile afterSetup k
           (Arm64ProgramEntryAllocation.allocation initial).1 (setupTemps temps fields) ready) ∧
+      (setupTemps temps fields).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
       ∀ (supplied : CC.Mem) (trace : CC.Trace),
         CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
           [.Vint 1] (Arm64Nop.allocation world ready).2 trace (.Vlong origins.stack) supplied →
@@ -84,7 +85,7 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
       Arm64Program._sp_valid = some (.Vint 0) := by
     rw [result.nextblock]
     exact (Arm64ProgramEntryColdRead.cold_cache_reads result data cells pointers false).2
-  refine ⟨entry, cells, ready, temps, traces, length, readyNext, entryRun, ?_⟩
+  refine ⟨entry, cells, ready, temps, traces, length, readyNext, entryRun, result.ctx, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag, pair,
       finalRegisters, frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,

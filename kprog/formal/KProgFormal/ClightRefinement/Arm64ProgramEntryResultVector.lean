@@ -180,4 +180,10 @@ theorem result (le : CC.TempEnv) (left right third zeroth : BitVec 64) :
     (temps le left right third zeroth).get Arm64ProgramFixture._result =
       some (.Vlong (left ^^^ right ^^^ third ^^^ zeroth)) := CC.PTree.gss _ _ _
 
+/-- Every original result temporary update retains the actual context parameter. -/
+theorem context (le : CC.TempEnv) (left right third zeroth : BitVec 64) :
+    (temps le left right third zeroth).get Arm64ProgramFixture._ctx = le.get Arm64ProgramFixture._ctx := by
+  unfold temps readTemps
+  repeat rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
+
 end KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector
