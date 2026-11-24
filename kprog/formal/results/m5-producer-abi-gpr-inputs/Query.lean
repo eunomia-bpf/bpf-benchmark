@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiGprInputs
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiGprInputs.entry_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiGprInputs.entry_initialized
