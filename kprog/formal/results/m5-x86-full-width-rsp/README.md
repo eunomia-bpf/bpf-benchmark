@@ -1,0 +1,3 @@
+The actual32/64-bit local overwrite, real reverse/table storage, non-increasing signed raw-SP release and writer-loop exit compose into94/91 Clight transitions. Initial reads, native-base correspondence, separation and permissions derive the native zero-extended/full-width RSP output and outside-block frames. Increasing-SP release and initial handler/writer entry remain separate obligations.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86FullWidthRspWriteback
+#check KProgFormal.ClightRefinement.X86FullWidthRspWriteback.from_storage
+#print axioms KProgFormal.ClightRefinement.X86FullWidthRspWriteback.from_storage
