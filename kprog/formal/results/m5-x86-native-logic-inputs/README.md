@@ -1,0 +1,3 @@
+All six original logical-tail observations and the source-lane field now derive from exact real OR/AND call execution with native-view operands, including either RSP reader. The original aux fields, width, binding and destination survive the real read/helper sequence; no independent intermediate result or execution premise is added. Existing observation interfaces are reused.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

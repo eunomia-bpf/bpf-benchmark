@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86AluNativeLogicInputs
+#check KProgFormal.ClightRefinement.X86AluNativeLogicInputs.observations
+#print axioms KProgFormal.ClightRefinement.X86AluNativeLogicInputs.observations
+#check KProgFormal.ClightRefinement.X86AluNativeLogicInputs.source_shift
+#print axioms KProgFormal.ClightRefinement.X86AluNativeLogicInputs.source_shift
+#check KProgFormal.ClightRefinement.X86AluNativeLogicInputs.entry
+#print axioms KProgFormal.ClightRefinement.X86AluNativeLogicInputs.entry
