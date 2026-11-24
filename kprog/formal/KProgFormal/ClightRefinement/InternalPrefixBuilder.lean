@@ -11,11 +11,11 @@ structure Built where
   continuation : Lean.Expr
   proof : Lean.Expr
 
-/-- Construct a silent prefix to one specified original Scall using the
+/-- Construct a silent prefix to one specified original statement using the
 EXISTING Clight doStep and soundness theorem. No interpreter, semantics or
 logical axiom is added. Unknown successors, other callees, changed memory
 and incompatible source boundaries fail instead of manufacturing a path. -/
-def build (world initial originalHandler target originalEnv originalMem : Lean.Expr) : Lean.Meta.MetaM Built := do
+def buildTo (world initial originalHandler target originalEnv originalMem : Lean.Expr) : Lean.Meta.MetaM Built := do
   let silent ← Lean.Meta.mkAppM ``CC.E0 #[]
   let mut current := initial
   let mut frames : Array Lean.Expr := #[]
@@ -24,8 +24,7 @@ def build (world initial originalHandler target originalEnv originalMem : Lean.E
     unless state.isAppOfArity ``CC.State.State 6 do throwError "source prefix left an internal statement state"
     let args := state.getAppArgs
     let stmt ← Lean.Meta.withTransparency .all (Lean.Meta.whnf args[1]!)
-    if stmt.isAppOfArity ``CC.Stmt.Scall 3 then
-      unless ← Lean.Meta.isDefEq stmt target do throwError "original source prefix selected a different callee"
+    if ← Lean.Meta.isDefEq stmt target then
       unless ← Lean.Meta.isDefEq args[0]! originalHandler do throwError "source prefix changed function"
       unless ← Lean.Meta.isDefEq args[3]! originalEnv do throwError "source prefix changed local environment"
       unless ← Lean.Meta.isDefEq args[5]! originalMem do throwError "source prefix changed memory"
@@ -41,6 +40,8 @@ def build (world initial originalHandler target originalEnv originalMem : Lean.E
           #[some world, some restArgs[1]!, some stepArgs[2]!, some stepArgs[4]!, some restArgs[3]!,
             some (Lean.mkConst ``True.intro), some transition, some proof]
       return ⟨frames.size,args[4]!,args[2]!,proof⟩
+    if stmt.isAppOfArity ``CC.Stmt.Scall 3 then
+      throwError "original source prefix selected a different callee"
     let application ← Lean.Meta.mkAppM ``CC.doStep #[world,current]
     let result ← Lean.Meta.withTransparency .all (Lean.Meta.whnf application)
     unless result.isAppOfArity ``Option.some 2 do throwError "original source prefix has no executable successor"
@@ -53,5 +54,13 @@ def build (world initial originalHandler target originalEnv originalMem : Lean.E
     frames := frames.push transition
     current := successor
   throwError "source prefix ended without its target"
+
+/-- The existing caller interface retains its specified Scall target and
+rejects every earlier different call. Both interfaces use the same kernel
+proof construction and the unchanged imported transition semantics. -/
+def build (world initial originalHandler target originalEnv originalMem : Lean.Expr) : Lean.Meta.MetaM Built := do
+  let targetShape ← Lean.Meta.withTransparency .all (Lean.Meta.whnf target)
+  unless targetShape.isAppOfArity ``CC.Stmt.Scall 3 do throwError "expected original source Scall target"
+  buildTo world initial originalHandler target originalEnv originalMem
 
 end KProgFormal.ClightRefinement.InternalPrefixBuilder

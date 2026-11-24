@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.executes
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.source_continuation
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.source_continuation
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.decisions
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.decisions
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataSelect.inputs
+
+#check KProgFormal.ClightRefinement.InternalPrefixBuilder.buildTo
+#check KProgFormal.ClightRefinement.InternalPrefixBuilder.build
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.executes
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments

@@ -1,0 +1,3 @@
+Every original overlap/flag/loop/skip transition executes on source-established index40/width8. Actual outputs prove all five earlier flags0 and slot5 flag1, retain binding/index/width/saved RBX and complete heap, and reach the original clearing loop/continuation. The owned elaborator shares existing doStep/doStep_sound proof construction through buildTo; old build Scall-only contract and all Dispatcher/Operand APIs remain, with focused regression/public axioms checked. No new interpreter/ISA/semantics/axiom, branch erasure or source-run/heap premise.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
