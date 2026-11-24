@@ -1,0 +1,5 @@
+The genuine eight-argument non-XOR handler call now composes actual allocation, width resolution, aux decoding and both complete reader/helper calls to the original arithmetic dispatcher for every width. The actual selector always takes both reads for OR/AND, including equal registers; no aliasing premise is needed. Initial caller reads and the real allocation frame derive every intermediate observation. The generic theorem requires decoded operation different from XOR; later selected arithmetic and full return are separate components.
+
+The retained whole-check3 is an actual exit2 after2.85s in peer untracked Arm64ProgramEntryRepeatMovAdmission.lean:129:46: fetched program/PC normalization through beforeNative(afterTwelve(nativeSetup ...)) is incomplete. Lane formal owns that draft. The V word root596/public125 and this focused non-XOR component pass at original limits; no whole success or complete instruction family is claimed.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
