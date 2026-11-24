@@ -1,0 +1,32 @@
+KProgFormal.ClightRefinement.X86PushChecked.reads (cpu : X86.Cpu) (length : Nat) :
+  X86.plannedReadAddresses { op := X86.Op.push X86.Size.q (X86.Operand.reg X86.GPR.rbx), len := length } cpu =
+    Except.ok []
+'KProgFormal.ClightRefinement.X86PushChecked.reads' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86PushChecked.success (state : X86.CheckedState) (profile : X86.MemoryProfile)
+  (length : Nat) (running : state.stopped = false) (present : state.profile = some profile)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.cpu.regs.get X86.GPR.rsp - 8#64 + BitVec.ofNat 64 lane) state.addressWidth) =
+      true)
+  (writable :
+    ((List.range 8).all fun lane => profile.writable (state.cpu.regs.get X86.GPR.rsp - 8#64 + BitVec.ofNat 64 lane)) =
+      true) :
+  have next :=
+    X86.step { op := X86.Op.push X86.Size.q (X86.Operand.reg X86.GPR.rbx), len := length } state.cpu state.addressWidth;
+  X86.stepChecked { op := X86.Op.push X86.Size.q (X86.Operand.reg X86.GPR.rbx), len := length } state =
+    { cpu := next,
+      profile :=
+        some
+          { readable := profile.readable, writable := profile.writable,
+            initialized := fun address =>
+              if BitVec.toNat (address - (state.cpu.regs.get X86.GPR.rsp - 8#64)) < 8 then true
+              else profile.initialized address },
+      addressWidth := state.addressWidth,
+      events :=
+        state.events ++
+          [X86.MemoryAccessEvent.memory X86.MemoryAccessKind.write (state.cpu.regs.get X86.GPR.rsp - 8#64)
+              (List.map (fun lane => next.mem.read (state.cpu.regs.get X86.GPR.rsp - 8#64 + BitVec.ofNat 64 lane))
+                (List.range 8))
+              true],
+      fault := state.fault }
+'KProgFormal.ClightRefinement.X86PushChecked.success' depends on axioms: [propext, Classical.choice, Quot.sound]
