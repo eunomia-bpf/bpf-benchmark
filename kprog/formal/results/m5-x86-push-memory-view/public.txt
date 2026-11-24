@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86PushMemoryView.view (memory : X86.Mem) (profile : X86.MemoryProfile) :
+  KProgFormal.Reference.Memory
+'KProgFormal.ClightRefinement.X86PushMemoryView.view' does not depend on any axioms
+KProgFormal.ClightRefinement.X86PushMemoryView.values (memory : X86.Mem) (profile : X86.MemoryProfile)
+  (origin value : BitVec 64) (byte : Fin 48) :
+  (memory.writeSize X86.Size.q (origin - 8) value).read
+      (KProgFormal.ClightRefinement.X86StackCacheView.address origin byte) =
+    (KProgFormal.Reference.storeMemory (KProgFormal.ClightRefinement.X86PushMemoryView.view memory profile) (origin - 8)
+          value 8).value
+      (KProgFormal.ClightRefinement.X86StackCacheView.address origin byte)
+'KProgFormal.ClightRefinement.X86PushMemoryView.values' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86PushMemoryView.represented (source after : CC.Mem) (block : CC.Block) (memory : X86.Mem)
+  (profile : X86.MemoryProfile) (origin value : BitVec 64)
+  (initial :
+    KProgFormal.ClightRefinement.X86StackCacheView.Represents source block
+      (KProgFormal.ClightRefinement.X86PushMemoryView.view memory profile) origin)
+  (table :
+    ∀ (byte : Fin 48),
+      CC.Mem.load CC.Chunk.Mint8unsigned after block ↑↑byte =
+        if ↑byte < 40 then CC.Mem.load CC.Chunk.Mint8unsigned source block ↑↑byte
+        else some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 (value >>> (8 * (↑byte - 40))))))) :
+  KProgFormal.ClightRefinement.X86StackCacheView.Represents after block
+    (KProgFormal.ClightRefinement.X86PushMemoryView.view (memory.writeSize X86.Size.q (origin - 8) value)
+      { readable := profile.readable, writable := profile.writable,
+        initialized := fun address =>
+          if BitVec.toNat (address - (origin - 8)) < 8 then true else profile.initialized address })
+    origin
+'KProgFormal.ClightRefinement.X86PushMemoryView.represented' depends on axioms: [propext, Classical.choice, Quot.sound]

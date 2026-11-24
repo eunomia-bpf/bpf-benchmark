@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86PushMemoryView
+#check KProgFormal.ClightRefinement.X86PushMemoryView.view
+#print axioms KProgFormal.ClightRefinement.X86PushMemoryView.view
+#check KProgFormal.ClightRefinement.X86PushMemoryView.values
+#print axioms KProgFormal.ClightRefinement.X86PushMemoryView.values
+#check KProgFormal.ClightRefinement.X86PushMemoryView.represented
+#print axioms KProgFormal.ClightRefinement.X86PushMemoryView.represented
