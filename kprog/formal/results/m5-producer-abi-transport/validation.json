@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-24T13:39:24.520630+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProducerAbiTransport"
+    ],
+    "exit": 0,
+    "seconds": 4.227327108383179,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 179,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-producer-abi-transport/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6555860042572021,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "actual_initializer": 568,
+    "actual_cache_stores": 12,
+    "actual_cache_prefix": 580,
+    "actual_setup_stores": 9,
+    "actual_setup_prefix": 589,
+    "actual_first_provider_boundary": 594,
+    "retained_complete_memset_prefix": 287
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerAbiTransport.lean",
+      "size_bytes": 10615,
+      "mtime_ns": 1795527514592209608
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

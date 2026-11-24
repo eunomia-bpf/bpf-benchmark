@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiTransport
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.cache_observed
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.cache_observed
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.setup_observed
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.setup_observed
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.first_provider
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiTransport.first_provider
