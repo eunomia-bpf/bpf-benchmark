@@ -1,0 +1,52 @@
+KProgFormal.ClightRefinement.X86ProducerPushStorageSource.source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage =
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.body.Sloop CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStorageSource.body =
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.first.Ssequence
+              (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.second.Ssequence
+                KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossSet)).Ssequence
+          ((KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCall.Ssequence
+                KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthSave).Ssequence
+            (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.valueSet.Ssequence
+              (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.fastLoop.Ssequence
+                KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossCheck))) ∧
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.fastLoop =
+          KProgFormal.ClightRefinement.X86ProducerPushStorageSource.fastBody.Sloop CC.Stmt.Sbreak ∧
+        KProgFormal.ClightRefinement.X86ProducerPushStorageSource.fastBody =
+          KProgFormal.ClightRefinement.X86ProducerPushStorageSource.indexSet.Ssequence
+            (((KProgFormal.ClightRefinement.X86ProducerPushStorageSource.guardCall.Ssequence
+                      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.alignTest).Ssequence
+                  KProgFormal.ClightRefinement.X86ProducerPushStorageSource.flagSet).Ssequence
+              KProgFormal.ClightRefinement.X86ProducerPushStorageSource.branch)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSource.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSource.inputs_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStorageSource.first =
+      CC.Stmt.Sset X86_program_profile_bpf._t'212 KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStorageSource.second =
+        CC.Stmt.Sset X86_program_profile_bpf._t'213
+          (KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer X86_program_profile_bpf._t'212) ∧
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossSet =
+        CC.Stmt.Sset X86_program_profile_bpf.___x86_loss_off
+          (((CC.Expr.Etempvar X86_program_profile_bpf._t'213 (CC.tptr CC.tvoid)).Ecast CC.tlong).Ecast CC.tlong)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSource.inputs_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSource.width_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCall =
+      CC.Stmt.Scall (some X86_program_profile_bpf._t'18)
+        (CC.Expr.Evar X86_program_profile_bpf._x86_width_effective
+          (CC.Ty.Tfunction [CC.tuchar] CC.tuchar CC.cc_default))
+        [CC.Expr.Etempvar X86_program_profile_bpf.___x86_l_pp_width CC.tuchar] ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthSave =
+        CC.Stmt.Sset X86_program_profile_bpf.___x86_loss_width
+          ((CC.Expr.Etempvar X86_program_profile_bpf._t'18 CC.tuchar).Ecast CC.tuchar) ∧
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.guardCall =
+        CC.Stmt.Scall (some X86_program_profile_bpf._t'32)
+          (CC.Expr.Evar X86_program_profile_bpf._x86_width_effective
+            (CC.Ty.Tfunction [CC.tuchar] CC.tuchar CC.cc_default))
+          [CC.Expr.Etempvar X86_program_profile_bpf.___x86_loss_width CC.tuchar]
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSource.width_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
