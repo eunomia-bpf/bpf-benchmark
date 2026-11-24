@@ -1,0 +1,3 @@
+The genuine same-RSP/same-low-lane XOR call refines the SAME canonical full-state X86.step through its original77-step zero shortcut, helper, flags, real qword writer, free and return. Native GPR/flags/PC/oracle and all unchanged architectural fields match; released locals/caller frame are retained. Signed non-increasing raw SP/native-base protection remain explicit; initial RSP destination is scalar/tag0.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
