@@ -1,0 +1,3 @@
+A single genuine reader-call interface now covers all sixteen registers and legal low/high-byte views. RSP executes its actual native-base path and requires no scalar-tag premise; ordinary rows reuse the accepted scalar reader. Exact source lengths retain the shorter RSP path. The complete caller memory is unchanged and the same represented native CPU supplies both possible results.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

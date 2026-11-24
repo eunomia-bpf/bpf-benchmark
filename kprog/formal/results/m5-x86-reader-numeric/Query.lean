@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86RegisterReadNumeric
+#check KProgFormal.ClightRefinement.X86RegisterReadNumeric.call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadNumeric.call
