@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86SubImmediateChecked.checked (state : X86.CheckedState) (reg : X86.GPR)
+  (value : BitVec 64) (length : Nat) (running : state.stopped = false) :
+  X86.stepChecked
+      { op := X86.Op.bin X86.BinKind.sub X86.Size.q (X86.Operand.reg reg) (X86.Operand.imm value), len := length }
+      state =
+    {
+      cpu :=
+        X86.step
+          { op := X86.Op.bin X86.BinKind.sub X86.Size.q (X86.Operand.reg reg) (X86.Operand.imm value), len := length }
+          state.cpu state.addressWidth,
+      profile := state.profile, addressWidth := state.addressWidth, events := state.events, fault := state.fault }
+'KProgFormal.ClightRefinement.X86SubImmediateChecked.checked' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubImmediateChecked.reads (cpu : X86.Cpu) (reg : X86.GPR) (value : BitVec 64)
+  (length : Nat) :
+  X86.plannedReadAddresses
+      { op := X86.Op.bin X86.BinKind.sub X86.Size.q (X86.Operand.reg reg) (X86.Operand.imm value), len := length } cpu =
+    Except.ok []
+'KProgFormal.ClightRefinement.X86SubImmediateChecked.reads' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86SubImmediateChecked.numeric (cpu : X86.Cpu) (reg : X86.GPR) (value : BitVec 64)
+  (length : Nat) (live : X86.Live cpu) (mode : X86.LinearAddressWidth := X86.LinearAddressWidth.la48) :
+  X86.step { op := X86.Op.bin X86.BinKind.sub X86.Size.q (X86.Operand.reg reg) (X86.Operand.imm value), len := length }
+      cpu mode =
+    have __src := cpu.setReg X86.Size.q reg (cpu.getReg X86.Size.q reg - value);
+    { regs := __src.regs, rip := cpu.rip + BitVec.ofNat 64 length,
+      flags := X86.Flags.sub X86.Size.q (cpu.getReg X86.Size.q reg) value cpu.flags, mem := __src.mem,
+      fsBase := __src.fsBase, gsBase := __src.gsBase, xmm := __src.xmm, mxcsr := __src.mxcsr, oracle := __src.oracle,
+      ms := __src.ms }
+'KProgFormal.ClightRefinement.X86SubImmediateChecked.numeric' depends on axioms: [propext, Classical.choice, Quot.sound]

@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86SubImmediateChecked
+#check KProgFormal.ClightRefinement.X86SubImmediateChecked.checked
+#print axioms KProgFormal.ClightRefinement.X86SubImmediateChecked.checked
+#check KProgFormal.ClightRefinement.X86SubImmediateChecked.reads
+#print axioms KProgFormal.ClightRefinement.X86SubImmediateChecked.reads
+#check KProgFormal.ClightRefinement.X86SubImmediateChecked.numeric
+#print axioms KProgFormal.ClightRefinement.X86SubImmediateChecked.numeric
