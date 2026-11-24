@@ -1,0 +1,3 @@
+Every original scalar kind6 provider/store site constructs its actual execution, trace/value, target readback, protected typed-load frame and permissions/frontier from the same explicit initial provider availability ABI. Actual local bindings identify the same cache. Untouched temporary observations are preserved. No raw byte equality is inferred across providers, no platform/oracle binding is invented and no new axiom or shared semantics edit is introduced.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

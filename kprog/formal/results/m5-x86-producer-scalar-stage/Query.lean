@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarStage
+#check KProgFormal.ClightRefinement.X86ProducerScalarStage.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarStage.execute

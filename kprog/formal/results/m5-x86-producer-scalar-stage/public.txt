@@ -1,0 +1,24 @@
+KProgFormal.ClightRefinement.X86ProducerScalarStage.execute (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (i : Fin 8)
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i))
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerScalarStage.Result before memory le k i object cache)
+'KProgFormal.ClightRefinement.X86ProducerScalarStage.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
