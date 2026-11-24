@@ -1,0 +1,50 @@
+KProgFormal.ClightRefinement.X86ProducerScalarSource.source_begin :
+  KProgFormal.ClightRefinement.X86ProducerGprChain.following =
+      KProgFormal.ClightRefinement.X86ProducerScalarSource.initialBaseZero.Ssequence
+        KProgFormal.ClightRefinement.X86ProducerScalarSource.start ∧
+    KProgFormal.ClightRefinement.X86ProducerScalarSource.start =
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.site 0).whole
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.source_begin' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarSource.source_route (i : Fin 8) :
+  (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).whole =
+    ((KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).call.Ssequence
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).assignment).Ssequence
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.source_route' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarSource.source_call (i : Fin 8) :
+  (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).call =
+    CC.Stmt.Scall (some (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).resultName)
+      (CC.Expr.Evar X86_program_profile_bpf._native_lab_entry_input
+        (CC.Ty.Tfunction [CC.tuint] CC.tulong CC.cc_default))
+      [CC.Expr.Econst_int (CC.Integers.Int.repr 6) CC.tint]
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarSource.source_assignment (i : Fin 8) :
+  (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).assignment =
+    CC.Stmt.Sassign
+      (CC.Expr.Evar
+        (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i))
+        (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localType
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i)))
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.rhs i)
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.source_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_at (i : Fin 8) :
+  KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor ↑i =
+    (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).whole
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_at' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_next (i : Fin 8) :
+  KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor (↑i + 1) =
+    (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following
+'KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_next' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

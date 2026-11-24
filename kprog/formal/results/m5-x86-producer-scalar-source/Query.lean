@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarSource
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.source_begin
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.source_begin
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.source_route
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.source_route
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.source_call
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.source_assignment
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.source_assignment
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_at
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_at
+#check KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_next
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSource.cursor_next

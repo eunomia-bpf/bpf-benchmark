@@ -1,0 +1,3 @@
+Original source identity retains the native-stack-base zero assignment between the accepted GPR chain and actual stage30 setup. All six CF/ZF/SF/OF/PF/AF kind6 calls and input&1 assignments, both full-word XMM kind6 calls/assignments and their actual successors are extracted from the original AST and kernel checked. No source function copy, provider assumption, runtime edit or new axiom. The first failed draft exposed the real intervening assignment, which is retained; no accepted step was discarded.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
