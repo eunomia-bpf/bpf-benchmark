@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushCacheBytes
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.written
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.written
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.table
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.table
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.native_payload
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheBytes.native_payload
