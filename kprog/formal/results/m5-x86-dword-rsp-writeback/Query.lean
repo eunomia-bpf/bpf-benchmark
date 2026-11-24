@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86DwordRspWriteback
+#check KProgFormal.ClightRefinement.X86DwordRspWriteback.execute
+#print axioms KProgFormal.ClightRefinement.X86DwordRspWriteback.execute
+#check KProgFormal.ClightRefinement.X86DwordRspWriteback.allocated
+#print axioms KProgFormal.ClightRefinement.X86DwordRspWriteback.allocated
