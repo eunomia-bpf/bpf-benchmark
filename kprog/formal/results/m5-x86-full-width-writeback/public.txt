@@ -1,0 +1,54 @@
+KProgFormal.ClightRefinement.X86FullWidthWriteback.table (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+  (base : CC.Integers.Ptrofs) (index : Fin 16) (value : BitVec 64) (narrow : Bool)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (current :
+    CC.Mem.load CC.Mptr memory localBlock 0 =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)))
+  (tag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some (CC.Val.Vint (BitVec.setWidth 32 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index))))
+  (ordinary : index ≠ 4)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock base))
+  (bindingSeparate : bindingBlock ≠ cellsBlock) (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cellsBlock base cpu)
+  (wordPermission :
+    memory.validAccess CC.Mptr cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+        CC.Permission.Writable =
+      true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ middle final,
+    KProgFormal.ClightRefinement.InternalRun ge 26
+        (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le memory)
+        (CC.State.State function CC.Stmt.Sskip k e
+          (KProgFormal.ClightRefinement.X86ShiftWriteback.tableTemps le
+            (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) (0#8) index cellsBlock
+            base)
+          final) ∧
+      CC.Mem.store CC.Mptr memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+            (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) =
+          some middle ∧
+        CC.Mem.store CC.Chunk.Mint8unsigned middle cellsBlock
+              (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned (CC.Val.Vint 0#32) =
+            some final ∧
+          KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cellsBlock base
+              (cpu.setReg (if narrow = true then X86.Size.d else X86.Size.q) (X86.GPR.ofIndex index) value) ∧
+            final.access = memory.access ∧
+              final.nextblock = memory.nextblock ∧
+                ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                  other ≠ cellsBlock → CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86FullWidthWriteback.table' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
