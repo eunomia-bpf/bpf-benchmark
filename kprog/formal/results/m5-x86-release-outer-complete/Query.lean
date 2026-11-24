@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ReleaseOuterComplete
+#check KProgFormal.ClightRefinement.X86ReleaseOuterComplete.from_first
+#print axioms KProgFormal.ClightRefinement.X86ReleaseOuterComplete.from_first
+#check KProgFormal.ClightRefinement.X86ReleaseOuterComplete.execute
+#print axioms KProgFormal.ClightRefinement.X86ReleaseOuterComplete.execute
+#check KProgFormal.ClightRefinement.X86ReleaseOuterComplete.from_table
+#print axioms KProgFormal.ClightRefinement.X86ReleaseOuterComplete.from_table
+#check KProgFormal.ClightRefinement.X86ReleaseOuterComplete.all_offsets
+#print axioms KProgFormal.ClightRefinement.X86ReleaseOuterComplete.all_offsets
