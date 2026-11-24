@@ -286,3 +286,4 @@ import KProgFormal.ClightRefinement.X86AluXorShortcutDwordCacheCall
 import KProgFormal.ClightRefinement.X86AluLogicPartialCacheCall
 import KProgFormal.ClightRefinement.X86AluXorPartialCacheCall
 import KProgFormal.ClightRefinement.X86AluXorShortcutPartialCacheCall
+import KProgFormal.ClightRefinement.X86ProducerCacheAllocation
