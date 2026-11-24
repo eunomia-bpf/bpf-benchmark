@@ -1,0 +1,53 @@
+KProgFormal.ClightRefinement.X86ProducerScalarView.flag (cpu : X86.Cpu) (index : Fin 6) : Bool
+'KProgFormal.ClightRefinement.X86ProducerScalarView.flag' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86ProducerScalarView.Represents {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) (memory : CC.Mem)
+  (cpu : X86.Cpu) : Prop
+'KProgFormal.ClightRefinement.X86ProducerScalarView.Represents' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarView.preserve {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (cpu : X86.Cpu)
+  (initial : KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready ready.after cpu) :
+  KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready complete.after cpu
+'KProgFormal.ClightRefinement.X86ProducerScalarView.preserve' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarView.reference {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (state : KProgFormal.Reference.X86.State) (nextPc : BitVec 64) (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable : ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true)
+  (initial :
+    KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready ready.after
+      (KProgFormal.ClightRefinement.X86LogicReference.input state)) :
+  KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready complete.after
+    (KProgFormal.ClightRefinement.X86LogicReference.input
+      (KProgFormal.Reference.X86.step
+          (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 nextPc) state).state)
+'KProgFormal.ClightRefinement.X86ProducerScalarView.reference' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

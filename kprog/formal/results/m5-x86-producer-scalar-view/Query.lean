@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarView
+#check KProgFormal.ClightRefinement.X86ProducerScalarView.flag
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarView.flag
+#check KProgFormal.ClightRefinement.X86ProducerScalarView.Represents
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarView.Represents
+#check KProgFormal.ClightRefinement.X86ProducerScalarView.preserve
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarView.preserve
+#check KProgFormal.ClightRefinement.X86ProducerScalarView.reference
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarView.reference
