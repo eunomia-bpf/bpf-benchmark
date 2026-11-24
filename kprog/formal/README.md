@@ -78,8 +78,11 @@ composition remain proof work. The actual OR/AND calls now cover the same
 ordinary scalar/tag0 register domain at all four widths, including legal
 low/high-byte slices and all aliasing, through the
 [canonical outputs](results/m5-x86-logic-register-root/README.md).
-The [RSP reader component](results/m5-x86-reader-rsp/README.md) executes its
-real native-base reads; complete RSP call/writeback composition remains open.
+The [RSP-aware logical calls](results/m5-x86-rsp-logic-root/README.md) extend
+OR/AND at all four widths to RSP sources through the genuine native-base
+reader calls and the same canonical full-state outputs. Their destination
+remains an ordinary scalar/tag0 register; legal byte slices are explicit.
+RSP destination writeback and other pointer operand domains remain open.
 
 ## Trust boundary
 
