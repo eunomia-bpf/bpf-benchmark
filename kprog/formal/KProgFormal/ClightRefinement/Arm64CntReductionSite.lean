@@ -8,6 +8,9 @@ namespace KProgFormal.ClightRefinement.Arm64Cnt.ReductionSite
 private structure Calls where
   high : CC.Stmt
   low : CC.Stmt
+  highRead : CC.Stmt
+  lowRead : CC.Stmt
+  highPath : CC.Stmt
 
 private def calls : Calls := by
   run_tac do
@@ -37,9 +40,11 @@ private def calls : Calls := by
     let lowRead ← peel lowBody[0]! ``CC.Stmt.Ssequence 2
     let lowCall ← peel lowRead[1]! ``CC.Stmt.Ssequence 2
     Lean.Elab.Tactic.closeMainGoal `actual_cnt_call_sites
-      (← Lean.Meta.mkAppM ``Calls.mk #[highCall[1]!,lowCall[1]!])
+      (← Lean.Meta.mkAppM ``Calls.mk #[highCall[1]!,lowCall[1]!,highBody[0]!,lowBody[0]!,selectedBranch[0]!])
 
 def site (upper : Bool) : CC.Stmt := if upper then calls.high else calls.low
+def readPrefix (upper : Bool) : CC.Stmt := if upper then calls.highRead else calls.lowRead
+def highPath : CC.Stmt := calls.highPath
 def inputKey (upper : Bool) : CC.Ident := if upper then Arm64Program._t'2837 else Arm64Program._t'2835
 def resultKey (upper : Bool) : CC.Ident := if upper then Arm64Program._t'2791 else Arm64Program._t'2792
 
