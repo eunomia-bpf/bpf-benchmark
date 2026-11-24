@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64UaddlvDispatch
+
+#check KProgFormal.ClightRefinement.Arm64Uaddlv.Dispatch.body_source
+#print axioms KProgFormal.ClightRefinement.Arm64Uaddlv.Dispatch.body_source
+#check KProgFormal.ClightRefinement.Arm64Uaddlv.Dispatch.body_dispatch
+#print axioms KProgFormal.ClightRefinement.Arm64Uaddlv.Dispatch.body_dispatch

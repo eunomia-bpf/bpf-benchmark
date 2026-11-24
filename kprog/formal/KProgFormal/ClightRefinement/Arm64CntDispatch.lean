@@ -310,4 +310,74 @@ theorem body_dispatch (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
   obtain ⟨count,le',choose,width,kept⟩ := after_width e le m k op
   exact ⟨_,le',by simpa only [CC.callCont] using (enter.trans helper).trans choose,width,kept⟩
 
+
+set_option hygiene false in
+private theorem after_width_uaddlv (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (op : le.get Arm64Program._op = some (.Vint (37#32))) :
+    ∃ count le', InternalRun Arm64ProgramEntryLinked.ge count
+      (.Returnstate (Arm64Width.result (8#8))
+        (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le (widthCont k)) m)
+      (.State Arm64Nop.handler Path.statement (continuation k) e le' m) ∧
+      le'.get Arm64Program.___a64_l_width = some (.Vint (8#32)) ∧
+      ∀ id ∈ [Arm64Program._entry,Arm64Program._dst,Arm64Program._src,Arm64Program._src2,
+        Arm64Program._src3,Arm64Program._flags,Arm64Program._aux,Arm64Program._op,Arm64Program._imm], le'.get id = le.get id := by
+  refine ⟨?count,?temps,?execution,?width,?kept⟩
+  case execution => run_tac Lean.Meta.withAssignableSyntheticOpaque do
+      let mut finished := false
+      for i in [:300] do
+        let goal ← Lean.Elab.Tactic.getMainTarget
+        let args := goal.getAppArgs
+        let state ← Lean.instantiateMVars args[2]!
+        if state.isAppOfArity ``CC.State.State 6 && state.getAppArgs[1]!.isConstOf ``Path.statement then
+          Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+          Lean.logInfo m!"actual UADDLV dispatch after-width transitions: {i}"
+          finished := true
+          break
+        if state.isAppOfArity ``CC.State.State 6 then
+          let stmt := state.getAppArgs[1]!
+          if let .const name _ := stmt then
+            if let .defnInfo _ ← Lean.getConstInfo name then
+              let alias := Lean.mkIdent name
+              Lean.Elab.Tactic.evalTactic (← `(tactic| unfold $alias:ident))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| simp +decide only [
+          CC.doStep, CC.setOpttemp, widthCont, continuation, widthSet, gate,
+          gate0,gate1,gate2,gate3,gate4,gate5,gate6,gate7,gate8,gate9,gate10,gate11,gate12,gate13,gate14,gate15,gate16,gate17,gate18,gate19,gate20,gate21,gate22,gate23,gate24,gate25,gate26,gate27,gate28,gate29,gate30,gate31,gate32,gate33,gate34,gate35,gate36,gate37,test0,condition0,test1,condition1,test2,condition2,test3,condition3,test4,condition4,test5,condition5,test6,condition6,test7,condition7,test8,condition8,test9,condition9,test10,condition10,test11,condition11,test12,condition12,test13,condition13,test14,condition14,test15,condition15,test16,condition16,test17,condition17,test18,condition18,test19,condition19,test20,condition20,test21,condition21,test22,condition22,test23,condition23,test24,condition24,test25,condition25,test26,condition26,test27,condition27,test28,condition28,test29,condition29,test30,condition30,test31,condition31,test32,condition32,test33,condition33,test34,condition34,test35,condition35,test36,condition36,test37,condition37, Arm64Width.result, Arm64Width.argument, CC.PTree.gss,
+          CC.PTree.gso, op, CC.doEvalExpr, CC.typeof, CC.Cop.semBinaryOperation, CC.Cop.semCmp,
+          CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+          CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes,
+          CC.tattr, CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.tbool,
+          CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.eq,
+          CC.Integers.MI.eq, CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int.unsigned,
+          CC.Integers.MI.unsigned, CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one, CC.E0,
+          CC.Eapp, List.nil_append, List.append_nil, ite_true, ite_false, eq_self,
+          Bool.false_eq_true, Bool.true_eq_false] <;> try rfl))
+      unless finished do throwError "UADDLV dispatch did not reach its original branch"
+  case width => simp +decide only [CC.PTree.gss,CC.PTree.gso]
+  case kept =>
+    intro id original
+    simp at original
+    rcases original with rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl|rfl
+    all_goals simp +decide only [CC.PTree.gso]
+
+/-- The real linked width helper and the first thirty-eight original dispatch gates reach UADDLV128;
+only genuine dispatch temporaries change, and the full heap is unchanged. -/
+theorem body_dispatch_uaddlv (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (unshadowed : e.get Arm64Program._arm64_width_effective = none)
+    (flags : le.get Arm64Program._flags = some (Arm64Width.argument (8#8)))
+    (op : le.get Arm64Program._op = some (.Vint (37#32))) :
+    ∃ count le', InternalRun Arm64ProgramEntryLinked.ge count
+      (.State Arm64Nop.handler Arm64Nop.handler.fn_body k e le m)
+      (.State Arm64Nop.handler Path.statement (continuation k) e le' m) ∧
+      le'.get Arm64Program.___a64_l_width = some (.Vint (8#32)) ∧
+      ∀ id ∈ [Arm64Program._entry,Arm64Program._dst,Arm64Program._src,Arm64Program._src2,
+        Arm64Program._src3,Arm64Program._flags,Arm64Program._aux,Arm64Program._op,Arm64Program._imm], le'.get id = le.get id := by
+  have enter := enter_width e le m k unshadowed flags
+  have helper := Arm64Width.internal Arm64ProgramEntryLinked.ge (8#8)
+    (.Kcall (some Arm64Program._t'1) Arm64Nop.handler e le (widthCont k)) m
+  obtain ⟨count,le',choose,width,kept⟩ := after_width_uaddlv e le m k op
+  exact ⟨_,le',by simpa only [CC.callCont] using (enter.trans helper).trans choose,width,kept⟩
+
 end KProgFormal.ClightRefinement.Arm64Cnt.Dispatch
