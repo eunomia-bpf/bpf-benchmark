@@ -153,28 +153,33 @@ Class F: B's frame exceeds the verifier's 512-byte stack.
   two apps: -856 x10, -888 x10, -800 x6, -864 x3, -952 x2, -768 x2,
   then -880, -704, -648, -584, -560 one each.
 
-  Cause, measured. The simulator keeps the emulated x86 stack in
-  `union x86_sim_stack_mem` inside `struct x86_sim_state`, and
-  X86_SIM_L_DECLARE_STATE declares that struct as a local of B's entry
-  function (kprog/x86/x86_sim_local_bpf.h:436, :505). The emitted
-  X86_SIM_STACK_BYTES is the emulated x86 stack the program needs, and
-  it is large: 8,640 to 86,432 bytes over the 62 Tetragon objects of
-  request 10's capture that carry the generated C. B is compiled with
-  `-mllvm -bpf-stack-size=4096` (kprog/x86/trusted_specializer.py:35
-  and :104), so clang accepts a frame the guest kernel does not:
-  MAX_BPF_STACK is 512 (vendor/linux-framework/include/linux/filter.h:99),
-  checked by check_stack_slot_within_bounds (verifier.c:7583) for writes
-  and by the per-subprogram depth sum at :6772. The guest image is
-  7.0.0-rc2, which has "combined stack size of %d calls is %d" and no
-  private-stack mode, so subprogram frames sum to 512.
+  Cause, measured, in two steps.
 
-  The refusal is therefore about how much emulated x86 stack a program
-  touches: request 1 declares X86_SIM_STACK_BYTES 56U and its loaded
-  object's largest r10 offset is 88, so it verifies; request 10 writes
-  at -856 and is refused. Both objects came from the same emitter with
-  the same flags. What remains to decide is where the emulated stack
-  lives in B (a map value, a per-program global, or a frame small
-  enough for 512) rather than the bound itself.
+  B's own bytes are the ones the verifier refuses. Tetragon request 10's
+  B opens with `0: r0 = 0` and `1: *(u64 *)(r10 - 0x358) = r0` (0x358 is
+  856), which is exactly the log's
+  "invalid write to stack R10 off=-856 size=8" after "processed 2 insns".
+  That B is 153,099 instructions and needs a 1408-byte frame, so the
+  emitter lays out a frame the guest kernel refuses: MAX_BPF_STACK is 512
+  (vendor/linux-framework/include/linux/filter.h:99), enforced by
+  check_stack_slot_within_bounds (verifier.c:7583) for writes and by the
+  per-subprogram depth sum at :6772. The guest image is 7.0.0-rc2, which
+  carries "combined stack size of %d calls is %d" and no private-stack
+  mode, so subprogram frames sum to 512.
+
+  The frame is not the emulated x86 stack. Request 10 declares
+  X86_SIM_STACK_BYTES 224U, and request 1 declares 56U with a largest
+  r10 offset of 88; both verified-emitter outputs, one refused and one
+  accepted. The 1408 bytes come from the generated code's own temporaries
+  around the emulated stack, not from the stack size the program needs.
+
+  Why clang accepts it: B is compiled with `-mllvm -bpf-stack-size=4096`
+  (kprog/x86/trusted_specializer.py:35 and :104), four times the
+  verifier's limit, so nothing in the build stage reports the overflow.
+
+  What remains to decide is the frame layout in B (spilling less around
+  the emulated stack, or moving that union to a map value or a global),
+  rather than the bound itself.
 
 Class G: dereference of a value read out of memory.
   "R* invalid mem access 'scalar'", 46 occurrences (Tetragon 32 across
