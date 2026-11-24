@@ -133,4 +133,77 @@ theorem admission (s : Reference.AArch64.State) (origins : Reference.Provenance.
     simpa only [fetch_inst] using thirteenthFetched
   exact ⟨finalPC,control.2.1.trans error12,fetched,finalProgram⟩
 
+/-- Actual thirteenth imported step, following the genuine pointer setup. -/
+def afterThirteen (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State) :
+    Reference.AArch64.State := (Reference.AArch64.step (beforeNative origins (afterTwelve s))).state
+
+/-- Original fourteenth PC, error, fetched word and program are transported
+through the actual repeated MOV, using its imported Wide step. -/
+theorem next_admission (s : Reference.AArch64.State) (origins : Reference.Provenance.AArch64.Origins)
+    (fields : Fin 3 → BitVec 32) (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth : Reference.AArch64.Instruction)
+    (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
+    (firstDecoded : first.decoded = .DPI (.Move_wide_imm (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
+      (Arm64MovKeep.Native.fields 1 (((fields 1).setWidth 64).setWidth 16) 1 false)))
+    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
+    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
+    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
+    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
+    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
+    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
+    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
+    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
+    (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
+    (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
+    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (noError : read_err s.machine = .None)
+    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
+    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
+    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
+    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
+    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
+    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
+    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
+    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
+    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
+    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
+    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
+    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
+    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding)
+    (fourteenthFetched : fetch_inst (read_pc s.machine + 52#64) s.machine = some fourteenth.encoding) :
+    read_pc (afterThirteen origins (Arm64ProgramEntryBodyView.nativeSetup s origins fields)).machine = read_pc s.machine + 52#64 ∧
+    read_err (afterThirteen origins (Arm64ProgramEntryBodyView.nativeSetup s origins fields)).machine = .None ∧
+    fetch_inst (read_pc (afterThirteen origins (Arm64ProgramEntryBodyView.nativeSetup s origins fields)).machine)
+      (afterThirteen origins (Arm64ProgramEntryBodyView.nativeSetup s origins fields)).machine = some fourteenth.encoding ∧
+    (afterThirteen origins (Arm64ProgramEntryBodyView.nativeSetup s origins fields)).machine.program = s.machine.program := by
+  have previous := admission s origins fields first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth imm column negate literal
+    firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched thirteenthFetched
+  let setup := Arm64ProgramEntryBodyView.nativeSetup s origins fields
+  let reached := beforeNative origins (afterTwelve setup)
+  have step13 := Arm64MovImmediate.Wide.reference_step reached thirteenth 1 imm column false negate
+    (by intro impossible; cases impossible) thirteenthDecoded previous.2.1 previous.2.2.1
+  have pc13 : read_pc (afterThirteen origins setup).machine = read_pc s.machine + 52#64 := by
+    unfold afterThirteen
+    rw [step13]
+    simp only [Arm64Nop.atCursor,read_pc,write_pc,r_of_w_same]
+    change read_pc reached.machine + 4#64 = _
+    rw [previous.1,BitVec.add_assoc]
+    rfl
+  have error13 : read_err (afterThirteen origins setup).machine = .None := by
+    unfold afterThirteen
+    rw [step13]
+    simpa [Arm64Nop.atCursor,Arm64RegisterWrite.nativeUpdate,read_err,write_pc,r_of_w_different] using previous.2.1
+  have program13 : (afterThirteen origins setup).machine.program = s.machine.program := by
+    unfold afterThirteen
+    rw [step13]
+    simpa [Arm64Nop.atCursor,Arm64RegisterWrite.nativeUpdate,write_pc,w,write_base_pc,write_base_gpr] using previous.2.2.2
+  have fetched : fetch_inst (read_pc (afterThirteen origins setup).machine)
+      (afterThirteen origins setup).machine = some fourteenth.encoding := by
+    unfold fetch_inst
+    rw [pc13,program13]
+    simpa only [fetch_inst] using fourteenthFetched
+  exact ⟨pc13,error13,fetched,program13⟩
+
 end KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovAdmission
