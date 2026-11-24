@@ -1,0 +1,94 @@
+KProgFormal.ClightRefinement.X86LogicRegisterReference.native_step (size : X86.Size)
+  (state : KProgFormal.Reference.X86.State) (dst src : Fin 16) (highDst highSrc : Bool) (kind : X86.BinKind)
+  (value nextPc : BitVec 64) (running : state.modelError = none)
+  (selected :
+    kind = X86.BinKind.xor ∧
+        value =
+          (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex dst) highDst ^^^
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex src) highSrc ∨
+      kind = X86.BinKind.or ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex dst) highDst |||
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex src) highSrc ∨
+        kind = X86.BinKind.and ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex dst) highDst &&&
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg size (X86.GPR.ofIndex src) highSrc) :
+  KProgFormal.Reference.X86.nativeStep
+      (X86.Op.bin kind size (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+        (X86.Operand.reg (X86.GPR.ofIndex src) highSrc))
+      nextPc state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg size (X86.GPR.ofIndex dst)
+                    (X86.Value.trunc size value) highDst).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.logic size (X86.Value.trunc size value) (state.oracle.bits state.oracle.cursor)
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth,
+          oracle :=
+            have __src := state.oracle;
+            { bits := __src.bits, cursor := state.oracle.cursor + 1 } },
+      events := [] }
+'KProgFormal.ClightRefinement.X86LogicRegisterReference.native_step' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86LogicRegisterReference.step (width : KProgFormal.Reference.X86.ScalarWidth)
+  (state : KProgFormal.Reference.X86.State) (dst src : KProgFormal.Reference.X86.RegisterSlice)
+  (kind : KProgFormal.Reference.X86.LogicKind) (value nextPc : BitVec 64) (running : state.modelError = none)
+  (selected :
+    kind = KProgFormal.Reference.X86.LogicKind.xor ∧
+        value =
+          (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+              (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex dst.reg)
+              (dst.shift width == 8) ^^^
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+              (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex src.reg)
+              (src.shift width == 8) ∨
+      kind = KProgFormal.Reference.X86.LogicKind.or ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+                (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex dst.reg)
+                (dst.shift width == 8) |||
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+                (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex src.reg)
+                (src.shift width == 8) ∨
+        kind = KProgFormal.Reference.X86.LogicKind.and ∧
+          value =
+            (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+                (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex dst.reg)
+                (dst.shift width == 8) &&&
+              (KProgFormal.ClightRefinement.X86LogicReference.input state).getReg
+                (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex src.reg)
+                (src.shift width == 8)) :
+  KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.logic width kind (KProgFormal.Reference.X86.ScalarDestination.register dst)
+        (KProgFormal.Reference.X86.ScalarSource.register src) nextPc)
+      state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg
+                    (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) (X86.GPR.ofIndex dst.reg)
+                    (X86.Value.trunc (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) value)
+                    (dst.shift width == 8)).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.logic (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width)
+                (X86.Value.trunc (KProgFormal.ClightRefinement.X86LogicRegisterReference.size width) value)
+                (state.oracle.bits state.oracle.cursor)
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth,
+          oracle :=
+            have __src := state.oracle;
+            { bits := __src.bits, cursor := state.oracle.cursor + 1 } },
+      events := [] }
+'KProgFormal.ClightRefinement.X86LogicRegisterReference.step' depends on axioms: [propext, Classical.choice, Quot.sound]

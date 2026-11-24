@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicRegisterReference
+
+#check KProgFormal.ClightRefinement.X86LogicRegisterReference.native_step
+#print axioms KProgFormal.ClightRefinement.X86LogicRegisterReference.native_step
+#check KProgFormal.ClightRefinement.X86LogicRegisterReference.step
+#print axioms KProgFormal.ClightRefinement.X86LogicRegisterReference.step

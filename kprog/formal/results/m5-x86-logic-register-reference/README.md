@@ -1,0 +1,3 @@
+For every canonical scalar width, imported XOR/OR/AND register semantics compose through the original checked-memory planner and SAME Reference.X86.step. The width and CPU/RFLAGS projections alias the pinned canonical binding; no numerical ISA is redefined. The result covers all native state fields, unchanged memory/address mode, empty events/no fault, next PC and one consumed AF oracle bit. Destination writeback includes the imported width truncation.
+
+Focused build175 and two public type/axiom queries pass at original200000/512,j1,32GiB inside shared timing. Only standard logical axioms occur. Actual source correspondence is composed separately.
