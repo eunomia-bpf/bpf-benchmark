@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushPrefix
+#check KProgFormal.ClightRefinement.X86ProducerPushPrefix.from_ready
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushPrefix.from_ready
+#check KProgFormal.ClightRefinement.X86ProducerPushPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushPrefix.from_call
