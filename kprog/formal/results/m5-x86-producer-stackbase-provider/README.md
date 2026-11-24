@@ -1,0 +1,3 @@
+A separate explicit kind1 Outcome and availability premise retain the actual trace/value/full supplied heap, permission/frontier and protected typed-load ABI. Actual source-local bindings identify the same cache, and original kind1 return/native-base store execute with readback/protected observations/current rights. The raw caller frame begins at the supplied heap, not before the provider. This is a conditional source theorem: no new axiom, derivation from determinacy, kind6 ABI substitution or real native-memory/oracle binding is asserted.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
