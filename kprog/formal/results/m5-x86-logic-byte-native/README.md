@@ -1,0 +1,3 @@
+The genuine scalar/tag0 byte OR/AND call executes both original readers and selected numerical helper, flag stores, actual width-specific register writer, local release and true return for every ordinary aliasing route. The final register and flag views match the SAME canonical ISA output, retaining PC, oracle, other architectural state, caller frame and released ranges. RSP/pointer arithmetic and dispatcher composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
