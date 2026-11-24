@@ -1,0 +1,10 @@
+KProgFormal.ClightRefinement.X86ProducerEntryReady.from_call (before : CC.Mem) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
+  (inputs6 : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (inputs1 : KProgFormal.ClightRefinement.X86ProducerStackBaseProvider.Inputs before) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k)
+'KProgFormal.ClightRefinement.X86ProducerEntryReady.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
