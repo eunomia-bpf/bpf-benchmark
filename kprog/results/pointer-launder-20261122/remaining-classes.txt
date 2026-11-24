@@ -148,15 +148,33 @@ were miscounted as zero in kprog/results/verified-coverage-20261120
 (corrected there): Tetragon 12 checked-sim-c / 83 direct-native,
 Tracee 3 / 32.
 
-Class F: a store past the 512-byte verifier frame.
+Class F: B's frame exceeds the verifier's 512-byte stack.
   "invalid write to stack R10 off=-560..-952", 38 occurrences across the
   two apps: -856 x10, -888 x10, -800 x6, -864 x3, -952 x2, -768 x2,
   then -880, -704, -648, -584, -560 one each.
-  B's own struct frame stays small (tetragon request 1 emits
-  X86_SIM_STACK_BYTES 56U), so the slot at -856 belongs to the linked
-  wrapper, not to the simulator's stack_mem; the offset is a function
-  of the emitted module's frame, not of the emulated x86 stack.
-  Not measured: which emitted construct owns it.
+
+  Cause, measured. The simulator keeps the emulated x86 stack in
+  `union x86_sim_stack_mem` inside `struct x86_sim_state`, and
+  X86_SIM_L_DECLARE_STATE declares that struct as a local of B's entry
+  function (kprog/x86/x86_sim_local_bpf.h:436, :505). The emitted
+  X86_SIM_STACK_BYTES is the emulated x86 stack the program needs, and
+  it is large: 8,640 to 86,432 bytes over the 62 Tetragon objects of
+  request 10's capture that carry the generated C. B is compiled with
+  `-mllvm -bpf-stack-size=4096` (kprog/x86/trusted_specializer.py:35
+  and :104), so clang accepts a frame the guest kernel does not:
+  MAX_BPF_STACK is 512 (vendor/linux-framework/include/linux/filter.h:99),
+  checked by check_stack_slot_within_bounds (verifier.c:7583) for writes
+  and by the per-subprogram depth sum at :6772. The guest image is
+  7.0.0-rc2, which has "combined stack size of %d calls is %d" and no
+  private-stack mode, so subprogram frames sum to 512.
+
+  The refusal is therefore about how much emulated x86 stack a program
+  touches: request 1 declares X86_SIM_STACK_BYTES 56U and its loaded
+  object's largest r10 offset is 88, so it verifies; request 10 writes
+  at -856 and is refused. Both objects came from the same emitter with
+  the same flags. What remains to decide is where the emulated stack
+  lives in B (a map value, a per-program global, or a frame small
+  enough for 512) rather than the bound itself.
 
 Class G: dereference of a value read out of memory.
   "R* invalid mem access 'scalar'", 46 occurrences (Tetragon 32 across
