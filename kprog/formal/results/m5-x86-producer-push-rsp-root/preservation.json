@@ -1,0 +1,19 @@
+{
+  "prior_query_receipt": "m5-x86-producer-push-read-root",
+  "prior_interfaces": 558,
+  "public_interfaces": 585,
+  "added_interfaces": 27,
+  "all_prior_query_text_preserved_verbatim": true,
+  "peer_root_imports_preserved_verbatim": true,
+  "accepted_modules": [
+    "X86ProducerPushRspSource",
+    "X86ProducerPushRspStore",
+    "X86ProducerPushRspAddress",
+    "X86ProducerPushRspValue",
+    "X86ProducerPushRspRead",
+    "X86ProducerPushRspExecute",
+    "X86ProducerPushRspResources",
+    "X86ProducerPushRspPrefix"
+  ],
+  "readme_words": 702
+}
