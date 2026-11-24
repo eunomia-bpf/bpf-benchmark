@@ -1,0 +1,3 @@
+Actual dword OR/AND calls now admit RSP as source, along with ordinary scalar sources and all aliases. Native-view operands feed the original numerical helper, five flag stores,197-step zero-extending writer, frame release and true void return. Initial caller data and permissions derive every intermediate source observation, with the same native CPU/register relation and caller frame retained. RSP destinations remain a writer obligation.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

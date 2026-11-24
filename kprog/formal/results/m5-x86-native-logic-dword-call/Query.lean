@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluNativeLogicDwordCall
+#check KProgFormal.ClightRefinement.X86AluNativeLogicDwordCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluNativeLogicDwordCall.execute
