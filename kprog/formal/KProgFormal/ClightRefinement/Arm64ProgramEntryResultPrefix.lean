@@ -2,6 +2,7 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvPrefixNative
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultCondition
 import KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovAdmission
 import KProgFormal.ClightRefinement.Arm64UaddlvCacheFrame
 import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission
 import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnPrefixNative
@@ -63,10 +64,17 @@ private theorem caller_context (le : CC.TempEnv) (fields : Fin 3 → BitVec 32) 
   unfold priorityTemps markTemps
   repeat rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
 
-/-- The original 98 provider inputs and complete twelve-call prefix compose
-with both actual GPR calls, vector loads, priority-derived condition and result
-XORs. Source selection and real intervening effects derive every input; all
-earlier contracts remain. -/
+/-- The actual result/condition temporaries reached before repeated MOV. -/
+def resultTemps (temps : CC.TempEnv) (fields : Fin 3 → BitVec 32) (native : Reference.AArch64.State) : CC.TempEnv :=
+  Arm64ProgramEntryResultCondition.resultTemps
+    (Arm64ProgramEntryResultVector.temps (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1))
+      (Reference.AArch64.gpr native 5) (Reference.AArch64.gpr native 7)
+      ((Reference.AArch64.readVector native 3).setWidth 64) ((Reference.AArch64.readVector native 0).setWidth 64))
+    (Arm64ProgramEntryResultCondition.nativeResult native) (fields 1) native
+
+/-- The original 98-provider and twelve-call result/condition/pointer prefix
+executes the complete thirteenth MOV. Every earlier source/native, heap, free,
+cache and provenance contract remains, including the full original call trace. -/
 theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
     (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
@@ -79,7 +87,7 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
     (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
       (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i)))
-    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
     (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
     (firstDecoded : first.decoded = .DPI (.Move_wide_imm
       (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
@@ -95,6 +103,8 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
     (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
     (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
+    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
     (noError : read_err s.machine = .None)
     (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
     (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
@@ -107,7 +117,8 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
     (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
     (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
-    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding) :
+    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
+    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding) :
     ∃ entry : HeaderLocal initial, ∃ header : (j : Fin 12) → HeaderSourceLocal initial j,
     ∃ ready temps, ∃ traces : List CC.Trace,
       traces.length = 98 ∧
@@ -375,7 +386,7 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
           ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 3).setWidth 64)
           ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 0).setWidth 64))
             (Arm64ProgramEntryResultCondition.nativeResult (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) (fields 1) (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) summed) ∧
-      ∃ pointerWritten, Arm64PointerWrite.Result summedStorage 0 (Arm64ProgramEntryPointerWrites.raw 0) (4#8) pointerWritten ∧
+      ∃ pointerWritten, ∃ pointerEffect : Arm64PointerWrite.Result summedStorage 0 (Arm64ProgramEntryPointerWrites.raw 0) (4#8) pointerWritten,
         InternalRun world (conditionCount + 57)
           (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryUaddlvCall.afterUaddlv k
             (Arm64ProgramEntryAllocation.allocation initial).1 (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1)) summed)
@@ -395,7 +406,29 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
           (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 7)
           ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 3).setWidth 64)
           ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 0).setWidth 64))
-            (Arm64ProgramEntryResultCondition.nativeResult (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) (fields 1) (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) := by
+            (Arm64ProgramEntryResultCondition.nativeResult (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) (fields 1) (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
+        ∃ repeatWritten repeatAfter, ∃ repeatResult : Arm64MovImmediate.OrdinaryCall.Result pointerEffect.storage
+          1 ((fields 0).setWidth 64) addresses origins (Arm64ProgramEntryRepeatMovNative.beforeNative origins (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields)))
+          (Arm64ProgramEntryOrdinaryMovePath.callCont initial (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) k (fields 0)) repeatWritten repeatAfter,
+          InternalRun world (conditionCount + 57 + 210)
+            (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryUaddlvCall.afterUaddlv k
+              (Arm64ProgramEntryAllocation.allocation initial).1
+              (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1)) summed)
+            (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryOrdinaryMoves.afterFirst k
+              (Arm64ProgramEntryAllocation.allocation initial).1 (Arm64ProgramEntryOrdinaryMoves.markTemps (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) (fields 0)) repeatAfter) ∧
+          Arm64Registers.Represents addresses origins (fun r => r.val) pointerWritten.nextblock repeatAfter (.Vptr entry.block 0)
+            (Reference.AArch64.step (Arm64ProgramEntryRepeatMovNative.beforeNative origins (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields)))).state ∧
+          (Reference.AArch64.step (Arm64ProgramEntryRepeatMovNative.beforeNative origins (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields)))).events = [] ∧ (Reference.AArch64.step (Arm64ProgramEntryRepeatMovNative.beforeNative origins (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields)))).fault = none ∧
+          FrameBelow initial.nextblock initial repeatAfter ∧
+          (∀ j, CC.Mem.load CC.Mptr repeatAfter entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+          Arm64RegisterReads.WarmEntryCache false pointerWritten.nextblock repeatAfter (.Vptr entry.block 0) origins.stack ∧
+          (Arm64Producer.allocation initial).2.nextblock.toNat ≤ repeatAfter.nextblock.toNat ∧
+          (Arm64ProgramEntryOrdinaryMoves.markTemps (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) (fields 0)).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
+          CC.Star (CC.Step2 world)
+            (.Callstate (.Internal Arm64ProgramFixture.f_arm64_execute_compile) [.Vptr ctxBlock ctxOfs] k initial)
+            (CC.Eapp traces.flatten trace)
+            (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryOrdinaryMoves.afterFirst k
+              (Arm64ProgramEntryAllocation.allocation initial).1 (Arm64ProgramEntryOrdinaryMoves.markTemps (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) (fields 0)) repeatAfter) := by
   obtain ⟨entry,header,ready,temps,traces,length,readyNext,entryRun, ctxRead, continuation⟩ :=
     Arm64ProgramEntryUaddlvPrefixNative.entry_corresponds initial ctxBlock ctxOfs k addresses ctxWord context
       values provider flags flagProvider vectors vectorProvider origins s native fields old reads
@@ -495,8 +528,34 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
       Arm64ProgramEntryResultCondition.priorityTemps
     repeat rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
     exact finalCtx
-  exact ⟨readCount,readRun,finalCtx,_,readRun.trans conditionRun,pointerWritten,pointerEffect,
-    (readRun.trans conditionRun).trans pointerRun,pointerRegisters,
-    facts12.2.2.2.2.2.1.trans pointerEffect.caller,pointerWarm,retainedCtx⟩
+  have admitted := Arm64ProgramEntryRepeatMovAdmission.admission s origins fields first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth imm column negate
+    literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched thirteenthFetched
+  have pointerFrame := facts12.2.2.2.2.2.1.trans pointerEffect.caller
+  obtain ⟨repeatWritten,repeatAfter,repeatResult,repeatRun,repeatRegisters,repeatEvents,repeatFault⟩ :=
+    Arm64ProgramEntryRepeatMovNative.execute summedStorage pointerEffect headerFacts.2.2 pointerFrame addresses origins
+      (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields)) currentRegisters (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) k ctxBlock ctxOfs (fields 0) old retainedCtx (reads 0)
+      thirteenth imm column negate literal thirteenthDecoded admitted.2.1 admitted.2.2.1
+  have pointerBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ pointerWritten.nextblock.toNat := by
+    simpa only [pointerEffect.nextblock] using headerFacts.2.2
+  have pointerPointers := pointerKept.pointers header headerFacts.1
+  have actualWarm : Arm64RegisterReads.WarmEntryCache false pointerWritten.nextblock pointerWritten (.Vptr entry.block 0) origins.stack := by
+    simpa only [pointerEffect.nextblock] using pointerWarm
+  have repeatWarm := repeatResult.kept.warm pointerWritten.nextblock header pointerBound pointerPointers false origins.stack actualWarm
+  have repeatPointers := repeatResult.kept.pointers header pointerPointers
+  have repeatBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ repeatAfter.nextblock.toNat := by
+    rw [repeatResult.nextblock,repeatResult.effect.nextblock]
+    exact Nat.le_trans pointerBound (FrameBelow.allocVariables
+      (Arm64MovImmediate.allocated_bound world pointerWritten) pointerWritten.nextblock (Nat.le_refl _)).1
+  have repeatCtx : (Arm64ProgramEntryOrdinaryMoves.markTemps (resultTemps temps fields (Arm64ProgramEntryRepeatMovAdmission.afterTwelve (nativeSetup s origins fields))) (fields 0)).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) := by
+    unfold Arm64ProgramEntryOrdinaryMoves.markTemps
+    rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
+    exact retainedCtx
+  have complete := star_trans facts12.2.1 (((readRun.trans conditionRun).trans pointerRun).trans repeatRun).sound
+  refine ⟨readCount,readRun,finalCtx,_,readRun.trans conditionRun,pointerWritten,pointerEffect,
+    (readRun.trans conditionRun).trans pointerRun,pointerRegisters,pointerFrame,pointerWarm,retainedCtx,
+    repeatWritten,repeatAfter,repeatResult,((readRun.trans conditionRun).trans pointerRun).trans repeatRun,
+    repeatRegisters,repeatEvents,repeatFault,pointerFrame.trans repeatResult.caller,
+    repeatPointers,repeatWarm,repeatBound,repeatCtx,?_⟩
+  simpa only [CC.Eapp,CC.E0,List.append_nil] using complete
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryResultPrefix
