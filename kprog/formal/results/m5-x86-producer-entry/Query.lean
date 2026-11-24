@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerEntry
+#check KProgFormal.ClightRefinement.X86ProducerEntry.entry_valid
+#print axioms KProgFormal.ClightRefinement.X86ProducerEntry.entry_valid
+#check KProgFormal.ClightRefinement.X86ProducerEntry.entry_internal
+#print axioms KProgFormal.ClightRefinement.X86ProducerEntry.entry_internal
+#check KProgFormal.ClightRefinement.X86ProducerEntry.entry_frame
+#print axioms KProgFormal.ClightRefinement.X86ProducerEntry.entry_frame

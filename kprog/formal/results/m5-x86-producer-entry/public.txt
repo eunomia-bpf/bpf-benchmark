@@ -1,0 +1,25 @@
+KProgFormal.ClightRefinement.X86ProducerEntry.entry_valid (ge : CC.CGenv) (before : CC.Mem) (ctx : CC.Val) :
+  CC.FunctionEntry2 ge KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer [ctx] before
+    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst
+    (KProgFormal.ClightRefinement.X86ProducerEntry.initialTemps ctx)
+    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).snd
+'KProgFormal.ClightRefinement.X86ProducerEntry.entry_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerEntry.entry_internal (ge : CC.CGenv) (before : CC.Mem) (ctx : CC.Val)
+  (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun ge 1
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer) [ctx] k
+      before)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer.fn_body k
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst
+      (KProgFormal.ClightRefinement.X86ProducerEntry.initialTemps ctx)
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).snd)
+'KProgFormal.ClightRefinement.X86ProducerEntry.entry_internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerEntry.entry_frame (ge : CC.CGenv) (before : CC.Mem) :
+  KProgFormal.ClightRefinement.FrameBelow before.nextblock before
+    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).snd
+'KProgFormal.ClightRefinement.X86ProducerEntry.entry_frame' depends on axioms: [propext, Classical.choice, Quot.sound]

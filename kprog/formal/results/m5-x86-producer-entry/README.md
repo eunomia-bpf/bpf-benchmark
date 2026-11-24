@@ -1,0 +1,3 @@
+The genuine original producer FunctionEntry2 is derived from its real one-argument parameter list, distinct local/temporary names and doAllocVariables result on arbitrary caller memory. One actual internal entry transition reaches the complete original fn_body and its full input/setup prefix, with exact initialized context temporary and caller allocation frame. This does not skip the prefix or assert its execution, provider results or initialized local contents. Existing allocation/header APIs remain unchanged; no new axiom or runtime/semantic edit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
