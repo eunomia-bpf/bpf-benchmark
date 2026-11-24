@@ -1,0 +1,3 @@
+The genuine scalar/tag0 XOR dword call through actual readers, helper, five flag stores,197-step writer, local release and return refines the SAME canonical ISA output. Complete native GPR/flag views, PC, oracle cursor, events/fault and all remaining reference fields are explicit. Initial cell observations derive the numerical result; no selected-result assumption is used. Focused build205 and public execute query pass. Distinct register/lane route only; all-alias composition follows.
+
+Checks use original200000/512,j1,32GiB inside shared timing. Existing source external assumptions stay explicit. Full per-operation families and dispatcher composition remain unfinished.
