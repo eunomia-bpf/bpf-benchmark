@@ -1,0 +1,50 @@
+KProgFormal.ClightRefinement.X86ProducerGprSites.source_route (i : Fin 16) :
+  (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).whole =
+    ((CC.Stmt.Sifthenelse (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).condition
+              (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).zero
+              ((KProgFormal.ClightRefinement.X86ProducerGprSites.site i).call.Ssequence
+                (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).saved)).Ssequence
+          (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).destination).Ssequence
+      ((KProgFormal.ClightRefinement.X86ProducerGprSites.site i).tag.Ssequence
+        (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).following)
+'KProgFormal.ClightRefinement.X86ProducerGprSites.source_route' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprSites.source_stores (i : Fin 16) :
+  (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).destination =
+      KProgFormal.ClightRefinement.X86ProducerGprStore.assignment
+        (KProgFormal.ClightRefinement.X86ProducerGprSites.valueRow i)
+        (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).savedName ∧
+    (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).tag =
+      KProgFormal.ClightRefinement.X86ProducerGprStore.assignment
+        (KProgFormal.ClightRefinement.X86ProducerGprSites.tagRow i)
+        (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).savedName
+'KProgFormal.ClightRefinement.X86ProducerGprSites.source_stores' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprSites.source_call (i : Fin 16) :
+  (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).call =
+    CC.Stmt.Scall (some (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).resultName)
+      (CC.Expr.Evar X86_program_profile_bpf._native_lab_entry_input
+        (CC.Ty.Tfunction [CC.tuint] CC.tulong CC.cc_default))
+      [CC.Expr.Econst_int (CC.Integers.Int.repr 6) CC.tint]
+'KProgFormal.ClightRefinement.X86ProducerGprSites.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprSites.source_saved (i : Fin 16) :
+  (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).saved =
+    CC.Stmt.Sset (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).savedName
+      (((CC.Expr.Etempvar (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).resultName CC.tulong).Ecast
+            (CC.tptr CC.tvoid)).Ecast
+        (CC.tptr CC.tvoid))
+'KProgFormal.ClightRefinement.X86ProducerGprSites.source_saved' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprSites.source_first :
+  (KProgFormal.ClightRefinement.X86ProducerGprSites.site 0).whole =
+      KProgFormal.ClightRefinement.X86ProducerGhostSource.beforeProvider ∧
+    (KProgFormal.ClightRefinement.X86ProducerGprSites.site 1).whole =
+      KProgFormal.ClightRefinement.X86ProducerGprAddress.afterRax
+'KProgFormal.ClightRefinement.X86ProducerGprSites.source_first' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

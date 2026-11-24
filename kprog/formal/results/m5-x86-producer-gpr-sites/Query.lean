@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerGprSites
+#check KProgFormal.ClightRefinement.X86ProducerGprSites.source_route
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprSites.source_route
+#check KProgFormal.ClightRefinement.X86ProducerGprSites.source_stores
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprSites.source_stores
+#check KProgFormal.ClightRefinement.X86ProducerGprSites.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprSites.source_call
+#check KProgFormal.ClightRefinement.X86ProducerGprSites.source_saved
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprSites.source_saved
+#check KProgFormal.ClightRefinement.X86ProducerGprSites.source_first
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprSites.source_first
