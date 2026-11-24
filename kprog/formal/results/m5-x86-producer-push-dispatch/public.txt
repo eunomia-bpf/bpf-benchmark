@@ -1,0 +1,40 @@
+KProgFormal.ClightRefinement.X86ProducerPushDispatch.target_source :
+  KProgFormal.ClightRefinement.X86ProducerPushDispatch.targetCall =
+    CC.Stmt.Scall none KProgFormal.ClightRefinement.X86ProducerPushDispatch.expression
+      KProgFormal.ClightRefinement.X86ProducerPushDispatch.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerPushDispatch.target_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).count
+    (KProgFormal.ClightRefinement.X86ProducerPushDispatch.start binding k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushDispatch.targetCall
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).continuation CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).output memory)
+'KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).output memory
+      KProgFormal.ClightRefinement.X86ProducerPushDispatch.argumentExpressions
+      KProgFormal.ClightRefinement.X86ProducerPushDispatch.argumentTypes =
+    some (KProgFormal.ClightRefinement.X86ProducerPushDispatch.values binding)
+'KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation (binding : CC.Block) (k : CC.Cont)
+  (memory : CC.Mem) :
+  (KProgFormal.ClightRefinement.X86ProducerPushDispatch.certificate binding k memory).continuation =
+    KProgFormal.ClightRefinement.X86ProducerPushWidth.loopCont k
+'KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
