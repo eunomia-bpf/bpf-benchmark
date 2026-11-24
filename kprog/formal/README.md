@@ -62,7 +62,11 @@ The [logical byte tail](results/m5-x86-logic-byte-tail/README.md) derives real
 flag stores, register writeback and local release from initial permissions.
 The [canonical byte step](results/m5-x86-canonical-byte-logic/README.md) gives
 the same reference ISA's full-state logical-register result, including oracle
-and PC updates. Their genuine caller and dispatcher composition continues.
+and PC updates. The [genuine XOR byte calls](results/m5-x86-xor-byte-all/README.md)
+now cover every ordinary scalar/tag0 register-slice aliasing route through
+actual stores, local release and return, with final GPR and flag views of that
+same ISA output. Other widths, RSP/pointer inputs and dispatcher composition
+remain work in progress.
 
 ## Trust boundary
 

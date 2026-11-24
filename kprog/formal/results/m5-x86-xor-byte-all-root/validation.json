@@ -1,0 +1,39 @@
+{
+  "commands": {
+    "xor-byte-all-root-build1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal"
+      ],
+      "exit": 0,
+      "seconds": 18.24201590399025,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    },
+    "xor-byte-all-root-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-xor-byte-all-root/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.544520278053824,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-native-20261124T081051Z",
+  "public_queries": 25,
+  "complete_instruction_families": 0,
+  "root_integration": "accepted",
+  "whole_make_check": "not rerun; original DIV fault marker regression remains"
+}
