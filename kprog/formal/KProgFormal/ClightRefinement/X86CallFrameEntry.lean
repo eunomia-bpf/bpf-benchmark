@@ -99,4 +99,64 @@ theorem call (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
   exact entered.trans (prefix_run ge layout CC.emptyEnv (initialTemps (.Vptr binding 0)) k memory
     binding cells base sp bindingRead header stackPointer)
 
+/-- The original frame call site performs its genuine global lookup and
+argument evaluation before entering that same helper and preparing raw SP. -/
+theorem from_site (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (caller : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+    (binding cells helper : CC.Block) (base : CC.Integers.Ptrofs) (sp : BitVec 64)
+    (symbol : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+    (global : CC.Genv.findFunctPtr ge.genv_genv helper = some (.Internal handler))
+    (notLocal : e.get X86_program_profile_bpf._x86_sim_inline_call_frame_values = none)
+    (bindingRead : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr binding 0))
+    (header : CC.Mem.load CC.Mptr memory binding 0 = some (.Vptr cells base))
+    (stackPointer : CC.Mem.load CC.Mptr memory cells
+      (CC.Integers.Ptrofs.unsigned (CC.Integers.Ptrofs.add base (64#64))) = some (.Vlong sp)) :
+    InternalRun ge 12
+      (.State caller X86RegisterWriteRspReleaseAdvance.frameCall k e le memory)
+      (.State handler afterSp (continuation (.Kcall none caller e le k)) CC.emptyEnv
+        (temps (initialTemps (.Vptr binding 0)) cells base sp) memory) := by
+  have signature : CC.typeOfFundef (.Internal handler) =
+      .Tfunction [CC.tptr (.Tstruct X86_program_profile_bpf._x86_sim_inline_bindings CC.noattr)]
+        CC.tvoid CC.cc_default := rfl
+  dsimp only [CC.tptr, CC.tvoid] at signature
+  have pointerZero : CC.Integers.Ptrofs.eq CC.Integers.Ptrofs.zero CC.Integers.Ptrofs.zero = true := rfl
+  have invoked : InternalRun ge 1
+      (.State caller X86RegisterWriteRspReleaseAdvance.frameCall k e le memory)
+      (.Callstate (.Internal handler) [.Vptr binding 0] (.Kcall none caller e le k) memory) := by
+    rw [X86RegisterWriteRspReleaseAdvance.frame_source]
+    apply internalRun_of_steps
+    all_goals simp only [steps, InternalPath, InternalState,
+      CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.typeof, CC.doDerefLoc,
+      CC.accessMode, CC.Genv.findFunct, CC.Cop.classifyFun,
+      symbol, global, notLocal, bindingRead, signature, pointerZero, ite_true, true_and, List.nil_append, eq_self,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.tptr, CC.tvoid, CC.Archi.ptr64_eq, CC.E0, CC.Eapp]
+  exact invoked.trans (call ge layout (.Kcall none caller e le k) memory binding cells base sp header stackPointer)
+
+/-- The final real slot backedge/exit, original caller transition and helper
+entry/read prefix compose in21 transitions, with the exact saved caller state. -/
+theorem from_last (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (caller : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+    (binding cells helper : CC.Block) (base : CC.Integers.Ptrofs) (sp : BitVec 64)
+    (symbol : CC.Genv.findSymbol ge.genv_genv X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+    (global : CC.Genv.findFunctPtr ge.genv_genv helper = some (.Internal handler))
+    (notLocal : e.get X86_program_profile_bpf._x86_sim_inline_call_frame_values = none)
+    (bindingRead : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr binding 0))
+    (observedIndex : le.get X86_program_profile_bpf.___x86_release_i__5 =
+      some (.Vint (X86RegisterWriteRspReleaseSelect.index (5 : Fin 6))))
+    (header : CC.Mem.load CC.Mptr memory binding 0 = some (.Vptr cells base))
+    (stackPointer : CC.Mem.load CC.Mptr memory cells
+      (CC.Integers.Ptrofs.unsigned (CC.Integers.Ptrofs.add base (64#64))) = some (.Vlong sp)) :
+    InternalRun ge 21
+      (.State caller .Sskip (X86RegisterWriteRspReleaseLoop.loopContinuation k) e le memory)
+      (.State handler afterSp
+        (continuation (.Kcall none caller e
+          (le.set X86_program_profile_bpf.___x86_release_i__5 (.Vint (48#32))) k)) CC.emptyEnv
+        (temps (initialTemps (.Vptr binding 0)) cells base sp) memory) := by
+  let ready := le.set X86_program_profile_bpf.___x86_release_i__5 (.Vint (48#32))
+  have bindingReady : ready.get X86_program_profile_bpf.___x86_bind = some (.Vptr binding 0) := by
+    simp +decide [ready, CC.PTree.gso, bindingRead]
+  exact (X86RegisterWriteRspReleaseAdvance.after_last ge caller e le k memory observedIndex).trans
+    (from_site ge layout caller e ready k memory binding cells helper base sp
+      symbol global notLocal bindingReady header stackPointer)
+
 end KProgFormal.ClightRefinement.X86CallFrameEntry
