@@ -1,0 +1,3 @@
+For all187 actual typed ABI assignments, original zero/null RHS evaluation and casts produce exact readback values. Allocated Freeable rights/current access derive Writable and construct each successful store, executing real sequence/assignment/skip transitions. Actual typed row intervals are pairwise disjoint; load_store_other preserves every other ABI row and all other blocks. Caller FrameBelow/access/frontier follow the real stores, with no store/readback/frame/output-view premise and no new axiom or source/runtime/semantics change.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
