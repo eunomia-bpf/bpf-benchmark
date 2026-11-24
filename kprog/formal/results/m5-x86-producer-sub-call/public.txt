@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86ProducerSubCall.source_site :
+  KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls =
+    (CC.Stmt.Slabel X86_program_profile_bpf._x86_l_1 KProgFormal.ClightRefinement.X86ProducerSubCall.callStmt).Ssequence
+      KProgFormal.ClightRefinement.X86ProducerSubCall.followingCalls
+'KProgFormal.ClightRefinement.X86ProducerSubCall.source_site' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubCall.source_call :
+  KProgFormal.ClightRefinement.X86ProducerSubCall.callStmt =
+    CC.Stmt.Scall none KProgFormal.ClightRefinement.X86ProducerSubCall.expression
+      KProgFormal.ClightRefinement.X86ProducerSubCall.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerSubCall.source_call' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubCall.handler_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol
+        X86_program_profile_bpf.___x86_instruction_X86_OP_ALU_IMM =
+      some KProgFormal.ClightRefinement.X86ProducerSubCall.handlerBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerSubCall.handlerBlock =
+      some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerSubCall.handler)
+'KProgFormal.ClightRefinement.X86ProducerSubCall.handler_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubCall.arguments (before memory : CC.Mem) (le : CC.TempEnv)
+  (entry :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory KProgFormal.ClightRefinement.X86ProducerSubCall.argumentExpressions
+      KProgFormal.ClightRefinement.X86ProducerSubCall.argumentTypes =
+    some (KProgFormal.ClightRefinement.X86ProducerSubCall.values entry.block)
+'KProgFormal.ClightRefinement.X86ProducerSubCall.arguments' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubCall.call (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (entry :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerSubCall.callStmt
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerSubCall.followingCalls k)
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerSubCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerSubCall.values entry.block)
+      (KProgFormal.ClightRefinement.X86ProducerSubCall.continuation
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerSubCall.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubCall.entry (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerSubCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerSubCall.values binding) k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubCall.handler
+      KProgFormal.ClightRefinement.X86ProducerSubCall.handler.fn_body k CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerSubCall.initialTemps binding) memory)
+'KProgFormal.ClightRefinement.X86ProducerSubCall.entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
