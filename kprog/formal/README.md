@@ -103,19 +103,14 @@ non-increasing raw-SP conditions. They retain the original 77-step zero
 shortcut for the same RSP/lane and both real native reader calls for distinct
 registers, then refine the same canonical full-state step through return.
 
-The [increasing-RSP components](results/m5-x86-rsp-release-byte-call/README.md)
-execute the original word/byte guards, real providers, casts and constructed
-cache stores, retaining arbitrary provider traces and memory effects. The
-[loop control](results/m5-x86-rsp-release-advance/README.md) reaches the exact
-frame-values call through the original backedges. Its
-[entry](results/m5-x86-call-frame-entry/README.md) derives raw SP from the real
-table read; the [caller proof](results/m5-x86-call-frame-caller/README.md)
-connects it to the actual last-slot backedge and call site. The
-[complete frame helper](results/m5-x86-call-frame-complete/README.md) now
-executes all six clearing-or-skip paths, real stores, local release and caller
-return from initial header/permission and target-separation premises. It
-preserves permissions, allocation frontier and the frame outside ghost targets.
-Full release-loop assembly and provider ABI/frame transport remain open.
+The [complete RSP release source](results/m5-x86-release-assembly-root/README.md)
+now composes real reverse materialization and table stores, both signed-SP
+branches, all six word/eight-byte slots, frame-helper clears, original loop
+exits and handler free/return. Initial reads and permissions derive every
+later store and release observation. Tagged GPR/provenance observations and
+all five flags survive under explicit cache/ghost ownership and actual-provider
+ABI premises. Binding those premises to the production provider and caller
+allocation, then composing canonical operation inputs, remains open.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
 preserving the entire native state except PC. Generic dispatcher selection
