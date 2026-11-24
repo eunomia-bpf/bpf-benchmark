@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushStoreObservation
+#check KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.event
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.event
+#check KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.source
+#check KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.correspondence
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.correspondence
