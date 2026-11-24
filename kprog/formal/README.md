@@ -111,6 +111,11 @@ later store and release observation. Tagged GPR/provenance observations and
 all five flags survive under explicit cache/ghost ownership and actual-provider
 ABI premises. Binding those premises to the production provider and caller
 allocation, then composing canonical operation inputs, remains open.
+The [whole qword writer](results/m5-x86-qword-release-return/README.md) also
+starts at its original selectors and derives saved-SP reads, local allocation
+rights, both helper scopes and every intermediate view through return.
+The [full-width tail](results/m5-x86-full-width-release-return/README.md)
+additionally covers the actual dword overwrite and zero-extension.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
 preserving the entire native state except PC. Generic dispatcher selection
