@@ -1,0 +1,3 @@
+The genuine OR/AND dword RSP-destination handler call refines the SAME canonical Reference.X86.step through actual readers/helpers/flags/223-step writer/free/return. Any initial RSP tag is admitted; the real32-bit write clears the tag and zero-extends native RSP. Full native GPR/flag/PC/oracle/memory/XMM/base/model-error outputs and caller/local frames are retained. Non-increasing signed raw SP and native-base protection remain explicit; increasing release, byte/word destinations and universal handler/dispatcher families remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

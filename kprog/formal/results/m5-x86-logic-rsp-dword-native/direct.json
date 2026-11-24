@@ -1,0 +1,18 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-logic-rsp-dword-native/Draft.lean"
+  ],
+  "exit": 0,
+  "seconds": 1.9921209259773605,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512,
+  "source_move_after_acceptance": true,
+  "output_products": false
+}
