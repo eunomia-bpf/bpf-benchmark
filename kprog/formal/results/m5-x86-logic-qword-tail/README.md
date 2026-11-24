@@ -1,0 +1,3 @@
+Initial permissions construct all five actual logical flag stores. The original flag stage, allocated252-step qword writer, real loop exits, local release and void return compose with native GPR/flag views, revoked local ranges and old caller-load frame. The seventh writer input, source shift, is derived from the exact actual flag-stage temporaries rather than assumed at an intermediate state.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

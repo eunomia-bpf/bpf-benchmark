@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicQwordTail
+
+#check KProgFormal.ClightRefinement.X86LogicQwordTail.source_shift
+#print axioms KProgFormal.ClightRefinement.X86LogicQwordTail.source_shift
+#check KProgFormal.ClightRefinement.X86LogicQwordTail.execute
+#print axioms KProgFormal.ClightRefinement.X86LogicQwordTail.execute
