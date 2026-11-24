@@ -1,0 +1,20 @@
+KProgFormal.ClightRefinement.X86ProducerPushReadValue.layout :
+  KProgFormal.ClightRefinement.X86RegisterReadValue.Layout KProgFormal.ClightRefinement.X86ProducerLayout.ge
+'KProgFormal.ClightRefinement.X86ProducerPushReadValue.layout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReadValue.call {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86RegisterReadScalar.length X86.Size.q)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg)
+      [CC.Val.Vptr ready.entry.block 0, CC.Val.Vlong 3#64, CC.Val.Vlong 8#64, CC.Val.Vlong 0] k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+    (CC.State.Returnstate (CC.Val.Vlong (ready.values 3)) (CC.callCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushReadValue.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

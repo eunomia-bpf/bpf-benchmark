@@ -1,0 +1,3 @@
+After actual PUSH local allocation, the complete existing original read_reg call returns the SAME initialized RBX scalar with unchanged complete memory. Header/GPR/tag loads and layout/helper bindings derive from the actual producer result and complete source world. This is the reader call theorem; the original PUSH operand call site and stack effects are separate obligations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
