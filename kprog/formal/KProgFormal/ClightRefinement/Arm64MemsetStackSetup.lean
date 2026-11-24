@@ -521,6 +521,37 @@ private theorem offset_entry (le : CC.TempEnv) :
   have other17 : Arm64Program.___a64_mws_off ≠ Arm64Program._entry := by decide +kernel
   simp only [offsetTemps,resultTemps,hasTemps,prepostTemps,copiedTemps,metadataTemps,CC.PTree.gso _ _ _ _ other0,CC.PTree.gso _ _ _ _ other1,CC.PTree.gso _ _ _ _ other2,CC.PTree.gso _ _ _ _ other3,CC.PTree.gso _ _ _ _ other4,CC.PTree.gso _ _ _ _ other5,CC.PTree.gso _ _ _ _ other6,CC.PTree.gso _ _ _ _ other7,CC.PTree.gso _ _ _ _ other8,CC.PTree.gso _ _ _ _ other9,CC.PTree.gso _ _ _ _ other10,CC.PTree.gso _ _ _ _ other11,CC.PTree.gso _ _ _ _ other12,CC.PTree.gso _ _ _ _ other13,CC.PTree.gso _ _ _ _ other14,CC.PTree.gso _ _ _ _ other15,CC.PTree.gso _ _ _ _ other16,CC.PTree.gso _ _ _ _ other17]
 
+private theorem offset_byte (le : CC.TempEnv) :
+    (offsetTemps le).get Arm64Program.___a64_lib_byte = le.get Arm64Program.___a64_lib_byte := by
+  have other0 : Arm64Program._t'3 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other1 : Arm64Program.___a64_mbo_has_index ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other2 : Arm64Program._t'4 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other3 : Arm64Program.___a64_mbo_isrc ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other4 : Arm64Program.___a64_mbo_imm ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other5 : Arm64Program.___a64_mbo_index ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other6 : Arm64Program.___kprog_a64_mbo_imm ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other7 : Arm64Program.___kprog_a64_mbo_index ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other8 : Arm64Program._t'13 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other9 : Arm64Program._t'14 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other10 : Arm64Program.___kprog_a64_mbo_prepost ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other11 : Arm64Program._t'15 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other12 : Arm64Program.___kprog_a64_mbo_has_index ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other13 : Arm64Program._t'16 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other14 : Arm64Program.___kprog_a64_mbo_base ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other15 : Arm64Program.___kprog_a64_mbo_result ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other16 : Arm64Program.___a64_mbo_result ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have other17 : Arm64Program.___a64_mws_off ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  simp only [offsetTemps,resultTemps,hasTemps,prepostTemps,copiedTemps,metadataTemps,CC.PTree.gso _ _ _ _ other0,CC.PTree.gso _ _ _ _ other1,CC.PTree.gso _ _ _ _ other2,CC.PTree.gso _ _ _ _ other3,CC.PTree.gso _ _ _ _ other4,CC.PTree.gso _ _ _ _ other5,CC.PTree.gso _ _ _ _ other6,CC.PTree.gso _ _ _ _ other7,CC.PTree.gso _ _ _ _ other8,CC.PTree.gso _ _ _ _ other9,CC.PTree.gso _ _ _ _ other10,CC.PTree.gso _ _ _ _ other11,CC.PTree.gso _ _ _ _ other12,CC.PTree.gso _ _ _ _ other13,CC.PTree.gso _ _ _ _ other14,CC.PTree.gso _ _ _ _ other15,CC.PTree.gso _ _ _ _ other16,CC.PTree.gso _ _ _ _ other17]
+
+/-- The actual offset/address setup preserves the original memset byte. -/
+theorem byte_preserved (le : CC.TempEnv) (i : BitVec 64) :
+    (temps le i).get Arm64Program.___a64_lib_byte = le.get Arm64Program.___a64_lib_byte := by
+  have regOther : Arm64Program.___a64_l_reg__2 ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have offOther : Arm64Program.___a64_mwr_off ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  have baseOther : Arm64Program.___a64_mws_off ≠ Arm64Program.___a64_lib_byte := by decide +kernel
+  simp only [temps,CC.PTree.gso _ _ _ _ regOther,CC.PTree.gso _ _ _ _ offOther,
+    CC.PTree.gso _ _ _ _ baseOther,offset_byte]
+
 /-- The original setup preserves its entry pointer and selects exactly R0. -/
 theorem selection (le : CC.TempEnv) (i : BitVec 64) :
     (temps le i).get Arm64Program._entry = le.get Arm64Program._entry ∧
