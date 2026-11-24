@@ -342,3 +342,28 @@ terminator, while the largest MIR that compiles is 30 MB / 698k lines
 large inputs, and its stderr is empty in all five, which is why the
 capture cannot name it; reproducing it needs one llc-18 run on an
 archived MIR, on the verify side.
+
+## Class E A/B, run 2026-11-24T08:21-08:26Z (same boot, wrapper in place)
+
+The A/B harness ran inside the guest for all 14 requests
+(/workspaces/kprog-raw/omp/checked-otel-14e, session-pda3t2ch, wrapper
+loader-ab.log): every request's `load-direct` argv went through the
+wrapper, which on request 14 runs the pre-fix loader
+(/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader,
+sha b1ea15f385e74aa9) and then the fixed loader on the identical argv.
+The A/B never fired: request 14 failed in generation in this boot, before
+any loader call -- "unsupported unresolved call target in call 39
+<custom__generic+0x39>" (simulator-failure.json, stage generation). The
+requests themselves verified and loaded clean this time: all 13 recorded
+rows are status 0, against 5 of 14 in the omp-five capture, so the
+boot-to-boot shift the 2026-11-22 correction found (perf_progs 194 vs
+183, report_events 4 vs 8) extends to whole request outcomes, and the
+same-boot comparison the class needs stays unobserved. Three attempts,
+three shapes: pre-fix boot loads 4 of 14, post-fix boot loads with
+different ids, this boot verifies all 13 before request 14 and never
+loads it. A fourth run that reaches the load-direct on request 14 with a
+foreign owner present is still the only thing that settles the retry.
+
+Also recorded: the wrapper ran all its load-direct calls for requests
+2-13 through the fixed loader (`exec "$FIXED"`) with status 0 each, so
+the fixed loader's non-retry path is clean end to end in a guest.
