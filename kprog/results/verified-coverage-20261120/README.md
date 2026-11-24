@@ -15,12 +15,34 @@ byte-identical to a build of `19d32566c`. Every run exited 0.
 | `cilium/agent` | 12 | 4 | **12** | 0 |
 | `otelcol-ebpf-profiler/profiling` | 14 | 5 | 4 | **10** |
 | `bcc/set` | 25 | 15 | 22 | **3** |
-| `tetragon/observer` | 95 (3 attempts) | 15 | **95** | 0 |
-| `tracee/monitor` | 35 | 3 | **35** | 0 |
+| `tetragon/observer` | 95 (3 attempts) | 15 | **12** | **83** |
+| `tracee/monitor` | 35 | 3 | **3** | **32** |
 | `katran` | 1 | 1 | **1** | 0 |
 
 Capture size varies with the app and the run (12/14/25 here from one command). The table retains request-level
 outcomes and ELF-object group counts; the raw `service.tar.gz` of each capture is kept at the path in `coverage.json`.
+
+**Correction, OMP 2026-11-24.** The Tetragon and Tracee rows above read 95/95 and 35/35 installed with zero
+fallback. That count was wrong: it counted every request that reached the service with `status 0`, but the
+service records a fallback with `status 0` too (`execution_path: direct-native`, B's generation or verification
+failure kept in `simulator_failure`). Read back from the same raw logs the report cites
+(`/workspaces/kprog-raw/verified/omp-five-20261120/*/state/session-*/service.log`):
+
+| app | checked-sim-c | direct-native |
+|---|---|---|
+| `tetragon/observer` | 12 | 83 |
+| `tracee/monitor` | 3 | 32 |
+
+The Tetragon fallbacks divide by stage: 58 `verification` and 25 `generation`; Tracee's 28 `verification` and
+4 `generation`. Two verifier shapes dominate both apps and are absent from the four classes below, because those
+were read from OTel and BCC only:
+
+  `invalid write to stack R10 off=-856|-864|-880|-888|-952` — a store past the 512-byte verifier frame;
+  `R* invalid mem access 'scalar'` — a dereference of the loaded value at `kprog_unspec`, in the same shape
+  as Tetragon request 3 insn 30 and Tracee request 3 insn 13.
+
+Both predate the 2026-11-23 B fixes (7db7ddc23, c3c89a8d3, e3ce00476, aaca40148, 25d4ae58b, 3ffc87abc), so this
+capture does not say whether they still occur; `omp-five-20261120` ran before all of them.
 
 ## The fallbacks are four separate defect classes, not one
 
