@@ -1,0 +1,3 @@
+The genuine eight-argument OR/AND handler call composes both actual native-base readers, the numerical helper, five flag stores, complete204/216-step partial writer, local release and void return. Byte source slices include every legal high-byte case, including same-register and RSP-source aliases. Initial RSP tag0, table/flag permissions, base separation and non-increasing signed raw SP remain explicit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
