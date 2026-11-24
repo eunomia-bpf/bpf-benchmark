@@ -1,0 +1,29 @@
+KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.outside {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (chunk : CC.Chunk) (offset : Int)
+  (disjoint : offset + CC.sizeChunk chunk ≤ 40 ∨ 48 ≤ offset) :
+  CC.Mem.load chunk complete.after (ready.sources 1).block offset =
+    CC.Mem.load chunk ready.after (ready.sources 1).block offset
+'KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.outside' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.lower_bytes {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (byte : Fin 40) :
+  CC.Mem.load CC.Chunk.Mint8unsigned complete.after (ready.sources 1).block ↑↑byte =
+    CC.Mem.load CC.Chunk.Mint8unsigned ready.after (ready.sources 1).block ↑↑byte
+'KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.lower_bytes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushCacheFrame
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.outside
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.outside
+#check KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.lower_bytes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCacheFrame.lower_bytes

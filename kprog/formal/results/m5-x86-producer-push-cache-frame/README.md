@@ -1,0 +1,3 @@
+Actual source memory frames derive every cache load disjoint from byte40..47 from the same initialized producer heap, including all40 lower bytes. Genuine body allocation/RSP update/metadata writes/cache store/free are included; no untouched byte is assumed zero or initialized. This supplies a source cache frame for the remaining native-memory bridge, not native-memory or fetched-ISA refinement. Direct/focused/public validation is separate from the earlier full-check Lean phase.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
