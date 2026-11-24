@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerPushStackSetup
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSetup.index_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSetup.index_source
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSetup.index_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSetup.index_value
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSetup.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSetup.execute
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSetup.from_rsp
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSetup.from_rsp
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSetup.inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSetup.inputs

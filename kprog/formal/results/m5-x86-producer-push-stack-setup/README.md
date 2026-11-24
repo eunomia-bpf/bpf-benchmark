@@ -1,0 +1,3 @@
+Fourteen actual loop/sequence/reload/cast/index transitions reach the real effective-width Scall. Updated RSPminus8 plus48 genuinely yields cache index40 through original source casts. All reloads derive the SAME accepted RSP-prefix result/current complete heap; actual width8 and saved RBX operand remain current. No assumed index/load/View/source-run or temporary environment is added.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
