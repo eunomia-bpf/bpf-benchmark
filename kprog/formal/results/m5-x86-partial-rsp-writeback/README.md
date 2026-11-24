@@ -1,0 +1,3 @@
+The genuine initial byte/word writer executes204/216 Clight transitions through the actual selectors, old-SP and cell/tag loads, width helper, union copy, add-base and low8/16 stores, reverse/table stores, non-increasing signed raw-SP release and loop exit. It refines native setReg while preserving upper56/48 bits and the caller frame. Scalar tag0 and legal low RSP byte remain explicit; increasing release and volatile alternatives remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
