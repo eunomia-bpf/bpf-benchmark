@@ -1,0 +1,3 @@
+The shared root retains all175 accepted ARM/x86 public interfaces and adds6 genuine RSP storage interfaces. The source14-step reverse gate and22-step table writer compose into a36-step execution to the exact stack-release frontier with the native GPR table view and memory frames. Whole RSP handler return/release/clobber and universal149-operation dispatcher proofs remain open. Canonical ISA, production code and benchmark sources are unchanged.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -82,7 +82,9 @@ The [RSP-aware logical calls](results/m5-x86-rsp-logic-root/README.md) extend
 OR/AND at all four widths to RSP sources through the genuine native-base
 reader calls and the same canonical full-state outputs. Their destination
 remains an ordinary scalar/tag0 register; legal byte slices are explicit.
-RSP destination writeback and other pointer operand domains remain open.
+The [RSP storage prefix](results/m5-x86-write-rsp-storage/README.md) executes
+reverse materialization and both table stores to the exact stack-release
+frontier. Complete RSP destination calls and other pointer domains remain open.
 
 ## Trust boundary
 
