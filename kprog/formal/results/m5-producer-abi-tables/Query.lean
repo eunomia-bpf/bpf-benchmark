@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiTables
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiTables.entry_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiTables.entry_initialized
