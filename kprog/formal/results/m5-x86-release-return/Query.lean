@@ -5,3 +5,5 @@ import KProgFormal.ClightRefinement.X86ReleaseReturn
 #print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.preserve_flags
 #check KProgFormal.ClightRefinement.X86ReleaseReturn.execute
 #print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.execute
+#check KProgFormal.ClightRefinement.X86ReleaseReturn.from_load
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.from_load
