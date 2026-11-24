@@ -1,0 +1,3 @@
+The integrated proof root now exposes complete ordinary scalar/tag0 qword XOR calls for every register aliasing route, together with existing byte/dword proofs and the latest ARM result-condition/twelve-call interfaces. The focused root build574 and103 public type/axiom queries passed. Source/native/canonical state, actual helper calls, allocation, flags, writeback, release and return are covered within the recorded premises. The next whole confirmation uses the corrected DIV443dac009 tree.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -226,3 +226,4 @@ import KProgFormal.ClightRefinement.X86AluXorByteAll
 import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvPrefixNative
 import KProgFormal.ClightRefinement.X86AluXorDwordAll
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultPrefix
+import KProgFormal.ClightRefinement.X86AluXorQwordAll

@@ -68,8 +68,11 @@ actual stores, local release and return, with final GPR and flag views of that
 same ISA output. The [dword calls](results/m5-x86-xor-dword-all/README.md)
 also cover all ordinary scalar/tag0 register aliasing, using the real
 197-step writer and actual return. Their matched shortcut additionally
-covers old represented pointer/tag cells. Word/qword callers, RSP/pointer
-arithmetic inputs and dispatcher composition remain work in progress.
+covers old represented pointer/tag cells. The [qword calls](results/m5-x86-xor-qword-all/README.md)
+cover the same ordinary scalar/tag0 aliasing domain through the original
+selectors, repeated tag calls, 252-step writer and actual return. Word-width
+callers, RSP/pointer arithmetic inputs and dispatcher composition are the next
+proof work.
 
 ## Trust boundary
 
