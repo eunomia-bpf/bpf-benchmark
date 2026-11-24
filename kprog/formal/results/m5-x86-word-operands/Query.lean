@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86LogicWordOperands
+#print axioms KProgFormal.ClightRefinement.X86LogicWordOperands.scalar
+#print axioms KProgFormal.ClightRefinement.X86LogicWordOperands.xor_step
