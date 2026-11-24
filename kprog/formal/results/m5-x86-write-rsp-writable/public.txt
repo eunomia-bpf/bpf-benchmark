@@ -1,0 +1,33 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspWritable.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (bindingBlock localBlock baseBlock : CC.Block) (baseOffset : CC.Integers.Ptrofs) (value nativeBase : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (CC.Val.Vlong value))
+  (header : CC.Mem.load CC.Mptr memory bindingBlock 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (native : CC.Mem.load CC.Chunk.Mint64 memory baseBlock baseOffset.unsigned = some (CC.Val.Vlong nativeBase))
+  (permission : memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true) :
+  ∃ after,
+    CC.Mem.store CC.Mptr memory localBlock 0 (CC.Val.Vlong (value - nativeBase)) = some after ∧
+      KProgFormal.ClightRefinement.InternalRun ge 14
+          (CC.State.State function CC.Stmt.Sskip
+            (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ShiftWriteback.storageTail k) e le memory)
+          (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e
+            (KProgFormal.ClightRefinement.X86RegisterWriteRsp.temps le baseBlock baseOffset value nativeBase) after) ∧
+        CC.Mem.load CC.Mptr after localBlock 0 = some (CC.Val.Vlong (value - nativeBase)) ∧
+          after.access = memory.access ∧
+            after.nextblock = memory.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ localBlock → CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspWritable.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
