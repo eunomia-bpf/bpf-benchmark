@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86PartialReleaseCacheFrame
+#check KProgFormal.ClightRefinement.X86PartialReleaseCacheFrame.execute
+#print axioms KProgFormal.ClightRefinement.X86PartialReleaseCacheFrame.execute
