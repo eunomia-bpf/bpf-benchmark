@@ -1,0 +1,3 @@
+The actual scalar/tag0 RSP qword writer runs282 Clight transitions from its original writer entry through the13-step RSP probe, both real tag helper calls, real old-SP/old-cell reads, width helper, local copy/overwrite, reverse materialization, both table stores, non-increasing signed raw-SP release and original loop exit. Initial native-base/read/separation/permission premises derive every intermediate result and the final full native RSP/frame. Increasing-SP release and complete initial handler-call composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
