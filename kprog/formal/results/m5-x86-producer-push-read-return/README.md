@@ -1,0 +1,3 @@
+The real nested reader Returnstate resumes its original Kcall, pops the genuine sequence and performs the original operand-temporary assignment in three internal transitions. The SAME body execution now reaches Sskip after saving the actual initialized RBX scalar, with real following continuation and unchanged complete allocated memory. This does not execute PUSH stack effects or complete the outer producer.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

@@ -1,0 +1,53 @@
+KProgFormal.ClightRefinement.X86ProducerPushReadReturn.source (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  (KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate binding k memory).continuation =
+    CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerPushReadReturn.save
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following binding k memory)
+'KProgFormal.ClightRefinement.X86ProducerPushReadReturn.source' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReadReturn.resume (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (value : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+    (CC.State.Returnstate (CC.Val.Vlong value)
+      (CC.callCont (KProgFormal.ClightRefinement.X86ProducerPushRead.continuation binding k memory))
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following binding k memory)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushReadReturn.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReadReturn.saved (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (value : BitVec 64) :
+  CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps binding k memory value) =
+    some (CC.Val.Vlong value)
+'KProgFormal.ClightRefinement.X86ProducerPushReadReturn.saved' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReadReturn.from_body {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    ((KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate ready.entry.block k ready.after).count + 1 +
+        KProgFormal.ClightRefinement.X86RegisterReadScalar.length X86.Size.q +
+      3)
+    (KProgFormal.ClightRefinement.X86ProducerPushOperand.start ready.entry.block k ready.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following ready.entry.block k ready.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block k ready.after (ready.values 3))
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushReadReturn.from_body' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

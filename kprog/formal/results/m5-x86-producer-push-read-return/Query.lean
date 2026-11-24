@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerPushReadReturn
+#check KProgFormal.ClightRefinement.X86ProducerPushReadReturn.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadReturn.source
+#check KProgFormal.ClightRefinement.X86ProducerPushReadReturn.resume
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadReturn.resume
+#check KProgFormal.ClightRefinement.X86ProducerPushReadReturn.saved
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadReturn.saved
+#check KProgFormal.ClightRefinement.X86ProducerPushReadReturn.from_body
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReadReturn.from_body
