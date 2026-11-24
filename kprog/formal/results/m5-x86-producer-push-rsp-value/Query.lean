@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspValue
+#check KProgFormal.ClightRefinement.X86ProducerPushRspValue.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspValue.source
+#check KProgFormal.ClightRefinement.X86ProducerPushRspValue.evaluate
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspValue.evaluate

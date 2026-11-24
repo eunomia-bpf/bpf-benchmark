@@ -1,0 +1,17 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspValue.source :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.rhs =
+    KProgFormal.ClightRefinement.X86ProducerPushRspValue.expression
+'KProgFormal.ClightRefinement.X86ProducerPushRspValue.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspValue.evaluate (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (current : CC.PTree.get X86_program_profile_bpf._t'230 le = some (CC.Val.Vlong 0))
+  (eight : CC.PTree.get X86_program_profile_bpf.___x86_l_pp_step le = some (CC.Val.Vlong 8#64)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+        KProgFormal.ClightRefinement.X86ProducerPushRspSource.rhs =
+      some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) ∧
+    CC.Cop.semCast (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)
+        (CC.typeof KProgFormal.ClightRefinement.X86ProducerPushRspSource.rhs)
+        (CC.typeof KProgFormal.ClightRefinement.X86ProducerPushRspSource.target) memory =
+      some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)
+'KProgFormal.ClightRefinement.X86ProducerPushRspValue.evaluate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

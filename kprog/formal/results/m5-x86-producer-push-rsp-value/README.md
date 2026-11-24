@@ -1,0 +1,3 @@
+The exact original PUSH assignment RHS converts the genuine pointer-typed union word through its original unsigned casts, negates actual step8, adds with64-bit wrap and casts to the actual pointer destination. With source-established rawRSP0 and step8 it yields Vlong(-8), without equating relative RSP with the native base pointer. No C, ISA specification or imported arithmetic semantics changes.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
