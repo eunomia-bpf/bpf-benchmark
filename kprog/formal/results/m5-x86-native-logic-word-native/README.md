@@ -1,0 +1,3 @@
+The actual word16 OR/AND call now refines the SAME canonical .logic.w16 state when its source is RSP or an ordinary scalar row. The source native-base loads, numerical helper, flags,181-step partial writer, real frame release and return are composed from initial caller storage. The ordinary scalar destination preserves48 upper bits; all architectural fields, caller loads and freed-local ranges remain explicit.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
