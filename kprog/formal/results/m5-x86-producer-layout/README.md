@@ -1,0 +1,3 @@
+The original complete exported program supplies the actual composite environment. Kernel-checked equality proves the full composite builder succeeds; mkprogram never takes its empty error case. The same environment yields existing source-derived binding/value/cache records and the actual register-union record, zero GPR-array offset, size256/alignment8/rank4. No hand-assembled composite subset or layout/offset premise remains for this source world. Original proof budgets are unchanged; no new axiom, source copy or imported-semantics/runtime edit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

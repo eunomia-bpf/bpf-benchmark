@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerLayout
+#check KProgFormal.ClightRefinement.X86ProducerLayout.built
+#print axioms KProgFormal.ClightRefinement.X86ProducerLayout.built
+#check KProgFormal.ClightRefinement.X86ProducerLayout.layouts
+#print axioms KProgFormal.ClightRefinement.X86ProducerLayout.layouts
+#check KProgFormal.ClightRefinement.X86ProducerLayout.cells_offset
+#print axioms KProgFormal.ClightRefinement.X86ProducerLayout.cells_offset
+#check KProgFormal.ClightRefinement.X86ProducerLayout.registers_layout
+#print axioms KProgFormal.ClightRefinement.X86ProducerLayout.registers_layout

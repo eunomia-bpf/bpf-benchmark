@@ -1,0 +1,30 @@
+KProgFormal.ClightRefinement.X86ProducerLayout.built :
+  CC.buildCompositeEnv X86_program_profile_bpf.composites =
+    CC.Res.OK KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+'KProgFormal.ClightRefinement.X86ProducerLayout.built' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerLayout.layouts :
+  CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings
+        KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord ∧
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+        some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord ∧
+      CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+          some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord ∧
+        CC.PTree.get X86_program_profile_bpf._x86_sim_register_cells
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+          some KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord
+'KProgFormal.ClightRefinement.X86ProducerLayout.layouts' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerLayout.cells_offset :
+  CC.unionFieldOffset KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv X86_program_profile_bpf._gpr_cells
+      KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord.co_members =
+    CC.Res.OK (0, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerLayout.cells_offset' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerLayout.registers_layout :
+  KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord.co_sizeof = 256 ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord.co_alignof = 8 ∧
+      KProgFormal.ClightRefinement.X86ProducerLayout.registersRecord.co_rank = 4
+'KProgFormal.ClightRefinement.X86ProducerLayout.registers_layout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
