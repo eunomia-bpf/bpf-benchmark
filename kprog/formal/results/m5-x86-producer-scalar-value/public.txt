@@ -1,0 +1,22 @@
+KProgFormal.ClightRefinement.X86ProducerScalarValue.evaluated (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (i : Fin 8) (word : BitVec 64)
+  (read :
+    CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).resultName le =
+      some (CC.Val.Vlong word)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.rhs i) =
+    some (KProgFormal.ClightRefinement.X86ProducerScalarValue.input i word)
+'KProgFormal.ClightRefinement.X86ProducerScalarValue.evaluated' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarValue.cast (memory : CC.Mem) (i : Fin 8) (word : BitVec 64) :
+  CC.Cop.semCast (KProgFormal.ClightRefinement.X86ProducerScalarValue.input i word)
+        (CC.typeof (KProgFormal.ClightRefinement.X86ProducerScalarSource.rhs i))
+        (KProgFormal.ClightRefinement.X86ProducerHeaderSource.localType
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i))
+        memory =
+      some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word) ∧
+    CC.Val.loadResult (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i)
+        (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word) =
+      KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word
+'KProgFormal.ClightRefinement.X86ProducerScalarValue.cast' depends on axioms: [propext, Classical.choice, Quot.sound]

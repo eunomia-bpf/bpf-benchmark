@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarValue
+#check KProgFormal.ClightRefinement.X86ProducerScalarValue.evaluated
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarValue.evaluated
+#check KProgFormal.ClightRefinement.X86ProducerScalarValue.cast
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarValue.cast
