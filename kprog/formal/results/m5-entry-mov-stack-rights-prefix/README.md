@@ -1,0 +1,7 @@
+# Same original entry constructs current stack resources after both MOV calls
+
+The same original98-provider source execution, actual initialization/setup, cold MOV and MOVK callers now construct the reached HeaderView AND all actual current Resources after both real calls. The original ready packet remains attached to the same outer witnesses; real caller permission frames and header effects derive current Freeable locals, cache resources and bounded access equality. All prior complete source/native/register/trace/cache/store/free/frontier/header/tail/ABI/24tag contracts remain, and old interfaces retain their types. No separately selected initializer, inferred Writable from raw loads, no-op provider or new external memory law is used. Provider outcome/CacheFrame admission stays explicit. Next carry this actual current resource result through the fetched two-step/native prefix and subsequent original callers, then original353 memset and complete sequential post-store/provider/tag/transfer/clobber/free/caller before one related root. Existing complete fixture14 and complete ISA families0 retain their scopes; this new current-rights prefix covers both real MOV calls.
+
+Focused build 321 and 1 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
