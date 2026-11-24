@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerGhostStore
+#check KProgFormal.ClightRefinement.X86ProducerGhostStore.local_bindings
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostStore.local_bindings
+#check KProgFormal.ClightRefinement.X86ProducerGhostStore.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostStore.write

@@ -1,0 +1,40 @@
+KProgFormal.ClightRefinement.X86ProducerGhostStore.local_bindings (before : CC.Mem) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerGhostStore.Locals before)
+'KProgFormal.ClightRefinement.X86ProducerGhostStore.local_bindings' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGhostStore.write (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (rest : CC.Stmt) (locals : KProgFormal.ClightRefinement.X86ProducerGhostStore.Locals before) (i : Fin 12)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          ((KProgFormal.ClightRefinement.X86ProducerGhostSource.assignment i).Ssequence rest) k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer rest k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk i) memory (locals i).block 0
+            (KProgFormal.ClightRefinement.X86ProducerGhostSource.value i) =
+          some after ∧
+        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk i) after (locals i).block 0 =
+            some (KProgFormal.ClightRefinement.X86ProducerGhostSource.value i) ∧
+          (∀ (j : Fin 12),
+              j ≠ i →
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk j) after (locals j).block 0 =
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk j) memory (locals j).block 0) ∧
+            (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                b ≠ (locals i).block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerGhostStore.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
