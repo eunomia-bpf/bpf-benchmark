@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64MemsetByteWrite
+
+#check KProgFormal.ClightRefinement.Arm64MemsetByteWrite.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteWrite.source
+#check KProgFormal.ClightRefinement.Arm64MemsetByteWrite.nonvolatile
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteWrite.nonvolatile
+#check KProgFormal.ClightRefinement.Arm64MemsetByteWrite.builtin
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteWrite.builtin
+#check KProgFormal.ClightRefinement.Arm64MemsetByteWrite.write
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteWrite.write
+#check KProgFormal.ClightRefinement.Arm64MemsetByteWrite.write_local
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteWrite.write_local
