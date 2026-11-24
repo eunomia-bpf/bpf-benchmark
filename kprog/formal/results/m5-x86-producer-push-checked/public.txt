@@ -1,0 +1,49 @@
+KProgFormal.ClightRefinement.X86ProducerPushChecked.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (state : X86.CheckedState) (profile : X86.MemoryProfile)
+  (length : Nat) (running : state.stopped = false) (present : state.profile = some profile)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.cpu.regs.get X86.GPR.rsp - 8#64 + BitVec.ofNat 64 lane) state.addressWidth) =
+      true)
+  (writable :
+    ((List.range 8).all fun lane => profile.writable (state.cpu.regs.get X86.GPR.rsp - 8#64 + BitVec.ofNat 64 lane)) =
+      true)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      state.cpu)
+  (memory :
+    KProgFormal.ClightRefinement.X86StackCacheView.Represents ready.after (ready.sources 1).block
+      (KProgFormal.ClightRefinement.X86PushMemoryView.view state.cpu.mem profile) origins.stack) :
+  have next := X86.stepChecked { op := X86.Op.push X86.Size.q (X86.Operand.reg X86.GPR.rbx), len := length } state;
+  ∃ outputProfile,
+    next.profile = some outputProfile ∧
+      CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+          (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+            KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+            (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+            (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+            ready.output ready.after)
+          CC.E0
+          (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+            KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+            (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+            ready.output complete.after) ∧
+        KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins complete.after
+            ready.gprs.block 0 next.cpu ∧
+          KProgFormal.ClightRefinement.X86StackCacheView.Represents complete.after (ready.sources 1).block
+              (KProgFormal.ClightRefinement.X86PushMemoryView.view next.cpu.mem outputProfile) origins.stack ∧
+            next.fault = state.fault
+'KProgFormal.ClightRefinement.X86ProducerPushChecked.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
