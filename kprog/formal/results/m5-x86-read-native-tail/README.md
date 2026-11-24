@@ -1,0 +1,3 @@
+Starting at the actual LHS call state, both genuine reader calls and original caller continuations now produce the native register inputs, admitting RSP on either side and legal high-byte views. Ordinary scalar rows and RSP use their distinct real source lengths and helper/base reads. Both results derive from the SAME initial CPU representation and unchanged memory, with no callee-run or returned-value premise.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
