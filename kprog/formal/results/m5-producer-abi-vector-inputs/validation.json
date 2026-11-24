@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-24T13:49:03.702840+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProducerAbiVectorInputs"
+    ],
+    "exit": 0,
+    "seconds": 7.078004837036133,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 201,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-producer-abi-vector-inputs/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.2818119525909424,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "GPR_provider_visits": 30,
+    "flag_provider_visits": 4,
+    "vector_provider_visits": 64,
+    "retained_traces": 98,
+    "retained_complete_memset_prefix": 287
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerAbiVectorInputs.lean",
+      "size_bytes": 6089,
+      "mtime_ns": 1795528039884531396
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
