@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerEffectiveWidth
+#check KProgFormal.ClightRefinement.X86ProducerEffectiveWidth.invoke
+#print axioms KProgFormal.ClightRefinement.X86ProducerEffectiveWidth.invoke

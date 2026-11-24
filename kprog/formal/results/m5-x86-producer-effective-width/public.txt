@@ -1,0 +1,14 @@
+KProgFormal.ClightRefinement.X86ProducerEffectiveWidth.invoke (frame memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (result argument : CC.Ident) (read : CC.PTree.get argument le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 8
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      (KProgFormal.ClightRefinement.X86ProducerEffectiveWidth.statement result argument) k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation frame).fst
+      (CC.PTree.set result (CC.Val.Vint 8#32) le) memory)
+'KProgFormal.ClightRefinement.X86ProducerEffectiveWidth.invoke' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
