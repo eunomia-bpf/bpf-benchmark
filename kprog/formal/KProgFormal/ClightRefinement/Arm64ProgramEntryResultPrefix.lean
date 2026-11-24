@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvPrefixNative
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultCondition
 import KProgFormal.ClightRefinement.Arm64UaddlvCacheFrame
 import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvAdmission
 import KProgFormal.ClightRefinement.Arm64ProgramEntryOrnPrefixNative
@@ -62,8 +63,9 @@ private theorem caller_context (le : CC.TempEnv) (fields : Fin 3 → BitVec 32) 
   repeat rw [CC.PTree.gso _ _ _ _ (by decide +kernel)]
 
 /-- The original 98 provider inputs and complete twelve-call prefix compose
-with both actual GPR calls, vector loads and result XORs. Source selection and
-the real intervening effects derive every input; all earlier contracts remain. -/
+with both actual GPR calls, vector loads, priority-derived condition and result
+XORs. Source selection and real intervening effects derive every input; all
+earlier contracts remain. -/
 theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
     (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
@@ -360,7 +362,18 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
         (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 7)
         ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 3).setWidth 64)
         ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 0).setWidth 64)).get
-        Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) := by
+        Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) ∧
+      ∃ conditionCount, InternalRun world conditionCount
+        (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryUaddlvCall.afterUaddlv k
+          (Arm64ProgramEntryAllocation.allocation initial).1 (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1)) summed)
+        (.State Arm64ProgramFixture.f_arm64_execute_compile Arm64ProgramEntryResultCondition.afterCondition k
+          (Arm64ProgramEntryAllocation.allocation initial).1
+          (Arm64ProgramEntryResultCondition.resultTemps (Arm64ProgramEntryResultVector.temps (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1))
+          (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 5)
+          (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 7)
+          ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 3).setWidth 64)
+          ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 0).setWidth 64))
+            (Arm64ProgramEntryResultCondition.nativeResult (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) (fields 1) (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) summed) := by
   obtain ⟨entry,header,ready,temps,traces,length,readyNext,entryRun, ctxRead, continuation⟩ :=
     Arm64ProgramEntryUaddlvPrefixNative.entry_corresponds initial ctxBlock ctxOfs k addresses ctxWord context
       values provider flags flagProvider vectors vectorProvider origins s native fields old reads
@@ -433,7 +446,18 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     false origins.stack).mp facts12.2.2.2.2.2.2.2.1
   obtain ⟨readCount,readRun⟩ := Arm64ProgramEntryResultVector.execute summedStorage addresses origins (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state currentRegisters
     (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1)) k bits _ kind kindCases lhs rhs (fun _ => currentWarm)
-  exact ⟨readCount,readRun,(Arm64ProgramEntryResultVector.context _ _ _ _ _).trans
-    ((caller_context temps fields).trans ctxRead)⟩
+  have finalCtx : (Arm64ProgramEntryResultVector.temps (priorityTemps (markTemps (setupTemps temps fields) (fields 0)) (fields 1))
+      (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 5)
+      (Reference.AArch64.gpr (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 7)
+      ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 3).setWidth 64)
+      ((Reference.AArch64.readVector (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state 0).setWidth 64)).get Arm64ProgramFixture._ctx = some (.Vptr ctxBlock ctxOfs) :=
+    (Arm64ProgramEntryResultVector.context _ _ _ _ _).trans
+    ((caller_context temps fields).trans ctxRead)
+  have field := (Arm64ProgramEntryBody.context_read_frame facts12.2.2.2.2.2.1 ctxBlock old ctxOfs 1).trans (reads 1)
+  obtain ⟨conditionCount,conditionRun⟩ := Arm64ProgramEntryResultCondition.execute summedStorage
+    (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state currentRegisters.flags _ k ctxBlock ctxOfs
+    (Arm64ProgramEntryResultCondition.nativeResult (Reference.AArch64.step (afterEleven (nativeSetup s origins fields))).state) (fields 1) finalCtx field
+    (Arm64ProgramEntryResultVector.result _ _ _ _ _)
+  exact ⟨readCount,readRun,finalCtx,_,readRun.trans conditionRun⟩
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryResultPrefix
