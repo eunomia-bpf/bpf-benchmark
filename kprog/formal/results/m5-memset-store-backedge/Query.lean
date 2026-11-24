@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.store_exit
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.store_exit
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.stored_inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.stored_inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.with_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge.with_stores
+#check KProgFormal.ClightRefinement.Arm64MemsetStackWrite.temps_inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackWrite.temps_inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.temps_inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.temps_inputs

@@ -1,0 +1,7 @@
+# Both actual stores reach the real post-store SP and tag loop
+
+At each of the16 original negative offsets, the real bias/action route and both s77 stores are composed with the actual17-transition post-store path: original do/while exit3, real SP header/cell loads6, signed comparison, loss-index0 initialization and original gate78 in8. The exact source temporaries are preserved by actual setter proofs. Current allocation-bound storage, View/Resources and24 tag-byte observations construct both stores; the actual source SP is explicitly identified as0. Source allocation separation derives the SP/header observations after the real stores, retaining both equations/readbacks, permissions/frontier, caller frame, outside-footprint loads and reached HeaderView. The endpoint is original s101: its real kind6 provider and repeated source store remain part of the following loss-tag loop, with actual outcome/trace/ABI required. The current theorem covers each offset; sequential16 iterations, same original-entry current-rights/native-SP binding, tag transfer, clobber/free/caller are the next composition. Existing interfaces remain unchanged, original instruction/native fixture14, memset full-call prefix353 and complete ISA families0 retain their scopes.
+
+Focused build 331 and 6 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.

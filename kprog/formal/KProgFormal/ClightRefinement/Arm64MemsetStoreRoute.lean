@@ -197,6 +197,14 @@ def temps (le : CC.TempEnv) (i : Fin 16) (byte : BitVec 8) : CC.TempEnv :=
   (Arm64MemsetStackAction.temps (preparedTemps le i byte) i).set Arm64Program.___a64_stw_action
     (.Vint (Arm64MemsetStackAction.action i))
 
+/-- The actual bias/action/cast setters retain the source entry and
+loss offset for the post-store continuation. -/
+theorem temps_inputs (le : CC.TempEnv) (i : Fin 16) (byte : BitVec 8) :
+    (temps le i byte).get Arm64Program._entry = le.get Arm64Program._entry ∧
+    (temps le i byte).get Arm64Program.___a64_loss_off = le.get Arm64Program.___a64_loss_off := by
+  constructor <;> simp +decide only [temps,Arm64MemsetStackAction.temps,preparedTemps,tailTemps,biasTemps,
+    CC.PTree.gso]
+
 /-- The original store loop reaches the real tag-word/byte store body in37
 transitions at every original offset, retaining its genuine bias read,
 index/value assignments, action selector/cast/guard and saved continuation. -/

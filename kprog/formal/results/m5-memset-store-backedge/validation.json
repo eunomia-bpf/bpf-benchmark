@@ -1,0 +1,61 @@
+{
+  "confirmed_utc": "2026-11-24T15:49:25.234331+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStoreBackedge"
+    ],
+    "exit": 0,
+    "seconds": 21.97226643562317,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 331,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-store-backedge/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8209502696990967,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 6,
+  "source_steps": {
+    "original_store_loop_exit": 3,
+    "actual_sp_header_cell_reads": 6,
+    "negative_test_index_init_gate78": 8,
+    "post_store_total": 17,
+    "original_offsets": 16
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStackWrite.lean",
+      "size_bytes": 12775,
+      "mtime_ns": 1795534928927223700
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStoreRoute.lean",
+      "size_bytes": 16293,
+      "mtime_ns": 1795534951795369906
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStoreBackedge.lean",
+      "size_bytes": 14456,
+      "mtime_ns": 1795534991470053530
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

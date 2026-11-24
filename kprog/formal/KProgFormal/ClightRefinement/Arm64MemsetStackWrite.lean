@@ -33,6 +33,15 @@ def temps (le : CC.TempEnv) (i : Fin 160) (tags stack : CC.Block) (word : BitVec
   Arm64MemsetLaneGates.temps (laneTemps
     (Arm64MemsetByteGates.temps (tagTemps le i tags word) (BitVec.ofNat 64 i.val)) value stack)
 
+/-- The actual tag/byte/gate temporary updates retain the original entry
+and loss offset used by the real post-store SP/tag loop. -/
+theorem temps_inputs (le : CC.TempEnv) (i : Fin 160) (tags stack : CC.Block)
+    (word : BitVec 64) (value : BitVec 8) :
+    (temps le i tags stack word value).get Arm64Program._entry = le.get Arm64Program._entry ∧
+    (temps le i tags stack word value).get Arm64Program.___a64_loss_off = le.get Arm64Program.___a64_loss_off := by
+  constructor <;> simp +decide only [temps,tagTemps,laneTemps,Arm64MemsetByteGates.temps,
+    Arm64MemsetLaneGates.temps,CC.PTree.gso]
+
 /-- The entire original stack arm executes its real tag read/modify/write,
 width and crossing gates, volatile byte store, and all seven remaining gates.
 The two real stores and their complete source continuations are retained. -/
