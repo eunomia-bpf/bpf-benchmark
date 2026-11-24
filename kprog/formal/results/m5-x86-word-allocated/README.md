@@ -1,0 +1,3 @@
+The genuine ALU handler allocation supplies the181-step low16 writer its actual local union binding, separation, byte/table permissions and unshadowed width helper. Its native register view, allocation frontier, permission map and caller-load frame are retained. Scalar/tag0 old-word observations are initial memory premises, not intermediate execution or store-success assumptions.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
