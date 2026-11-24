@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64MovKeepWordRights
+
+#check KProgFormal.ClightRefinement.Arm64MovKeep.LinkedWordRights.call
+#print axioms KProgFormal.ClightRefinement.Arm64MovKeep.LinkedWordRights.call
