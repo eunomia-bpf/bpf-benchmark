@@ -1,0 +1,3 @@
+The proof root imports complete ordinary scalar/tag0 XOR dword calls for every register aliasing route. It retains all existing byte proofs and ARM CNT/UADDLV twelve-call prefix imports. The focused root build550 and65 public type/axiom queries pass, covering the previous byte interfaces, ARM UADDLV interfaces, all full-width storage/writeback components and the new dword source/canonical composition.
+
+Checks run at original200000/512,j1,32GiB inside shared timing on CPUs12–15. This is a focused Lean confirmation; whole make check is not rerun unchanged while the coordinator owns its original DIV fault-marker correction. RSP/pointer arithmetic inputs, word/qword callers, complete instruction families and dispatchers remain unfinished.

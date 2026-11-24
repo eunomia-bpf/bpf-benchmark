@@ -65,8 +65,11 @@ the same reference ISA's full-state logical-register result, including oracle
 and PC updates. The [genuine XOR byte calls](results/m5-x86-xor-byte-all/README.md)
 now cover every ordinary scalar/tag0 register-slice aliasing route through
 actual stores, local release and return, with final GPR and flag views of that
-same ISA output. Other widths, RSP/pointer inputs and dispatcher composition
-remain work in progress.
+same ISA output. The [dword calls](results/m5-x86-xor-dword-all/README.md)
+also cover all ordinary scalar/tag0 register aliasing, using the real
+197-step writer and actual return. Their matched shortcut additionally
+covers old represented pointer/tag cells. Word/qword callers, RSP/pointer
+arithmetic inputs and dispatcher composition remain work in progress.
 
 ## Trust boundary
 
