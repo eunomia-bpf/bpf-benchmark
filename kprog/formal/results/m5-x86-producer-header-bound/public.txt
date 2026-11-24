@@ -1,0 +1,52 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderBound.to_first_call (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) (values : Fin 5 → CC.Val) (typed : KProgFormal.ClightRefinement.X86ProducerContextSource.Typed values)
+  (inputs :
+    ∀ (i : Fin 5), CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i) le = some (values i))
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ entry sources after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 94
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerStart k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls k)
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      KProgFormal.ClightRefinement.X86ReleaseProvider.View after entry.block (sources 1).block 0 ∧
+        KProgFormal.ClightRefinement.X86CallFrameComplete.View after entry.block
+            (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) ∧
+          CC.Mem.load CC.Mptr after entry.block 0 = some (CC.Val.Vptr (sources 0).block 0) ∧
+            (∀ (i : Fin 5),
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk i) after entry.block
+                    (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i) =
+                  some (values i)) ∧
+              entry.block ≠ (sources 1).block ∧
+                KProgFormal.ClightRefinement.X86CallFrameComplete.Outside
+                    (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) (sources 1).block ∧
+                  KProgFormal.ClightRefinement.X86CallFrameComplete.Separated entry.block
+                      (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources) ∧
+                    CC.Positive.toNat (sources 1).block < CC.Positive.toNat after.nextblock ∧
+                      (∀ (slot : Fin 6),
+                          CC.Positive.toNat
+                                ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources).tag slot).fst <
+                              CC.Positive.toNat after.nextblock ∧
+                            CC.Positive.toNat
+                                ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts sources).pointer
+                                    slot).fst <
+                              CC.Positive.toNat after.nextblock) ∧
+                        (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                            b ≠ entry.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+                          KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                            after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerHeaderBound.to_first_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
