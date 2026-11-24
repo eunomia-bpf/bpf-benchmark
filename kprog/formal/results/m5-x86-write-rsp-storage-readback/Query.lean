@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspStorage
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspStorage.execute_readback
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspStorage.execute_readback
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspStorage.execute
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspStorage.execute
