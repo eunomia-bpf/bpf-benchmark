@@ -1,0 +1,3 @@
+The genuine handler allocation and old caller table rights derive the actual writer local binding, separation from both caller blocks, local/table write permissions and unshadowed width helper. The complete original ordinary dword writer then executes197 transitions with whole native GPR correspondence, including overwritten pointer/tag cells. Every old caller load outside the table survives.
+
+Focused build169 and allocated type/axiom query pass at original200000/512,j1,32GiB inside shared timing. Actual source external assumptions remain explicit. The preceding computation, complete handler and dispatcher remain open.
