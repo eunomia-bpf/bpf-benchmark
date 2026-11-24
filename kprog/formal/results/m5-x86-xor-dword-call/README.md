@@ -1,0 +1,3 @@
+The genuine eight-argument scalar/tag0 XOR dword call executes both original register reads and numerical helper, all five actual flag stores, the complete197-step register writer, local release and actual void return. All intermediate inputs and successful stores/free are derived. The final GPR/logical flag views, revoked locals, allocation frontier and old caller load frame are explicit. Distinct registers or distinct encoded source/destination lanes are covered; matched shortcut, RSP/pointer input arithmetic and full dispatcher remain open.
+
+Focused build201 and execute type/axiom query pass at original200000/512,j1,32GiB inside shared timing. Canonical ISA output composition follows separately.
