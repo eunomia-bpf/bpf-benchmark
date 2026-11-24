@@ -1,0 +1,2 @@
+import KProgFormal.ClightRefinement.X86WordTable
+#print axioms KProgFormal.ClightRefinement.X86WordTable.writable

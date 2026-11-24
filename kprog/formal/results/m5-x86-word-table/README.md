@@ -1,0 +1,3 @@
+Actual table word/tag stores of the low16 merged value refine the SAME native word update. The old scalar word and tag are derived from the existing represented memory, and initial table permissions construct both real stores. Every other register representation, other block load, access map and allocation frontier is preserved. This is a table refinement component, not a complete handler family.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
