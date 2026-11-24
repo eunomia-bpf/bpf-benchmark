@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicByteOperands
+
+#check KProgFormal.ClightRefinement.X86LogicByteOperands.scalar
+#print axioms KProgFormal.ClightRefinement.X86LogicByteOperands.scalar
+#check KProgFormal.ClightRefinement.X86LogicByteOperands.xor_step
+#print axioms KProgFormal.ClightRefinement.X86LogicByteOperands.xor_step

@@ -1,0 +1,67 @@
+KProgFormal.ClightRefinement.X86LogicByteOperands.scalar
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base cpu)
+  (slice : KProgFormal.Reference.X86.RegisterSlice) (word : BitVec 64) (shift : BitVec 8) (ordinary : slice.reg ≠ 4)
+  (lane : shift = BitVec.ofNat 8 (slice.shift KProgFormal.Reference.X86.ScalarWidth.w8))
+  (current :
+    CC.Mem.load CC.Mptr memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑slice.reg)).unsigned =
+      some (CC.Val.Vlong word))
+  (tag :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑slice.reg) + 8).unsigned =
+      some (CC.Val.Vint 0#32)) :
+  KProgFormal.ClightRefinement.X86RegisterReadLanes.result word X86.Size.b shift =
+    cpu.getReg X86.Size.b (X86.GPR.ofIndex slice.reg) (slice.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8)
+'KProgFormal.ClightRefinement.X86LogicByteOperands.scalar' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicByteOperands.xor_step
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs) (state : KProgFormal.Reference.X86.State)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base
+      (KProgFormal.ClightRefinement.X86LogicReference.input state))
+  (dst src : KProgFormal.Reference.X86.RegisterSlice) (left right nextPc : BitVec 64) (aux : BitVec 32)
+  (ordinaryDst : dst.reg ≠ 4) (ordinarySrc : src.reg ≠ 4)
+  (dstLane : BitVec.setWidth 8 (aux >>> 8) = BitVec.ofNat 8 (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8))
+  (srcLane : BitVec.setWidth 8 (aux >>> 16) = BitVec.ofNat 8 (src.shift KProgFormal.Reference.X86.ScalarWidth.w8))
+  (leftRead :
+    CC.Mem.load CC.Mptr memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑dst.reg)).unsigned =
+      some (CC.Val.Vlong left))
+  (rightRead :
+    CC.Mem.load CC.Mptr memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑src.reg)).unsigned =
+      some (CC.Val.Vlong right))
+  (leftTag :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑dst.reg) + 8).unsigned =
+      some (CC.Val.Vint 0#32))
+  (rightTag :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory block (base + CC.Integers.Ptrofs.repr (16 * ↑↑src.reg) + 8).unsigned =
+      some (CC.Val.Vint 0#32))
+  (running : state.modelError = none) :
+  have value :=
+    KProgFormal.ClightRefinement.X86RegisterReadLanes.result left X86.Size.b (BitVec.setWidth 8 (aux >>> 8)) ^^^
+      KProgFormal.ClightRefinement.X86RegisterReadLanes.result right X86.Size.b (BitVec.setWidth 8 (aux >>> 16));
+  KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.logic KProgFormal.Reference.X86.ScalarWidth.w8
+        KProgFormal.Reference.X86.LogicKind.xor (KProgFormal.Reference.X86.ScalarDestination.register dst)
+        (KProgFormal.Reference.X86.ScalarSource.register src) nextPc)
+      state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.b (X86.GPR.ofIndex dst.reg)
+                    value (dst.shift KProgFormal.Reference.X86.ScalarWidth.w8 == 8)).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.logic X86.Size.b (X86.Value.trunc X86.Size.b value) (state.oracle.bits state.oracle.cursor)
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth,
+          oracle :=
+            have __src := state.oracle;
+            { bits := __src.bits, cursor := state.oracle.cursor + 1 } },
+      events := [] }
+'KProgFormal.ClightRefinement.X86LogicByteOperands.xor_step' depends on axioms: [propext, Classical.choice, Quot.sound]
