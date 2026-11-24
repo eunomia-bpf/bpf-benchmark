@@ -1,0 +1,38 @@
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.source :
+  KProgFormal.ClightRefinement.X86ProducerPushMetadataSource.clear 5 =
+      KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.body.Sloop CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.body =
+      (KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagRead.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagStore).Ssequence
+        (KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerRead.Ssequence
+          KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerStore)
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.reads :
+  KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagRead =
+      CC.Stmt.Sset X86_program_profile_bpf._t'215
+        KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagExpression ∧
+    KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerRead =
+        CC.Stmt.Sset X86_program_profile_bpf._t'214
+          KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerExpression ∧
+      KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagExpression =
+          KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.field X86_program_profile_bpf._tag
+            (CC.tptr CC.tuchar) ∧
+        KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerExpression =
+          KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.field X86_program_profile_bpf._pointer
+            (CC.tptr (CC.tptr CC.tvoid))
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.reads' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.stores :
+  KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagStore =
+      CC.Stmt.Sassign ((CC.Expr.Etempvar X86_program_profile_bpf._t'215 (CC.tptr CC.tuchar)).Ederef CC.tuchar)
+        (CC.Expr.Econst_int (CC.Integers.Int.repr 0) CC.tuint) ∧
+    KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerStore =
+      CC.Stmt.Sassign
+        ((CC.Expr.Etempvar X86_program_profile_bpf._t'214 (CC.tptr (CC.tptr CC.tvoid))).Ederef (CC.tptr CC.tvoid))
+        (CC.Expr.Econst_int (CC.Integers.Int.repr 0) CC.tint)
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.stores' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

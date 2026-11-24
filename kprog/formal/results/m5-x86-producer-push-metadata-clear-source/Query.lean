@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.source
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.reads
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.reads
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.stores
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.stores
