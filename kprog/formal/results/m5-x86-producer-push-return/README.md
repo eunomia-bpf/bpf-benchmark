@@ -1,0 +1,3 @@
+The SAME original post-cache heap executes all real signed-loss/enclosing-loop exits, body free/fallthrough, wrapper resumption/break/empty-frame return and producer next sequence. Actual original local allocation/access maps construct successful free; every released local range, old caller raw frame and contents/frontier are retained. No assumed return/free/source run or replacement continuation. Canonical ISA/native-memory/input-oracle/trace/full149 work remains separate.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

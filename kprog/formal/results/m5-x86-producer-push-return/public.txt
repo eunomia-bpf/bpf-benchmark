@@ -1,0 +1,67 @@
+KProgFormal.ClightRefinement.X86ProducerPushReturn.resume {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) (le : CC.TempEnv)
+  (memory after : CC.Mem)
+  (freed :
+    memory.freeList
+        (CC.blocksOfEnv KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 7
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      ready.output after)
+'KProgFormal.ClightRefinement.X86ProducerPushReturn.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushReturn.from_cache {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+        (14 +
+            2 *
+              (KProgFormal.ClightRefinement.X86ProducerPushExitSource.bodies ready.entry.block
+                  (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after).length +
+          7)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+          (KProgFormal.ClightRefinement.X86ProducerPushCacheExecute.following rsp
+            (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.control ready) metadata.after)
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+          (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) result.after)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          ready.output after) ∧
+      result.after.freeList
+            (CC.blocksOfEnv KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+              (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst) =
+          some after ∧
+        KProgFormal.ClightRefinement.FrameBelow ready.after.nextblock result.after after ∧
+          after.contents = result.after.contents ∧
+            after.nextblock = result.after.nextblock ∧
+              ∀ (row : CC.Block × CC.Z × CC.Z),
+                row ∈
+                    CC.blocksOfEnv KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+                      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst →
+                  ∀ (ofs : CC.Z),
+                    row.snd.fst ≤ ofs →
+                      ofs < row.snd.snd →
+                        ∀ (kind : CC.PermKind) (permission : CC.Permission),
+                          after.perm row.fst ofs kind permission = false
+'KProgFormal.ClightRefinement.X86ProducerPushReturn.from_cache' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushReturn
+#check KProgFormal.ClightRefinement.X86ProducerPushReturn.resume
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReturn.resume
+#check KProgFormal.ClightRefinement.X86ProducerPushReturn.from_cache
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushReturn.from_cache
