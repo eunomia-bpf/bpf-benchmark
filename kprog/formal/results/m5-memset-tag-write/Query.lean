@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagWrite
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.source
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.loop_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.loop_source
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.read_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.read_step
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.store_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.store_step
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWrite.execute_local
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWrite.execute_local
