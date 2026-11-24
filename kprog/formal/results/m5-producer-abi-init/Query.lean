@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiInit
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiInit.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiInit.source
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiInit.observed
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiInit.observed
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiInit.prefix_with_kind
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiInit.prefix_with_kind

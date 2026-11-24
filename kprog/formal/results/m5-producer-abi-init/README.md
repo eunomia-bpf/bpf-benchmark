@@ -1,0 +1,7 @@
+# Actual production ABI initializer readback from the original source prefix
+
+The actual original production cachePrefix has 189 assignments; its final source statement stores unsigned byte2 in the actual ABI-kind local (TailLocal6). The proof consumes any original568-transition production prefix certificate, cancels the real entry transition, peels the first188 actual assignments at three source transitions each and inverts the final original three transitions. Actual deterministic expression/lvalue evaluation, cast and store/readback derive the ABI byte from that same execution. The retained existing prefix witness now carries access/frontier/caller frame and actual ABI observation together, with no successful read premise. No instruction semantics or runtime changes. Original complete memset prefix remains287 until this observation and actual header704 pointer are transported through the real earlier source effects; instruction/native prefix14 and complete ISA families0. Next source-local/header transport and original stack route, all16 stores, transfer/clobber/free/caller before one related root batch.
+
+Focused build 177 and 3 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
