@@ -1,0 +1,3 @@
+The actual RSP table-release continuation reads saved old SP and the newly stored RSP, compares their signed raw offsets, and exits both real loops without changing memory when the new offset does not increase. The20 transitions compose source5/12/3 boundaries at original resource caps; no store, intermediate execution, release result or external outcome is assumed. Increasing-SP release/clobber and complete handler composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

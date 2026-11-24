@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspRelease
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.unchanged
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.unchanged
