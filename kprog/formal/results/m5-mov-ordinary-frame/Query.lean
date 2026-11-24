@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateOrdinaryFrame
+
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.OrdinaryCall.corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.OrdinaryCall.corresponds
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.OrdinaryCall.Result.storage
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.OrdinaryCall.Result.storage
