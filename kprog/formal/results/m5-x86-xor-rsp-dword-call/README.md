@@ -1,0 +1,3 @@
+The genuine distinct-register RSP dword XOR call executes actual native readers, numerical helper, five flags, real writer, local free and void return. All intermediate inputs follow from initial heap/representation and the actual allocation. Non-increasing signed raw SP and native-base protection remain explicit. The dword writer admits ANY initial RSP tag and actually zero-extends.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
