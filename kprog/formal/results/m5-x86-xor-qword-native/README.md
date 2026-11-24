@@ -1,0 +1,3 @@
+The genuine scalar/tag0 qword XOR reader route through actual helpers, stores,252-step writer, release and return refines the SAME canonical ISA step. Final source GPR/flag views use that step output, including PC/oracle updates, empty events/no fault and preservation of all remaining reference state fields. Actual source cell observations derive both numerical operands; no selected-value premise is used.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
