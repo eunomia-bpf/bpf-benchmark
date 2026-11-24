@@ -1,0 +1,3 @@
+The genuine matched-register/lane qword XOR shortcut, actual numerical helper, five flag stores,252-step writer with both tag calls, local release and void return compose. The exact seventh source-shift input is derived from the original decoded shortcut. Tag0 destination storage and whole register representation supply actual cell/SP reads and casts; no shortcut-result or intermediate execution premise is added.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
