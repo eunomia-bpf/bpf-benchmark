@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64MemsetPointerRoute
+
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.enter
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.enter
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.word_read
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.word_read
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.read
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.read
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.finish
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.finish
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerRoute.original
