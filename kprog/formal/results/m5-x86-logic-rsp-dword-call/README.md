@@ -1,0 +1,3 @@
+The actual OR/AND RSP-destination dword handler call composes genuine RSP-aware readers, numerical helper, all flag stores,223-step zero-extending RSP writer, local free and true void return. Every initial RSP tag is admitted; non-increasing signed raw result and native-base protection remain explicit. All intermediate source reads/stores/free and final native GPR/flag/caller frames derive from the SAME original heap, with no successful run/store premise.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
