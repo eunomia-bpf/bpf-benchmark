@@ -1,0 +1,3 @@
+Root build passed652 jobs;207 public interfaces retain every prior155 query. Adds the actual RSP byte/word scalar writeback tail (83/82 Clight steps), with native upper56/48-bit preservation, real reverse/table stores and the non-increasing signed raw-SP release branch. This is a tail theorem: complete byte/word writer entry/calls, volatile alternatives, increasing release and universal149-op refinement remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -87,8 +87,11 @@ reverse materialization and both table stores to the exact stack-release
 frontier. The [RSP destination calls](results/m5-x86-rsp-dword-root/README.md)
 refine the same canonical OR/AND step through free and return for non-increasing
 raw SP: qword with tag0, dword with any initial tag and real zero-extension.
-Increasing-SP release, byte/word destinations, other qword tags and remaining
-pointer operand domains stay open.
+The [byte/word scalar tail](results/m5-x86-rsp-partial-writeback/README.md)
+also preserves native upper56/48 bits through the actual partial stores,
+reverse/table writes and non-increasing release. Its initial writer/call and
+volatile alternatives remain open, along with increasing-SP release, other
+qword tags and remaining pointer operand domains.
 
 ## Trust boundary
 
