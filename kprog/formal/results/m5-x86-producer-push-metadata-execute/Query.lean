@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.resume
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.resume
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.from_rsp
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.from_rsp
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataExecute.inputs

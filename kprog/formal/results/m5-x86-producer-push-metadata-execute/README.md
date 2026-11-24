@@ -1,0 +1,3 @@
+The SAME accepted RSP heap executes original25-step index/width preparation, all six overlap selectors, both genuine selected slot5 stores and every slot/prepare-loop/sequence exit into the actual storage loop. Store/readbacks/current header-GPR-cache-ghost resources/actual rights-frontier/caller raw and typed frames accompany one execution. No independent layout/load/store/View/source-run premise or new provider ABI is added; actual payload cache write and return remain separate.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
