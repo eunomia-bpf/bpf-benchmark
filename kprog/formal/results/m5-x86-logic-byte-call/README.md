@@ -1,0 +1,3 @@
+The genuine byte OR/AND handler call now executes both actual readers and numerical helper, five flag stores,169-step byte writer, frame release and true return. Every ordinary scalar/tag0 aliasing route and source lane within the stated bounds is retained; later canonical correspondence supplies legal low/high-byte slices. Initial memory and permissions derive all intermediate source/store observations.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
