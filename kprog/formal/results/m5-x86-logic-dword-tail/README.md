@@ -1,0 +1,3 @@
+Initial permissions derive all five actual logical flag stores. The original flag stage, full197-step dword writer, actual loop exits, local deallocation and void return compose. Complete native GPR and logical flag views, old caller load frame and revoked local ranges follow, including overwritten pointer/tag destination cells and represented pointer SP. No extra old-SP or destination read premise is used.
+
+Focused build181 and execute type/axiom query pass at original200000/512,j1,32GiB inside shared timing. Actual source external assumptions and helper bindings stay explicit. The full call prefix and canonical ISA output remain the next composition.
