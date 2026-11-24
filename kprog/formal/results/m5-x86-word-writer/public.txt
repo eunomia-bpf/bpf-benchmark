@@ -1,0 +1,5 @@
+'KProgFormal.ClightRefinement.X86WordWriter.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
