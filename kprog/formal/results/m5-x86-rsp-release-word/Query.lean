@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.layout_source
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.layout_source
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.enter
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.enter
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.returned
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.returned
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.execute
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.execute
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.selected
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.selected

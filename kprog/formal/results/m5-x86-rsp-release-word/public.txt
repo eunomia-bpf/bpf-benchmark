@@ -1,0 +1,160 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.layout_source :
+  (match KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackDefinition✝ with
+    | CC.CompositeDef.Composite name kind rows attr => CC.compositeOfDef CC.PTree.empty name kind rows attr) =
+    CC.Res.OK KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.layout_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (input : CC.Block)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 2
+    (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_110 k e le memory)
+    (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 6#32]
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.continuation function e le k) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.returned (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (supplied : CC.Mem) (binding stack : CC.Block)
+  (base : CC.Integers.Ptrofs) (slot : Fin 6) (value : BitVec 64)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (indexRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (header : CC.Mem.load CC.Mptr supplied binding 8 = some (CC.Val.Vptr stack base))
+  (writable :
+    supplied.validAccess CC.Chunk.Mint64 stack
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ after,
+    CC.Mem.store CC.Chunk.Mint64 supplied stack
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+          (CC.Val.Vlong value) =
+        some after ∧
+      KProgFormal.ClightRefinement.InternalRun ge 6
+          (CC.State.Returnstate (CC.Val.Vlong value)
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.continuation function e le k) supplied)
+          (CC.State.State function CC.Stmt.Sskip k e
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.temps le value stack base) after) ∧
+        CC.Mem.load CC.Chunk.Mint64 after stack
+              (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned =
+            some (CC.Val.Vlong value) ∧
+          after.access = supplied.access ∧
+            after.nextblock = supplied.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ stack → CC.Mem.load chunk after other offset = CC.Mem.load chunk supplied other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.returned' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (before supplied : CC.Mem)
+  (binding stack input : CC.Block) (base : CC.Integers.Ptrofs) (slot : Fin 6) (value : BitVec 64) (trace : CC.Trace)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (indexRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (provider :
+    CC.externalCall KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputEF ge.genv_genv.toSenv
+      [CC.Val.Vint 6#32] before trace (CC.Val.Vlong value) supplied)
+  (header : CC.Mem.load CC.Mptr supplied binding 8 = some (CC.Val.Vptr stack base))
+  (writable :
+    supplied.validAccess CC.Chunk.Mint64 stack
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ after,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_110 k e le before) trace
+        (CC.State.State function CC.Stmt.Sskip k e
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.temps le value stack base) after) ∧
+      CC.Mem.store CC.Chunk.Mint64 supplied stack
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+            (CC.Val.Vlong value) =
+          some after ∧
+        CC.Mem.load CC.Chunk.Mint64 after stack
+              (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned =
+            some (CC.Val.Vlong value) ∧
+          after.access = supplied.access ∧
+            after.nextblock = supplied.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ stack → CC.Mem.load chunk after other offset = CC.Mem.load chunk supplied other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.selected (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (before supplied : CC.Mem)
+  (binding stack input : CC.Block) (base : CC.Integers.Ptrofs) (slot : Fin 6) (old next value : BitVec 64)
+  (trace : CC.Trace) (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (indexRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (offsetRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_off__5 le =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.offset slot)))
+  (oldRead : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (nextRead : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next))
+  (whole : KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.whole slot old next = true)
+  (provider :
+    CC.externalCall KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputEF ge.genv_genv.toSenv
+      [CC.Val.Vint 6#32] before trace (CC.Val.Vlong value) supplied)
+  (header : CC.Mem.load CC.Mptr supplied binding 8 = some (CC.Val.Vptr stack base))
+  (writable :
+    supplied.validAccess CC.Chunk.Mint64 stack
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ after,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration k e le before)
+        trace
+        (CC.State.State function CC.Stmt.Sskip k e
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.temps
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.temps le slot old next) value stack base)
+          after) ∧
+      CC.Mem.store CC.Chunk.Mint64 supplied stack
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned
+            (CC.Val.Vlong value) =
+          some after ∧
+        CC.Mem.load CC.Chunk.Mint64 after stack
+              (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.address base slot).unsigned =
+            some (CC.Val.Vlong value) ∧
+          after.access = supplied.access ∧
+            after.nextblock = supplied.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ stack → CC.Mem.load chunk after other offset = CC.Mem.load chunk supplied other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.selected' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
