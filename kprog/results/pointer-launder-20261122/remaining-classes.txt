@@ -139,3 +139,49 @@ a clean verify.
   reloads once with foreign PROG_ARRAY fds dropped, re-arming
   NATIVE_LAB_TRUSTED_CHUNK first, exactly as the non-trusted path already
   did (native_loader.cpp:3498). kprog/libnativeloader/src/native_loader_trusted.cpp.
+
+Classes F and G, found 2026-11-24 in the Tetragon/Tracee capture
+(/workspaces/kprog-raw/verified/omp-five-20261120, logs under
+*/state/session-*/service.log). Neither is in the four classes above
+because those were read from OTel and BCC only. Both apps' fallbacks
+were miscounted as zero in kprog/results/verified-coverage-20261120
+(corrected there): Tetragon 12 checked-sim-c / 83 direct-native,
+Tracee 3 / 32.
+
+Class F: a store past the 512-byte verifier frame.
+  "invalid write to stack R10 off=-560..-952", 38 occurrences across the
+  two apps: -856 x10, -888 x10, -800 x6, -864 x3, -952 x2, -768 x2,
+  then -880, -704, -648, -584, -560 one each.
+  B's own struct frame stays small (tetragon request 1 emits
+  X86_SIM_STACK_BYTES 56U), so the slot at -856 belongs to the linked
+  wrapper, not to the simulator's stack_mem; the offset is a function
+  of the emitted module's frame, not of the emulated x86 stack.
+  Not measured: which emitted construct owns it.
+
+Class G: dereference of a value read out of memory.
+  "R* invalid mem access 'scalar'", 46 occurrences (Tetragon 32 across
+  its 3 attempts, Tracee 14). 44 share one shape: load kprog_unspec's
+  u64 word, test one bit, then dereference the loaded value:
+    tetragon 3  insn 27-30: r2 = *(u64 *)(r2+0); r2 &= 1;
+                            if r2 != 0 goto +3; r1 = *(u32 *)(r1+0)
+    tracee   3  insn 10-13: r2 = *(u64 *)(r7+0); r2 &= 1;
+                            if r2 != 0 goto +13; r2 = *(u32 *)(r0+0)
+  The other two (tetragon 5 and tetragon3 4, the same program) are
+  "181: r0 = 0; 182: *(u64 *)(r0 +0) = r0" — a store through a zero
+  scalar base, the RIP-relative absolute-address form the load macro
+  comments on, which the verifier refuses as a scalar store.
+  The x86 really loads through the address the application computed, and
+  B reads that slot with kprog_x86_mem_load_fixed_into, whose body is
+  bpf_probe_read_kernel (kprog/formal/generated/x86_mem_access.h:100-111):
+  the result is a plain scalar, so the pointer provenance is gone before
+  the second load. This is the same root as class A (a helper's integer
+  result dereferenced) but reached through B's own load path rather than
+  through bpf_get_current_task, so the class-A fix does not cover it.
+  The pointer-launder pass (kprog/x86/packet_bounds_ir.cpp:370-500)
+  rewrites frame-pointer differences and a pointer-typed minuend; it does
+  not give a loaded scalar pointer provenance.
+
+Both classes predate the 2026-11-23 B fixes (7db7ddc23, c3c89a8d3,
+e3ce00476, aaca40148, 25d4ae58b, 3ffc87abc), so this capture cannot say
+whether they still occur. Their current state needs a guest run of
+tetragon/observer and tracee/monitor.
