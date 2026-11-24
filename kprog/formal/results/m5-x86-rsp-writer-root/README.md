@@ -1,0 +1,3 @@
+The shared proof root retains all190 earlier ARM/x86 public interfaces and adds4 actual RSP writer interfaces. The113-step selectors,94/91-step full-width storage tails,282-step qword writer and real handler-allocation adapter pass original caps. The exact source reads/stores/helper calls, native zero-extended/full RSP views and caller frames are retained under explicit scalar/tag0 and non-increasing signed raw-SP premises. Increasing release/clobber and complete handler/dispatcher composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
