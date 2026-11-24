@@ -1,0 +1,3 @@
+The shared root retains all187 earlier public interfaces and adds3 strengthened RSP source interfaces. Exact table/storage readbacks compose the real36-step storage prefix with the20-step non-increasing signed raw-SP release exit, yielding56 source transitions to the original continuation with native GPR/frame conclusions. Earlier execute types remain unchanged. Increasing-SP release/clobber, width-writer entry and whole-handler/dispatcher obligations remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

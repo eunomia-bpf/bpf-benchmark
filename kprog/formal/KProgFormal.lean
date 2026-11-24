@@ -248,3 +248,4 @@ import KProgFormal.ClightRefinement.X86AluNativeLogicQwordNative
 import KProgFormal.ClightRefinement.X86RegisterWriteRspStorage
 import KProgFormal.ClightRefinement.X86RegisterWriteRspPartial
 import KProgFormal.ClightRefinement.X86RegisterWriteRspRelease
+import KProgFormal.ClightRefinement.X86RegisterWriteRspStable
