@@ -1,0 +1,3 @@
+The actual distinct-register byte XOR call composes both complete native readers (including RSP sources of any tag), original numerical helper, flags, real scalar writer, free and void return. Destination is ordinary scalar/tag0; legal byte/high slices and all source observations, permissions and caller frames are derived from the initial relation and real allocation. No intermediate execution/result/store is assumed.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

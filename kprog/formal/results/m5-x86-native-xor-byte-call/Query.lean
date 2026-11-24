@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluNativeXorByteCall
+#check KProgFormal.ClightRefinement.X86AluNativeXorByteCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluNativeXorByteCall.execute
