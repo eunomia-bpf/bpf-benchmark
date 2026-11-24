@@ -1,0 +1,3 @@
+The original same-RSP/same-low-lane XOR77-step shortcut executes its actual zero initialization and numerical helper, five flags, genuine RSP dword writer, free and void return. No reader helper or assumed zero result is required. Writer table rights, native-base protection and non-increasing signed raw SP remain explicit. Dword admits ANY initial tag with real zero-extension.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
