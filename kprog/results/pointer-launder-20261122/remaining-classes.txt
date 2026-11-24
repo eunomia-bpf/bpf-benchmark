@@ -204,6 +204,16 @@ Class G: dereference of a value read out of memory.
   rewrites frame-pointer differences and a pointer-typed minuend; it does
   not give a loaded scalar pointer provenance.
 
+  Mechanism, checked in the header. Every B memory read takes the helper:
+  KPROG_X86_MEM_LOAD is kprog_x86_mem_load (:173), and the fixed-
+  displacement form B uses for these sites is
+  kprog_x86_mem_load_fixed_into (:86-104), whose BPF arm per width is
+  bpf_probe_read_kernel at :93, :96, :99 and :102 followed by a re-read
+  of the destination. The helper leaves a scalar, so the loaded 8 bytes
+  arrive at B with no provenance; the emulated pointer tag survives in
+  the simulator's tags, and the verifier cannot see it. A store through
+  such a value is the zero-base case above; a load through it is class G.
+
 Both classes predate the 2026-11-23 B fixes (7db7ddc23, c3c89a8d3,
 e3ce00476, aaca40148, 25d4ae58b, 3ffc87abc), so this capture cannot say
 whether they still occur. Their current state needs a guest run of
