@@ -1,0 +1,3 @@
+Every187 original ABI destination is evaluated through the real field lookup and typed array pointer arithmetic, or original direct pointer field. The actual source-world layout and allocated ABI binding give exact addresses for all byte padding, five32-bit CB entries and both pointer fields. Finite original indices establish actual signed-index/pointer arithmetic normalization without assuming an address or raising budgets. All earlier source statements and subsequent provider/setup suffix remain intact; no new axiom or runtime/semantic edit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
