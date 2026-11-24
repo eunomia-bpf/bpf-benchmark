@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerSubEntry
+#check KProgFormal.ClightRefinement.X86ProducerSubEntry.call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubEntry.call
+#check KProgFormal.ClightRefinement.X86ProducerSubEntry.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubEntry.execute
