@@ -1,0 +1,3 @@
+The original qword destination pointer selector with aligned lanes reaches its actual first reg_tag call in15 Clight transitions. The source identity, real helper resolution, exact arguments, temporary map, caller continuation and unchanged memory are proved. All architectural destination indices are covered; no tag value or successful call execution is assumed.
+
+Focused build167 and source/enter type/axiom queries pass at original200000/512,j1,32GiB inside shared timing. The deterministic build2 timeout was corrected by splitting the14-step source prefix from the actual relational call step, with unchanged budgets. The accepted21-step helper and its real caller return are the next composition.

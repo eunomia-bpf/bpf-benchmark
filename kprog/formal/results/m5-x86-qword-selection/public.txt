@@ -1,0 +1,48 @@
+KProgFormal.ClightRefinement.X86QwordSelection.source :
+  KProgFormal.ClightRefinement.X86ShiftWriteback.scalarWriter =
+      ((((KProgFormal.ClightRefinement.X86QwordSelection.first✝.Ssequence
+                        KProgFormal.ClightRefinement.X86QwordSelection.second✝).Ssequence
+                    KProgFormal.ClightRefinement.X86QwordSelection.third✝).Ssequence
+                KProgFormal.ClightRefinement.X86QwordSelection.fourth✝).Ssequence
+            KProgFormal.ClightRefinement.X86QwordSelection.fifth✝).Ssequence
+        KProgFormal.ClightRefinement.X86QwordSelection.gate✝ ∧
+    KProgFormal.ClightRefinement.X86QwordSelection.third✝ =
+      CC.Stmt.Sifthenelse (CC.Expr.Etempvar X86_program_profile_bpf._t'130 CC.tint)
+        ((KProgFormal.ClightRefinement.X86QwordSelection.tagCall✝.Ssequence
+              KProgFormal.ClightRefinement.X86QwordSelection.compared).Ssequence
+          KProgFormal.ClightRefinement.X86QwordSelection.selected)
+        (CC.Stmt.Sset X86_program_profile_bpf._t'131 (CC.Expr.Econst_int (0#32) CC.tint))
+'KProgFormal.ClightRefinement.X86QwordSelection.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86QwordSelection.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (index : Fin 16) (bindingBlock helperBlock : CC.Block)
+  (offset : CC.Integers.Ptrofs)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (dstShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (srcShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock offset))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 15
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.scalarWriter k e le memory)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag)
+      [CC.Val.Vptr bindingBlock offset,
+        CC.Val.Vlong (BitVec.setWidth 64 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index))]
+      (CC.Cont.Kcall (some X86_program_profile_bpf._t'132) function e
+        (KProgFormal.ClightRefinement.X86QwordSelection.temps le)
+        (KProgFormal.ClightRefinement.X86QwordSelection.continuation k))
+      memory)
+'KProgFormal.ClightRefinement.X86QwordSelection.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
