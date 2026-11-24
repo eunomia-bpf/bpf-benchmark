@@ -1,0 +1,3 @@
+The genuine distinct-register native XOR call now derives every flags/writeback input and original source shift from the exact reached temporaries. Both original reader calls and numerical helper are included; all four widths and ordinary scalar/tag0 or RSP native operands are supported. The original scalar XOR Observed contract is reused; no new numerical ISA model or intermediate-result premise is added.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
