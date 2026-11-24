@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushGprView
+#check KProgFormal.ClightRefinement.X86ProducerPushGprView.table
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushGprView.table
+#check KProgFormal.ClightRefinement.X86ProducerPushGprView.initial_sp
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushGprView.initial_sp
+#check KProgFormal.ClightRefinement.X86ProducerPushGprView.registers
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushGprView.registers

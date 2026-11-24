@@ -1,0 +1,52 @@
+KProgFormal.ClightRefinement.X86ProducerPushGprView.table {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (row : Fin 32) :
+  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) complete.after ready.gprs.block
+      (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+    if row = 8 then some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)
+    else
+      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) ready.after ready.gprs.block
+        (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)
+'KProgFormal.ClightRefinement.X86ProducerPushGprView.table' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushGprView.initial_sp {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu) :
+  cpu.regs.get (X86.GPR.ofIndex 4) = origins.stack
+'KProgFormal.ClightRefinement.X86ProducerPushGprView.initial_sp' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushGprView.registers {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins complete.after ready.gprs.block 0
+    (cpu.setReg X86.Size.q (X86.GPR.ofIndex 4)
+      (KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp + origins.stack))
+'KProgFormal.ClightRefinement.X86ProducerPushGprView.registers' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
