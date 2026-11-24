@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerPushPointerRead
+#check KProgFormal.ClightRefinement.X86ProducerPushPointerRead.scalar
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushPointerRead.scalar

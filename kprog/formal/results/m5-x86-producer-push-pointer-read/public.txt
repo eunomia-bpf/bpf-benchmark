@@ -1,0 +1,10 @@
+KProgFormal.ClightRefinement.X86ProducerPushPointerRead.scalar (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (cells : CC.Block) (temporary : CC.Ident) (word : BitVec 64)
+  (read : CC.PTree.get temporary le = some (CC.Val.Vptr cells 0))
+  (current : CC.Mem.load CC.Mptr memory cells 64 = some (CC.Val.Vlong word)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      (KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer temporary) =
+    some (CC.Val.Vlong word)
+'KProgFormal.ClightRefinement.X86ProducerPushPointerRead.scalar' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
