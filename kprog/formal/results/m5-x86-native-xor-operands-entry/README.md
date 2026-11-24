@@ -1,0 +1,3 @@
+The genuine eight-argument XOR call enters the actual allocated handler, resolves width and aux lanes, executes the original distinct-register selector and both complete native readers, and reaches arithmetic dispatch. All current register, table and native-base observations are derived from the initial caller relation and actual allocation frame. All four widths and legal high-byte selectors are admitted; ordinary rows require scalar/tag0 while RSP admits any tag.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
