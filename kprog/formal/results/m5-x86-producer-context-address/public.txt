@@ -1,0 +1,29 @@
+KProgFormal.ClightRefinement.X86ProducerContextAddress.field_offset (ce : CC.CompositeEnv)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ce =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (i : Fin 5) :
+  CC.fieldOffset ce (KProgFormal.ClightRefinement.X86ProducerContextSource.fieldName i)
+      KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord.co_members =
+    CC.Res.OK (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerContextAddress.field_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextAddress.target_address (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (binding : CC.Block) (i : Fin 5)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (bound :
+    CC.PTree.get X86_program_profile_bpf.___x86_inline_bindings e =
+      some (binding, KProgFormal.ClightRefinement.X86ProducerHeaderSource.headerType)) :
+  CC.doEvalLvalue ge e le memory (KProgFormal.ClightRefinement.X86ProducerContextSource.target i) =
+    some
+      (binding, CC.Integers.Ptrofs.repr (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i),
+        CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerContextAddress.target_address' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

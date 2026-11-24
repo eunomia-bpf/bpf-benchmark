@@ -1,0 +1,3 @@
+The actual imported binding members give pointer fields at192/200/208 and byte fields at216/217. Original field-address evaluation constructs exact header addresses for all five assignments under the existing binding/value composite layouts. Ground source-name distinctions and source layout arithmetic are kernel checked at original budgets; no offset/address premise or new axiom. The pointer header and subsequent real loop/caller are unchanged.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
