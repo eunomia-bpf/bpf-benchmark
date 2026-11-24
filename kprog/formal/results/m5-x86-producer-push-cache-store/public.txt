@@ -1,0 +1,18 @@
+KProgFormal.ClightRefinement.X86ProducerPushCacheStore.write {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp) :
+  ∃ after,
+    CC.Mem.store CC.Chunk.Mint64 result.after (ready.sources 1).block 40 (CC.Val.Vlong (ready.values 3)) = some after ∧
+      CC.Mem.load CC.Chunk.Mint64 after (ready.sources 1).block 40 = some (CC.Val.Vlong (ready.values 3)) ∧
+        (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+            b ≠ (ready.sources 1).block ∨ ofs + CC.sizeChunk c ≤ 40 ∨ 48 ≤ ofs →
+              CC.Mem.load c after b ofs = CC.Mem.load c result.after b ofs) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock result.after after ∧
+            after.access = result.after.access ∧ after.nextblock = result.after.nextblock
+'KProgFormal.ClightRefinement.X86ProducerPushCacheStore.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
