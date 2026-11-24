@@ -1,0 +1,46 @@
+KProgFormal.ClightRefinement.X86ProducerGprEnter.enter (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (i : Fin 16) (ordinary : i ≠ 4) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 5
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).whole k
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 6#32]
+      (KProgFormal.ClightRefinement.X86ProducerGprEnter.continuation i
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerGprEnter.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprEnter.returned (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) (k : CC.Cont)
+  (i : Fin 16) (word : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.Returnstate (CC.Val.Vlong word) (KProgFormal.ClightRefinement.X86ProducerGprEnter.continuation i e le k)
+      memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).destination
+      (CC.Cont.Kseq (KProgFormal.ClightRefinement.X86ProducerGprEnter.tail i) k) e
+      (KProgFormal.ClightRefinement.X86ProducerGprEnter.temps i le word) memory)
+'KProgFormal.ClightRefinement.X86ProducerGprEnter.returned' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprEnter.rsp (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 5
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).whole k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).destination
+      (CC.Cont.Kseq (KProgFormal.ClightRefinement.X86ProducerGprEnter.tail 4) k) e
+      (CC.PTree.set (KProgFormal.ClightRefinement.X86ProducerGprSites.site 4).savedName (CC.Val.Vlong 0) le) memory)
+'KProgFormal.ClightRefinement.X86ProducerGprEnter.rsp' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

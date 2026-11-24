@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerGprEnter
+#check KProgFormal.ClightRefinement.X86ProducerGprEnter.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprEnter.enter
+#check KProgFormal.ClightRefinement.X86ProducerGprEnter.returned
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprEnter.returned
+#check KProgFormal.ClightRefinement.X86ProducerGprEnter.rsp
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprEnter.rsp
