@@ -1,0 +1,3 @@
+The genuine native-base zero assignment and all eight original flag/XMM provider/store sites compose from the same original post-GPR boundary. Actual local-name separation preserves the zero base readback through every provider frame/store; all eight scalar readbacks, protected typed loads, untouched temporaries/access/frontier follow the same run with actual concatenated trace/values. Explicit provider ABI remains and no raw-contents equality or native-memory/oracle binding is inferred.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
