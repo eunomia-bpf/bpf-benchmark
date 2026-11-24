@@ -1,0 +1,20 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/scalar-inputs-20261124T194253Z",
+  "command": [
+    "make",
+    "-C",
+    "kprog/formal",
+    "check"
+  ],
+  "started": "2026-11-24T20:00:09.263095+00:00",
+  "head": "6a32110e892d183bcabdea8c228afa25b09daab7",
+  "cpus": "12-15",
+  "shared_timing": true,
+  "formal_full_check_lock": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512,
+  "exit": 0,
+  "seconds": 813.6524885279359,
+  "finished": "2026-11-24T20:13:42.916977+00:00"
+}

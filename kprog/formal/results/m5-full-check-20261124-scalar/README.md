@@ -1,0 +1,5 @@
+Complete `make -C kprog/formal check` passed with exit0 in813.652489 seconds, finishing2026-11-24T20:13:42.916977Z. The run started at6a32110e892d183bcabdea8c228afa25b09daab7 (integrated root816/public502). Its full Lean build passed982 jobs, followed by the complete existing reference/hardware comparisons, host semantic/frame/fault oracles and BPF compile checks.
+
+Original200000 heartbeats/512 depth/j1/32GiB, nice19 CPUs12–15 inside shared timing and exclusive formal-full-check. No numerical ISA, C/export, oracle, runtime or benchmark setting was changed. Existing peer WIP and all raw results remain.
+
+After the full run's Lean phase, three new independent proof leaves (ContextSetup, StackBaseProvider, EntryReady) were direct/focused/public-validated separately. Their later aggregate integration is recorded in `../m5-x86-producer-entry-ready-root/`; this receipt does not label those later leaves as part of the earlier full Lean phase. Full149-operation/native-memory/provider-oracle/trace/dispatcher refinement remains unfinished.
