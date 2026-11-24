@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerGhostInitialize
+#check KProgFormal.ClightRefinement.X86ProducerGhostInitialize.ghosts_initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostInitialize.ghosts_initialized
+#check KProgFormal.ClightRefinement.X86ProducerGhostInitialize.setup_initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerGhostInitialize.setup_initialized
