@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86AluReadNativeOperands
+#check KProgFormal.ClightRefinement.X86AluReadNativeOperands.read
+#print axioms KProgFormal.ClightRefinement.X86AluReadNativeOperands.read
+#check KProgFormal.ClightRefinement.X86AluReadNativeOperands.observations
+#print axioms KProgFormal.ClightRefinement.X86AluReadNativeOperands.observations

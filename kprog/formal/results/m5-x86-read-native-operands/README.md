@@ -1,0 +1,3 @@
+The original non-XOR selector and both complete reader calls now reach the real arithmetic dispatcher with native register views, including RSP on either side, legal high-byte reads and all aliasing. The selector, call bindings, source continuations, initial representation and actual base/word loads derive both simultaneous results. The exact caller memory and decoded operation/width are preserved.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
