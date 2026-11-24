@@ -33,7 +33,7 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-release-cache-frame-root/README.md)
+[integrated public queries](results/m5-x86-writer-cache-frame-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
@@ -60,11 +60,11 @@ standard logical axioms. Imported Clight execution also uses the existing
 explicit provider availability, permission/frontier preservation and memory
 frame premises. The imported external-call interface supplies determinacy
 and trace-length laws; those laws do not establish the provider memory ABI.
-Actual byte/word release stores, all six slots, the metadata helper and
-free/return additionally preserve cache reads at or above new SP. This uses
-explicit stronger provider preservation, cache/ghost separation and initial
-cache lifetime premises. Binding them to the real provider/producer and
-composing the finer frame through whole writers remain open.
+The complete logical-register calls additionally preserve actual cache reads
+at or above new SP, from caller allocation through flag stores, whole writers,
+release and free/return. This uses explicit stronger provider preservation,
+cache/ghost separation and initial cache lifetime premises. Binding those
+premises to the real provider/producer remains open.
 
 The argument also trusts the C front end/exporter, imported semantics and
 their correspondence to production C, artifact binding and platform memory
