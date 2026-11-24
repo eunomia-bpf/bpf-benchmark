@@ -167,11 +167,18 @@ Class F: B's frame exceeds the verifier's 512-byte stack.
   carries "combined stack size of %d calls is %d" and no private-stack
   mode, so subprogram frames sum to 512.
 
-  The frame is not the emulated x86 stack. Request 10 declares
-  X86_SIM_STACK_BYTES 224U, and request 1 declares 56U with a largest
-  r10 offset of 88; both verified-emitter outputs, one refused and one
-  accepted. The 1408 bytes come from the generated code's own temporaries
-  around the emulated stack, not from the stack size the program needs.
+  The frame breaks into four parts, all measured on request 10's object
+  and its generated C:
+    union x86_sim_stack_mem                      224 B  (X86_SIM_STACK_BYTES 224U)
+    __u8 __x86_stack_value_tags[28]                28 B  (one byte per 8-byte word)
+    void *__x86_stack_value_ptrs[28]              224 B  (one pointer per word)
+    register cells, ABI copies and spills          932 B
+  The emulated stack is declared as a local by X86_SIM_L_DECLARE_STACK
+  (kprog/x86/x86_sim_local_bpf.h:524-525) and the two side arrays by
+  X86_SIM_L_DECLARE_STACK_VALUES (:336-338), so the first three rows,
+  476 B, are unavoidable frame for a program with any stack at all. The
+  remaining 932 B is what pushes this object past 512: request 1, which
+  verifies, declares 56 U of stack and its whole object stays at 88 B.
 
   Why clang accepts it: B is compiled with `-mllvm -bpf-stack-size=4096`
   (kprog/x86/trusted_specializer.py:35 and :104), four times the
