@@ -1,0 +1,14 @@
+KProgFormal.ClightRefinement.X86AluXorInputs.source_shift (binding op imm : CC.Val) (dst src : Fin 16)
+  (flags width : BitVec 8) (aux : BitVec 32) (size : X86.Size) (left right : BitVec 64) :
+  CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift
+      (KProgFormal.ClightRefinement.X86AluXorInputs.temps binding op imm dst src flags width aux size left right) =
+    some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 (aux >>> 16))))
+'KProgFormal.ClightRefinement.X86AluXorInputs.source_shift' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86AluXorShortcutInputs.source_shift (binding op imm : CC.Val) (reg : Fin 16)
+  (flags width : BitVec 8) (aux : BitVec 32) :
+  CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift
+      (KProgFormal.ClightRefinement.X86AluXorShortcutInputs.temps binding op imm reg flags width aux) =
+    some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 (aux >>> 16))))
+'KProgFormal.ClightRefinement.X86AluXorShortcutInputs.source_shift' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

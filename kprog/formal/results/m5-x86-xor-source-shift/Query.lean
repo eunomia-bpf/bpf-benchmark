@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86AluXorShortcutInputs
+
+#check KProgFormal.ClightRefinement.X86AluXorInputs.source_shift
+#print axioms KProgFormal.ClightRefinement.X86AluXorInputs.source_shift
+#check KProgFormal.ClightRefinement.X86AluXorShortcutInputs.source_shift
+#print axioms KProgFormal.ClightRefinement.X86AluXorShortcutInputs.source_shift

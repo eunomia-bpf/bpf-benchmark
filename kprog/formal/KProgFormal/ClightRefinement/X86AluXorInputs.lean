@@ -45,6 +45,22 @@ theorem observations (binding op imm : CC.Val) (dst src : Fin 16) (flags width :
       X86RegisterView.writerInitialTemps, X86Width.argument, CC.PTree.gss, CC.PTree.gso,
       X86AluDecode.field_byte, BitVec.ushiftRight_zero, same, xorCode, effective]
 
+/-- The real decode and source execution retain the original source-lane
+field needed by qword pointer selection; no intermediate observation is assumed. -/
+theorem source_shift (binding op imm : CC.Val) (dst src : Fin 16) (flags width : BitVec 8)
+    (aux : BitVec 32) (size : X86.Size) (left right : BitVec 64) :
+    (temps binding op imm dst src flags width aux size left right).get
+      X86_program_profile_bpf.___x86_l_src_shift =
+      some (.Vint (((aux >>> 16).setWidth 8).setWidth 32)) := by
+  by_cases same : dst = src
+  all_goals
+    simp +decide [temps, X86ShiftLeftSite.afterTemps, X86AluReadXorOperands.temps,
+      X86AluReadXorOperands.selectedTemps, X86AluReadXorSelect.differentLaneTemps,
+      X86AluReadSite.selectedTemps, X86AluReadTail.temps, X86AluReadRhs.temps,
+      X86AluReadSite.lhsTemps, X86AluDecode.temps, X86AluEntry.widthTemps,
+      X86RegisterView.writerInitialTemps, X86Width.argument, CC.PTree.gss, CC.PTree.gso,
+      X86AluDecode.field_byte, same]
+
 /-- The genuine eight-argument call derives both source execution and all
 six tail inputs from the original reader/helper bodies and actual caller heap. -/
 theorem entry (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)

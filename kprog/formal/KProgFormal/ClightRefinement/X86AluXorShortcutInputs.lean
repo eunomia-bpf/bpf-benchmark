@@ -26,6 +26,16 @@ theorem observations (binding op imm : CC.Val) (reg : Fin 16) (flags width : Bit
     X86Width.argument, CC.PTree.gss, CC.PTree.gso, X86AluDecode.field_byte,
     BitVec.ushiftRight_zero, xorCode, effective]
 
+/-- The real decode and source execution retain the original source-lane
+field needed by qword pointer selection; no intermediate observation is assumed. -/
+theorem source_shift (binding op imm : CC.Val) (reg : Fin 16) (flags width : BitVec 8)
+    (aux : BitVec 32) :
+    (temps binding op imm reg flags width aux).get X86_program_profile_bpf.___x86_l_src_shift =
+      some (.Vint (((aux >>> 16).setWidth 8).setWidth 32)) := by
+  simp +decide [temps, X86ShiftLeftSite.afterTemps, X86AluReadSelfXor.temps,
+    X86AluDecode.temps, X86AluEntry.widthTemps, X86RegisterView.writerInitialTemps,
+    X86Width.argument, CC.PTree.gss, CC.PTree.gso, X86AluDecode.field_byte]
+
 /-- Genuine eight-argument matched XOR call reaches the flags stage in77
 actual transitions and derives every tail observation, without a register
 reader call or an assumed shortcut result. -/
