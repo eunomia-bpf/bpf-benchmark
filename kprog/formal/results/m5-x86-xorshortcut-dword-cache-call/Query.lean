@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluXorShortcutDwordCacheCall
+#check KProgFormal.ClightRefinement.X86AluXorShortcutDwordCacheCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluXorShortcutDwordCacheCall.execute
