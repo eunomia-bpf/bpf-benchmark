@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushNativeCache
+#check KProgFormal.ClightRefinement.X86ProducerPushNativeCache.memory
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNativeCache.memory
+#check KProgFormal.ClightRefinement.X86ProducerPushNativeCache.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNativeCache.execute

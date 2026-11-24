@@ -1,0 +1,63 @@
+KProgFormal.ClightRefinement.X86ProducerPushNativeCache.memory {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (native : KProgFormal.Reference.Memory) (cpu : X86.Cpu)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86StackCacheView.Represents ready.after (ready.sources 1).block native
+      origins.stack) :
+  KProgFormal.ClightRefinement.X86StackCacheView.Represents complete.after (ready.sources 1).block
+    (KProgFormal.Reference.storeMemory native (cpu.regs.get (X86.GPR.ofIndex 4) - 8) (cpu.regs.get (X86.GPR.ofIndex 3))
+      8)
+    origins.stack
+'KProgFormal.ClightRefinement.X86ProducerPushNativeCache.memory' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushNativeCache.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (native : KProgFormal.Reference.Memory) (cpu : X86.Cpu)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins ready.after ready.gprs.block 0
+      cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86StackCacheView.Represents ready.after (ready.sources 1).block native
+      origins.stack) :
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output ready.after)
+      CC.E0
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output complete.after) ∧
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins complete.after ready.gprs.block 0
+        (cpu.setReg X86.Size.q (X86.GPR.ofIndex 4) (cpu.regs.get (X86.GPR.ofIndex 4) - 8)) ∧
+      KProgFormal.ClightRefinement.X86StackCacheView.Represents complete.after (ready.sources 1).block
+        (KProgFormal.Reference.storeMemory native (cpu.regs.get (X86.GPR.ofIndex 4) - 8)
+          (cpu.regs.get (X86.GPR.ofIndex 3)) 8)
+        origins.stack
+'KProgFormal.ClightRefinement.X86ProducerPushNativeCache.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
