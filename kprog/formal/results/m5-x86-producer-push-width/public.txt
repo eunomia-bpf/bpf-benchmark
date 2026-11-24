@@ -1,0 +1,75 @@
+KProgFormal.ClightRefinement.X86ProducerPushWidth.source :
+  KProgFormal.ClightRefinement.X86ProducerPushCall.handler.fn_body =
+      KProgFormal.ClightRefinement.X86ProducerPushWidth.body.Sloop CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86ProducerPushWidth.body =
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.widthCall.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerPushWidth.widthSet).Ssequence
+        KProgFormal.ClightRefinement.X86ProducerPushWidth.decision
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.width_source :
+  KProgFormal.ClightRefinement.X86ProducerPushWidth.widthCall =
+    CC.Stmt.Scall (some X86_program_profile_bpf._t'1)
+      (CC.Expr.Evar X86_program_profile_bpf._x86_width_effective (CC.Ty.Tfunction [CC.tuchar] CC.tuchar CC.cc_default))
+      [CC.Expr.Etempvar X86_program_profile_bpf._flags CC.tuchar]
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.width_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.width_assignment :
+  KProgFormal.ClightRefinement.X86ProducerPushWidth.widthSet =
+    CC.Stmt.Sset X86_program_profile_bpf.___x86_dispatch_width
+      ((CC.Expr.Etempvar X86_program_profile_bpf._t'1 CC.tuchar).Ecast CC.tuchar)
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.width_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.width_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective =
+      some KProgFormal.ClightRefinement.X86ProducerPushWidth.widthBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerPushWidth.widthBlock =
+      some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective)
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.width_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.enter (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (read : CC.PTree.get X86_program_profile_bpf._flags le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushCall.handler.fn_body k CC.emptyEnv le memory)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective) [CC.Val.Vint 8#32]
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.widthCont le k) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.resume (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.Returnstate (CC.Val.Vint 8#32) (KProgFormal.ClightRefinement.X86ProducerPushWidth.widthCont le k) memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushWidth.decision
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.loopCont k) CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.temps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.from_call (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 15
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerPushCall.values binding) k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushWidth.decision
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.loopCont k) CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushWidth.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushCall.initialTemps binding))
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushWidth.unchanged (le : CC.TempEnv) (name : CC.Ident)
+  (notResult : X86_program_profile_bpf._t'1 ≠ name) (notWidth : X86_program_profile_bpf.___x86_dispatch_width ≠ name) :
+  CC.PTree.get name (KProgFormal.ClightRefinement.X86ProducerPushWidth.temps le) = CC.PTree.get name le
+'KProgFormal.ClightRefinement.X86ProducerPushWidth.unchanged' depends on axioms: [propext, Classical.choice, Quot.sound]

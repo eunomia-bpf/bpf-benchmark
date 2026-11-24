@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.X86ProducerPushWidth
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.source
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.width_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.width_source
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.width_assignment
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.width_assignment
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.width_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.width_binding
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.enter
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.resume
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.resume
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.from_call
+#check KProgFormal.ClightRefinement.X86ProducerPushWidth.unchanged
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushWidth.unchanged
