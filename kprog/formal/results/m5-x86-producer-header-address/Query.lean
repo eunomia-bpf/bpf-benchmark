@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderAddress
+#check KProgFormal.ClightRefinement.X86ProducerHeaderAddress.direct_offset
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderAddress.direct_offset
+#check KProgFormal.ClightRefinement.X86ProducerHeaderAddress.values_offset
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderAddress.values_offset
+#check KProgFormal.ClightRefinement.X86ProducerHeaderAddress.ghost_offset
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderAddress.ghost_offset

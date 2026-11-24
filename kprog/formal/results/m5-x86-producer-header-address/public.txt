@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderAddress.direct_offset (ge : CC.CGenv)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (i : Fin 24) (direct : ↑i < 2 ∨ 14 ≤ ↑i) :
+  CC.fieldOffset ge.genv_cenv (KProgFormal.ClightRefinement.X86ProducerHeaderSource.fieldName i)
+      KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord.co_members =
+    CC.Res.OK (8 * ↑↑i, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerHeaderAddress.direct_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderAddress.values_offset (ce : CC.CompositeEnv)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ce =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord) :
+  CC.fieldOffset ce X86_program_profile_bpf._values
+      KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord.co_members =
+    CC.Res.OK (16, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerHeaderAddress.values_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderAddress.ghost_offset (ce : CC.CompositeEnv) (isPointer : Bool) :
+  CC.fieldOffset ce (if isPointer = true then X86_program_profile_bpf._pointer else X86_program_profile_bpf._tag)
+      KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord.co_members =
+    CC.Res.OK (if isPointer = true then 8 else 0, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerHeaderAddress.ghost_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
