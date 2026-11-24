@@ -1,0 +1,43 @@
+{
+  "commands": {
+    "reference-view-build5": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.X86LogicReferenceView"
+      ],
+      "exit": 0,
+      "seconds": 12.850028543034568,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    },
+    "reference-view-public5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-x86-logic-reference-view/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.654886970994994,
+      "cpus": "12-15",
+      "shared_timing": true,
+      "memory_limit": 34359738368,
+      "maxHeartbeats": 200000,
+      "maxRecDepth": 512
+    }
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-native-20261124T081051Z",
+  "retained_failures": [
+    "reference-view-build1",
+    "reference-view-build2",
+    "reference-view-build3",
+    "reference-view-build4"
+  ],
+  "complete_instruction_families": 0,
+  "root_integration": "pending"
+}

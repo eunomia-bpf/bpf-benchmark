@@ -1,0 +1,20 @@
+KProgFormal.ClightRefinement.X86LogicReferenceView.flags (state : KProgFormal.Reference.X86.State) (old : BitVec 64)
+  (bits : X86.Flags) (encoded : state.rflags = KProgFormal.ClightRefinement.X86LogicReference.flagsWord old bits) :
+  (KProgFormal.ClightRefinement.X86LogicReference.input state).flags = bits
+'KProgFormal.ClightRefinement.X86LogicReferenceView.flags' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicReferenceView.represented
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs) (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (cpu : X86.Cpu)
+  (state : KProgFormal.Reference.X86.State) (old : BitVec 64)
+  (registers : KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base cpu)
+  (flagBytes : KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places cpu.flags)
+  (gprs : ∀ (index : Fin 16), state.gpr index = cpu.regs.get (X86.GPR.ofIndex index))
+  (rflags : state.rflags = KProgFormal.ClightRefinement.X86LogicReference.flagsWord old cpu.flags) :
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base
+      (KProgFormal.ClightRefinement.X86LogicReference.input state) ∧
+    KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+      (KProgFormal.ClightRefinement.X86LogicReference.input state).flags
+'KProgFormal.ClightRefinement.X86LogicReferenceView.represented' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

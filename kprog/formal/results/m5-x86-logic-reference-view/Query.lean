@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.X86LogicReferenceView
+
+#check KProgFormal.ClightRefinement.X86LogicReferenceView.flags
+#print axioms KProgFormal.ClightRefinement.X86LogicReferenceView.flags
+#check KProgFormal.ClightRefinement.X86LogicReferenceView.represented
+#print axioms KProgFormal.ClightRefinement.X86LogicReferenceView.represented
