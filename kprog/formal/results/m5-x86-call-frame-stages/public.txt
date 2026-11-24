@@ -1,0 +1,44 @@
+KProgFormal.ClightRefinement.X86CallFrameStages.source :
+  KProgFormal.ClightRefinement.X86CallFrameEntry.afterSp =
+    (KProgFormal.ClightRefinement.X86CallFrameStages.stage 0).Ssequence
+      ((KProgFormal.ClightRefinement.X86CallFrameStages.stage 1).Ssequence
+        ((KProgFormal.ClightRefinement.X86CallFrameStages.stage 2).Ssequence
+          ((KProgFormal.ClightRefinement.X86CallFrameStages.stage 3).Ssequence
+            ((KProgFormal.ClightRefinement.X86CallFrameStages.stage 4).Ssequence
+              (KProgFormal.ClightRefinement.X86CallFrameStages.stage 5)))))
+'KProgFormal.ClightRefinement.X86CallFrameStages.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameStages.choose (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) (sp : BitVec 64)
+  (observedSp : CC.PTree.get X86_program_profile_bpf.___x86_sv_sp le = some (CC.Val.Vlong sp)) :
+  KProgFormal.ClightRefinement.InternalRun ge 2
+    (CC.State.State function (KProgFormal.ClightRefinement.X86CallFrameStages.stage slot) k e le memory)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86CallFrameStages.arm slot sp)
+      (KProgFormal.ClightRefinement.X86CallFrameStages.continuation slot k) e le memory)
+'KProgFormal.ClightRefinement.X86CallFrameStages.choose' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameStages.finish (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) :
+  KProgFormal.ClightRefinement.InternalRun ge 2
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86CallFrameStages.continuation slot k) e le
+      memory)
+    (CC.State.State function CC.Stmt.Sskip k e le memory)
+'KProgFormal.ClightRefinement.X86CallFrameStages.finish' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86CallFrameStages.skipped (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) (sp : BitVec 64)
+  (observedSp : CC.PTree.get X86_program_profile_bpf.___x86_sv_sp le = some (CC.Val.Vlong sp))
+  (decision : KProgFormal.ClightRefinement.X86CallFrameStages.selected slot sp = false) :
+  KProgFormal.ClightRefinement.InternalRun ge 4
+    (CC.State.State function (KProgFormal.ClightRefinement.X86CallFrameStages.stage slot) k e le memory)
+    (CC.State.State function CC.Stmt.Sskip k e le memory)
+'KProgFormal.ClightRefinement.X86CallFrameStages.skipped' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

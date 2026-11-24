@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86CallFrameStages
+#check KProgFormal.ClightRefinement.X86CallFrameStages.source
+#print axioms KProgFormal.ClightRefinement.X86CallFrameStages.source
+#check KProgFormal.ClightRefinement.X86CallFrameStages.choose
+#print axioms KProgFormal.ClightRefinement.X86CallFrameStages.choose
+#check KProgFormal.ClightRefinement.X86CallFrameStages.finish
+#print axioms KProgFormal.ClightRefinement.X86CallFrameStages.finish
+#check KProgFormal.ClightRefinement.X86CallFrameStages.skipped
+#print axioms KProgFormal.ClightRefinement.X86CallFrameStages.skipped

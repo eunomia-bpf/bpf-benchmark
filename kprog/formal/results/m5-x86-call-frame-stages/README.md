@@ -1,0 +1,3 @@
+All6 original frame-value slot loops are retained in exact source order. Their actual signed offset/raw-SP guards choose the original clearing or skip body in2 transitions for arbitrary64-bit SP and identical heap/temporaries; original backedge/breaks complete in2 more, so excluded slots execute4 internal heap-preserving steps. No selected clearing store or complete helper result is assumed. Actual source extraction/evaluation is kernel checked at original budgets.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
