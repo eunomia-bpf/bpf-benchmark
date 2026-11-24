@@ -1,0 +1,16 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderLocals.header_local (ce : CC.CompositeEnv) (before : CC.Mem) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal ce before)
+'KProgFormal.ClightRefinement.X86ProducerHeaderLocals.header_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_local (ce : CC.CompositeEnv) (before : CC.Mem)
+  (i : Fin 24) : Nonempty (KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal ce before i)
+'KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_separate (ce : CC.CompositeEnv) (before : CC.Mem)
+  (i : Fin 24) (entry : KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal ce before)
+  (source : KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal ce before i) : source.block ≠ entry.block
+'KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_separate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

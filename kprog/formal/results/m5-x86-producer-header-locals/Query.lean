@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderLocals
+#check KProgFormal.ClightRefinement.X86ProducerHeaderLocals.header_local
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderLocals.header_local
+#check KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_local
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_local
+#check KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_separate
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderLocals.source_separate
