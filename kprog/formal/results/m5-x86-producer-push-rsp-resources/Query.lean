@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspResources
+#check KProgFormal.ClightRefinement.X86ProducerPushRspResources.views
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspResources.views

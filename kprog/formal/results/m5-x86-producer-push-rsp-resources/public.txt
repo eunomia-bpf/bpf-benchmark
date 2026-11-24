@@ -1,0 +1,21 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspResources.views {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) {after : CC.Mem}
+  (stored :
+    CC.Mem.store CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+        64 (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) =
+      some after) :
+  (∀ (c : CC.Chunk) (ofs : CC.Z),
+      CC.Mem.load c after ready.entry.block ofs =
+        CC.Mem.load c (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.entry.block
+          ofs) ∧
+    KProgFormal.ClightRefinement.X86ReleaseProvider.View after ready.entry.block (ready.sources 1).block 0 ∧
+      KProgFormal.ClightRefinement.X86CallFrameComplete.View after ready.entry.block
+          (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources) ∧
+        CC.Mem.load CC.Mptr after ready.entry.block 0 = some (CC.Val.Vptr ready.gprs.block 0) ∧
+          CC.Mem.load CC.Chunk.Mint8unsigned after ready.gprs.block 72 = some (CC.Val.Vint 0)
+'KProgFormal.ClightRefinement.X86ProducerPushRspResources.views' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

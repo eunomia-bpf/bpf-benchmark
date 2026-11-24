@@ -1,0 +1,3 @@
+Original allocated-name separation and genuine store disjointness preserve every header load, current cache/ghost Views and cell pointer across the real RSP decrement. Unchanged access transports actual write rights; byte72 RSP tag0 is disjoint from byte64 Mptr store and remains current. No post-store View/load/permission premise is added; the actual source composition supplies stored.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
