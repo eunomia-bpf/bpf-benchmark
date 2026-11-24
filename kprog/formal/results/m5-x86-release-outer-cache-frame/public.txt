@@ -1,0 +1,168 @@
+KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.from_first (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (binding stack cells input helper : CC.Block) (base cellOffset : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86CallFrameComplete.Places) (sp old next : BitVec 64)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (helperSymbol : ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+  (helperGlobal :
+    ge.genv_genv.findFunctPtr helper = some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler))
+  (helperNotLocal : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_call_frame_values e = none)
+  (bindingSeparate : binding ≠ stack) (cellsSeparate : cells ≠ stack)
+  (cacheOutside : KProgFormal.ClightRefinement.X86CallFrameComplete.Outside places stack)
+  (metadataSeparate : KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places)
+  (available : KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.PreservingInputs ge binding stack base next)
+  (view :
+    KProgFormal.ClightRefinement.X86ReleaseOuterComplete.View memory binding stack cells base cellOffset places sp)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding 0 old next) :
+  ∃ trace after finalTemps,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.loopContinuation k) e le memory)
+        trace (CC.State.State function CC.Stmt.Sskip k e finalTemps after) ∧
+      KProgFormal.ClightRefinement.X86CallFrameComplete.View after binding places ∧
+        after.access = memory.access ∧
+          after.nextblock = memory.nextblock ∧
+            KProgFormal.ClightRefinement.X86ReleaseOuterComplete.Frame stack places memory after ∧
+              KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next memory after
+'KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.from_first' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (binding stack cells input helper : CC.Block) (base cellOffset : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86CallFrameComplete.Places) (sp old next : BitVec 64)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (helperSymbol : ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+  (helperGlobal :
+    ge.genv_genv.findFunctPtr helper = some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler))
+  (helperNotLocal : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_call_frame_values e = none)
+  (bindingSeparate : binding ≠ stack) (cellsSeparate : cells ≠ stack)
+  (cacheOutside : KProgFormal.ClightRefinement.X86CallFrameComplete.Outside places stack)
+  (metadataSeparate : KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places)
+  (available : KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.PreservingInputs ge binding stack base next)
+  (view :
+    KProgFormal.ClightRefinement.X86ReleaseOuterComplete.View memory binding stack cells base cellOffset places sp)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (oldRead : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (nextRead : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next)) :
+  ∃ trace after finalTemps,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing k e le memory) trace
+        (CC.State.State function CC.Stmt.Sskip k e finalTemps after) ∧
+      KProgFormal.ClightRefinement.X86CallFrameComplete.View after binding places ∧
+        after.access = memory.access ∧
+          after.nextblock = memory.nextblock ∧
+            KProgFormal.ClightRefinement.X86ReleaseOuterComplete.Frame stack places memory after ∧
+              KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next memory after
+'KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.from_table (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (binding stack cells input helper : CC.Block) (base cellOffset : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86CallFrameComplete.Places) (old next : BitVec 64)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (helperSymbol : ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+  (helperGlobal :
+    ge.genv_genv.findFunctPtr helper = some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler))
+  (helperNotLocal : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_call_frame_values e = none)
+  (bindingSeparate : binding ≠ stack) (cellsSeparate : cells ≠ stack)
+  (cacheOutside : KProgFormal.ClightRefinement.X86CallFrameComplete.Outside places stack)
+  (metadataSeparate : KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places)
+  (available : KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.PreservingInputs ge binding stack base next)
+  (view :
+    KProgFormal.ClightRefinement.X86ReleaseOuterComplete.View memory binding stack cells base cellOffset places next)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (increasing : CC.Integers.Int64.cmp CC.Comparison.Cgt next old = true) :
+  ∃ trace after finalTemps,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+        trace (CC.State.State function CC.Stmt.Sskip k e finalTemps after) ∧
+      KProgFormal.ClightRefinement.X86CallFrameComplete.View after binding places ∧
+        after.access = memory.access ∧
+          after.nextblock = memory.nextblock ∧
+            KProgFormal.ClightRefinement.X86ReleaseOuterComplete.Frame stack places memory after ∧
+              KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next memory after
+'KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.from_table' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.all_offsets (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (binding stack cells input helper : CC.Block) (base cellOffset : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86CallFrameComplete.Places) (old next : BitVec 64)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (helperSymbol : ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+  (helperGlobal :
+    ge.genv_genv.findFunctPtr helper = some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler))
+  (helperNotLocal : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_call_frame_values e = none)
+  (bindingSeparate : binding ≠ stack) (cellsSeparate : cells ≠ stack)
+  (cacheOutside : KProgFormal.ClightRefinement.X86CallFrameComplete.Outside places stack)
+  (metadataSeparate : KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places)
+  (available : KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.PreservingInputs ge binding stack base next)
+  (view :
+    KProgFormal.ClightRefinement.X86ReleaseOuterComplete.View memory binding stack cells base cellOffset places next)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old)) :
+  ∃ trace after finalTemps,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+        trace (CC.State.State function CC.Stmt.Sskip k e finalTemps after) ∧
+      KProgFormal.ClightRefinement.X86CallFrameComplete.View after binding places ∧
+        after.access = memory.access ∧
+          after.nextblock = memory.nextblock ∧
+            KProgFormal.ClightRefinement.X86ReleaseOuterComplete.Frame stack places memory after ∧
+              KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next memory after
+'KProgFormal.ClightRefinement.X86ReleaseOuterCacheFrame.all_offsets' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
