@@ -105,7 +105,10 @@ registers, then refine the same canonical full-state step through return.
 
 The [increasing-RSP prefixes](results/m5-x86-rsp-release-select/README.md)
 execute the actual growing-SP branch, loop entry and all six word/byte
-selectors. Provider calls, stores, backedges and frame clobbers remain open.
+selectors. The [whole-word arm](results/m5-x86-rsp-release-word/README.md)
+also executes the real provider call and constructed cache store at every
+word position, retaining arbitrary provider traces and memory effects. Byte
+releases, outer backedges and frame clobbers remain open.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
 preserving the entire native state except PC. Generic dispatcher selection

@@ -1,0 +1,21 @@
+{
+  "prior_receipt": "kprog/formal/results/m5-x86-native-xor-nop-root",
+  "prior_interfaces": 257,
+  "current_interfaces": 262,
+  "preserved_exact_prior_query_text": true,
+  "added_names": [
+    "X86RegisterWriteRspReleaseWord.layout_source",
+    "X86RegisterWriteRspReleaseWord.enter",
+    "X86RegisterWriteRspReleaseWord.returned",
+    "X86RegisterWriteRspReleaseWord.execute",
+    "X86RegisterWriteRspReleaseWord.selected"
+  ],
+  "root_jobs": 694,
+  "public_interfaces": 262,
+  "missing_prior_interfaces": [],
+  "formal_full_check_lock": true,
+  "scope": "All6 source whole-word selectors, actual2-step kind6 call entry,6-step real return/header/store, exact provider trace and supplied memory, store readback/access/nextblock/frame outside cache. Byte alternatives, outer backedges, final frame-value clobber and generic dispatcher remain open.",
+  "full_semantic_check_receipt": "kprog/formal/results/m5-full-check-rsp-20261124",
+  "full_semantic_check_commit": "833d3f2dd3fe5af10d66e4b7e45b2b218760ba46",
+  "full_semantic_check_scope": "Prior full make check PASS849.622537s finished12:40:07Z. Later proof-only focused/root queries passed separately; runtime/spec/oracles unchanged."
+}

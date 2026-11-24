@@ -1,0 +1,3 @@
+Root694 and262 public type/axiom queries pass, preserving all257 preceding queries verbatim and every peer import. Five actual word-release APIs add the source-built stack layout, real kind6 call entry, constructed return/header/store, exact external trace and selected-arm composition at all6 positions. No runtime/spec/oracle changed. Byte release, outer backedges, final frame clobber and universal dispatcher composition remain open. Prior full semantic make check PASS833d3f2dd remains distinct from these later proof-only focused/root checks.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
