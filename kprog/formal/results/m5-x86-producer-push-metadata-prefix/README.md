@@ -1,0 +1,3 @@
+One SAME original producer/input trace now reaches the actual storage loop after real RSP decrement, stack index/width call, all six overlap guards and both selected slot5 metadata stores with every loop/sequence exit. Actual store/readbacks/current header-GPR-cache-ghost resources/relative RSPminus8-tag0/rights-frontier/caller typed loads and exact last-provider raw frame are retained. Only existing explicit kind6/kind1 platform ABIs remain. Payload cache write/return/native-memory/input-oracle/trace/canonical full149 work stays open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
