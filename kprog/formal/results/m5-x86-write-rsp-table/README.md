@@ -1,0 +1,3 @@
+The two actual RSP table stores write the result minus the SAME native stack origin and clear the tag. Materialization then recovers the complete native result; every other register retains its raw word, tag and provenance. Initial permissions derive both stores plus access/allocation maps and outside-block load frames. This table component does not claim source stack release has executed.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

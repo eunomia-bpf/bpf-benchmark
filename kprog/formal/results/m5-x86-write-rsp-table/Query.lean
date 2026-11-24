@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspTable
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspTable.native
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspTable.native
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspTable.writable
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspTable.writable
