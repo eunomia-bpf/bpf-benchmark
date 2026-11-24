@@ -70,20 +70,20 @@ theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
     simp +decide [firstTemps, X86QwordSelection.temps, CC.PTree.gso, destination]
   have readyBinding : firstTemps.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock offset) := by
     simp +decide [firstTemps, X86QwordSelection.temps, CC.PTree.gso, binding]
-  have entered := X86QwordDestination.enter ge function e firstTemps k memory index bindingBlock
-    helperBlock offset (by simp only [firstTemps, CC.PTree.gss]) readyDst readyBinding helper unshadowed
-  have called := X86RegisterTagCall.execute ge layout memory
-    (.Kcall (some X86_program_profile_bpf._t'135) function e (X86QwordDestination.temps firstTemps)
-      (X86QwordDestination.continuation k)) index (0#8) bindingBlock cellsBlock offset base cells current
-  have resumed : InternalRun ge 1
-      (.Returnstate (X86Width.argument (0#8))
-        (CC.callCont (.Kcall (some X86_program_profile_bpf._t'135) function e
-          (X86QwordDestination.temps firstTemps) (X86QwordDestination.continuation k))) memory)
-      (.State function .Sskip (X86QwordDestination.continuation k) e secondTemps memory) := by
-    apply internalRun_of_steps
-    all_goals simp only [steps, InternalPath, InternalState, CC.doStep, CC.callCont,
-      CC.setOpttemp, secondTemps, CC.Eapp, CC.E0, List.nil_append, true_and]
+  have prepared := X86QwordDestination.prepare ge function e firstTemps k memory
+    (by simp only [firstTemps, CC.PTree.gss])
+  have preparedDst : (X86QwordDestination.temps firstTemps).get X86_program_profile_bpf._dst =
+      some (X86Width.argument (X86RegisterReadValue.registerByte index)) := by
+    simp +decide [X86QwordDestination.temps, CC.PTree.gso, readyDst]
+  have preparedBinding : (X86QwordDestination.temps firstTemps).get
+      X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock offset) := by
+    simp +decide [X86QwordDestination.temps, CC.PTree.gso, readyBinding]
+  have called := X86RegisterTagSite.execute ge layout function e
+    (X86QwordDestination.temps firstTemps) (X86QwordDestination.continuation k) memory
+    X86_program_profile_bpf._t'135 X86_program_profile_bpf._dst index (0#8)
+    bindingBlock cellsBlock helperBlock offset base preparedDst preparedBinding helper unshadowed cells current
+  rw [← X86QwordDestination.call_source] at called
   have finished := finish ge function e secondTemps k memory (by simp only [secondTemps, CC.PTree.gss])
-  exact (((firstRun.trans entered).trans called).trans resumed).trans finished
+  exact ((firstRun.trans prepared).trans called).trans finished
 
 end KProgFormal.ClightRefinement.X86QwordDestinationScalar

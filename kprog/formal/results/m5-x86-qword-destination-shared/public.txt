@@ -1,0 +1,90 @@
+KProgFormal.ClightRefinement.X86QwordDestination.call_source :
+  KProgFormal.ClightRefinement.X86QwordDestination.tagCall✝ =
+    KProgFormal.ClightRefinement.X86RegisterTagSite.statement X86_program_profile_bpf._t'135
+      X86_program_profile_bpf._dst
+'KProgFormal.ClightRefinement.X86QwordDestination.call_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86QwordDestination.prepare (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (firstTag :
+    CC.PTree.get X86_program_profile_bpf._t'132 le = some (KProgFormal.ClightRefinement.X86Width.argument 0#8)) :
+  KProgFormal.ClightRefinement.InternalRun ge 7
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86QwordSelection.continuation k) e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86QwordDestination.tagCall✝
+      (KProgFormal.ClightRefinement.X86QwordDestination.continuation k) e
+      (KProgFormal.ClightRefinement.X86QwordDestination.temps le) memory)
+'KProgFormal.ClightRefinement.X86QwordDestination.prepare' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86QwordDestination.enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (index : Fin 16) (bindingBlock helperBlock : CC.Block)
+  (offset : CC.Integers.Ptrofs)
+  (firstTag :
+    CC.PTree.get X86_program_profile_bpf._t'132 le = some (KProgFormal.ClightRefinement.X86Width.argument 0#8))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock offset))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none) :
+  KProgFormal.ClightRefinement.InternalRun ge 8
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86QwordSelection.continuation k) e le memory)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag)
+      [CC.Val.Vptr bindingBlock offset,
+        CC.Val.Vlong (BitVec.setWidth 64 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index))]
+      (CC.Cont.Kcall (some X86_program_profile_bpf._t'135) function e
+        (KProgFormal.ClightRefinement.X86QwordDestination.temps le)
+        (KProgFormal.ClightRefinement.X86QwordDestination.continuation k))
+      memory)
+'KProgFormal.ClightRefinement.X86QwordDestination.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86QwordDestinationScalar.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (index : Fin 16) (bindingBlock cellsBlock helperBlock : CC.Block)
+  (offset base : CC.Integers.Ptrofs)
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (dstShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (srcShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock offset))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none)
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock offset.unsigned = some (CC.Val.Vptr cellsBlock base))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument 0#8)) :
+  have firstTemps :=
+    CC.PTree.set X86_program_profile_bpf._t'132 (KProgFormal.ClightRefinement.X86Width.argument 0#8)
+      (KProgFormal.ClightRefinement.X86QwordSelection.temps le);
+  have secondTemps :=
+    CC.PTree.set X86_program_profile_bpf._t'135 (KProgFormal.ClightRefinement.X86Width.argument 0#8)
+      (KProgFormal.ClightRefinement.X86QwordDestination.temps firstTemps);
+  KProgFormal.ClightRefinement.InternalRun ge 79
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.scalarWriter k e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.sourceWriter k e
+      (KProgFormal.ClightRefinement.X86QwordDestinationScalar.temps secondTemps) memory)
+'KProgFormal.ClightRefinement.X86QwordDestinationScalar.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

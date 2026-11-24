@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.X86QwordDestinationScalar
+
+#check KProgFormal.ClightRefinement.X86QwordDestination.call_source
+#print axioms KProgFormal.ClightRefinement.X86QwordDestination.call_source
+#check KProgFormal.ClightRefinement.X86QwordDestination.prepare
+#print axioms KProgFormal.ClightRefinement.X86QwordDestination.prepare
+#check KProgFormal.ClightRefinement.X86QwordDestination.enter
+#print axioms KProgFormal.ClightRefinement.X86QwordDestination.enter
+#check KProgFormal.ClightRefinement.X86QwordDestinationScalar.execute
+#print axioms KProgFormal.ClightRefinement.X86QwordDestinationScalar.execute

@@ -1,0 +1,3 @@
+The accepted79-step destination-selector theorem now composes its actual repeated helper call through the shared23-step tag-site proof. The seven preceding source transitions and exact original call identity are exposed; every previously accepted source/entry/execution theorem is retained. Duplicate helper-entry/return proof code is removed from the complete scalar composition, without changing its premises or result.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.X86QwordTagStage
+import KProgFormal.ClightRefinement.X86RegisterTagSite
 
 namespace KProgFormal.ClightRefinement.X86QwordDestination
 
@@ -38,6 +39,31 @@ def continuation (k : CC.Cont) : CC.Cont :=
   .Kseq compared (.Kseq saved (.Kseq X86QwordSelection.fourth
     (.Kseq X86QwordSelection.fifth (.Kseq X86QwordSelection.gate k))))
 
+/-- This identity binds the original repeated call to the shared actual site. -/
+theorem call_source : tagCall = X86RegisterTagSite.statement
+    X86_program_profile_bpf._t'135 X86_program_profile_bpf._dst := rfl
+
+/-- The seven real gate transitions preceding the repeated call. -/
+theorem prepare (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
+    (k : CC.Cont) (memory : CC.Mem)
+    (firstTag : le.get X86_program_profile_bpf._t'132 = some (X86Width.argument (0#8))) :
+    InternalRun ge 7 (.State function .Sskip (X86QwordSelection.continuation k) e le memory)
+      (.State function tagCall (continuation k) e (temps le) memory) := by
+  apply internalRun_of_steps
+  all_goals
+    simp +decide [steps, InternalPath, InternalState, X86QwordSelection.continuation,
+      X86QwordSelection.compared, X86QwordSelection.selected, temps, continuation,
+      CC.doStep, CC.doEvalExpr, CC.typeof, firstTag, X86Width.argument,
+      CC.PTree.gss, CC.PTree.gso, CC.Cop.semBinaryOperation, CC.Cop.semCmp,
+      CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes, CC.tattr,
+      CC.tuchar, CC.tuint, CC.tint, CC.tbool,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero, CC.Integers.MI.zero,
+      CC.Integers.Int.one, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Eapp, CC.E0]
+  exact ⟨rfl, rfl, rfl⟩
+
 /-- A real scalar tag still takes the original second helper call. The
 actual first comparison and scalar fallback reach that call in eight steps. -/
 theorem enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.TempEnv)
@@ -56,23 +82,7 @@ theorem enter (ge : CC.CGenv) (function : CC.Function) (e : CC.Env) (le : CC.Tem
       (.Callstate (.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag)
         [.Vptr bindingBlock offset, .Vlong ((X86RegisterReadValue.registerByte index).setWidth 64)]
         (.Kcall (some X86_program_profile_bpf._t'135) function e (temps le) (continuation k)) memory) := by
-  have prior : InternalRun ge 7
-      (.State function .Sskip (X86QwordSelection.continuation k) e le memory)
-      (.State function tagCall (continuation k) e (temps le) memory) := by
-    apply internalRun_of_steps
-    all_goals
-      simp +decide [steps, InternalPath, InternalState, X86QwordSelection.continuation,
-        X86QwordSelection.compared, X86QwordSelection.selected, temps, continuation,
-        CC.doStep, CC.doEvalExpr, CC.typeof, firstTag, X86Width.argument,
-        CC.PTree.gss, CC.PTree.gso, CC.Cop.semBinaryOperation, CC.Cop.semCmp,
-        CC.Cop.classifyCmp, CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
-        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
-        CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes, CC.tattr,
-        CC.tuchar, CC.tuint, CC.tint, CC.tbool,
-        CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero, CC.Integers.MI.zero,
-        CC.Integers.Int.one, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
-        CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Eapp, CC.E0]
-    exact ⟨rfl, rfl, rfl⟩
+  have prior := prepare ge function e le k memory firstTag
   have readyBinding : (temps le).get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock offset) := by
     simp +decide [temps, CC.PTree.gso, binding]
   have readyDst : (temps le).get X86_program_profile_bpf._dst =
