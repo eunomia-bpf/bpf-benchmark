@@ -333,3 +333,12 @@ Together with the Tetragon count above, the two apps' 121 requests hold
 six distinct failure shapes: F, G, the jump-chain limit, the llc-18
 empty-stderr exit, the E2BIG verify argv, and the two native-link
 refusals.
+
+The five llc-18 exits correlate with MIR size, not malformation: the
+failing packed.mir files are 158-232 MB (3.5-4.9 M lines, 295k+ basic
+blocks) and each ends cleanly on a RET with the "..." machine-function
+terminator, while the largest MIR that compiles is 30 MB / 698k lines
+(Tetragon request 10). The failure is an llc resource boundary on very
+large inputs, and its stderr is empty in all five, which is why the
+capture cannot name it; reproducing it needs one llc-18 run on an
+archived MIR, on the verify side.
