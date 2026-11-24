@@ -189,8 +189,13 @@ Class F: B's frame exceeds the verifier's 512-byte stack.
   rather than the bound itself.
 
   Scope, measured on the archived Tetragon capture: 23 of the 61 B
-  objects that carry both the generated C and the object reach past 512
-  bytes of frame. Request 10 is the largest seen at 1408. The pointer-
+  bytes of frame. The frames cluster: ten objects reach 1736 (requests
+  15, 18, 28, 30, 43, 48, 59, 70, 79 and 82, each with 304 bytes of
+  emulated stack), ten reach 1408 with 224 (request 10 among them), two
+  reach 1120 with 208 and one reaches 944. One object with a larger
+  declared stack stays small: request 3 declares 320 bytes, never touches
+  the emulated stack in its code, and its frame is 408, so the cost
+  follows the stack the program actually uses. The pointer-
   launder record (kprog/results/pointer-launder-20261122/README.md:133)
   measured all fourteen OTel requests after the borrow-form change and
   every one stays inside 512, with r3 at exactly 512, so the OTel side of
