@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushLossCheck
+#check KProgFormal.ClightRefinement.X86ProducerPushLossCheck.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLossCheck.source
+#check KProgFormal.ClightRefinement.X86ProducerPushLossCheck.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLossCheck.execute
+#check KProgFormal.ClightRefinement.X86ProducerPushLossCheck.from_cache
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLossCheck.from_cache

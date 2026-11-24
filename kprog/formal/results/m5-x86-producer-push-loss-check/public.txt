@@ -1,0 +1,59 @@
+KProgFormal.ClightRefinement.X86ProducerPushLossCheck.source :
+  KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossCheck =
+      KProgFormal.ClightRefinement.X86ProducerPushLossCheck.first.Ssequence
+        (KProgFormal.ClightRefinement.X86ProducerPushLossCheck.second.Ssequence
+          (CC.Stmt.Sifthenelse KProgFormal.ClightRefinement.X86ProducerPushLossCheck.condition
+            KProgFormal.ClightRefinement.X86ProducerPushLossCheck.release CC.Stmt.Sskip)) ∧
+    KProgFormal.ClightRefinement.X86ProducerPushLossCheck.first =
+        CC.Stmt.Sset X86_program_profile_bpf._t'200 KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead ∧
+      KProgFormal.ClightRefinement.X86ProducerPushLossCheck.second =
+          CC.Stmt.Sset X86_program_profile_bpf._t'201
+            (KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer X86_program_profile_bpf._t'200) ∧
+        KProgFormal.ClightRefinement.X86ProducerPushLossCheck.condition =
+          CC.Expr.Ebinop CC.Binop.Olt (CC.Expr.Etempvar X86_program_profile_bpf.___x86_loss_off CC.tlong)
+            (((CC.Expr.Etempvar X86_program_profile_bpf._t'201 (CC.tptr CC.tvoid)).Ecast CC.tlong).Ecast CC.tlong)
+            CC.tint
+'KProgFormal.ClightRefinement.X86ProducerPushLossCheck.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLossCheck.execute (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory : CC.Mem) (binding cells : CC.Block)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (offset :
+    CC.PTree.get X86_program_profile_bpf.___x86_loss_off le =
+      some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp))
+  (header : CC.Mem.load CC.Mptr memory binding 0 = some (CC.Val.Vptr cells 0))
+  (rsp :
+    CC.Mem.load CC.Mptr memory cells 64 =
+      some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 7
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossCheck k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86ProducerPushLossCheck.temps le cells) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushLossCheck.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLossCheck.from_cache {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 7
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.lossCheck k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushLossCheck.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.temps metadata) ready.gprs.block)
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushLossCheck.from_cache' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
