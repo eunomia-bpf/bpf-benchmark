@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ReleaseReturn
+#check KProgFormal.ClightRefinement.X86ReleaseReturn.registers
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.registers
+#check KProgFormal.ClightRefinement.X86ReleaseReturn.preserve_flags
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.preserve_flags
+#check KProgFormal.ClightRefinement.X86ReleaseReturn.execute
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturn.execute
