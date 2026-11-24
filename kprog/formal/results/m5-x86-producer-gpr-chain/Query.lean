@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerGprChain
+#check KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_at
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_at
+#check KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_next
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_next
+#check KProgFormal.ClightRefinement.X86ProducerGprChain.initialized_prefix
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprChain.initialized_prefix
+#check KProgFormal.ClightRefinement.X86ProducerGprChain.complete
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprChain.complete

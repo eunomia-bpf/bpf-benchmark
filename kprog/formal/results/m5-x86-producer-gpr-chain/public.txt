@@ -1,0 +1,56 @@
+KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_at (i : Fin 16) :
+  KProgFormal.ClightRefinement.X86ProducerGprChain.cursor ↑i =
+    (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).whole
+'KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_at' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_next (i : Fin 16) :
+  KProgFormal.ClightRefinement.X86ProducerGprChain.cursor (↑i + 1) =
+    (KProgFormal.ClightRefinement.X86ProducerGprSites.site i).following
+'KProgFormal.ClightRefinement.X86ProducerGprChain.cursor_next' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprChain.initialized_prefix (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock)
+  (count : Nat) (bound : count ≤ 16) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerGprChain.Result before memory le k gprs cache count)
+'KProgFormal.ClightRefinement.X86ProducerGprChain.initialized_prefix' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprChain.complete (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (gprs :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 0)
+  (cache :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 1)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access)
+  (frontier :
+    memory.nextblock =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerGprChain.Result before memory le k gprs cache 16)
+'KProgFormal.ClightRefinement.X86ProducerGprChain.complete' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
