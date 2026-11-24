@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86ProducerPushDispatch
+#check KProgFormal.ClightRefinement.InternalPrefixBuilder.build
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.executes
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.arguments
+#check KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushDispatch.source_continuation

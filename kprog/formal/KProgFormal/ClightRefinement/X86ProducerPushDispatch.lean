@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.X86ProducerPushWidth
+import KProgFormal.ClightRefinement.InternalPrefixBuilder
 
 namespace KProgFormal.ClightRefinement.X86ProducerPushDispatch
 open X86ProducerPushCall (handler initialTemps)
@@ -67,44 +68,10 @@ def certificate (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) : Certifica
     let originalEnv ← Lean.Elab.Term.elabTerm (← `(CC.emptyEnv)) none
     let originalHandler ← Lean.Elab.Term.elabTerm (← `(handler)) none
     let target ← Lean.Elab.Term.elabTerm (← `(targetCall)) none
-    let silent ← Lean.Elab.Term.elabTerm (← `(CC.E0)) none
-    let mut current := initial
-    let mut frames : Array Lean.Expr := #[]
-    while true do
-      let state ← Lean.Meta.withTransparency .all (Lean.Meta.whnf current)
-      unless state.isAppOfArity ``CC.State.State 6 do throwError "PUSH dispatch left an internal statement state"
-      let args := state.getAppArgs
-      let stmt ← Lean.Meta.withTransparency .all (Lean.Meta.whnf args[1]!)
-      if stmt.isAppOfArity ``CC.Stmt.Scall 3 then
-        unless ← Lean.Meta.isDefEq stmt target do throwError "original dispatch selected a different callee"
-        unless ← Lean.Meta.isDefEq args[0]! originalHandler do throwError "PUSH dispatch changed wrapper"
-        unless ← Lean.Meta.isDefEq args[3]! originalEnv do throwError "PUSH dispatch changed local environment"
-        unless ← Lean.Meta.isDefEq args[5]! originalMem do throwError "PUSH decision prefix changed memory"
-        let mut proof ← Lean.Meta.mkAppOptM ``InternalRun.refl #[some world, some current]
-        let zeroType ← Lean.Meta.mkAppM ``InternalRun #[world, Lean.mkNatLit 0, current, current]
-        unless ← Lean.Meta.isDefEq (← Lean.Meta.inferType proof) zeroType do throwError "PUSH certificate endpoint mismatch"
-        for transition in frames.toList.reverse do
-          let transitionType ← Lean.Meta.inferType transition
-          let restType ← Lean.Meta.inferType proof
-          let stepArgs := transitionType.getAppArgs
-          let restArgs := restType.getAppArgs
-          proof ← Lean.Meta.mkAppOptM ``InternalRun.step
-            #[some world, some restArgs[1]!, some stepArgs[2]!, some stepArgs[4]!, some restArgs[3]!,
-              some (Lean.mkConst ``True.intro), some transition, some proof]
-        let term ← Lean.Meta.mkAppM ``Certificate.mk #[Lean.mkNatLit frames.size, args[4]!, args[2]!, proof]
-        Lean.Elab.Tactic.closeMainGoal `original_x86_push_dispatch_path term
-        return
-      let application ← Lean.Meta.mkAppM ``CC.doStep #[world,current]
-      let result ← Lean.Meta.withTransparency .all (Lean.Meta.whnf application)
-      unless result.isAppOfArity ``Option.some 2 do throwError "original PUSH decision prefix has no executable successor"
-      let pair ← Lean.Meta.withTransparency .all (Lean.Meta.whnf result.getAppArgs[1]!)
-      unless pair.isAppOfArity ``Prod.mk 4 do throwError "original PUSH successor changed shape"
-      unless ← Lean.Meta.isDefEq pair.getAppArgs[2]! silent do throwError "PUSH decision prefix emitted an external trace"
-      let successor := pair.getAppArgs[3]!
-      let equation ← Lean.Meta.mkEqRefl result
-      let transition ← Lean.Meta.mkAppM ``CC.doStep_sound #[world,current,silent,successor,equation]
-      frames := frames.push transition
-      current := successor
+    let built ← InternalPrefixBuilder.build world initial originalHandler target originalEnv originalMem
+    let term ← Lean.Meta.mkAppM ``Certificate.mk
+      #[Lean.mkNatLit built.count, built.output, built.continuation, built.proof]
+    Lean.Elab.Tactic.closeMainGoal `original_x86_push_dispatch_path term
 
 theorem executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
     InternalRun ge (certificate binding k memory).count (start binding k memory)
