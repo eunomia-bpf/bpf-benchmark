@@ -1,0 +1,41 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspPartialStore.execute (isWord : Bool) (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (bindingBlock localBlock baseBlock : CC.Block) (baseOffset : CC.Integers.Ptrofs) (old nativeBase next : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (CC.Val.Vlong old))
+  (header : CC.Mem.load CC.Mptr memory bindingBlock 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (native : CC.Mem.load CC.Chunk.Mint64 memory baseBlock baseOffset.unsigned = some (CC.Val.Vlong nativeBase))
+  (permission : memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true)
+  (scalarTag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (observed : CC.PTree.get X86_program_profile_bpf.___x86_wr_next__2 le = some (CC.Val.Vlong next))
+  (low : isWord = false → CC.PTree.get X86_program_profile_bpf.___x86_wr_shift__2 le = some (CC.Val.Vint 0#32)) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun ge (13 + if isWord = true then 11 else 12)
+        (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.leaf isWord) k e le memory)
+        (CC.State.State function CC.Stmt.Sskip k e
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.temps isWord
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.temps isWord le baseBlock baseOffset old
+              nativeBase)
+            next)
+          after) ∧
+      CC.Mem.load CC.Mptr after localBlock 0 =
+          some
+            (CC.Val.Vlong
+              (X86.Value.writeView (if isWord = true then X86.Size.w else X86.Size.b) (old + nativeBase) next)) ∧
+        after.access = memory.access ∧
+          after.nextblock = memory.nextblock ∧
+            ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+              other ≠ localBlock → CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspPartialStore.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
