@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64UaddlvReductionNative
+open KProgFormal.ClightRefinement
+#check Arm64Uaddlv.Reduction.corresponds
+#print axioms Arm64Uaddlv.Reduction.corresponds
