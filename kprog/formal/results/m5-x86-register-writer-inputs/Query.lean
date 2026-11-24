@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.X86RegisterWriterInputs
+
+#check KProgFormal.ClightRefinement.X86RegisterWriterInputs.casts
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriterInputs.casts
+#check KProgFormal.ClightRefinement.X86RegisterWriterInputs.cell
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriterInputs.cell
+#check KProgFormal.ClightRefinement.X86RegisterWriterInputs.stack
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriterInputs.stack
