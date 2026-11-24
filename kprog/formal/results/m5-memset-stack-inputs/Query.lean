@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackInputs
+#check KProgFormal.ClightRefinement.Arm64MemsetStackInputs.gpr
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackInputs.gpr
+#check KProgFormal.ClightRefinement.Arm64MemsetStackInputs.tail
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackInputs.tail
+#check KProgFormal.ClightRefinement.Arm64MemsetStackInputs.header
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackInputs.header
+#check KProgFormal.ClightRefinement.Arm64MemsetStackInputs.sp
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackInputs.sp
