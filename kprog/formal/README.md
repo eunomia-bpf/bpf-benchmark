@@ -33,18 +33,19 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-logic-dword-release-root/README.md)
+[integrated public queries](results/m5-x86-logic-partial-release-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
 
 The complete x86 NOP handler and its actual generic dispatcher case refine
 the same checked ISA step on arbitrary heaps. Scoped logical-register calls
-cover all widths and aliases. RSP qword/dword OR/AND/XOR calls additionally
+cover all widths and aliases. RSP OR/AND/XOR calls at all four widths additionally
 execute both signed-SP release branches, all real cache/metadata updates,
 loops and free/return, yielding GPR and flag views of the same canonical
-output. The dword writer zero-extends for arbitrary initial RSP tags; qword
-calls retain their scalar/tag0 destination domain. Initial source domains,
+output. The dword writer zero-extends for arbitrary initial RSP tags; qword, byte
+and word calls retain their scalar/tag0 destination domain. Byte/word writes
+preserve the upper 56/48 bits. Initial source domains,
 legal slices, cache/ghost ownership and
 provider ABI remain explicit. Native-memory/provider-trace correspondence,
 remaining operand domains and operations, fetched call-site correspondence,
@@ -59,6 +60,10 @@ standard logical axioms. Imported Clight execution also uses the existing
 explicit provider availability, permission/frontier preservation and memory
 frame premises. The imported external-call interface supplies determinacy
 and trace-length laws; those laws do not establish the provider memory ABI.
+The complete eight-lane byte fallback additionally preserves cache reads at
+or above the new SP under an explicit stronger provider-frame premise.
+Binding that premise to the real provider, and completing corresponding
+word-store and outer/helper frames, remain open.
 
 The argument also trusts the C front end/exporter, imported semantics and
 their correspondence to production C, artifact binding and platform memory
