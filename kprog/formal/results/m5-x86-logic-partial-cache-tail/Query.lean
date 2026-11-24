@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86LogicPartialCacheTail
+#check KProgFormal.ClightRefinement.X86LogicPartialCacheTail.execute
+#print axioms KProgFormal.ClightRefinement.X86LogicPartialCacheTail.execute
