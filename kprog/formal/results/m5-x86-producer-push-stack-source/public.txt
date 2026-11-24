@@ -1,0 +1,48 @@
+KProgFormal.ClightRefinement.X86ProducerPushStackSource.loop_source :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop =
+    KProgFormal.ClightRefinement.X86ProducerPushStackSource.body.Sloop CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86ProducerPushStackSource.loop_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackSource.body_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.body =
+    (KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare.Sloop CC.Stmt.Sbreak).Ssequence
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage
+'KProgFormal.ClightRefinement.X86ProducerPushStackSource.body_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare =
+    (KProgFormal.ClightRefinement.X86ProducerPushStackSource.first.Ssequence
+          (KProgFormal.ClightRefinement.X86ProducerPushStackSource.second.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerPushStackSource.indexSet)).Ssequence
+      ((KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCall.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthSave).Ssequence
+        KProgFormal.ClightRefinement.X86ProducerPushStackSource.stages)
+'KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackSource.reads_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.first =
+      CC.Stmt.Sset X86_program_profile_bpf._t'226 KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStackSource.second =
+        CC.Stmt.Sset X86_program_profile_bpf._t'227
+          (KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer X86_program_profile_bpf._t'226) ∧
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.indexSet =
+        CC.Stmt.Sset X86_program_profile_bpf.___x86_sv_index
+          KProgFormal.ClightRefinement.X86ProducerPushStackSource.indexExpression
+'KProgFormal.ClightRefinement.X86ProducerPushStackSource.reads_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStackSource.width_source :
+  KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthCall =
+      CC.Stmt.Scall (some X86_program_profile_bpf._t'11)
+        (CC.Expr.Evar X86_program_profile_bpf._x86_width_effective
+          (CC.Ty.Tfunction [CC.tuchar] CC.tuchar CC.cc_default))
+        [CC.Expr.Etempvar X86_program_profile_bpf.___x86_l_pp_width CC.tuchar] ∧
+    KProgFormal.ClightRefinement.X86ProducerPushStackSource.widthSave =
+      CC.Stmt.Sset X86_program_profile_bpf.___x86_sv_width
+        ((CC.Expr.Etempvar X86_program_profile_bpf._t'11 CC.tuchar).Ecast CC.tulong)
+'KProgFormal.ClightRefinement.X86ProducerPushStackSource.width_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

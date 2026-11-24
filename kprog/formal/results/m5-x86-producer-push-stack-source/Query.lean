@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerPushStackSource
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSource.loop_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSource.loop_source
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSource.body_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSource.body_source
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSource.prepare_source
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSource.reads_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSource.reads_source
+#check KProgFormal.ClightRefinement.X86ProducerPushStackSource.width_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStackSource.width_source
