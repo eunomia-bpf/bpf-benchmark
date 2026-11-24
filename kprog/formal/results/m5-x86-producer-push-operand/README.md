@@ -1,0 +1,3 @@
+The original DISP_PUSH body executes its recovery, mode, direction, width and sequence selectors to the genuine RBX read_reg call. A kernel-checked equality transports the normalized exact original temporary map back to original initialTemps, retaining actual local allocation, unchanged complete memory and source continuation. No assumed source path, branch erasure, temporary-environment premise, budget increase or semantics change.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

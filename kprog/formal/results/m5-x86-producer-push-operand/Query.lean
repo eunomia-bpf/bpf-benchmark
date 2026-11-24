@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerPushOperand
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.source_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.source_read
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.exact_start
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.exact_start
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.executes
+#check KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments

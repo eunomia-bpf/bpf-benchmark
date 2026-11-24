@@ -1,0 +1,41 @@
+KProgFormal.ClightRefinement.X86ProducerPushOperand.source_read :
+  KProgFormal.ClightRefinement.X86ProducerPushOperand.readCall =
+    CC.Stmt.Scall (some X86_program_profile_bpf._t'10) KProgFormal.ClightRefinement.X86ProducerPushOperand.expression
+      KProgFormal.ClightRefinement.X86ProducerPushOperand.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerPushOperand.source_read' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushOperand.exact_start (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.X86ProducerPushOperand.start binding k memory =
+    KProgFormal.ClightRefinement.X86ProducerPushOperand.cachedStart binding k memory
+'KProgFormal.ClightRefinement.X86ProducerPushOperand.exact_start' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushOperand.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate binding k memory).count
+    (KProgFormal.ClightRefinement.X86ProducerPushOperand.start binding k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushOperand.readCall
+      (KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate binding k memory).continuation
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate binding k memory).output
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerPushOperand.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushOperand.certificate binding k memory).output
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd
+      KProgFormal.ClightRefinement.X86ProducerPushOperand.argumentExpressions
+      KProgFormal.ClightRefinement.X86ProducerPushOperand.argumentTypes =
+    some (KProgFormal.ClightRefinement.X86ProducerPushOperand.values binding)
+'KProgFormal.ClightRefinement.X86ProducerPushOperand.arguments' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
