@@ -1,0 +1,3 @@
+The genuine matched-register qword XOR shortcut with tag0 destination storage refines the SAME canonical ISA self-XOR step through actual helpers, flag/table writes, local release and return. The full GPR/flag views, canonical PC/oracle/events/fault state, caller frame and released locals are explicit. Scalar or represented-pointer values in tag0 destination storage share this proven writeback path.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
