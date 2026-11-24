@@ -1,0 +1,50 @@
+{
+  "confirmed_utc": "2026-11-24T14:10:14.376871+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterPrefixNativeTail"
+    ],
+    "exit": 0,
+    "seconds": 5.80148720741272,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 283,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-add-register-prefix-native-tail/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.8252058029174805,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "native_calls_with_original_observations": 4,
+    "original_input_provider_traces": 98,
+    "actual_stack_tag_byte_readbacks": 24,
+    "retained_complete_memset_prefix": 287
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryAddRegisterPrefixNativeTail.lean",
+      "size_bytes": 15233,
+      "mtime_ns": 1795529248044000126
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
