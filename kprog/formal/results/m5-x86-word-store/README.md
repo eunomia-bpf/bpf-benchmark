@@ -1,0 +1,5 @@
+The actual ordinary scalar/tag0 word leaf now executes its real unsigned16 union-field store, tag assignment and loop break in15 transitions; its original width selector composes to24. The actual initial local64 initialization supplies both-byte write permission. Constructed storage reads back exactly SAME ISA writeView.w, preserving48 upper bits, other block loads, access map and allocation frontier. The complete table/writer/call composition follows separately.
+
+The retained whole-check2 record is an actual failure: lake default target Arm64ProgramEntryOrdinaryMoves (an untracked lane-formal draft) reaches maxRecDepth512 at159:4 after30.92s. The root itself built. Lane formal owns correction; its source is preserved and the failure is not relabeled a pass. The prior rotate/helper correction remains focused-accepted. No complete instruction family or whole make check success is claimed.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
