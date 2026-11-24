@@ -1,0 +1,7 @@
+'KProgFormal.ClightRefinement.X86AluLogicInputs.observations' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.X86AluLogicInputs.source_shift' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.X86AluLogicInputs.entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

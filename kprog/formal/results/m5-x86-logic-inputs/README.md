@@ -1,0 +1,3 @@
+The actual OR/AND eight-argument calls now derive all six flag/writeback observations and the seventh source-lane field from exact reached source temporaries, both original readers and the real numerical helper. All widths and every register aliasing route retain genuine allocation and caller memory observations. No intermediate run premise is added. The next composition uses the existing generic logical tails and SAME canonical reference step.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
