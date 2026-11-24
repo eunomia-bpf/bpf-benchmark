@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerContextInitialize
+#check KProgFormal.ClightRefinement.X86ProducerContextInitialize.context_initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextInitialize.context_initialized

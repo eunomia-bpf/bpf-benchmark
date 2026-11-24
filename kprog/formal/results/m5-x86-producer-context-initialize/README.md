@@ -1,0 +1,3 @@
+The same actually allocated header receives all five original context assignments in fifteen internal transitions. List composition retains every source store/readback, all earlier typed header loads ending by192, all other block loads, original caller FrameBelow, current access and frontier. Real typed source temporaries/current access/composite layouts remain explicit at this cut; no output memory, store, frame or initialized View is assumed. Prior pointer initializer APIs and exact source continuation are preserved.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
