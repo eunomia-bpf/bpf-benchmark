@@ -1,0 +1,39 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspPrefix.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (value : BitVec 64)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (CC.Val.Vlong (value - origins.stack)))
+  (observedTag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (bindingSeparate : bindingBlock ≠ cellsBlock)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cellsBlock cellsOffset cpu)
+  (wordPermission : memory.validAccess CC.Mptr cellsBlock (cellsOffset + 64).unsigned CC.Permission.Writable = true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned cellsBlock (cellsOffset + 64 + 8).unsigned CC.Permission.Writable =
+      true) :
+  ∃ final,
+    KProgFormal.ClightRefinement.InternalRun ge 22
+        (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le memory)
+        (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e
+          (KProgFormal.ClightRefinement.X86ShiftWriteback.tableTemps le (CC.Val.Vlong (value - origins.stack)) (0#8) 4
+            cellsBlock cellsOffset)
+          final) ∧
+      KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cellsBlock cellsOffset
+          (cpu.setReg X86.Size.q (X86.GPR.ofIndex 4) value) ∧
+        final.access = memory.access ∧
+          final.nextblock = memory.nextblock ∧
+            ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+              other ≠ cellsBlock → CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86RegisterWriteRspPrefix.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
