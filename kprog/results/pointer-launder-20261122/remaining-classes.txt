@@ -406,3 +406,14 @@ sim-ir matcher fix together cover every shape the archive recorded for
 Tracee. The Tetragon side of the same conclusion sits in the rerun
 section above (81 of 85, with the three pre-fix compiler failures and
 one new largest class-F instance at -1448).
+
+Request 85's own object, measured from the rerun archive
+(/tmp on the omp side; tarball tetragon service request 85): the
+generated C declares X86_SIM_STACK_BYTES 488U, the object's largest
+r10 offset is 2144, and the three stack locals alone need 1037 bytes
+(488 union + 61 tag bytes + 488 pointer words). 1107 more bytes are
+register/ABI state and spills. The verifier refused at insn 1 writing
+-1448, inside the deepest spill band (2048-2303 has 367 references).
+The 2.125x structural ratio holds here: 488 touched bytes is past the
+241-byte ceiling on its own, before any spill, and the object reaches
+2144 -- the largest measured so far, above the archive's 1736.
