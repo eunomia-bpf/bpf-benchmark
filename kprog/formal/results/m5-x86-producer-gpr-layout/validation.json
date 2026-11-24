@@ -1,0 +1,28 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/input-return-20261124T183812Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86ProducerGprLayout"
+    ],
+    "exit": 0,
+    "seconds": 20.877001860004384,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "status": "not_started",
+    "reason": "coordinator exclusive timing lock; queued command cancelled before Lean launch",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-gpr-layout/Query.lean"
+    ]
+  }
+}

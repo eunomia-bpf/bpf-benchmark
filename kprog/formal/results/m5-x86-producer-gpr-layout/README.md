@@ -1,0 +1,3 @@
+The complete original source world supplies the named GPR struct, GPR union and tagged cell records. All sixteen actual value/tag offsets and both nested zero offsets are proved against that environment, without layout/offset premises or a new axiom.
+
+Direct Lean and focused canonical builds passed at original200000 heartbeats/512 depth/j1/32GiB under shared timing on CPUs12–15 (20.832321s and20.877002s). The public type/axiom Query.lean has not run: the coordinator acquired exclusive timing, and its queued command was cancelled before launch. No public-query PASS or new integrated-root/full-suite result is claimed. Run that existing query under shared timing when the resource is available.

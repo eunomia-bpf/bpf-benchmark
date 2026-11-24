@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerGprLayout
+#check KProgFormal.ClightRefinement.X86ProducerGprLayout.source_layouts
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprLayout.source_layouts
+#check KProgFormal.ClightRefinement.X86ProducerGprLayout.field_offsets
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprLayout.field_offsets
+#check KProgFormal.ClightRefinement.X86ProducerGprLayout.nested_offsets
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprLayout.nested_offsets
