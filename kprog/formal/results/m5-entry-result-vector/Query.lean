@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.vector_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.vector_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.finish
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.finish
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.execute
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.result
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultVector.result
