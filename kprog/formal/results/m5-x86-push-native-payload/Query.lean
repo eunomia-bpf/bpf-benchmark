@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86PushNativePayload
+#check KProgFormal.ClightRefinement.X86PushNativePayload.coordinate
+#print axioms KProgFormal.ClightRefinement.X86PushNativePayload.coordinate
+#check KProgFormal.ClightRefinement.X86PushNativePayload.bytes
+#print axioms KProgFormal.ClightRefinement.X86PushNativePayload.bytes

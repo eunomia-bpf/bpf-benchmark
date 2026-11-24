@@ -1,0 +1,8 @@
+KProgFormal.ClightRefinement.X86PushNativePayload.coordinate (origin : BitVec 64) (lane : Fin 8) :
+  KProgFormal.ClightRefinement.X86StackCacheView.address origin ⟨40 + ↑lane, ⋯⟩ = origin - 8#64 + BitVec.ofNat 64 ↑lane
+'KProgFormal.ClightRefinement.X86PushNativePayload.coordinate' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86PushNativePayload.bytes (memory : X86.Mem) (address value : BitVec 64) :
+  List.map (fun lane => (memory.writeSize X86.Size.q address value).read (address + BitVec.ofNat 64 lane))
+      (List.range 8) =
+    KProgFormal.Reference.valueBytes value 8
+'KProgFormal.ClightRefinement.X86PushNativePayload.bytes' depends on axioms: [propext, Quot.sound]
