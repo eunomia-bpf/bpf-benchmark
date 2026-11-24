@@ -94,6 +94,12 @@ preserving native upper56/48 bits. Their scalar/tag0 destination and legal
 byte slices remain explicit. Volatile partial writes, increasing-SP release,
 other qword tags and remaining pointer operand domains stay open.
 
+The [RSP XOR calls](results/m5-x86-xor-rsp-root/README.md) cover every legal
+source-register alias at all four widths within those destination tag and
+non-increasing raw-SP conditions. They retain the original 77-step zero
+shortcut for the same RSP/lane and both real native reader calls for distinct
+registers, then refine the same canonical full-state step through return.
+
 ## Trust boundary
 
 Lean's kernel checks proof terms against the pinned definitions, with the
