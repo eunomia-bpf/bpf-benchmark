@@ -1,0 +1,47 @@
+{
+  "confirmed_utc": "2026-11-24T00:14:30.300309+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64CntHigh"
+    ],
+    "exit": 0,
+    "seconds": 2.8342912197113037,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 197,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cnt-high/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.167447566986084,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "selection_and_copy_overhead": 7
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64CntHigh.lean",
+      "size_bytes": 6402,
+      "mtime_ns": 1795479196628141405
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
