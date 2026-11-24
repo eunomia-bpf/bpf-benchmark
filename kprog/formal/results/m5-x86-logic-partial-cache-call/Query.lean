@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluLogicPartialCacheCall
+#check KProgFormal.ClightRefinement.X86AluLogicPartialCacheCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluLogicPartialCacheCall.execute
