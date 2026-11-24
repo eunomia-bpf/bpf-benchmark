@@ -1,0 +1,82 @@
+{
+  "full-check1": {
+    "command": [
+      "make",
+      "-C",
+      "kprog/formal",
+      "check"
+    ],
+    "started": "2026-11-24T10:00:29.663297+00:00",
+    "head": "c66b956e32dbbccc62a6d3427a966b46d2107d0c",
+    "cpus": "12-15",
+    "shared_timing": true,
+    "formal_full_check_lock": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "exit": 2,
+    "seconds": 264.4756432750146,
+    "finished": "2026-11-24T10:04:56.384140+00:00"
+  },
+  "rotate-helper1": {
+    "command": [
+      "python3",
+      "tools/check_x86_rotate_handler.py"
+    ],
+    "exit": 0,
+    "seconds": 51.91998728195904,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368
+  },
+  "memory-helper1": {
+    "results": [
+      {
+        "command": [
+          "python3",
+          "tools/check_x86_high_load.py"
+        ],
+        "exit": 0,
+        "seconds": 32.83515104604885
+      },
+      {
+        "command": [
+          "python3",
+          "tools/check_x86_popcount_memory.py"
+        ],
+        "exit": 0,
+        "seconds": 28.398189430008642
+      },
+      {
+        "command": [
+          "python3",
+          "tools/check_x86_memory_widths.py"
+        ],
+        "exit": 1,
+        "seconds": 0.12370654899859801
+      }
+    ],
+    "seconds": 61.35730744898319,
+    "exit": 1,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368
+  },
+  "memory-helper2": {
+    "results": [
+      {
+        "command": [
+          "python3",
+          "tools/check_x86_memory_widths.py"
+        ],
+        "exit": 0,
+        "seconds": 0.5919116229633801
+      }
+    ],
+    "seconds": 0.5920774060068652,
+    "exit": 0,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368
+  }
+}

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Check actual BPF primitive access kind, address, width and multiplicity."""
 import argparse
+import json
 from pathlib import Path
 import re
 import struct
 import subprocess
+from bpf_memory_accesses import BpfObject
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -98,6 +100,65 @@ def instructions_by_function(disassembly):
     return functions
 
 
+def check_call_mutations(module):
+    """Catch ignored callee widths, caller offsets, calls and ELF bindings.
+
+    Mutate instructions in the real compiled byte fixture, in memory only.
+    No separately compiled or copied source/product is needed.
+    """
+    entry = "fixed_b8_context"
+    wanted = [("read", 88, 1)]
+    assert module.accesses(entry) == wanted
+    trace = module.executed
+
+    def unique(predicate):
+        candidates = [step for step in trace if predicate(step)]
+        if len(candidates) != 1:
+            raise AssertionError(("memory mutation site", candidates))
+        return candidates[0]
+
+    def immediate_mutant(step, value):
+        data = bytearray(module.data)
+        struct.pack_into("<i", data, module.file_offset(*step[:2]) + 4, value)
+        return BpfObject(data)
+
+    width = unique(lambda step: step[2] in (0xb4, 0xb7) and step[3] == 2 and step[4] == 1)
+    displacement = unique(lambda step: step[2] in (0xb4, 0xb7) and step[3] == 3 and step[4] == 88)
+    call = unique(lambda step: step[2:4] == (0x85, 0x10))
+    probe = unique(lambda step: step[2:] == (0x85, 0, 113))
+    results = {}
+    for name, mutant, expected in (
+        ("callee-width", immediate_mutant(width, 2), [("read", 88, 2)]),
+        ("caller-displacement", immediate_mutant(displacement, 89), [("read", 89, 1)]),
+    ):
+        actual = mutant.accesses(entry)
+        assert actual == expected and actual != wanted, (name, actual, expected)
+        results[name] = actual
+    try:
+        immediate_mutant(displacement, 89).accesses(entry, fixed_displacement=88)
+    except ValueError as error:
+        assert "base/displacement" in str(error), str(error)
+        results["fixed-call-arguments"] = str(error)
+    else:
+        raise AssertionError("memory trace accepted changed fixed-call displacement")
+    data = bytearray(module.data)
+    struct.pack_into("<BBhi", data, module.file_offset(*probe[:2]), 0xb7, 0, 0, 0)
+    actual = BpfObject(data).accesses(entry)
+    assert actual == [], ("removed-call", actual)
+    results["removed-call"] = actual
+    data = bytearray(module.data)
+    _, _, relocation = module.relocations[call[:2]]
+    struct.pack_into("<Q", data, relocation + 8, 10)  # Undefined symbol zero.
+    try:
+        BpfObject(data).accesses(entry)
+    except ValueError as error:
+        assert "undefined call target" in str(error), str(error)
+        results["call-relocation"] = str(error)
+    else:
+        raise AssertionError("memory trace accepted undefined call relocation")
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clang", default="clang-18")
@@ -108,10 +169,11 @@ def main():
     args.build_dir.mkdir(parents=True, exist_ok=True)
     obj = args.build_dir / "x86.bpf.o"
     command([args.clang, "-target", "bpfel", "-mcpu=v3", "-O2", "-g", "-I", str(args.include_dir),
-             "-I", str(ROOT), "-c", str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(obj)])
+             "-I", str(ROOT), "-I", str(ROOT.parents[1] / "vendor/libbpf/src"),
+             "-I/usr/include/x86_64-linux-gnu", "-c", str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(obj)])
     disassembly = command([args.objdump, "-d", str(obj)])
     (args.build_dir / "x86.asm").write_text(disassembly)
-    functions = instructions_by_function(disassembly)
+    module = BpfObject.read(obj)
     expected = {f"{kind}_{name}": [("read" if kind == "load" else "write", 3, width)]
                 for name, width in [("b8", 1), ("b16", 2), ("b32", 4), ("b64", 8), ("default", 8)]
                 for kind in ("load", "store")}
@@ -119,26 +181,30 @@ def main():
              for name, width in [("b8", 1), ("b16", 2), ("b32", 4), ("b64", 8), ("default", 8)]
              for suffix, offset in [("context", 88), ("negative", -3), ("minimum", -32768), ("maximum", 32767)]}
     expected.update(fixed)
-    if functions.keys() != expected.keys():
-        raise SystemExit(f"memory widths: function set mismatch: {functions.keys() ^ expected.keys()}")
+    if module.entries != expected.keys():
+        raise SystemExit(f"memory widths: entry set mismatch: {module.entries ^ expected.keys()}")
     for name, wanted in expected.items():
-        actual = accesses(functions[name], wanted[0][1] if name in fixed else None)
+        actual = module.accesses(name, fixed_displacement=wanted[0][1] if name in fixed else None)
         if actual != wanted:
             raise SystemExit(f"memory widths: {name}: got {actual}, expected {wanted}")
+    mutations = check_call_mutations(module)
+    (args.build_dir / "call-mutations.json").write_text(json.dumps(mutations, indent=2) + "\n")
+    print("x86 BPF memory call mutations: " + json.dumps(mutations, sort_keys=True))
     # The current C preserves literal signed16 offsets and computes other
     # addresses. Check those existing supported cases instead of demanding a
     # removed compile-time refusal. R2 is the fixture's long-long argument.
     for mode in (1, 2, 3):
         computed = args.build_dir / f"computed-fixed-{mode}.o"
         command([args.clang, "-target", "bpfel", "-mcpu=v3", "-O2", "-I", str(args.include_dir),
-            "-I", str(ROOT), f"-DKPROG_TEST_COMPUTED_FIXED={mode}", "-c",
+            "-I", str(ROOT), "-I", str(ROOT.parents[1] / "vendor/libbpf/src"),
+            "-I/usr/include/x86_64-linux-gnu", f"-DKPROG_TEST_COMPUTED_FIXED={mode}", "-c",
             str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(computed)])
         assembly = command([args.objdump, "-d", str(computed)])
         (args.build_dir / f"computed-fixed-{mode}.asm").write_text(assembly)
-        instructions = instructions_by_function(assembly)["computed_fixed"]
+        computed_module = BpfObject.read(computed)
         offsets = (-32769, -3, 0, 32768) if mode == 1 else ((32768,) if mode == 2 else (-32769,))
         for offset in offsets:
-            actual = accesses(instructions, second_argument=offset if mode == 1 else None)
+            actual = computed_module.accesses("computed_fixed", second_argument=offset if mode == 1 else None)
             if actual != [("read", offset, 4)]:
                 raise SystemExit(f"memory widths: computed mode{mode} offset{offset}: got {actual}")
     movx = args.build_dir / "x86-movx.bpf.o"
@@ -147,16 +213,16 @@ def main():
              "-I/usr/include/x86_64-linux-gnu", "-c", str(ROOT / "oracles/test_x86_movx_widths.c"), "-o", str(movx)])
     assembly = command([args.objdump, "-d", str(movx)])
     (args.build_dir / "x86-movx.asm").write_text(assembly)
-    functions = instructions_by_function(assembly)
+    module = BpfObject.read(movx)
     expected = {f"{kind}_{sw}_{tw}": [("read", 3, sw)]
                 for kind in ("zx", "sx") for sw, tw in ((1,2),(1,4),(1,8),(2,4),(2,8),(4,8))}
-    if functions.keys() != expected.keys():
-        raise SystemExit(f"MOVX memory widths: function set mismatch: {functions.keys() ^ expected.keys()}")
+    if module.entries != expected.keys():
+        raise SystemExit(f"MOVX memory widths: entry set mismatch: {module.entries ^ expected.keys()}")
     for name, wanted in expected.items():
-        actual = accesses(functions[name])
+        actual = module.accesses(name)
         if actual != wanted:
             raise SystemExit(f"MOVX memory widths: {name}: got {actual}, expected {wanted}")
-    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements, dynamic and out-of-signed16 computed offsets and twelve actual MOVX handler access widths OK")
+    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed callee bases/displacements, dynamic and out-of-signed16 computed offsets and twelve actual MOVX handler access widths OK")
 
 
 if __name__ == "__main__":

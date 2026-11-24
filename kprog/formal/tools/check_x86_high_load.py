@@ -4,7 +4,7 @@ import importlib.util
 from pathlib import Path
 import subprocess
 import sys
-from check_x86_memory_widths import accesses, instructions_by_function
+from bpf_memory_accesses import BpfObject
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0,str(ROOT.parent/"x86/micro-prog"))
@@ -69,8 +69,8 @@ def main():
                         "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
         assembly=subprocess.check_output(["llvm-objdump-18","-d",str(path.with_suffix(".o"))],text=True)
         path.with_suffix(".asm").write_text(assembly)
-        functions=instructions_by_function(assembly)
-        assert len(functions)==1 and accesses(next(iter(functions.values())))==[("read",3,1)],assembly
+        module=BpfObject.read(path.with_suffix(".o"))
+        assert module.entries=={"probe"} and module.accesses("probe")==[("read",3,1)],assembly
     print(f"x86 high-byte loads: {len(cases)} encoded host/BPF programs, 5124 byte/alias/stack/readonly results and four exact one-byte BPF reads OK")
 
 

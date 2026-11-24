@@ -5,7 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from check_x86_memory_widths import accesses, instructions_by_function
+from bpf_memory_accesses import BpfObject
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT.parent / "x86/micro-prog"))
@@ -120,10 +120,9 @@ def main():
             "-I/usr/include/x86_64-linux-gnu", "-c", str(probe), "-o", str(probe.with_suffix(".o"))], check=True)
         assembly = subprocess.check_output(["llvm-objdump-18", "-d", str(probe.with_suffix(".o"))], text=True)
         probe.with_suffix(".asm").write_text(assembly)
-        functions = instructions_by_function(assembly)
-        assert len(functions) == 1, assembly
-        instructions = next(iter(functions.values()))
-        assert accesses(instructions) == [("read", 0, width)], assembly
+        module = BpfObject.read(probe.with_suffix(".o"))
+        assert module.entries == {"probe"}, assembly
+        assert module.accesses("probe") == [("read", 0, width)], assembly
     readonly = g.NativeInsn(0, "popcnt rax,QWORD PTR [rip+0]", "popcnt", ("rax", "QWORD PTR [rip+0]"),
         reloc_symbol="datum", reloc_type="R_X86_64_PC32", symbol_offset=17)
     c = folder / "readonly.c"

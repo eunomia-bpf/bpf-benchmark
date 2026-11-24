@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 from check_reference_x86_legacy_shift import numeric
-from check_x86_memory_widths import accesses, instructions_by_function
+from bpf_memory_accesses import BpfObject
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT.parent / 'x86/micro-prog'))
@@ -96,9 +96,10 @@ def main():
             subprocess.run(['clang-18','-target','bpfel','-mcpu=v3','-O2','-D__TARGET_ARCH_x86',*includes,'-c',p,'-o',p.with_suffix('.o')],check=True)
             if 'PTR' in operand:
                 assembly = subprocess.check_output(['llvm-objdump-18','-d',p.with_suffix('.o')],text=True)
-                functions = instructions_by_function(assembly)
-                assert len(functions)==1, assembly
-                actual_accesses = accesses(next(iter(functions.values())))
+                module = BpfObject.read(p.with_suffix('.o'))
+                entry = name + '_x86_sim_xdp'
+                assert module.entries == {entry}, assembly
+                actual_accesses = module.accesses(entry)
                 expected_accesses = [('read',3,bits//8),('write',3,bits//8)]
                 assert actual_accesses==expected_accesses, (operand,count,actual_accesses,expected_accesses)
             artifacts += 1

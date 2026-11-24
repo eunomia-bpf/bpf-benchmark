@@ -1,9 +1,7 @@
 /* Compile the production memory contract to BPF: each guest access must keep
  * its width/address and happen once, including unaligned addresses and width0. */
-typedef unsigned char __u8;
-typedef unsigned short __u16;
-typedef unsigned int __u32;
-typedef unsigned long long __u64;
+#include <linux/bpf.h>
+#include <bpf_helpers.h>
 #define X86_WIDTH_8 1U
 #define X86_WIDTH_16 2U
 #define X86_WIDTH_32 4U
@@ -23,8 +21,11 @@ ACCESS(b32, X86_WIDTH_32)
 ACCESS(b64, X86_WIDTH_64)
 ACCESS(default, 0)
 
+/* Separate callers from the production helper so these cases also exercise
+ * the ELF call relocations used by the simulator's sectioned BPF entries. */
 #define FIXED(NAME, WIDTH, OFFSET, SUFFIX)                                \
-__attribute__((used,noinline)) __u64 fixed_##NAME##_##SUFFIX(const __u8 *p) \
+__attribute__((used,noinline,section(".text.fixed")))                     \
+__u64 fixed_##NAME##_##SUFFIX(const __u8 *p)                              \
 { return KPROG_X86_MEM_LOAD_FIXED(p, OFFSET, WIDTH); }
 #define FIXED_WIDTH(NAME, WIDTH)                                         \
 FIXED(NAME, WIDTH, 88, context)                                          \
