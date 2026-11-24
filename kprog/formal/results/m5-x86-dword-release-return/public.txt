@@ -1,0 +1,96 @@
+KProgFormal.ClightRefinement.X86DwordReleaseReturn.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (caller memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (binding baseBlock cells stack input helper widthBlock : CC.Block)
+  (baseOffset cellOffset cacheOffset : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86CallFrameComplete.Places) (value old : BitVec 64) (shift : BitVec 8)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (flags : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.d))
+  (code : BitVec 32) (alu : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint code))
+  (scalarCode : code ≠ 0#32 ∧ code ≠ 1#32)
+  (observedShift :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint (BitVec.setWidth 32 shift)))
+  (observedValue : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong value))
+  (widthBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (header : CC.Mem.load CC.Mptr memory binding 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (native : CC.Mem.load CC.Chunk.Mint64 memory baseBlock baseOffset.unsigned = some (CC.Val.Vlong origins.stack))
+  (bindingCells : binding ≠ cells)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cells cellOffset cpu)
+  (flagValues : KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory flags cpu.flags)
+  (view :
+    KProgFormal.ClightRefinement.X86ReleaseOuterComplete.View memory binding stack cells cacheOffset cellOffset places
+      old)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (helperSymbol : ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_call_frame_values = some helper)
+  (helperGlobal :
+    ge.genv_genv.findFunctPtr helper = some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86CallFrameEntry.handler))
+  (bindingSeparate : binding ≠ stack) (cellsSeparate : cells ≠ stack)
+  (metadataSeparate : KProgFormal.ClightRefinement.X86CallFrameComplete.Separated binding places)
+  (available : KProgFormal.ClightRefinement.X86ReleaseProvider.Available ge binding stack cacheOffset)
+  (cellsOutside : KProgFormal.ClightRefinement.X86ReleaseReturn.ObserverOutside stack places cells)
+  (flagsOutside : KProgFormal.ClightRefinement.X86ReleaseReturn.FlagsOutside stack places flags)
+  (flagsNotCells :
+    flags.cf.fst ≠ cells ∧
+      flags.zf.fst ≠ cells ∧ flags.sf.fst ≠ cells ∧ flags.overflow.fst ≠ cells ∧ flags.pf.fst ≠ cells)
+  (baseOld : CC.Positive.toNat baseBlock < CC.Positive.toNat caller.nextblock)
+  (bindingOld : CC.Positive.toNat binding < CC.Positive.toNat caller.nextblock)
+  (cellsOld : CC.Positive.toNat cells < CC.Positive.toNat caller.nextblock)
+  (flagsOld :
+    CC.Positive.toNat flags.cf.fst < CC.Positive.toNat caller.nextblock ∧
+      CC.Positive.toNat flags.zf.fst < CC.Positive.toNat caller.nextblock ∧
+        CC.Positive.toNat flags.sf.fst < CC.Positive.toNat caller.nextblock ∧
+          CC.Positive.toNat flags.overflow.fst < CC.Positive.toNat caller.nextblock ∧
+            CC.Positive.toNat flags.pf.fst < CC.Positive.toNat caller.nextblock)
+  (access :
+    memory.access = (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd.access)
+  (wordPermission : memory.validAccess CC.Mptr cells (cellOffset + 64).unsigned CC.Permission.Writable = true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned cells (cellOffset + 64 + 8).unsigned CC.Permission.Writable = true)
+  (boundary : CC.isCallCont k = true) :
+  ∃ trace final,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+          KProgFormal.ClightRefinement.X86ShiftWriteback.writer
+          (KProgFormal.ClightRefinement.X86AluEntry.continuation k)
+          (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst le memory)
+        trace (CC.State.Returnstate CC.Val.Vundef k final) ∧
+      KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cells cellOffset
+          (cpu.setReg X86.Size.d (X86.GPR.ofIndex 4) value) ∧
+        KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent final flags cpu.flags ∧
+          final.nextblock = memory.nextblock ∧
+            (∀ (row : CC.Block × CC.Z × CC.Z),
+                row ∈
+                    CC.blocksOfEnv ge.genv_cenv
+                      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst →
+                  ∀ (offset : CC.Z),
+                    row.snd.fst ≤ offset →
+                      offset < row.snd.snd →
+                        ∀ (kind : CC.PermKind) (permission : CC.Permission),
+                          final.perm row.fst offset kind permission = false) ∧
+              ∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+                CC.Positive.toNat block < CC.Positive.toNat caller.nextblock →
+                  block ≠ cells →
+                    KProgFormal.ClightRefinement.X86ReleaseReturn.ObserverOutside stack places block →
+                      CC.Mem.load chunk final block offset = CC.Mem.load chunk memory block offset
+'KProgFormal.ClightRefinement.X86DwordReleaseReturn.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
