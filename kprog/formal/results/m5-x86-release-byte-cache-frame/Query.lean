@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame
+#check KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.same_position
+#print axioms KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.same_position
+#check KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.released_distinct_address
+#print axioms KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.released_distinct_address
+#check KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.frame_trans
+#print axioms KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.frame_trans
+#check KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.selected
+#print axioms KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.selected

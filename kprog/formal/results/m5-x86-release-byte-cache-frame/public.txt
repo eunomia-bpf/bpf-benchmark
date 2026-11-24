@@ -1,0 +1,96 @@
+KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.same_position (base : CC.Integers.Ptrofs) (slot readSlot : Fin 6)
+  (lane readLane : Fin 8)
+  (same :
+    KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base readSlot readLane =
+      KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot lane) :
+  KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.position readSlot readLane =
+    KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.position slot lane
+'KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.same_position' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.released_distinct_address (base : CC.Integers.Ptrofs)
+  (slot : Fin 6) (lane : Fin 8) (readSlot : Fin 6) (readLane : Fin 8) (old next : BitVec 64)
+  (released : KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.released slot lane old next = true)
+  (above :
+    CC.Integers.Int64.cmp CC.Comparison.Cge
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.position readSlot readLane) next =
+      true) :
+  (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base readSlot readLane).unsigned ≠
+    (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot lane).unsigned
+'KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.released_distinct_address' depends on axioms: [propext,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.frame_trans (stack : CC.Block) (base : CC.Integers.Ptrofs)
+  (next : BitVec 64) (before middle after : CC.Mem)
+  (first : KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next before middle)
+  (last : KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next middle after) :
+  KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next before after
+'KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.frame_trans' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.selected (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (before supplied : CC.Mem)
+  (binding stack input : CC.Block) (base : CC.Integers.Ptrofs) (slot : Fin 6) (lane : Fin 8)
+  (old next value : BitVec 64) (trace : CC.Trace)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none)
+  (bindingRead : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (indexRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (laneRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_lane__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.laneArg lane)))
+  (offsetRead :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_off__5 le =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.offset slot)))
+  (oldRead : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (nextRead : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next))
+  (released : KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.released slot lane old next = true)
+  (provider :
+    CC.externalCall KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputEF ge.genv_genv.toSenv
+      [CC.Val.Vint 6#32] before trace (CC.Val.Vlong value) supplied)
+  (header : CC.Mem.load CC.Mptr supplied binding 8 = some (CC.Val.Vptr stack base))
+  (writable :
+    supplied.validAccess CC.Chunk.Mint8unsigned stack
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot lane).unsigned
+        CC.Permission.Writable =
+      true)
+  (providerFrame : KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next before supplied) :
+  ∃ after,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.body
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e le before)
+        trace
+        (CC.State.State function CC.Stmt.Sskip
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.loopContinuation k) e
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.temps
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteLoop.temps le slot lane old next) value stack
+            base)
+          after) ∧
+      CC.Mem.store CC.Chunk.Mint8unsigned supplied stack
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot lane).unsigned
+            (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 value))) =
+          some after ∧
+        CC.Mem.load CC.Chunk.Mint8unsigned after stack
+              (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot lane).unsigned =
+            some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 value))) ∧
+          after.access = supplied.access ∧
+            after.nextblock = supplied.nextblock ∧
+              (∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                  other ≠ stack → CC.Mem.load chunk after other offset = CC.Mem.load chunk supplied other offset) ∧
+                (∀ (offset : CC.Z),
+                    offset ≠
+                        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseByteCall.address base slot
+                            lane).unsigned →
+                      CC.Mem.load CC.Chunk.Mint8unsigned after stack offset =
+                        CC.Mem.load CC.Chunk.Mint8unsigned supplied stack offset) ∧
+                  KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next before after
+'KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.selected' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
