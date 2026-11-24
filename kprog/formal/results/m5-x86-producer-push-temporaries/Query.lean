@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushTemporaries
+#check KProgFormal.ClightRefinement.X86ProducerPushTemporaries.undefined_exact
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushTemporaries.undefined_exact
+#check KProgFormal.ClightRefinement.X86ProducerPushTemporaries.cached_binds
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushTemporaries.cached_binds
+#check KProgFormal.ClightRefinement.X86ProducerPushTemporaries.exact_initial
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushTemporaries.exact_initial

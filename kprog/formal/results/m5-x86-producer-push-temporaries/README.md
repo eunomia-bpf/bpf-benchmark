@@ -1,0 +1,3 @@
+The exact original DISP_PUSH undefined-temporary map is cached at the export’s four actual declaration chunks, then bound to the original eight parameters. Kernel-checked equality recovers the original initialTemps, without an environment premise or new axiom. Original proof budgets are retained. This changes proof construction only; imported execution semantics, source exports and runtime are unchanged.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
