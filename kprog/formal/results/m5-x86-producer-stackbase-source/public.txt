@@ -1,0 +1,84 @@
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_route :
+  KProgFormal.ClightRefinement.X86ProducerScalarSource.following =
+      KProgFormal.ClightRefinement.X86ProducerStackBaseSource.zero.Ssequence
+        KProgFormal.ClightRefinement.X86ProducerStackBaseSource.afterZero ∧
+    KProgFormal.ClightRefinement.X86ProducerStackBaseSource.afterZero =
+      (KProgFormal.ClightRefinement.X86ProducerStackBaseSource.inputCall.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerStackBaseSource.assignment).Ssequence
+        KProgFormal.ClightRefinement.X86ProducerStackBaseSource.finalSetup
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_route' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_zero :
+  KProgFormal.ClightRefinement.X86ProducerStackBaseSource.zero =
+    CC.Stmt.Sassign (CC.Expr.Evar X86_program_profile_bpf.___x86_sim_ret_addr CC.tulong)
+      (CC.Expr.Econst_int (CC.Integers.Int.repr 0) CC.tint)
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_zero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_call :
+  KProgFormal.ClightRefinement.X86ProducerStackBaseSource.inputCall =
+    CC.Stmt.Scall (some KProgFormal.ClightRefinement.X86ProducerStackBaseSource.resultName)
+      (CC.Expr.Evar X86_program_profile_bpf._native_lab_entry_input
+        (CC.Ty.Tfunction [CC.tuint] CC.tulong CC.cc_default))
+      [CC.Expr.Econst_int (CC.Integers.Int.repr 1) CC.tint]
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_assignment :
+  KProgFormal.ClightRefinement.X86ProducerStackBaseSource.assignment =
+    CC.Stmt.Sassign (CC.Expr.Evar X86_program_profile_bpf.___x86_native_stack_base CC.tulong)
+      (CC.Expr.Etempvar KProgFormal.ClightRefinement.X86ProducerStackBaseSource.resultName CC.tulong)
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.source_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.return_zero (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont)
+  (ret :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 23)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerScalarSource.following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerStackBaseSource.afterZero k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store CC.Chunk.Mint64 memory ret.block 0 (CC.Val.Vlong 0) = some after ∧
+        CC.Mem.load CC.Chunk.Mint64 after ret.block 0 = some (CC.Val.Vlong 0) ∧
+          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+              b ≠ ret.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+              after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.return_zero' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerStackBaseSource.enter (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerStackBaseSource.afterZero k
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 1#32]
+      (KProgFormal.ClightRefinement.X86ProducerStackBaseSource.continuation
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerStackBaseSource.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

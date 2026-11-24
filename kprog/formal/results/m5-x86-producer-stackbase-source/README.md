@@ -1,0 +1,3 @@
+Actual exported-source identities retain return-address zero, genuine kind1 input, native-base assignment and final-context continuation. The return zero store derives its original eight-byte local rights, with actual store/readback/other-block frame/access/frontier. Original sequences and real global binding reach the actual kind1 external Callstate in three further internal steps. No kind1 outcome/frame/availability or native binding is assumed, and the kind6 ABI is not reused for kind1. Every previous source step/API is retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
