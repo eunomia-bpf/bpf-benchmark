@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoveNative
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoveNative.first
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoveNative.first
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoveNative.constant
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoveNative.constant
