@@ -1,0 +1,3 @@
+The original RSP continuation is kernel-equal to its actual enclosing loop-frame chain ending at the supplied true caller continuation. Each original skip/increment/break transition executes; no loop or continuation is erased and no free/return is assumed. Source extraction rejects any different increment/frame shape; source and generic Step2 composition are checked at original limits.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

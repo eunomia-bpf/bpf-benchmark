@@ -1,0 +1,29 @@
+KProgFormal.ClightRefinement.X86ProducerPushExitSource.source (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.control binding k memory =
+    KProgFormal.ClightRefinement.X86ProducerPushExitSource.chain
+      (KProgFormal.ClightRefinement.X86ProducerPushExitSource.bodies binding k memory) k
+'KProgFormal.ClightRefinement.X86ProducerPushExitSource.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushExitSource.finish_loop (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (body : CC.Stmt) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (CC.Cont.Kloop1 body CC.Stmt.Sbreak k) e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k e le memory)
+'KProgFormal.ClightRefinement.X86ProducerPushExitSource.finish_loop' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushExitSource.finish (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (rows : List CC.Stmt) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge (2 * rows.length)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerPushExitSource.chain rows k) e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip k e le memory)
+'KProgFormal.ClightRefinement.X86ProducerPushExitSource.finish' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
