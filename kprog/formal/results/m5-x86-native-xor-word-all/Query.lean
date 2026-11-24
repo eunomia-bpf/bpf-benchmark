@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluNativeXorWordAll
+#check KProgFormal.ClightRefinement.X86AluNativeXorWordAll.execute
+#print axioms KProgFormal.ClightRefinement.X86AluNativeXorWordAll.execute
