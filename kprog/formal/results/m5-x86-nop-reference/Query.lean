@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86NopReference
+#check KProgFormal.ClightRefinement.X86NopReference.flags_roundtrip
+#print axioms KProgFormal.ClightRefinement.X86NopReference.flags_roundtrip
+#check KProgFormal.ClightRefinement.X86NopReference.step
+#print axioms KProgFormal.ClightRefinement.X86NopReference.step

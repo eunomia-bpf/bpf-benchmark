@@ -1,0 +1,17 @@
+KProgFormal.ClightRefinement.X86NopReference.flags_roundtrip (state : KProgFormal.Reference.X86.State) :
+  KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+      (KProgFormal.ClightRefinement.X86LogicReference.input state).flags =
+    state.rflags
+'KProgFormal.ClightRefinement.X86NopReference.flags_roundtrip' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86NopReference.step (state : KProgFormal.Reference.X86.State) (nextPc : BitVec 64)
+  (running : state.modelError = none) :
+  KProgFormal.Reference.X86.step (KProgFormal.Reference.X86.Instruction.nop nextPc) state =
+    {
+      state :=
+        { gpr := state.gpr, rflags := state.rflags, xmm0 := state.xmm0, memory := state.memory, pc := nextPc,
+          fsBase := state.fsBase, gsBase := state.gsBase, addressWidth := state.addressWidth, oracle := state.oracle,
+          modelError := state.modelError },
+      events := [] }
+'KProgFormal.ClightRefinement.X86NopReference.step' depends on axioms: [propext, Classical.choice, Quot.sound]
