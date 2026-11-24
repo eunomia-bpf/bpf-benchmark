@@ -3026,14 +3026,11 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         const bpf_map_info info = load_map_info(fd.get());
         return info.type == BPF_MAP_TYPE_PROG_ARRAY;
     };
-    // reopen_relocated_map_fds skips a 0 id and repeats, so fd_array[i] is
-    // not relocated_map_ids[i]; walk both with the same rule.
+    // collect_relocated_map_ids already drops 0 and repeats, so these two
+    // vectors hold one entry per distinct relocated map, in one order.
     std::vector<std::pair<int, uint32_t>> load_fds;
-    std::unordered_set<uint32_t> opened;
-    for (uint32_t id : linked.relocated_map_ids) {
-        if (id == 0 || !opened.insert(id).second) continue;
-        load_fds.emplace_back(fd_array[load_fds.size()], id);
-    }
+    for (size_t i = 0; i < fd_array.size(); i++)
+        load_fds.emplace_back(fd_array[i], linked.relocated_map_ids[i]);
     const auto arm_and_load = [&](const std::vector<std::pair<int, uint32_t>> &pairs) {
         std::vector<int> fds;
         for (const auto &pair : pairs) fds.push_back(pair.first);
