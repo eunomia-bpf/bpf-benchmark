@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushNextCall
+#check KProgFormal.ClightRefinement.X86ProducerPushNextCall.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNextCall.enter
+#check KProgFormal.ClightRefinement.X86ProducerPushNextCall.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushNextCall.execute
