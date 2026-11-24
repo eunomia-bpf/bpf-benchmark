@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerPushResources
+#check KProgFormal.ClightRefinement.X86ProducerPushResources.same_local
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushResources.same_local
+#check KProgFormal.ClightRefinement.X86ProducerPushResources.old_access
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushResources.old_access
+#check KProgFormal.ClightRefinement.X86ProducerPushResources.views
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushResources.views
+#check KProgFormal.ClightRefinement.X86ProducerPushResources.observations
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushResources.observations

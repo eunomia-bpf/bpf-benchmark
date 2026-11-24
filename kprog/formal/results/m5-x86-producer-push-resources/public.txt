@@ -1,0 +1,96 @@
+KProgFormal.ClightRefinement.X86ProducerPushResources.same_local {before : CC.Mem} {name : CC.Ident} {ty : CC.Ty}
+  (left right :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name ty) :
+  left.block = right.block
+'KProgFormal.ClightRefinement.X86ProducerPushResources.same_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushResources.old_access (memory : CC.Mem) (b : CC.Block)
+  (old : CC.Positive.toNat b < CC.Positive.toNat memory.nextblock) (c : CC.Chunk) (ofs : CC.Z)
+  (permission : CC.Permission) :
+  (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation memory).snd.validAccess c b ofs permission =
+    memory.validAccess c b ofs permission
+'KProgFormal.ClightRefinement.X86ProducerPushResources.old_access' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushResources.views {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.View
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.entry.block
+      (ready.sources 1).block 0 ∧
+    KProgFormal.ClightRefinement.X86CallFrameComplete.View
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources) ∧
+      CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+            ready.entry.block 0 =
+          some (CC.Val.Vptr ready.gprs.block 0) ∧
+        (ready.sources 1).block = ready.cache.block ∧
+          (ready.sources 14).block = ready.base.block ∧
+            CC.Positive.toNat (ready.sources 1).block <
+                CC.Positive.toNat
+                  (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.nextblock ∧
+              ∀ (slot : Fin 6),
+                CC.Positive.toNat
+                      ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources).tag slot).fst <
+                    CC.Positive.toNat
+                      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.nextblock ∧
+                  CC.Positive.toNat
+                      ((KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources).pointer slot).fst <
+                    CC.Positive.toNat
+                      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerPushResources.views' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushResources.observations {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) :
+  (∀ (i : Fin 16),
+      i ≠ 7 →
+        CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+              ready.gprs.block (16 * ↑↑i) =
+            some (CC.Val.Vlong (ready.values i)) ∧
+          CC.Mem.load CC.Chunk.Mint8unsigned
+              (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+              (16 * ↑↑i + 8) =
+            some (CC.Val.Vint 0)) ∧
+    CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+          112 =
+        some (CC.Val.Vptr ctxBlock ctxOffset) ∧
+      CC.Mem.load CC.Chunk.Mint8unsigned (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+            ready.gprs.block 120 =
+          some (CC.Val.Vint 1#32) ∧
+        (∀ (i : Fin 8),
+            CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i)
+                (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd (ready.scalars i).block
+                0 =
+              some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i (ready.scalarValues i))) ∧
+          CC.Mem.load CC.Chunk.Mint64 (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+                ready.base.block 0 =
+              some (CC.Val.Vlong ready.stackOutcome.value) ∧
+            CC.Mem.load CC.Chunk.Mint64 (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+                  ready.ret.block 0 =
+                some (CC.Val.Vlong 0) ∧
+              (∀ (i : Fin 187),
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerAbiSource.chunk i)
+                      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.abi.block
+                      (KProgFormal.ClightRefinement.X86ProducerAbiSource.offset i) =
+                    some (KProgFormal.ClightRefinement.X86ProducerAbiSource.value i)) ∧
+                (∀ (i : Fin 12),
+                    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk i)
+                        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+                        (ready.ghosts i).block 0 =
+                      some (KProgFormal.ClightRefinement.X86ProducerGhostSource.value i)) ∧
+                  ∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                    CC.Positive.toNat b < CC.Positive.toNat before.nextblock →
+                      CC.Mem.load c (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd b
+                          ofs =
+                        CC.Mem.load c before b ofs
+'KProgFormal.ClightRefinement.X86ProducerPushResources.observations' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
