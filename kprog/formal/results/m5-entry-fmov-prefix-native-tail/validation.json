@@ -1,0 +1,50 @@
+{
+  "confirmed_utc": "2026-11-24T14:24:25.836159+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProgramEntryFmovPrefixNativeTail"
+    ],
+    "exit": 0,
+    "seconds": 21.166271924972534,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 394,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-fmov-prefix-native-tail/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 5.180330991744995,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "native_calls_with_original_observations": 10,
+    "original_input_provider_traces": 98,
+    "actual_stack_tag_byte_readbacks": 24,
+    "retained_complete_memset_prefix": 287
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryFmovPrefixNativeTail.lean",
+      "size_bytes": 28435,
+      "mtime_ns": 1795530135811532885
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
