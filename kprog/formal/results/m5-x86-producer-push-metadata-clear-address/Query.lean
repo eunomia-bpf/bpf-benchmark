@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.tag_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.tag_value
+#check KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.pointer_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.pointer_value

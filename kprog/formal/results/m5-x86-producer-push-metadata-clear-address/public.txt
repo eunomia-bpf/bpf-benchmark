@@ -1,0 +1,20 @@
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.tag_value (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (binding tagBlock : CC.Block) (tagOffset : CC.Integers.Ptrofs)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (read : CC.Mem.load CC.Mptr memory binding 96 = some (CC.Val.Vptr tagBlock tagOffset)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.tagExpression =
+    some (CC.Val.Vptr tagBlock tagOffset)
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.tag_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.pointer_value (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (binding pointerBlock : CC.Block) (pointerOffset : CC.Integers.Ptrofs)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (read : CC.Mem.load CC.Mptr memory binding 104 = some (CC.Val.Vptr pointerBlock pointerOffset)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushMetadataClearSource.pointerExpression =
+    some (CC.Val.Vptr pointerBlock pointerOffset)
+'KProgFormal.ClightRefinement.X86ProducerPushMetadataClearAddress.pointer_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
