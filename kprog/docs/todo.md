@@ -39,7 +39,7 @@
 0. **协调者：性能排查**（运营者 11-23：“性能是不是不够好? 为啥?”）。
    - [x] Cilium 11-22 的 0.461x：x86 链接器丢了 jiffies_64 的 GOT 读，时钟读到旧寄存器（dcf4a1aef 修好，11-23 每次调用 1.205x）。
    - [x] Katran：05-29 和 8430daa81 的原生 142–146 ns 来自旧链接器按调用顺序配查找点，三处 LRU 连接表查找拿到 stats 的 PERCPU_ARRAY 内联形式，每个包都返回 NULL，LRU 查找没做（kprog/results/katran-callorder-20261123，5c8423561）。Katran 的 05-29 底线和 OTel 的一样作废；现在原生和 eBPF 都是 180 ns。
-   - Cilium：stats 关吞吐 1.169x，低于 05-29 的 1.319x；每次调用 1.205x。旧链接器按顺序配查找点的缺陷在 Cilium 上没有出现（kprog/results/katran-callorder-20261123/cilium-replay.out）。
+   - Cilium：05-29 的 1.319x 是每次调用（kprog/results/restore-529-20261121/x86-rotate-20261121.md 的“05-29 per call”列，出自 native_eval_20260529）；现在每次调用 1.248x（11-24）、1.105x（11-23），低于；stats 关吞吐 1.179x–1.190x。协调者 11-23 至 11-24 的报告把这一列当成 stats 关吞吐的底线，11-24 20:2xZ 更正。旧链接器按顺序配查找点的缺陷在 Cilium 上没有出现（kprog/results/katran-callorder-20261123/cilium-replay.out）。
    - OTel：每次调用 0.930x。宿主 PMU 采样（kprog/results/profile-20261123/profile-host.sh）显示：72 处多 map 查找 eBPF 也走通用 helper（kprog/results/lookup-binding-20261123）；差别在 LPM trie 查找，原生走通用 helper，eBPF 直调 trie_lookup_elem，通用 helper 里那一个间接调用的目标来回换（array_map_lookup_elem+0x7 原生 15204 样本、eBPF 1128）。77908203a 让已知的 LPM trie 直调 trie_lookup_elem；镜像、检查、OTel profile、四个有 LPM trie 的应用（OTel、Cilium、Tetragon、Tracee）重测由 kprog/results/trie-direct-20261123/chain.sh 进行。
    - map-in-map 的内层表：verifier 按外层表的内层模板内联，原生原来调通用 helper（Tracee 直线代码上 1404 处，Cilium、Katran 各 2 处；kprog/results/lookup-binding-20261123）。30e401e37：shim 在 BPF_MAP_CREATE 时记下 inner_map_fd 的模板，加载器给出“<map>#inner”形式，x86、arm64 链接器把外层查找的结果记成“<map>#inner”。
    - 重测：trie 那一轮在 OTel stats 关之后停（STOP），inner-20261123/chain.sh 用 30e401e37 重建 x86 镜像、检查，再对 OTel、Cilium、Tetragon、Tracee、Katran 完整计时；arm64 镜像和检查由 trie-direct-20261123/arm64-chain.sh 进行，之后在 Spark 上补测受影响的应用。
