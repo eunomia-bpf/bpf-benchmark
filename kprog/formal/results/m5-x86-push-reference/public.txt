@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86PushReference.step (state : KProgFormal.Reference.X86.State) (nextPc : BitVec 64)
+  (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable :
+    ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true) :
+  KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 nextPc) state =
+    {
+      state :=
+        {
+          gpr := fun reg =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.q X86.GPR.rsp
+                    (state.gpr 4 - 8#64)).regs.get
+              (X86.GPR.ofIndex reg),
+          rflags := state.rflags, xmm0 := state.xmm0,
+          memory := KProgFormal.Reference.storeMemory state.memory (state.gpr 4 - 8#64) (state.gpr 3) 8, pc := nextPc,
+          fsBase := state.fsBase, gsBase := state.gsBase, addressWidth := state.addressWidth, oracle := state.oracle,
+          modelError := state.modelError },
+      events :=
+        [KProgFormal.Reference.Event.memory KProgFormal.Reference.AccessKind.write (state.gpr 4 - 8#64)
+            (KProgFormal.Reference.valueBytes (state.gpr 3) 8) true] }
+'KProgFormal.ClightRefinement.X86PushReference.step' depends on axioms: [propext, Classical.choice, Quot.sound]
