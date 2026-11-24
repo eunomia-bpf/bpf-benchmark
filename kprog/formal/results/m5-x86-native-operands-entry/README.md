@@ -1,0 +1,3 @@
+The original eight-argument non-XOR ALU call now executes allocation, width resolution, aux decoding and both complete native-view reader calls, including RSP on either side. Initial table, tag, native-base and representation facts are transported through the real allocation frame. Both simultaneous operands and their exact source temporaries are derived; the original memory and helper bindings remain explicit.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
