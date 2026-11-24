@@ -1,0 +1,55 @@
+KProgFormal.ClightRefinement.X86ProducerStackBasePrefix.from_call (before : CC.Mem) (ctx : CC.Val) (k : CC.Cont)
+  (inputs : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before) :
+  ∃ abi ghosts gprs cache memory gpr objects base scalar ret after,
+    CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+        (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer) [ctx] k
+          before)
+        (CC.Eapp gpr.trace scalar.trace)
+        (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 1#32]
+          (KProgFormal.ClightRefinement.X86ProducerStackBaseSource.continuation
+            (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+            scalar.output k)
+          after) ∧
+      (∀ (i : Fin 16),
+          CC.Mem.load CC.Mptr after gprs.block (16 * ↑↑i) = some (CC.Val.Vlong (gpr.values i)) ∧
+            CC.Mem.load CC.Chunk.Mint8unsigned after gprs.block (16 * ↑↑i + 8) = some (CC.Val.Vint 0)) ∧
+        gpr.values 4 = 0 ∧
+          (∀ (i : Fin 8),
+              CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i) after (objects i).block 0 =
+                some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i (scalar.values i))) ∧
+            CC.Mem.load CC.Chunk.Mint64 after base.block 0 = some (CC.Val.Vlong 0) ∧
+              CC.Mem.load CC.Chunk.Mint64 after ret.block 0 = some (CC.Val.Vlong 0) ∧
+                (∀ (i : Fin 187),
+                    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerAbiSource.chunk i) after abi.block
+                        (KProgFormal.ClightRefinement.X86ProducerAbiSource.offset i) =
+                      some (KProgFormal.ClightRefinement.X86ProducerAbiSource.value i)) ∧
+                  (∀ (i : Fin 12),
+                      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGhostSource.chunk i) after (ghosts i).block
+                          0 =
+                        some (KProgFormal.ClightRefinement.X86ProducerGhostSource.value i)) ∧
+                    KProgFormal.ClightRefinement.X86ProducerContextSource.Typed
+                        KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues ∧
+                      (∀ (i : Fin 5),
+                          CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i)
+                              scalar.output =
+                            some (KProgFormal.ClightRefinement.X86ProducerInitialPrefix.contextValues i)) ∧
+                        CC.PTree.get X86_program_profile_bpf._ctx scalar.output = some ctx ∧
+                          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                              CC.Positive.toNat b < CC.Positive.toNat before.nextblock →
+                                CC.Mem.load c after b ofs = CC.Mem.load c before b ofs) ∧
+                            KProgFormal.ClightRefinement.FrameBelow before.nextblock before memory ∧
+                              KProgFormal.ClightRefinement.FrameBelow before.nextblock scalar.after after ∧
+                                after.access =
+                                    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                                          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+                                          before).snd.access ∧
+                                  after.nextblock =
+                                    (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                                          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+                                          before).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerStackBasePrefix.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
