@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.first_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.first_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.second_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.second_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.third_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.third_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.invoke
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOrdinaryMoves.invoke
