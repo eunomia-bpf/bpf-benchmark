@@ -57,6 +57,12 @@ structure Result (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Integer
   access : after.access = (allocation ge.genv_cenv before).2.access
   frontier : after.nextblock = (allocation ge.genv_cenv before).2.nextblock
 
+/-- Derived original header observations, retained separately so the old
+Result and every old theorem keep precisely their existing premises. -/
+def HeaderReads {before : CC.Mem} {ctxBlock : CC.Block} {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+    (ready : Result before ctxBlock ctxOffset k) : Prop := ∀ i : Fin 24,
+  CC.Mem.load CC.Mptr ready.after ready.entry.block (8 * (i.val : Int)) = some (.Vptr (ready.sources i).block 0)
+
 private theorem rows : ∀ i : Fin 16,
     X86ProducerGprStore.chunk (X86ProducerGprSites.valueRow i) = CC.Mptr ∧
     X86ProducerGprStore.offset (X86ProducerGprSites.valueRow i) = 16 * (i.val : Int) ∧
@@ -69,9 +75,9 @@ private theorem rows : ∀ i : Fin 16,
 initialization readbacks and current header/cache/ghost resources. Kind6 and
 kind1 platform ABIs remain separate explicit premises. No native-memory or
 provider-oracle/trace correspondence is inferred from this source theorem. -/
-theorem from_call (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
+theorem from_call_with_header (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
     (inputs6 : X86ProducerRaxPrefix.Inputs before) (inputs1 : X86ProducerStackBaseProvider.Inputs before) :
-    Nonempty (Result before ctxBlock ctxOffset k) := by
+    ∃ ready : Result before ctxBlock ctxOffset k, HeaderReads ready := by
   obtain ⟨abi, ghosts, gprs, cache, memory, gpr, objects, base, scalar, ret, current,
     prefixRun, gprReads, rspZero, scalarReads, oldBaseRead, retRead, abiReads, ghostReads,
     typed, contextReads, ctxRead, callerReads, initialFrame, scalarFrame, access, frontier⟩ :=
@@ -93,8 +99,8 @@ theorem from_call (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Intege
     exact contextReads i
   obtain ⟨entry, sources, after, readyRun, cacheView, ghostView, cellsRead, headerContexts,
     entryCache, cacheGhosts, ghostsSeparate, cacheLive, ghostsLive, rdiRead, rdiTag,
-    otherRows, outside, readyFrame, readyAccess, readyNext⟩ :=
-    X86ProducerContextSetup.to_first_call before stack.after
+    otherRows, outside, readyFrame, readyAccess, readyNext, headerReads⟩ :=
+    X86ProducerContextSetup.to_first_call_with_reads before stack.after
       (X86ProducerStackBaseReturn.temps scalar.output stack.outcome.value) k gprs ctxBlock ctxOffset
       currentCtx currentInputs (stack.access.trans access)
   have gprNames : localName (0 : Fin 24) ≠ localName (14 : Fin 24) ∧ localName (0 : Fin 24) ≠ localName (1 : Fin 24) := by decide +kernel
@@ -142,7 +148,7 @@ theorem from_call (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Intege
     cache_live := cacheLive, ghosts_live := ghostsLive,
     context := (X86ProducerContextSetup.context_preserved _ ctxBlock ctxOffset).trans currentCtx,
     caller_loads := ?_, post_provider_frame := stack.post_frame.trans readyFrame,
-    access := readyAccess.trans (stack.access.trans access), frontier := readyNext.trans (stack.frontier.trans frontier) }⟩
+    access := readyAccess.trans (stack.access.trans access), frontier := readyNext.trans (stack.frontier.trans frontier) }, ?_⟩
   · simpa only [CC.E0, CC.Eapp, List.append_nil] using star_trans (star_trans prefixRun stack.run) readyRun.sound
   · intro i notRdi
     have apart := (rows i).2.2.2.2 notRdi
@@ -169,5 +175,14 @@ theorem from_call (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Intege
       omega
     exact (outside c b ofs (fresh entry) (fresh gprs)).trans
       ((stack.outside c b ofs (fresh base) (fresh cache)).trans (callerReads c b ofs below))
+
+  · exact headerReads
+
+/-- Original entry interface: no added header or input premise. -/
+theorem from_call (before : CC.Mem) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
+    (inputs6 : X86ProducerRaxPrefix.Inputs before) (inputs1 : X86ProducerStackBaseProvider.Inputs before) :
+    Nonempty (Result before ctxBlock ctxOffset k) := by
+  obtain ⟨ready, _header⟩ := from_call_with_header before ctxBlock ctxOffset k inputs6 inputs1
+  exact ⟨ready⟩
 
 end KProgFormal.ClightRefinement.X86ProducerEntryReady

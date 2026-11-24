@@ -1,0 +1,34 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/header-20261124T232640Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86ProducerEntryReady"
+    ],
+    "exit": 0,
+    "seconds": 205.12960744299926,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "actual_phase": "header-core-build1"
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-header-reads/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.701241175062023,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}

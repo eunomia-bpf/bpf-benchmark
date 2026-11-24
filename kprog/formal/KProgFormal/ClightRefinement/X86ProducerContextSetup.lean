@@ -226,6 +226,50 @@ theorem context_inputs (le : CC.TempEnv) (ctxBlock : CC.Block) (ctxOffset : CC.I
 bind-loop and label suffix. Current context values, real RDI pointer/tag1,
 other GPR rows, resource Views and source caller frame all survive to PUSH.
 The preceding kind1 provider memory/native-memory binding remains separate. -/
+theorem to_first_call_with_reads (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (gprs : SourceLocal ge.genv_cenv before 0) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
+    (read : le.get X86_program_profile_bpf._ctx = some (.Vptr ctxBlock ctxOffset))
+    (inputs : ∀ i : Fin 5, le.get (X86ProducerContextSource.tempName i) = some (X86ProducerInitialPrefix.contextValues i))
+    (access : memory.access = (allocation ge.genv_cenv before).2.access) :
+    ∃ entry : X86ProducerHeaderLocals.HeaderLocal ge.genv_cenv before,
+    ∃ sources : (i : Fin 24) → SourceLocal ge.genv_cenv before i, ∃ after,
+    InternalRun ge 106 (.State producer X86ProducerStackBaseSource.finalSetup k (allocation ge.genv_cenv before).1 le memory)
+      (.State producer X86ProducerBindLoop.firstCall (.Kseq X86ProducerContextSource.followingCalls k)
+        (allocation ge.genv_cenv before).1 (temps le ctxBlock ctxOffset) after) ∧
+    X86ReleaseProvider.View after entry.block (sources 1).block 0 ∧
+    X86CallFrameComplete.View after entry.block (X86ProducerHeaderViews.ghosts sources) ∧
+    CC.Mem.load CC.Mptr after entry.block 0 = some (.Vptr (sources 0).block 0) ∧
+    (∀ i, CC.Mem.load (X86ProducerContextSource.chunk i) after entry.block (X86ProducerContextSource.offset i) = some (contextValues ctxBlock ctxOffset i)) ∧
+    entry.block ≠ (sources 1).block ∧ X86CallFrameComplete.Outside (X86ProducerHeaderViews.ghosts sources) (sources 1).block ∧
+    X86CallFrameComplete.Separated entry.block (X86ProducerHeaderViews.ghosts sources) ∧
+    (sources 1).block.toNat < after.nextblock.toNat ∧
+    (∀ slot, (((X86ProducerHeaderViews.ghosts sources).tag slot).1).toNat < after.nextblock.toNat ∧
+      (((X86ProducerHeaderViews.ghosts sources).pointer slot).1).toNat < after.nextblock.toNat) ∧
+    CC.Mem.load CC.Mptr after gprs.block 112 = some (.Vptr ctxBlock ctxOffset) ∧
+    CC.Mem.load .Mint8unsigned after gprs.block 120 = some (.Vint (1#32)) ∧
+    (∀ row : Fin 32, row ≠ 14 → row ≠ 15 → CC.Mem.load (X86ProducerGprStore.chunk row) after gprs.block (X86ProducerGprStore.offset row) =
+      CC.Mem.load (X86ProducerGprStore.chunk row) memory gprs.block (X86ProducerGprStore.offset row)) ∧
+    (∀ c b ofs, b ≠ entry.block → b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+    FrameBelow before.nextblock memory after ∧ after.access = memory.access ∧ after.nextblock = memory.nextblock ∧
+    (∀ i : Fin 24, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr (sources i).block 0)) := by
+  obtain ⟨middle, current, contextRun, pointerStored, tagStored, pointerRead, tagRead, otherRows, outside,
+    frame, rights, next⟩ := initialized before memory le k gprs ctxBlock ctxOffset read access
+  have currentInputs := context_inputs le ctxBlock ctxOffset inputs
+  obtain ⟨entry, sources, after, headerRun, cacheView, ghostView, cellsRead, contextReads, entryCache,
+    cacheOutsideGhosts, ghostSeparated, cacheLive, ghostsLive, headerOutside, headerFrame, headerAccess, headerNext, headerReads⟩ :=
+    X86ProducerHeaderBound.to_first_call_with_reads before current (temps le ctxBlock ctxOffset) k
+      (contextValues ctxBlock ctxOffset) currentInputs.1 currentInputs.2 (rights.trans access)
+  have gprEntry := X86ProducerHeaderLocals.source_separate ge.genv_cenv before 0 entry gprs
+  refine ⟨entry, sources, after, contextRun.trans headerRun, cacheView, ghostView, cellsRead, contextReads,
+    entryCache, cacheOutsideGhosts, ghostSeparated, cacheLive, ghostsLive,
+    (headerOutside _ _ _ gprEntry).trans pointerRead, (headerOutside _ _ _ gprEntry).trans tagRead,
+    ?_, ?_, frame.trans headerFrame, headerAccess.trans rights, headerNext.trans next, headerReads⟩
+  · intro row notPointer notTag
+    exact (headerOutside _ _ _ gprEntry).trans (otherRows row notPointer notTag)
+  · intro c b ofs notHeader notGpr
+    exact (headerOutside c b ofs notHeader).trans (outside c b ofs notGpr)
+
+/-- Compatibility interface: all original premises and conclusions are retained. -/
 theorem to_first_call (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (gprs : SourceLocal ge.genv_cenv before 0) (ctxBlock : CC.Block) (ctxOffset : CC.Integers.Ptrofs)
     (read : le.get X86_program_profile_bpf._ctx = some (.Vptr ctxBlock ctxOffset))
@@ -251,21 +295,8 @@ theorem to_first_call (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
       CC.Mem.load (X86ProducerGprStore.chunk row) memory gprs.block (X86ProducerGprStore.offset row)) ∧
     (∀ c b ofs, b ≠ entry.block → b ≠ gprs.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
     FrameBelow before.nextblock memory after ∧ after.access = memory.access ∧ after.nextblock = memory.nextblock := by
-  obtain ⟨middle, current, contextRun, pointerStored, tagStored, pointerRead, tagRead, otherRows, outside,
-    frame, rights, next⟩ := initialized before memory le k gprs ctxBlock ctxOffset read access
-  have currentInputs := context_inputs le ctxBlock ctxOffset inputs
-  obtain ⟨entry, sources, after, headerRun, cacheView, ghostView, cellsRead, contextReads, entryCache,
-    cacheOutsideGhosts, ghostSeparated, cacheLive, ghostsLive, headerOutside, headerFrame, headerAccess, headerNext⟩ :=
-    X86ProducerHeaderBound.to_first_call before current (temps le ctxBlock ctxOffset) k
-      (contextValues ctxBlock ctxOffset) currentInputs.1 currentInputs.2 (rights.trans access)
-  have gprEntry := X86ProducerHeaderLocals.source_separate ge.genv_cenv before 0 entry gprs
-  refine ⟨entry, sources, after, contextRun.trans headerRun, cacheView, ghostView, cellsRead, contextReads,
-    entryCache, cacheOutsideGhosts, ghostSeparated, cacheLive, ghostsLive,
-    (headerOutside _ _ _ gprEntry).trans pointerRead, (headerOutside _ _ _ gprEntry).trans tagRead,
-    ?_, ?_, frame.trans headerFrame, headerAccess.trans rights, headerNext.trans next⟩
-  · intro row notPointer notTag
-    exact (headerOutside _ _ _ gprEntry).trans (otherRows row notPointer notTag)
-  · intro c b ofs notHeader notGpr
-    exact (headerOutside c b ofs notHeader).trans (outside c b ofs notGpr)
+  obtain ⟨entry, sources, after, run, cacheView, ghostView, cells, contextReads, bindingCache, outsideGhosts, separated, cacheLive, ghostsLive, rdiRead, rdiTag, otherRows, outside, frame, finalAccess, frontier, headerReads⟩ :=
+    to_first_call_with_reads before memory le k gprs ctxBlock ctxOffset read inputs access
+  exact ⟨entry, sources, after, run, cacheView, ghostView, cells, contextReads, bindingCache, outsideGhosts, separated, cacheLive, ghostsLive, rdiRead, rdiTag, otherRows, outside, frame, finalAccess, frontier⟩
 
 end KProgFormal.ClightRefinement.X86ProducerContextSetup
