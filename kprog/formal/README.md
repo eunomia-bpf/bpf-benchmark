@@ -84,10 +84,11 @@ reader calls and the same canonical full-state outputs. Their destination
 remains an ordinary scalar/tag0 register; legal byte slices are explicit.
 The [RSP storage prefix](results/m5-x86-write-rsp-storage/README.md) executes
 reverse materialization and both table stores to the exact stack-release
-frontier. The [qword RSP destination calls](results/m5-x86-rsp-destination-root/README.md)
-now refine the same canonical OR/AND step through free and return for tag0
-and non-increasing raw SP. Increasing-SP release, other destination widths/tags
-and remaining pointer operand domains stay open.
+frontier. The [RSP destination calls](results/m5-x86-rsp-dword-root/README.md)
+refine the same canonical OR/AND step through free and return for non-increasing
+raw SP: qword with tag0, dword with any initial tag and real zero-extension.
+Increasing-SP release, byte/word destinations, other qword tags and remaining
+pointer operand domains stay open.
 
 ## Trust boundary
 
