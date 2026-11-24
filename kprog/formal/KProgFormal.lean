@@ -269,3 +269,5 @@ import KProgFormal.ClightRefinement.X86CallFrameComplete
 import KProgFormal.ClightRefinement.X86ReleaseStorageReturn
 import KProgFormal.ClightRefinement.X86QwordReleaseReturn
 import KProgFormal.ClightRefinement.X86NopDispatch
+import KProgFormal.ClightRefinement.X86AluLogicQwordReleaseNative
+import KProgFormal.ClightRefinement.X86AluXorQwordReleaseAll
