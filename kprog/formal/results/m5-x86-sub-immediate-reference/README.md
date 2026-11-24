@@ -1,0 +1,3 @@
+The same canonical Reference.X86.step now has an exact register/immediate qword SUB theorem: original external arithmetic and all six arithmetic flags, selected GPR update, exact next PC and preserved arbitrary native memory/vector/oracle/address state. Running model state is explicit. This native-model theorem does not prove actual source-handler execution, code artifact/fetch or the universal dispatcher step.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

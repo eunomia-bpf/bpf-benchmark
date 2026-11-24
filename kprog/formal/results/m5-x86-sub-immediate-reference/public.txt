@@ -1,0 +1,23 @@
+KProgFormal.ClightRefinement.X86SubImmediateReference.step (state : KProgFormal.Reference.X86.State) (reg : Fin 16)
+  (value nextPc : BitVec 64) (running : state.modelError = none) :
+  KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.arithmetic KProgFormal.Reference.X86.ScalarWidth.w64
+        KProgFormal.Reference.X86.ArithmeticKind.sub
+        (KProgFormal.Reference.X86.ScalarDestination.register (KProgFormal.Reference.X86.RegisterSlice.low reg))
+        (KProgFormal.Reference.X86.ScalarSource.immediate value) nextPc)
+      state =
+    {
+      state :=
+        {
+          gpr := fun r =>
+            ((KProgFormal.ClightRefinement.X86LogicReference.input state).setReg X86.Size.q (X86.GPR.ofIndex reg)
+                    (state.gpr reg - value)).regs.get
+              (X86.GPR.ofIndex r),
+          rflags :=
+            KProgFormal.ClightRefinement.X86LogicReference.flagsWord state.rflags
+              (X86.Flags.sub X86.Size.q (state.gpr reg) value
+                (KProgFormal.ClightRefinement.X86LogicReference.input state).flags),
+          xmm0 := state.xmm0, memory := state.memory, pc := nextPc, fsBase := state.fsBase, gsBase := state.gsBase,
+          addressWidth := state.addressWidth, oracle := state.oracle, modelError := state.modelError },
+      events := [] }
+'KProgFormal.ClightRefinement.X86SubImmediateReference.step' depends on axioms: [propext, Classical.choice, Quot.sound]
