@@ -1,0 +1,3 @@
+Every ordinary scalar/tag0 dword-register XOR aliasing route, including identical registers, refines the SAME canonical ISA output through the actual eight-argument call, source-selected shortcut/read path, helper, flags,197-step writer, local release and void return. No different-register or shortcut-result premise is imposed. Final GPR/flag views, every other reference-state field, PC, oracle, events/fault, caller loads and released locals are explicit. The separate matched-path theorem also covers old represented pointer/tag cells.
+
+Focused build209 and execute type/axiom query pass at original200000/512,j1,32GiB inside shared timing. RSP/pointer arithmetic input domains, word/qword source callers and dispatcher composition remain open.
