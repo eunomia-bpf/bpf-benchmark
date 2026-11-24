@@ -1,0 +1,57 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.source :
+  KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration =
+    (X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_108.Ssequence
+          (CC.Stmt.Sifthenelse KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.oldTest✝
+            X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_109
+            KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.zero✝)).Ssequence
+      (CC.Stmt.Sifthenelse KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.nextTest✝
+        X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_110
+        X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_111)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.choose (ge : CC.CGenv) (function : CC.Function)
+  (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (slot : Fin 6) (old next : BitVec 64)
+  (observedIndex :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_i__5 le =
+      some (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.index slot)))
+  (observedOffset :
+    CC.PTree.get X86_program_profile_bpf.___x86_release_off__5 le =
+      some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.offset slot)))
+  (observedOld : CC.PTree.get X86_program_profile_bpf.___x86_release_old__5 le = some (CC.Val.Vlong old))
+  (observedNext : CC.PTree.get X86_program_profile_bpf.___x86_release_new__5 le = some (CC.Val.Vlong next)) :
+  KProgFormal.ClightRefinement.InternalRun ge 9
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.iteration k e le memory)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.arm slot old next) k e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.temps le slot old next) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.choose' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.from_table (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (old next : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (newSp : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong next))
+  (increasingOffset : CC.Integers.Int64.cmp CC.Comparison.Cgt next old = true) :
+  KProgFormal.ClightRefinement.InternalRun ge 38
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.arm 0 old next)
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.loopContinuation
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.releaseContinuation k))
+      e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.temps
+        (KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseLoop.temps
+          (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.temps le cellsBlock cellsOffset old next))
+        0 old next)
+      memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseSelect.from_table' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
