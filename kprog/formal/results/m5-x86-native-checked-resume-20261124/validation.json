@@ -1,0 +1,24 @@
+{
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-logic-native-checked/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6056237390148453,
+    "memory_limit": 34359738368,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "lean_num_threads": 1
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "raw_directory": "/workspaces/kprog-raw/V/xor-byte-call02-20261124T070803Z",
+  "query": "results/m5-x86-logic-native-checked/Query.lean",
+  "complete_instruction_families": 0
+}

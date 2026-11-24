@@ -1,0 +1,86 @@
+KProgFormal.ClightRefinement.X86LogicNative.register_step (cpu : X86.Cpu) (dst src : Fin 16) (highDst highSrc : Bool)
+  (kind : X86.BinKind) (value : BitVec 64) (length : Nat) (live : X86.Live cpu)
+  (selected :
+    kind = X86.BinKind.xor ∧
+        value =
+          cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst ^^^ cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc ∨
+      kind = X86.BinKind.or ∧
+          value =
+            cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst |||
+              cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc ∨
+        kind = X86.BinKind.and ∧
+          value =
+            cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst &&& cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc)
+  (addressWidth : X86.LinearAddressWidth := X86.LinearAddressWidth.la48) :
+  X86.step
+      {
+        op :=
+          X86.Op.bin kind X86.Size.b (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+            (X86.Operand.reg (X86.GPR.ofIndex src) highSrc),
+        len := length }
+      cpu addressWidth =
+    have __src := cpu.setReg X86.Size.b (X86.GPR.ofIndex dst) value highDst;
+    { regs := __src.regs, rip := cpu.rip + BitVec.ofNat 64 length,
+      flags :=
+        X86.Flags.logic X86.Size.b (X86.Value.trunc X86.Size.b value) (cpu.oracle.bits cpu.oracle.cursor) cpu.flags,
+      mem := __src.mem, fsBase := __src.fsBase, gsBase := __src.gsBase, xmm := __src.xmm, mxcsr := __src.mxcsr,
+      oracle :=
+        have __src := cpu.oracle;
+        { bits := __src.bits, cursor := cpu.oracle.cursor + 1 },
+      ms := __src.ms }
+'KProgFormal.ClightRefinement.X86LogicNative.register_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicNative.represented (cpu : X86.Cpu) (dst src : Fin 16) (highDst highSrc : Bool)
+  (kind : X86.BinKind) (value : BitVec 64) (length : Nat) (live : X86.Live cpu)
+  (selected :
+    kind = X86.BinKind.xor ∧
+        value =
+          cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst ^^^ cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc ∨
+      kind = X86.BinKind.or ∧
+          value =
+            cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst |||
+              cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc ∨
+        kind = X86.BinKind.and ∧
+          value =
+            cpu.getReg X86.Size.b (X86.GPR.ofIndex dst) highDst &&& cpu.getReg X86.Size.b (X86.GPR.ofIndex src) highSrc)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (memory : CC.Mem) (block : CC.Block)
+  (base : CC.Integers.Ptrofs)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base
+      (cpu.setReg X86.Size.b (X86.GPR.ofIndex dst) value highDst))
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations)
+  (flags :
+    KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+      (X86.Flags.logic X86.Size.b (X86.Value.trunc X86.Size.b value) (cpu.oracle.bits cpu.oracle.cursor) cpu.flags))
+  (addressWidth : X86.LinearAddressWidth := X86.LinearAddressWidth.la48) :
+  have next :=
+    X86.step
+      {
+        op :=
+          X86.Op.bin kind X86.Size.b (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+            (X86.Operand.reg (X86.GPR.ofIndex src) highSrc),
+        len := length }
+      cpu addressWidth;
+  KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory block base next ∧
+    KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places next.flags
+'KProgFormal.ClightRefinement.X86LogicNative.represented' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86LogicChecked.register (state : X86.CheckedState) (dst src : Fin 16)
+  (highDst highSrc : Bool) (kind : X86.BinKind) (length : Nat) (running : state.stopped = false) :
+  X86.stepChecked
+      {
+        op :=
+          X86.Op.bin kind X86.Size.b (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+            (X86.Operand.reg (X86.GPR.ofIndex src) highSrc),
+        len := length }
+      state =
+    {
+      cpu :=
+        X86.step
+          {
+            op :=
+              X86.Op.bin kind X86.Size.b (X86.Operand.reg (X86.GPR.ofIndex dst) highDst)
+                (X86.Operand.reg (X86.GPR.ofIndex src) highSrc),
+            len := length }
+          state.cpu state.addressWidth,
+      profile := state.profile, addressWidth := state.addressWidth, events := state.events, fault := state.fault }
+'KProgFormal.ClightRefinement.X86LogicChecked.register' depends on axioms: [propext, Classical.choice, Quot.sound]
