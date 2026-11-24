@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-24T11:12:08.740693+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.5204944610595703,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 612,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-fourteenth-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.869635820388794,
+    "cpu": "16-23",
+    "workers": 1,
+    "nice": 19,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 155,
+  "query_union": {
+    "retained_source": "kprog/formal/results/m5-x86-logic-register-root/Query.lean",
+    "retained_count": 153,
+    "added": [
+      "Arm64ProgramEntryRepeatMovAdmission.next_admission",
+      "Arm64ProgramEntryConstantMovNative.execute"
+    ],
+    "root_import": "existing ResultPrefix import; all current imports retained"
+  },
+  "complete_original_call_prefix": 14,
+  "complete_isa_families": 0,
+  "root_metadata": {
+    "path": "kprog/formal/KProgFormal.lean",
+    "size_bytes": 13462,
+    "mtime_ns": 1795517775949236917
+  },
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
