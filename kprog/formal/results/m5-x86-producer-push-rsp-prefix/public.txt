@@ -1,0 +1,116 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_ready {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k) :
+  Nonempty (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_ready' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_call (before : CC.Mem) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs) (k : CC.Cont)
+  (inputs6 : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (inputs1 : KProgFormal.ClightRefinement.X86ProducerStackBaseProvider.Inputs before) :
+  ∃ ready, Nonempty (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.run {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer)
+      [CC.Val.Vptr ctxBlock ctxOffset] k before)
+    ready.trace
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop
+      (KProgFormal.ClightRefinement.X86ProducerPushRspSource.control ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerPushPrefix.bodyCont ready) ready.after)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.temps ready) self.after)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_read {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  CC.Mem.load CC.Mptr self.after ready.gprs.block 64 =
+    some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_read' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rows {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (row : Fin 32) :
+  row ≠ 8 →
+    CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) self.after ready.gprs.block
+        (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row)
+        (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+        (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rows' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.cache_view {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.View self.after ready.entry.block (ready.sources 1).block 0
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.cache_view' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.ghost_view {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  KProgFormal.ClightRefinement.X86CallFrameComplete.View self.after ready.entry.block
+    (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.ghost_view' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_tag {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  CC.Mem.load CC.Chunk.Mint8unsigned self.after ready.gprs.block 72 = some (CC.Val.Vint 0)
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_tag' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.caller_loads {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) (c : CC.Chunk) (b : CC.Block)
+  (ofs : CC.Z) :
+  CC.Positive.toNat b < CC.Positive.toNat before.nextblock → CC.Mem.load c self.after b ofs = CC.Mem.load c before b ofs
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.caller_loads' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.post_provider_frame {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {k : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset k}
+  (self : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  KProgFormal.ClightRefinement.FrameBelow before.nextblock ready.stackOutcome.supplied self.after
+'KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.post_provider_frame' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

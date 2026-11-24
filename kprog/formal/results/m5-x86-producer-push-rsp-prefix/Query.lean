@@ -1,0 +1,21 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspPrefix
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_ready
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_ready
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.from_call
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.run
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.run
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_read
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_read
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rows
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rows
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.cache_view
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.cache_view
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.ghost_view
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.ghost_view
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_tag
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.rsp_tag
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.caller_loads
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.caller_loads
+#check KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.post_provider_frame
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result.post_provider_frame
