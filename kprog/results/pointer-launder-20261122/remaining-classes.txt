@@ -180,6 +180,14 @@ Class F: B's frame exceeds the verifier's 512-byte stack.
   remaining 932 B is what pushes this object past 512: request 1, which
   verifies, declares 56 U of stack and its whole object stays at 88 B.
 
+  The layout itself caps the emulated stack before any spill. The three
+  locals cost 2.125 x S for S bytes of stack the program touches
+  (S for the union, S/8 for the tag bytes, S for the pointer word), so
+  the verifier's 512-byte limit admits at most 241 bytes of emulated
+  stack with nothing else in the frame. The ten requests at 1736 touch
+  304 bytes and the 1408 group touches 224, so both the side arrays and
+  the spills have to shrink, or the stack has to leave the frame.
+
   Why clang accepts it: B is compiled with `-mllvm -bpf-stack-size=4096`
   (kprog/x86/trusted_specializer.py:35 and :104), four times the
   verifier's limit, so nothing in the build stage reports the overflow.
