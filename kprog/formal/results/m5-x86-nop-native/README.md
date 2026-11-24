@@ -1,0 +1,3 @@
+The genuine six-step DISP_NOP handler call refines the SAME canonical checked NOP state. All heaps, pointer tags and ignored operands are unrestricted; actual initial GPR/flag representations persist in the identical heap. PC alone advances, with every architectural state field and caller allocation preserved. Generic dispatcher selection remains a separate open composition obligation.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

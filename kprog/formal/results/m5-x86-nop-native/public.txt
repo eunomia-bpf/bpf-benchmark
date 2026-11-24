@@ -1,0 +1,34 @@
+KProgFormal.ClightRefinement.X86NopNative.execute (ge : CC.CGenv) (memory : CC.Mem) (k : CC.Cont)
+  (binding op dst src flags aux imm : CC.Val) (width : BitVec 8)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cells : CC.Block) (base : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (state : KProgFormal.Reference.X86.State)
+  (nextPc : BitVec 64)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cells base
+      (KProgFormal.ClightRefinement.X86LogicReference.input state))
+  (flagBytes :
+    KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+      (KProgFormal.ClightRefinement.X86LogicReference.input state).flags)
+  (running : state.modelError = none) (boundary : CC.isCallCont k = true) :
+  have native := KProgFormal.Reference.X86.step (KProgFormal.Reference.X86.Instruction.nop nextPc) state;
+  KProgFormal.ClightRefinement.InternalRun ge 6
+      (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86NopCall.handler)
+        [binding, op, dst, src, flags, aux, imm, CC.Val.Vint (BitVec.setWidth 32 width)] k memory)
+      (CC.State.Returnstate CC.Val.Vundef k memory) ∧
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cells base
+        (KProgFormal.ClightRefinement.X86LogicReference.input native.state) ∧
+      KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+          (KProgFormal.ClightRefinement.X86LogicReference.input native.state).flags ∧
+        native =
+          {
+            state :=
+              { gpr := state.gpr, rflags := state.rflags, xmm0 := state.xmm0, memory := state.memory, pc := nextPc,
+                fsBase := state.fsBase, gsBase := state.gsBase, addressWidth := state.addressWidth,
+                oracle := state.oracle, modelError := state.modelError },
+            events := [] }
+'KProgFormal.ClightRefinement.X86NopNative.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
