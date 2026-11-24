@@ -1,0 +1,3 @@
+The SAME actual saved operand path now executes all13 original transitions through real header/RSP reads, actual wrapping decrement and genuine Mptr assignment/sequence pop into the original stack loop. The store is constructed from actual allocator/provider-preserved rights; its readback/all disjoint register-tag rows/other blocks/old caller/access/frontier frames are retained. No successful-store/source-run/permission/output-memory premise remains in from_ready; native-memory/canonical ISA correspondence is still separate.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

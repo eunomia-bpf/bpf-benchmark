@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspExecute.assignment (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory after : CC.Mem) (cells : CC.Block)
+  (first : CC.PTree.get X86_program_profile_bpf._t'228 le = some (CC.Val.Vptr cells 0))
+  (current : CC.PTree.get X86_program_profile_bpf._t'230 le = some (CC.Val.Vlong 0))
+  (eight : CC.PTree.get X86_program_profile_bpf.___x86_l_pp_step le = some (CC.Val.Vlong 8#64))
+  (stored :
+    CC.Mem.store CC.Mptr memory cells 64 (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.store
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop k) e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop k e le after)
+'KProgFormal.ClightRefinement.X86ProducerPushRspExecute.assignment' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspExecute.from_ready {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer)
+  (bodyCont : CC.Cont) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 13
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler CC.Stmt.Sskip
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.following ready.entry.block bodyCont ready.after)
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+          (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block bodyCont ready.after
+            (ready.values 3))
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+          KProgFormal.ClightRefinement.X86ProducerPushRspSource.stackLoop
+          (KProgFormal.ClightRefinement.X86ProducerPushRspSource.control ready.entry.block bodyCont ready.after)
+          (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+          (KProgFormal.ClightRefinement.X86ProducerPushRspRead.temps
+            (KProgFormal.ClightRefinement.X86ProducerPushReadReturn.temps ready.entry.block bodyCont ready.after
+              (ready.values 3))
+            ready.gprs.block)
+          after) ∧
+      CC.Mem.store CC.Mptr (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd
+            ready.gprs.block 64 (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) =
+          some after ∧
+        CC.Mem.load CC.Mptr after ready.gprs.block 64 =
+            some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp) ∧
+          (∀ (row : Fin 32),
+              row ≠ 8 →
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row) after ready.gprs.block
+                    (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row) =
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerGprStore.chunk row)
+                    (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd ready.gprs.block
+                    (KProgFormal.ClightRefinement.X86ProducerGprStore.offset row)) ∧
+            (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                b ≠ ready.gprs.block →
+                  CC.Mem.load c after b ofs =
+                    CC.Mem.load c (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd b ofs) ∧
+              KProgFormal.ClightRefinement.FrameBelow before.nextblock
+                  (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd after ∧
+                after.access = (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.access ∧
+                  after.nextblock =
+                    (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerPushRspExecute.from_ready' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
