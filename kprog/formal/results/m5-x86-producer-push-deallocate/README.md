@@ -1,0 +1,3 @@
+Original actual allocation and preserved access maps derive every still-Freeable declared local range after GPR/metadata/cache writes. The real free-list succeeds, retaining all old caller bytes/Cur-Max maps and contents/frontier while revoking every freed local range. No successful-free/live-local/permission/frame premise is introduced; three actual body locals are the original source declarations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

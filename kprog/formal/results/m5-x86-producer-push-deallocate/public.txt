@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86ProducerPushDeallocate.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata) :
+  ∃ after,
+    result.after.freeList
+          (CC.blocksOfEnv KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+            (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst) =
+        some after ∧
+      KProgFormal.ClightRefinement.FrameBelow ready.after.nextblock result.after after ∧
+        after.contents = result.after.contents ∧
+          after.nextblock = result.after.nextblock ∧
+            ∀ (row : CC.Block × CC.Z × CC.Z),
+              row ∈
+                  CC.blocksOfEnv KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+                    (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst →
+                ∀ (ofs : CC.Z),
+                  row.snd.fst ≤ ofs →
+                    ofs < row.snd.snd →
+                      ∀ (kind : CC.PermKind) (permission : CC.Permission),
+                        after.perm row.fst ofs kind permission = false
+'KProgFormal.ClightRefinement.X86ProducerPushDeallocate.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
