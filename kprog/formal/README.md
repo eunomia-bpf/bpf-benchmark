@@ -103,12 +103,16 @@ non-increasing raw-SP conditions. They retain the original 77-step zero
 shortcut for the same RSP/lane and both real native reader calls for distinct
 registers, then refine the same canonical full-state step through return.
 
-The [increasing-RSP prefixes](results/m5-x86-rsp-release-select/README.md)
-execute the actual growing-SP branch, loop entry and all six word/byte
-selectors. The [whole-word arm](results/m5-x86-rsp-release-word/README.md)
-also executes the real provider call and constructed cache store at every
-word position, retaining arbitrary provider traces and memory effects. Byte
-releases, outer backedges and frame clobbers remain open.
+The [increasing-RSP components](results/m5-x86-rsp-release-byte-call/README.md)
+execute the original word/byte guards, real providers, casts and constructed
+cache stores, retaining arbitrary provider traces and memory effects. The
+[loop control](results/m5-x86-rsp-release-advance/README.md) reaches the exact
+frame-values call through the original backedges. Its
+[entry](results/m5-x86-call-frame-entry/README.md) derives raw SP from the real
+table read; the [caller proof](results/m5-x86-call-frame-caller/README.md)
+connects it to the actual last-slot backedge and call site. Full loop assembly,
+provider ABI/frame transport and the helper's six metadata-clearing arms remain
+open.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
 preserving the entire native state except PC. Generic dispatcher selection
