@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64ProducerTailFrame
+
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.Frame.trans
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.Frame.trans
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_frame
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_frame
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_kept
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_kept
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_cache
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_cache
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_setup
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.of_setup
+#check KProgFormal.ClightRefinement.Arm64ProducerTailFrame.Frame.abi
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTailFrame.Frame.abi
