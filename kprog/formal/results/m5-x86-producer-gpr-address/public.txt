@@ -1,0 +1,37 @@
+KProgFormal.ClightRefinement.X86ProducerGprAddress.pointer_address (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (block : CC.Block) (i : Fin 16)
+  (bound :
+    CC.PTree.get X86_program_profile_bpf.___x86_local_gprs e =
+      some (block, KProgFormal.ClightRefinement.X86ProducerGprAddress.registersType)) :
+  CC.doEvalLvalue KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      (KProgFormal.ClightRefinement.X86ProducerGprAddress.pointerTarget i) =
+    some (block, CC.Integers.Ptrofs.repr (16 * ↑↑i), CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerGprAddress.pointer_address' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprAddress.tag_address (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (block : CC.Block) (i : Fin 16)
+  (bound :
+    CC.PTree.get X86_program_profile_bpf.___x86_local_gprs e =
+      some (block, KProgFormal.ClightRefinement.X86ProducerGprAddress.registersType)) :
+  CC.doEvalLvalue KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      (KProgFormal.ClightRefinement.X86ProducerGprAddress.tagTarget i) =
+    some (block, CC.Integers.Ptrofs.repr (16 * ↑↑i + 8), CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerGprAddress.tag_address' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprAddress.source_destination :
+  KProgFormal.ClightRefinement.X86ProducerInputReturn.destination =
+    CC.Stmt.Sassign (KProgFormal.ClightRefinement.X86ProducerGprAddress.pointerTarget 0)
+      (CC.Expr.Etempvar X86_program_profile_bpf._t'1 (CC.tptr CC.tvoid))
+'KProgFormal.ClightRefinement.X86ProducerGprAddress.source_destination' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerGprAddress.source_tag :
+  KProgFormal.ClightRefinement.X86ProducerInputReturn.following =
+    (CC.Stmt.Sassign (KProgFormal.ClightRefinement.X86ProducerGprAddress.tagTarget 0)
+          (CC.Expr.Econst_int (CC.Integers.Int.repr 0) CC.tuint)).Ssequence
+      KProgFormal.ClightRefinement.X86ProducerGprAddress.afterRax
+'KProgFormal.ClightRefinement.X86ProducerGprAddress.source_tag' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

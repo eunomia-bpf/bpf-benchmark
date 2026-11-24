@@ -1,15 +1,33 @@
 {
-  "status": "not_started",
-  "raw_directory": "/workspaces/kprog-raw/V/input-return-20261124T183812Z",
-  "reason": "coordinator exclusive timing lock; queued direct Lean command cancelled before launch",
-  "queued_phase": "gpr-address-draft1",
-  "command": [
-    "lake",
-    "env",
-    "lean",
-    "-j1",
-    "results/m5-x86-producer-gpr-address/Draft.lean"
-  ],
-  "canonical_module": "X86ProducerGprAddress",
-  "next_phase": "gpr-address-draft2"
+  "raw_directory": "/workspaces/kprog-raw/V/gpr-stores-20261124T191025Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86ProducerGprAddress"
+    ],
+    "exit": 0,
+    "seconds": 19.67489275499247,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-gpr-address/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5955864660209045,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
 }

@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerGprAddress
+#check KProgFormal.ClightRefinement.X86ProducerGprAddress.pointer_address
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprAddress.pointer_address
+#check KProgFormal.ClightRefinement.X86ProducerGprAddress.tag_address
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprAddress.tag_address
+#check KProgFormal.ClightRefinement.X86ProducerGprAddress.source_destination
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprAddress.source_destination
+#check KProgFormal.ClightRefinement.X86ProducerGprAddress.source_tag
+#print axioms KProgFormal.ClightRefinement.X86ProducerGprAddress.source_tag

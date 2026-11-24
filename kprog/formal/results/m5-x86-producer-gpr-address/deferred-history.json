@@ -1,0 +1,20 @@
+{
+  "validation": {
+    "status": "not_started",
+    "raw_directory": "/workspaces/kprog-raw/V/input-return-20261124T183812Z",
+    "reason": "coordinator exclusive timing lock; queued direct Lean command cancelled before launch",
+    "queued_phase": "gpr-address-draft1",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-gpr-address/Draft.lean"
+    ],
+    "canonical_module": "X86ProducerGprAddress",
+    "next_phase": "gpr-address-draft2"
+  },
+  "readme": "Pending proof draft for actual nested GPR pointer/tag addresses and the original RAX value/tag source identities. This file is not imported by the proof root and has not been validated.\n\nThe queued direct Lean command never launched because the coordinator holds exclusive timing; it was cancelled without running alongside the measurement. Resume with a fresh phase name under shared timing, correct the actual source boundary if needed, and move this same file to the canonical module only after acceptance. The prerequisite GPR layout has passed direct/focused kernel builds; its public query is also pending.\n",
+  "resolved_by_phase": "gpr-address-draft2",
+  "raw_directory": "/workspaces/kprog-raw/V/gpr-stores-20261124T191025Z"
+}
