@@ -1,0 +1,3 @@
+The genuine matched dword XOR shortcut and complete real return refine the SAME canonical ISA self-XOR step. Zero result, one AF oracle bit, full native GPR/flag views, all other reference fields, actual caller frame and released locals follow. Old represented pointer/tag destination cells are covered; arithmetic pointer inputs on the separate reader route remain open. Focused build205 and public execute query pass.
+
+Checks use original200000/512,j1,32GiB inside shared timing. Existing source external assumptions stay explicit. Full per-operation families and dispatcher composition remain unfinished.
