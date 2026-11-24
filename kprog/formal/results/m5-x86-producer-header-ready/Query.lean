@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderReady
+#check KProgFormal.ClightRefinement.X86ProducerHeaderReady.source_block
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderReady.source_block
+#check KProgFormal.ClightRefinement.X86ProducerHeaderReady.preserve
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderReady.preserve
+#check KProgFormal.ClightRefinement.X86ProducerHeaderReady.current
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderReady.current
+#check KProgFormal.ClightRefinement.X86ProducerHeaderReady.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderReady.from_call

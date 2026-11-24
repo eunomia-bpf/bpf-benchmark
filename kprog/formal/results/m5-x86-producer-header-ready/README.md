@@ -1,0 +1,3 @@
+All24 actual initialized header pointers survive the full original PUSH stores and local freeing. Header0/current GPRs, header112/current native-base pointer, actual kind1 native-base word and actual raw RSPminus8 derive the same initializer and genuine frames. The stronger whole prefix is constructed under the existing kind6/kind1 inputs, with no new header/run premise and no narrowing of old Result/from_call APIs.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
