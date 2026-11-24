@@ -1,0 +1,6 @@
+KProgFormal.ClightRefinement.X86ScalarStoreBytes.load {before after : CC.Mem} {block : CC.Block} {offset : Int}
+  {value : BitVec 64} (stored : CC.Mem.store CC.Chunk.Mint64 before block offset (CC.Val.Vlong value) = some after)
+  (lane : Fin 8) :
+  CC.Mem.load CC.Chunk.Mint8unsigned after block (offset + ↑↑lane) =
+    some (CC.Val.Vint (BitVec.setWidth 32 (BitVec.setWidth 8 (value >>> (8 * ↑lane)))))
+'KProgFormal.ClightRefinement.X86ScalarStoreBytes.load' depends on axioms: [propext, Classical.choice, Quot.sound]

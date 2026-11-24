@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ScalarStoreBytes
+#check KProgFormal.ClightRefinement.X86ScalarStoreBytes.load
+#print axioms KProgFormal.ClightRefinement.X86ScalarStoreBytes.load
