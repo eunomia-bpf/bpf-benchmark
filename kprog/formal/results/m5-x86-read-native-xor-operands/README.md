@@ -1,0 +1,3 @@
+The original distinct-register XOR selector executes its actual10-step gate and3-step first call, then both complete native-view readers through arithmetic dispatch. All widths, legal high-byte source/destination slices, ordinary scalar/tag0 rows and RSP rows of any tag are covered. Native results follow from the same initial representation and actual header112/base loads; the entire heap is unchanged. Same-register shortcuts remain separate existing source paths.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
