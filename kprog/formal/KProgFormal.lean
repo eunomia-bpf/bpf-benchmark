@@ -221,3 +221,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryCntCall
 import KProgFormal.ClightRefinement.Arm64CntReduction
 import KProgFormal.ClightRefinement.Arm64CntBody
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCntPrefixNative
+import KProgFormal.ClightRefinement.X86AluXorByteNative
