@@ -1,0 +1,3 @@
+The unchanged original outer loop executes each4-step index backedge and6-step unsigned guard/signed offset preparation, composing10 transitions between slots. The last40-to48 increment plus real false guard/breaks reaches exactly the existing x86_sim_inline_call_frame_values call in9 transitions, preserving the heap and all source branches. The frame call is retained and identified by its exact original expression/prototype; execution of that helper and full provider/loop/native composition remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
