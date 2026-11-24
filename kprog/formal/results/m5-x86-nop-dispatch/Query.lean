@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86NopDispatch
+#check KProgFormal.ClightRefinement.X86NopDispatch.handler_source
+#print axioms KProgFormal.ClightRefinement.X86NopDispatch.handler_source
+#check KProgFormal.ClightRefinement.X86NopDispatch.source
+#print axioms KProgFormal.ClightRefinement.X86NopDispatch.source
+#check KProgFormal.ClightRefinement.X86NopDispatch.execute
+#print axioms KProgFormal.ClightRefinement.X86NopDispatch.execute
+#check KProgFormal.ClightRefinement.X86NopDispatch.refines
+#print axioms KProgFormal.ClightRefinement.X86NopDispatch.refines

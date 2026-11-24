@@ -1,0 +1,72 @@
+KProgFormal.ClightRefinement.X86NopDispatch.handler_source :
+  X86Inline.f_x86_sim_inline_arm_DISP_NOP = KProgFormal.ClightRefinement.X86NopCall.handler
+'KProgFormal.ClightRefinement.X86NopDispatch.handler_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86NopDispatch.source :
+  KProgFormal.ClightRefinement.X86NopDispatch.handler.fn_body =
+      KProgFormal.ClightRefinement.X86NopDispatch.loopBody✝.Sloop CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86NopDispatch.decision✝ =
+      CC.Stmt.Sifthenelse KProgFormal.ClightRefinement.X86NopDispatch.test✝
+        KProgFormal.ClightRefinement.X86NopDispatch.nopCall✝ KProgFormal.ClightRefinement.X86NopDispatch.other✝
+'KProgFormal.ClightRefinement.X86NopDispatch.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86NopDispatch.execute (ge : CC.CGenv) (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block)
+  (offset : CC.Integers.Ptrofs) (dst src flags : BitVec 8) (aux : BitVec 32) (imm : BitVec 64)
+  (widthBlock nopBlock : CC.Block)
+  (widthSymbol : ge.genv_genv.findSymbol X86Inline._x86_width_effective = some widthBlock)
+  (widthGlobal : ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86Inline.f_x86_width_effective))
+  (nopSymbol : ge.genv_genv.findSymbol X86Inline._x86_sim_inline_arm_DISP_NOP = some nopBlock)
+  (nopGlobal : ge.genv_genv.findFunctPtr nopBlock = some (CC.FunDef.Internal X86Inline.f_x86_sim_inline_arm_DISP_NOP))
+  (boundary : CC.isCallCont k = true) :
+  KProgFormal.ClightRefinement.InternalRun ge 27
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86NopDispatch.handler)
+      [CC.Val.Vptr binding offset, CC.Val.Vint 0#32, KProgFormal.ClightRefinement.X86Width.argument dst,
+        KProgFormal.ClightRefinement.X86Width.argument src, KProgFormal.ClightRefinement.X86Width.argument flags,
+        CC.Val.Vint aux, CC.Val.Vlong imm]
+      k memory)
+    (CC.State.Returnstate CC.Val.Vundef k memory)
+'KProgFormal.ClightRefinement.X86NopDispatch.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86NopDispatch.refines (ge : CC.CGenv) (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block)
+  (offset : CC.Integers.Ptrofs) (dst src flags : BitVec 8) (aux : BitVec 32) (imm : BitVec 64)
+  (widthBlock nopBlock : CC.Block)
+  (widthSymbol : ge.genv_genv.findSymbol X86Inline._x86_width_effective = some widthBlock)
+  (widthGlobal : ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86Inline.f_x86_width_effective))
+  (nopSymbol : ge.genv_genv.findSymbol X86Inline._x86_sim_inline_arm_DISP_NOP = some nopBlock)
+  (nopGlobal : ge.genv_genv.findFunctPtr nopBlock = some (CC.FunDef.Internal X86Inline.f_x86_sim_inline_arm_DISP_NOP))
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cells : CC.Block) (base : CC.Integers.Ptrofs)
+  (places : KProgFormal.ClightRefinement.X86LogicFlagOrder.Locations) (state : KProgFormal.Reference.X86.State)
+  (nextPc : BitVec 64)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cells base
+      (KProgFormal.ClightRefinement.X86LogicReference.input state))
+  (flagBytes :
+    KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+      (KProgFormal.ClightRefinement.X86LogicReference.input state).flags)
+  (running : state.modelError = none) (boundary : CC.isCallCont k = true) :
+  have native := KProgFormal.Reference.X86.step (KProgFormal.Reference.X86.Instruction.nop nextPc) state;
+  KProgFormal.ClightRefinement.InternalRun ge 27
+      (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86NopDispatch.handler)
+        [CC.Val.Vptr binding offset, CC.Val.Vint 0#32, KProgFormal.ClightRefinement.X86Width.argument dst,
+          KProgFormal.ClightRefinement.X86Width.argument src, KProgFormal.ClightRefinement.X86Width.argument flags,
+          CC.Val.Vint aux, CC.Val.Vlong imm]
+        k memory)
+      (CC.State.Returnstate CC.Val.Vundef k memory) ∧
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cells base
+        (KProgFormal.ClightRefinement.X86LogicReference.input native.state) ∧
+      KProgFormal.ClightRefinement.X86LogicFlagMemory.FlagsRepresent memory places
+          (KProgFormal.ClightRefinement.X86LogicReference.input native.state).flags ∧
+        native =
+          {
+            state :=
+              { gpr := state.gpr, rflags := state.rflags, xmm0 := state.xmm0, memory := state.memory, pc := nextPc,
+                fsBase := state.fsBase, gsBase := state.gsBase, addressWidth := state.addressWidth,
+                oracle := state.oracle, modelError := state.modelError },
+            events := [] }
+'KProgFormal.ClightRefinement.X86NopDispatch.refines' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
