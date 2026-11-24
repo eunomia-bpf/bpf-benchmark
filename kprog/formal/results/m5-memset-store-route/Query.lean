@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStoreRoute
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.prepare
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.prepare
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStoreRoute.observations
