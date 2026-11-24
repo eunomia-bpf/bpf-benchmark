@@ -1,0 +1,36 @@
+KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.loads {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) {name : CC.Ident} {type : CC.Ty}
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name type)
+  (different :
+    name ≠ KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName 0 ∧
+      name ≠ KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName 1 ∧
+        name ≠ KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName 12 ∧
+          name ≠ KProgFormal.ClightRefinement.X86ProducerHeaderSource.localName 13)
+  (chunk : CC.Chunk) (offset : Int) :
+  CC.Mem.load chunk complete.after object.block offset = CC.Mem.load chunk ready.after object.block offset
+'KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.loads' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.scalars {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (i : Fin 8) :
+  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i) complete.after (ready.scalars i).block 0 =
+    some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i (ready.scalarValues i))
+'KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.scalars' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerPushLocalFrame
+#check KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.loads
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.loads
+#check KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.scalars
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushLocalFrame.scalars

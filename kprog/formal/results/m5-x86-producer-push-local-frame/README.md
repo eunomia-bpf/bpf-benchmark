@@ -1,0 +1,3 @@
+True source allocation/name separation derives every other actual producer local typed load frame through real RSP/metadata/cache stores and genuine body free. All6 initialized flag-byte observations and both original XMM words are retained from the SAME ready result; no new native-input/oracle premise or post-store frame is assumed. Existing source/store/free/ABI proofs and all public interfaces retained. Full source/native platform/event/fetch/full149 refinement remains open; no semantics/ISA/C/runtime/oracle/ARM/paper edit.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
