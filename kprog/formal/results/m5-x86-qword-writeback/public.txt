@@ -1,0 +1,62 @@
+KProgFormal.ClightRefinement.X86QwordWriteback.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+  (base : CC.Integers.Ptrofs) (index : Fin 16) (value : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (localBlock, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (destination :
+    CC.PTree.get X86_program_profile_bpf._dst le =
+      some (CC.Val.Vint (BitVec.setWidth 32 (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index))))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_l_width__1 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument X86.Size.q))
+  (code : BitVec 32) (alu : CC.PTree.get X86_program_profile_bpf.___x86_l_alu le = some (CC.Val.Vint code))
+  (scalarCode : code ≠ 0#32 ∧ code ≠ 1#32)
+  (observedShift : CC.PTree.get X86_program_profile_bpf.___x86_l_dst_shift le = some (CC.Val.Vint 0#32))
+  (sourceShift : CC.PTree.get X86_program_profile_bpf.___x86_l_src_shift le = some (CC.Val.Vint 0#32))
+  (observedValue : CC.PTree.get X86_program_profile_bpf.___x86_l_result le = some (CC.Val.Vlong value))
+  (widthBlock : CC.Block)
+  (widthBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_width_effective e = none) (tagHelper : CC.Block)
+  (tagBinding :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some tagHelper ∧
+      ge.genv_genv.findFunctPtr tagHelper = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (tagUnshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none) (ordinary : index ≠ 4)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock base))
+  (scalarTag :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument 0#8))
+  (bindingSeparate : bindingBlock ≠ cellsBlock) (localSeparate : bindingBlock ≠ localBlock ∧ cellsBlock ≠ localBlock)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu)
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins memory cellsBlock base cpu)
+  (localPermission : memory.validAccess CC.Mptr localBlock 0 CC.Permission.Writable = true)
+  (wordPermission :
+    memory.validAccess CC.Mptr cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index)).unsigned
+        CC.Permission.Writable =
+      true)
+  (tagPermission :
+    memory.validAccess CC.Chunk.Mint8unsigned cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned
+        CC.Permission.Writable =
+      true) :
+  ∃ final finalTemps,
+    KProgFormal.ClightRefinement.InternalRun ge 252
+        (CC.State.State function KProgFormal.ClightRefinement.X86ShiftWriteback.writer k e le memory)
+        (CC.State.State function CC.Stmt.Sskip k e finalTemps final) ∧
+      KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins final cellsBlock base
+          (cpu.setReg X86.Size.q (X86.GPR.ofIndex index) value) ∧
+        final.access = memory.access ∧
+          final.nextblock = memory.nextblock ∧
+            ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+              other ≠ localBlock →
+                other ≠ cellsBlock → CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86QwordWriteback.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

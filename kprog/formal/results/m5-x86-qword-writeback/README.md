@@ -1,0 +1,3 @@
+The complete original ordinary scalar-tag qword writer executes252 Clight transitions, including both real destination tag calls, all selectors, old-SP and destination-cell reads, width helper, local copy, qword overwrite, both table stores and loop exit. Initial whole-register representation and write permissions derive every read/cast/store; old-SP may be a represented pointer. Final native GPRs follow cpu.setReg.q, while access, allocation frontier and all loads outside the real local/table blocks are preserved.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
