@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovStackPrefix
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryMovStackPrefix.entry_pair
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryMovStackPrefix.entry_pair

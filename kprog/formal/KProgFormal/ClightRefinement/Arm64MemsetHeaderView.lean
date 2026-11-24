@@ -21,6 +21,13 @@ structure View (initial memory : CC.Mem) (entry : HeaderLocal initial) where
   capacity : CC.Mem.load .Mint32 memory entry.block 656 = some (.Vint 160)
   bias : CC.Mem.load .Mint64 memory entry.block 672 = some (.Vlong 96)
 
+/-- One source invocation supplies the actual initialized view and its
+allocation resources at the SAME reached setup memory. -/
+structure Ready (initial memory : CC.Mem) (entry : HeaderLocal initial) where
+  view : View initial memory entry
+  resources : Arm64ProgramEntryResources.Resources initial memory entry
+  access : memory.access = (allocation initial).2.access
+
 private noncomputable def canonical_tag (initial : CC.Mem) (source : TailLocal initial 2) : StackTagLocal initial := by
   let actual := Classical.choice (stack_tag_local initial)
   have same : actual.block = source.block :=

@@ -1,0 +1,54 @@
+{
+  "confirmed_utc": "2026-11-24T15:35:56.116371+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProgramEntryMovStackPrefix"
+    ],
+    "exit": 0,
+    "seconds": 2.2898685932159424,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 315,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-entry-mov-stack-prefix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2442071437835693,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "same_invocation_provider_traces": 98,
+    "source_calls_with_ready_packet": 2,
+    "retained_original_memset_source_prefix": 353
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetHeaderView.lean",
+      "size_bytes": 9038,
+      "mtime_ns": 1795534179269491125
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryMovStackPrefix.lean",
+      "size_bytes": 9982,
+      "mtime_ns": 1795534214695110704
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
