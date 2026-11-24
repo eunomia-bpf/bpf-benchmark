@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialCall
+#check KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialCall.execute
+#print axioms KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialCall.execute
