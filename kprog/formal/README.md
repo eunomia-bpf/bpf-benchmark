@@ -118,8 +118,11 @@ The [full-width tail](results/m5-x86-full-width-release-return/README.md)
 additionally covers the actual dword overwrite and zero-extension.
 The [complete NOP handler](results/m5-x86-nop-native/README.md) refines the
 same canonical checked step for arbitrary heaps, tags and ignored operands,
-preserving the entire native state except PC. Generic dispatcher selection
-remains a separate composition obligation.
+preserving the entire native state except PC. The existing
+[generic dispatcher NOP case](results/m5-x86-nop-dispatch/README.md) now
+composes its actual width helper, opcode guard, handler call and return in
+27 transitions, for every byte flag/operand code and arbitrary heap. The
+other dispatch arms and fetched call-site composition remain open.
 
 ## Trust boundary
 
