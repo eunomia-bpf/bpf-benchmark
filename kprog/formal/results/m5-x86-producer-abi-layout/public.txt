@@ -1,0 +1,22 @@
+KProgFormal.ClightRefinement.X86ProducerAbiLayout.source_layout :
+  CC.PTree.get X86_program_profile_bpf._x86_sim_skb_abi KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ProducerAbiLayout.abiRecord ∧
+    CC.sizeof KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv
+        KProgFormal.ClightRefinement.X86ProducerAbiSource.abiType =
+      216
+'KProgFormal.ClightRefinement.X86ProducerAbiLayout.source_layout' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerAbiLayout.field_offset (ce : CC.CompositeEnv) (g : Fin 6) :
+  CC.fieldOffset ce (KProgFormal.ClightRefinement.X86ProducerAbiSource.fieldName g)
+      KProgFormal.ClightRefinement.X86ProducerAbiLayout.abiRecord.co_members =
+    CC.Res.OK (KProgFormal.ClightRefinement.X86ProducerAbiSource.base g, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerAbiLayout.field_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerAbiLayout.abi_local (before : CC.Mem) :
+  Nonempty
+    (KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before X86_program_profile_bpf.___x86_sim_abi
+      KProgFormal.ClightRefinement.X86ProducerAbiSource.abiType)
+'KProgFormal.ClightRefinement.X86ProducerAbiLayout.abi_local' depends on axioms: [propext, Classical.choice, Quot.sound]

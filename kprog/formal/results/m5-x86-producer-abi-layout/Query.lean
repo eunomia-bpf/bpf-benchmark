@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerAbiLayout
+#check KProgFormal.ClightRefinement.X86ProducerAbiLayout.source_layout
+#print axioms KProgFormal.ClightRefinement.X86ProducerAbiLayout.source_layout
+#check KProgFormal.ClightRefinement.X86ProducerAbiLayout.field_offset
+#print axioms KProgFormal.ClightRefinement.X86ProducerAbiLayout.field_offset
+#check KProgFormal.ClightRefinement.X86ProducerAbiLayout.abi_local
+#print axioms KProgFormal.ClightRefinement.X86ProducerAbiLayout.abi_local

@@ -1,0 +1,3 @@
+The complete original source environment provides the real216-byte ABI struct. All six actual field offsets are computed from its imported member list; actual producer doAllocVariables constructs the original ABI local with fresh owned block and full Freeable rights. No layout, allocation outcome or initialized contents are assumed. Existing complete source/header/function-entry proofs remain unchanged, and original proof budgets are retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
