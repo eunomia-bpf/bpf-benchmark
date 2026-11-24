@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerRaxReturn
+#check KProgFormal.ClightRefinement.X86ProducerRaxReturn.returned
+#print axioms KProgFormal.ClightRefinement.X86ProducerRaxReturn.returned
+#check KProgFormal.ClightRefinement.X86ProducerRaxReturn.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerRaxReturn.execute
