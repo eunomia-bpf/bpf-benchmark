@@ -1,0 +1,3 @@
+Initial permissions derive all real logical flag stores, the282-step scalar/tag0 non-increasing RSP writer, local free and actual void return. Initial native-base separation protects the original word through flag stores; all RSP/base reads derive from the SAME heap/frame. Final native GPR/flag views, revoked locals and caller loads are retained. Increasing-SP release and complete initial handler-call/native composition remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
