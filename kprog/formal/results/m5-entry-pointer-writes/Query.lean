@@ -1,0 +1,14 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.call_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.call_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.invoke
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.invoke
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.execute
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.native_gpr
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryPointerWrites.native_gpr
