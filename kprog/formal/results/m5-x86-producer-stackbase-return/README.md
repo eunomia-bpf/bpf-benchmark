@@ -1,0 +1,3 @@
+A genuine kind1 external outcome/trace/full supplied heap executes the original return and allocation-derived native-base word assignment to the real final-context setup. Actual store/readback, other supplied-memory blocks, post-provider raw caller frame/access/frontier are preserved. Supplied-heap permissions and actual kind1 call remain explicit; kind6 availability/frame is not substituted for kind1. No successful-store or output-heap premise, source copy or new axiom.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

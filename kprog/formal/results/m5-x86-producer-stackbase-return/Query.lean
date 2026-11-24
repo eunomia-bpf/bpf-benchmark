@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerStackBaseReturn
+#check KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.returned
+#print axioms KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.returned
+#check KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.stored
+#print axioms KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.stored
+#check KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerStackBaseReturn.execute
