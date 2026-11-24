@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterStackPrefixNative
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterStackPrefixNative.entry_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryAddRegisterStackPrefixNative.entry_corresponds
