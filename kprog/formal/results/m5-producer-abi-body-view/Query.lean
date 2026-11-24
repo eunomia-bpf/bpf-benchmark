@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerAbiBodyView
+
+#check KProgFormal.ClightRefinement.Arm64ProducerAbiBodyView.entry_setup_represents
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerAbiBodyView.entry_setup_represents
