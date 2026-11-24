@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemsetByteGates
+#check KProgFormal.ClightRefinement.Arm64MemsetByteGates.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteGates.source
+#check KProgFormal.ClightRefinement.Arm64MemsetByteGates.to_byte
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteGates.to_byte
