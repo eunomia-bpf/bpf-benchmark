@@ -44,10 +44,12 @@ def temps (le : CC.TempEnv) (cellsBlock : CC.Block) (cellsOffset : CC.Integers.P
     X86_program_profile_bpf._t'144 (.Vlong next)).set
     X86_program_profile_bpf.___x86_release_new__5 (.Vlong next)
 
-/-- The real RSP release branch reads the saved old offset and the actual
-new cell. A non-increasing signed raw offset takes the source's no-release
-branch and exits both real loops without changing memory. -/
-theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+/-- Original increasing-SP branch and its unchanged enclosing release loop. -/
+def increasing : CC.Stmt := growing
+
+def releaseContinuation (k : CC.Cont) : CC.Cont := .Kloop1 body .Sbreak k
+
+private theorem to_choice (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
     (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs)
     (old next : BitVec 64)
@@ -56,11 +58,11 @@ theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
     (oldSp : le.get X86_program_profile_bpf.___x86_write_old_sp__5 = some (.Vlong old))
     (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
     (newSp : CC.Mem.load CC.Mptr memory cellsBlock
-      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some (.Vlong next))
-    (nonIncreasing : CC.Integers.Int64.cmp .Cgt next old = false) :
-    InternalRun ge 20
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some (.Vlong next)) :
+    InternalRun ge 17
       (.State function .Sskip (X86ShiftWriteback.tableCont k) e le memory)
-      (.State function .Sskip k e (temps le cellsBlock cellsOffset old next) memory) := by
+      (.State function choice (.Kloop1 body .Sbreak k) e
+        (temps le cellsBlock cellsOffset old next) memory) := by
   have tableAddress := X86RegisterReadValue.table_address ge layout bindingBlock (0 : CC.Integers.Ptrofs)
   have valueAddress := X86RegisterReadValue.value_address ge layout cellsBlock (cellsOffset + 64)
   have pointerAddress := X86RegisterReadValue.pointer_address ge layout cellsBlock (cellsOffset + 64)
@@ -75,20 +77,14 @@ theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
       CC.Cop.semCast (.Vlong bits) (CC.tptr CC.tvoid) CC.tlong memory = some (.Vlong bits) := rfl
   have longCast (bits : BitVec 64) :
       CC.Cop.semCast (.Vlong bits) CC.tlong CC.tlong memory = some (.Vlong bits) := rfl
-  have comparison : CC.Cop.semBinaryOperation ge.genv_cenv .Ogt (.Vlong next) CC.tlong
-      (.Vlong old) CC.tlong memory = some (.Vint (0#32)) := by
-    change some (CC.Val.ofBool (CC.Integers.Int64.cmp .Cgt next old)) = _
-    rw [nonIncreasing]
-    rfl
   have guard : CC.Cop.semBinaryOperation ge.genv_cenv .Oeq (.Vint (4#32)) CC.tuchar
       (.Vint (CC.Integers.Int.repr 4)) CC.tuint memory = some (.Vint (1#32)) := rfl
   have trueValue : CC.Cop.boolVal (.Vint (1#32)) CC.tint memory = some true := rfl
-  have falseValue : CC.Cop.boolVal (.Vint (0#32)) CC.tint memory = some false := rfl
   have structAccess (name : CC.Ident) : CC.accessMode (.Tstruct name CC.noattr) = .By_copy := rfl
   have unionAccess : CC.accessMode (.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr) = .By_copy := rfl
   have ptrAccess (ty : CC.Ty) : CC.accessMode (.Tpointer ty CC.noattr) = .By_value CC.Mptr := rfl
   have unsigned0 : CC.Integers.Ptrofs.unsigned (0 : CC.Integers.Ptrofs) = 0 := rfl
-  dsimp only [CC.tint, CC.tuchar, CC.tuint, CC.tptr, CC.tlong] at cellAdd guard comparison pointerCast longCast trueValue falseValue
+  dsimp only [CC.tint, CC.tuchar, CC.tuint, CC.tptr, CC.tlong] at cellAdd guard pointerCast longCast trueValue
   have entered : InternalRun ge 5
       (.State function .Sskip (X86ShiftWriteback.tableCont k) e le memory)
       (.State function body (.Kloop1 body .Sbreak k) e le memory) := by
@@ -109,6 +105,34 @@ theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
       CC.Mem.loadv, binding, oldSp, cells, newSp, CC.PTree.gss, CC.PTree.gso,
       pointerCast, longCast, CC.tint, CC.tlong,
       CC.Eapp, CC.E0, List.nil_append, true_and]
+  exact entered.trans loaded
+
+/-- The real RSP release branch reads the saved old offset and the actual
+new cell. A non-increasing signed raw offset takes the source's no-release
+branch and exits both real loops without changing memory. -/
+theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs)
+    (old next : BitVec 64)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (4#32)))
+    (oldSp : le.get X86_program_profile_bpf.___x86_write_old_sp__5 = some (.Vlong old))
+    (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (newSp : CC.Mem.load CC.Mptr memory cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some (.Vlong next))
+    (nonIncreasing : CC.Integers.Int64.cmp .Cgt next old = false) :
+    InternalRun ge 20
+      (.State function .Sskip (X86ShiftWriteback.tableCont k) e le memory)
+      (.State function .Sskip k e (temps le cellsBlock cellsOffset old next) memory) := by
+  have comparison : CC.Cop.semBinaryOperation ge.genv_cenv .Ogt (.Vlong next) CC.tlong
+      (.Vlong old) CC.tlong memory = some (.Vint (0#32)) := by
+    change some (CC.Val.ofBool (CC.Integers.Int64.cmp .Cgt next old)) = _
+    rw [nonIncreasing]
+    rfl
+  have falseValue : CC.Cop.boolVal (.Vint (0#32)) CC.tint memory = some false := rfl
+  dsimp only [CC.tint, CC.tlong] at comparison falseValue
+  have started := to_choice ge layout function e le k memory bindingBlock cellsBlock cellsOffset old next
+    binding destination oldSp cells newSp
   have finished : InternalRun ge 3
       (.State function choice (.Kloop1 body .Sbreak k) e (temps le cellsBlock cellsOffset old next) memory)
       (.State function .Sskip k e (temps le cellsBlock cellsOffset old next) memory) := by
@@ -116,6 +140,42 @@ theorem unchanged (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
     all_goals simp +decide only [steps, InternalPath, InternalState, CC.doStep, choice_source, test, temps,
       CC.doEvalExpr, CC.typeof, CC.tint, CC.tlong, CC.PTree.gss, CC.PTree.gso, comparison, falseValue,
       CC.Eapp, CC.E0, List.nil_append, true_and, ite_false, Bool.false_eq_true]
-  exact (entered.trans loaded).trans finished
+  exact started.trans finished
+
+/-- The real positive signed-SP comparison reaches the original release
+loop in18 actual transitions, retaining every write/helper branch and the
+whole heap. This is an entry theorem, not completion of the growing release. -/
+theorem increasing_enter (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block) (cellsOffset : CC.Integers.Ptrofs)
+    (old next : BitVec 64)
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (4#32)))
+    (oldSp : le.get X86_program_profile_bpf.___x86_write_old_sp__5 = some (.Vlong old))
+    (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (newSp : CC.Mem.load CC.Mptr memory cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) = some (.Vlong next))
+    (increasingOffset : CC.Integers.Int64.cmp .Cgt next old = true) :
+    InternalRun ge 18
+      (.State function .Sskip (X86ShiftWriteback.tableCont k) e le memory)
+      (.State function increasing (releaseContinuation k) e (temps le cellsBlock cellsOffset old next) memory) := by
+  have comparison : CC.Cop.semBinaryOperation ge.genv_cenv .Ogt (.Vlong next) CC.tlong
+      (.Vlong old) CC.tlong memory = some (.Vint (1#32)) := by
+    change some (CC.Val.ofBool (CC.Integers.Int64.cmp .Cgt next old)) = _
+    rw [increasingOffset]
+    rfl
+  have trueValue : CC.Cop.boolVal (.Vint (1#32)) CC.tint memory = some true := rfl
+  dsimp only [CC.tint, CC.tlong] at comparison trueValue
+  have started := to_choice ge layout function e le k memory bindingBlock cellsBlock cellsOffset old next
+    binding destination oldSp cells newSp
+  have selected : InternalRun ge 1
+      (.State function choice (.Kloop1 body .Sbreak k) e (temps le cellsBlock cellsOffset old next) memory)
+      (.State function increasing (releaseContinuation k) e (temps le cellsBlock cellsOffset old next) memory) := by
+    apply internalRun_of_steps
+    all_goals simp +decide only [steps, InternalPath, InternalState, CC.doStep, choice_source,
+      test, increasing, releaseContinuation, temps, CC.doEvalExpr, CC.typeof, CC.tint, CC.tlong,
+      CC.PTree.gss, CC.PTree.gso, comparison, trueValue, CC.Eapp, CC.E0,
+      List.nil_append, true_and, ite_true]
+  exact started.trans selected
 
 end KProgFormal.ClightRefinement.X86RegisterWriteRspRelease

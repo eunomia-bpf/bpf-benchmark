@@ -1,0 +1,39 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.unchanged (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (old next : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (newSp : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong next))
+  (nonIncreasing : CC.Integers.Int64.cmp CC.Comparison.Cgt next old = false) :
+  KProgFormal.ClightRefinement.InternalRun ge 20
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.temps le cellsBlock cellsOffset old next) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.unchanged' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing_enter (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (bindingBlock cellsBlock : CC.Block)
+  (cellsOffset : CC.Integers.Ptrofs) (old next : BitVec 64)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (destination : CC.PTree.get X86_program_profile_bpf._dst le = some (CC.Val.Vint 4#32))
+  (oldSp : CC.PTree.get X86_program_profile_bpf.___x86_write_old_sp__5 le = some (CC.Val.Vlong old))
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (newSp : CC.Mem.load CC.Mptr memory cellsBlock (cellsOffset + 64).unsigned = some (CC.Val.Vlong next))
+  (increasingOffset : CC.Integers.Int64.cmp CC.Comparison.Cgt next old = true) :
+  KProgFormal.ClightRefinement.InternalRun ge 18
+    (CC.State.State function CC.Stmt.Sskip (KProgFormal.ClightRefinement.X86ShiftWriteback.tableCont k) e le memory)
+    (CC.State.State function KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.releaseContinuation k) e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.temps le cellsBlock cellsOffset old next) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspRelease.increasing_enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

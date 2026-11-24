@@ -1,0 +1,33 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/xor-source-20261124T131558Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86RegisterWriteRspRelease"
+    ],
+    "exit": 0,
+    "seconds": 3.5525163440033793,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-rsp-release-increasing-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5408051880076528,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}

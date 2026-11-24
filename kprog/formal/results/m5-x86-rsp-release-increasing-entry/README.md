@@ -1,0 +1,3 @@
+The original table-writer release prefix is shared without losing the accepted unchanged20-step theorem or changing its public type. The increasing signed raw-SP branch now executes18 real Clight transitions to its original complete release loop and continuation, retaining every memory-write/helper arm and the entire heap. This is an entry theorem; the increasing release loop and call-frame clobbers are still open. No runtime, reference ISA, oracle or proof-budget change.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
