@@ -1,0 +1,3 @@
+The complete actual RSP reader call now returns the existing x86lean register view at every width. RegistersRepresent and the original cell load derive raw+origins.stack, independently of the initial RSP tag. The real native-base word load uses that same origin. No intermediate result equality, alternate ISA model or assumed helper run is introduced, and the entire caller memory remains unchanged.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

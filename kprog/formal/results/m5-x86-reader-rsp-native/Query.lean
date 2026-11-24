@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86RegisterReadRspNative
+#check KProgFormal.ClightRefinement.X86RegisterReadRspNative.native_word
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadRspNative.native_word
+#check KProgFormal.ClightRefinement.X86RegisterReadRspNative.call
+#print axioms KProgFormal.ClightRefinement.X86RegisterReadRspNative.call
