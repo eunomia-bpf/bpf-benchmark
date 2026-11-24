@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.X86FullWidthStorage
+
+#check KProgFormal.ClightRefinement.X86FullWidthStorage.execute
+#print axioms KProgFormal.ClightRefinement.X86FullWidthStorage.execute

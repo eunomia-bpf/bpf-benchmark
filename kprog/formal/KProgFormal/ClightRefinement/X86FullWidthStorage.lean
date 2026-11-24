@@ -175,4 +175,43 @@ theorem writable (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
   · exact CC.Mem.store_access stored
   · exact CC.Mem.store_nextblock stored
 
+/-- Actual width selection and permission-derived storage compose from the
+original branch. The concrete store, readback, access map, allocation frontier
+and every other block's loads are retained for the table-writer composition. -/
+theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (memory : CC.Mem) (block : CC.Block) (value : BitVec 64) (narrow : Bool)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (block, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (width : le.get X86_program_profile_bpf.___x86_wr_width__2 =
+      some (X86ShiftLeft.argument (if narrow then .d else .q)))
+    (observed : le.get X86_program_profile_bpf.___x86_wr_next__2 = some (.Vlong value))
+    (permission : CC.Mem.validAccess memory CC.Mptr block 0 .Writable = true) :
+    ∃ after, CC.Mem.store CC.Mptr memory block 0 (.Vlong (result narrow value)) = some after ∧
+      InternalRun ge (26 + (if narrow then 10 else 7))
+        (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106 k e le memory)
+        (.State function .Sskip k e (temps (selectionTemps le narrow) narrow value) after) ∧
+      CC.Mem.load CC.Mptr after block 0 = some (.Vlong (result narrow value)) ∧
+      after.access = memory.access ∧ after.nextblock = memory.nextblock ∧
+      (∀ chunk other offset, other ≠ block →
+        CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset) := by
+  have selected := select ge function e le k memory narrow width
+  have kept : (selectionTemps le narrow).get X86_program_profile_bpf.___x86_wr_next__2 =
+      some (.Vlong value) := by
+    simp +decide [selectionTemps, CC.PTree.gso, observed]
+  have existsStore : ∃ after, CC.Mem.store CC.Mptr memory block 0
+      (.Vlong (result narrow value)) = some after := by
+    simp only [CC.Mem.store, permission, ite_true]
+    exact ⟨_, rfl⟩
+  obtain ⟨after, stored⟩ := existsStore
+  have written := run ge layout function e (selectionTemps le narrow) k memory after block value
+    narrow declared kept stored
+  have normalized : CC.Val.loadResult CC.Mptr (.Vlong (result narrow value)) =
+      .Vlong (result narrow value) := rfl
+  refine ⟨after, stored, selected.trans written,
+    (CC.Mem.load_store_same stored).trans (congrArg some normalized),
+    CC.Mem.store_access stored, CC.Mem.store_nextblock stored, ?_⟩
+  intro chunk other offset different
+  exact CC.Mem.load_store_other stored chunk other offset (.inl different)
+
 end KProgFormal.ClightRefinement.X86FullWidthStorage

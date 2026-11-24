@@ -1,0 +1,32 @@
+KProgFormal.ClightRefinement.X86FullWidthStorage.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (block : CC.Block) (value : BitVec 64) (narrow : Bool)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (block, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (width :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_width__2 le =
+      some (KProgFormal.ClightRefinement.X86ShiftLeft.argument (if narrow = true then X86.Size.d else X86.Size.q)))
+  (observed : CC.PTree.get X86_program_profile_bpf.___x86_wr_next__2 le = some (CC.Val.Vlong value))
+  (permission : memory.validAccess CC.Mptr block 0 CC.Permission.Writable = true) :
+  ∃ after,
+    CC.Mem.store CC.Mptr memory block 0
+          (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) =
+        some after ∧
+      KProgFormal.ClightRefinement.InternalRun ge (26 + if narrow = true then 10 else 7)
+          (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_106 k e le memory)
+          (CC.State.State function CC.Stmt.Sskip k e
+            (KProgFormal.ClightRefinement.X86FullWidthStorage.temps
+              (KProgFormal.ClightRefinement.X86FullWidthStorage.selectionTemps le narrow) narrow value)
+            after) ∧
+        CC.Mem.load CC.Mptr after block 0 =
+            some (CC.Val.Vlong (KProgFormal.ClightRefinement.X86FullWidthStorage.result narrow value)) ∧
+          after.access = memory.access ∧
+            after.nextblock = memory.nextblock ∧
+              ∀ (chunk : CC.Chunk) (other : CC.Block) (offset : CC.Z),
+                other ≠ block → CC.Mem.load chunk after other offset = CC.Mem.load chunk memory other offset
+'KProgFormal.ClightRefinement.X86FullWidthStorage.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
