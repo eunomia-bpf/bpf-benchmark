@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.call_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.call_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.read
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.read
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.both
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.both
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.native_word
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultRead.native_word
