@@ -1,0 +1,37 @@
+KProgFormal.ClightRefinement.X86ProducerFirstInput.input_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol
+        X86_program_profile_bpf._native_lab_entry_input =
+      some KProgFormal.ClightRefinement.X86ProducerFirstInput.inputBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerFirstInput.inputBlock =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction
+'KProgFormal.ClightRefinement.X86ProducerFirstInput.input_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerFirstInput.call_source :
+  KProgFormal.ClightRefinement.X86ProducerFirstInput.inputCall =
+    CC.Stmt.Scall (some X86_program_profile_bpf._t'2)
+      (CC.Expr.Evar X86_program_profile_bpf._native_lab_entry_input
+        (CC.Ty.Tfunction [CC.tuint] CC.tulong CC.cc_default))
+      [CC.Expr.Econst_int (CC.Integers.Int.repr 6) CC.tint]
+'KProgFormal.ClightRefinement.X86ProducerFirstInput.call_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerFirstInput.enter (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 5
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerGhostSource.beforeProvider k
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 6#32]
+      (KProgFormal.ClightRefinement.X86ProducerFirstInput.continuation
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerFirstInput.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerFirstInput
+#check KProgFormal.ClightRefinement.X86ProducerFirstInput.input_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerFirstInput.input_binding
+#check KProgFormal.ClightRefinement.X86ProducerFirstInput.call_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerFirstInput.call_source
+#check KProgFormal.ClightRefinement.X86ProducerFirstInput.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerFirstInput.enter
