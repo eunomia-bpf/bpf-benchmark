@@ -1,0 +1,33 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/rsp-20261124T110008Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.X86QwordRspAllocated"
+    ],
+    "exit": 0,
+    "seconds": 3.3781041119946167,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "/workspaces/kprog-raw/V/rsp-20261124T110008Z/qword-rsp-allocated-query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9408504129969515,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}

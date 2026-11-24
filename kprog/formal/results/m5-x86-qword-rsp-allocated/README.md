@@ -1,0 +1,3 @@
+The actual handler allocation derives the fresh local, binding/cell/base separation, caller-derived local/table permissions and both helper scopes for the282-step scalar/tag0 non-increasing RSP qword writer. Initial raw RSP/native-base reads stay explicit; no intermediate execution or successful store is assumed. Final native register view and all older outside-table caller loads are retained.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
