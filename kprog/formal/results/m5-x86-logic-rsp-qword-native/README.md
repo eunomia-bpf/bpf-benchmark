@@ -1,0 +1,3 @@
+The actual eight-argument OR/AND RSP-destination qword handler call, including true readers/helpers/flags/writer/free/return, refines the SAME canonical Reference.X86.step. Final native GPR/flag views, PC/oracle/memory frame, XMM/base/address-width/model-error fields and caller/local frames are derived. The initial RSP is scalar/tag0, raw result is non-increasing signed SP, and native-base protection through flag stores is explicit. Increasing-SP release, other widths/tags and complete operation/dispatcher families remain open.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.
