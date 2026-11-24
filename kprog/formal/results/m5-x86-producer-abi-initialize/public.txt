@@ -1,0 +1,72 @@
+KProgFormal.ClightRefinement.X86ProducerAbiInitialize.abi_initialized (before : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) :
+  ∃ abi after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 561
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer.fn_body k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerAbiSource.afterAbi k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      (∀ (i : Fin 187),
+          CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerAbiSource.chunk i) after abi.block
+              (KProgFormal.ClightRefinement.X86ProducerAbiSource.offset i) =
+            some (KProgFormal.ClightRefinement.X86ProducerAbiSource.value i)) ∧
+        (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+            b ≠ abi.block →
+              CC.Mem.load c after b ofs =
+                CC.Mem.load c
+                  (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd
+                  b ofs) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock before after ∧
+            after.access =
+                (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access ∧
+              after.nextblock =
+                (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerAbiInitialize.abi_initialized' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerAbiInitialize.from_call (before : CC.Mem) (ctx : CC.Val) (k : CC.Cont) :
+  ∃ abi after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 562
+        (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer) [ctx] k
+          before)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerAbiSource.afterAbi k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (KProgFormal.ClightRefinement.X86ProducerEntry.initialTemps ctx) after) ∧
+      (∀ (i : Fin 187),
+          CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerAbiSource.chunk i) after abi.block
+              (KProgFormal.ClightRefinement.X86ProducerAbiSource.offset i) =
+            some (KProgFormal.ClightRefinement.X86ProducerAbiSource.value i)) ∧
+        (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+            b ≠ abi.block →
+              CC.Mem.load c after b ofs =
+                CC.Mem.load c
+                  (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd
+                  b ofs) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock before after ∧
+            after.access =
+                (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access ∧
+              after.nextblock =
+                (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+                      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerAbiInitialize.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

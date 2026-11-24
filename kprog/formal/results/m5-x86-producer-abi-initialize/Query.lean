@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerAbiInitialize
+#check KProgFormal.ClightRefinement.X86ProducerAbiInitialize.abi_initialized
+#print axioms KProgFormal.ClightRefinement.X86ProducerAbiInitialize.abi_initialized
+#check KProgFormal.ClightRefinement.X86ProducerAbiInitialize.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerAbiInitialize.from_call
