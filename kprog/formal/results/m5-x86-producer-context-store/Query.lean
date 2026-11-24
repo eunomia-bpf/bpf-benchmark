@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerContextStore
+#check KProgFormal.ClightRefinement.X86ProducerContextStore.rhs_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextStore.rhs_value
+#check KProgFormal.ClightRefinement.X86ProducerContextStore.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerContextStore.write

@@ -1,0 +1,58 @@
+KProgFormal.ClightRefinement.X86ProducerContextStore.rhs_value (ge : CC.CGenv) (e : CC.Env) (le : CC.TempEnv)
+  (memory : CC.Mem) (values : Fin 5 → CC.Val)
+  (typed : KProgFormal.ClightRefinement.X86ProducerContextSource.Typed values) (i : Fin 5)
+  (bound : CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i) le = some (values i)) :
+  CC.doEvalExpr ge e le memory (KProgFormal.ClightRefinement.X86ProducerContextSource.rhs i) = some (values i) ∧
+    CC.Cop.semCast (values i) (CC.typeof (KProgFormal.ClightRefinement.X86ProducerContextSource.rhs i))
+          (CC.typeof (KProgFormal.ClightRefinement.X86ProducerContextSource.target i)) memory =
+        some (values i) ∧
+      CC.Val.loadResult (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk i) (values i) = values i
+'KProgFormal.ClightRefinement.X86ProducerContextStore.rhs_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerContextStore.write (ge : CC.CGenv)
+  (bindingsLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_bindings ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.bindingsRecord)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt) (values : Fin 5 → CC.Val)
+  (typed : KProgFormal.ClightRefinement.X86ProducerContextSource.Typed values) (i : Fin 5)
+  (inputs :
+    ∀ (i : Fin 5), CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerContextSource.tempName i) le = some (values i))
+  (entry : KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal ge.genv_cenv before)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun ge 3
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          ((KProgFormal.ClightRefinement.X86ProducerContextSource.assignment i).Ssequence rest) k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer rest k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst le after) ∧
+      CC.Mem.store (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk i) memory entry.block
+            (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i) (values i) =
+          some after ∧
+        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk i) after entry.block
+              (KProgFormal.ClightRefinement.X86ProducerContextSource.offset i) =
+            some (values i) ∧
+          (∀ (j : Fin 5),
+              j ≠ i →
+                CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk j) after entry.block
+                    (KProgFormal.ClightRefinement.X86ProducerContextSource.offset j) =
+                  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerContextSource.chunk j) memory entry.block
+                    (KProgFormal.ClightRefinement.X86ProducerContextSource.offset j)) ∧
+            (∀ (c : CC.Chunk) (ofs : CC.Z),
+                ofs + CC.sizeChunk c ≤ 192 →
+                  CC.Mem.load c after entry.block ofs = CC.Mem.load c memory entry.block ofs) ∧
+              (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+                  b ≠ entry.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+                KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+                  after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerContextStore.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
