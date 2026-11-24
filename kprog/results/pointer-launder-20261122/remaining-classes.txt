@@ -108,3 +108,34 @@ Harness facts worth keeping, each one cost a wrong verdict when missed:
   header does. R_BPF_64_64 map relocations need the source register set to
   BPF_PSEUDO_MAP_FD, or BPF_PSEUDO_MAP_VALUE with the offset in the next
   instruction's imm when the map entry carries value_offset.
+
+Class E, found 2026-11-23 (not a verifier rejection): a PROG_ARRAY the
+program does not itself use, reached through fd_array, fails the load after
+a clean verify.
+  request 14, prog_type 2 (kprobe, section kprobe/trusted, entry
+  custom__generic), names OTel's perf_progs (PROG_ARRAY, id 194) among its
+  11 map triples. The verifier log is clean ("processed 4 insns") and the
+  load still returns -EINVAL.
+
+  kernel/bpf/verifier.c:25428 process_fd_array() adds every fd in
+  fd_array to env->used_maps, so the trusted direct-native stub (4 insns)
+  inherits a map it never references. kernel/bpf/core.c:2500
+  bpf_check_tail_call() then calls __bpf_prog_map_compatible(), which
+  compares the map owner's prog type with the loaded program's and
+  returns -EINVAL with no log line.
+
+  Host probe /tmp/owner3 (host 7.3.0, BPF_PROG_LOAD, the map created by
+  bpf_map_create as PROG_ARRAY with no owner, then owned by the first load
+  that names it through fd_array):
+    sock_filter(1) load naming it  fd=4   ACCEPTED (becomes the owner)
+    kprobe(2)     load naming it  fd=-22  EINVAL, log clean
+    sock_filter(1) load again     fd=6   ACCEPTED
+    xdp(6)        load naming it  fd=-22  EINVAL
+   The verdict is decided by the owner's prog type, not by whether the
+   program itself calls tail_call: the loaded programs contain no
+   tail_call at all.
+
+  Fix, in the loader (not the kernel, not the stub): the trusted path now
+  reloads once with foreign PROG_ARRAY fds dropped, re-arming
+  NATIVE_LAB_TRUSTED_CHUNK first, exactly as the non-trusted path already
+  did (native_loader.cpp:3498). kprog/libnativeloader/src/native_loader_trusted.cpp.
