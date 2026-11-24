@@ -1,0 +1,16 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "results/m5-x86-release-return-cache-frame/Draft.lean"
+  ],
+  "exit": 0,
+  "seconds": 1.7965269550331868,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512
+}

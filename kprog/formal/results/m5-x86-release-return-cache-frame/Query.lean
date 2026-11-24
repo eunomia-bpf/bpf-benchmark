@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ReleaseReturnCacheFrame
+#check KProgFormal.ClightRefinement.X86ReleaseReturnCacheFrame.execute
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturnCacheFrame.execute
+#check KProgFormal.ClightRefinement.X86ReleaseReturnCacheFrame.from_load
+#print axioms KProgFormal.ClightRefinement.X86ReleaseReturnCacheFrame.from_load
