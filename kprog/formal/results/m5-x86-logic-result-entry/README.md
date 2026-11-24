@@ -1,0 +1,3 @@
+Actual OR/AND calls execute their non-XOR operand route, both complete scalar readers, original numerical helper and source resume into the real flag stage for every width. The selected operation is derived from the initial aux byte. All aliasing routes take both real reads, and the heap is the genuine handler allocation. Flags/writeback/return remain the next composition.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

@@ -1,0 +1,2 @@
+import KProgFormal.ClightRefinement.X86AluLogicResultEntry
+#print axioms KProgFormal.ClightRefinement.X86AluLogicResultEntry.from_call
