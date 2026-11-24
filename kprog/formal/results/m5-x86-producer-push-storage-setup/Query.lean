@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerPushStorageSetup
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.execute
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.from_metadata
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.from_metadata
+#check KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.inputs
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.inputs

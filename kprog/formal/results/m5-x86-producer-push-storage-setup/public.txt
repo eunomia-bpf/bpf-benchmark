@@ -1,0 +1,62 @@
+KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.execute (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+  (memory : CC.Mem) (binding cells : CC.Block)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (header : CC.Mem.load CC.Mptr memory binding 0 = some (CC.Val.Vptr cells 0))
+  (rsp :
+    CC.Mem.load CC.Mptr memory cells 64 =
+      some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 12
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCall
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCont k) e
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.temps le cells) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.from_metadata {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  (result : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 12
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStackSource.storage k
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) result.after)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushBody.handler
+      KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCall
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSource.widthCont k)
+      (KProgFormal.ClightRefinement.X86ProducerPushBody.allocation ready.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.temps
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) ready.gprs.block)
+      result.after)
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.from_metadata' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.inputs {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+        (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.temps
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) ready.gprs.block) =
+      some (CC.Val.Vptr ready.entry.block 0) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_l_pp_width
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.temps
+            (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) ready.gprs.block) =
+        some (CC.Val.Vint 8#32) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_l_pp_value
+          (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.temps
+            (KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.initialTemps rsp) ready.gprs.block) =
+        some (CC.Val.Vlong (ready.values 3))
+'KProgFormal.ClightRefinement.X86ProducerPushStorageSetup.inputs' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
