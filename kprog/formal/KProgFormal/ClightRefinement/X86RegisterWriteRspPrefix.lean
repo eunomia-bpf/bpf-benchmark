@@ -6,7 +6,7 @@ open X86RegisterView
 /-- The original table writer executes its real local reads, index selection
 and both RSP cell stores. The native GPR view is established at the exact
 stack-release frontier; that remaining source branch is deliberately retained. -/
-theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+theorem execute_readback (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
     (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
     (cellsOffset : CC.Integers.Ptrofs) (value : BitVec 64)
@@ -32,6 +32,8 @@ theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
           cellsBlock cellsOffset) final) ∧
       RegistersRepresent addresses origins final cellsBlock cellsOffset
         (cpu.setReg .q (X86.GPR.ofIndex 4) value) ∧
+      CC.Mem.load CC.Mptr final cellsBlock (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) =
+        some (.Vlong (value - origins.stack)) ∧
       final.access = memory.access ∧ final.nextblock = memory.nextblock ∧
       (∀ chunk other offset, other ≠ cellsBlock →
         CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset) := by
@@ -62,6 +64,46 @@ theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
   have written := X86ShiftWriteback.table_body ge layout.bindings layout.gpr layout.cell function e reached
     (X86ShiftWriteback.tableCont k) memory middle final bindingBlock cellsBlock cellsOffset index raw tag
     keptBinding cells keptIndex keptValue keptTag (by rfl) bindingSeparate wordStored tagStored
-  exact ⟨final, (prepared.trans selected).trans written, registers, access, next, frame⟩
+  have reads := X86ShiftWriteback.cell_write_readback memory middle final cellsBlock
+    (cellsOffset + CC.Integers.Ptrofs.repr (16 * ((4 : Fin 16).val : Int))) raw tag wordStored tagStored
+  have normalized : CC.Val.loadResult CC.Mptr raw = raw := rfl
+  exact ⟨final, (prepared.trans selected).trans written, registers,
+    reads.1.trans (congrArg some normalized), access, next, frame⟩
+
+/-- Retain the accepted public interface while the stronger source result
+also exposes the actual raw RSP read needed by release composition. -/
+theorem execute (ge : CC.CGenv) (layout : X86RegisterReadValue.Layout ge)
+    (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+    (memory : CC.Mem) (localBlock bindingBlock cellsBlock : CC.Block)
+    (cellsOffset : CC.Integers.Ptrofs) (value : BitVec 64)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.X86.Origins)
+    (cpu : X86.Cpu)
+    (declared : e.get X86_program_profile_bpf.___x86_wr_cell__2 =
+      some (localBlock, .Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+    (current : CC.Mem.load CC.Mptr memory localBlock 0 = some (.Vlong (value - origins.stack)))
+    (observedTag : le.get X86_program_profile_bpf.___x86_wr_cell_tag__2 = some (.Vint (0#32)))
+    (destination : le.get X86_program_profile_bpf._dst = some (.Vint (4#32)))
+    (binding : le.get X86_program_profile_bpf.___x86_bind = some (.Vptr bindingBlock 0))
+    (cells : CC.Mem.load CC.Mptr memory bindingBlock 0 = some (.Vptr cellsBlock cellsOffset))
+    (bindingSeparate : bindingBlock ≠ cellsBlock)
+    (represented : RegistersRepresent addresses origins memory cellsBlock cellsOffset cpu)
+    (wordPermission : CC.Mem.validAccess memory CC.Mptr cellsBlock
+      (CC.Integers.Ptrofs.unsigned (cellsOffset + 64)) .Writable = true)
+    (tagPermission : CC.Mem.validAccess memory .Mint8unsigned cellsBlock
+      (CC.Integers.Ptrofs.unsigned ((cellsOffset + 64) + 8)) .Writable = true) :
+    ∃ final, InternalRun ge 22
+      (.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_112 k e le memory)
+      (.State function .Sskip (X86ShiftWriteback.tableCont k) e
+        (X86ShiftWriteback.tableTemps le (.Vlong (value - origins.stack)) (0#8) 4
+          cellsBlock cellsOffset) final) ∧
+      RegistersRepresent addresses origins final cellsBlock cellsOffset
+        (cpu.setReg .q (X86.GPR.ofIndex 4) value) ∧
+      final.access = memory.access ∧ final.nextblock = memory.nextblock ∧
+      (∀ chunk other offset, other ≠ cellsBlock →
+        CC.Mem.load chunk final other offset = CC.Mem.load chunk memory other offset) := by
+  obtain ⟨final, run, registers, _, access, next, frame⟩ := execute_readback ge layout
+    function e le k memory localBlock bindingBlock cellsBlock cellsOffset value addresses origins cpu
+    declared current observedTag destination binding cells bindingSeparate represented wordPermission tagPermission
+  exact ⟨final, run, registers, access, next, frame⟩
 
 end KProgFormal.ClightRefinement.X86RegisterWriteRspPrefix
