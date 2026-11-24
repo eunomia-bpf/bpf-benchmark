@@ -1,0 +1,28 @@
+KProgFormal.ClightRefinement.X86RegisterTagSite.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge) (function : CC.Function) (e : CC.Env)
+  (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (target register : CC.Ident) (index : Fin 16) (tag : BitVec 8)
+  (bindingBlock cellsBlock helperBlock : CC.Block) (offset base : CC.Integers.Ptrofs)
+  (registerRead :
+    CC.PTree.get register le =
+      some
+        (KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte index)))
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock offset))
+  (helper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_reg_tag = some helperBlock ∧
+      ge.genv_genv.findFunctPtr helperBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_reg_tag))
+  (unshadowed : CC.PTree.get X86_program_profile_bpf._x86_sim_inline_reg_tag e = none)
+  (cells : CC.Mem.load CC.Mptr memory bindingBlock offset.unsigned = some (CC.Val.Vptr cellsBlock base))
+  (current :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cellsBlock (base + CC.Integers.Ptrofs.repr (16 * ↑↑index) + 8).unsigned =
+      some (KProgFormal.ClightRefinement.X86Width.argument tag)) :
+  KProgFormal.ClightRefinement.InternalRun ge 23
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterTagSite.statement target register) k e le memory)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (CC.PTree.set target (KProgFormal.ClightRefinement.X86Width.argument tag) le) memory)
+'KProgFormal.ClightRefinement.X86RegisterTagSite.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
