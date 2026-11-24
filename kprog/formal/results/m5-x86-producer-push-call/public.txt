@@ -1,0 +1,63 @@
+KProgFormal.ClightRefinement.X86ProducerPushCall.source_call :
+  KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall =
+    CC.Stmt.Scall none KProgFormal.ClightRefinement.X86ProducerPushCall.expression
+      KProgFormal.ClightRefinement.X86ProducerPushCall.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerPushCall.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCall.handler_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol
+        X86_program_profile_bpf.___x86_instruction_X86_OP_PUSH =
+      some KProgFormal.ClightRefinement.X86ProducerPushCall.handlerBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerPushCall.handlerBlock =
+      some (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushCall.handler)
+'KProgFormal.ClightRefinement.X86ProducerPushCall.handler_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCall.arguments (before memory : CC.Mem) (le : CC.TempEnv)
+  (entry :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory KProgFormal.ClightRefinement.X86ProducerPushCall.argumentExpressions
+      KProgFormal.ClightRefinement.X86ProducerPushCall.argumentTypes =
+    some (KProgFormal.ClightRefinement.X86ProducerPushCall.values entry.block)
+'KProgFormal.ClightRefinement.X86ProducerPushCall.arguments' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCall.call (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (entry :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.HeaderLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+      (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls k)
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerPushCall.values entry.block)
+      (KProgFormal.ClightRefinement.X86ProducerPushCall.continuation
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerPushCall.call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushCall.entry (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerPushCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerPushCall.values binding) k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerPushCall.handler
+      KProgFormal.ClightRefinement.X86ProducerPushCall.handler.fn_body k CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerPushCall.initialTemps binding) memory)
+'KProgFormal.ClightRefinement.X86ProducerPushCall.entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

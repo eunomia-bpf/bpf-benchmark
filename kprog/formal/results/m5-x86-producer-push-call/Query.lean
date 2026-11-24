@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerPushCall
+#check KProgFormal.ClightRefinement.X86ProducerPushCall.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCall.source_call
+#check KProgFormal.ClightRefinement.X86ProducerPushCall.handler_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCall.handler_binding
+#check KProgFormal.ClightRefinement.X86ProducerPushCall.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCall.arguments
+#check KProgFormal.ClightRefinement.X86ProducerPushCall.call
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCall.call
+#check KProgFormal.ClightRefinement.X86ProducerPushCall.entry
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushCall.entry
