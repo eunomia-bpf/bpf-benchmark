@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialNative
+#check KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialNative.execute
+#print axioms KProgFormal.ClightRefinement.X86AluXorShortcutRspPartialNative.execute
