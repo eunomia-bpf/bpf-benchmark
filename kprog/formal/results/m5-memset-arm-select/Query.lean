@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemsetArmSelect
+#check KProgFormal.ClightRefinement.Arm64MemsetArmSelect.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetArmSelect.source
+#check KProgFormal.ClightRefinement.Arm64MemsetArmSelect.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetArmSelect.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetArmSelect.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetArmSelect.original
