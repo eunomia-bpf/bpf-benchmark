@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovAdmission
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovAdmission.admission
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryRepeatMovAdmission.admission
