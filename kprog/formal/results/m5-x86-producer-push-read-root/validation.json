@@ -1,0 +1,33 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/push-20261124T202134Z",
+  "build": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.160321479081176,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-push-read-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 7.811906432034448,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}

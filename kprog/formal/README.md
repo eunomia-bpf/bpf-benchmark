@@ -33,7 +33,7 @@ theorem per ISA. That complete argument is still in progress; the
 The library proves actual helper/handler executions, typed loads and stores,
 allocation and deallocation, memory frames, register/tag/provenance and flag
 views, and source-to-native caller compositions. The
-[integrated public queries](results/m5-x86-producer-entry-ready-root/README.md)
+[integrated public queries](results/m5-x86-producer-push-read-root/README.md)
 retain the prior interfaces and expose each theorem's precise premises.
 AArch64 source/caller/native fixture prefixes are also integrated in that
 library; they do not establish all AArch64 operations.
@@ -68,13 +68,15 @@ producer's complete exported world supplies its layouts and input binding.
 One source execution now composes its entry/ABI/ghost/context setup, sixteen
 GPR initializers, base-zero/six-flag/two-XMM inputs, return zero/kind-1 base
 input, final context/RDI pointer and tag1, and all 29 header assignments/bind
-loop/label to the original first PUSH call. It retains constructed readbacks,
-current cache/ghost/header views, separation, lifetimes, rights/frontier and
-actual input traces. Both kind-6 and kind-1 availability/memory ABIs remain
+loop/label through the original PUSH wrapper, width helper, dispatch, local
+allocation and register-mode guards to the complete RBX reader call, return
+and actual operand assignment. It retains constructed readbacks, current
+cache/ghost/header views, separation, lifetimes, rights/frontier and actual
+input traces. Both kind-6 and kind-1 availability/memory ABIs remain
 explicit premises. Protected typed loads across providers do not imply raw
 contents equality; the raw caller frame begins at the last complete supplied
-heap. Real native-memory/input-oracle/trace correspondence and PUSH execution
-remain open.
+heap. Real native-memory/input-oracle/trace correspondence and the remaining
+PUSH stack effects remain open.
 
 The argument also trusts the C front end/exporter, imported semantics and
 their correspondence to production C, artifact binding and platform memory

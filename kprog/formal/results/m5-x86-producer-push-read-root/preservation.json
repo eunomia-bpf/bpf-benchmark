@@ -1,0 +1,23 @@
+{
+  "prior_query_receipt": "m5-x86-producer-entry-ready-root",
+  "prior_interfaces": 511,
+  "public_interfaces": 558,
+  "added_interfaces": 47,
+  "all_prior_query_text_preserved_verbatim": true,
+  "peer_root_imports_preserved_verbatim": true,
+  "accepted_modules": [
+    "X86ProducerPushCall",
+    "X86ProducerPushWidth",
+    "X86ProducerPushDispatch",
+    "X86ProducerPushBody",
+    "X86ProducerPushResources",
+    "X86ProducerPushPrefix",
+    "X86ProducerPushTemporaries",
+    "X86ProducerPushReadValue",
+    "X86ProducerPushOperand",
+    "X86ProducerPushRead",
+    "X86ProducerPushReadReturn",
+    "X86ProducerPushReadPrefix"
+  ],
+  "readme_words": 682
+}
