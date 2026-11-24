@@ -1,0 +1,37 @@
+KProgFormal.ClightRefinement.X86ProducerPushRspAddress.original :
+  KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead =
+      KProgFormal.ClightRefinement.X86ProducerPushRspAddress.header ∧
+    KProgFormal.ClightRefinement.X86ProducerPushRspSource.currentRead =
+        KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer X86_program_profile_bpf._t'229 ∧
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.target =
+        KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer X86_program_profile_bpf._t'228
+'KProgFormal.ClightRefinement.X86ProducerPushRspAddress.original' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspAddress.header_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (binding cells : CC.Block)
+  (bound : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr binding 0))
+  (read : CC.Mem.load CC.Mptr memory binding 0 = some (CC.Val.Vptr cells 0)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.headerRead =
+    some (CC.Val.Vptr cells 0)
+'KProgFormal.ClightRefinement.X86ProducerPushRspAddress.header_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer_address (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (cells : CC.Block) (temporary : CC.Ident) (read : CC.PTree.get temporary le = some (CC.Val.Vptr cells 0)) :
+  CC.doEvalLvalue KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      (KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer temporary) =
+    some (cells, 64#64, CC.Bitfield.Full)
+'KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer_address' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerPushRspAddress.current_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (cells : CC.Block) (read : CC.PTree.get X86_program_profile_bpf._t'229 le = some (CC.Val.Vptr cells 0))
+  (rsp : CC.Mem.load CC.Mptr memory cells 64 = some (CC.Val.Vlong 0)) :
+  CC.doEvalExpr KProgFormal.ClightRefinement.X86ProducerLayout.ge e le memory
+      KProgFormal.ClightRefinement.X86ProducerPushRspSource.currentRead =
+    some (CC.Val.Vlong 0)
+'KProgFormal.ClightRefinement.X86ProducerPushRspAddress.current_value' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

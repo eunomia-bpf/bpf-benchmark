@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerPushRspAddress
+#check KProgFormal.ClightRefinement.X86ProducerPushRspAddress.original
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspAddress.original
+#check KProgFormal.ClightRefinement.X86ProducerPushRspAddress.header_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspAddress.header_value
+#check KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer_address
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspAddress.pointer_address
+#check KProgFormal.ClightRefinement.X86ProducerPushRspAddress.current_value
+#print axioms KProgFormal.ClightRefinement.X86ProducerPushRspAddress.current_value

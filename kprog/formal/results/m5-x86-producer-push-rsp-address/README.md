@@ -1,0 +1,3 @@
+The original two cell-pointer loads, RSP union read and target pointer are related to the SAME complete exported source layouts. Actual target addresses are GPR byte64; readback of the pointer-typed union accepts genuine Vlong0. No copied ISA rule, independent source layout or source-run premise is introduced. The finite address arithmetic is checked against imported Clight operations.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
