@@ -1,0 +1,142 @@
+KProgFormal.ClightRefinement.X86ProducerScalarExecute.initial_zero (before memory : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont)
+  (base :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before 14)
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerGprChain.following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerScalarSource.start k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store CC.Chunk.Mint64 memory base.block 0 (CC.Val.Vlong 0) = some after ∧
+        CC.Mem.load CC.Chunk.Mint64 after base.block 0 = some (CC.Val.Vlong 0) ∧
+          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+              b ≠ base.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+              after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerScalarExecute.initial_zero' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarExecute.enter (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (i : Fin 8) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 3
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).whole k
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+          KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+      le memory)
+    (CC.State.Callstate KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction [CC.Val.Vint 6#32]
+      (KProgFormal.ClightRefinement.X86ProducerScalarExecute.continuation i
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        le k)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerScalarExecute.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarExecute.returned (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
+  (k : CC.Cont) (i : Fin 8) (word : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+    (CC.State.Returnstate (CC.Val.Vlong word)
+      (KProgFormal.ClightRefinement.X86ProducerScalarExecute.continuation i e le k) memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).assignment
+      (CC.Cont.Kseq (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following k) e
+      (KProgFormal.ClightRefinement.X86ProducerScalarExecute.temps i le word) memory)
+'KProgFormal.ClightRefinement.X86ProducerScalarExecute.returned' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarExecute.stored (before memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (i : Fin 8) (word : BitVec 64)
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i))
+  (read :
+    CC.PTree.get (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).resultName le = some (CC.Val.Vlong word))
+  (access :
+    memory.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 2
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).assignment
+          (CC.Cont.Kseq (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following k)
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le after) ∧
+      CC.Mem.store (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i) memory object.block 0
+            (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word) =
+          some after ∧
+        CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i) after object.block 0 =
+            some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word) ∧
+          (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+              b ≠ object.block → CC.Mem.load c after b ofs = CC.Mem.load c memory b ofs) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+              after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerScalarExecute.stored' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerScalarExecute.execute (before memory supplied : CC.Mem) (le : CC.TempEnv)
+  (k : CC.Cont) (i : Fin 8) (word : BitVec 64) (trace : CC.Trace)
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before
+      (KProgFormal.ClightRefinement.X86ProducerScalarSource.row i))
+  (provider :
+    CC.externalCall KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputEF
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.toSenv [CC.Val.Vint 6#32] memory trace
+      (CC.Val.Vlong word) supplied)
+  (access :
+    supplied.access =
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access) :
+  ∃ after,
+    CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).whole k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          le memory)
+        trace
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          (KProgFormal.ClightRefinement.X86ProducerScalarSource.site i).following k
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          (KProgFormal.ClightRefinement.X86ProducerScalarExecute.temps i le word) after) ∧
+      CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i) after object.block 0 =
+          some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i word) ∧
+        (∀ (c : CC.Chunk) (b : CC.Block) (ofs : CC.Z),
+            b ≠ object.block → CC.Mem.load c after b ofs = CC.Mem.load c supplied b ofs) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock supplied after ∧
+            after.access = supplied.access ∧ after.nextblock = supplied.nextblock
+'KProgFormal.ClightRefinement.X86ProducerScalarExecute.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

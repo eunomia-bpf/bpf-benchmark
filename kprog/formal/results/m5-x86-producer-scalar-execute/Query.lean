@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarExecute
+#check KProgFormal.ClightRefinement.X86ProducerScalarExecute.initial_zero
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarExecute.initial_zero
+#check KProgFormal.ClightRefinement.X86ProducerScalarExecute.enter
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarExecute.enter
+#check KProgFormal.ClightRefinement.X86ProducerScalarExecute.returned
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarExecute.returned
+#check KProgFormal.ClightRefinement.X86ProducerScalarExecute.stored
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarExecute.stored
+#check KProgFormal.ClightRefinement.X86ProducerScalarExecute.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarExecute.execute
