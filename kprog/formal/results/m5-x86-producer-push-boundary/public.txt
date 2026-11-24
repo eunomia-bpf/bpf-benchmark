@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86ProducerPushBoundary.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (arena : BitVec 64)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (state : KProgFormal.Reference.X86.State)
+  (nextPc : BitVec 64) (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable : ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) ready.after ready.gprs.block 0
+      (KProgFormal.ClightRefinement.X86LogicReference.input state))
+  (scalars :
+    KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready ready.after
+      (KProgFormal.ClightRefinement.X86LogicReference.input state))
+  (memory :
+    KProgFormal.ClightRefinement.X86StackCacheView.Represents ready.after (ready.sources 1).block state.memory
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena).stack) :
+  have next :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 nextPc) state;
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output ready.after)
+      CC.E0
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output complete.after) ∧
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+        (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) complete.after ready.gprs.block 0
+        (KProgFormal.ClightRefinement.X86LogicReference.input next.state) ∧
+      KProgFormal.ClightRefinement.X86ProducerScalarView.Represents ready complete.after
+          (KProgFormal.ClightRefinement.X86LogicReference.input next.state) ∧
+        KProgFormal.ClightRefinement.X86StackCacheView.Represents complete.after (ready.sources 1).block
+            next.state.memory (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena).stack ∧
+          next.state.pc = nextPc ∧
+            next.fault = none ∧
+              next.events =
+                  [KProgFormal.ClightRefinement.X86ProducerPushStoreObservation.event
+                      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena).stack
+                      (ready.values 3)] ∧
+                state.gpr 4 = ready.stackOutcome.value ∧
+                  CC.Mem.load CC.Chunk.Mint64 complete.after ready.base.block 0 = some (CC.Val.Vlong (state.gpr 4)) ∧
+                    CC.Mem.store CC.Chunk.Mint64 metadata.after (ready.sources 1).block 40
+                        (CC.Val.Vlong (ready.values 3)) =
+                      some cache.after
+'KProgFormal.ClightRefinement.X86ProducerPushBoundary.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
