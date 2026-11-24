@@ -185,3 +185,19 @@ Both classes predate the 2026-11-23 B fixes (7db7ddc23, c3c89a8d3,
 e3ce00476, aaca40148, 25d4ae58b, 3ffc87abc), so this capture cannot say
 whether they still occur. Their current state needs a guest run of
 tetragon/observer and tracee/monitor.
+
+Class E A/B, corrected 2026-11-24. The earlier claim that the fix
+returns status 0 on the same request compared two different guest boots:
+the pre-fix request named perf_progs id 194 and the post-fix request
+named perf_progs id 183, and report_events differed the same way
+(max_entries 4 against 8). Neither run's map table is the other's, so
+the post-fix status 0 says that request loaded, not that the retry ran.
+
+The retry itself is unobserved in a guest: the post-fix request's
+load-direct.stderr is 0 bytes and carries no "reloading without foreign
+PROG_ARRAY map(s)" line, while the same file captured the pre-fix
+failure text, so stderr capture works in both. What decides this class
+in a guest is that line plus the request's status, in one run whose
+perf_progs has a foreign owner at load time.
+
+Recorded here because the class stays open until that run exists.
