@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResourceTransport
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResourceTransport.field
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResourceTransport.field
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResourceTransport.resources
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResourceTransport.resources
