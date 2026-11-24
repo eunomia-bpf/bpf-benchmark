@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.X86NativeByteFold
+#check KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes
+#check KProgFormal.ClightRefinement.X86NativeByteFold.byte_value
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.byte_value
+#check KProgFormal.ClightRefinement.X86NativeByteFold.byte_initialized
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.byte_initialized
+#check KProgFormal.ClightRefinement.X86NativeByteFold.selected
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.selected
+#check KProgFormal.ClightRefinement.X86NativeByteFold.observations
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.observations
+#check KProgFormal.ClightRefinement.X86NativeByteFold.scalar
+#print axioms KProgFormal.ClightRefinement.X86NativeByteFold.scalar

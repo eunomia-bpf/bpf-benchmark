@@ -1,0 +1,32 @@
+KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes :
+  KProgFormal.Reference.Memory → BitVec 64 → List (BitVec 8) → KProgFormal.Reference.Memory
+'KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes' depends on axioms: [propext]
+KProgFormal.ClightRefinement.X86NativeByteFold.byte_value (memory : KProgFormal.Reference.Memory)
+  (address value target : BitVec 64) :
+  (KProgFormal.Reference.storeMemory memory address value 1).value target =
+    if target = address then BitVec.setWidth 8 value else memory.value target
+'KProgFormal.ClightRefinement.X86NativeByteFold.byte_value' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86NativeByteFold.byte_initialized (memory : KProgFormal.Reference.Memory)
+  (address value target : BitVec 64) :
+  (KProgFormal.Reference.storeMemory memory address value 1).initialized target =
+    if target = address then true else memory.initialized target
+'KProgFormal.ClightRefinement.X86NativeByteFold.byte_initialized' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86NativeByteFold.selected (address target : BitVec 64) (lane : Nat) (bound : lane < 8) :
+  target = address + BitVec.ofNat 64 lane ↔ (target - address).toNat = lane
+'KProgFormal.ClightRefinement.X86NativeByteFold.selected' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86NativeByteFold.observations (memory : KProgFormal.Reference.Memory)
+  (address value target : BitVec 64) :
+  (KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes memory address
+            (KProgFormal.Reference.valueBytes value 8)).value
+        target =
+      (KProgFormal.Reference.storeMemory memory address value 8).value target ∧
+    (KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes memory address
+            (KProgFormal.Reference.valueBytes value 8)).initialized
+        target =
+      (KProgFormal.Reference.storeMemory memory address value 8).initialized target
+'KProgFormal.ClightRefinement.X86NativeByteFold.observations' depends on axioms: [propext, Quot.sound]
+KProgFormal.ClightRefinement.X86NativeByteFold.scalar (memory : KProgFormal.Reference.Memory)
+  (address value : BitVec 64) :
+  KProgFormal.ClightRefinement.X86NativeByteFold.storeBytes memory address (KProgFormal.Reference.valueBytes value 8) =
+    KProgFormal.Reference.storeMemory memory address value 8
+'KProgFormal.ClightRefinement.X86NativeByteFold.scalar' depends on axioms: [propext, Quot.sound]
