@@ -1,0 +1,3 @@
+The exact original post-materialization byte/word loops compute their lane and choose the scalar arm in6 source transitions. Actual scalar stores, tag reset and real loop exits compose into12/11-step suffix runs, reusing the accepted original byte/word store and exit proofs. The RSP byte lane is low0 and the source cell tag is0; volatile alternatives remain actual retained source, not assumed executions. The single draft was moved only after direct Lean acceptance and then canonical build/public acceptance.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

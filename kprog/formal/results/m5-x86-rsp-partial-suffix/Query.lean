@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.source
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.source
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.enter
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.enter
+#check KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.run
+#print axioms KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.run

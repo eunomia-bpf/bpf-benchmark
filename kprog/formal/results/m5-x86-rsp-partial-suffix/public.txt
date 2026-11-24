@@ -1,0 +1,48 @@
+KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.source (isWord : Bool) :
+  KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.suffix isWord =
+    ((KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.lane✝ isWord).Ssequence
+          ((KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.choice✝ isWord).Ssequence
+            (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.tag✝ isWord))).Sloop
+      CC.Stmt.Sbreak
+'KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.enter (isWord : Bool) (ge : CC.CGenv)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem) (next : BitVec 64)
+  (scalarTag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (observed : CC.PTree.get X86_program_profile_bpf.___x86_wr_next__2 le = some (CC.Val.Vlong next)) :
+  KProgFormal.ClightRefinement.InternalRun ge 6
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.suffix isWord) k e le memory)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.scalar isWord)
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.continuation isWord k) e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.laneTemps isWord le next) memory)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.run (isWord : Bool) (ge : CC.CGenv)
+  (gprLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_gpr ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterLayout.gprRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory after : CC.Mem) (block : CC.Block)
+  (next : BitVec 64)
+  (declared :
+    CC.PTree.get X86_program_profile_bpf.___x86_wr_cell__2 e =
+      some (block, CC.Ty.Tunion X86_program_profile_bpf._x86_sim_gpr CC.noattr))
+  (scalarTag : CC.PTree.get X86_program_profile_bpf.___x86_wr_cell_tag__2 le = some (CC.Val.Vint 0#32))
+  (observed : CC.PTree.get X86_program_profile_bpf.___x86_wr_next__2 le = some (CC.Val.Vlong next))
+  (low : isWord = false → CC.PTree.get X86_program_profile_bpf.___x86_wr_shift__2 le = some (CC.Val.Vint 0#32))
+  (stored :
+    CC.Mem.store (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.chunk isWord) memory block 0
+        (CC.Val.Vint (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.value isWord next)) =
+      some after) :
+  KProgFormal.ClightRefinement.InternalRun ge (if isWord = true then 11 else 12)
+    (CC.State.State function (KProgFormal.ClightRefinement.X86RegisterWriteRspPartial.suffix isWord) k e le memory)
+    (CC.State.State function CC.Stmt.Sskip k e
+      (KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.temps isWord le next) after)
+'KProgFormal.ClightRefinement.X86RegisterWriteRspScalarSuffix.run' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
