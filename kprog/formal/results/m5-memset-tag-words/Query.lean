@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagWords
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWords.byte_zero
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWords.byte_zero
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWords.zero_word
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWords.zero_word
+#check KProgFormal.ClightRefinement.Arm64MemsetTagWords.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagWords.original
