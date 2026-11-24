@@ -1,0 +1,30 @@
+KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.execute (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (stackLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_stack_mem ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.stackRecord)
+  (function : CC.Function) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (binding stack input : CC.Block) (base : CC.Integers.Ptrofs) (slot : Fin 6) (old next : BitVec 64)
+  (symbol : ge.genv_genv.findSymbol X86_program_profile_bpf._native_lab_entry_input = some input)
+  (global :
+    ge.genv_genv.findFunctPtr input = some KProgFormal.ClightRefinement.X86RegisterWriteRspReleaseWord.inputFunction)
+  (notLocal : CC.PTree.get X86_program_profile_bpf._native_lab_entry_input e = none) (separate : binding ≠ stack)
+  (available : KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.PreservingInputs ge binding stack base next)
+  (view : KProgFormal.ClightRefinement.X86ReleaseProvider.View memory binding stack base)
+  (core : KProgFormal.ClightRefinement.X86ReleaseProvider.Core le binding slot old next) :
+  ∃ trace after finalTemps,
+    CC.Star (CC.Step2 ge)
+        (CC.State.State function X86_program_profile_bpf.s_x86_sim_inline_arm_ALU_REG_111 k e le memory) trace
+        (CC.State.State function CC.Stmt.Sskip k e finalTemps after) ∧
+      KProgFormal.ClightRefinement.X86ReleaseProvider.View after binding stack base ∧
+        KProgFormal.ClightRefinement.X86ReleaseProvider.Core finalTemps binding slot old next ∧
+          KProgFormal.ClightRefinement.X86ReleaseByteComplete.AtLane finalTemps 8 ∧
+            after.access = memory.access ∧
+              after.nextblock = memory.nextblock ∧
+                KProgFormal.ClightRefinement.X86ReleaseProvider.Frame stack memory after ∧
+                  KProgFormal.ClightRefinement.X86ReleaseByteCacheFrame.AboveFrame stack base next memory after
+'KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
