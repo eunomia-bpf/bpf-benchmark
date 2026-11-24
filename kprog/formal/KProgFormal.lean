@@ -276,3 +276,4 @@ import KProgFormal.ClightRefinement.X86AluXorDwordReleaseAll
 import KProgFormal.ClightRefinement.X86AluLogicPartialReleaseNative
 import KProgFormal.ClightRefinement.X86AluXorPartialReleaseAll
 import KProgFormal.ClightRefinement.X86ReleaseByteCompleteFrame
+import KProgFormal.ClightRefinement.X86ReleaseStorageCacheFrame
