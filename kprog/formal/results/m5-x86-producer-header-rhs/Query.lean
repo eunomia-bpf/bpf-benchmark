@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerHeaderRhs
+#check KProgFormal.ClightRefinement.X86ProducerHeaderRhs.rhs_pointer
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderRhs.rhs_pointer
+#check KProgFormal.ClightRefinement.X86ProducerHeaderRhs.cast_pointer
+#print axioms KProgFormal.ClightRefinement.X86ProducerHeaderRhs.cast_pointer

@@ -1,0 +1,20 @@
+KProgFormal.ClightRefinement.X86ProducerHeaderRhs.rhs_pointer (ge : CC.CGenv) (before memory : CC.Mem) (le : CC.TempEnv)
+  (i : Fin 24) (source : KProgFormal.ClightRefinement.X86ProducerHeaderLocals.SourceLocal ge.genv_cenv before i)
+  (registers : CC.Composite)
+  (registersLayout : CC.PTree.get X86_program_profile_bpf._x86_sim_register_cells ge.genv_cenv = some registers)
+  (cellsOffset :
+    CC.unionFieldOffset ge.genv_cenv X86_program_profile_bpf._gpr_cells registers.co_members =
+      CC.Res.OK (0, CC.Bitfield.Full)) :
+  CC.doEvalExpr ge (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation ge.genv_cenv before).fst le
+      memory (KProgFormal.ClightRefinement.X86ProducerHeaderSource.rhs i) =
+    some (CC.Val.Vptr source.block 0)
+'KProgFormal.ClightRefinement.X86ProducerHeaderRhs.rhs_pointer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerHeaderRhs.cast_pointer (before : CC.Mem) (i : Fin 24) (block : CC.Block) :
+  CC.Cop.semCast (CC.Val.Vptr block 0) (CC.typeof (KProgFormal.ClightRefinement.X86ProducerHeaderSource.rhs i))
+      (CC.typeof (KProgFormal.ClightRefinement.X86ProducerHeaderSource.target i)) before =
+    some (CC.Val.Vptr block 0)
+'KProgFormal.ClightRefinement.X86ProducerHeaderRhs.cast_pointer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
