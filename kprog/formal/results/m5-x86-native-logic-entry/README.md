@@ -1,0 +1,3 @@
+Genuine OR/AND handler calls now compose actual allocation, decode, both real reader calls, the selected numerical helper and original caller resume into the real flag stage, admitting RSP on either side. Both operands come from the same initial represented native CPU; actual initial native-base and register reads survive the real allocation frame. Every width and legal low/high-byte source view is retained.
+
+Focused build and public type/axiom queries passed at original200000/512,j1,32GiB inside shared timing on CPUs12–15. Existing source external semantics remain explicit. The validation records and raw logs specify the checked scope.

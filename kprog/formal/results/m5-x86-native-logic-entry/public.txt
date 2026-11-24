@@ -1,0 +1,94 @@
+KProgFormal.ClightRefinement.X86AluNativeLogicEntry.from_call (ge : CC.CGenv)
+  (layout : KProgFormal.ClightRefinement.X86RegisterReadValue.Layout ge)
+  (valueLayout :
+    CC.PTree.get X86_program_profile_bpf._x86_sim_inline_value ge.genv_cenv =
+      some KProgFormal.ClightRefinement.X86ShiftLeftCarry.valueRecord)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.X86.Origins) (cpu : X86.Cpu) (caller : CC.Mem) (k : CC.Cont)
+  (op imm : CC.Val) (dst src : Fin 16) (flags width : BitVec 8) (aux : BitVec 32) (size : X86.Size)
+  (highDst highSrc : Bool) (left right : BitVec 64)
+  (widthBlock readerBlock aluBlock bindingBlock cellsBlock baseBlock : CC.Block)
+  (cellsOffset baseOffset : CC.Integers.Ptrofs)
+  (oldBinding : CC.Positive.toNat bindingBlock < CC.Positive.toNat caller.nextblock)
+  (oldCells : CC.Positive.toNat cellsBlock < CC.Positive.toNat caller.nextblock)
+  (oldBase : CC.Positive.toNat baseBlock < CC.Positive.toNat caller.nextblock) (isAnd : Bool)
+  (operationCode :
+    BitVec.setWidth 32 (BitVec.setWidth 8 aux) =
+      BitVec.setWidth 32 (KProgFormal.ClightRefinement.X86AluLogicResultEntry.code isAnd))
+  (represented :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses origins caller cellsBlock cellsOffset cpu)
+  (legalDst : highDst = true → size = X86.Size.b ∧ ↑dst < 4) (legalSrc : highSrc = true → size = X86.Size.b ∧ ↑src < 4)
+  (dstLane : BitVec.setWidth 8 (aux >>> 8) = if highDst = true then 8 else 0)
+  (srcLane : BitVec.setWidth 8 (aux >>> 16) = if highSrc = true then 8 else 0)
+  (effective :
+    KProgFormal.ClightRefinement.X86Width.result flags = KProgFormal.ClightRefinement.X86ShiftLeft.argument size)
+  (widthHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_effective = some widthBlock ∧
+      ge.genv_genv.findFunctPtr widthBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective))
+  (readerHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_sim_inline_read_reg = some readerBlock ∧
+      ge.genv_genv.findFunctPtr readerBlock =
+        some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_read_reg))
+  (aluHelper :
+    ge.genv_genv.findSymbol X86_program_profile_bpf._x86_alu_result = some aluBlock ∧
+      ge.genv_genv.findFunctPtr aluBlock = some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result))
+  (cells :
+    CC.Mem.load CC.Mptr caller bindingBlock (CC.Integers.Ptrofs.unsigned 0) = some (CC.Val.Vptr cellsBlock cellsOffset))
+  (leftRead :
+    CC.Mem.load CC.Mptr caller cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑dst)).unsigned =
+      some (CC.Val.Vlong left))
+  (rightRead :
+    CC.Mem.load CC.Mptr caller cellsBlock (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑src)).unsigned =
+      some (CC.Val.Vlong right))
+  (leftTag :
+    dst ≠ 4 →
+      CC.Mem.load CC.Chunk.Mint8unsigned caller cellsBlock
+          (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑dst) + 8).unsigned =
+        some (CC.Val.Vint 0#32))
+  (rightTag :
+    src ≠ 4 →
+      CC.Mem.load CC.Chunk.Mint8unsigned caller cellsBlock
+          (cellsOffset + CC.Integers.Ptrofs.repr (16 * ↑↑src) + 8).unsigned =
+        some (CC.Val.Vint 0#32))
+  (header : CC.Mem.load CC.Mptr caller bindingBlock 112 = some (CC.Val.Vptr baseBlock baseOffset))
+  (native : CC.Mem.load CC.Chunk.Mint64 caller baseBlock baseOffset.unsigned = some (CC.Val.Vlong origins.stack)) :
+  have initial :=
+    KProgFormal.ClightRefinement.X86RegisterView.writerInitialTemps (CC.Val.Vptr bindingBlock 0) op
+      (KProgFormal.ClightRefinement.X86Width.argument
+        (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte dst))
+      (KProgFormal.ClightRefinement.X86Width.argument
+        (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte src))
+      (KProgFormal.ClightRefinement.X86Width.argument flags) (CC.Val.Vint aux) imm
+      (KProgFormal.ClightRefinement.X86Width.argument width);
+  have ready :=
+    KProgFormal.ClightRefinement.X86AluDecode.temps
+      (KProgFormal.ClightRefinement.X86AluEntry.widthTemps
+        (CC.PTree.set X86_program_profile_bpf.___x86_l_width (KProgFormal.ClightRefinement.X86Width.argument width)
+          initial)
+        flags)
+      aux;
+  have leftValue := cpu.getReg size (X86.GPR.ofIndex dst) highDst;
+  have rightValue := cpu.getReg size (X86.GPR.ofIndex src) highSrc;
+  KProgFormal.ClightRefinement.InternalRun ge
+    (37 + KProgFormal.ClightRefinement.X86AluReadNativeOperands.length dst src size + 29)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG)
+      [CC.Val.Vptr bindingBlock 0, op,
+        KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte dst),
+        KProgFormal.ClightRefinement.X86Width.argument
+          (KProgFormal.ClightRefinement.X86RegisterReadValue.registerByte src),
+        KProgFormal.ClightRefinement.X86Width.argument flags, CC.Val.Vint aux, imm,
+        KProgFormal.ClightRefinement.X86Width.argument width]
+      k caller)
+    (CC.State.State X86_program_profile_bpf.f_x86_sim_inline_arm_ALU_REG
+      KProgFormal.ClightRefinement.X86ShiftLeftRoute.flags (KProgFormal.ClightRefinement.X86AluEntry.continuation k)
+      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).fst
+      (KProgFormal.ClightRefinement.X86ShiftLeftSite.afterTemps
+        (KProgFormal.ClightRefinement.X86AluReadNativeOperands.temps ready leftValue rightValue)
+        (CC.Val.Vlong (KProgFormal.ClightRefinement.X86AluLogicResultEntry.result isAnd leftValue rightValue)))
+      (KProgFormal.ClightRefinement.X86RegisterView.writerAllocation ge.genv_cenv caller).snd)
+'KProgFormal.ClightRefinement.X86AluNativeLogicEntry.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
