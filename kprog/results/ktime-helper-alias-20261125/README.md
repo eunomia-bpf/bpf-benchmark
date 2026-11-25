@@ -35,3 +35,11 @@ The stock verifier's verdict on these B programs comes from the next checked-cor
 Cilium's 31 generation refusals are `use of undeclared identifier 'jiffies_64'`: P reads jiffies_64 directly
 (native-helpers.h's bpf_jiffies64) and B renders the address as X86_OP_MOV_LOAD_MAP_PTR(&jiffies_64). That case
 went to OMP with this diagnosis (COORDINATION 2026-11-25T06:0xZ).
+
+## Guest result (2026-11-25T09:47Z–09:51Z)
+
+`make -C kprog/libnativeloader checked-corpus-all CHECKED_APPS='bcc/set katran'` on the image rebuilt from
+840780870 (which restores `--results`), output /workspaces/kprog-raw/verified/checked-corpus-20261125-ktime2:
+BCC 25 requests, **24** installed checked-sim-c, 1 fell back at verification, 0 failed (11-25 recheck: 14/25,
+11 generation fallbacks). BCC finished at 09:51:05, before the class-G and jiffies change of
+kprog/results/kernel-data-probe-read-20261125 reached the tree (09:51:47); Katran ran after it.

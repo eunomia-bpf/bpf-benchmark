@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from helper_abi import KERNEL_FUNCTION_HELPERS, helper_idents, is_helper_symbol
+from helper_abi import KERNEL_DATA_SYMBOLS, KERNEL_FUNCTION_HELPERS, helper_idents, is_helper_symbol
 
 from x86_abi import check_definedness
 import kfunc_codegen
@@ -683,6 +683,9 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             if is_helper_symbol(insn.reloc_symbol):
                 return enc("X86_OP_MOV_LOAD_HELPER_ID", dst=dst_reg[0],
                            imm=f"X86_SIM_HELPER_{insn.reloc_symbol}")
+            if insn.reloc_symbol in KERNEL_DATA_SYMBOLS:
+                return enc("X86_OP_MOV_IMM", dst=dst_reg[0],
+                           imm=c_ptr_u64(f"&{insn.reloc_symbol}"))
             if insn.reloc_symbol:
                 if insn.reloc_symbol in rodata_idents:
                     raise ValueError(f"unsupported scalar rodata load: {insn.raw}")
@@ -1968,6 +1971,8 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append(source_prelude.rstrip())
         lines.append("")
     lines.extend(kfunc_codegen.declarations(kernel_functions))
+    for symbol in sorted(KERNEL_DATA_SYMBOLS & referenced):
+        lines.append(f'extern const void {symbol} __ksym;')
     for symbol in sorted(trusted_names & referenced):
         ident = trusted_idents[symbol]
         label = native_map_label(symbol)

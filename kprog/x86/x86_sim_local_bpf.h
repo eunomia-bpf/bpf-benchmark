@@ -939,6 +939,19 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 
 
 #define X86_SIM_L_LOAD_ADDR(ADDR, WIDTH) KPROG_X86_MEM_LOAD((ADDR), (WIDTH))
+/* The verifier types an address whose base carries a stack, context,
+ * packet or map tag; B keeps the direct access for those. Every other
+ * address is kernel memory, and B reads it through the probe-read callee
+ * (design: 读内核内存要调用 bpf_probe_read), as the fixed-displacement arm
+ * already does. Host and Clight builds read the same bytes directly. */
+#if defined(__bpf__) || defined(__BPF__)
+#define X86_SIM_L_TAG_KERNEL_MEMORY(TAG) \
+    ((TAG)!=X86_SIM_TAG_STACK && (TAG)!=X86_SIM_TAG_ABI && \
+     (TAG)!=X86_SIM_TAG_PACKET && (TAG)!=X86_SIM_TAG_PACKET_END && \
+     (TAG)!=X86_SIM_TAG_MAP_PTR && (TAG)!=X86_SIM_TAG_MAP_VALUE)
+#else
+#define X86_SIM_L_TAG_KERNEL_MEMORY(TAG) 0
+#endif
 
 #ifndef X86_SIM_L_NATIVE_DATA_LOAD
 #define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \
@@ -967,7 +980,10 @@ do { \
                  (OUTPUT)=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
          } } while(0)
 #define X86_SIM_L_LOAD_ADDR_TAGGED_INTO(OUTPUT, ADDR, WIDTH, TAG) \
-    do { __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
+    do { __u64 __x86_alias_observed; \
+         if (X86_SIM_L_TAG_KERNEL_MEMORY(TAG)) \
+             __x86_alias_observed=KPROG_X86_MEM_LOAD_FIXED((ADDR),0,(WIDTH)); \
+         else __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
          X86_SIM_L_OBSERVE_STACK_LOAD(__x86_alias_observed,ADDR,WIDTH,TAG); \
          (OUTPUT)=__x86_alias_observed; } while(0)
 #define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \
@@ -975,7 +991,10 @@ do { \
        X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_alias_result, ADDR, WIDTH, TAG); \
        __x86_alias_result; })
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \
-    do { __u64 __x86_data_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
+    do { __u64 __x86_data_observed; \
+         if (X86_SIM_L_TAG_KERNEL_MEMORY(TAG)) \
+             __x86_data_observed=KPROG_X86_MEM_LOAD_FIXED((BASE),(OFF),(WIDTH)); \
+         else __x86_data_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
          X86_SIM_L_OBSERVE_STACK_LOAD(__x86_data_observed,KPROG_PTR_ADD64_BITS((BASE),(OFF)),WIDTH,TAG); \
          (OUTPUT)=__x86_data_observed; } while(0)
 #define X86_SIM_L_FIXED_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \

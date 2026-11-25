@@ -59,6 +59,11 @@ KERNEL_FUNCTION_HELPERS = {
     'ktime_get_mono_fast_ns': 'bpf_ktime_get_ns',
 }
 
+# Kernel data that P reads by its kernel name in place of a helper
+# (vendor/bpf/native-helpers.h: bpf_jiffies64 reads jiffies_64). B takes the
+# symbol's kallsyms address as a scalar and reads it as kernel memory.
+KERNEL_DATA_SYMBOLS = frozenset({'jiffies_64'})
+
 
 def is_helper_symbol(symbol: str | None) -> bool:
     return symbol in helper_prototypes()
