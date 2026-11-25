@@ -1,4 +1,5 @@
 // Translate public entry contexts; application source and helper ctx stay intact.
+#include "llvm/Analysis/ConstantFolding.h"
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
@@ -13,6 +14,8 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include <algorithm>
 #include <cstdlib>
@@ -68,7 +71,36 @@ int main(int argc,char **argv) {
     auto Document=readJSON(FunctionBodies);
     if (auto E=native_bpf::materializeFunctions(*M,Document)) fail(toString(std::move(E)));
   }
-  const auto &DL=M->getDataLayout(); unsigned Count=0;
+  const auto &DL=M->getDataLayout();
+  // A barrier fixes register bits with freeze. A frozen constant is that
+  // constant, but the value only reaches the guards when the fold is applied:
+  // an integer freeze hides the bits from constant folding, the guard over
+  // them stays open, and a context access in the arm it discards still
+  // reaches the scan below, e.g. physical tc_index 134 written under
+  // "134-48 < 20". Fold those freezes and let the CFG pass close the arms.
+  // Every other freeze keeps its meaning: a reserved input stays a frozen
+  // undefined value, not poison.
+  for (auto &F:*M) if (!F.isDeclaration()) {
+    SmallVector<FreezeInst *,16> Fixed;
+    for (auto &I:instructions(F)) if (auto *Freeze=dyn_cast<FreezeInst>(&I))
+      if (isa<ConstantInt>(Freeze->getOperand(0))) Fixed.push_back(Freeze);
+    for (auto *Freeze:Fixed) {
+      Freeze->replaceAllUsesWith(Freeze->getOperand(0)); Freeze->eraseFromParent();
+    }
+    // A folded constant exposes the next instruction in the chain, so fold
+    // until a round changes nothing.
+    for (bool Changed=true;Changed;) {
+      Changed=false; DenseMap<Instruction *,Constant *> Folds;
+      for (auto &I:instructions(F)) if (I.getType()->isIntegerTy() && std::all_of(
+            I.operands().begin(),I.operands().end(),[](Value *O){ return isa<ConstantInt>(O); }))
+        if (auto *Fold=ConstantFoldInstruction(&I,DL)) Folds[&I]=Fold;
+      for (auto &Fold:Folds) { Fold.first->replaceAllUsesWith(Fold.second); Fold.first->eraseFromParent(); Changed=true; }
+    }
+    legacy::FunctionPassManager FPM(M.get());
+    FPM.add(createCFGSimplificationPass());
+    FPM.run(F);
+  }
+  unsigned Count=0;
   for (auto &F:*M) {
     if (F.isDeclaration() || F.arg_empty()) continue;
     auto Section=F.getSection(); std::string Kind;
