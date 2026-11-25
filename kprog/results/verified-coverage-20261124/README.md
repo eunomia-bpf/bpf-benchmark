@@ -16,3 +16,29 @@ write to stack R10 (class F, B frame past 512 bytes), 20 invalid mem access 'sca
 instructions), 1 too complex.
 
 Script: count.py in this directory (one pass over the outer archive, each request archive opened in memory).
+
+## Recheck on the current tree (2026-11-25T01:3xZ, coordinator)
+
+Capture: /workspaces/kprog-raw/verified/checked-corpus-20261125-recheck (`make -C kprog/libnativeloader
+checked-corpus-all` at 00:1xZ on 18c1fd4e1's parent tree; make exit 1). Counted the same way, per request:
+checked-sim-c when the archive has no simulator-failure.json and is a success archive.
+
+| App | Requests | Verified path (checked-sim-c) | Fallback to direct-native | Failed outright |
+|---|---|---|---|---|
+| BCC | 25 | **14** | 11 (generation) | 0 |
+| Cilium | 64 | **16** | 43 (generation 31, verification 12) | 5 |
+| Katran | 1 | **0** | 1 (generation) | 0 |
+| OTel | 14 | **9** | 4 (generation) | 1 |
+
+- Cilium's 5 failures (cil_from_host ×3, cil_to_container ×2) stop in the context-lower step after B passed the
+  verifier; the tool kept no stderr. These programs did not load at all.
+- OTel request 14 (custom__generic): generation fell back and the direct-native load was rejected ("Invalid
+  argument", 4 instructions processed).
+- OTel request 13 (native_tracer_entry, direct-native after a generation refusal, "unsupported unresolved call
+  target") then crashed the guest kernel: RIP native_tracer_entry+0x1e2, `mov rax,[rbx]; mov rax,[rax]; cmp qword
+  [rax+0xa0],0x2b`, RAX 0x26, CR2 0xc6. This is a user_mode(regs) test whose regs pointer read 0x26 from the ctx.
+  The fault is on the direct-native fallback, not on the verified path. Handed to OMP (COORDINATION 01:27Z).
+- An earlier count of Cilium as 21/64 counted the 5 failure archives as verified; corrected here and in
+  COORDINATION 01:3xZ.
+
+Script: count-recheck.py in this directory.
