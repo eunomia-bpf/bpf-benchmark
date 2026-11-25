@@ -462,10 +462,20 @@ int main(int argc, char **argv) {
       auto DataAddr = native_lto::offset(Types.get(), "perf_sample_data", "addr");
       const auto &DL = M->getDataLayout();
       auto *Ctx = F->getArg(0);
+      // The manifest native object is partly in physical form already: a
+      // pointer-typed load of the physical pointer slot IS the view. Re-wrapping
+      // it adds a second dereference (regs.r15, whose public offset is 0, read
+      // as the regs pointer), which faults at the first field access.
       SmallVector<LoadInst *, 32> Loads;
-      for (auto &I : instructions(F))
-        if (auto *L = dyn_cast<LoadInst>(&I))
-          if (getUnderlyingObject(L->getPointerOperand()) == Ctx) Loads.push_back(L);
+      for (auto &I : instructions(F)) {
+        auto *L = dyn_cast<LoadInst>(&I);
+        if (!L || getUnderlyingObject(L->getPointerOperand()) != Ctx) continue;
+        int64_t Offset = 0;
+        GetPointerBaseWithConstantOffset(L->getPointerOperand(), Offset, DL);
+        if (L->getType()->isPointerTy() &&
+            (Offset == RegPointer || Offset == DataPointer)) continue;
+        Loads.push_back(L);
+      }
       for (auto *L : Loads) {
         int64_t Offset = 0;
         auto *Base = GetPointerBaseWithConstantOffset(L->getPointerOperand(), Offset, DL);
