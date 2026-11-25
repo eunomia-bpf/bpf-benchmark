@@ -32,7 +32,7 @@ theorem per ISA. That complete argument is still in progress; the
 
 The library proves actual C helper/handler executions, typed memory effects,
 allocation/freeing, caller frames and native register/scalar/cache views.
-[Public type and axiom queries](results/m5-x86-producer-push-boundary-root/README.md)
+[Public type and axiom queries](results/m5-x86-producer-header-sub-root/README.md)
 expose every theorem's precise premises and retain prior interfaces.
 
 The complete NOP handler and its actual generic dispatcher case refine the
@@ -50,6 +50,13 @@ Input native memory remains arbitrary. Native ELF/code-storage binding,
 general source/guest trace simulation, platform/input-oracle correspondence,
 remaining operand/fault domains and all149 universal handler/dispatcher-step
 goals remain unfinished.
+
+For the next original SUB RSP,32, source execution reaches its genuine
+ALU_IMM call through the wrapper, width helper and dispatcher. All 24
+initialized header pointers survive PUSH; the real RSP reader returns the
+same kind-1 native base minus eight. Separate native-model proofs characterize
+canonical qword SUB flags/state and concrete 48 83 ec 20 decoding. Source SUB
+handler arithmetic and writeback remain unfinished.
 
 ## What is trusted
 
