@@ -585,6 +585,10 @@ std::vector<uint32_t> collect_relocated_map_ids(
 
 const char *helper_symbol_for_id(int helper_id);
 
+// Kernel data that P reads by its kernel name (vendor/bpf/native-helpers.h; kprog/helper_abi.py
+// KERNEL_DATA_SYMBOLS). B declares each as an untyped ksym and takes its kallsyms address.
+constexpr const char *kKernelDataSymbols[] = {"jiffies_64"};
+
 const std::unordered_map<std::string, uint64_t> &kallsyms_table()
 {
     static std::unordered_map<std::string, uint64_t> table;
@@ -610,6 +614,9 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.insert(kHtabLruPercpuMapLookupElemSymbol);
     wanted.insert("trie_lookup_elem");
     wanted.insert("bpf_verifier_ops");
+    for (const char *symbol : kKernelDataSymbols) {
+        wanted.insert(symbol);
+    }
 #if defined(__x86_64__)
     for (const char *symbol : native_lto::kernel_symbols) {
         wanted.insert(symbol);
@@ -2796,6 +2803,19 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
                         symbol, relocation.r_addend, proof[offset / sizeof(bpf_insn)],
                         proof[offset / sizeof(bpf_insn) + 1]);
                     continue;
+                }
+                // An untyped ksym (`extern const void name __ksym`, a VAR of type void) takes its
+                // kallsyms address as the immediate, as libbpf binds such an extern.
+                const int variable_id = btf__find_by_name_kind(declaration_btf.get(), name, BTF_KIND_VAR);
+                if (variable_id > 0 && btf__type_by_id(declaration_btf.get(), variable_id)->type == 0) {
+                    if (const uint64_t address = kallsyms_lookup(name)) {
+                        bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
+                        const uint64_t value = address + static_cast<uint64_t>(relocation.r_addend) +
+                            (static_cast<uint32_t>(low.imm) | (static_cast<uint64_t>(static_cast<uint32_t>(high.imm)) << 32));
+                        low.imm = static_cast<int32_t>(static_cast<uint32_t>(value));
+                        high.imm = static_cast<int32_t>(static_cast<uint32_t>(value >> 32));
+                        continue;
+                    }
                 }
             }
             if (!name || GELF_ST_BIND(symbol.st_info) != STB_GLOBAL)

@@ -29,3 +29,17 @@ Operator 2026-11-25T05:51Z "别的包括之前的修了吗?", 09:48Z "也可以�
 Offline full generation of Cilium request 12 (tail_handle_snat_fwd_ipv4), which failed with the undeclared
 identifier: GENERATION OK (/workspaces/kprog-raw/coordinator/jiffies-20261125/out-cil-12). The stock verifier's
 verdicts come from the Cilium, Tetragon and Tracee checked-corpus runs that follow; their counts go here.
+
+## Cilium after the change (checked-corpus-20261125-kdata2, 11:29Z–11:39Z)
+
+Cilium 64 requests: **19** installed checked-sim-c (recheck 16), 9 fell back at verification, 5 failed in
+context-lower (OMP's 5a7fc6c8d, context-lower rebuilt 12:04Z after this run), and 31 fell back at
+verification-preparation: the trusted loader refused B with "unbound trusted proof extern: jiffies_64". B now
+declares jiffies_64 as an untyped ksym, and the loader bound only readonly data, trusted maps and kfuncs.
+kprog/libnativeloader/src/native_loader_trusted.cpp now binds a BTF VAR of type void (an untyped ksym) to its
+kallsyms address, as libbpf does, and asks kallsyms for the names in kKernelDataSymbols (jiffies_64). The
+verifier statistics of the 19 accepted B: verification time median 969 us, max 3184 us; processed instructions
+median 312, max 1355.
+
+chain2.sh in this directory rebuilds kprog-ck/verified-loader once the kdata2 run (Tetragon, Tracee) has finished,
+then reruns Cilium (checked-corpus-20261125-kdata3).
