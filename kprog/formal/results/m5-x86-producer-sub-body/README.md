@@ -1,0 +1,3 @@
+Actual ALU_IMM global binding/call/function entry allocates all original locals and binds eight real parameters on the same original producer world. Every old byte and Cur/Max permission is framed, actual frontier growth and all declared local bindings/range rights follow the real allocator. SUB body execution/arithmetic/writeback remain separate; no post-allocation memory premise or copied handler is used.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
