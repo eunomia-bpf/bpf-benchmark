@@ -1,0 +1,3 @@
+SAME original kind6/kind1 initializer, complete first PUSH, actual SUB wrapper/dispatch/ALU_IMM allocation/width/AUX decode/read-site/complete materialized RSP reader/return and lhs assignment compose. Real saved lhs is SAME kind1base-minus8, with exact original heap/temporaries/continuations/trace and derived header packet. No source run/lhs equality/post-store load is assumed; RHS helper/arithmetic/flags/RSP-special writeback/release/free/return and universal native refinement remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
