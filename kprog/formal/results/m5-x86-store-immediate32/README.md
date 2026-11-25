@@ -1,0 +1,3 @@
+Original x86_store_imm_value on actual imm32/width8 executes all10 real transitions, including actual sign-bit and low32 paths, returning32 on every arbitrary heap/continuation/global environment. No result/source-run premise, replacement arithmetic model, external call or memory change. First tactic free-variable failure retained; direct path construction corrects it at original caps.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86StoreImmediate32
+#check KProgFormal.ClightRefinement.X86StoreImmediate32.internal
+#print axioms KProgFormal.ClightRefinement.X86StoreImmediate32.internal

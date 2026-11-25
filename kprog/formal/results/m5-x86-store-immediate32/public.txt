@@ -1,0 +1,10 @@
+KProgFormal.ClightRefinement.X86StoreImmediate32.internal (ge : CC.CGenv) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 10
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_store_imm_value)
+      [CC.Val.Vlong 32#64, CC.Val.Vint 8#32] k memory)
+    (CC.State.Returnstate (CC.Val.Vlong 32#64) (CC.callCont k) memory)
+'KProgFormal.ClightRefinement.X86StoreImmediate32.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
