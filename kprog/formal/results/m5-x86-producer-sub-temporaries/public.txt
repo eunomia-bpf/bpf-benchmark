@@ -1,0 +1,20 @@
+KProgFormal.ClightRefinement.X86ProducerSubTemporaries.undefined_exact :
+  KProgFormal.ClightRefinement.X86ProducerSubTemporaries.undefined =
+    CC.createUndefTemps KProgFormal.ClightRefinement.X86ProducerSubBody.handler.fn_temps
+'KProgFormal.ClightRefinement.X86ProducerSubTemporaries.undefined_exact' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubTemporaries.cached_binds (binding : CC.Block) :
+  CC.bindParameterTemps KProgFormal.ClightRefinement.X86ProducerSubBody.handler.fn_params
+      (KProgFormal.ClightRefinement.X86ProducerSubDispatch.values binding)
+      KProgFormal.ClightRefinement.X86ProducerSubTemporaries.undefined =
+    some (KProgFormal.ClightRefinement.X86ProducerSubTemporaries.cached binding)
+'KProgFormal.ClightRefinement.X86ProducerSubTemporaries.cached_binds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubTemporaries.exact_initial (binding : CC.Block) :
+  KProgFormal.ClightRefinement.X86ProducerSubTemporaries.cached binding =
+    KProgFormal.ClightRefinement.X86ProducerSubBody.initialTemps binding
+'KProgFormal.ClightRefinement.X86ProducerSubTemporaries.exact_initial' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
