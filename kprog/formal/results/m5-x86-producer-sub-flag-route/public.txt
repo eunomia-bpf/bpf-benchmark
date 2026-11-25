@@ -1,0 +1,37 @@
+KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.source_call :
+  KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.widthCall =
+    CC.Stmt.Scall (some KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.resultName)
+      KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.expression
+      KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.certificate binding k memory lhs cfBlock word).count
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.start binding k memory lhs cfBlock word)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.widthCall
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.certificate binding k memory lhs cfBlock word).continuation
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.certificate binding k memory lhs cfBlock word).output
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.arguments (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.certificate binding k memory lhs cfBlock word).output
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd
+      KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.argumentExpressions [CC.tuchar] =
+    some [CC.Val.Vint 8#32]
+'KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.arguments' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

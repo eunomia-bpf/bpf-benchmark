@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubFlagRoute
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.source_call
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagRoute.arguments

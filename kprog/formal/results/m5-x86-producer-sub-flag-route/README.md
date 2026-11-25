@@ -1,0 +1,3 @@
+Every reached original flag-arm guard/switch/selected SUB loop executes from actual oldCF-save state to genuine effective-width call with exact actual width8 expressions. Existing Clight doStep locates source syntax; generic InternalPrefixBuilder certificate is kernel-checked on original memory/temporaries/continuations. No source condition, oldCF read or imported semantics replaced, no selector execution premise.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
