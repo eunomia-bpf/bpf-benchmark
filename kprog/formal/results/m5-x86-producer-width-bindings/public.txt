@@ -1,0 +1,18 @@
+KProgFormal.ClightRefinement.X86ProducerWidthBindings.mask_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_mask =
+      some KProgFormal.ClightRefinement.X86ProducerWidthBindings.maskBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerWidthBindings.maskBlock =
+      some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_mask)
+'KProgFormal.ClightRefinement.X86ProducerWidthBindings.mask_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerWidthBindings.sign_binding :
+  KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findSymbol X86_program_profile_bpf._x86_width_sign_mask =
+      some KProgFormal.ClightRefinement.X86ProducerWidthBindings.signBlock ∧
+    KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_genv.findFunctPtr
+        KProgFormal.ClightRefinement.X86ProducerWidthBindings.signBlock =
+      some (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_sign_mask)
+'KProgFormal.ClightRefinement.X86ProducerWidthBindings.sign_binding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

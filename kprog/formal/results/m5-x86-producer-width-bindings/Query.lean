@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerWidthBindings
+#check KProgFormal.ClightRefinement.X86ProducerWidthBindings.mask_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerWidthBindings.mask_binding
+#check KProgFormal.ClightRefinement.X86ProducerWidthBindings.sign_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerWidthBindings.sign_binding
