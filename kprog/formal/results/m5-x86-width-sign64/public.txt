@@ -1,0 +1,9 @@
+KProgFormal.ClightRefinement.X86WidthSign64.internal (ge : CC.CGenv) (k : CC.Cont) (memory : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 14
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_sign_mask) [CC.Val.Vint 8#32] k memory)
+    (CC.State.Returnstate (CC.Val.Vlong 9223372036854775808#64) (CC.callCont k) memory)
+'KProgFormal.ClightRefinement.X86WidthSign64.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
