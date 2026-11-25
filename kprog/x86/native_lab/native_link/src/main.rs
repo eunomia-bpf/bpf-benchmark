@@ -2289,6 +2289,14 @@ fn rewrite_arm64_pass(
                                 continue;
                             }
                         }
+                        // The arm64 JIT's bpf_get_current_task(_btf): current is sp_el0
+                        // (arch/arm64/net/bpf_jit_comp.c, bpf_jit_inlines_helper_call).
+                        if reloc.target_name == "bpf_get_current_task"
+                            || reloc.target_name == "bpf_get_current_task_btf"
+                        {
+                            append_u32(&mut blob, a64_mrs_sp_el0(0)?);
+                            continue;
+                        }
                         let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
                         let mut helper_addr_from_site = false;
                         let mut lookup_postprocess = None;

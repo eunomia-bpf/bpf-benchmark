@@ -34,3 +34,11 @@ clobbers. The 11-20 gs-load version lived in P's header code and was reverted af
 Build: native-link release and loader build pass; 9 native-link tests pass. Guest: `make -C kprog/perf/one-image
 check` (default, six apps, 1 x 10 s each) on the image rebuilt from this commit, then the Cilium, Tetragon and
 Tracee checked corpus (chain.sh).
+
+## arm64 bpf_get_current_task(_btf)
+
+The arm64 JIT inlines bpf_get_current_task and bpf_get_current_task_btf as `mrs x0, sp_el0`
+(vendor/linux-framework arch/arm64/net/bpf_jit_comp.c:1608 and bpf_jit_inlines_helper_call). native-link's
+arm64 path now emits the same instruction for both calls (main.rs, next to the arm64 get_smp_processor_id inline).
+Build and the 9 native-link tests pass. chain-arm64.sh rebuilds the arm64 image and runs the arm64 functional check
+(qemu, `make -C kprog/perf/one-image-arm64 check`) after the queued OTel profile.
