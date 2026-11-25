@@ -1,0 +1,3 @@
+Every actual post-result sequence/flag loop reaches the original oldCF header-pointer load, with true temporary/expression/continuation/current allocated heap retained. Source syntax is extracted from the original next compound and checked against the real path; no flag read is erased or supplied as an execution premise. First Block-numeral extraction mismatch fixed with original Positive.xH at fresh phase/original caps.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

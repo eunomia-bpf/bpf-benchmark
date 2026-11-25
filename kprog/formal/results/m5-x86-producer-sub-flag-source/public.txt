@@ -1,0 +1,33 @@
+KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointer_source :
+  KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerLoad =
+    CC.Stmt.Sset KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerTemp
+      KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerExpr
+'KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointer_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagSource.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate binding k memory lhs).count
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.start binding k memory lhs)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerLoad
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate binding k memory lhs).continuation
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate binding k memory lhs).output
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerSubFlagSource.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagSource.binding (block : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate block k memory lhs).output =
+    some (CC.Val.Vptr block 0)
+'KProgFormal.ClightRefinement.X86ProducerSubFlagSource.binding' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

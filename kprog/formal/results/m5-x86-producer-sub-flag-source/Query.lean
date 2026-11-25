@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubFlagSource
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointer_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointer_source
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagSource.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagSource.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagSource.binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagSource.binding
