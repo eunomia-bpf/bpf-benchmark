@@ -54,3 +54,13 @@ as libbpf decides an untyped ksym (libbpf's btf__resolve_type returns -EINVAL at
 Checked on this request's B: VAR jiffies_64 -> type 24, kind CONST -> type 0. Verifier statistics of the 24 accepted
 B: time median 1759 us, max 3211 us; processed instructions median 619, max 1355. chain4.sh rebuilds the verified
 loader after kdata3 (Tetragon, Tracee) and reruns Cilium (checked-corpus-20261125-kdata4).
+
+## Cilium kdata4 (15:20Z–15:31Z, verified loader with 2d308a86f)
+
+Cilium 64 requests: **33** installed checked-sim-c (kdata3 24, kdata2 19, recheck 16). The "unbound trusted proof
+extern: jiffies_64" refusals are gone: 9 jiffies_64 programs now install checked-sim-c, 17 reach the verifier and
+5 (tail_handle_snat_fwd_ipv4 x3, tail_ipv4_policy x2) pass the verifier and fail in context-lower. The 26 verifier
+rejections, by the line before "processed" in verify.stderr: 22 "R8 offset is outside of the packet" (a packet store
+whose bounds check B does not carry to the verifier, e.g. `*(u8 *)(r8 +0) = r4` at off=22, r=0), 2 "only read is
+supported", 2 "invalid mem access 'scalar'". Verifier statistics of the 33 accepted B: time median 2055 us, max
+42660 us; processed instructions median 929, max 14369.
