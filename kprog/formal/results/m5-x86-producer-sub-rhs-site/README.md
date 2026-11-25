@@ -1,0 +1,3 @@
+Every actual post-lhs sequence reaches genuine x86_store_imm_value call. Original expression/casts derive imm32/width8; helper symbol/function derive SAME complete producer world. Actual call and all10 real helper transitions return32 on the identical allocated heap, preserving materialized lhs and original continuations. No rhs result, callee binding or execution premise is added.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
