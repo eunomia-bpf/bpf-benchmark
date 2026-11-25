@@ -2620,9 +2620,11 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
         const size_t index = elf_ndxscn(section);
         if (!(table.sh_flags & SHF_EXECINSTR) || index == static_cast<size_t>(selected->st_shndx) ||
             !table.sh_size) continue;
-        if (table.sh_size % sizeof(bpf_insn) ||
-            proof.size() + table.sh_size / sizeof(bpf_insn) > (1u << 20))
+        if (table.sh_size % sizeof(bpf_insn))
             fail("source proof subprogram section is not whole instructions");
+        if (proof.size() + table.sh_size / sizeof(bpf_insn) > (1u << 20))
+            fail("source proof exceeds the BPF instruction limit: " +
+                 std::to_string(proof.size() + table.sh_size / sizeof(bpf_insn)) + " instructions");
         const ProofFunction *function = nullptr;
         for (const auto &candidate : functions) {
             if (candidate.section != index) continue;
@@ -2960,8 +2962,16 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         opts.func_info = records.data(); opts.func_info_cnt = 1;
         opts.func_info_rec_size = sizeof(bpf_func_info);
     }
-    std::vector<char> log(16 * 1024 * 1024, '\0');
-    opts.log_buf = log.data(); opts.log_size = log.size(); opts.log_level = 1;
+    // The verify step also sets BPF_LOG_STATS (4), which adds the kernel's
+    // "verification time" and "stack depth" lines before "processed ...".
+    // The 4 KiB slack holds those lines, so every log that fit the 16 MiB
+    // buffer at level 1 still fits and the kernel's -ENOSPC on a full log
+    // keeps its old outcome.
+    constexpr size_t kVerifierLogBytes = 16 * 1024 * 1024;
+    constexpr size_t kVerifierStatsSlack = 4096;
+    std::vector<char> log(kVerifierLogBytes + (options.trusted_verify_only ? kVerifierStatsSlack : 0), '\0');
+    opts.log_buf = log.data(); opts.log_size = log.size();
+    opts.log_level = options.trusted_verify_only ? 1 | 4 /* BPF_LOG_LEVEL1 | BPF_LOG_STATS */ : 1;
     const auto name = prog_info_name_or_stub(info);
     if (options.trusted_verify_only) {
         ScopedFd verified(bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
@@ -2969,6 +2979,11 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         if (verified.get() < 0)
             throw native_loader::SimulatorVerificationError("service simulator verification failed before native compilation: " +
                 libbpf_error_string(verified.get()) + "\n" + std::string(log.data(), strnlen(log.data(), log.size())));
+        // Accepted B: copy the kernel's closing statistics lines to stderr,
+        // which the service saves as request/verify.stderr.
+        const std::string_view text(log.data(), strnlen(log.data(), log.size()));
+        if (const auto at = text.rfind("verification time "); at != std::string_view::npos)
+            std::fwrite(text.data() + at, 1, text.size() - at, stderr);
         native_loader::LoadedProgram out{};
         out.prog_fd = verified.fd; verified.fd = -1;
         out.bpf_bytecode_bytes = proof.size() * sizeof(bpf_insn);
