@@ -1,0 +1,3 @@
+SAME original provider/PUSH/SUB source run now includes actual immediate rhs32, ordinary SUB guards/full20-step ALU helper/real return/result assignment. Saved wrapping result derives actual physical lhs-minus32; actual lhs/rhs observations, complete heap/trace/caller/continuations/temporary maps and provider ABIs remain. No result equality or source execution premise is added. Source flag stores/RSP writeback/release/free/return remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
