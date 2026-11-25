@@ -485,3 +485,29 @@ Two corrections to the paragraph above: "all 13 recorded rows are status
 not checked-sim-c, so the boot verified 10 of 13 rather than 13; and the
 statement that request 14 "failed in generation in this boot" describes
 request 2's message shape, not request 14's (this session has 13 rows).
+
+## The "not whole instructions" refusals (Tracee 34, 36, 49, 101, 150), named 2026-11-25T02:35Z
+
+The loader message is shared by two conditions at
+kprog/libnativeloader/src/native_loader_trusted.cpp:2624-2626: a section
+whose length is not a multiple of sizeof(bpf_insn), and one that would
+push the accumulated proof past (1u << 20) instructions. On the archived
+request 34 (tracee, /workspaces/kprog-raw/omp/classfg-20261124T070800Z,
+extracted to /tmp/r34) it is the second one:
+
+  trusted_x86.bpf.o  .text            320 B        40 insns   mod8 0
+  trusted_x86.bpf.o  kprobe/trusted   11713856 B   1464232 insns mod8 0
+
+Every executable section is a whole number of instructions; the entry
+section alone is 1,464,232, which is 1.4x the 1,048,576 cap, so the
+proof cannot be handed to the verifier as one program at all. The cap is
+a loader resource bound on a single BPF_PROG_LOAD, not a correctness
+check: Tracee's B for this native object inlines the whole tracee
+dispatcher.
+
+Two consequences worth recording. (1) The message should name which
+condition fired, since "not whole instructions" is untrue for this
+object and cost a detour; that is a one-line loader change. (2) The real
+fix is B's size for large native objects -- Tracee's 5 largest produce
+>1M instructions after lowering -- which is the same inlining pressure as
+class F, so it belongs with that work rather than a separate one.
