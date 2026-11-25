@@ -32,7 +32,7 @@ theorem per ISA. That complete argument is still in progress; the
 
 The library proves actual C helper/handler executions, typed memory effects,
 allocation/freeing, caller frames and native register/scalar/cache views.
-[Public type and axiom queries](results/m5-x86-producer-sub-result-root/README.md)
+[Public type and axiom queries](results/m5-x86-producer-sub-flag-root/README.md)
 expose every theorem's precise premises and retain prior interfaces.
 
 The complete NOP handler and its actual generic dispatcher case refine the
@@ -51,15 +51,16 @@ general source/guest trace simulation, platform/input-oracle correspondence,
 remaining operand/fault domains and all149 universal handler/dispatcher-step
 goals remain unfinished.
 
-For the next original SUB RSP,32, the same source execution includes its
-actual call/allocation, width/AUX setup, complete materialized-RSP and
-immediate helpers, both operand saves, ordinary arithmetic helper and result
-save. The saved number equals RSP after canonical PUSH and SUB under the
-initial register relation and explicit native PUSH access domain. All 24
-headers and current cache/ghost/caller resources survive; normalized temporary
-maps equal the original declarations. Concrete 48 83 ec 20 decoding is proved
-separately. Source flag stores, RSP writeback, release/free/return and the
-complete SUB refinement remain unfinished.
+For the next original SUB RSP,32, the same source prefix includes actual
+allocation, both operand helpers/saves, arithmetic/result save, unconditional
+old-CF header/byte read, intermediate temporary, cast/save, real flag-arm
+selection and SUB width-helper return. The saved number equals canonical
+PUSH/SUB RSP under the initial register relation and native PUSH access domain.
+Current scalar/header observations and per-object permissions derive actual
+allocation/store/free frames; normalized temporary maps equal the original.
+Concrete 48 83 ec 20 decoding is separate. The width cast, remaining flag
+helpers/stores, RSP writeback/release/free/return and complete SUB refinement
+remain unfinished.
 
 ## What is trusted
 
