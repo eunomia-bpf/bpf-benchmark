@@ -455,3 +455,33 @@ verification-preparation, rc 1). The loader refuses the proof object
 before the verifier sees it, so B's proof section carries a byte count
 that is not a multiple of 8. That is the checked chain's own defect,
 on the x86 side, and it costs 5 Tracee programs independently of F/G.
+
+## Class E A/B, closed 2026-11-25T01:1xZ
+
+The same boot's request log answers the class, and the answer is not the
+loader retry. Reading all 13 rows of
+/workspaces/kprog-raw/omp/checked-otel-14e/state/session-pda3t2ch/requests/requests.jsonl:
+
+  requests 1, 3-11   checked-sim-c, status 0        (10)
+  requests 2, 12, 13  direct-native, status 0, stage generation (3)
+
+Each of the three fell back in B's generation with one message:
+"unsupported unresolved call target in call ... <perf_unwind_stop+0x1f0>",
+"<tracepoint__sched_process_free+0x87>", "<native_tracer_entry+0x25>".
+No loader call failed anywhere in the boot; the wrapper's load-direct
+path for requests 2-13 ran the fixed loader with status 0 each time.
+
+So class E as recorded ("the load-direct that follows the retry") is not
+what these requests show: three OTel programs cannot be generated at all
+because a native call's target is unresolved, and the direct-native fall
+is the same fallback every other generation failure takes. Class E is
+therefore a B-generation class like the others, not a loader-retry class,
+and no same-boot A/B of the two loaders can settle it -- the earlier
+record already said the A/B never fired; this says why, and that it
+cannot fire for these three programs.
+
+Two corrections to the paragraph above: "all 13 recorded rows are status
+0 ... so the boot-to-boot shift" holds for status, but 3 of the 13 are
+not checked-sim-c, so the boot verified 10 of 13 rather than 13; and the
+statement that request 14 "failed in generation in this boot" describes
+request 2's message shape, not request 14's (this session has 13 rows).
