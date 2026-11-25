@@ -1,0 +1,121 @@
+KProgFormal.ClightRefinement.X86ProducerSubResources.frontier {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) :
+  CC.Positive.toNat ready.after.nextblock ≤ CC.Positive.toNat complete.after.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubResources.frontier' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.old_local {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) {name : CC.Ident} {ty : CC.Ty}
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name ty) :
+  CC.Positive.toNat object.block < CC.Positive.toNat complete.after.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubResources.old_local' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.old_access (memory : CC.Mem) (block : CC.Block)
+  (old : CC.Positive.toNat block < CC.Positive.toNat memory.nextblock) (chunk : CC.Chunk) (offset : Int)
+  (permission : CC.Permission) :
+  (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd.validAccess chunk block offset permission =
+    memory.validAccess chunk block offset permission
+'KProgFormal.ClightRefinement.X86ProducerSubResources.old_access' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.headers {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) (i : Fin 24) :
+  CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ready.entry.block
+      (8 * ↑↑i) =
+    some (CC.Val.Vptr (ready.sources i).block 0)
+'KProgFormal.ClightRefinement.X86ProducerSubResources.headers' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.current {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) :
+  CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ready.entry.block
+        0 =
+      some (CC.Val.Vptr ready.gprs.block 0) ∧
+    CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+          ready.entry.block 112 =
+        some (CC.Val.Vptr ready.base.block 0) ∧
+      CC.Mem.load CC.Chunk.Mint64 (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+            ready.base.block 0 =
+          some (CC.Val.Vlong ready.stackOutcome.value) ∧
+        CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+            ready.gprs.block 64 =
+          some (CC.Val.Vlong KProgFormal.ClightRefinement.X86ProducerPushRspStore.nextRsp)
+'KProgFormal.ClightRefinement.X86ProducerSubResources.current' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.views {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) :
+  KProgFormal.ClightRefinement.X86ReleaseProvider.View
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ready.entry.block
+      (ready.sources 1).block 0 ∧
+    KProgFormal.ClightRefinement.X86CallFrameComplete.View
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ready.entry.block
+      (KProgFormal.ClightRefinement.X86ProducerHeaderViews.ghosts ready.sources)
+'KProgFormal.ClightRefinement.X86ProducerSubResources.views' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubResources.observations {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) :
+  CC.Mem.load CC.Chunk.Mint64 (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+        (ready.sources 1).block 40 =
+      some (CC.Val.Vlong (ready.values 3)) ∧
+    CC.Mem.load CC.Chunk.Mint8unsigned (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+          ready.gprs.block 72 =
+        some (CC.Val.Vint 0) ∧
+      KProgFormal.ClightRefinement.FrameBelow before.nextblock ready.stackOutcome.supplied
+          (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ∧
+        ∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+          CC.Positive.toNat block < CC.Positive.toNat before.nextblock →
+            CC.Mem.load chunk (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd block
+                offset =
+              CC.Mem.load chunk before block offset
+'KProgFormal.ClightRefinement.X86ProducerSubResources.observations' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

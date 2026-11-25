@@ -1,0 +1,3 @@
+Actual PUSH frontier and original allocator bindings establish all old source objects remain live after real ALU_IMM local allocation. All24 initialized header pointers, actual kind1 native-base/current rawRSP inputs, savedRBX/cache/ghost rights, RSPtag0 and caller typed/raw frames derive the SAME source run. No post-allocation view/load/native-base premise is introduced; old APIs and provider ABIs remain intact.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

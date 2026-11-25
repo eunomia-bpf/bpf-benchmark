@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.X86ProducerSubResources
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.frontier
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.frontier
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.old_local
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.old_local
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.old_access
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.old_access
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.headers
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.headers
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.current
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.current
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.views
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.views
+#check KProgFormal.ClightRefinement.X86ProducerSubResources.observations
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResources.observations
