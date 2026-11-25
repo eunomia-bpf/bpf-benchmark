@@ -430,3 +430,28 @@ problem: the verify call at native_loader_trusted.cpp:2964 refuses
 before native compilation, exactly as recorded. The verify-side lever
 is B's own size (the same frame/spill work as class F), and the
 correct label for the failure is the insn-count limit.
+
+Class F/G current counts, measured 2026-11-25T01:0xZ from the completed
+checked run at /workspaces/kprog-raw/omp/classfg-20261124T070800Z (both
+apps ended rc=0; request-level reads are the archives'
+service/requests/requests.jsonl). The earlier 95/35 "all installed"
+reading is superseded, as the coverage README already notes:
+
+  tetragon/observer  85 requests: 13 checked-sim-c, 68 direct-native, 4 no
+                     outcome.  Failures by class: F 34, G 20, E2BIG 12,
+                     complexity 1, llc 1.
+  tracee/monitor    169 requests: 49 checked-sim-c, 120 direct-native.
+                     Failures by class: F 97, G 9, E2BIG 2, complexity 3,
+                     unknown-arg-type 2, whole-instruction 5, over-1M 1.
+
+Class F and class G therefore still dominate both apps and no class is
+closed by this run. Tetragon's 4 no-outcome requests are the ones whose
+service record carries neither an execution path nor a failure: the
+request reached the endpoint and the record ended before load.
+
+One class is new here and is not a verifier shape: "source proof
+subprogram section is not whole instructions" (tracee, 5 requests,
+verification-preparation, rc 1). The loader refuses the proof object
+before the verifier sees it, so B's proof section carries a byte count
+that is not a multiple of 8. That is the checked chain's own defect,
+on the x86 side, and it costs 5 Tracee programs independently of F/G.
