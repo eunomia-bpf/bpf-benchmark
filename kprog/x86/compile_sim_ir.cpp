@@ -24,6 +24,14 @@ static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
 static cl::list<std::string> ArrayMaps("array-map");
 static cl::opt<std::string> HelperList("helper-list");
+// The simulator arena's IR type differs per ISA: x86 names a union, and the
+// arm64 body's volatile arena is anonymous (%union.anon). Every name given
+// here is treated as the private arena; the default is the x86 spelling, so
+// existing invocations keep their behaviour.
+static cl::list<std::string> StackArena("stack-arena",cl::CommaSeparated);
+static cl::opt<std::string> TargetTriple("arch",cl::init("x86_64-unknown-linux-gnu"));
+static cl::opt<std::string> TargetLayout("data-layout",
+    cl::init("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"));
 #define HELPER_NAME(name) "bpf_" #name
 static const char *HelperNames[] = {__BPF_FUNC_MAPPER(HELPER_NAME)};
 #undef HELPER_NAME
@@ -98,6 +106,18 @@ static Value *memoryAsm(CallInst *call, StringRef text, IRBuilder<> &b) {
 
 // The same private arena has ordinary Mem semantics in the checked B pass
 // (packet_bounds_ir.cpp). Context/global/atomic accesses retain volatility.
+// The arena's IR type name is ISA-specific, so the accepted names come from
+// -stack-arena and default to the x86 spelling.
+static const std::set<std::string> &arenaNames() {
+  static const std::set<std::string> names=[] {
+    std::set<std::string> result;
+    for (const auto &name:StackArena) result.insert(name);
+    if (result.empty()) result.insert("union.x86_sim_stack_mem");
+    return result;
+  }();
+  return names;
+}
+
 static unsigned normalizePrivateStack(Module &module) {
   unsigned count=0;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
@@ -114,7 +134,7 @@ static unsigned normalizePrivateStack(Module &module) {
     for (auto *object:objects) {
       auto *local=dyn_cast<AllocaInst>(object);
       auto *type=local?dyn_cast<StructType>(local->getAllocatedType()):nullptr;
-      if (!type || type->getName()!="union.x86_sim_stack_mem") {
+      if (!type || !arenaNames().count(type->getName().str())) {
         privateStack=false;break;
       }
     }
@@ -225,8 +245,8 @@ int main(int argc,char **argv) {
     if (result) call->replaceAllUsesWith(result);
     call->eraseFromParent(); ++lowered;
   }
-  m->setTargetTriple("x86_64-unknown-linux-gnu");
-  m->setDataLayout("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
+  m->setTargetTriple(TargetTriple);
+  m->setDataLayout(TargetLayout);
   errs()<<"native private stack accesses normalized="<<normalizePrivateStack(*m)<<'\n';
   errs()<<"native unspecified inputs frozen="<<freezeUnspecifiedInputs(*m)<<'\n';
   if (verifyModule(*m,&errs())) return 1;

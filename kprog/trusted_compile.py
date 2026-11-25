@@ -70,7 +70,34 @@ def execute(job: dict, scope: Path, clang: str, arm64_sysroot: Path | None = Non
     return result
 
 
-def serve(scope: Path, state: Path, clang: str, arm64_sysroot: Path | None = None) -> None:
+def execute_command(job: dict, scope: Path, tool_roots: tuple[Path, ...] = ()) -> dict:
+    """Run a tool already built for the host, from the run scope or a tool root."""
+    command = [str(x) for x in job['command']]
+    if not command:
+        raise ValueError('empty command job')
+    resolved = Path(command[0]).resolve(strict=True)
+    allowed = (scope,) + tool_roots
+    if not any(root == resolved.parent or root in resolved.parents for root in allowed):
+        raise ValueError('command outside the compiler scope: ' + str(resolved))
+    start = time.monotonic()
+    with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+        child = subprocess.Popen([str(resolved), *command[1:]], stdout=stdout, stderr=stderr)
+        _, status, usage = os.wait4(child.pid, 0)
+        child.returncode = os.waitstatus_to_exitcode(status)
+        stdout.seek(0)
+        stderr.seek(0)
+        return dict(returncode=child.returncode,
+                    stdout=stdout.read().decode(errors='replace'),
+                    stderr=stderr.read().decode(errors='replace'),
+                    command=[str(resolved), *command[1:]],
+                    executable_sha256=digest(resolved),
+                    wall_seconds=time.monotonic() - start,
+                    max_rss_kib=usage.ru_maxrss,
+                    user_seconds=usage.ru_utime, system_seconds=usage.ru_stime)
+
+
+def serve(scope: Path, state: Path, clang: str, arm64_sysroot: Path | None = None,
+          tool_roots: tuple[Path, ...] = ()) -> None:
     scope = scope.resolve(strict=True)
     state = state.resolve()
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -91,7 +118,7 @@ def serve(scope: Path, state: Path, clang: str, arm64_sysroot: Path | None = Non
                 continue
             try:
                 job = json.loads(request.read_text())
-                result = execute(job, scope, compiler, arm64_sysroot)
+                result = execute_command(job, scope, tool_roots) if job.get('command') else execute(job, scope, compiler, arm64_sysroot)
             except Exception as error:
                 result = dict(returncode=1, stdout='', stderr=str(error) + '\n')
             atomic_json(state / (identity + '.result.json'), result)
@@ -126,6 +153,29 @@ def submit(state: Path, source: Path, output: Path, arch: str) -> int:
     return result['returncode'] if result['returncode'] >= 0 else 128 - result['returncode']
 
 
+def run_command(state: Path, command: list[str], output: Path) -> int:
+    """Ask the host broker to run a built tool; the guest keeps only paths."""
+    state = state.resolve(strict=True)
+    output = output.resolve()
+    command = command[1:] if command[:1] == ['--'] else command
+    if not command:
+        raise ValueError('exec job needs a command')
+    identity = uuid.uuid4().hex
+    atomic_json(state / (identity + '.request.json'), dict(command=command))
+    response = state / (identity + '.result.json')
+    while not response.exists():
+        if (state / 'failed.json').exists():
+            raise RuntimeError((state / 'failed.json').read_text())
+        time.sleep(0.1)
+    result = json.loads(response.read_text())
+    atomic_json(output.with_suffix(output.suffix + '.broker.json'),
+                {key: value for key, value in result.items() if key not in {'stdout', 'stderr'}})
+    print(result['stdout'], end='')
+    import sys
+    print(result['stderr'], end='', file=sys.stderr)
+    return result['returncode'] if result['returncode'] >= 0 else 128 - result['returncode']
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='mode', required=True)
@@ -134,15 +184,23 @@ def main() -> int:
     server.add_argument('--state', type=Path, required=True)
     server.add_argument('--clang', default='clang-18')
     server.add_argument('--arm64-sysroot', type=Path)
+    server.add_argument('--tool-root', type=Path, action='append', default=[])
     client = commands.add_parser('submit')
     client.add_argument('--state', type=Path, required=True)
     client.add_argument('--source', type=Path, required=True)
     client.add_argument('--output', type=Path, required=True)
     client.add_argument('--arch', choices=['x86', 'arm64'], required=True)
+    execute_parser = commands.add_parser('exec')
+    execute_parser.add_argument('--state', type=Path, required=True)
+    execute_parser.add_argument('--output', type=Path, required=True)
+    execute_parser.add_argument('command', nargs=argparse.REMAINDER)
     arguments = parser.parse_args()
     if arguments.mode == 'serve':
-        serve(arguments.scope, arguments.state, arguments.clang, arguments.arm64_sysroot)
+        serve(arguments.scope, arguments.state, arguments.clang, arguments.arm64_sysroot,
+              tuple(root.resolve() for root in arguments.tool_root))
         return 0
+    if arguments.mode == 'exec':
+        return run_command(arguments.state, arguments.command, arguments.output)
     return submit(arguments.state, arguments.source, arguments.output, arguments.arch)
 
 

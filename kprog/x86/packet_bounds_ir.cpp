@@ -28,6 +28,19 @@
 using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
+// The private arena's IR type name is ISA-specific: x86's body names a
+// union, arm64's volatile arena is anonymous (%union.anon). Accepted names
+// come from -stack-arena and default to the x86 spelling.
+static cl::list<std::string> StackArena("stack-arena",cl::CommaSeparated);
+static const std::set<std::string> &arenaNames() {
+  static const std::set<std::string> names=[] {
+    std::set<std::string> result;
+    for (const auto &name:StackArena) result.insert(name);
+    if (result.empty()) result.insert("union.x86_sim_stack_mem");
+    return result;
+  }();
+  return names;
+}
 // Clang can leave an asm-named extern's debug declaration detached from its
 // actual LLVM global. BTF then omits the VAR and libbpf cannot open B. Rendered
 // map bindings are zero-length byte arrays; describe that exact IR declaration
@@ -127,7 +140,7 @@ static unsigned normalize_private_stack_accesses(Module &module) {
     for (auto *object:objects) {
       auto *local=dyn_cast<AllocaInst>(object);
       auto *type=local?dyn_cast<StructType>(local->getAllocatedType()):nullptr;
-      if (!type || type->getName()!="union.x86_sim_stack_mem") {
+      if (!type || !arenaNames().count(type->getName().str())) {
         private_stack=false;break;
       }
     }

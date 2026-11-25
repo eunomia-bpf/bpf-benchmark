@@ -26,6 +26,9 @@ static cl::opt<std::string> Physical("physical-layout",cl::Required);
 static cl::opt<bool> Native("native-codegen",cl::init(false));
 static cl::opt<std::string> HelperNames("helper-names");
 static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
+static cl::opt<std::string> TargetTriple("arch",cl::init("x86_64-unknown-linux-gnu"));
+static cl::opt<std::string> TargetLayout("data-layout",
+    cl::init("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"));
 struct Rule { std::string Kind, Child; int64_t PublicOffset, PublicWidth, Offset, Width; SmallVector<int64_t,2> Pointers; bool PointerValue, Boolean; int64_t Mask, StoreMax; };
 static json::Value readJSON(StringRef Path) {
   auto File=MemoryBuffer::getFile(Path);
@@ -278,8 +281,8 @@ int main(int argc,char **argv) {
         }
       }
     }
-    M->setTargetTriple("x86_64-unknown-linux-gnu");
-    M->setDataLayout("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
+    M->setTargetTriple(TargetTriple);
+    M->setDataLayout(TargetLayout);
   }
   if (verifyModule(*M,&errs())) return 1;
   std::error_code EC; ToolOutputFile Out(Output,EC,sys::fs::OF_None);
