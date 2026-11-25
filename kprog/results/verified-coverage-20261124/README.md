@@ -20,7 +20,8 @@ Script: count.py in this directory (one pass over the outer archive, each reques
 ## Recheck on the current tree (2026-11-25T01:3xZ, coordinator)
 
 Capture: /workspaces/kprog-raw/verified/checked-corpus-20261125-recheck (`make -C kprog/libnativeloader
-checked-corpus-all` at 00:1xZ on 18c1fd4e1's parent tree; make exit 1). Counted the same way, per request:
+checked-corpus-all`, started 00:16Z with HEAD 77644d009 plus the shared tree's uncommitted changes, before
+c39250e88 landed at 01:01Z; make exit 1). Counted the same way, per request:
 checked-sim-c when the archive has no simulator-failure.json and is a success archive.
 
 | App | Requests | Verified path (checked-sim-c) | Fallback to direct-native | Failed outright |
