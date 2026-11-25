@@ -1,0 +1,3 @@
+Original SUB dispatch traverses all reached real guards and temporary updates to the actual ALU_IMM call, retaining the original wrapper loop continuation, same heap and exact ten/dst4/src255/width8/aux1/imm32 argument values. Existing InternalPrefixBuilder constructs ordinary kernel-checked Step2 terms; no dispatcher branch or imported semantics is erased. Arithmetic/writeback remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

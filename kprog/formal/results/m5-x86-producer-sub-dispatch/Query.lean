@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerSubDispatch
+#check KProgFormal.ClightRefinement.X86ProducerSubDispatch.target_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubDispatch.target_source
+#check KProgFormal.ClightRefinement.X86ProducerSubDispatch.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubDispatch.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubDispatch.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubDispatch.arguments
+#check KProgFormal.ClightRefinement.X86ProducerSubDispatch.source_continuation
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubDispatch.source_continuation
