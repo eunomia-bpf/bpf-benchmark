@@ -1,0 +1,3 @@
+The SAME complete original first PUSH composes through real producer sequencing/label1/argument call, actual SUB wrapper entry, complete width helper and every reached original dispatch guard to the genuine ALU_IMM call statement. Exact source temporaries/current heap/caller and dispatch-loop continuations are retained. Actual ALU_IMM function entry, RSP read-site binding, arithmetic/writeback/free/return and native fetched-step refinement remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
