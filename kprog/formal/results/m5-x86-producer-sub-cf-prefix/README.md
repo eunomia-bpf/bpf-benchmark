@@ -1,0 +1,3 @@
+SAME original provider/PUSH/SUB traced execution includes actual oldCF header/byte reads, intermediate temporary, uchar cast/save before flag selection. Actual current oldCF derives original provider scalar; real lhs/rhs/result observations remain, with full allocated heap/source temporaries/continuations/trace and unchanged kind6/kind1 ABIs. No post-read/header/cast/source-run premise introduced; flag update/writeback remains open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

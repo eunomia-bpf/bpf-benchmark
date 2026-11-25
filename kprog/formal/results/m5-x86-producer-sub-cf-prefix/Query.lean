@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubCfPrefix
+#check KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.observations
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.observations
+#check KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubCfPrefix.from_call
