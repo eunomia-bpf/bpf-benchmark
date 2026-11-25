@@ -1,0 +1,3 @@
+SAME original producer/PUSH/SUB source execution now includes genuine immediate-helper return and actual rhs assignment. Saved physical lhs derives same kind1base-minus8 and saved rhs32 derives real helper, retaining exact heap/temporaries/continuations/trace and original provider ABIs. No operand equality/source-run/header premise added. Arithmetic/flags/RSP-specific writeback/release/free/return remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
