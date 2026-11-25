@@ -1,0 +1,3 @@
+After the actual body width helper return, every reached original sequence/cast/AUX1 decode/destination shift reaches the genuine RSP reader call. Exact original argument expressions and real global reader binding invoke the complete reader on SAME allocated heap; returned lhs is derived actual kind1base-minus8, not an assumed result or raw-offset arithmetic. Original memory/continuations/temporary environment are retained; arithmetic/writeback follow separately.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
