@@ -388,6 +388,7 @@ def main():
     parser.add_argument('--sim-physical-layout',type=Path)
     parser.add_argument('--sim-bounds-compiler',type=Path)
     parser.add_argument('--module',type=Path)
+    parser.add_argument('--results',type=Path)
     parser.add_argument('--run',nargs=argparse.REMAINDER)
     args=parser.parse_args()
     if args.execution_mode == 'checked-sim-c' and not args.sim_native_compiler:
