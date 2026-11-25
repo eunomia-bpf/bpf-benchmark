@@ -98,10 +98,14 @@ NativeLinkArgs build_native_link_args(
 #if defined(__x86_64__)
     {
         uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
+        uint64_t current_task_addr = kallsyms_lookup("current_task");
         this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
         if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
             add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
             add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
+        }
+        if (current_task_addr != 0 && this_cpu_off_addr != 0) {
+            add_name_addr(out.helpers, kX86CurrentTaskHelperKey, current_task_addr);
         }
         add_name_addr(out.helpers, kX86BpfMapMaxEntriesOffsetKey,
                       K_BPF_MAP_MAX_ENTRIES_OFFSET);

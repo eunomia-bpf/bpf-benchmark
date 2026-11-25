@@ -14,6 +14,7 @@ mod readonly_relocs;
 
 const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_THIS_CPU_OFF_HELPER_KEY: &str = "__native_x86_this_cpu_off";
+const X86_CURRENT_TASK_HELPER_KEY: &str = "__native_x86_current_task";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
 const X86_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_x86_bpf_array_ptrs_offset";
 const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_offset";
@@ -154,6 +155,25 @@ fn build_x86_get_smp_processor_id_inline(
     bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
     bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
     bytes.extend_from_slice(&[0x8B, 0x40, 0x00]); // mov eax, [rax]
+    Ok(Some(declared_byte_chunks(&bytes)?))
+}
+
+// The verifier's x86-64 form of bpf_get_current_task(_btf): the per-CPU current_task pointer.
+fn build_x86_get_current_task_inline(
+    helper_addrs: &HashMap<String, u64>,
+) -> Result<Option<Vec<Instruction>>> {
+    let (Some(&current_task), Some(&this_cpu_off)) = (
+        helper_addrs.get(X86_CURRENT_TASK_HELPER_KEY),
+        helper_addrs.get(X86_THIS_CPU_OFF_HELPER_KEY),
+    ) else {
+        return Ok(None);
+    };
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(&[0x48, 0xC7, 0xC0]); // mov rax, sign_extend32(&current_task)
+    bytes.extend_from_slice(&(current_task as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x65, 0x48, 0x03, 0x04, 0x25]); // add rax, gs:[this_cpu_off]
+    bytes.extend_from_slice(&(this_cpu_off as u32).to_le_bytes());
+    bytes.extend_from_slice(&[0x48, 0x8B, 0x00]); // mov rax, [rax]
     Ok(Some(declared_byte_chunks(&bytes)?))
 }
 
@@ -1325,6 +1345,22 @@ pub(super) fn rewrite_x86(
                         resolved_helper_call_sites.insert(site_key);
                         clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
+                    }
+                    if name == "bpf_get_current_task" || name == "bpf_get_current_task_btf" {
+                        if let Some(inline) = build_x86_get_current_task_inline(helper_addrs)? {
+                            for ib in inline {
+                                push_x86_synthetic(
+                                    &mut local,
+                                    &mut kinds,
+                                    &mut insn_local_ip,
+                                    &mut next_synthetic_ip,
+                                    ib,
+                                )?;
+                            }
+                            resolved_helper_call_sites.insert(site_key);
+                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
+                            continue;
+                        }
                     }
                     if name == "bpf_get_smp_processor_id" {
                         if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {

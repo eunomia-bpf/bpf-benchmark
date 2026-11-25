@@ -436,6 +436,7 @@ constexpr const char *kTypedHelperSymbols[] = {
 
 constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
 constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
+constexpr const char *kX86CurrentTaskHelperKey = "__native_x86_current_task";
 constexpr const char *kX86BpfMapMaxEntriesOffsetKey =
     "__native_x86_bpf_map_max_entries_offset";
 constexpr const char *kX86BpfArrayPtrsOffsetKey = "__native_x86_bpf_array_ptrs_offset";
@@ -445,7 +446,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v42";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -1218,6 +1219,7 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     std::vector<const char *> wanted;
 #if defined(__x86_64__)
     wanted.push_back("cpu_number");
+    wanted.push_back("current_task");
     wanted.push_back("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) {
