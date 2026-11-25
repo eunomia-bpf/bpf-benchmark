@@ -64,3 +64,12 @@ rejections, by the line before "processed" in verify.stderr: 22 "R8 offset is ou
 whose bounds check B does not carry to the verifier, e.g. `*(u8 *)(r8 +0) = r4` at off=22, r=0), 2 "only read is
 supported", 2 "invalid mem access 'scalar'". Verifier statistics of the 33 accepted B: time median 2055 us, max
 42660 us; processed instructions median 929, max 14369.
+
+## Tetragon kdata4 (15:31Z–18:57Z)
+
+Tetragon 83 requests: **33** installed checked-sim-c (classfg-20261124T070800Z: 13 of 85), 49 fell back at
+verification, 1 at generation, 1 failed. Verifier rejections by the line before "processed": 34 "invalid write to
+stack" (class F, B frame past 512 bytes), 12 "BPF program is too large" (over 1M processed instructions), 2
+"invalid mem access 'scalar'" (class G, 20 on 11-24), 1 "sequence of jumps is too complex". Class G fell from 20
+to 2 with the probe-read change. Verifier statistics of the 33 accepted B: time median 11086 us, max 19693 us;
+processed instructions median 3570, max 7055.
