@@ -1,0 +1,3 @@
+Real post-rhs SBB/ADC guards select the original ordinary x86_alu_result call. Exact original expressions derive materialized lhs/rhs32/op1/width8, actual helper symbol/function comes from SAME full producer world, and complete20-step original helper derives lhs-minus32 on identical heap. No selector/callee/result/run premise or source branch erased. An omitted dependent lhs argument in first draft is corrected at fresh phase; all failures retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

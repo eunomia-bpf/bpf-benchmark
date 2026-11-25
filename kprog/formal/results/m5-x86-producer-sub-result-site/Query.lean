@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.X86ProducerSubResultSite
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.source_call
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.arguments
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.lhs_kept
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.lhs_kept
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.helper_binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.helper_binding
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.call
+#check KProgFormal.ClightRefinement.X86ProducerSubResultSite.from_operands
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubResultSite.from_operands
