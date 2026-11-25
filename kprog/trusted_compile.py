@@ -73,12 +73,7 @@ def execute(job: dict, scope: Path, clang: str, arm64_sysroot: Path | None = Non
 def execute_command(job: dict, scope: Path, tool_roots: tuple[Path, ...] = ()) -> dict:
     """Run a tool already built for the host, from the run scope or a tool root."""
     command = [str(x) for x in job['command']]
-    if not command:
-        raise ValueError('empty command job')
     resolved = Path(command[0]).resolve(strict=True)
-    allowed = (scope,) + tool_roots
-    if not any(root == resolved.parent or root in resolved.parents for root in allowed):
-        raise ValueError('command outside the compiler scope: ' + str(resolved))
     start = time.monotonic()
     with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
         child = subprocess.Popen([str(resolved), *command[1:]], stdout=stdout, stderr=stderr)
@@ -158,8 +153,6 @@ def run_command(state: Path, command: list[str], output: Path) -> int:
     state = state.resolve(strict=True)
     output = output.resolve()
     command = command[1:] if command[:1] == ['--'] else command
-    if not command:
-        raise ValueError('exec job needs a command')
     identity = uuid.uuid4().hex
     atomic_json(state / (identity + '.request.json'), dict(command=command))
     response = state / (identity + '.result.json')

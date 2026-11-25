@@ -160,8 +160,6 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         run(["llvm-link-18", lowered, *helper_irs, "-o", linked])
         lowered = linked
     if artifacts.get("context_kind", "raw") != "raw":
-        if not context_compiler or not public_layout or not physical_layout:
-            raise ValueError("packet simulator native compilation requires target context compiler/layouts")
         context_ir = directory / "checked-simulator.context.bc"
         run([context_compiler, lowered, "--public-layout", public_layout,
              "--physical-layout", physical_layout, "-o", context_ir,
