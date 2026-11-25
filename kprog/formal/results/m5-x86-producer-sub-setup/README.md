@@ -1,0 +1,3 @@
+Original ALU_IMM loops/width setup reach the true width call. Actual target/argument evaluation, complete unchanged helper and real caller return retain the same allocated heap and exact original return temporary. The cached start is proved equal to the original temporary environment. Initial recursion512 failure is retained and corrected with original declaration-boundary normalization, not raised limits.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

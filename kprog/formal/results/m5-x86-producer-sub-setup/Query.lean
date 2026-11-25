@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.X86ProducerSubSetup
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.width_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.width_source
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.exact_start
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.exact_start
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.original_run
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.original_run
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.arguments
+#check KProgFormal.ClightRefinement.X86ProducerSubSetup.invoke
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSetup.invoke
