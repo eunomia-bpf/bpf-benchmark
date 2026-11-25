@@ -47,6 +47,8 @@
    - [x] 直接原生和 verifier 的内联一一对应（运营者 11-25：“我们之前说的一些不符合设计的都改掉了吗”）：ARRAY_OF_MAPS 查找（c0c202bff）、get_current_task(_btf)（b418fb960）；Cilium 三个对象恢复 agent 的编译开关（6cdde0600）。镜像 b418fb960 的 10 秒检查六个应用 rc 0（每次调用诊断值 OTel 0.940x、BCC 1.018x、Cilium 1.164x、Tetragon 1.880x、Tracee 1.943x、Katran 1.040x；kprog/results/array-of-maps-inline-20261125）。
    - 协调者：hash 族查找改调按 key 大小特化的 C 例程，例程写在头文件里（运营者 11-22“helper 例程用 C 写在头文件里”；方案 /workspaces/kprog-raw/coordinator/sa-20261124/inline-more/README.md 的 P3，可信模块保持原样）。BCC、Katran、Cilium 的热路径以 hash 查找为主（运营者 11-25：“还有啥可能性能差的? 所有性能都优化和测试过了吗?”）。
    - 协调者：OTel 每次调用 0.940x（10 秒检查），用宿主 PMU 采样找原生一侧多出来的时间。
+   - 协调者：编译器生成的 memset，eBPF 一侧按字节展开，原生调内核 memset（Tetragon 5905 处、Tracee 818 处，/workspaces/kprog-raw/coordinator/sa-20261124/inline-more/static-helper-sites-all-apps.txt）；先查这些调用的大小分布，再定编译参数（所有应用一组）。
+   - 协调者：arm64 get_current_task(_btf) 按 arm64 JIT 内联（mrs x0, sp_el0），arm64 镜像重建后跑 arm64 功能检查（chain-arm64.sh）；arm64 验证覆盖第一阶段 208/327，第二阶段（来宾里交 verifier）待做。
    - [x] 每个程序用到最好的版本（运营者 11-24：“你要想办法每个程序确保用到最好的版本, 比如说这样的性能. 代码要是这样的.”）：30e401e37 在两边六个应用的每次调用上都达到或超过各自最好的版本（x86 kprog/results/inner-template-20261123/x86-rerun-20261124.md，24d4f3023；arm64 kprog/results/arm64-spark-run7-20261124，c233d0063）。x86 Tetragon 的 stats 关吞吐三次都在 lab 宿主 E 核忙的时段（0.459x、0.880x、1.882x），再跑一次（rerun-chain3.sh）。
    - 协调者：Cilium 热点链（cil_from_container 及其尾调用）查找形式，05-29 链接器对现在的链接器，用已有的 kprog/results/katran-callorder-20261123/cilium-replay.sh，说明 05-29 的 1.319x 和现在 1.18x 的差别（运营者 11-24：“有啥加速不够显著的? 为啥? 为啥之前可以显著?”）。benchmark 配置自 9f3855f6f 零改动，保持原样。
    - omp（Tracee 客户机之后）：arm64 验证路径逐应用覆盖（论文 RQ1 两种 ISA）。
