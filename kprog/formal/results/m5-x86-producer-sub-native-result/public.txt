@@ -1,0 +1,133 @@
+KProgFormal.ClightRefinement.X86ProducerSubNativeResult.native {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  (arena : BitVec 64) (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (state : KProgFormal.Reference.X86.State) (pushPc subPc : BitVec 64) (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable : ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) ready.after ready.gprs.block 0
+      (KProgFormal.ClightRefinement.X86LogicReference.input state)) :
+  have pushed :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 pushPc) state;
+  have subtracted :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.arithmetic KProgFormal.Reference.X86.ScalarWidth.w64
+        KProgFormal.Reference.X86.ArithmeticKind.sub
+        (KProgFormal.Reference.X86.ScalarDestination.register (KProgFormal.Reference.X86.RegisterSlice.low 4))
+        (KProgFormal.Reference.X86.ScalarSource.immediate 32) subPc)
+      pushed.state;
+  subtracted.state.gpr 4 = ready.stackOutcome.value - 8#64 - 32#64
+'KProgFormal.ClightRefinement.X86ProducerSubNativeResult.native' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubNativeResult.saved {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (arena : BitVec 64)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (state : KProgFormal.Reference.X86.State)
+  (pushPc subPc : BitVec 64) (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable : ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) ready.after ready.gprs.block 0
+      (KProgFormal.ClightRefinement.X86LogicReference.input state)) :
+  have pushed :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 pushPc) state;
+  have subtracted :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.arithmetic KProgFormal.Reference.X86.ScalarWidth.w64
+        KProgFormal.Reference.X86.ArithmeticKind.sub
+        (KProgFormal.Reference.X86.ScalarDestination.register (KProgFormal.Reference.X86.RegisterSlice.low 4))
+        (KProgFormal.Reference.X86.ScalarSource.immediate 32) subPc)
+      pushed.state;
+  CC.PTree.get X86_program_profile_bpf.___x86_l_result
+      (KProgFormal.ClightRefinement.X86ProducerSubResult.temps ready.entry.block
+        (KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete) complete.after
+        (ready.stackOutcome.value - 8#64)) =
+    some (CC.Val.Vlong (subtracted.state.gpr 4))
+'KProgFormal.ClightRefinement.X86ProducerSubNativeResult.saved' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubNativeResult.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) (arena : BitVec 64)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (state : KProgFormal.Reference.X86.State)
+  (pushPc subPc : BitVec 64) (running : state.modelError = none)
+  (canonical :
+    ((List.range 8).all fun lane =>
+        X86.canonical (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)
+          (match state.addressWidth with
+          | KProgFormal.Reference.X86.AddressWidth.w48 => X86.LinearAddressWidth.la48
+          | KProgFormal.Reference.X86.AddressWidth.w57 => X86.LinearAddressWidth.la57)) =
+      true)
+  (writable : ((List.range 8).all fun lane => state.memory.writable (state.gpr 4 - 8#64 + BitVec.ofNat 64 lane)) = true)
+  (registers :
+    KProgFormal.ClightRefinement.X86RegisterView.RegistersRepresent addresses
+      (KProgFormal.ClightRefinement.X86ProducerPushInputOrigin.origins ready arena) ready.after ready.gprs.block 0
+      (KProgFormal.ClightRefinement.X86LogicReference.input state)) :
+  have pushed :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.push KProgFormal.Reference.X86.StackWidth.w64 3 pushPc) state;
+  have subtracted :=
+    KProgFormal.Reference.X86.step
+      (KProgFormal.Reference.X86.Instruction.arithmetic KProgFormal.Reference.X86.ScalarWidth.w64
+        KProgFormal.Reference.X86.ArithmeticKind.sub
+        (KProgFormal.Reference.X86.ScalarDestination.register (KProgFormal.Reference.X86.RegisterSlice.low 4))
+        (KProgFormal.Reference.X86.ScalarSource.immediate 32) subPc)
+      pushed.state;
+  CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+        KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+        (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+        (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+        ready.output ready.after)
+      CC.E0
+      (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler CC.Stmt.Sskip
+        (KProgFormal.ClightRefinement.X86ProducerSubResult.following ready.entry.block
+          (KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete) complete.after
+          (ready.stackOutcome.value - 8#64))
+        (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).fst
+        (KProgFormal.ClightRefinement.X86ProducerSubResult.temps ready.entry.block
+          (KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete) complete.after
+          (ready.stackOutcome.value - 8#64))
+        (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_l_result
+        (KProgFormal.ClightRefinement.X86ProducerSubResult.temps ready.entry.block
+          (KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete) complete.after
+          (ready.stackOutcome.value - 8#64)) =
+      some (CC.Val.Vlong (subtracted.state.gpr 4))
+'KProgFormal.ClightRefinement.X86ProducerSubNativeResult.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

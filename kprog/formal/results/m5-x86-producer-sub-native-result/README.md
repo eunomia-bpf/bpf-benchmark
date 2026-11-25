@@ -1,0 +1,3 @@
+Original initial GPR relation binds actual kind1 stack origin; SAME canonical PUSH and SUB steps derive native RSP=(kind1base-minus8)-32 on explicit model-running/PUSH canonical+writable domain. Genuine original source result-save run and actual saved temporary equal that native RSP, without an intermediate result/native-base equality premise. This is numeric-result correspondence only; source flags/GPR writeback/release/free/return, code fetch/platform/oracle/general trace/full149 remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

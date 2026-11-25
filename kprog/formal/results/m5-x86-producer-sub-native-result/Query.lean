@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubNativeResult
+#check KProgFormal.ClightRefinement.X86ProducerSubNativeResult.native
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubNativeResult.native
+#check KProgFormal.ClightRefinement.X86ProducerSubNativeResult.saved
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubNativeResult.saved
+#check KProgFormal.ClightRefinement.X86ProducerSubNativeResult.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubNativeResult.execute
