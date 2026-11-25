@@ -1,0 +1,69 @@
+KProgFormal.ClightRefinement.X86ProducerSubScalarResources.access {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) {name : CC.Ident} {ty : CC.Ty}
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name ty) :
+  CC.PMap.get object.block (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.access =
+    CC.PMap.get object.block
+      (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+            KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).snd.access
+'KProgFormal.ClightRefinement.X86ProducerSubScalarResources.access' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubScalarResources.rights {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) {name : CC.Ident} {ty : CC.Ty}
+  (object :
+    KProgFormal.ClightRefinement.X86ProducerHeaderLocals.Local
+      KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before name ty) :
+  (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.rangePerm object.block 0
+      (CC.sizeof KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv ty) CC.PermKind.Cur
+      CC.Permission.Freeable =
+    true
+'KProgFormal.ClightRefinement.X86ProducerSubScalarResources.rights' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubScalarResources.scalars {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (i : Fin 8) :
+  CC.Mem.load (KProgFormal.ClightRefinement.X86ProducerScalarSource.chunk i)
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd (ready.scalars i).block 0 =
+    some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value i (ready.scalarValues i))
+'KProgFormal.ClightRefinement.X86ProducerSubScalarResources.scalars' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubScalarResources.headers {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) (i : Fin 8) :
+  CC.Mem.load CC.Mptr (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd ready.entry.block
+      (8 * ↑↑(KProgFormal.ClightRefinement.X86ProducerScalarSource.row i)) =
+    some (CC.Val.Vptr (ready.scalars i).block 0)
+'KProgFormal.ClightRefinement.X86ProducerSubScalarResources.headers' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

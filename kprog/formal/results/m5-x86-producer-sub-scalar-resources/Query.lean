@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerSubScalarResources
+#check KProgFormal.ClightRefinement.X86ProducerSubScalarResources.access
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubScalarResources.access
+#check KProgFormal.ClightRefinement.X86ProducerSubScalarResources.rights
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubScalarResources.rights
+#check KProgFormal.ClightRefinement.X86ProducerSubScalarResources.scalars
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubScalarResources.scalars
+#check KProgFormal.ClightRefinement.X86ProducerSubScalarResources.headers
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubScalarResources.headers

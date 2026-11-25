@@ -1,0 +1,3 @@
+Actual original producer per-object Cur/Max maps survive every PUSH store/body free and genuine SUB allocation, yielding declared Freeable range rights on the current heap without asserting total access-map equality. All six real flag-byte/two XMM loads and their original header pointers derive same initializer/provider packet and genuine source frames. Initial private rangePerm simplification cut corrected with imported rangePerm_congr at original caps; raw failure retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
