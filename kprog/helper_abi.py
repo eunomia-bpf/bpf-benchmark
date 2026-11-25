@@ -51,5 +51,14 @@ def helper_idents() -> dict[int, str]:
     return {prototype.number: name for name, prototype in helper_prototypes().items()}
 
 
+# Kernel functions that P calls by their kernel name in place of a helper
+# (vendor/bpf/native-helpers.h). The helper's kernel body is that same call
+# (kernel/bpf/helpers.c: bpf_ktime_get_ns returns ktime_get_mono_fast_ns()),
+# so B calls the helper where P calls the function.
+KERNEL_FUNCTION_HELPERS = {
+    'ktime_get_mono_fast_ns': 'bpf_ktime_get_ns',
+}
+
+
 def is_helper_symbol(symbol: str | None) -> bool:
     return symbol in helper_prototypes()

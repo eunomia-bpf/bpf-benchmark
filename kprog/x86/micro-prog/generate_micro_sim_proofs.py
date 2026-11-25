@@ -16,7 +16,7 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from helper_abi import helper_idents, is_helper_symbol
+from helper_abi import KERNEL_FUNCTION_HELPERS, helper_idents, is_helper_symbol
 
 from x86_abi import check_definedness
 import kfunc_codegen
@@ -150,6 +150,8 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
                 raise ValueError("relocation lacks its native instruction extent")
             offset = int(addend, 16) if addend else 0
             offset += insns[-1].end_addr-int(reloc.group(1),16)
+            if insns[-1].mnemonic == "call":
+                symbol = KERNEL_FUNCTION_HELPERS.get(symbol, symbol)
             insns[-1] = replace(insns[-1], reloc_symbol=symbol,
                                 reloc_type=reloc.group(2), symbol_offset=offset)
             continue
