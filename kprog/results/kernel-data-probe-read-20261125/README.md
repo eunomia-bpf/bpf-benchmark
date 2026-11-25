@@ -43,3 +43,14 @@ median 312, max 1355.
 
 chain2.sh in this directory rebuilds kprog-ck/verified-loader once the kdata2 run (Tetragon, Tracee) has finished,
 then reruns Cilium (checked-corpus-20261125-kdata3).
+
+## Cilium kdata3 (13:27Z–13:38Z) and the modifier fix
+
+Cilium 64 requests: **24** installed checked-sim-c, 9 fell back at verification, 0 failed (OMP's 5a7fc6c8d moved the
+5 context-lower failures into the verified set). The 31 jiffies_64 requests still stopped at "unbound trusted proof
+extern: jiffies_64": c0967c992 looked for a VAR of type 0, and clang declares `extern const void` as VAR -> CONST
+(type 24) -> void. The loader now walks modifiers and typedefs down to void before taking the kallsyms address,
+as libbpf decides an untyped ksym (libbpf's btf__resolve_type returns -EINVAL at void, so the walk is written out).
+Checked on this request's B: VAR jiffies_64 -> type 24, kind CONST -> type 0. Verifier statistics of the 24 accepted
+B: time median 1759 us, max 3211 us; processed instructions median 619, max 1355. chain4.sh rebuilds the verified
+loader after kdata3 (Tetragon, Tracee) and reruns Cilium (checked-corpus-20261125-kdata4).

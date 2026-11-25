@@ -2804,10 +2804,15 @@ void relocate_trusted_proof(bpf_object *object, const std::filesystem::path &pat
                         proof[offset / sizeof(bpf_insn) + 1]);
                     continue;
                 }
-                // An untyped ksym (`extern const void name __ksym`, a VAR of type void) takes its
+                // An untyped ksym (`extern const void name __ksym`, a VAR whose type is void under its modifiers) takes its
                 // kallsyms address as the immediate, as libbpf binds such an extern.
                 const int variable_id = btf__find_by_name_kind(declaration_btf.get(), name, BTF_KIND_VAR);
-                if (variable_id > 0 && btf__type_by_id(declaration_btf.get(), variable_id)->type == 0) {
+                __u32 declared = variable_id > 0 ? btf__type_by_id(declaration_btf.get(), variable_id)->type : 1;
+                for (const btf_type *t = btf__type_by_id(declaration_btf.get(), declared);
+                     declared && t && (btf_is_mod(t) || btf_is_typedef(t));
+                     t = btf__type_by_id(declaration_btf.get(), declared))
+                    declared = t->type;
+                if (variable_id > 0 && declared == 0) {
                     if (const uint64_t address = kallsyms_lookup(name)) {
                         bpf_insn &low = proof[offset / sizeof(bpf_insn)], &high = proof[offset / sizeof(bpf_insn) + 1];
                         const uint64_t value = address + static_cast<uint64_t>(relocation.r_addend) +
