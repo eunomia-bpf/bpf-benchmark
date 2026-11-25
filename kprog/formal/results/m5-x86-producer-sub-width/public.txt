@@ -1,0 +1,66 @@
+KProgFormal.ClightRefinement.X86ProducerSubWidth.source :
+  KProgFormal.ClightRefinement.X86ProducerSubCall.handler.fn_body =
+      KProgFormal.ClightRefinement.X86ProducerSubWidth.body.Sloop CC.Stmt.Sbreak ∧
+    KProgFormal.ClightRefinement.X86ProducerSubWidth.body =
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.widthCall.Ssequence
+            KProgFormal.ClightRefinement.X86ProducerSubWidth.widthSet).Ssequence
+        KProgFormal.ClightRefinement.X86ProducerSubWidth.decision
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.width_source :
+  KProgFormal.ClightRefinement.X86ProducerSubWidth.widthCall =
+    CC.Stmt.Scall (some X86_program_profile_bpf._t'1)
+      (CC.Expr.Evar X86_program_profile_bpf._x86_width_effective (CC.Ty.Tfunction [CC.tuchar] CC.tuchar CC.cc_default))
+      [CC.Expr.Etempvar X86_program_profile_bpf._flags CC.tuchar]
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.width_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.width_assignment :
+  KProgFormal.ClightRefinement.X86ProducerSubWidth.widthSet =
+    CC.Stmt.Sset X86_program_profile_bpf.___x86_dispatch_width
+      ((CC.Expr.Etempvar X86_program_profile_bpf._t'1 CC.tuchar).Ecast CC.tuchar)
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.width_assignment' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.enter (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+  (read : CC.PTree.get X86_program_profile_bpf._flags le = some (CC.Val.Vint 8#32)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubCall.handler
+      KProgFormal.ClightRefinement.X86ProducerSubCall.handler.fn_body k CC.emptyEnv le memory)
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_width_effective) [CC.Val.Vint 8#32]
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.widthCont le k) memory)
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.enter' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.resume (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.Returnstate (CC.Val.Vint 8#32) (KProgFormal.ClightRefinement.X86ProducerSubWidth.widthCont le k) memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubCall.handler
+      KProgFormal.ClightRefinement.X86ProducerSubWidth.decision
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.loopCont k) CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.temps le) memory)
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.resume' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.from_call (memory : CC.Mem) (k : CC.Cont) (binding : CC.Block) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 15
+    (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerSubCall.handler)
+      (KProgFormal.ClightRefinement.X86ProducerSubCall.values binding) k memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubCall.handler
+      KProgFormal.ClightRefinement.X86ProducerSubWidth.decision
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.loopCont k) CC.emptyEnv
+      (KProgFormal.ClightRefinement.X86ProducerSubWidth.temps
+        (KProgFormal.ClightRefinement.X86ProducerSubCall.initialTemps binding))
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubWidth.unchanged (le : CC.TempEnv) (name : CC.Ident)
+  (notResult : X86_program_profile_bpf._t'1 ≠ name) (notWidth : X86_program_profile_bpf.___x86_dispatch_width ≠ name) :
+  CC.PTree.get name (KProgFormal.ClightRefinement.X86ProducerSubWidth.temps le) = CC.PTree.get name le
+'KProgFormal.ClightRefinement.X86ProducerSubWidth.unchanged' depends on axioms: [propext, Classical.choice, Quot.sound]
