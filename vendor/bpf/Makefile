@@ -77,6 +77,21 @@ TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
 
+# The switches cilium-agent itself turns on for the frozen workload, read from the node_config.h, ep_config.h,
+# netdev_config.h and filter_config.h it generates (/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2/
+# baseline-state/state; again /workspaces/kprog-raw/perf/20261113-cilium-live-config/baseline-state/state): IPv4 with
+# masquerade and nodeport, every packet traced (ep_config.h #undef MONITOR_AGGREGATION, so lib/trace.h takes
+# TRACE_AGGREGATE_NONE = 0), policy audit and verdict notifications. The agent runs with --policy-audit-mode=true,
+# --enable-monitor=false, --enable-hubble=false (runner/libs/app_runners/cilium.py). Both arms then do the same
+# per-packet work. First added in 3ff2ac946 (11-17); the 5/29 restore 3aa496416 (11-21) dropped it.
+CILIUM_AGENT_NODE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 \
+	-DSERVICE_NO_BACKEND_RESPONSE=1 -DCT_REPORT_FLAGS=0x0007 -DMONITOR_AGGREGATION=0 \
+	-DPOLICY_AUDIT_MODE=1 -DPOLICY_VERDICT_NOTIFY=1
+CILIUM_AGENT_LXC_OPTIONS := $(CILIUM_AGENT_NODE_OPTIONS) -DENABLE_ROUTING=1
+CILIUM_AGENT_HOST_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS) -DHOST_ENDPOINT=1
+CILIUM_AGENT_XDP_OPTIONS := $(CILIUM_AGENT_NODE_OPTIONS) -DCIDR4_HMAP_ELEMS=20971520 -DCIDR4_LMAP_ELEMS=65536 \
+	-DCIDR4_FILTER -DCIDR4_LPM_PREFILTER -DCIDR6_FILTER -DCIDR6_LPM_PREFILTER
+# Objects the frozen workload leaves unloaded (overlay, sock, wireguard) keep these broader options.
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DPOLICY_AUDIT_MODE=1 \
 	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
@@ -198,12 +213,12 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/$(BPF_AR
 		$(SYS_INC) \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_overlay.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_sock.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LB_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_HOST_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_HOST_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_WIREGUARD_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
 $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h native-helpers.h

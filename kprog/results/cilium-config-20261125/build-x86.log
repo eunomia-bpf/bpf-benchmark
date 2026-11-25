@@ -1,0 +1,882 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/"
+"clang-18" -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 -DSERVICE_NO_BACKEND_RESPONSE=1 -DCT_REPORT_FLAGS=0x0007 -DMONITOR_AGGREGATION=0 -DPOLICY_AUDIT_MODE=1 -DPOLICY_VERDICT_NOTIFY=1 -DENABLE_ROUTING=1  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-include "/workspaces/repository/vendor/bpf/native_compat.h" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf" -I"/workspaces/repository/vendor/bpf/cilium/bpf/include" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/linux" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/lib" \
+	-I/usr/include -I/usr/include/x86_64-linux-gnu \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_lxc.native.o" "cilium/bpf/bpf_lxc.c"
+In file included from cilium/bpf/bpf_lxc.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:36:
+In file included from cilium/bpf/lib/lxc.h:14:
+In file included from cilium/bpf/lib/proxy.h:6:
+cilium/bpf/lib/conntrack.h:524:19: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  524 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  646 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  783 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  904 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+In file included from cilium/bpf/bpf_lxc.c:49:
+cilium/bpf/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1674 |                                           CT_EGRESS, &tuple->dport);
+      |                                                       ^~~~~~~~~~~~
+cilium/bpf/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2057 |                 if (READ_ONCE(val->last_used) +
+      |                               ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'
+  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \
+      |                                                          ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'
+   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)
+      |                                                          ^
+In file included from cilium/bpf/bpf_lxc.c:49:
+cilium/bpf/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2068 |                 WRITE_ONCE(val->last_used, now);
+      |                            ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'
+  116 |                                    __WRITE_ONCE(X, __val);      \
+      |                                                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'
+  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)
+      |                                                          ^
+In file included from cilium/bpf/bpf_lxc.c:55:
+cilium/bpf/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  946 |                                          CT_EGRESS, &tuple->dport);
+      |                                                      ^~~~~~~~~~~~
+cilium/bpf/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1159 |                                          CT_INGRESS, &tuple.dport);
+      |                                                       ^~~~~~~~~~~
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:18:21: warning: function 'redirect' has internal linkage but is not defined [-Wundefined-internal]
+   18 | static int BPF_FUNC(redirect, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:121:9: note: used here
+  121 |         return redirect(ifindex, flags);
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:21:21: warning: function 'redirect_peer' has internal linkage but is not defined [-Wundefined-internal]
+   21 | static int BPF_FUNC(redirect_peer, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:127:9: note: used here
+  127 |         return redirect_peer(ifindex, flags);
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:41:21: warning: function 'skb_change_tail' has internal linkage but is not defined [-Wundefined-internal]
+   41 | static int BPF_FUNC(skb_change_tail, struct __sk_buff *skb, __u32 nlen,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:133:9: note: used here
+  133 |         return skb_change_tail(ctx, ctx->len + len_diff, 0);
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:68:22: warning: function 'tail_call' has internal linkage but is not defined [-Wundefined-internal]
+   68 | static void BPF_FUNC(tail_call, void *ctx, const void *map, __u32 index);
+      |                      ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/tailcall.h:60:2: note: used here
+   60 |         tail_call(ctx, map, slot);
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:44:23: warning: function 'ktime_get_ns' has internal linkage but is not defined [-Wundefined-internal]
+   44 | static __u64 BPF_FUNC(ktime_get_ns);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/time.h:19:9: note: used here
+   19 |         return ktime_get_ns() / NSEC_PER_SEC;
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:46:23: warning: function 'jiffies64' has internal linkage but is not defined [-Wundefined-internal]
+   46 | static __u64 BPF_FUNC(jiffies64);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/time.h:27:10: note: used here
+   27 |                 return jiffies64() >> BPF_MONO_SCALER;
+      |                        ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:25:21: warning: function 'skb_load_bytes' has internal linkage but is not defined [-Wundefined-internal]
+   25 | static int BPF_FUNC(skb_load_bytes, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/eth.h:44:9: note: used here
+   44 |         return ctx_load_bytes(ctx, off + ETH_ALEN, mac, ETH_ALEN);
+      |                ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:36:25: note: expanded from macro 'ctx_load_bytes'
+   36 | #define ctx_load_bytes          skb_load_bytes
+      |                                 ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:27:21: warning: function 'skb_store_bytes' has internal linkage but is not defined [-Wundefined-internal]
+   27 | static int BPF_FUNC(skb_store_bytes, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/eth.h:50:9: note: used here
+   50 |         return ctx_store_bytes(ctx, off + ETH_ALEN, mac, ETH_ALEN, 0);
+      |                ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:37:26: note: expanded from macro 'ctx_store_bytes'
+   37 | #define ctx_store_bytes         skb_store_bytes
+      |                                 ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:46:21: warning: function 'skb_pull_data' has internal linkage but is not defined [-Wundefined-internal]
+   46 | static int BPF_FUNC(skb_pull_data, struct __sk_buff *skb, __u32 len);
+      |                     ^
+cilium/bpf/lib/common.h:107:3: note: used here
+  107 |                 ctx_pull_data(ctx, (__u32)tot_len);
+      |                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:45:24: note: expanded from macro 'ctx_pull_data'
+   45 | #define ctx_pull_data           skb_pull_data
+      |                                 ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:43:21: warning: function 'skb_change_head' has internal linkage but is not defined [-Wundefined-internal]
+   43 | static int BPF_FUNC(skb_change_head, struct __sk_buff *skb, __u32 head_room,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/overloadable_skb.h:150:9: note: used here
+  150 |         return skb_change_head(ctx, head_room, flags);
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:34:23: warning: function 'map_lookup_elem' has internal linkage but is not defined [-Wundefined-internal]
+   34 | static void *BPF_FUNC(map_lookup_elem, const void *map, const void *key);
+      |                       ^
+cilium/bpf/lib/config_map.h:45:15: note: used here
+   45 |         __u64 *val = map_lookup_elem(&cilium_runtime_config, &index);
+      |                      ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:35:21: warning: function 'map_update_elem' has internal linkage but is not defined [-Wundefined-internal]
+   35 | static int BPF_FUNC(map_update_elem, const void *map, const void *key,
+      |                     ^
+cilium/bpf/lib/config_map.h:59:2: note: used here
+   59 |         map_update_elem(&cilium_runtime_config, &index, &value, BPF_ANY);
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:32:21: warning: function 'l4_csum_replace' has internal linkage but is not defined [-Wundefined-internal]
+   32 | static int BPF_FUNC(l4_csum_replace, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/csum.h:77:9: note: used here
+   77 |         return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:30:21: warning: function 'l3_csum_replace' has internal linkage but is not defined [-Wundefined-internal]
+   30 | static int BPF_FUNC(l3_csum_replace, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/ipv4.h:44:9: note: used here
+   44 |         return l3_csum_replace(ctx, l3_off + offsetof(struct iphdr, check),
+      |                ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:35:21: warning: function 'skb_adjust_room' has internal linkage but is not defined [-Wundefined-internal]
+   35 | static int BPF_FUNC(skb_adjust_room, struct __sk_buff *skb, __s32 len_diff,
+      |                     ^
+cilium/bpf/lib/icmp6.h:646:8: note: used here
+  646 |         ret = skb_adjust_room(ctx, sizeof(struct ipv6hdr) + sizeof(struct icmp6hdr),
+      |               ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:38:21: warning: function 'skb_change_type' has internal linkage but is not defined [-Wundefined-internal]
+   38 | static int BPF_FUNC(skb_change_type, struct __sk_buff *skb, __u32 type);
+      |                     ^
+cilium/bpf/lib/local_delivery.h:95:3: note: used here
+   95 |                 ctx_change_type(ctx, PACKET_HOST);
+      |                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:41:26: note: expanded from macro 'ctx_change_type'
+   41 | #define ctx_change_type         skb_change_type
+      |                                 ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:65:34: warning: function 'skc_lookup_tcp' has internal linkage but is not defined [-Wundefined-internal]
+   65 | static struct bpf_sock *BPF_FUNC(skc_lookup_tcp, struct __sk_buff *skb,
+      |                                  ^
+cilium/bpf/lib/proxy.h:20:7: note: used here
+   20 |         sk = skc_lookup_tcp(ctx, tuple, len, BPF_F_CURRENT_NETNS, 0);
+      |              ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:69:21: warning: function 'sk_assign' has internal linkage but is not defined [-Wundefined-internal]
+   69 | static int BPF_FUNC(sk_assign, struct __sk_buff *skb, struct bpf_sock *sk,
+      |                     ^
+cilium/bpf/lib/proxy.h:30:11: note: used here
+   30 |         result = sk_assign(ctx, sk, 0);
+      |                  ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:68:21: warning: function 'sk_release' has internal linkage but is not defined [-Wundefined-internal]
+   68 | static int BPF_FUNC(sk_release, struct bpf_sock *sk);
+      |                     ^
+cilium/bpf/lib/proxy.h:37:2: note: used here
+   37 |         sk_release(sk);
+      |         ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:90:34: warning: function 'sk_lookup_udp' has internal linkage but is not defined [-Wundefined-internal]
+   90 | static struct bpf_sock *BPF_FUNC(sk_lookup_udp, void *ctx,
+      |                                  ^
+cilium/bpf/lib/proxy.h:54:7: note: used here
+   54 |         sk = sk_lookup_udp(ctx, tuple, len, BPF_F_CURRENT_NETNS, 0);
+      |              ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:39:21: warning: function 'skb_change_proto' has internal linkage but is not defined [-Wundefined-internal]
+   39 | static int BPF_FUNC(skb_change_proto, struct __sk_buff *skb, __u32 proto,
+      |                     ^
+cilium/bpf/lib/nat_46x64.h:294:6: note: used here
+  294 |         if (ctx_change_proto(ctx, bpf_htons(ETH_P_IPV6), 0) < 0)
+      |             ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:42:26: note: expanded from macro 'ctx_change_proto'
+   42 | #define ctx_change_proto        skb_change_proto
+      |                                 ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:60:23: warning: function 'get_prandom_u32' has internal linkage but is not defined [-Wundefined-internal]
+   60 | static __u32 BPF_FUNC(get_prandom_u32);
+      |                       ^
+cilium/bpf/lib/lb.h:1897:16: note: used here
+ 1897 |         __u16 slot = (get_prandom_u32() % svc->count) + 1;
+      |                       ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:37:21: warning: function 'map_delete_elem' has internal linkage but is not defined [-Wundefined-internal]
+   37 | static int BPF_FUNC(map_delete_elem, const void *map, const void *key);
+      |                     ^
+cilium/bpf/lib/lb.h:2059:4: note: used here
+ 2059 |                         map_delete_elem(&cilium_lb4_affinity, &key);
+      |                         ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:19:21: warning: function 'redirect_neigh' has internal linkage but is not defined [-Wundefined-internal]
+   19 | static int BPF_FUNC(redirect_neigh, int ifindex, struct bpf_redir_neigh *params,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/fib.h:114:16: note: used here
+  114 |                         return (int)redirect_neigh(oif, &nh_params,
+      |                                     ^
+In file included from cilium/bpf/bpf_lxc.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:83:21: warning: function 'fib_lookup' has internal linkage but is not defined [-Wundefined-internal]
+   83 | static int BPF_FUNC(fib_lookup, void *ctx, struct bpf_fib_lookup *params,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/fib.h:169:13: note: used here
+  169 |         ret = (int)fib_lookup(ctx, &fib_params->l, sizeof(fib_params->l),
+      |                    ^
+39 warnings generated.
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/"
+"clang-18" -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 -DSERVICE_NO_BACKEND_RESPONSE=1 -DCT_REPORT_FLAGS=0x0007 -DMONITOR_AGGREGATION=0 -DPOLICY_AUDIT_MODE=1 -DPOLICY_VERDICT_NOTIFY=1 -DENABLE_ROUTING=1 -DHOST_ENDPOINT=1  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-include "/workspaces/repository/vendor/bpf/native_compat.h" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf" -I"/workspaces/repository/vendor/bpf/cilium/bpf/include" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/linux" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/lib" \
+	-I/usr/include -I/usr/include/x86_64-linux-gnu \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_host.native.o" "cilium/bpf/bpf_host.c"
+In file included from cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from cilium/bpf/bpf_host.c:5:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/api.h:17:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+In file included from cilium/bpf/bpf_host.c:38:
+In file included from cilium/bpf/lib/proxy.h:6:
+cilium/bpf/lib/conntrack.h:524:19: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  524 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  646 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  783 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  904 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+In file included from cilium/bpf/bpf_host.c:46:
+cilium/bpf/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  946 |                                          CT_EGRESS, &tuple->dport);
+      |                                                      ^~~~~~~~~~~~
+cilium/bpf/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1159 |                                          CT_INGRESS, &tuple.dport);
+      |                                                       ^~~~~~~~~~~
+In file included from cilium/bpf/bpf_host.c:47:
+cilium/bpf/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1674 |                                           CT_EGRESS, &tuple->dport);
+      |                                                       ^~~~~~~~~~~~
+cilium/bpf/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2057 |                 if (READ_ONCE(val->last_used) +
+      |                               ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'
+  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \
+      |                                                          ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'
+   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)
+      |                                                          ^
+In file included from cilium/bpf/bpf_host.c:47:
+cilium/bpf/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2068 |                 WRITE_ONCE(val->last_used, now);
+      |                            ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'
+  116 |                                    __WRITE_ONCE(X, __val);      \
+      |                                                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'
+  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)
+      |                                                          ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:18:21: warning: function 'redirect' has internal linkage but is not defined [-Wundefined-internal]
+   18 | static int BPF_FUNC(redirect, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:121:9: note: used here
+  121 |         return redirect(ifindex, flags);
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:21:21: warning: function 'redirect_peer' has internal linkage but is not defined [-Wundefined-internal]
+   21 | static int BPF_FUNC(redirect_peer, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:127:9: note: used here
+  127 |         return redirect_peer(ifindex, flags);
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:41:21: warning: function 'skb_change_tail' has internal linkage but is not defined [-Wundefined-internal]
+   41 | static int BPF_FUNC(skb_change_tail, struct __sk_buff *skb, __u32 nlen,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:133:9: note: used here
+  133 |         return skb_change_tail(ctx, ctx->len + len_diff, 0);
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:68:22: warning: function 'tail_call' has internal linkage but is not defined [-Wundefined-internal]
+   68 | static void BPF_FUNC(tail_call, void *ctx, const void *map, __u32 index);
+      |                      ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/tailcall.h:60:2: note: used here
+   60 |         tail_call(ctx, map, slot);
+      |         ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:44:23: warning: function 'ktime_get_ns' has internal linkage but is not defined [-Wundefined-internal]
+   44 | static __u64 BPF_FUNC(ktime_get_ns);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/time.h:19:9: note: used here
+   19 |         return ktime_get_ns() / NSEC_PER_SEC;
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:46:23: warning: function 'jiffies64' has internal linkage but is not defined [-Wundefined-internal]
+   46 | static __u64 BPF_FUNC(jiffies64);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/time.h:27:10: note: used here
+   27 |                 return jiffies64() >> BPF_MONO_SCALER;
+      |                        ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:25:21: warning: function 'skb_load_bytes' has internal linkage but is not defined [-Wundefined-internal]
+   25 | static int BPF_FUNC(skb_load_bytes, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/eth.h:44:9: note: used here
+   44 |         return ctx_load_bytes(ctx, off + ETH_ALEN, mac, ETH_ALEN);
+      |                ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:36:25: note: expanded from macro 'ctx_load_bytes'
+   36 | #define ctx_load_bytes          skb_load_bytes
+      |                                 ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:27:21: warning: function 'skb_store_bytes' has internal linkage but is not defined [-Wundefined-internal]
+   27 | static int BPF_FUNC(skb_store_bytes, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/eth.h:50:9: note: used here
+   50 |         return ctx_store_bytes(ctx, off + ETH_ALEN, mac, ETH_ALEN, 0);
+      |                ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:37:26: note: expanded from macro 'ctx_store_bytes'
+   37 | #define ctx_store_bytes         skb_store_bytes
+      |                                 ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:46:21: warning: function 'skb_pull_data' has internal linkage but is not defined [-Wundefined-internal]
+   46 | static int BPF_FUNC(skb_pull_data, struct __sk_buff *skb, __u32 len);
+      |                     ^
+cilium/bpf/lib/common.h:107:3: note: used here
+  107 |                 ctx_pull_data(ctx, (__u32)tot_len);
+      |                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:45:24: note: expanded from macro 'ctx_pull_data'
+   45 | #define ctx_pull_data           skb_pull_data
+      |                                 ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:43:21: warning: function 'skb_change_head' has internal linkage but is not defined [-Wundefined-internal]
+   43 | static int BPF_FUNC(skb_change_head, struct __sk_buff *skb, __u32 head_room,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/overloadable_skb.h:150:9: note: used here
+  150 |         return skb_change_head(ctx, head_room, flags);
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:34:23: warning: function 'map_lookup_elem' has internal linkage but is not defined [-Wundefined-internal]
+   34 | static void *BPF_FUNC(map_lookup_elem, const void *map, const void *key);
+      |                       ^
+cilium/bpf/lib/config_map.h:45:15: note: used here
+   45 |         __u64 *val = map_lookup_elem(&cilium_runtime_config, &index);
+      |                      ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:35:21: warning: function 'map_update_elem' has internal linkage but is not defined [-Wundefined-internal]
+   35 | static int BPF_FUNC(map_update_elem, const void *map, const void *key,
+      |                     ^
+cilium/bpf/lib/config_map.h:59:2: note: used here
+   59 |         map_update_elem(&cilium_runtime_config, &index, &value, BPF_ANY);
+      |         ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:32:21: warning: function 'l4_csum_replace' has internal linkage but is not defined [-Wundefined-internal]
+   32 | static int BPF_FUNC(l4_csum_replace, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/csum.h:77:9: note: used here
+   77 |         return l4_csum_replace(ctx, (__u32)(l4_off + csum->offset), from, to, flags | csum->flags);
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:30:21: warning: function 'l3_csum_replace' has internal linkage but is not defined [-Wundefined-internal]
+   30 | static int BPF_FUNC(l3_csum_replace, struct __sk_buff *skb, __u32 off,
+      |                     ^
+cilium/bpf/lib/ipv4.h:44:9: note: used here
+   44 |         return l3_csum_replace(ctx, l3_off + offsetof(struct iphdr, check),
+      |                ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:35:21: warning: function 'skb_adjust_room' has internal linkage but is not defined [-Wundefined-internal]
+   35 | static int BPF_FUNC(skb_adjust_room, struct __sk_buff *skb, __s32 len_diff,
+      |                     ^
+cilium/bpf/lib/icmp6.h:646:8: note: used here
+  646 |         ret = skb_adjust_room(ctx, sizeof(struct ipv6hdr) + sizeof(struct icmp6hdr),
+      |               ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:65:34: warning: function 'skc_lookup_tcp' has internal linkage but is not defined [-Wundefined-internal]
+   65 | static struct bpf_sock *BPF_FUNC(skc_lookup_tcp, struct __sk_buff *skb,
+      |                                  ^
+cilium/bpf/lib/proxy.h:20:7: note: used here
+   20 |         sk = skc_lookup_tcp(ctx, tuple, len, BPF_F_CURRENT_NETNS, 0);
+      |              ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:69:21: warning: function 'sk_assign' has internal linkage but is not defined [-Wundefined-internal]
+   69 | static int BPF_FUNC(sk_assign, struct __sk_buff *skb, struct bpf_sock *sk,
+      |                     ^
+cilium/bpf/lib/proxy.h:30:11: note: used here
+   30 |         result = sk_assign(ctx, sk, 0);
+      |                  ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:68:21: warning: function 'sk_release' has internal linkage but is not defined [-Wundefined-internal]
+   68 | static int BPF_FUNC(sk_release, struct bpf_sock *sk);
+      |                     ^
+cilium/bpf/lib/proxy.h:37:2: note: used here
+   37 |         sk_release(sk);
+      |         ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:90:34: warning: function 'sk_lookup_udp' has internal linkage but is not defined [-Wundefined-internal]
+   90 | static struct bpf_sock *BPF_FUNC(sk_lookup_udp, void *ctx,
+      |                                  ^
+cilium/bpf/lib/proxy.h:54:7: note: used here
+   54 |         sk = sk_lookup_udp(ctx, tuple, len, BPF_F_CURRENT_NETNS, 0);
+      |              ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:38:21: warning: function 'skb_change_type' has internal linkage but is not defined [-Wundefined-internal]
+   38 | static int BPF_FUNC(skb_change_type, struct __sk_buff *skb, __u32 type);
+      |                     ^
+cilium/bpf/lib/proxy.h:355:2: note: used here
+  355 |         ctx_change_type(ctx, PACKET_HOST);
+      |         ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:41:26: note: expanded from macro 'ctx_change_type'
+   41 | #define ctx_change_type         skb_change_type
+      |                                 ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:19:21: warning: function 'redirect_neigh' has internal linkage but is not defined [-Wundefined-internal]
+   19 | static int BPF_FUNC(redirect_neigh, int ifindex, struct bpf_redir_neigh *params,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/fib.h:114:16: note: used here
+  114 |                         return (int)redirect_neigh(oif, &nh_params,
+      |                                     ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:83:21: warning: function 'fib_lookup' has internal linkage but is not defined [-Wundefined-internal]
+   83 | static int BPF_FUNC(fib_lookup, void *ctx, struct bpf_fib_lookup *params,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/fib.h:169:13: note: used here
+  169 |         ret = (int)fib_lookup(ctx, &fib_params->l, sizeof(fib_params->l),
+      |                    ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:39:21: warning: function 'skb_change_proto' has internal linkage but is not defined [-Wundefined-internal]
+   39 | static int BPF_FUNC(skb_change_proto, struct __sk_buff *skb, __u32 proto,
+      |                     ^
+cilium/bpf/lib/nat_46x64.h:294:6: note: used here
+  294 |         if (ctx_change_proto(ctx, bpf_htons(ETH_P_IPV6), 0) < 0)
+      |             ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:42:26: note: expanded from macro 'ctx_change_proto'
+   42 | #define ctx_change_proto        skb_change_proto
+      |                                 ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:60:23: warning: function 'get_prandom_u32' has internal linkage but is not defined [-Wundefined-internal]
+   60 | static __u32 BPF_FUNC(get_prandom_u32);
+      |                       ^
+cilium/bpf/lib/nat.h:88:52: note: used here
+   88 |                __snat_clamp_port_range(start, end, (__u16)get_prandom_u32());
+      |                                                           ^
+In file included from cilium/bpf/bpf_host.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/skb.h:12:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_skb.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:37:21: warning: function 'map_delete_elem' has internal linkage but is not defined [-Wundefined-internal]
+   37 | static int BPF_FUNC(map_delete_elem, const void *map, const void *key);
+      |                     ^
+cilium/bpf/lib/nat.h:106:9: note: used here
+  106 |         return map_delete_elem(map, tuple);
+      |                ^
+39 warnings generated.
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/"
+"clang-18" -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 -DSERVICE_NO_BACKEND_RESPONSE=1 -DCT_REPORT_FLAGS=0x0007 -DMONITOR_AGGREGATION=0 -DPOLICY_AUDIT_MODE=1 -DPOLICY_VERDICT_NOTIFY=1 -DCIDR4_HMAP_ELEMS=20971520 -DCIDR4_LMAP_ELEMS=65536 -DCIDR4_FILTER -DCIDR4_LPM_PREFILTER -DCIDR6_FILTER -DCIDR6_LPM_PREFILTER  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-include "/workspaces/repository/vendor/bpf/native_compat.h" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf" -I"/workspaces/repository/vendor/bpf/cilium/bpf/include" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/include/linux" \
+	-I"/workspaces/repository/vendor/bpf/cilium/bpf/lib" \
+	-I/usr/include -I/usr/include/x86_64-linux-gnu \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_xdp.native.o" "cilium/bpf/bpf_xdp.c"
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:8:9: warning: 'CIDR4_HMAP_ELEMS' macro redefined [-Wmacro-redefined]
+    8 | #define CIDR4_HMAP_ELEMS 1024
+      |         ^
+<command line>:10:9: note: previous definition is here
+   10 | #define CIDR4_HMAP_ELEMS 20971520
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:9:9: warning: 'CIDR4_LMAP_ELEMS' macro redefined [-Wmacro-redefined]
+    9 | #define CIDR4_LMAP_ELEMS 1024
+      |         ^
+<command line>:11:9: note: previous definition is here
+   11 | #define CIDR4_LMAP_ELEMS 65536
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:10:9: warning: 'CIDR4_FILTER' macro redefined [-Wmacro-redefined]
+   10 | #define CIDR4_FILTER
+      |         ^
+<command line>:12:9: note: previous definition is here
+   12 | #define CIDR4_FILTER 1
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:11:9: warning: 'CIDR4_LPM_PREFILTER' macro redefined [-Wmacro-redefined]
+   11 | #define CIDR4_LPM_PREFILTER
+      |         ^
+<command line>:13:9: note: previous definition is here
+   13 | #define CIDR4_LPM_PREFILTER 1
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:12:9: warning: 'CIDR6_FILTER' macro redefined [-Wmacro-redefined]
+   12 | #define CIDR6_FILTER
+      |         ^
+<command line>:14:9: note: previous definition is here
+   14 | #define CIDR6_FILTER 1
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:11:
+/workspaces/repository/vendor/bpf/cilium/bpf/filter_config.h:13:9: warning: 'CIDR6_LPM_PREFILTER' macro redefined [-Wmacro-redefined]
+   13 | #define CIDR6_LPM_PREFILTER
+      |         ^
+<command line>:15:9: note: previous definition is here
+   15 | #define CIDR6_LPM_PREFILTER 1
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:47:
+In file included from cilium/bpf/lib/nodeport.h:11:
+In file included from cilium/bpf/lib/nat.h:18:
+cilium/bpf/lib/conntrack.h:524:19: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  524 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:646:14: warning: taking address of packed member 'dport' of class or structure 'ipv6_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  646 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:783:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  783 |                                   CT_EGRESS, &tuple->dport);
+      |                                               ^~~~~~~~~~~~
+cilium/bpf/lib/conntrack.h:904:14: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  904 |                                           dir, &tuple->dport);
+      |                                                 ^~~~~~~~~~~~
+In file included from cilium/bpf/bpf_xdp.c:47:
+In file included from cilium/bpf/lib/nodeport.h:11:
+cilium/bpf/lib/nat.h:833:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  833 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:946:19: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+  946 |                                          CT_EGRESS, &tuple->dport);
+      |                                                      ^~~~~~~~~~~~
+cilium/bpf/lib/nat.h:1060:36: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1060 |                 if (l4_load_ports(ctx, icmpoff, &tuple.dport) < 0)
+      |                                                  ^~~~~~~~~~~
+cilium/bpf/lib/nat.h:1159:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1159 |                                          CT_INGRESS, &tuple.dport);
+      |                                                       ^~~~~~~~~~~
+In file included from cilium/bpf/bpf_xdp.c:47:
+In file included from cilium/bpf/lib/nodeport.h:14:
+cilium/bpf/lib/lb.h:1674:20: warning: taking address of packed member 'dport' of class or structure 'ipv4_ct_tuple' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 1674 |                                           CT_EGRESS, &tuple->dport);
+      |                                                       ^~~~~~~~~~~~
+cilium/bpf/lib/lb.h:2057:17: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2057 |                 if (READ_ONCE(val->last_used) +
+      |                               ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:108:37: note: expanded from macro 'READ_ONCE'
+  108 |                         ({ typeof(X) __val = __READ_ONCE(X);    \
+      |                                                          ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:97:51: note: expanded from macro '__READ_ONCE'
+   97 | # define __READ_ONCE(X)         (*(volatile typeof(X) *)&X)
+      |                                                          ^
+In file included from cilium/bpf/bpf_xdp.c:47:
+In file included from cilium/bpf/lib/nodeport.h:14:
+cilium/bpf/lib/lb.h:2068:14: warning: taking address of packed member 'last_used' of class or structure 'lb_affinity_val' may result in an unaligned pointer value [-Waddress-of-packed-member]
+ 2068 |                 WRITE_ONCE(val->last_used, now);
+      |                            ^~~~~~~~~~~~~~
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:116:21: note: expanded from macro 'WRITE_ONCE'
+  116 |                                    __WRITE_ONCE(X, __val);      \
+      |                                                 ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../compiler.h:101:54: note: expanded from macro '__WRITE_ONCE'
+  101 | # define __WRITE_ONCE(X, V)     (*(volatile typeof(X) *)&X) = (V)
+      |                                                          ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:16:21: warning: function 'xdp_adjust_head' has internal linkage but is not defined [-Wundefined-internal]
+   16 | static int BPF_FUNC(xdp_adjust_head, struct xdp_md *xdp, int delta);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:343:8: note: used here
+  343 |         ret = xdp_adjust_head(ctx, -len_diff);
+      |               ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:17:21: warning: function 'xdp_adjust_tail' has internal linkage but is not defined [-Wundefined-internal]
+   17 | static int BPF_FUNC(xdp_adjust_tail, struct xdp_md *xdp, int delta);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:358:9: note: used here
+  358 |         return xdp_adjust_tail(ctx, len_diff);
+      |                ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:20:21: warning: function 'redirect' has internal linkage but is not defined [-Wundefined-internal]
+   20 | static int BPF_FUNC(redirect, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:437:9: note: used here
+  437 |         return redirect(ifindex, flags);
+      |                ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:34:23: warning: function 'map_lookup_elem' has internal linkage but is not defined [-Wundefined-internal]
+   34 | static void *BPF_FUNC(map_lookup_elem, const void *map, const void *key);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:497:31: note: used here
+  497 |         __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+      |                                      ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:68:22: warning: function 'tail_call' has internal linkage but is not defined [-Wundefined-internal]
+   68 | static void BPF_FUNC(tail_call, void *ctx, const void *map, __u32 index);
+      |                      ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/tailcall.h:60:2: note: used here
+   60 |         tail_call(ctx, map, slot);
+      |         ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:15:21: warning: function 'xdp_adjust_meta' has internal linkage but is not defined [-Wundefined-internal]
+   15 | static int BPF_FUNC(xdp_adjust_meta, struct xdp_md *xdp, int delta);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/overloadable_xdp.h:112:8: note: used here
+  112 |                 if (!ctx_adjust_meta(ctx, -(int)sizeof(meta_xfer))) {
+      |                      ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:158:27: note: expanded from macro 'ctx_adjust_meta'
+  158 | #define ctx_adjust_meta                 xdp_adjust_meta
+      |                                         ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:44:23: warning: function 'ktime_get_ns' has internal linkage but is not defined [-Wundefined-internal]
+   44 | static __u64 BPF_FUNC(ktime_get_ns);
+      |                       ^
+cilium/bpf/lib/time.h:19:9: note: used here
+   19 |         return ktime_get_ns() / NSEC_PER_SEC;
+      |                ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:46:23: warning: function 'jiffies64' has internal linkage but is not defined [-Wundefined-internal]
+   46 | static __u64 BPF_FUNC(jiffies64);
+      |                       ^
+cilium/bpf/lib/time.h:27:10: note: used here
+   27 |                 return jiffies64() >> BPF_MONO_SCALER;
+      |                        ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:35:21: warning: function 'map_update_elem' has internal linkage but is not defined [-Wundefined-internal]
+   35 | static int BPF_FUNC(map_update_elem, const void *map, const void *key,
+      |                     ^
+cilium/bpf/lib/metrics.h:65:3: note: used here
+   65 |                 map_update_elem(&cilium_metrics, &key, &new_entry, 0);
+      |                 ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:83:21: warning: function 'fib_lookup' has internal linkage but is not defined [-Wundefined-internal]
+   83 | static int BPF_FUNC(fib_lookup, void *ctx, struct bpf_fib_lookup *params,
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/lib/fib.h:169:13: note: used here
+  169 |         ret = (int)fib_lookup(ctx, &fib_params->l, sizeof(fib_params->l),
+      |                    ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:60:23: warning: function 'get_prandom_u32' has internal linkage but is not defined [-Wundefined-internal]
+   60 | static __u32 BPF_FUNC(get_prandom_u32);
+      |                       ^
+cilium/bpf/lib/nat.h:88:52: note: used here
+   88 |                __snat_clamp_port_range(start, end, (__u16)get_prandom_u32());
+      |                                                           ^
+In file included from cilium/bpf/bpf_xdp.c:4:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:37:21: warning: function 'map_delete_elem' has internal linkage but is not defined [-Wundefined-internal]
+   37 | static int BPF_FUNC(map_delete_elem, const void *map, const void *key);
+      |                     ^
+cilium/bpf/lib/nat.h:106:9: note: used here
+  106 |         return map_delete_elem(map, tuple);
+      |                ^
+32 warnings generated.
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium"
+rm -f "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium"/*.native.o
+install -m 0644 /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_lxc.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_overlay.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_sock.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_host.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_wireguard.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_xdp.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_alignchecker.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/cilium_placeholders.native.o "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium"
+python3 "/workspaces/repository/vendor/bpf/write_native_manifest.py" --app cilium --llvm-nm "llvm-nm-18" \
+	--output "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/manifest.json" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_sock.native.o" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/bpf_xdp.native.o,prog_type=6" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.3.0-070300rc3-generic/native/cilium/cilium_placeholders.native.o"
+true
+python3 "/workspaces/repository/vendor/bpf/write_native_manifest.py" --app cilium --llvm-nm "llvm-nm-18" \
+	--output "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/manifest.json" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o,symbol=tail_drop_notify,source_xlated_len=752" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o,symbol=tail_drop_notify,source_xlated_len=696" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o,prog_type=6" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/cilium_placeholders.native.o"
+make: Leaving directory '/workspaces/repository/vendor/bpf'
