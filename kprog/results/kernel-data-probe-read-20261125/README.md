@@ -73,3 +73,13 @@ stack" (class F, B frame past 512 bytes), 12 "BPF program is too large" (over 1M
 "invalid mem access 'scalar'" (class G, 20 on 11-24), 1 "sequence of jumps is too complex". Class G fell from 20
 to 2 with the probe-read change. Verifier statistics of the 33 accepted B: time median 11086 us, max 19693 us;
 processed instructions median 3570, max 7055.
+
+## Cilium packet-bounds class, one case read (coordinator, 2026-11-25T20:2xZ)
+
+tail_handle_ipv4_from_host, kdata4 request 12, verify.stderr: B reads the byte at packet offset 22 (the IPv4 TTL)
+through a callee with `bpf_probe_read_kernel` on `pkt(off=22,r=0)`, then stores the decremented value with
+`*(u8 *)(r8 +0) = r4` where r8 is `pkt(off=22,r=0)`; the verifier refuses the store ("invalid access to packet,
+off=22 size=1 ... R8 offset is outside of the packet"). r=0 means no comparison with data_end reached this pointer in
+B. P makes that comparison before the TTL update (Cilium's revalidate_data before ipv4_dec_ttl), so B lacks a
+verifier-visible form of P's bounds check on this path. Most of the 22 are jiffies_64 programs that reached the
+verifier for the first time in kdata4.
