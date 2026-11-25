@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.X86ProducerSubAllocated
+#check KProgFormal.ClightRefinement.X86ProducerSubAllocated.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubAllocated.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubAllocated.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubAllocated.from_call
