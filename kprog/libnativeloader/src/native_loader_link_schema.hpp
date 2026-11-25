@@ -30,6 +30,8 @@ const char *lookup_kind_name(CompanionLoad::LookupSite::Kind kind)
         return "array";
     case CompanionLoad::LookupSite::Kind::PerCpuArray:
         return "percpu_array";
+    case CompanionLoad::LookupSite::Kind::ArrayOfMaps:
+        return "array_of_maps";
     }
     fail("native_link: unknown lookup kind");
 }

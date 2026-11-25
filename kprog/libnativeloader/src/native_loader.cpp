@@ -445,7 +445,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v41";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v42";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -2044,6 +2044,7 @@ struct CompanionLoad {
             HashOfMaps,
             Array,
             PerCpuArray,
+            ArrayOfMaps,
         } kind;
         uint64_t target_addr;
         uint32_t key_offset;
@@ -2625,9 +2626,14 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         site.key_offset = htab_offsets.key + rounded;
         return true;
     }
+    // The verifier inlines an ARRAY_OF_MAPS lookup (array_of_map_gen_lookup): the array element
+    // address, then the inner map pointer stored there.
     if (t == BPF_MAP_TYPE_ARRAY_OF_MAPS) {
-        site.kind = CompanionLoad::LookupSite::Kind::Call;
-        site.target_addr = array_of_map_lookup_elem_kernel_addr();
+        site.kind = CompanionLoad::LookupSite::Kind::ArrayOfMaps;
+        site.max_entries = shape.max_entries;
+        site.elem_size = sizeof(void *);
+        site.index_mask = roundup_pow2_mask(shape.max_entries);
+        site.value_offset = array_offsets.value;
         return true;
     }
     // An LPM trie has no inline lookup; the verifier's fixup calls the map type's own function

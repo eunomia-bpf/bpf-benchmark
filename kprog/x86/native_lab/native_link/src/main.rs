@@ -138,6 +138,7 @@ enum LookupKind {
     HashOfMaps,
     Array,
     PerCpuArray,
+    ArrayOfMaps,
 }
 
 #[derive(Clone, Debug)]
@@ -334,6 +335,7 @@ fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
         "hash_of_maps" => Ok(LookupKind::HashOfMaps),
         "array" => Ok(LookupKind::Array),
         "percpu_array" => Ok(LookupKind::PerCpuArray),
+        "array_of_maps" => Ok(LookupKind::ArrayOfMaps),
         _ => bail!("unknown lookup kind {s:?}"),
     }
 }
@@ -352,7 +354,7 @@ fn resolve_lookup_site_target(spec: &LookupSiteSpec, context: &str) -> Result<u6
         | LookupKind::LruHash
         | LookupKind::PerCpuHash
         | LookupKind::HashOfMaps => require_call_target(spec.target_addr, context),
-        LookupKind::Array | LookupKind::PerCpuArray => {
+        LookupKind::Array | LookupKind::PerCpuArray | LookupKind::ArrayOfMaps => {
             bail!("{context} inline array lookup should not resolve a call target")
         }
     }
@@ -1507,8 +1509,10 @@ fn build_arm64_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<u32>> {
         words.push(a64_madd64(X0, X9, X10, X8)?);
     }
 
-    if matches!(spec.kind, LookupKind::PerCpuArray) {
+    if matches!(spec.kind, LookupKind::PerCpuArray | LookupKind::ArrayOfMaps) {
         words.push(a64_ldr_u64(X0, X0, 0)?);
+    }
+    if matches!(spec.kind, LookupKind::PerCpuArray) {
         words.push(A64_MRS_X10_TPIDR_EL1);
         words.push(a64_add_shift64(X0, X0, X10, 0)?);
     }
@@ -1532,7 +1536,11 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
 
     if matches!(
         spec.kind,
-        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray
+        LookupKind::Call
+            | LookupKind::Lpm12
+            | LookupKind::Array
+            | LookupKind::PerCpuArray
+            | LookupKind::ArrayOfMaps
     ) {
         return Ok(Vec::new());
     }
@@ -1564,7 +1572,11 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
             words.push(A64_MRS_X10_TPIDR_EL1);
             words.push(a64_add_shift64(X0, X0, X10, 0)?);
         }
-        LookupKind::Call | LookupKind::Lpm12 | LookupKind::Array | LookupKind::PerCpuArray => {}
+        LookupKind::Call
+        | LookupKind::Lpm12
+        | LookupKind::Array
+        | LookupKind::PerCpuArray
+        | LookupKind::ArrayOfMaps => {}
     }
     let done = words.len();
     words[null_branch] = a64_patch_cbz_cbnz(words[null_branch], null_branch, done)?;
@@ -2305,7 +2317,7 @@ fn rewrite_arm64_pass(
                         };
                         if let Some(spec) = lookup_site {
                             match spec.kind {
-                                LookupKind::Array | LookupKind::PerCpuArray => {
+                                LookupKind::Array | LookupKind::PerCpuArray | LookupKind::ArrayOfMaps => {
                                     for word in build_arm64_array_lookup(spec)? {
                                         append_u32(&mut blob, word);
                                     }
