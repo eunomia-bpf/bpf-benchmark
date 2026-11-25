@@ -1,0 +1,3 @@
+Original current header120 pointer, byte dereference, actual t258 temporary, uchar cast and oldCF save all execute on SAME SUB allocated heap. Six real steps after genuine pointer-load boundary derive current reads from same initialized scalar/provider packet; no new header/CF/cast/run premise. Real source boundaries and generic environment layout cut correct original-depth failures at unchanged200000/512; all raw diagnostics retained.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

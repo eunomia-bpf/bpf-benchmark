@@ -1,0 +1,81 @@
+KProgFormal.ClightRefinement.X86ProducerSubOldCf.pointer (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (bindingBlock cfBlock : CC.Block)
+  (binding : CC.PTree.get X86_program_profile_bpf.___x86_bind le = some (CC.Val.Vptr bindingBlock 0))
+  (header : CC.Mem.load CC.Mptr memory bindingBlock 120 = some (CC.Val.Vptr cfBlock 0)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 1
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerLoad k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler CC.Stmt.Sskip k e
+      (CC.PTree.set KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerTemp (CC.Val.Vptr cfBlock 0) le)
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerSubOldCf.pointer' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte_source :
+  KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteLoad =
+    (CC.Stmt.Sset KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteTemp
+          KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteExpr).Ssequence
+      (CC.Stmt.Sset X86_program_profile_bpf.___x86_l_old_cf KProgFormal.ClightRefinement.X86ProducerSubOldCf.castExpr)
+'KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte_source' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubOldCf.source (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) :
+  (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate binding k memory lhs).continuation =
+    CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteLoad
+      (KProgFormal.ClightRefinement.X86ProducerSubOldCf.following binding k memory lhs)
+'KProgFormal.ClightRefinement.X86ProducerSubOldCf.source' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory : CC.Mem)
+  (cfBlock : CC.Block) (word : BitVec 64)
+  (current :
+    CC.PTree.get KProgFormal.ClightRefinement.X86ProducerSubFlagSource.pointerTemp le = some (CC.Val.Vptr cfBlock 0))
+  (read :
+    CC.Mem.load CC.Chunk.Mint8unsigned memory cfBlock 0 =
+      some (KProgFormal.ClightRefinement.X86ProducerScalarValue.value 0 word)) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge 4
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteLoad k e le memory)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler CC.Stmt.Sskip k e
+      (CC.PTree.set X86_program_profile_bpf.___x86_l_old_cf
+        (KProgFormal.ClightRefinement.X86ProducerScalarValue.value 0 word)
+        (CC.PTree.set KProgFormal.ClightRefinement.X86ProducerSubOldCf.byteTemp
+          (KProgFormal.ClightRefinement.X86ProducerScalarValue.value 0 word) le))
+      memory)
+'KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubOldCf.from_result {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) (k : CC.Cont) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    ((KProgFormal.ClightRefinement.X86ProducerSubFlagSource.certificate ready.entry.block k complete.after
+          (ready.stackOutcome.value - 8#64)).count +
+      6)
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagSource.start ready.entry.block k complete.after
+      (ready.stackOutcome.value - 8#64))
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler CC.Stmt.Sskip
+      (KProgFormal.ClightRefinement.X86ProducerSubOldCf.following ready.entry.block k complete.after
+        (ready.stackOutcome.value - 8#64))
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubOldCf.temps ready.entry.block k complete.after
+        (ready.stackOutcome.value - 8#64) (ready.scalars 0).block
+        (KProgFormal.ClightRefinement.X86ProducerScalarValue.value 0 (ready.scalarValues 0)))
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd)
+'KProgFormal.ClightRefinement.X86ProducerSubOldCf.from_result' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

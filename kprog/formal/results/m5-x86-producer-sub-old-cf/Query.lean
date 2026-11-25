@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.X86ProducerSubOldCf
+#check KProgFormal.ClightRefinement.X86ProducerSubOldCf.pointer
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubOldCf.pointer
+#check KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte_source
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte_source
+#check KProgFormal.ClightRefinement.X86ProducerSubOldCf.source
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubOldCf.source
+#check KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubOldCf.byte
+#check KProgFormal.ClightRefinement.X86ProducerSubOldCf.from_result
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubOldCf.from_result
