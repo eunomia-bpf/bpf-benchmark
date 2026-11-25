@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubFlagMask
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagMask.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagMask.source_call
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagMask.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagMask.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagMask.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagMask.arguments

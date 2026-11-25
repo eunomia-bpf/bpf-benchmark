@@ -1,0 +1,37 @@
+KProgFormal.ClightRefinement.X86ProducerSubFlagMask.source_call :
+  KProgFormal.ClightRefinement.X86ProducerSubFlagMask.maskCall =
+    CC.Stmt.Scall (some KProgFormal.ClightRefinement.X86ProducerSubFlagMask.resultName)
+      KProgFormal.ClightRefinement.X86ProducerSubFlagMask.expression
+      KProgFormal.ClightRefinement.X86ProducerSubFlagMask.argumentExpressions
+'KProgFormal.ClightRefinement.X86ProducerSubFlagMask.source_call' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagMask.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagMask.certificate binding k memory lhs cfBlock word).count
+    (KProgFormal.ClightRefinement.X86ProducerSubFlagMask.start binding k memory lhs cfBlock word)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubFlagMask.maskCall
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagMask.certificate binding k memory lhs cfBlock word).continuation
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagMask.certificate binding k memory lhs cfBlock word).output
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd)
+'KProgFormal.ClightRefinement.X86ProducerSubFlagMask.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagMask.arguments (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) :
+  CC.doEvalExprlist KProgFormal.ClightRefinement.X86ProducerLayout.ge
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubFlagMask.certificate binding k memory lhs cfBlock word).output
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).snd
+      KProgFormal.ClightRefinement.X86ProducerSubFlagMask.argumentExpressions [CC.tuchar] =
+    some [CC.Val.Vint 8#32]
+'KProgFormal.ClightRefinement.X86ProducerSubFlagMask.arguments' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
