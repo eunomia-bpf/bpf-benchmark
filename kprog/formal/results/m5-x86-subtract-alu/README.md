@@ -1,0 +1,3 @@
+Original x86_alu_result operation1 executes all20 real transitions for arbitrary lhs/rhs/width, including actual switch, double-not-zero borrow expression, assignments, breaks and return. It derives wrapping lhs-minus-rhs and retains the complete arbitrary heap, without a result/helper-run premise or new arithmetic model. Failed proof cuts retained and corrected using actual imported unary/type-conversion definitions and sub-zero lemma at original caps.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

@@ -1,0 +1,11 @@
+KProgFormal.ClightRefinement.X86SubtractAlu.internal (ge : CC.CGenv) (lhs rhs : BitVec 64) (width : BitVec 8)
+  (k : CC.Cont) (m : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun ge 20
+    (CC.State.Callstate (CC.FunDef.Internal X86_program_profile_bpf.f_x86_alu_result)
+      [CC.Val.Vlong lhs, CC.Val.Vlong rhs, CC.Val.Vint 1#32, CC.Val.Vint (BitVec.setWidth 32 width)] k m)
+    (CC.State.Returnstate (CC.Val.Vlong (lhs - rhs)) (CC.callCont k) m)
+'KProgFormal.ClightRefinement.X86SubtractAlu.internal' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86SubtractAlu
+#check KProgFormal.ClightRefinement.X86SubtractAlu.internal
+#print axioms KProgFormal.ClightRefinement.X86SubtractAlu.internal
