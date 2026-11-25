@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerSubFlagWidth
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.invoke
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.invoke
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.from_old_cf
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.from_old_cf
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagWidth.from_call

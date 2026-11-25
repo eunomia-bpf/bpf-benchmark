@@ -1,0 +1,3 @@
+SAME original provider/PUSH/SUB trace now includes actual oldCF header/byte/temp/cast/save, every reached flag-arm guard/switch/SUB loop and original effective-width call/helper/return. Current heap/source continuations/temporaries/provider ABIs retained, no flag-read/selector/helper-run premise. True width cast and later mask/sign/helper/6flag stores remain original unconsumed source; current producer-owned permission maps/ranges derive actual store/free/allocation evidence.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
