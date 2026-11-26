@@ -1,0 +1,13 @@
+{
+  "returncode": 0,
+  "request_id": 39,
+  "object_bytes": 1791576,
+  "ir_level": 1,
+  "backend_level": 1,
+  "input": "trusted_x86.bpf.bounds.bc",
+  "generated_artifacts": [
+    "trusted_x86.bpf.o"
+  ],
+  "untouched_intermediates": "Existing backend-input.ll and MIR files are archived for provenance, not produced by this control.",
+  "scope": "Diagnose uninterrupted normal-O1 B emission from preserved bounds IR.\n\nThis bypasses only the MIR serialization/packing boundary in a result-local\ncontrol. Production policy, frontend input, native P and LTO are unchanged.\n"
+}
