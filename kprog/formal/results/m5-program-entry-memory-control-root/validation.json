@@ -1,0 +1,68 @@
+{
+  "confirmed_utc": "2026-11-26T23:09:55.648530+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 6.370834112167358,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1363,
+  "initial_full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 142.44630432128906,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-memory-control-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.227220058441162,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 21934,
+      "sha256": "2e2581ffb8a846d5c254d6698da18ea8be06819ea1267d6f3122dabc8baaf442"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 6212,
+      "sha256": "83a54e323c1f71cb71053d2c519abbdc5814e7ffed83dd698c851e0c5f485476"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports the actual same-source/helper/control line, including real code/PC Admission transport, two real B.GT successor code sites, provider-derived CMP views and complete original source return/freeList. Original pointer/MOV effects derive helper/current-resource/temporary inputs. The original eight helper provider families supply the same reached arrays/Packet and exact source trace. The admitted native suffix has four genuine imported steps and live pre-terminal source/code/flags facts. Native physical helper/memory/environment execution, complete global input/output and universal operation domains retain their explicit worklist scope.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

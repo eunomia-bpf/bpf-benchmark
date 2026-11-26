@@ -40,6 +40,14 @@ checked ISA on arbitrary heaps. Scoped logical-register calls cover widths,
 aliases and real RSP release/store/free paths within their stated domains.
 AArch64 source/caller/native fixture prefixes are also integrated.
 
+The complete original AArch64 source return retains both memory helpers,
+provider traces, caller memory and its scalar result observer. Actual pointer
+and MOV effects derive helper inputs, resources and source temporaries. Its admitted
+CMP/B.GT/BL/RET native suffix selects genuine code at two actual successor
+sites from the same provider values. Public theorem types expose the live
+source heap and code domains; the worklist orders native helper memory and
+whole-program input/output correspondence next.
+
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
 represents GPRs, six flag bytes, XMM0 and initialized cache bytes of the exact

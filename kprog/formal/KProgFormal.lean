@@ -372,3 +372,5 @@ import KProgFormal.ClightRefinement.X86ProducerSubOfStore
 import KProgFormal.ClightRefinement.X86ProducerSubPfStore
 import KProgFormal.ClightRefinement.X86ProducerSubAfStore
 import KProgFormal.ClightRefinement.Arm64MemsetProgramCaller
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMemoryControlReturn
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCompleteControl

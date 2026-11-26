@@ -1,0 +1,10 @@
+import KProgFormal
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryPostMemoryCodeAdmission.transport
+#print axioms Arm64ProgramEntryPostMemoryCodeAdmission.transport
+#check Arm64ProgramEntryPostMemoryBranchSites.admission
+#print axioms Arm64ProgramEntryPostMemoryBranchSites.admission
+#check Arm64ProgramEntryMemoryControlReturn.compose
+#print axioms Arm64ProgramEntryMemoryControlReturn.compose
+#check Arm64ProgramEntryCompleteControl.compose
+#print axioms Arm64ProgramEntryCompleteControl.compose
