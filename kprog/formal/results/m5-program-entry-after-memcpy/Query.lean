@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAfterMemcpy
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryAfterMemcpy.source
+#print axioms Arm64ProgramEntryAfterMemcpy.source
+#check Arm64ProgramEntryAfterMemcpy.read_step
+#print axioms Arm64ProgramEntryAfterMemcpy.read_step
+#check Arm64ProgramEntryAfterMemcpy.execute
+#print axioms Arm64ProgramEntryAfterMemcpy.execute
