@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyByteStorage
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.local_load
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.local_load
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.storage
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.gpr
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.gpr
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.flag
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteStorage.flag
