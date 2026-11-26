@@ -1,0 +1,32 @@
+arg#0 reference type('UNKNOWN ') size cannot be determined: -22
+0: R1=ctx() R10=fp0
+0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()
+1: (bf) r2 = r10                      ; R2=fp0 R10=fp0
+2: (07) r2 += -312                    ; R2=fp-312
+3: (7b) *(u64 *)(r10 -312) = r2       ; R2=fp-312 R10=fp0 fp-312=fp-312
+4: (bf) r1 = r2                       ; R1=fp-312 R2=fp-312
+5: (bc) w1 = w1                       ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+6: (bf) r2 = r1                       ; R1=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+7: (63) *(u32 *)(r10 -312) = r2       ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-312=mmmmscalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+8: (79) r1 = *(u64 *)(r10 -312)       ; R1=scalar() R10=fp0 fp-312=mmmmscalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))
+9: (7b) *(u64 *)(r10 -320) = r1       ; R1=scalar(id=2) R10=fp0 fp-320=scalar(id=2)
+10: (18) r7 = 0xffff8c3045abb930      ; R7=map_value(map=kprog_unspec,ks=4,vs=8)
+12: (79) r1 = *(u64 *)(r7 +0)         ; R1=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+13: (79) r2 = *(u64 *)(r7 +0)         ; R2=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+14: (79) r3 = *(u64 *)(r7 +0)         ; R3=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+15: (79) r4 = *(u64 *)(r7 +0)         ; R4=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+16: (79) r5 = *(u64 *)(r7 +0)         ; R5=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+17: (79) r0 = *(u64 *)(r7 +0)         ; R0=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+18: (7b) *(u64 *)(r10 -16) = r2       ; R2=scalar(id=3) R10=fp0 fp-16=scalar(id=3)
+19: (7b) *(u64 *)(r10 -24) = r0       ; R0=scalar(id=4) R10=fp0 fp-24=scalar(id=4)
+20: (7b) *(u64 *)(r10 -32) = r5       ; R5=scalar(id=5) R10=fp0 fp-32=scalar(id=5)
+21: (7b) *(u64 *)(r10 -40) = r4       ; R4=scalar(id=6) R10=fp0 fp-40=scalar(id=6)
+22: (7b) *(u64 *)(r10 -48) = r3       ; R3=scalar(id=7) R10=fp0 fp-48=scalar(id=7)
+23: (7b) *(u64 *)(r10 -56) = r1       ; R1=scalar(id=8) R10=fp0 fp-56=scalar(id=8)
+24: (79) r1 = *(u64 *)(r7 +0)         ; R1=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)
+25: (7b) *(u64 *)(r10 -328) = r1      ; R1=scalar(id=9) R10=fp0 fp-328=scalar(id=9)
+26: (bf) r1 = r10                     ; R1=fp0 R10=fp0
+27: (07) r1 += -8                     ; R1=fp-8
+28: (7b) *(u64 *)(r10 -808) = r6
+invalid write to stack R10 off=-808 size=8
+processed 28 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

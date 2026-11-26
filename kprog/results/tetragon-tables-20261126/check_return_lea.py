@@ -1,4 +1,4 @@
-"""A displaced saved return PC must not retain its original exact target."""
+"""Displaced return PCs and external RSP aliases must not invent RET edges."""
 import json
 from pathlib import Path
 import subprocess
@@ -22,7 +22,7 @@ if revision:
 linker = ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link'
 results = []
 for name, known in [('return_lea_copy', True), ('return_lea_forward', False),
-                    ('return_lea_backward', False)]:
+                    ('return_lea_backward', False), ('return_external_stack', False)]:
     out = HERE / 'calls' / name
     out.mkdir(parents=True, exist_ok=True)
     linked = subprocess.run([linker, '--input', HERE / 'calls.o', '--symbol', name,
@@ -45,9 +45,9 @@ for name, known in [('return_lea_copy', True), ('return_lea_forward', False),
     results.append(dict(case=name, known_return=actual, expected=known,
                         return_sites={str(pc): sorted(targets) if targets is not None else None
                                       for pc, targets in sites.items()}))
-suffix = '-before' if revision else ''
-(HERE / ('return-lea-checks' + suffix + '.json')).write_text(json.dumps(results, indent=2) + '\n')
+suffix = '-' + revision if revision else ''
+(HERE / ('return-safety-checks' + suffix + '.json')).write_text(json.dumps(results, indent=2) + '\n')
 failures = [row for row in results if row['known_return'] != row['expected']]
 if failures:
     raise AssertionError(failures)
-print('3 assembled return-address LEA cases passed')
+print('4 assembled return-address safety cases passed')

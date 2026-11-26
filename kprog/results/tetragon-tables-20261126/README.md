@@ -333,3 +333,26 @@ commands are retained in unsplit-dry-run.log. Production B/P flags, image,
 all LTO components and frozen full timing stay unchanged.
 
 PERF 2026-11-26T19:39:25Z: uninterrupted-O1 controller708379 compiled39 at19:37:29–19:37:39Z, one child0/ELF1791576. Static executable sections have96458instructions including40in .text, directFP memory offsets reach-1424. The archive9350013bytes has tar/zstd/split all0. Stock and final publication remain pending; this is no verifier acceptance or production-policy change. Recipe/fresh24replay publishedd3532f653, exact launch texts retained because the job started from18d696405 while that publication ran.
+
+PERF 2026-11-26T19:43:10Z — Actual uninterrupted-O1 stock failure
+
+Controller708379 completes1; stock19:38:43–19:38:48Z submits96458instructions
+and rejects insn28 atR10-808, processed28/errno13/rc2/stock_loadedfalse.
+Raw publicationsfffad8a3d/f429c0220 retain compiler archive9350013bytes and
+stock metadata; completed ignored logs are now explicitly committed.
+Removing MIR serialization/packing alone does not fix stack bounds. No
+production recipe is adopted and no claim of a unique layout cause is made.
+The original normal three stock failures and9emission failure remain.
+
+The return-fact audit also found return_from indexing its saved-value map
+with False (external-pointer marker), which Python equates with offset0.
+An actual local callee copies its savedPC to private offset0, changesRSPto
+externalRDI and returns;18d696405 invented the original continuation.
+The common analysis now requires an actual integer private stack offset,
+matching the existing table-fact consumer guard. Four return-safety cases,
+18call-liveness and8persistent-table cases pass (30total). Prior18d fails
+the new external-stack case. This fixes analysis correctness only; nativeP,
+flags, image and runtime LTO stay unchanged. Four source-group representative
+replays are in progress; full timing remains frozen.
+
+PERF 2026-11-26T19:44:05Z: after the external-RSP integer guard, representatives9/12/38/39 all regenerate B C and each source text is byte-for-byte unchanged. return-stack-breadth.json/log records these four distinct-source classes, not a new full24replay or stock acceptance. The earlier full24replay after the LEA fix remains separately retained. No B rebuild or native/image change is justified by identical source text. All finite controls and their publications have completed; current compiler controls are diagnostics only and none is adopted.

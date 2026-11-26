@@ -1,0 +1,99 @@
+{
+  "recorded_utc": "2026-11-26T19:43:10Z",
+  "controller": {
+    "started_utc": "2026-11-26T19:37:29Z",
+    "compile_target": "unsplit-group",
+    "source": "18d696405b24af2aefae0438148ed52d902c0fa0",
+    "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+    "scope": "Common uninterrupted O1 backend control, production policy unchanged. B compilation and sole-kernel detached stock verification only; no native execution or timing.",
+    "cases": [
+      {
+        "request": 39,
+        "started_utc": "2026-11-26T19:37:29Z",
+        "command": [
+          "taskset",
+          "-c",
+          "16",
+          "prlimit",
+          "--as=17179869184",
+          "--",
+          "make",
+          "-C",
+          "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+          "unsplit-group",
+          "REQUEST=39",
+          "RECORDS=/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/39"
+        ],
+        "compile_returncode": 0,
+        "ended_utc": "2026-11-26T19:37:39Z",
+        "archive_members": [
+          "trusted_x86.bpf.backend-input.ll",
+          "trusted_x86.bpf.before.mir",
+          "trusted_x86.bpf.bounds-input.bc",
+          "trusted_x86.bpf.bounds.bc",
+          "trusted_x86.bpf.i",
+          "trusted_x86.bpf.o",
+          "trusted_x86.bpf.packed.lowering.json",
+          "trusted_x86.bpf.packed.mir"
+        ],
+        "archive_pipeline_status": [
+          0,
+          0,
+          0
+        ],
+        "archive_parts": [
+          {
+            "name": "compiler-evidence.tar.zst.part-aa",
+            "bytes": 9350013
+          }
+        ]
+      }
+    ],
+    "stock_command": [
+      "make",
+      "-f",
+      "kprog/results/cilium-headlen-20261119/Makefile",
+      "archive-stock",
+      "OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/stock",
+      "INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/stock-index.json",
+      "REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/replay"
+    ],
+    "stock_started_utc": "2026-11-26T19:38:43Z",
+    "stock_returncode": 2,
+    "stock_ended_utc": "2026-11-26T19:38:48Z",
+    "ended_utc": "2026-11-26T19:38:48Z",
+    "controller_status": 1
+  },
+  "compile": {
+    "returncode": 0,
+    "request_id": 39,
+    "object_bytes": 1791576,
+    "ir_level": 1,
+    "backend_level": 1,
+    "input": "trusted_x86.bpf.bounds.bc",
+    "generated_artifacts": [
+      "trusted_x86.bpf.o"
+    ],
+    "untouched_intermediates": "Existing backend-input.ll and MIR files are archived for provenance, not produced by this control.",
+    "scope": "Diagnose uninterrupted normal-O1 B emission from preserved bounds IR.\n\nThis bypasses only the MIR serialization/packing boundary in a result-local\ncontrol. Production policy, frontend input, native P and LTO are unchanged.\n"
+  },
+  "stock": {
+    "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+    "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/replay",
+    "requests": [
+      {
+        "request": 39,
+        "returncode": 2,
+        "stock_loaded": false,
+        "errno": 13,
+        "instructions": 96458
+      }
+    ],
+    "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+  },
+  "adopted": false,
+  "causal_scope": "Uninterrupted normal-O1 B emission still fails stock stack bounds. Removing MIR serialization/packing alone does not fix the failure; no claim about unique cause of the exact original layout.",
+  "first_bad_instruction": 28,
+  "first_bad_stack_offset": -808,
+  "processed_instructions": 28
+}

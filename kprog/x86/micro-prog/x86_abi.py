@@ -127,7 +127,10 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
         reg, width, shift = parsed
         return state.defined[reg] >> shift & (1 << width) - 1
     def return_from(state):
-        destinations = state.pointers.get(state.aliases[rsp])
+        stack = state.aliases[rsp]
+        # False marks an external pointer; Python otherwise aliases it with
+        # private stack offset zero when looking up the saved return value.
+        destinations = state.pointers.get(stack) if type(stack) is int else None
         if return_sites_by_pc is not None:
             if (not isinstance(destinations, frozenset) or not destinations or
                     any(d.target is None for d in destinations)):

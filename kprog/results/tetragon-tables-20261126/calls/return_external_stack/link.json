@@ -1,0 +1,5 @@
+{
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=return_external_stack (8 bytes), 2 reachable symbol(s) total\n  - return_external_stack (vaddr 0x125, 8 bytes) [entry]\n  - callee_external_stack (vaddr 0x12d, 13 bytes)\nnative-link: wrote proof object 25 bytes, 0 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/calls/return_external_stack/test.proof.o\n"
+}

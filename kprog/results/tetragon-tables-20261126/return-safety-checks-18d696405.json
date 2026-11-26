@@ -1,0 +1,38 @@
+[
+  {
+    "case": "return_lea_copy",
+    "known_return": true,
+    "expected": true,
+    "return_sites": {
+      "23": [
+        5
+      ]
+    }
+  },
+  {
+    "case": "return_lea_forward",
+    "known_return": false,
+    "expected": false,
+    "return_sites": {
+      "24": null
+    }
+  },
+  {
+    "case": "return_lea_backward",
+    "known_return": false,
+    "expected": false,
+    "return_sites": {
+      "24": null
+    }
+  },
+  {
+    "case": "return_external_stack",
+    "known_return": true,
+    "expected": false,
+    "return_sites": {
+      "24": [
+        5
+      ]
+    }
+  }
+]

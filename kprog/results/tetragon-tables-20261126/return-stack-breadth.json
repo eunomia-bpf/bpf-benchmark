@@ -1,0 +1,81 @@
+{
+  "recorded_utc": "2026-11-26T19:42:53Z",
+  "returncode": 0,
+  "scope": "One representative of each of the four already-established identical-source groups. Source generation, not stock acceptance.",
+  "cases": [
+    {
+      "request": 9,
+      "source_unchanged": true
+    },
+    {
+      "request": 12,
+      "source_unchanged": true
+    },
+    {
+      "request": 38,
+      "source_unchanged": true
+    },
+    {
+      "request": 39,
+      "source_unchanged": true
+    }
+  ],
+  "generation": [
+    {
+      "request_id": 9,
+      "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/9.success.tar.gz",
+      "historical_error": "unresolved finite indirect target at 0x3580: jmp    rax",
+      "status": "lowered",
+      "input_instructions": 4917,
+      "output_instructions": 4900,
+      "b_source_generation": {
+        "status": "generated",
+        "source_bytes": 717038
+      },
+      "liveness_witnesses": [],
+      "indirect_jump_context": []
+    },
+    {
+      "request_id": 12,
+      "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/12.success.tar.gz",
+      "historical_error": "relative table computation has live register or flag results",
+      "status": "lowered",
+      "input_instructions": 2526,
+      "output_instructions": 2498,
+      "b_source_generation": {
+        "status": "generated",
+        "source_bytes": 371430
+      },
+      "liveness_witnesses": [],
+      "indirect_jump_context": []
+    },
+    {
+      "request_id": 38,
+      "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/38.success.tar.gz",
+      "historical_error": "relative table computation has live register or flag results",
+      "status": "lowered",
+      "input_instructions": 2515,
+      "output_instructions": 2487,
+      "b_source_generation": {
+        "status": "generated",
+        "source_bytes": 370458
+      },
+      "liveness_witnesses": [],
+      "indirect_jump_context": []
+    },
+    {
+      "request_id": 39,
+      "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/39.success.tar.gz",
+      "historical_error": "relative table computation has live register or flag results",
+      "status": "lowered",
+      "input_instructions": 4252,
+      "output_instructions": 4244,
+      "b_source_generation": {
+        "status": "generated",
+        "source_bytes": 608257
+      },
+      "liveness_witnesses": [],
+      "indirect_jump_context": []
+    }
+  ]
+}

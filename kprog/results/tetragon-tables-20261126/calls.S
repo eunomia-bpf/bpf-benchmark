@@ -147,4 +147,14 @@ callee_\name:
 return_lea return_lea_copy, 0
 return_lea return_lea_forward, 1
 return_lea return_lea_backward, -1
+entry return_external_stack, callee_external_stack
+    xor %eax,%eax
+end return_external_stack
+.type callee_external_stack,@function
+callee_external_stack:
+    mov (%rsp),%rax
+    mov %rax,8(%rsp)
+    mov %rdi,%rsp
+    ret
+.size callee_external_stack,.-callee_external_stack
 .section .note.GNU-stack,"",@progbits
