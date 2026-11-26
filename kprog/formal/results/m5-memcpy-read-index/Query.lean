@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadIndex
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.physical_index
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.physical_index
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadIndex.kept
