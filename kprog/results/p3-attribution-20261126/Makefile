@@ -3,7 +3,7 @@ HERE := $(ROOT)/kprog/results/p3-attribution-20261126
 APP ?= tetragon/observer
 OUT ?= $(HERE)
 
-.PHONY: diagnostic profile batch checks pmu-check
+.PHONY: diagnostic profile batch checks analyze pmu-check
 diagnostic:
 	python3 $(HERE)/diagnostic.py $(APP) $(OUT)
 profile:
@@ -12,5 +12,7 @@ batch:
 	python3 $(HERE)/batch.py $(OUT)
 checks:
 	python3 $(HERE)/batch.py $(OUT) diagnostic
+analyze:
+	python3 $(HERE)/profile_summary.py $(OUT)/tetragon-profile $(OUT)/tracee-profile
 pmu-check:
 	/workspaces/.agent-state/kprog-ck/perf-tool/perf stat -a -C 0-7 -e cpu_core/cycles/ -- sleep 1
