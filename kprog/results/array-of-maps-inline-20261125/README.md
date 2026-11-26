@@ -42,3 +42,23 @@ The arm64 JIT inlines bpf_get_current_task and bpf_get_current_task_btf as `mrs 
 arm64 path now emits the same instruction for both calls (main.rs, next to the arm64 get_smp_processor_id inline).
 Build and the 9 native-link tests pass. chain-arm64.sh rebuilds the arm64 image and runs the arm64 functional check
 (qemu, `make -C kprog/perf/one-image-arm64 check`) after the queued OTel profile.
+
+## arm64 functional check, 2026-11-26
+
+The arm64 image one-image-arm64-20261126T0319Z was built from 24bbf8b89, which contains the ARRAY_OF_MAPS and
+get_current_task changes above (make rc 0). `make -C kprog/perf/one-image-arm64 check` then ran qemu TCG
+(cortex-a57, 4 vCPUs, 8G), one 10 s sample per app with bpf stats on. All six apps returned rc 0 and their run
+metadata say `completed`:
+
+| app | end (UTC) | run |
+|---|---|---|
+| otelcol-ebpf-profiler/profiling | 04:04:05 | corpus/results/arm64_qemu_corpus_19700101_000013_988050 |
+| bcc/set | 04:06:36 | corpus/results/arm64_qemu_corpus_19700101_000012_898849 |
+| cilium/agent | 04:17:02 | corpus/results/arm64_qemu_corpus_19700101_000015_309957 |
+| tetragon/observer | 04:37:19 | corpus/results/arm64_qemu_corpus_19700101_000013_198696 |
+| tracee/monitor | 04:50:13 | corpus/results/arm64_qemu_corpus_19700101_000014_067643 |
+| katran | 04:53:24 | corpus/results/arm64_qemu_corpus_19700101_000016_838766 |
+
+Logs: /workspaces/kprog-raw/coordinator/arm64-check-20261125.log, /workspaces/kprog-raw/one-image-arm64-runs/check.log
+and the build log /workspaces/kprog-raw/builds/one-image-arm64-20261126T0319Z.log. TCG times serve the functional
+check only; arm64 timing runs on the Spark.
