@@ -1,0 +1,7 @@
+# Original20-index tag-release scan control
+
+The actual clobber tag scan initializes its independent unsigned32 counter and visits all20 word indices. The original capacity160 load and (capacity+7)/8 division give the actual bound20. Real signed predicates select the tag RMW body only at0 through7. Those true paths execute BOTH original bias reads, including s_clobbers_0 and its bool cast; indices8 through19 execute the genuine short-circuit t4=0 path. The true capacity guard takes7 transitions, active selection11/inactive selection8, giving18 or15 to the original selected body or skip. Each inactive complete iteration takes18 including the actual counter/backedge. Counter20 exits with the original guard/break8 and outer do/while/sequence3 to genuine clobber rest. All source parameter, word counter, signed bounds and completed byte counter observations remain, with identical heap on these controls. Both original branches and every counter are retained. The selected eight actual offset0 tag-word read/modify/write stores and complete20 composition follow, then remaining provider/clobber/free/return/caller work before related root/M5 recount/M6. Original C, exports, imported semantics and all prior interfaces remain.
+
+Focused build 348 and 10 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
