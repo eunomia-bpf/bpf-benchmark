@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-11-26T10:45:17.094769+00:00",
+  "controller_pid": 448885,
+  "waits_for_controller": 445963,
+  "revision": "95ad0f3ca",
+  "command": [
+    "bash",
+    "kprog/results/p3-attribution-20261126/retry-checks.sh",
+    "445963",
+    "/workspaces/repository/kprog/results/p3-attribution-20261126/checks-20261126T104517Z"
+  ],
+  "scope": "After the active profiles, three real Tetragon checks then three real OTel checks; first attempts were launcher errors without app runs."
+}

@@ -36,3 +36,60 @@ Tracee profiles continue, then retry-checks.sh runs the required three
 Tetragon and three OTel checks. A launcher failure now stops dependent check
 launches while retaining their error; it does not discard measurements or
 block independent profiles.
+
+## Historical localization before the repeats
+
+`historical-mix.json` reads the five named raw runs using the same ns/call
+calculation and existing >=100-call cutoff as native_eval_20260529.py.
+`historical-summary.txt` retains the existing check_summary.py output, including
+workload throughput; no framework counter or aggregation code changes.
+
+| Tetragon run | eBPF aggregate ns/call | Native aggregate ns/call | eBPF tracepoint ns/call | Native tracepoint ns/call | Native kprobe group ns/call |
+|---|---:|---:|---:|---:|---:|
+| 20261125_111939_929854 | 595.1 | 316.6 | 536.8 | 671.1 | 55.2 |
+| 20261125_153231_815043 | 1282.3 | 396.0 | none retained | none retained | 482.7 |
+| 20261126_072843_366158 | 1137.6 | 1150.8 | 1530.7 | 2609.4 | 54.1 |
+
+The 11:19 and P3 runs each have one retained tracepoint record, with the same
+reported byte lengths: eBPF 14,942 B and native 14,003 B. The native kprobe and
+return-kprobe groups stay near their earlier costs; the tracepoint drives the
+observed native increase. Its eBPF cost also rises substantially. The 15:32 run
+has no tracepoint record above the existing cutoff; this does not establish
+whether a program was loaded or ran, and its aggregate is a different call mix.
+Program-name/type groups can combine several IDs, so the kprobe rows are group
+observations rather than a claim of exact program identity.
+
+OTel's one retained perf-event entry rises in both phases: eBPF 3320.4 to
+3815.7 ns/call, native 3531.5 to 4220.0. Diagnostic throughput ratios from the
+existing evaluator are Tetragon 1.025x/1.415x/0.763x for the three rows above,
+and OTel 1.045x/0.993x for Nov 25/P3. This localization neither proves nor
+excludes a P3 cause; repeated short checks and phase-resolved PMU samples are
+still required before changing implementation.
+
+## Profile capture completed
+
+Both profile guests finished with rc 0 and app status `ok`, error empty:
+Tetragon raw run `x86_kvm_corpus_20261126_104304_967169` and Tracee
+`x86_kvm_corpus_20261126_105114_881631`. The PMU recorder wrote 11,446,569
+Tetragon samples (804.932 MB) and 7,978,939 Tracee samples (559.313 MB).
+Each raw profile, dynamic symbol snapshots and linked-code cache is retained
+locally and committed as compressed 44 MiB parts in its profile directory.
+
+The wrapper returned an error because the requested SIGINT stop of perf
+terminated its sleep child with status 143. Both guest exits and original
+recorder/wrapper statuses remain recorded; no app measurement is discarded
+or repeated. Future runs record the explicit stop request and accept 143 only
+when that stop was requested after guest completion.
+
+`profile_summary.py` uses the last completed shim measure_start/measure_finish
+pair in each phase, the captured clock conversion and phase-specific module/BPF
+snapshots. It reports flat cycle-sample shares for P3, kernel hash lookup,
+program bodies, memset and the remaining work. It also counts real stack
+frames separately from perf context markers. Flat memset samples alone are
+not proof that every memset call came from P; caller attribution and the
+chosen denominator must accompany the final memset weight.
+
+The corrected six short checks run after the profiles in
+`checks-20261126T104517Z`. PMU summary job 452715 waits for timing SH and writes
+phase-summary.json in each profile directory. These analyses and checks remain
+pending before causal attribution or a production optimization.

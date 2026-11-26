@@ -1,0 +1,11 @@
+{
+  "pid": 452715,
+  "waits_for_controller": 445963,
+  "command": "make -C kprog/results/p3-attribution-20261126 analyze OUT=/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z",
+  "resources": "timing SH, CPUs16-17,8GiB address-space cap",
+  "outputs": [
+    "tetragon-profile/phase-summary.json",
+    "tracee-profile/phase-summary.json"
+  ],
+  "scope": "Derived PMU phase weights only; source image and workload unchanged"
+}

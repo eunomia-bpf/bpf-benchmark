@@ -1,0 +1,22 @@
+20261125_111025_188467 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=0.940x (3320.4 / 3531.5 ns) thr=1.045x
+20261125_111306_194833 bcc/set                          status=ok samples=1 s=10.0 per-call=1.018x (104.8 / 103.0 ns) thr=1.010x
+20261125_111623_024146 cilium/agent                     status=ok samples=1 s=10.0 per-call=1.164x (626.0 / 537.9 ns) thr=1.139x
+20261125_111939_929854 tetragon/observer                status=ok samples=1 s=10.0 per-call=1.880x (595.1 / 316.6 ns) thr=1.025x
+20261125_112423_473416 tracee/monitor                   status=ok samples=1 s=10.0 per-call=1.943x (363.9 / 187.3 ns) thr=1.713x
+20261125_112836_233680 katran                           status=ok samples=1 s=10.0 per-call=1.040x (172.7 / 166.2 ns) thr=1.011x
+20261125_113056_394981 cilium/agent                     status=ok samples=1 s=10.0 per-call=1.129x (658.0 / 582.7 ns) thr=1.149x
+20261125_114033_645046 unreadable expected one app json under corpus/results/x86_kvm_corpus_20261125_114033_645046, found []
+20261125_132903_647758 cilium/agent                     status=ok samples=1 s=10.0 per-call=0.807x (636.0 / 787.6 ns) thr=0.972x
+20261125_133945_721718 unreadable expected one app json under corpus/results/x86_kvm_corpus_20261125_133945_721718, found []
+20261125_152158_968672 cilium/agent                     status=ok samples=1 s=10.0 per-call=0.578x (636.3 / 1100.5 ns) thr=0.789x
+20261125_153231_815043 tetragon/observer                status=ok samples=1 s=10.0 per-call=3.238x (1282.3 / 396.0 ns) thr=1.415x
+20261125_185915_685058 tracee/monitor                   status=ok samples=1 s=10.0 per-call=1.564x (730.0 / 466.7 ns) thr=1.400x
+20261126_021130_098005 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=60.0 per-call=- thr=1.331x
+20261126_021711_899337 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=0.687x (4797.7 / 6984.7 ns) thr=0.300x
+20261126_072004_258004 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=0.904x (3815.7 / 4220.0 ns) thr=0.993x
+20261126_072235_795145 bcc/set                          status=ok samples=1 s=10.0 per-call=1.028x (107.8 / 104.8 ns) thr=1.013x
+20261126_072536_648665 cilium/agent                     status=ok samples=1 s=10.0 per-call=1.229x (850.1 / 691.7 ns) thr=1.167x
+20261126_072843_366158 tetragon/observer                status=ok samples=1 s=10.0 per-call=0.989x (1137.6 / 1150.8 ns) thr=0.763x
+20261126_073319_240233 tracee/monitor                   status=ok samples=1 s=10.0 per-call=2.470x (392.9 / 159.1 ns) thr=1.799x
+20261126_073722_681565 katran                           status=ok samples=1 s=10.0 per-call=1.048x (178.7 / 170.5 ns) thr=1.038x
+20261126_104304_967169 unreadable expected one app json under corpus/results/x86_kvm_corpus_20261126_104304_967169, found []

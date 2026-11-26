@@ -1,0 +1,431 @@
+[
+  {
+    "run": "corpus/results/x86_kvm_corpus_20261125_111939_929854",
+    "app": "tetragon/observer",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 595.1165426675261,
+      "calls": 66365917,
+      "time_ns": 39495455076,
+      "retained": 21,
+      "records": 287,
+      "groups": {
+        "generic_kprobe_:kprobe": {
+          "calls": 25178627,
+          "time_ns": 21970832566,
+          "ids": [
+            105,
+            111,
+            132,
+            139,
+            150,
+            225,
+            234,
+            245,
+            256,
+            303,
+            54,
+            59,
+            71,
+            87,
+            96
+          ],
+          "ns_per_call": 872.5985164322105,
+          "call_share": 0.3793909304379837,
+          "time_share": 0.5562876164794693
+        },
+        "generic_tracepo:tracepoint": {
+          "calls": 31779470,
+          "time_ns": 17059125706,
+          "ids": [
+            211
+          ],
+          "ns_per_call": 536.7970487235942,
+          "call_share": 0.47885226990836277,
+          "time_share": 0.4319262981822491
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 9407820,
+          "time_ns": 465496804,
+          "ids": [
+            142,
+            152,
+            253,
+            66,
+            90
+          ],
+          "ns_per_call": 49.47977363512482,
+          "call_share": 0.14175679965365354,
+          "time_share": 0.011786085338281519
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 316.56782622739877,
+      "calls": 89673239,
+      "time_ns": 28387662341,
+      "retained": 19,
+      "records": 287,
+      "groups": {
+        "generic_tracepo:tracepoint": {
+          "calls": 38168425,
+          "time_ns": 25615559091,
+          "ids": [
+            712
+          ],
+          "ns_per_call": 671.1191014824426,
+          "call_share": 0.42563896905742415,
+          "time_share": 0.9023483083354743
+        },
+        "generic_kprobe_:kprobe": {
+          "calls": 36809477,
+          "time_ns": 2030867677,
+          "ids": [
+            398,
+            422,
+            446,
+            480,
+            494,
+            504,
+            542,
+            558,
+            578,
+            734,
+            782,
+            804,
+            886
+          ],
+          "ns_per_call": 55.17241326194338,
+          "call_share": 0.4104845259353239,
+          "time_share": 0.0715405042023076
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 14695337,
+          "time_ns": 741235573,
+          "ids": [
+            412,
+            462,
+            568,
+            590,
+            786
+          ],
+          "ns_per_call": 50.440188816357185,
+          "call_share": 0.16387650500725193,
+          "time_share": 0.026111187462218095
+        }
+      }
+    }
+  },
+  {
+    "run": "corpus/results/x86_kvm_corpus_20261125_153231_815043",
+    "app": "tetragon/observer",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 1282.2900566901053,
+      "calls": 16791290,
+      "time_ns": 21531304206,
+      "retained": 14,
+      "records": 168,
+      "groups": {
+        "generic_kprobe_:kprobe": {
+          "calls": 11961601,
+          "time_ns": 21195530255,
+          "ids": [
+            105,
+            109,
+            130,
+            135,
+            151,
+            53,
+            61,
+            72,
+            84,
+            97
+          ],
+          "ns_per_call": 1771.9643260964815,
+          "call_share": 0.7123693891297215,
+          "time_share": 0.9844053129440049
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 4829689,
+          "time_ns": 335773951,
+          "ids": [
+            143,
+            154,
+            66,
+            90
+          ],
+          "ns_per_call": 69.52289288192263,
+          "call_share": 0.2876306108702786,
+          "time_share": 0.015594687055995052
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 395.98292917569944,
+      "calls": 8774093,
+      "time_ns": 3474391047,
+      "retained": 7,
+      "records": 81,
+      "groups": {
+        "generic_kprobe_:kprobe": {
+          "calls": 6854511,
+          "time_ns": 3308517535,
+          "ids": [
+            563,
+            608,
+            723,
+            768,
+            813
+          ],
+          "ns_per_call": 482.67739813970684,
+          "call_share": 0.7812216031902101,
+          "time_share": 0.9522582490697974
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 1919582,
+          "time_ns": 165873512,
+          "ids": [
+            575,
+            736
+          ],
+          "ns_per_call": 86.41126661950362,
+          "call_share": 0.21877839680978992,
+          "time_share": 0.04774175093020265
+        }
+      }
+    }
+  },
+  {
+    "run": "corpus/results/x86_kvm_corpus_20261126_072843_366158",
+    "app": "tetragon/observer",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 1137.5834292341146,
+      "calls": 44088101,
+      "time_ns": 50153893124,
+      "retained": 20,
+      "records": 258,
+      "groups": {
+        "generic_tracepo:tracepoint": {
+          "calls": 20572926,
+          "time_ns": 31491331204,
+          "ids": [
+            213
+          ],
+          "ns_per_call": 1530.7171767399543,
+          "call_share": 0.4666321645380008,
+          "time_share": 0.6278940525342895
+        },
+        "generic_kprobe_:kprobe": {
+          "calls": 16956671,
+          "time_ns": 18315034844,
+          "ids": [
+            100,
+            111,
+            129,
+            139,
+            146,
+            225,
+            232,
+            250,
+            259,
+            53,
+            59,
+            69,
+            81,
+            93
+          ],
+          "ns_per_call": 1080.1079317986414,
+          "call_share": 0.38460878593977094,
+          "time_share": 0.36517673311457766
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 6558504,
+          "time_ns": 347527076,
+          "ids": [
+            143,
+            154,
+            253,
+            66,
+            89
+          ],
+          "ns_per_call": 52.988772439568535,
+          "call_share": 0.14875904952222824,
+          "time_share": 0.006929214351132771
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 1150.7897331243369,
+      "calls": 44808432,
+      "time_ns": 51565083503,
+      "retained": 19,
+      "records": 287,
+      "groups": {
+        "generic_tracepo:tracepoint": {
+          "calls": 19243718,
+          "time_ns": 50214219453,
+          "ids": [
+            710
+          ],
+          "ns_per_call": 2609.382420434554,
+          "call_share": 0.429466445065518,
+          "time_share": 0.9738027370803849
+        },
+        "generic_kprobe_:kprobe": {
+          "calls": 18146804,
+          "time_ns": 982386588,
+          "ids": [
+            402,
+            422,
+            448,
+            480,
+            484,
+            496,
+            548,
+            554,
+            580,
+            736,
+            778,
+            804,
+            888
+          ],
+          "ns_per_call": 54.13551543291039,
+          "call_share": 0.4049863650662893,
+          "time_share": 0.01905139139244962
+        },
+        "generic_retkpro:kprobe": {
+          "calls": 7417910,
+          "time_ns": 368477462,
+          "ids": [
+            412,
+            462,
+            572,
+            594,
+            792
+          ],
+          "ns_per_call": 49.6740270507461,
+          "call_share": 0.16554718986819267,
+          "time_share": 0.007145871527165517
+        }
+      }
+    }
+  },
+  {
+    "run": "corpus/results/x86_kvm_corpus_20261125_111025_188467",
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 3320.3880219252515,
+      "calls": 7748691,
+      "time_ns": 25728660782,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 7748691,
+          "time_ns": 25728660782,
+          "ids": [
+            17
+          ],
+          "ns_per_call": 3320.3880219252515,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 3531.5206571045883,
+      "calls": 7529395,
+      "time_ns": 26590213978,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 7529395,
+          "time_ns": 26590213978,
+          "ids": [
+            48
+          ],
+          "ns_per_call": 3531.5206571045883,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    }
+  },
+  {
+    "run": "corpus/results/x86_kvm_corpus_20261126_072004_258004",
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 3815.7423284500137,
+      "calls": 7223638,
+      "time_ns": 27563541282,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 7223638,
+          "time_ns": 27563541282,
+          "ids": [
+            17
+          ],
+          "ns_per_call": 3815.7423284500137,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 4219.966036801497,
+      "calls": 6619459,
+      "time_ns": 27933892162,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 6619459,
+          "time_ns": 27933892162,
+          "ids": [
+            48
+          ],
+          "ns_per_call": 4219.966036801497,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    }
+  }
+]

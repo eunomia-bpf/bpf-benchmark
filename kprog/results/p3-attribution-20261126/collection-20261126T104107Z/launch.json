@@ -1,0 +1,30 @@
+{
+  "started_at": "2026-11-26T10:41:07.928476+00:00",
+  "controller_pid": 445963,
+  "detachment": "setsid nohup",
+  "revision": "eddc1d06d0c28112ec12402582e08fe5200fa497",
+  "image": "sha256:fb53150e89ea564a9066099be63944ded8215747c6087cbcf9a877a7776ce1cd",
+  "command": [
+    "taskset",
+    "-c",
+    "16-17",
+    "prlimit",
+    "--as=85899345920",
+    "--",
+    "make",
+    "-C",
+    "kprog/results/p3-attribution-20261126",
+    "batch",
+    "OUT=/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z"
+  ],
+  "order": [
+    "tetragon-1",
+    "tetragon-2",
+    "tetragon-3",
+    "otel-1",
+    "otel-2",
+    "otel-3",
+    "tetragon-profile",
+    "tracee-profile"
+  ]
+}

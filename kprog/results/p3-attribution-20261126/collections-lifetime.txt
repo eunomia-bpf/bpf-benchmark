@@ -1,0 +1,3 @@
+    PID    PPID    PGID     SID STAT COMMAND
+ 445963       1  445963  445963 Ss   make -C kprog/results/p3-attribution-20261126 batch OUT=/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z
+ 448885       1  448885  448885 Ss   bash kprog/results/p3-attribution-20261126/retry-checks.sh 445963 /workspaces/repository/kprog/results/p3-attribution-20261126/checks-20261126T104517Z

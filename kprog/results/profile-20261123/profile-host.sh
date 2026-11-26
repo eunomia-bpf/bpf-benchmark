@@ -60,7 +60,12 @@ timeout 900 taskset -c 0-7 vng --run /workspaces/.agent-state/kprog-ck/build-x86
   --cpus 8 --memory 32G --append 'loglevel=4 panic=30 oops=panic' --exec "bash /var/tmp/guest.sh" > $OUT/guest.log 2>&1
 guest_rc=$?
 echo "guest rc=$guest_rc end $(date +%s.%N)" >> $OUT/guest.log
-if kill -0 $P 2>/dev/null; then kill -INT $P; fi
+stop_requested=0
+if kill -0 $P 2>/dev/null; then
+  stop_requested=1
+  printf 'SIGINT after guest completion\n' > $OUT/perf-stop-requested.txt
+  kill -INT $P
+fi
 wait $P; perf_rc=$?
 printf '%s\n' "$guest_rc" > $OUT/guest-exit.txt
 printf '%s\n' "$perf_rc" > $OUT/perf-exit.txt
@@ -70,4 +75,7 @@ done
 rm -f $V/bpf-benchmark-docker.img
 grep -o '"artifact_run_dir": "[^"]*"' $OUT/guest.log | tail -1 | cut -d'"' -f4 > $OUT/run_dir
 if [ "$guest_rc" != 0 ]; then exit "$guest_rc"; fi
-if [ "$perf_rc" != 0 ] && [ "$perf_rc" != 130 ]; then exit "$perf_rc"; fi
+if [ "$perf_rc" = 0 ]; then exit 0; fi
+# perf forwards the requested stop to its sleep workload; that child can return SIGTERM (143).
+if [ "$stop_requested" = 1 ] && { [ "$perf_rc" = 130 ] || [ "$perf_rc" = 143 ]; }; then exit 0; fi
+exit "$perf_rc"

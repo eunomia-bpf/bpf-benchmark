@@ -35,3 +35,17 @@ The count gives the call sites; their weight comes from a host PMU profile of Te
 (profile-host.sh, as for OTel in kprog/results/profile-20261123): the share of `memset`, `memset_orig` and
 `__memset` in the native samples. Their profile comes next. Its guest needs 32 GiB, and it runs after the arm64 stage-1 compile pool, whose compiles hold that memory now
 (COORDINATION 2026-11-26T04:38Z and 05:18Z).
+
+## Host PMU captures available, 2026-11-26
+
+Tetragon and Tracee host-cycle profiles on the unchanged P3 image fb53150e89ea
+are captured in `../p3-attribution-20261126/collection-20261126T104107Z/`:
+`tetragon-profile` has 11,446,569 samples, `tracee-profile` has 7,978,939.
+Both guests completed with app status ok. Event cpu_core/cycles/, period
+1,000,000, stats off, 60 s workload, 32 GiB guests; the existing shim measurement
+messages identify the phase windows. Raw PMU data, symbols and linked-code
+caches remain local and are committed as compressed parts. The wrapper's
+nonzero status came from its intentional recorder stop (perf child 143),
+not an app failure. The final phase-resolved memset weight and denominator
+will be recorded here after the queued PMU summary; sample inventory alone
+is not a memset weight or a performance conclusion.
