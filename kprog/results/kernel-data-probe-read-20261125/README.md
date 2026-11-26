@@ -135,3 +135,56 @@ The recorded pass result stands: these five fall back to eBPF, which is what
 would need a rule the current source does not have — `Match` is chosen by constant
 `Offset` — and it is frozen, so the change belongs with whoever opens
 `kprog/build/socket-context-lower.cpp`.
+
+## The other four Cilium rejections: `queue_mapping`, and a real `div` fault (omp 2026-11-26T09:4xZ)
+
+**Two "only read is supported" (requests 9 and 37, `cil_from_container`).** Both
+reject the same instruction, a u16 store through the physical `sk_buff`:
+
+```
+88: (07) r2 += 124                    ; R2=trusted_ptr_sk_buff(off=124)
+89: (6b) *(u16 *)(r2 +0) = r8
+only read is supported
+```
+
+B writes the physical field directly — `%78 = getelementptr inbounds i8, ptr %37, i64 124`
+with `%37 = bpf_cast_to_kern_ctx(%0)`, then
+`asm "*(u16 *)($0 + 0) = $1"(ptr %78, i64 0)` — while the kernel accepts a
+`BPF_WRITE` at a *public* `__sk_buff` offset only (`tc_cls_act_is_valid_access`,
+`filter.c:9144-9162`, whose write list is mark/tc_index/priority/tc_classid/cb/tstamp/
+queue_mapping), and `bpf_skb_is_valid_access` requires `size == sizeof(__u32)` for such
+a write. Offset 124 is `queue_mapping`'s physical position (public offset 12, u16 in
+`bpf.h:6351`), so the store belongs on `%0 + 12`, which is the same canonicalization
+`packet_bounds_ir.cpp:690-725` already performs for `tc_classid` at 46.
+
+Measured: extending that pass to treat `offset==124` as `queue_mapping` and emit
+`*(u32 *)($0 + 12) = $1` on the original `%0` produces `lowered=3` on both requests,
+replaces the store with `asm "*(u32 *)($0 + 12) = $1"(ptr %0, i64 0)`, and leaves the
+same predicate counts on the other 35 archived requests. It is not applied: the pass is
+frozen.
+
+**Two `invalid mem access 'scalar'` (requests 5 and 45, `tail_handle_ipv4`).** Both
+reject `r0 = 0; *(u64 *)(r0 + 0) = r0`, which is
+`X86_SIM_L_ARCHITECTURAL_FAULT()` (`x86_sim_local_bpf.h:3066`). The source is a real
+`div ecx` at `trusted_x86.bpf.c:1304` and `:1790`, where the divisor is
+`movzx ecx, WORD PTR [r15+0x4]` — a load from the program's own map value, so the
+verifier cannot prove it non-zero and B's fault arm is reachable. B simulates the
+guest faithfully here (P would fault the same way), so this pair is a property of the
+program, and the fallback to eBPF is correct.
+
+## Wide-branch x86 guest program: the fault arm is what the verifier refuses
+
+The two `invalid mem access 'scalar'` rejections above are the only x86 case in the
+kdata4 run where B is refused for a path that exists in P, and it is worth stating what
+that means for the fault arm. `X86_SIM_L_ARCHITECTURAL_FAULT()` stores through the
+null value it computes, which is a deliberate B-side construct; the verifier rejects it
+as written. A B whose native program can reach a processor fault therefore has to keep
+that arm unreachable *in the verifier's own analysis*, which the simulated `div` only
+does when the divisor is provably non-zero. For a divisor read from a map, nothing in B
+gives it that fact, and the arm stays reachable.
+
+The `queue_mapping` widening is recorded at
+`queue-mapping/packet_bounds_ir.queue_mapping.cpp` (sha256
+`6f7842a2e225f84ef0d152d047228b1b1fa734a02b98724e9ecc43d873bb5a04`): the kdata4
+packet-bounds source plus that pass, so the two Cilium widenings (`1140013`'s two
+gates and this one) are both reproducible from the record.
