@@ -1,0 +1,12 @@
+{
+  "pid": 661398,
+  "started_utc": "2026-11-26T17:28:27Z",
+  "source": "deeb968d38b7eaa0947b242fb215c6b8873228e7",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "hoisted-pipeline"
+  ],
+  "resources": "One16GiB-AS normal B compile on CPU16 under timingSH, then sole-kernel2vCPU/2GiB stock guest on18-19 under timingSH/imageSH."
+}
