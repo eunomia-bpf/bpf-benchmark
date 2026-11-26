@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.local_binding
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.local_binding
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.write
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.write
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.store_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.store_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.read_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.read_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkCall.execute
