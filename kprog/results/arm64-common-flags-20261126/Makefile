@@ -27,3 +27,7 @@ abi-checked-after:
 .PHONY: select-audit
 select-audit:
 	python3 select_audit.py
+
+.PHONY: select-backend
+select-backend:
+	python3 select_backend.py

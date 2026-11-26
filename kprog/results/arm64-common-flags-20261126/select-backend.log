@@ -1,0 +1,137 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 select_backend.py
+bcc default 0
+bcc without-early-ifcvt 0
+katran default 6
+katran without-early-ifcvt 6
+cilium default 54
+cilium without-early-ifcvt 54
+{
+  "recorded_utc": "2026-11-26T22:45:17Z",
+  "revision": "496658bae06258e64686eb6abd957087ef7c7747",
+  "rows": [
+    {
+      "app": "bcc",
+      "input": "vendor/build/native-bpf/arm64/stage/bcc/vfsstat.native.o",
+      "code_sections_equal": true,
+      "default_selects": {},
+      "without_early_ifcvt_selects": {},
+      "default_code_bytes": 544,
+      "without_early_ifcvt_code_bytes": 544
+    },
+    {
+      "app": "katran",
+      "input": "vendor/build/native-bpf/arm64/stage/katran/balancer.native.o",
+      "code_sections_equal": true,
+      "default_selects": {
+        "process_packet": 1,
+        "ignorable_quic_icmp_code": 1,
+        "increment_quic_cid_version_stats": 1,
+        "update_vip_lru_miss_stats": 3
+      },
+      "without_early_ifcvt_selects": {
+        "process_packet": 1,
+        "ignorable_quic_icmp_code": 1,
+        "increment_quic_cid_version_stats": 1,
+        "update_vip_lru_miss_stats": 3
+      },
+      "default_code_bytes": 9732,
+      "without_early_ifcvt_code_bytes": 9732
+    },
+    {
+      "app": "cilium",
+      "input": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "code_sections_equal": true,
+      "default_selects": {
+        "compute_capture_len": 1,
+        "generate_icmp4_reply": 1,
+        "fib_ok": 1,
+        "handle_ipv4_from_lxc": 3,
+        "drop_for_direction": 1,
+        "check_and_store_ip_trace_id": 1,
+        "ipv4_policy": 2,
+        "ipv6_addr_equals": 1,
+        "icmp6_send_ndisc_adv": 2,
+        "ipfrag_has_l4_header": 1,
+        "ct_lookup_select_tuple_type": 2,
+        "__ct_lookup4": 1,
+        "ct_tcp_select_action": 1,
+        "ct_entry_expired_rebalance": 1,
+        "ct_entry_alive": 1,
+        "ct_flip_tuple_dir4": 1,
+        "snat_v4_rev_nat_can_skip": 1,
+        "snat_v4_rev_nat_handle_icmp_error": 2,
+        "ct_create4": 2,
+        "device_mac": 1,
+        "send_policy_verdict_notify": 1,
+        "__policy_can_access": 4,
+        "__policy_check": 1,
+        "policy_verdict_filter_allow": 1,
+        "ct_has_egress_entry4": 1,
+        "lb4_lookup_wildcard_service": 1,
+        "lb4_local": 1,
+        "identity_is_remote_node": 1,
+        "lb4_svc_is_external": 1,
+        "eth_addrcmp": 1,
+        "eth_is_supported_ethertype": 1,
+        "tail_nodeport_rev_dnat_ipv4": 1,
+        "tail_nodeport_nat_ingress_ipv4": 1,
+        "tail_nodeport_nat_egress_ipv4": 1,
+        "tail_handle_ipv4_cont": 1,
+        "tail_handle_ipv4": 1,
+        "tail_ipv4_policy": 3,
+        "tail_ipv4_to_endpoint": 2,
+        "cil_from_container": 1,
+        "cil_lxc_policy": 1,
+        "cil_to_container": 1
+      },
+      "without_early_ifcvt_selects": {
+        "compute_capture_len": 1,
+        "generate_icmp4_reply": 1,
+        "fib_ok": 1,
+        "handle_ipv4_from_lxc": 3,
+        "drop_for_direction": 1,
+        "check_and_store_ip_trace_id": 1,
+        "ipv4_policy": 2,
+        "ipv6_addr_equals": 1,
+        "icmp6_send_ndisc_adv": 2,
+        "ipfrag_has_l4_header": 1,
+        "ct_lookup_select_tuple_type": 2,
+        "__ct_lookup4": 1,
+        "ct_tcp_select_action": 1,
+        "ct_entry_expired_rebalance": 1,
+        "ct_entry_alive": 1,
+        "ct_flip_tuple_dir4": 1,
+        "snat_v4_rev_nat_can_skip": 1,
+        "snat_v4_rev_nat_handle_icmp_error": 2,
+        "ct_create4": 2,
+        "device_mac": 1,
+        "send_policy_verdict_notify": 1,
+        "__policy_can_access": 4,
+        "__policy_check": 1,
+        "policy_verdict_filter_allow": 1,
+        "ct_has_egress_entry4": 1,
+        "lb4_lookup_wildcard_service": 1,
+        "lb4_local": 1,
+        "identity_is_remote_node": 1,
+        "lb4_svc_is_external": 1,
+        "eth_addrcmp": 1,
+        "eth_is_supported_ethertype": 1,
+        "tail_nodeport_rev_dnat_ipv4": 1,
+        "tail_nodeport_nat_ingress_ipv4": 1,
+        "tail_nodeport_nat_egress_ipv4": 1,
+        "tail_handle_ipv4_cont": 1,
+        "tail_handle_ipv4": 1,
+        "tail_ipv4_policy": 3,
+        "tail_ipv4_to_endpoint": 2,
+        "cil_from_container": 1,
+        "cil_lxc_policy": 1,
+        "cil_to_container": 1
+      },
+      "default_code_bytes": 73076,
+      "without_early_ifcvt_code_bytes": 73076
+    }
+  ],
+  "scope": "Fixed backend-only early-if-conversion control on three current staged modules. Embedded IR attributes retained; llc regenerates both controls. No claim that regenerated default equals original P bytes, no stock/app/semantic/timing result or production policy change."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

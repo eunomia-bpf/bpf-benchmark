@@ -1,0 +1,89 @@
+[
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/bcc/vfsstat.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-",
+      "-aarch64-enable-early-ifcvt=false"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/bcc/vfsstat.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/katran/balancer.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-",
+      "-aarch64-enable-early-ifcvt=false"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/katran/balancer.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-relocation-model=pic",
+      "-filetype=obj",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/select-backend.o",
+      "-",
+      "-aarch64-enable-early-ifcvt=false"
+    ],
+    "input": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o:.llvmbc",
+    "returncode": 0,
+    "stderr": ""
+  }
+]
