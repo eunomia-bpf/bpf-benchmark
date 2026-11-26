@@ -205,6 +205,14 @@ theorem temps_inputs (le : CC.TempEnv) (i : Fin 16) (byte : BitVec 8) :
   constructor <;> simp +decide only [temps,Arm64MemsetStackAction.temps,preparedTemps,tailTemps,biasTemps,
     CC.PTree.gso]
 
+/-- Real store temporary assignments preserve the enclosing loop counter,
+length and byte parameter. -/
+theorem temps_loop (le : CC.TempEnv) (i : Fin 16) (byte : BitVec 8) :
+    (temps le i byte).get Arm64Program.___a64_lib_i = le.get Arm64Program.___a64_lib_i ∧
+    (temps le i byte).get Arm64Program.___a64_lib_len = le.get Arm64Program.___a64_lib_len ∧
+    (temps le i byte).get Arm64Program.___a64_lib_byte = le.get Arm64Program.___a64_lib_byte := by
+  refine ⟨?_,?_,?_⟩ <;> simp +decide only [temps,Arm64MemsetStackAction.temps,preparedTemps,tailTemps,biasTemps,CC.PTree.gso]
+
 /-- The original store loop reaches the real tag-word/byte store body in37
 transitions at every original offset, retaining its genuine bias read,
 index/value assignments, action selector/cast/guard and saved continuation. -/

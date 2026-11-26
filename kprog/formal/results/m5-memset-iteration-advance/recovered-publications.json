@@ -1,0 +1,202 @@
+{
+  "confirmed_utc": "2026-11-26T06:25:24.153027+00:00",
+  "resumed_by": "foreground-formal-20261126T0648",
+  "old_published": 22,
+  "new_published": 10,
+  "verification": "Each recorded commit equals its published marker and is an ancestor of origin/master. Existing commits were pushed normally. Original interrupted logs and failed HEAD-race evidence remain in raw storage.",
+  "rows": [
+    {
+      "name": "entry-mov-stack-prefix",
+      "committed": "b0c13b9e52e0219b5ce3e73f0c0edf8757314725",
+      "published": "b0c13b9e52e0219b5ce3e73f0c0edf8757314725",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-stack-prefix-native",
+      "committed": "5e151b02363521b0b233e29ef9ab6c2844f844db",
+      "published": "5e151b02363521b0b233e29ef9ab6c2844f844db",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-add-stack-prefix-native",
+      "committed": "32ca1addaf2c7949d11f341c5109eb0633c4424a",
+      "published": "32ca1addaf2c7949d11f341c5109eb0633c4424a",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-add-register-stack-prefix-native",
+      "committed": "57ab8bd2d564dbb80ecc7c4d11fc53af0e8ea3c8",
+      "published": "57ab8bd2d564dbb80ecc7c4d11fc53af0e8ea3c8",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mul-stack-prefix-native",
+      "committed": "7d3e8dfdddf35533baa344aeab96a8e38938a8ea",
+      "published": "7d3e8dfdddf35533baa344aeab96a8e38938a8ea",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-compare-stack-prefix-native",
+      "committed": "ead149ff0e40ad6b7935b127881d40c160f4c5cc",
+      "published": "ead149ff0e40ad6b7935b127881d40c160f4c5cc",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-select-stack-prefix-native",
+      "committed": "c0b4cf0b7b379da27bd3bdeafe0418b428995ce2",
+      "published": "c0b4cf0b7b379da27bd3bdeafe0418b428995ce2",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-cneg-stack-prefix-native",
+      "committed": "53167a92af72d5d17f71d7f40906fb96db936dd0",
+      "published": "53167a92af72d5d17f71d7f40906fb96db936dd0",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-orn-stack-prefix-native",
+      "committed": "d764834b0886ea614d3bf3fc1b64c4c9268b38b8",
+      "published": "d764834b0886ea614d3bf3fc1b64c4c9268b38b8",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-fmov-stack-prefix-native",
+      "committed": "1de7fac2f6065830f87bc493aeca784aba654478",
+      "published": "1de7fac2f6065830f87bc493aeca784aba654478",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-cnt-stack-prefix-native",
+      "committed": "928899467d64a0b841ce99d27f3a32865ddc0fe5",
+      "published": "928899467d64a0b841ce99d27f3a32865ddc0fe5",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-uaddlv-stack-prefix-native",
+      "committed": "9e6900187ecfe7c4ec8b18e1de4a4d8423c1d6bc",
+      "published": "9e6900187ecfe7c4ec8b18e1de4a4d8423c1d6bc",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-result-stack-prefix",
+      "committed": "3b77bf000d65d11cc71b31a2c19b04a53c304105",
+      "published": "3b77bf000d65d11cc71b31a2c19b04a53c304105",
+      "batch": "old_rows"
+    },
+    {
+      "name": "memset-store-backedge",
+      "committed": "faf08918e7a0bf0973425a8dcb3cfdd5b3831cbd",
+      "published": "faf08918e7a0bf0973425a8dcb3cfdd5b3831cbd",
+      "batch": "old_rows"
+    },
+    {
+      "name": "mov-immediate-linked-rights",
+      "committed": "8e770d07e516b3d9c1d54616da7c7a9751d677dc",
+      "published": "8e770d07e516b3d9c1d54616da7c7a9751d677dc",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-rights",
+      "committed": "1f39da959f7c2ea12170443fdc2d6e573ef901eb",
+      "published": "1f39da959f7c2ea12170443fdc2d6e573ef901eb",
+      "batch": "old_rows"
+    },
+    {
+      "name": "mov-keep-word-rights",
+      "committed": "d9572374082edb2e5e01d7a367e5611d3e6748f3",
+      "published": "d9572374082edb2e5e01d7a367e5611d3e6748f3",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-keep-rights",
+      "committed": "35f75e299b3e90ec8f001912c8e4d0b4c2cd346b",
+      "published": "35f75e299b3e90ec8f001912c8e4d0b4c2cd346b",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-pair-rights",
+      "committed": "ded4504e2b174a35c51f8c586ad3328e1fdf06ac",
+      "published": "ded4504e2b174a35c51f8c586ad3328e1fdf06ac",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-resource-transport",
+      "committed": "f81e336bdced9f707bbfed0423a9057ae6aa26f4",
+      "published": "f81e336bdced9f707bbfed0423a9057ae6aa26f4",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-stack-rights-prefix",
+      "committed": "a77bb99b0e65f412341aa9eeacbbc34aaecf28e0",
+      "published": "a77bb99b0e65f412341aa9eeacbbc34aaecf28e0",
+      "batch": "old_rows"
+    },
+    {
+      "name": "entry-mov-stack-rights-prefix-native",
+      "committed": "a2a993857ff44330aa1c83402acb31b658d5f942",
+      "published": "a2a993857ff44330aa1c83402acb31b658d5f942",
+      "batch": "old_rows"
+    },
+    {
+      "name": "divide-handler-resume-20261126",
+      "committed": "f31af67c9a673a35bf0689cc01f03228ca32505c",
+      "published": "f31af67c9a673a35bf0689cc01f03228ca32505c",
+      "batch": "new_rows"
+    },
+    {
+      "name": "add-immediate-call-rights",
+      "committed": "aeffcc4ae2a6757febe156a660b72fbbd4156b10",
+      "published": "aeffcc4ae2a6757febe156a660b72fbbd4156b10",
+      "batch": "new_rows"
+    },
+    {
+      "name": "add-immediate-native-call-rights",
+      "committed": "9b66cd518b7fa2cd69b9d36d0e6e11afcfc43a22",
+      "published": "9b66cd518b7fa2cd69b9d36d0e6e11afcfc43a22",
+      "batch": "new_rows"
+    },
+    {
+      "name": "entry-add-call-rights",
+      "committed": "e20907179a9870ed2f79bf46e23e145ba99bc777",
+      "published": "e20907179a9870ed2f79bf46e23e145ba99bc777",
+      "batch": "new_rows"
+    },
+    {
+      "name": "entry-add-stack-rights-prefix-native",
+      "committed": "e8e0e061d407614a9dd830e692a40f10e4ba2d5d",
+      "published": "e8e0e061d407614a9dd830e692a40f10e4ba2d5d",
+      "batch": "new_rows"
+    },
+    {
+      "name": "memset-stack-base-backedge",
+      "committed": "9cbcdbe2e6e3f8527e61306100afa439b88fa83e",
+      "published": "9cbcdbe2e6e3f8527e61306100afa439b88fa83e",
+      "batch": "new_rows"
+    },
+    {
+      "name": "memset-iteration-resources",
+      "committed": "fb095b32cf290ca88b4bf7addcaf421cd65d3aef",
+      "published": "fb095b32cf290ca88b4bf7addcaf421cd65d3aef",
+      "batch": "new_rows"
+    },
+    {
+      "name": "memset-tag-byte-transport",
+      "committed": "9ca62a196dd6cec56d2bf01881a35ff62fe7f57d",
+      "published": "9ca62a196dd6cec56d2bf01881a35ff62fe7f57d",
+      "batch": "new_rows"
+    },
+    {
+      "name": "memset-iteration-step",
+      "committed": "38d101e3968aec3aec196d52b92ae39291179809",
+      "published": "38d101e3968aec3aec196d52b92ae39291179809",
+      "batch": "new_rows"
+    },
+    {
+      "name": "memset-iteration-storage",
+      "committed": "6bd81a01300a5d5b41d9febc8c0e05b1c53b9fb9",
+      "published": "6bd81a01300a5d5b41d9febc8c0e05b1c53b9fb9",
+      "batch": "new_rows"
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

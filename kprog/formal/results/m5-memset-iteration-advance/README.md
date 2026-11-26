@@ -1,0 +1,7 @@
+# Actual memset store iteration reaches the incremented loop head
+
+The complete actual tag-word and stack-byte stores, SP=-32 post-store path, both enclosing do/while exits, and original unsigned counter increment compose to the next real for-loop head on the same final heap. The actual two wrapper exits take four transitions; the actual increment/backedge takes three, for seven post-body transitions. The prior next-source estimate of six plus three is corrected by direct execution of the imported Clight control. Actual temporary-map observations retain the original entry, length and byte while the counter increases. All other 15 target-byte loads, 24 tag-byte observations, current Freeable/cache Resources, architectural Storage with source SP=-32, header view, access/frontier and caller/outside frame remain on this same heap. This component starts at the actual loss/store body; original loop guard/setup/ABI/R0 reads and all 16 sequential iterations compose next. Every previous interface is retained. The recovery receipt also records all 22 old and 10 new published increments after foreground verification of their actual Git ancestry.
+
+Focused build 337 and 7 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.

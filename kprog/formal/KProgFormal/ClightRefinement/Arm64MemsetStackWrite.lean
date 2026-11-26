@@ -42,6 +42,14 @@ theorem temps_inputs (le : CC.TempEnv) (i : Fin 160) (tags stack : CC.Block)
   constructor <;> simp +decide only [temps,tagTemps,laneTemps,Arm64MemsetByteGates.temps,
     Arm64MemsetLaneGates.temps,CC.PTree.gso]
 
+/-- Real store temporary assignments preserve the enclosing loop counter,
+length and byte parameter. -/
+theorem temps_loop (le : CC.TempEnv) (i : Fin 160) (tags stack : CC.Block) (word : BitVec 64) (value : BitVec 8) :
+    (temps le i tags stack word value).get Arm64Program.___a64_lib_i = le.get Arm64Program.___a64_lib_i ∧
+    (temps le i tags stack word value).get Arm64Program.___a64_lib_len = le.get Arm64Program.___a64_lib_len ∧
+    (temps le i tags stack word value).get Arm64Program.___a64_lib_byte = le.get Arm64Program.___a64_lib_byte := by
+  refine ⟨?_,?_,?_⟩ <;> simp +decide only [temps,tagTemps,laneTemps,Arm64MemsetByteGates.temps,Arm64MemsetLaneGates.temps,CC.PTree.gso]
+
 /-- The entire original stack arm executes its real tag read/modify/write,
 width and crossing gates, volatile byte store, and all seven remaining gates.
 The two real stores and their complete source continuations are retained. -/
