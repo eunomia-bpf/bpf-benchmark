@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.resume
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.resume
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.execute
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.result_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.result_readback
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.branch_reads
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpWritten.branch_reads
