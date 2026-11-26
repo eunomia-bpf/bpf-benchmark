@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCbz
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.read
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.read
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.current_read
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbz.current_read
