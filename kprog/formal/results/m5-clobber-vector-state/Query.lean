@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ClobberVectorState
+
+open KProgFormal.ClightRefinement
+#check Arm64ClobberVectorState.written
+#print axioms Arm64ClobberVectorState.written
+#check Arm64ClobberVectorState.caller_written
+#print axioms Arm64ClobberVectorState.caller_written
