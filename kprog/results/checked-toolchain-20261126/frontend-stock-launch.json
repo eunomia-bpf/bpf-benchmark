@@ -1,0 +1,12 @@
+{
+  "started_utc": "2026-11-26T23:39:12Z",
+  "launcher_pid": 818215,
+  "command": [
+    "make",
+    "-C",
+    "kprog/results/checked-toolchain-20261126",
+    "frontend-stock"
+  ],
+  "revision": "f1a3ca8a2fb965d69e94c79e471d490687d977e5",
+  "scope": "Finite existing archive-stock before/direct/broker B comparison, sole x86 kernel, unchanged2GiB/2CPU guest defaults. Not app/native ARM execution or timing."
+}
