@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory
+#check KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.write_loop
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.write_loop
+#check KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.transfer
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.transfer
+#check KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.entry
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyFlagMemory.entry
