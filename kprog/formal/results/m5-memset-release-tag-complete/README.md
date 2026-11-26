@@ -1,0 +1,7 @@
+# Complete original clobber byte and tag release execution
+
+The same reached memset packet executes all20 actual tag-word indices, including eight genuine volatile read/modify/write stores at offset0 with shifts0 through56, twelve original short-circuit skips, the actual counter/backedges, final guard and release-wrapper exit into real clobber rest. Each reached heap retains the entire completed160-byte-index packet, all16 earlier data values, all24 tag observations, HeaderView, current Resources, Storage/SP, R0 and ABI. The saved original caller environment stays fixed while helper temporaries and both independent release counters advance. No new provider premise is used for the tag scan. The original clobbers-call theorem composes the accepted64 actual kind6 byte-provider calls/stores and complete160-index byte scan with this complete20-index tag scan, preserving ordered real traces and the existing explicit provider/cache ABI. Both source loops and all72 actual memory stores remain. The next real source is the18 GPR/provider pairs, then4 flag and64 vector providers/stores, followed by actual helper/caller freeing and return. Related root confirmation, remaining M5/O1/O2/O4/recount and M6 follow. Original C, exports, imported semantics and every prior interface remain.
+
+Focused build 350 and 4 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
