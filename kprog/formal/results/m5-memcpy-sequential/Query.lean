@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpySequential
+#check KProgFormal.ClightRefinement.Arm64MemcpySequential.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpySequential.iterations
+#check KProgFormal.ClightRefinement.Arm64MemcpySequential.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpySequential.execute
