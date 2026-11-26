@@ -251,6 +251,7 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     attributes.write_text(''.join(f'{name},no-jump-tables=true\n' for name in functions))
     run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
          '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
+         '-mllvm', '-x86-cmov-converter-force-all',
          '-mllvm', '-force-attribute=noredzone',
          '-mllvm', f'-forceattrs-csv-path={attributes}',
          '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',

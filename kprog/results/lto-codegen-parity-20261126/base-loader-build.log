@@ -1,0 +1,51 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "/workspaces/.agent-state/kprog-ck/verified-loader" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/.agent-state/kprog-ck/verified-loader
+cmake --build "/workspaces/.agent-state/kprog-ck/verified-loader" --target native_loader native_loader_shared trusted-native-loader
+gmake[1]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 33%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader.cpp.o
+[ 66%] Building CXX object CMakeFiles/native_loader.dir/src/native_loader_trusted.cpp.o
+[100%] Linking CXX static library libnative_loader.a
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target native_loader
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 33%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader.cpp.o
+[ 66%] Building CXX object CMakeFiles/native_loader_shared.dir/src/native_loader_trusted.cpp.o
+[100%] Linking CXX shared library libnative_loader.so
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target native_loader_shared
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 60%] Built target native_loader
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[4]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[ 80%] Building CXX object CMakeFiles/trusted-native-loader.dir/workspaces/repository/kprog/trusted_loader.cpp.o
+[100%] Linking CXX executable trusted-native-loader
+gmake[4]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+[100%] Built target trusted-native-loader
+gmake[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+gmake[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-loader'
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'

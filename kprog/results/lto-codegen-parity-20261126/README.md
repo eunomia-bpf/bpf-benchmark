@@ -19,3 +19,32 @@ does not invoke this x86 context compiler. No ISA, framework, CPU, image,
 P flag, runtime or benchmark setting changed in this reproduction.
 The next repair is the same fixed option in every context-LTO invocation
 and a cache identity update, with no per-program selection or new knob.
+
+2026-11-26T22:00:42Z: repaired both native emission boundaries using the existing fixed
+x86 option, with no new configuration. native_context_lto_object supplies it
+and changes its cache identity tov3. trusted_specializer's final checked-
+native Clang command supplies the same option; helper IR compilation does
+not emit native instructions and needs no redundant backend option.
+
+The real old shared-loader call emitted9cmovs; rebuilt loader emits0,
+passes16384cases, ignores a deliberately stale old-key cache sentinel,
+and reuses its new cache on the next call. The actual checked-native
+compiler function likewise changes9→0 and passes16384cases each time;
+its frontend IR bytes are identical. This isolated compiler fixture is
+not a service admission or stock-verified/installed application result.
+Before/after generated artifacts and complete commands are archived.
+
+The verified-loader base was rebuilt in place under imageEX on CPUs16/18
+with16GiB address-space cap. The redundant kprog/libnativeloader/build
+was removed after retaining its logs/cache/link recipes; that legacy path
+now aliases the existing base. Fresh emission through this canonical base
+again has0cmovs and passes16384cases, not merely a previous cached result.
+No runtime image or kernel was rebuilt. base-refresh.json records actions.
+
+Next finite validation uses the existing kernel-probe-live-20261120 Make
+recipe: control plus twelve native probe inputs, stock B verification,
+checked-sim-c installation and TEST_RUN on the sole kernel/base. It does
+not measure applications or full timing. guest_check.py retains raw files
+under /workspaces, archives/publications on completion, and resumes the
+lane on every result. This is targeted validation of changed native emission;
+it does not close Tetragon's separate oversized-B-frame coverage issue.

@@ -13,7 +13,7 @@ std::filesystem::path native_context_lto_object(
     if (prog_type != BPF_PROG_TYPE_PERF_EVENT && function_bodies.empty() &&
         immutable_globals.empty() && map_types.empty()) return input;
     Hash64 hash;
-    hash.add_string("perf-context-lto-v2");
+    hash.add_string("perf-context-lto-v3");
     hash_file_contents(hash, input, "native_elf");
     hash_file_contents(hash, kernel_btf, "boot_kernel_btf");
     hash_file_identity(hash, compiler, "context_lto_compiler");
@@ -40,7 +40,8 @@ std::filesystem::path native_context_lto_object(
     if (exists) return output;
     const auto temporary = output.string() + ".tmp." + std::to_string(getpid());
     const auto log = temporary + ".stderr.txt";
-    std::vector<std::string> argv = {compiler.string(), input.string(),
+    // Re-emission must retain vendor/bpf/Makefile's common x86 backend policy.
+    std::vector<std::string> argv = {compiler.string(), "--x86-cmov-converter-force-all", input.string(),
         "--symbol", symbol, "--kernel-btf", kernel_btf.string(),
         "--prog-type", std::to_string(prog_type), "-o", temporary};
     if (!immutable_globals.empty()) {

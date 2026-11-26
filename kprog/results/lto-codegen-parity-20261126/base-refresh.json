@@ -1,0 +1,22 @@
+{
+  "started_utc": "2026-11-26T21:56:00Z",
+  "removed_build": "/workspaces/repository/kprog/libnativeloader/build",
+  "canonical_build": "/workspaces/.agent-state/kprog-ck/verified-loader",
+  "retained_records": 6,
+  "scope": "Rebuildable duplicate loader build removed; logs/config/link recipes retained. One existing verified-loader base rebuilt in place; local build path aliases it. No source/image/kernel/raw run deletion.",
+  "command": [
+    "taskset",
+    "-c",
+    "16,18",
+    "prlimit",
+    "--as=17179869184",
+    "--",
+    "make",
+    "-C",
+    "kprog/libnativeloader",
+    "BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader"
+  ],
+  "returncode": 0,
+  "ended_utc": "2026-11-26T21:56:19Z",
+  "local_build_is_alias": true
+}

@@ -1,0 +1,61 @@
+[
+  {
+    "command": [
+      "g++",
+      "-std=c++20",
+      "/workspaces/repository/kprog/results/lto-codegen-parity-20261126/loader_call.cpp",
+      "-L/workspaces/repository/kprog/libnativeloader/build",
+      "-lnative_loader",
+      "-Wl,-rpath=/workspaces/repository/kprog/libnativeloader/build",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/loader-call"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/loader-call",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/p.o",
+      "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/cache"
+    ],
+    "returncode": 0,
+    "stdout": "/var/tmp/kprog-tmp/perf/lto-codegen-parity/cache/5c01fb1d9b58300f.perf.native.o\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llvm-objdump-18",
+      "-d",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/cache/5c01fb1d9b58300f.perf.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/lto-codegen-parity/cache/5c01fb1d9b58300f.perf.native.o:\tfile format elf64-x86-64\n\nDisassembly of section .text:\n\n0000000000000000 <entry>:\n       0: 31 c0                        \txorl\t%eax, %eax\n       2: 48 39 b7 f8 00 00 00         \tcmpq\t%rsi, 0xf8(%rdi)\n       9: 0f 92 c0                     \tsetb\t%al\n       c: c1 e0 05                     \tshll\t$0x5, %eax\n       f: 48 8d 48 0f                  \tleaq\t0xf(%rax), %rcx\n      13: 48 39 34 cf                  \tcmpq\t%rsi, (%rdi,%rcx,8)\n      17: 73 08                        \tjae\t0x21 <entry+0x21>\n      19: 48 8d 48 1f                  \tleaq\t0x1f(%rax), %rcx\n      1d: 48 83 c8 10                  \torq\t$0x10, %rax\n      21: 8d 14 08                     \tleal\t(%rax,%rcx), %edx\n      24: d1 ea                        \tshrl\t%edx\n      26: 48 39 34 d7                  \tcmpq\t%rsi, (%rdi,%rdx,8)\n      2a: 72 37                        \tjb\t0x63 <entry+0x63>\n      2c: 48 89 d1                     \tmovq\t%rdx, %rcx\n      2f: 48 8d 14 08                  \tleaq\t(%rax,%rcx), %rdx\n      33: 48 d1 ea                     \tshrq\t%rdx\n      36: 48 39 34 d7                  \tcmpq\t%rsi, (%rdi,%rdx,8)\n      3a: 73 3a                        \tjae\t0x76 <entry+0x76>\n      3c: 48 ff c2                     \tincq\t%rdx\n      3f: 48 89 d0                     \tmovq\t%rdx, %rax\n      42: 48 8d 14 08                  \tleaq\t(%rax,%rcx), %rdx\n      46: 48 d1 ea                     \tshrq\t%rdx\n      49: 48 39 34 d7                  \tcmpq\t%rsi, (%rdi,%rdx,8)\n      4d: 73 37                        \tjae\t0x86 <entry+0x86>\n      4f: 48 ff c2                     \tincq\t%rdx\n      52: 48 89 d0                     \tmovq\t%rdx, %rax\n      55: 48 01 c1                     \taddq\t%rax, %rcx\n      58: 48 d1 e9                     \tshrq\t%rcx\n      5b: 48 39 34 cf                  \tcmpq\t%rsi, (%rdi,%rcx,8)\n      5f: 72 34                        \tjb\t0x95 <entry+0x95>\n      61: eb 38                        \tjmp\t0x9b <entry+0x9b>\n      63: 48 ff c2                     \tincq\t%rdx\n      66: 48 89 d0                     \tmovq\t%rdx, %rax\n      69: 48 8d 14 08                  \tleaq\t(%rax,%rcx), %rdx\n      6d: 48 d1 ea                     \tshrq\t%rdx\n      70: 48 39 34 d7                  \tcmpq\t%rsi, (%rdi,%rdx,8)\n      74: 72 c6                        \tjb\t0x3c <entry+0x3c>\n      76: 48 89 d1                     \tmovq\t%rdx, %rcx\n      79: 48 8d 14 08                  \tleaq\t(%rax,%rcx), %rdx\n      7d: 48 d1 ea                     \tshrq\t%rdx\n      80: 48 39 34 d7                  \tcmpq\t%rsi, (%rdi,%rdx,8)\n      84: 72 c9                        \tjb\t0x4f <entry+0x4f>\n      86: 48 89 d1                     \tmovq\t%rdx, %rcx\n      89: 48 01 c1                     \taddq\t%rax, %rcx\n      8c: 48 d1 e9                     \tshrq\t%rcx\n      8f: 48 39 34 cf                  \tcmpq\t%rsi, (%rdi,%rcx,8)\n      93: 73 06                        \tjae\t0x9b <entry+0x9b>\n      95: 48 ff c1                     \tincq\t%rcx\n      98: 48 89 c8                     \tmovq\t%rcx, %rax\n      9b: c3                           \tretq\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "gcc",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "/workspaces/repository/kprog/results/lto-codegen-parity-20261126/driver.c",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/cache/5c01fb1d9b58300f.perf.native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/execute"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/lto-codegen-parity/execute"
+    ],
+    "returncode": 0,
+    "stdout": "16384 cases passed\n",
+    "stderr": ""
+  }
+]

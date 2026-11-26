@@ -1,0 +1,17 @@
+install -d /var/tmp/kprog-tmp/perf/kernel-probe-live
+clang-18 -O3 -march=native -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -c /workspaces/repository/kprog/test/trusted_native.c -o /var/tmp/kprog-tmp/perf/kernel-probe-live/control.o
+set -e; for n in 0 1 2 3 4 5 6 7 8 9 10 11; do \
+	clang-18 -O3 -march=native -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only -fomit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -DPROBE_CASE=$n -c /workspaces/repository/kprog/results/kernel-probe-live-20261120/program.c -o /var/tmp/kprog-tmp/perf/kernel-probe-live/case-$n.o; \
+done
+install -d /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/program-inputs
+git -C /workspaces/repository rev-parse HEAD > /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/source-commit
+tar -C /var/tmp/kprog-tmp/perf/kernel-probe-live -czf /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/native-inputs.tar.gz .
+date -u +%FT%TZ > /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/started
+status=0; flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
+	taskset -c 16-17 prlimit --as=17179869184 -- vng \
+	--run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run --rodir /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/program-inputs=/var/tmp/kprog-tmp/perf/kernel-probe-live \
+	--overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G \
+	--append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -f kprog/results/kernel-probe-live-20261120/Makefile guest OUT=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run' || status=$?; \
+	printf '%s\n' "$status" > /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/exit-code; date -u +%FT%TZ > /workspaces/kprog-raw/perf/lto-codegen-parity-20261126/dry-run/finished; exit $status

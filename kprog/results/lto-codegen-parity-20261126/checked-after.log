@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/lto-codegen-parity-20261126'
+python3 checked_emit.py after
+{
+  "recorded_utc": "2026-11-26T21:53:00Z",
+  "phase": "after",
+  "cmov_instructions": 0,
+  "execution": "16384 cases passed\n",
+  "scope": "Actual checked-native compiler function only, on a standalone codegen fixture. No service admission, stock verification, bound installation, app or timing result.",
+  "frontend_ir_unchanged": true
+}
+make: Leaving directory '/workspaces/repository/kprog/results/lto-codegen-parity-20261126'
