@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.tailFrame
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.tailFrame
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.gpr
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.gpr
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.memory
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.memory
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.vector
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFrame.vector
