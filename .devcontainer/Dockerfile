@@ -23,6 +23,7 @@ RUN apt-get update \
         libyaml-cpp-dev libspdlog-dev libfmt-dev \
         clang-18 llvm-18 llvm-18-dev lld-18 libclang-18-dev \
         gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
+        libelf-dev:arm64 zlib1g-dev:arm64 libzstd-dev:arm64 \
         qemu-system-x86 qemu-system-arm qemu-user-static \
         python3 python3-pip python3-venv python3-yaml python3-argcomplete python3-requests python3-pyelftools \
     && rm -rf /var/lib/apt/lists/*
