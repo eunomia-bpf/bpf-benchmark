@@ -1,0 +1,31 @@
+make: Entering directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
+python3 regressions.py
+private 0 {'private_sum': 0, 'global_access': 2, 'pointer_access': 2, 'mixed': 2, 'other_local': 2, 'atomic_local': 2} 1344 private/global/pointer/mixed/atomic executions passed
+
+
+array 0 1008 ARRAY boundary cases and two generic calls passed
+
+probe 0 96 probe copy/error/guard cases, two u32 lengths and compat retention passed
+
+hash 0 {
+  "layout": {
+    "buckets": 448,
+    "count": 824,
+    "seed": 832,
+    "stride": 16,
+    "head": 0,
+    "hash_node": 0,
+    "next": 0,
+    "hash_offset": 40,
+    "key_offset": 48
+  },
+  "helpers": [
+    "__kprog_array_lookup"
+  ],
+  "execution": "2052 kernel hash oracle cases, 286748 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases",
+  "undefined_symbols": "                 U bpf_map_lookup_elem\n                 U map_a\n                 U map_b\n                 U map_c\n                 U map_same\n",
+  "raw": "/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/hash",
+  "scope": "Kernel-header hash oracle, native helper C and installed compiler ABI, including mixed key shapes/generic retention/nulls restart. No stock/app/performance result."
+}
+
+make: Leaving directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'

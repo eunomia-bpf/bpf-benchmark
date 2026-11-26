@@ -1,0 +1,52 @@
+{
+  "recorded_utc": "2026-11-26T23:17:40Z",
+  "rows": [
+    {
+      "case": "private",
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/results/native-private-stack-20261119/test.py",
+        "/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/private",
+        "normalized"
+      ],
+      "returncode": 0,
+      "stdout": "{'private_sum': 0, 'global_access': 2, 'pointer_access': 2, 'mixed': 2, 'other_local': 2, 'atomic_local': 2} 1344 private/global/pointer/mixed/atomic executions passed\n\n",
+      "stderr": ""
+    },
+    {
+      "case": "array",
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/results/checked-array-c-20261119/test.py",
+        "/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/array",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir"
+      ],
+      "returncode": 0,
+      "stdout": "1008 ARRAY boundary cases and two generic calls passed\n",
+      "stderr": ""
+    },
+    {
+      "case": "probe",
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/results/checked-probe-c-20261119/test.py",
+        "/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/probe"
+      ],
+      "returncode": 0,
+      "stdout": "96 probe copy/error/guard cases, two u32 lengths and compat retention passed\n",
+      "stderr": ""
+    },
+    {
+      "case": "hash",
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/results/hash-c-lto-20261120/check.py",
+        "/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/hash"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"layout\": {\n    \"buckets\": 448,\n    \"count\": 824,\n    \"seed\": 832,\n    \"stride\": 16,\n    \"head\": 0,\n    \"hash_node\": 0,\n    \"next\": 0,\n    \"hash_offset\": 40,\n    \"key_offset\": 48\n  },\n  \"helpers\": [\n    \"__kprog_array_lookup\"\n  ],\n  \"execution\": \"2052 kernel hash oracle cases, 286748 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases\",\n  \"undefined_symbols\": \"                 U bpf_map_lookup_elem\\n                 U map_a\\n                 U map_b\\n                 U map_c\\n                 U map_same\\n\",\n  \"raw\": \"/var/tmp/kprog-tmp/perf/checked-toolchain/regressions/hash\",\n  \"scope\": \"Kernel-header hash oracle, native helper C and installed compiler ABI, including mixed key shapes/generic retention/nulls restart. No stock/app/performance result.\"\n}\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "Existing host compiler/helper/UBSan and static current-kernel link regressions. No kernel execution, stock/app acceptance or timing result."
+}

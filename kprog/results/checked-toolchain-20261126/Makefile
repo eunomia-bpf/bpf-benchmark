@@ -10,3 +10,7 @@ build-sim:
 	flock /workspaces/.agent-state/kprog-lanes/locks/image clang++-18 $(LLVM_CXXFLAGS) -O2 $(ROOT)/kprog/x86/compile_sim_ir.cpp $(LLVM_LDFLAGS) -o $(BASE)/compile-sim-ir
 compare:
 	python3 default_ir.py after
+
+.PHONY: regressions
+regressions:
+	python3 regressions.py

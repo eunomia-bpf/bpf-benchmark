@@ -1,0 +1,44 @@
+{
+  "recorded_utc": "2026-11-26T23:17:02Z",
+  "phase": "after",
+  "rows": [
+    {
+      "case": "private",
+      "bytes": 6728,
+      "helpers": [],
+      "default_ir_equal": true
+    },
+    {
+      "case": "array",
+      "bytes": 3816,
+      "helpers": [
+        "__kprog_array_lookup"
+      ],
+      "default_ir_equal": true
+    },
+    {
+      "case": "probe",
+      "bytes": 12040,
+      "helpers": [
+        "__kprog_probe_read_kernel",
+        "__kprog_probe_read_user"
+      ],
+      "default_ir_equal": true
+    },
+    {
+      "case": "hash",
+      "bytes": 4664,
+      "helpers": [
+        "__kprog_array_lookup"
+      ],
+      "default_ir_equal": true
+    },
+    {
+      "case": "pid",
+      "bytes": 3188,
+      "helpers": [],
+      "default_ir_equal": true
+    }
+  ],
+  "scope": "Actual default x86 compiler lowering on five existing regression fixtures; IR compatibility only, not complete request or stock/app acceptance."
+}

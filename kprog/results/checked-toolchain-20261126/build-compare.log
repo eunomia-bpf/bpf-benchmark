@@ -1,0 +1,43 @@
+make: Entering directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
+flock /workspaces/.agent-state/kprog-lanes/locks/image clang++-18 -I/usr/lib/llvm-18/include -std=c++17   -fno-exceptions -funwind-tables -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -O2 /workspaces/repository/kprog/x86/compile_sim_ir.cpp -L/usr/lib/llvm-18/lib  -lLLVM-18 -o /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
+python3 default_ir.py after
+[
+  {
+    "case": "private",
+    "bytes": 6728,
+    "helpers": [],
+    "default_ir_equal": true
+  },
+  {
+    "case": "array",
+    "bytes": 3816,
+    "helpers": [
+      "__kprog_array_lookup"
+    ],
+    "default_ir_equal": true
+  },
+  {
+    "case": "probe",
+    "bytes": 12040,
+    "helpers": [
+      "__kprog_probe_read_kernel",
+      "__kprog_probe_read_user"
+    ],
+    "default_ir_equal": true
+  },
+  {
+    "case": "hash",
+    "bytes": 4664,
+    "helpers": [
+      "__kprog_array_lookup"
+    ],
+    "default_ir_equal": true
+  },
+  {
+    "case": "pid",
+    "bytes": 3188,
+    "helpers": [],
+    "default_ir_equal": true
+  }
+]
+make: Leaving directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
