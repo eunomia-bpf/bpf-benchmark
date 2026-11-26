@@ -1,0 +1,7 @@
+# Original clobber byte-release loop control
+
+The actual clobber helper byte loop scans its full 160-index domain. Real header capacity160 and bias96 reads, unsigned32 counter comparison, signed offset computation, signed lower/upper predicates and original bool temporary select the genuine provider/store body exactly for indices0 through63. The remaining96 indices execute their original skip path. The actual true capacity guard takes7 transitions; original offset and signed selection control takes11, giving18 to the selected body or skip. Inactive iterations include the real unsigned counter increment and backedge in21 transitions. Counter160 executes the actual capacity load, false guard and break wrappers in8. Imported word/cast/comparison operations prove the finite domain; exact setter observations preserve original helper parameter, release counter and signed bounds. All controls preserve the same heap. The selected provider outcomes and volatile byte stores, full160 composition,20-index tag scan and remaining clobber/free/return/caller execution continue before the related root batch, M5 recount and M6. Original C, exports, ISA/specification and previous interfaces remain.
+
+Focused build 345 and 8 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
