@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpGprInputs
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpGprInputs.entry_initialized
+#print axioms Arm64ProducerIsXdpGprInputs.entry_initialized
