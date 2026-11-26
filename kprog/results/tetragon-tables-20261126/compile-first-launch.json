@@ -1,0 +1,23 @@
+{
+  "pid": 625429,
+  "source": "6b21e329f3a2ab141482de56cf5b351b601a4aa9",
+  "started_utc": "2026-11-26T16:00:46Z",
+  "command": [
+    "nohup",
+    "flock",
+    "-s",
+    "/workspaces/.agent-state/kprog-lanes/locks/timing",
+    "taskset",
+    "-c",
+    "16-17",
+    "prlimit",
+    "--as=17179869184",
+    "--",
+    "/usr/bin/time",
+    "-v",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "compile"
+  ]
+}
