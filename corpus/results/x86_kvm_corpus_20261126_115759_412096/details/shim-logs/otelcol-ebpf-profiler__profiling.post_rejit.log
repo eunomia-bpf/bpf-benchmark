@@ -1,0 +1,495 @@
+[116.777811 pid=1911 tid=1911] shim_init pid=1911 exe=/usr/local/bin/otelcol-ebpf-profiler
+[116.778277 pid=1911 tid=1915] socket: listening on /var/run/bpfrejit/shim-1911.sock
+[116.860655 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=feature_test
+[116.860992 pid=1911 tid=1911]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=204
+[116.861135 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=.test
+[116.861354 pid=1911 tid=1911]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=205
+[116.862435 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=144 max_entries=1 name=system_analysis
+[116.862580 pid=1911 tid=1911]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=206
+[116.862717 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=44 max_entries=1 name=.rodata.var
+[116.862816 pid=1911 tid=1911]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=207
+[116.887324 pid=1911 tid=1911] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=4294967295 attach_btf_obj_fd=0 attach_prog_fd=0
+[116.887795 pid=1911 tid=1911]   PROG_LOAD -> fd=-1 errno=9 kernel_prog_id=0
+[116.888262 pid=1911 tid=1911] BPF_PROG_LOAD type=2 (kprobe) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[116.888536 pid=1911 tid=1911] native-loader skipped feature probe program name= insn_cnt=6
+[116.889516 pid=1911 tid=1911]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=20
+[116.889696 pid=1911 tid=1911] BPF_PROG_LOAD type=17 (raw_tracepoint) name=read_task_struc insn_cnt=56 hash=6b2dc94f90220b82 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[116.975783 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[117.057629 pid=1911 tid=1911] native-loader jit-info original fd=13 id=21 type=17 name=read_task_struc tag=7f6621b619c2ec76 jited_len=202 xlated_len=320 nr_jited_ksyms=1 ksym0=0xffffffffc0401768 ksym1=0x0
+[117.057941 pid=1911 tid=1911] native-loader jit-info native fd=17 id=22 type=17 name=read_task_struc tag=59f4a931744dcdc6 jited_len=567 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc040184c ksym1=0x0
+[117.058122 pid=1911 tid=1911] native-loader replaced prog=read_task_struc original_fd=13 native_fd=17 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_6b2dc94f90220b82.bpf
+[117.058333 pid=1911 tid=1911]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=22
+[117.058508 pid=1911 tid=1911] BPF_RAW_TRACEPOINT_OPEN name=sys_enter prog_fd=17
+[117.058924 pid=1911 tid=1911]   RAW_TRACEPOINT_OPEN -> fd=10 errno=0
+[117.059087 pid=1911 tid=1911] BPF_LINK_CREATE prog_fd=4294967295 target_fd=4294967295 attach_type=0 flags=0
+[117.059168 pid=1911 tid=1911]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[117.059789 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=40 max_entries=1024 name=ruby_procs
+[117.059954 pid=1911 tid=1911]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=208
+[117.060225 pid=1911 tid=1911] BPF_MAP_CREATE type=6 key_size=4 value_size=5000 max_entries=1 name=per_cpu_records
+[117.060380 pid=1911 tid=1911]   MAP_CREATE -> fd=15 errno=0 kernel_map_id=209
+[117.060536 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=28 max_entries=1024 name=v8_procs
+[117.060662 pid=1911 tid=1911]   MAP_CREATE -> fd=16 errno=0 kernel_map_id=210
+[117.060781 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=exe_id_to_12_st
+[117.060909 pid=1911 tid=1911]   MAP_CREATE -> fd=17 errno=0 kernel_map_id=211
+[117.061025 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_12_st
+[117.062677 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.062886 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_12_st
+[117.063949 pid=1911 tid=1911]   MAP_CREATE -> fd=18 errno=0 kernel_map_id=212
+[117.064138 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=exe_id_to_11_st
+[117.064252 pid=1911 tid=1911]   MAP_CREATE -> fd=17 errno=0 kernel_map_id=213
+[117.064377 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_11_st
+[117.065523 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.065669 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_11_st
+[117.066637 pid=1911 tid=1911]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=214
+[117.066913 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=24 max_entries=1024 name=php_procs
+[117.067053 pid=1911 tid=1911]   MAP_CREATE -> fd=17 errno=0 kernel_map_id=215
+[117.067190 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8388608 name=exe_id_to_23_st
+[117.074913 pid=1911 tid=1911]   MAP_CREATE -> fd=20 errno=0 kernel_map_id=216
+[117.076323 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_23_st
+[117.077662 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.078008 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_23_st
+[117.079065 pid=1911 tid=1911]   MAP_CREATE -> fd=21 errno=0 kernel_map_id=217
+[117.079576 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=4 max_entries=1024 name=dotnet_procs
+[117.080665 pid=1911 tid=1911]   MAP_CREATE -> fd=20 errno=0 kernel_map_id=218
+[117.080914 pid=1911 tid=1911] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=report_events
+[117.081025 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.081110 pid=1911 tid=1911] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=report_events
+[117.081199 pid=1911 tid=1911]   MAP_CREATE -> fd=22 errno=0 kernel_map_id=219
+[117.081373 pid=1911 tid=1911] BPF_MAP_CREATE type=11 key_size=16 value_size=16 max_entries=1048576 name=pid_page_to_map
+[117.081477 pid=1911 tid=1911]   MAP_CREATE -> fd=23 errno=0 kernel_map_id=220
+[117.081580 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1048576 name=exe_id_to_20_st
+[117.082535 pid=1911 tid=1911]   MAP_CREATE -> fd=24 errno=0 kernel_map_id=221
+[117.083385 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_20_st
+[117.084830 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.085195 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_20_st
+[117.086149 pid=1911 tid=1911]   MAP_CREATE -> fd=25 errno=0 kernel_map_id=222
+[117.086408 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=44 max_entries=1 name=.rodata.var
+[117.086556 pid=1911 tid=1911]   MAP_CREATE -> fd=24 errno=0 kernel_map_id=223
+[117.086714 pid=1911 tid=1911] BPF_MAP_CREATE type=7 key_size=4 value_size=1016 max_entries=16384 name=kernel_stackmap
+[117.089420 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.089622 pid=1911 tid=1911] BPF_MAP_CREATE type=7 key_size=4 value_size=1016 max_entries=16384 name=kernel_stackmap
+[117.091582 pid=1911 tid=1911]   MAP_CREATE -> fd=26 errno=0 kernel_map_id=224
+[117.092658 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=1 max_entries=2 name=inhibit_events
+[117.092812 pid=1911 tid=1911]   MAP_CREATE -> fd=27 errno=0 kernel_map_id=225
+[117.092966 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=16 value_size=8 max_entries=65536 name=stack_delta_pag
+[117.094138 pid=1911 tid=1911]   MAP_CREATE -> fd=28 errno=0 kernel_map_id=226
+[117.094325 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=exe_id_to_14_st
+[117.094462 pid=1911 tid=1911]   MAP_CREATE -> fd=29 errno=0 kernel_map_id=227
+[117.094590 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_14_st
+[117.095806 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.096019 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_14_st
+[117.097023 pid=1911 tid=1911]   MAP_CREATE -> fd=30 errno=0 kernel_map_id=228
+[117.097179 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=524288 name=exe_id_to_19_st
+[117.097783 pid=1911 tid=1911]   MAP_CREATE -> fd=29 errno=0 kernel_map_id=229
+[117.097937 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_19_st
+[117.099397 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.100230 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_19_st
+[117.101288 pid=1911 tid=1911]   MAP_CREATE -> fd=31 errno=0 kernel_map_id=230
+[117.101453 pid=1911 tid=1911] BPF_MAP_CREATE type=6 key_size=4 value_size=8 max_entries=99 name=metrics
+[117.101579 pid=1911 tid=1911]   MAP_CREATE -> fd=29 errno=0 kernel_map_id=231
+[117.101695 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=8 value_size=40 max_entries=32 name=interpreter_off
+[117.101938 pid=1911 tid=1911]   MAP_CREATE -> fd=32 errno=0 kernel_map_id=232
+[117.102128 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=40 max_entries=1024 name=perl_procs
+[117.102280 pid=1911 tid=1911]   MAP_CREATE -> fd=33 errno=0 kernel_map_id=233
+[117.102425 pid=1911 tid=1911] BPF_MAP_CREATE type=9 key_size=4 value_size=8 max_entries=65536 name=reported_pids
+[117.103418 pid=1911 tid=1911]   MAP_CREATE -> fd=34 errno=0 kernel_map_id=234
+[117.103598 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=exe_id_to_15_st
+[117.103738 pid=1911 tid=1911]   MAP_CREATE -> fd=35 errno=0 kernel_map_id=235
+[117.103855 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_15_st
+[117.104896 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.105052 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_15_st
+[117.105955 pid=1911 tid=1911]   MAP_CREATE -> fd=36 errno=0 kernel_map_id=236
+[117.106155 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=exe_id_to_8_sta
+[117.106259 pid=1911 tid=1911]   MAP_CREATE -> fd=35 errno=0 kernel_map_id=237
+[117.106355 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_8_sta
+[117.107435 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.108387 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_8_sta
+[117.109400 pid=1911 tid=1911]   MAP_CREATE -> fd=37 errno=0 kernel_map_id=238
+[117.109605 pid=1911 tid=1911] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=10 name=perf_progs
+[117.109790 pid=1911 tid=1911]   MAP_CREATE -> fd=35 errno=0 kernel_map_id=239
+[117.109961 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=65536 name=exe_id_to_16_st
+[117.110088 pid=1911 tid=1911]   MAP_CREATE -> fd=38 errno=0 kernel_map_id=240
+[117.110334 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_16_st
+[117.111552 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.111689 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_16_st
+[117.112650 pid=1911 tid=1911]   MAP_CREATE -> fd=39 errno=0 kernel_map_id=241
+[117.113501 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4194304 name=exe_id_to_22_st
+[117.116632 pid=1911 tid=1911]   MAP_CREATE -> fd=38 errno=0 kernel_map_id=242
+[117.116853 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_22_st
+[117.118037 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.118229 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_22_st
+[117.119104 pid=1911 tid=1911]   MAP_CREATE -> fd=40 errno=0 kernel_map_id=243
+[117.119937 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=144 max_entries=1 name=system_analysis
+[117.120089 pid=1911 tid=1911]   MAP_CREATE -> fd=38 errno=0 kernel_map_id=244
+[117.120179 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=40 max_entries=1024 name=py_procs
+[117.120296 pid=1911 tid=1911]   MAP_CREATE -> fd=41 errno=0 kernel_map_id=245
+[117.120405 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8192 name=exe_id_to_13_st
+[117.120500 pid=1911 tid=1911]   MAP_CREATE -> fd=42 errno=0 kernel_map_id=246
+[117.120590 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_13_st
+[117.121847 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.122143 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_13_st
+[117.123082 pid=1911 tid=1911]   MAP_CREATE -> fd=43 errno=0 kernel_map_id=247
+[117.123223 pid=1911 tid=1911] BPF_MAP_CREATE type=6 key_size=4 value_size=8 max_entries=1 name=custom_context_
+[117.123315 pid=1911 tid=1911]   MAP_CREATE -> fd=42 errno=0 kernel_map_id=248
+[117.123427 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=28 max_entries=128 name=go_labels_procs
+[117.123523 pid=1911 tid=1911]   MAP_CREATE -> fd=44 errno=0 kernel_map_id=249
+[117.123620 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=exe_id_to_10_st
+[117.123712 pid=1911 tid=1911]   MAP_CREATE -> fd=45 errno=0 kernel_map_id=250
+[117.123808 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_10_st
+[117.124963 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.125074 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_10_st
+[117.125608 pid=1911 tid=1911]   MAP_CREATE -> fd=46 errno=0 kernel_map_id=251
+[117.125767 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=12 max_entries=16384 name=unwind_info_arr
+[117.125911 pid=1911 tid=1911]   MAP_CREATE -> fd=45 errno=0 kernel_map_id=252
+[117.126028 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=131072 name=exe_id_to_17_st
+[117.126241 pid=1911 tid=1911]   MAP_CREATE -> fd=47 errno=0 kernel_map_id=253
+[117.126347 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_17_st
+[117.127394 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.127542 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_17_st
+[117.128197 pid=1911 tid=1911]   MAP_CREATE -> fd=48 errno=0 kernel_map_id=254
+[117.128337 pid=1911 tid=1911] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=trace_events
+[117.128510 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.128623 pid=1911 tid=1911] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=trace_events
+[117.128726 pid=1911 tid=1911]   MAP_CREATE -> fd=47 errno=0 kernel_map_id=255
+[117.128847 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=128 name=apm_int_procs
+[117.128957 pid=1911 tid=1911]   MAP_CREATE -> fd=49 errno=0 kernel_map_id=256
+[117.129058 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=8 value_size=1 max_entries=65536 name=pid_events
+[117.129975 pid=1911 tid=1911]   MAP_CREATE -> fd=50 errno=0 kernel_map_id=257
+[117.130112 pid=1911 tid=1911] BPF_MAP_CREATE type=1 key_size=4 value_size=40 max_entries=256 name=hotspot_procs
+[117.130222 pid=1911 tid=1911]   MAP_CREATE -> fd=51 errno=0 kernel_map_id=258
+[117.130313 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2097152 name=exe_id_to_21_st
+[117.131905 pid=1911 tid=1911]   MAP_CREATE -> fd=52 errno=0 kernel_map_id=259
+[117.132080 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_21_st
+[117.134565 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.134742 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_21_st
+[117.135438 pid=1911 tid=1911]   MAP_CREATE -> fd=53 errno=0 kernel_map_id=260
+[117.135640 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=exe_id_to_9_sta
+[117.135989 pid=1911 tid=1911]   MAP_CREATE -> fd=52 errno=0 kernel_map_id=261
+[117.136098 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_9_sta
+[117.137290 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.138613 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_9_sta
+[117.139415 pid=1911 tid=1911]   MAP_CREATE -> fd=54 errno=0 kernel_map_id=262
+[117.139619 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=262144 name=exe_id_to_18_st
+[117.139922 pid=1911 tid=1911]   MAP_CREATE -> fd=52 errno=0 kernel_map_id=263
+[117.140055 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_18_st
+[117.141149 pid=1911 tid=1911]   MAP_CREATE -> fd=-1 errno=524 kernel_map_id=0
+[117.141262 pid=1911 tid=1911] BPF_MAP_CREATE type=13 key_size=8 value_size=4 max_entries=65536 name=exe_id_to_18_st
+[117.142217 pid=1911 tid=1911]   MAP_CREATE -> fd=55 errno=0 kernel_map_id=264
+[117.142411 pid=1911 tid=1911] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=10 name=kprobe_progs
+[117.144897 pid=1911 tid=1911]   MAP_CREATE -> fd=52 errno=0 kernel_map_id=265
+[117.163094 pid=1911 tid=1911] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_sto insn_cnt=1631 hash=4e2a20edfb8151bc license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.236075 pid=1911 tid=1911] native-loader jit-info original fd=56 id=23 type=7 name=perf_unwind_sto tag=d09a8823a8b5cbd9 jited_len=3650 xlated_len=6144 nr_jited_ksyms=1 ksym0=0xffffffffc0401ca8 ksym1=0x0
+[117.237291 pid=1911 tid=1911] native-loader jit-info native fd=100 id=26 type=7 name=perf_unwind_sto tag=acce632fa2867084 jited_len=7562 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0402b10 ksym1=0x0
+[117.237410 pid=1911 tid=1911] native-loader replaced prog=perf_unwind_sto original_fd=56 native_fd=100 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_4e2a20edfb8151bc.bpf
+[117.237678 pid=1911 tid=1911]   PROG_LOAD -> fd=100 errno=0 kernel_prog_id=26
+[117.237870 pid=1911 tid=1911] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=0 prog_fd=100 prog_id=26 flags=0 ret=0 errno=0
+[117.238017 pid=1911 tid=1911] native-loader jit-info prog_array-target fd=100 id=26 type=7 name=perf_unwind_sto tag=acce632fa2867084 jited_len=7562 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0402b10 ksym1=0x0
+[117.239289 pid=1911 tid=1911] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_nat insn_cnt=6972 hash=bca99a814ee5cf7e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.259736 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[117.342444 pid=1911 tid=1911] native-loader jit-info original fd=56 id=27 type=7 name=perf_unwind_nat tag=1600221a15411be1 jited_len=21868 xlated_len=37024 nr_jited_ksyms=1 ksym0=0xffffffffc0404f8c ksym1=0x0
+[117.343038 pid=1911 tid=1911] native-loader jit-info native fd=102 id=28 type=7 name=perf_unwind_nat tag=acce632fa2867084 jited_len=30686 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc040a558 ksym1=0x0
+[117.343160 pid=1911 tid=1911] native-loader replaced prog=perf_unwind_nat original_fd=56 native_fd=102 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_bca99a814ee5cf7e.bpf
+[117.343487 pid=1911 tid=1911]   PROG_LOAD -> fd=102 errno=0 kernel_prog_id=28
+[117.343836 pid=1911 tid=1911] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=1 prog_fd=102 prog_id=28 flags=0 ret=0 errno=0
+[117.343978 pid=1911 tid=1911] native-loader jit-info prog_array-target fd=102 id=28 type=7 name=perf_unwind_nat tag=acce632fa2867084 jited_len=30686 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc040a558 ksym1=0x0
+[117.345308 pid=1911 tid=1911] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_hot insn_cnt=7593 hash=e007b109cca03800 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.429838 pid=1911 tid=1911] native-loader jit-info original fd=56 id=29 type=7 name=perf_unwind_hot tag=01bbc1bc0b8db8ac jited_len=18424 xlated_len=28080 nr_jited_ksyms=1 ksym0=0xffffffffc041452c ksym1=0x0
+[117.430146 pid=1911 tid=1911] native-loader jit-info native fd=104 id=30 type=7 name=perf_unwind_hot tag=acce632fa2867084 jited_len=40066 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0418d54 ksym1=0x0
+[117.430265 pid=1911 tid=1911] native-loader replaced prog=perf_unwind_hot original_fd=56 native_fd=104 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_e007b109cca03800.bpf
+[117.430518 pid=1911 tid=1911]   PROG_LOAD -> fd=104 errno=0 kernel_prog_id=30
+[117.430753 pid=1911 tid=1911] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=2 prog_fd=104 prog_id=30 flags=0 ret=0 errno=0
+[117.430899 pid=1911 tid=1911] native-loader jit-info prog_array-target fd=104 id=30 type=7 name=perf_unwind_hot tag=acce632fa2867084 jited_len=40066 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0418d54 ksym1=0x0
+[117.432128 pid=1911 tid=1911] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_per insn_cnt=7475 hash=d7f6b6280d600694 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.511151 pid=1911 tid=1911] native-loader jit-info original fd=56 id=31 type=7 name=perf_unwind_per tag=69e1bd538f5df53f jited_len=18264 xlated_len=29640 nr_jited_ksyms=1 ksym0=0xffffffffc0425064 ksym1=0x0
+[117.511417 pid=1911 tid=1911] native-loader jit-info native fd=106 id=32 type=7 name=perf_unwind_per tag=acce632fa2867084 jited_len=36377 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04297d4 ksym1=0x0
+[117.511530 pid=1911 tid=1911] native-loader replaced prog=perf_unwind_per original_fd=56 native_fd=106 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_d7f6b6280d600694.bpf
+[117.511749 pid=1911 tid=1911]   PROG_LOAD -> fd=106 errno=0 kernel_prog_id=32
+[117.511933 pid=1911 tid=1911] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=3 prog_fd=106 prog_id=32 flags=0 ret=0 errno=0
+[117.512048 pid=1911 tid=1911] native-loader jit-info prog_array-target fd=106 id=32 type=7 name=perf_unwind_per tag=acce632fa2867084 jited_len=36377 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04297d4 ksym1=0x0
+[117.513134 pid=1911 tid=1911] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_php insn_cnt=6899 hash=2aecd87ad597b1b1 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.544609 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[117.578997 pid=1911 tid=1911] native-loader jit-info original fd=56 id=33 type=7 name=perf_unwind_php tag=cb8c6977d70b42f3 jited_len=14983 xlated_len=24736 nr_jited_ksyms=1 ksym0=0xffffffffc0434f94 ksym1=0x0
+[117.579780 pid=1911 tid=1911] native-loader jit-info native fd=108 id=34 type=7 name=perf_unwind_php tag=acce632fa2867084 jited_len=33230 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0438a58 ksym1=0x0
+[117.579933 pid=1911 tid=1911] native-loader replaced prog=perf_unwind_php original_fd=56 native_fd=108 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_2aecd87ad597b1b1.bpf
+[117.580176 pid=1911 tid=1911]   PROG_LOAD -> fd=108 errno=0 kernel_prog_id=34
+[117.580391 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=5 prog_fd=108 prog_id=34 flags=0 ret=0 errno=0
+[117.580639 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=108 id=34 type=7 name=perf_unwind_php tag=acce632fa2867084 jited_len=33230 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0438a58 ksym1=0x0
+[117.581819 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_pyt insn_cnt=5894 hash=2927c14f70666366 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.637063 pid=1911 tid=1922] native-loader jit-info original fd=56 id=35 type=7 name=perf_unwind_pyt tag=25e9c6cfd51576de jited_len=19605 xlated_len=33208 nr_jited_ksyms=1 ksym0=0xffffffffc0442b88 ksym1=0x0
+[117.637644 pid=1911 tid=1922] native-loader jit-info native fd=110 id=36 type=7 name=perf_unwind_pyt tag=acce632fa2867084 jited_len=20381 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0447874 ksym1=0x0
+[117.638063 pid=1911 tid=1922] native-loader replaced prog=perf_unwind_pyt original_fd=56 native_fd=110 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_2927c14f70666366.bpf
+[117.638318 pid=1911 tid=1922]   PROG_LOAD -> fd=110 errno=0 kernel_prog_id=36
+[117.639535 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=4 prog_fd=110 prog_id=36 flags=0 ret=0 errno=0
+[117.639741 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=110 id=36 type=7 name=perf_unwind_pyt tag=acce632fa2867084 jited_len=20381 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0447874 ksym1=0x0
+[117.641058 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_rub insn_cnt=5458 hash=b688e4693fcfa049 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.707041 pid=1911 tid=1922] native-loader jit-info original fd=56 id=37 type=7 name=perf_unwind_rub tag=742a9f07f8d80c04 jited_len=17840 xlated_len=30280 nr_jited_ksyms=1 ksym0=0xffffffffc044ea30 ksym1=0x0
+[117.707524 pid=1911 tid=1922] native-loader jit-info native fd=112 id=38 type=7 name=perf_unwind_rub tag=acce632fa2867084 jited_len=26580 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0453010 ksym1=0x0
+[117.707653 pid=1911 tid=1922] native-loader replaced prog=perf_unwind_rub original_fd=56 native_fd=112 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_b688e4693fcfa049.bpf
+[117.707922 pid=1911 tid=1922]   PROG_LOAD -> fd=112 errno=0 kernel_prog_id=38
+[117.708113 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=6 prog_fd=112 prog_id=38 flags=0 ret=0 errno=0
+[117.708280 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=112 id=38 type=7 name=perf_unwind_rub tag=acce632fa2867084 jited_len=26580 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0453010 ksym1=0x0
+[117.709688 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_v8 insn_cnt=7817 hash=bc8a5610e67a1da9 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.781977 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[117.795103 pid=1911 tid=1922] native-loader jit-info original fd=56 id=39 type=7 name=perf_unwind_v8 tag=ee37ab900524f2f1 jited_len=20215 xlated_len=33448 nr_jited_ksyms=1 ksym0=0xffffffffc045c150 ksym1=0x0
+[117.796481 pid=1911 tid=1922] native-loader jit-info native fd=114 id=40 type=7 name=perf_unwind_v8 tag=acce632fa2867084 jited_len=34469 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0461094 ksym1=0x0
+[117.796646 pid=1911 tid=1922] native-loader replaced prog=perf_unwind_v8 original_fd=56 native_fd=114 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_bc8a5610e67a1da9.bpf
+[117.796919 pid=1911 tid=1922]   PROG_LOAD -> fd=114 errno=0 kernel_prog_id=40
+[117.797242 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=7 prog_fd=114 prog_id=40 flags=0 ret=0 errno=0
+[117.797529 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=114 id=40 type=7 name=perf_unwind_v8 tag=acce632fa2867084 jited_len=34469 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0461094 ksym1=0x0
+[117.798888 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=perf_unwind_dot insn_cnt=7974 hash=bb9cc9193e2e4b76 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.871568 pid=1911 tid=1922] native-loader jit-info original fd=56 id=41 type=7 name=perf_unwind_dot tag=fed97753b6f3d6ed jited_len=22797 xlated_len=37440 nr_jited_ksyms=1 ksym0=0xffffffffc046c250 ksym1=0x0
+[117.871858 pid=1911 tid=1922] native-loader jit-info native fd=116 id=42 type=7 name=perf_unwind_dot tag=acce632fa2867084 jited_len=36073 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0471b98 ksym1=0x0
+[117.872124 pid=1911 tid=1922] native-loader replaced prog=perf_unwind_dot original_fd=56 native_fd=116 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_bb9cc9193e2e4b76.bpf
+[117.872377 pid=1911 tid=1922]   PROG_LOAD -> fd=116 errno=0 kernel_prog_id=42
+[117.872539 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=8 prog_fd=116 prog_id=42 flags=0 ret=0 errno=0
+[117.872630 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=116 id=42 type=7 name=perf_unwind_dot tag=acce632fa2867084 jited_len=36073 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0471b98 ksym1=0x0
+[117.873052 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=perf_go_labels insn_cnt=683 hash=b8f0841568646483 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.916257 pid=1911 tid=1922] native-loader jit-info original fd=56 id=43 type=7 name=perf_go_labels tag=7b78cdb1fdbb08b1 jited_len=1572 xlated_len=2504 nr_jited_ksyms=1 ksym0=0xffffffffc047ce4c ksym1=0x0
+[117.916544 pid=1911 tid=1922] native-loader jit-info native fd=117 id=44 type=7 name=perf_go_labels tag=59f4a931744dcdc6 jited_len=2977 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc047d494 ksym1=0x0
+[117.916644 pid=1911 tid=1922] native-loader replaced prog=perf_go_labels original_fd=56 native_fd=117 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_b8f0841568646483.bpf
+[117.916914 pid=1911 tid=1922]   PROG_LOAD -> fd=117 errno=0 kernel_prog_id=44
+[117.917084 pid=1911 tid=1922] BPF_MAP_UPDATE_ELEM prog_array name=perf_progs map_fd=35 key=9 prog_fd=117 prog_id=44 flags=0 ret=0 errno=0
+[117.917182 pid=1911 tid=1922] native-loader jit-info prog_array-target fd=117 id=44 type=7 name=perf_go_labels tag=59f4a931744dcdc6 jited_len=2977 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc047d494 ksym1=0x0
+[117.917496 pid=1911 tid=1922] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sch insn_cnt=283 hash=d0454416698f2eea license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.943129 pid=1911 tid=1922] native-loader jit-info original fd=56 id=45 type=5 name=tracepoint__sch tag=8e27912705160e38 jited_len=792 xlated_len=1320 nr_jited_ksyms=1 ksym0=0xffffffffc040184c ksym1=0x0
+[117.943436 pid=1911 tid=1922] native-loader jit-info native fd=119 id=46 type=5 name=tracepoint__sch tag=59f4a931744dcdc6 jited_len=1358 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc047e3b4 ksym1=0x0
+[117.943542 pid=1911 tid=1922] native-loader replaced prog=tracepoint__sch original_fd=56 native_fd=119 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_d0454416698f2eea.bpf
+[117.943808 pid=1911 tid=1922]   PROG_LOAD -> fd=119 errno=0 kernel_prog_id=46
+[117.944335 pid=1911 tid=1922] BPF_PROG_LOAD type=7 (perf_event) name=native_tracer_e insn_cnt=1322 hash=d42ddf1ccfbb0cd9 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.974128 pid=1911 tid=1922] native-loader jit-info original fd=56 id=47 type=7 name=native_tracer_e tag=1e32ec934f932167 jited_len=3815 xlated_len=5904 nr_jited_ksyms=1 ksym0=0xffffffffc047eac8 ksym1=0x0
+[117.974425 pid=1911 tid=1922] native-loader jit-info native fd=122 id=48 type=7 name=native_tracer_e tag=acce632fa2867084 jited_len=7084 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc047f9e4 ksym1=0x0
+[117.974594 pid=1911 tid=1922] native-loader replaced prog=native_tracer_e original_fd=56 native_fd=122 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_d42ddf1ccfbb0cd9.bpf
+[117.974860 pid=1911 tid=1922]   PROG_LOAD -> fd=122 errno=0 kernel_prog_id=48
+[117.975478 pid=1911 tid=1922] BPF_PROG_LOAD type=2 (kprobe) name=custom__generic insn_cnt=1253 hash=72b902ca7fccefc1 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=10 attach_btf_obj_fd=0 attach_prog_fd=0
+[117.998012 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[118.004030 pid=1911 tid=1922] native-loader jit-info original fd=56 id=49 type=2 name=custom__generic tag=6c481ffe9a987240 jited_len=3679 xlated_len=5712 nr_jited_ksyms=1 ksym0=0xffffffffc0481d14 ksym1=0x0
+[118.004287 pid=1911 tid=1922] native-loader jit-info native fd=123 id=50 type=2 name=custom__generic tag=acce632fa2867084 jited_len=6037 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0482ba4 ksym1=0x0
+[118.004411 pid=1911 tid=1922] native-loader replaced prog=custom__generic original_fd=56 native_fd=123 manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1911_72b902ca7fccefc1.bpf
+[118.004653 pid=1911 tid=1922]   PROG_LOAD -> fd=123 errno=0 kernel_prog_id=50
+[118.004957 pid=1911 tid=1922] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=5 name=
+[118.005154 pid=1911 tid=1922]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=278
+[118.005327 pid=1911 tid=1922] BPF_MAP_CREATE type=11 key_size=8 value_size=8 max_entries=5 name=
+[118.005452 pid=1911 tid=1922]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=279
+[118.011277 pid=1911 tid=1918] BPF_PROG_LOAD type=2 (kprobe) name=probe_bpf_perf_ insn_cnt=2 hash=58255400910d7827 license=MIT expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.012000 pid=1911 tid=1918] native-loader skipped feature probe program name=probe_bpf_perf_ insn_cnt=2
+[118.012419 pid=1911 tid=1918]   PROG_LOAD -> fd=74 errno=0 kernel_prog_id=51
+[118.012717 pid=1911 tid=1918] BPF_LINK_CREATE prog_fd=74 target_fd=0 attach_type=41 flags=0
+[118.013069 pid=1911 tid=1918]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.013383 pid=1911 tid=1918] BPF_LINK_CREATE prog_fd=119 target_fd=73 attach_type=41 flags=0
+[118.013939 pid=1911 tid=1918] BPF_TASK_FD_QUERY target_fd=73 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=46 probe_offset=0 probe_addr=0 symbol=sched_process_free
+[118.014183 pid=1911 tid=1918]   LINK_CREATE -> fd=74 errno=0 kernel_link_id=4
+[118.206584 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[118.409501 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[118.610825 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[118.812037 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.013678 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.214965 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.416646 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.618425 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.820354 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[119.925159 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[119.925429 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=280
+[119.926382 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[119.926706 pid=1911 tid=1955]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=281
+[119.927311 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[119.927713 pid=1911 tid=1955]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=282
+[119.932668 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=
+[119.933405 pid=1911 tid=1955]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=283
+[119.935693 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[119.937134 pid=1911 tid=1955]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=284
+[119.940144 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[119.940577 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=285
+[119.943343 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[119.943566 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=286
+[119.944414 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[119.944734 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=287
+[119.945303 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[119.945585 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=288
+[119.959169 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[119.959903 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=289
+[119.973827 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[119.974262 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=290
+[119.981556 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[119.981897 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=291
+[119.983577 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[119.984238 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=292
+[119.985237 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[119.985366 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=293
+[119.985903 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[119.986018 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=294
+[119.986723 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[119.986834 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=295
+[119.987147 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[119.987236 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=296
+[119.988114 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[119.989458 pid=1911 tid=1955]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=297
+[119.992759 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=
+[119.992994 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=298
+[119.995775 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8192 name=
+[119.995967 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=299
+[119.997088 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[119.997244 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=300
+[119.997828 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[119.998133 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=301
+[120.010614 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[120.012352 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=302
+[120.015926 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[120.017107 pid=1911 tid=1957]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=303
+[120.021422 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[120.029274 pid=1911 tid=1957] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[120.029527 pid=1911 tid=1957]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=304
+[120.045329 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[120.045818 pid=1911 tid=1911]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=305
+[120.052888 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8192 name=
+[120.053309 pid=1911 tid=1911]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=306
+[120.057928 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[120.059349 pid=1911 tid=1911]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=307
+[120.066537 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[120.066796 pid=1911 tid=1911]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=308
+[120.090448 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[120.090989 pid=1911 tid=1911]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=309
+[120.097347 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8192 name=
+[120.097726 pid=1911 tid=1911]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=310
+[120.100868 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[120.101045 pid=1911 tid=1911]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=311
+[120.226367 pid=1911 tid=1915] socket: cmd=list_progs len=22
+[120.235830 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.237135 pid=1911 tid=1911]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=312
+[120.237864 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[120.238022 pid=1911 tid=1911]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=313
+[120.254957 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[120.255879 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=314
+[120.288266 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[120.292976 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=315
+[120.312373 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.312682 pid=1911 tid=1921]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=316
+[120.332372 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.342165 pid=1911 tid=1921]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=317
+[120.348443 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.353812 pid=1911 tid=1921]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=318
+[120.372304 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[120.382363 pid=1911 tid=1921]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=319
+[120.407164 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[120.420852 pid=1911 tid=1921]   MAP_CREATE -> fd=107 errno=0 kernel_map_id=320
+[120.428204 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.433013 pid=1911 tid=1922]   MAP_CREATE -> fd=107 errno=0 kernel_map_id=321
+[120.434441 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.450143 pid=1911 tid=1922]   MAP_CREATE -> fd=107 errno=0 kernel_map_id=322
+[120.526776 pid=1911 tid=1911] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[120.527303 pid=1911 tid=1911]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=323
+[120.844128 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=262144 name=
+[120.848828 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=324
+[120.906666 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=
+[120.909716 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=325
+[120.918239 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[120.921158 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=326
+[120.922189 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[120.922310 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=327
+[120.925576 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.926698 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=328
+[120.949686 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=
+[120.956829 pid=1911 tid=1955]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=329
+[120.959869 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.961915 pid=1911 tid=1955]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=330
+[120.965237 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[120.966189 pid=1911 tid=1921]   MAP_CREATE -> fd=113 errno=0 kernel_map_id=331
+[120.966959 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[120.967400 pid=1911 tid=1921]   MAP_CREATE -> fd=113 errno=0 kernel_map_id=332
+[120.968778 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[120.979829 pid=1911 tid=1921]   MAP_CREATE -> fd=107 errno=0 kernel_map_id=333
+[120.994667 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[120.999866 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=334
+[121.007559 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.008499 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=335
+[121.014701 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.015309 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=336
+[121.015887 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.016089 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=337
+[121.017071 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.030225 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=338
+[121.032705 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.042263 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=339
+[121.045794 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.048825 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=340
+[121.054812 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.055964 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=341
+[121.060702 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.062302 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=342
+[121.071345 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.077155 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=343
+[121.089969 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[121.090292 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=344
+[121.091506 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.105464 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=345
+[121.106384 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.110275 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=346
+[121.111026 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[121.120084 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=347
+[121.122845 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.124402 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=348
+[121.130996 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.131183 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=349
+[121.131936 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.140076 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=350
+[121.141664 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.141785 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=351
+[121.148182 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.148272 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=352
+[121.154679 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.154976 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=353
+[121.174477 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[121.181498 pid=1911 tid=1921]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=354
+[121.201183 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[121.205522 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=355
+[121.223414 pid=1911 tid=1955] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.223874 pid=1911 tid=1955]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=356
+[121.236909 pid=1911 tid=1989] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16384 name=
+[121.247016 pid=1911 tid=1989]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=357
+[121.256287 pid=1911 tid=1989] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.260069 pid=1911 tid=1989]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=358
+[121.262577 pid=1911 tid=1989] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.262730 pid=1911 tid=1989]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=359
+[121.276042 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.279372 pid=1911 tid=1954]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=360
+[121.280500 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.281969 pid=1911 tid=1954]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=361
+[121.293392 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.296193 pid=1911 tid=1954]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=362
+[121.302981 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.309251 pid=1911 tid=1954]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=363
+[121.316953 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[121.322131 pid=1911 tid=1922]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=364
+[121.328381 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[121.332473 pid=1911 tid=1922]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=365
+[121.350753 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.354814 pid=1911 tid=1922]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=366
+[121.363354 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=512 name=
+[121.370702 pid=1911 tid=1954]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=367
+[121.380245 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.387803 pid=1911 tid=1921]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=368
+[121.471777 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=65536 name=
+[121.477529 pid=1911 tid=1921]   MAP_CREATE -> fd=103 errno=0 kernel_map_id=369
+[121.576603 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.581543 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=370
+[121.610275 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=8192 name=
+[121.618873 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=371
+[121.668216 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=4096 name=
+[121.680115 pid=1911 tid=1954]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=372
+[121.720522 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[121.723482 pid=1911 tid=1922]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=373
+[121.745104 pid=1911 tid=1956] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1024 name=
+[121.747606 pid=1911 tid=1956]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=374
+[121.825233 pid=1911 tid=1922] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=2048 name=
+[121.827261 pid=1911 tid=1922]   MAP_CREATE -> fd=105 errno=0 kernel_map_id=375
+[130.872791 pid=1911 tid=1915] socket: cmd=measure_start len=25
+[130.878113 pid=1911 tid=1954] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[130.879075 pid=1911 tid=1954]   MAP_CREATE -> fd=107 errno=0 kernel_map_id=376
+[130.905461 pid=1911 tid=1988] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[130.908371 pid=1911 tid=1988]   MAP_CREATE -> fd=109 errno=0 kernel_map_id=377
+[130.998476 pid=1911 tid=1919] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=32768 name=
+[131.003222 pid=1911 tid=1919]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=378
+[131.010996 pid=1911 tid=1917] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[131.011353 pid=1911 tid=1917]   MAP_CREATE -> fd=101 errno=0 kernel_map_id=379
+[131.014838 pid=1911 tid=1921] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=256 name=
+[131.025926 pid=1911 tid=1921]   MAP_CREATE -> fd=111 errno=0 kernel_map_id=380
+[141.896931 pid=1911 tid=1915] socket: cmd=measure_finish len=26
