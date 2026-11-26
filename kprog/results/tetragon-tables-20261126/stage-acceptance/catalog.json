@@ -1,0 +1,1806 @@
+{
+  "explicit": [
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "symbol": "blk_account_io_merge_bio"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "symbol": "block_rq_complete"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "symbol": "block_rq_insert"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/biosnoop.native.o",
+      "symbol": "block_rq_issue"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "fentry_vfs_create"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "fentry_vfs_fsync"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "fentry_vfs_open"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "fentry_vfs_read"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "fentry_vfs_write"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "symbol": "handle_sched_switch"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "symbol": "handle_switch"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/tcplife.native.o",
+      "symbol": "inet_sock_set_state"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "kprobe_vfs_create"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "kprobe_vfs_fsync"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "kprobe_vfs_open"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "kprobe_vfs_read"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/vfsstat.native.o",
+      "symbol": "kprobe_vfs_write"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "symbol": "sched_switch"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "symbol": "sched_wakeup"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "symbol": "sched_wakeup_new"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/syscount.native.o",
+      "symbol": "sys_enter"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/syscount.native.o",
+      "symbol": "sys_exit"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o",
+      "symbol": "tcp_v4_connect"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o",
+      "symbol": "tcp_v4_connect_ret"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o",
+      "symbol": "tcp_v6_connect"
+    },
+    {
+      "app": "bcc",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/tcpconnect.native.o",
+      "symbol": "tcp_v6_connect_ret"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "cil_from_container"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "cil_from_host"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "cil_from_netdev"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "cil_from_overlay"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "cil_from_wireguard"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "cil_host_policy"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/cilium_placeholders.native.o",
+      "symbol": "cil_host_policy"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "cil_lxc_policy"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "cil_lxc_policy_egress"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/cilium_placeholders.native.o",
+      "symbol": "cil_lxc_policy_egress"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock4_connect"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock4_post_bind"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock4_recvmsg"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock4_sendmsg"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock6_connect"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock6_post_bind"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock6_recvmsg"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock6_sendmsg"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o",
+      "symbol": "cil_sock_release"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "cil_to_container"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "cil_to_host"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "cil_to_netdev"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "cil_to_overlay"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "cil_to_wireguard"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "symbol": "cil_xdp_entry"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "symbol": "tail_drop_notify"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_handle_arp"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_handle_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_handle_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_handle_snat_fwd_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_icmp6_handle_ns"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_icmp6_handle_ns"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_icmp6_send_time_exceeded"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_ipv4_to_endpoint"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "symbol": "tail_no_service_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_nodeport_ipv4_dsr"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "app": "cilium",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "symbol": "tail_policy_denied_ipv4"
+    },
+    {
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+      "symbol": "balancer_ingress"
+    },
+    {
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+      "symbol": "healthcheck_encap"
+    },
+    {
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+      "symbol": "xdp_root"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "custom__generic"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "finish_task_switch"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe__dummy"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_go_labels"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_dotnet"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_hotspot"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_native"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_ruby"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_stop"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "kprobe_unwind_v8"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "native_tracer_entry"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_go_labels"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_dotnet"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_hotspot"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_native"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_perl"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_php"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_python"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_ruby"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_stop"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "perf_unwind_v8"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "read_kernel_memory"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "read_task_struct"
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "symbol": "uprobe__generic"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "__do_bytes"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "__do_str"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v511.native.o",
+      "symbol": "bpf_strncasestr"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "cwd_read_v61"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "data_event_bytes"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "data_event_str"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "do_action"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "do_bytes"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "do_str"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "event_execve"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_exit_v511.native.o",
+      "symbol": "event_exit_acct_process"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_exit_v511.native.o",
+      "symbol": "event_exit_disassociate_ctty"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o",
+      "symbol": "event_wake_up_new_task"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_map_update_v61.native.o",
+      "symbol": "execve_map_update"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "execve_rate"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "symbol": "execve_send"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "extract_arg_depth"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_16ty"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_16ty_map"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_16ty_range"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_16ty_selector_val"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_32ty"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_32ty_map"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_32ty_range"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_32ty_selector_val"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_64ty"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_64ty_map"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_64ty_range"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_64ty_selector_val"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_8ty"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_8ty_map"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_8ty_range"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_8ty_selector_val"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_char_substring"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_file_buf"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_file_type"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_inet"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "filter_sockaddr_un"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_fmodret_enforcer.native.o",
+      "symbol": "fmodret_enforcer"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v61.native.o",
+      "symbol": "generic_fexit_actions"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v61.native.o",
+      "symbol": "generic_fexit_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v61.native.o",
+      "symbol": "generic_fexit_filter_arg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_fexit_v61.native.o",
+      "symbol": "generic_fexit_output"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_kprobe_v61.native.o",
+      "symbol": "generic_fmodret_override"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "symbol": "generic_lsm_actions"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "symbol": "generic_lsm_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "symbol": "generic_lsm_filter_arg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_output_v61.native.o",
+      "symbol": "generic_lsm_output"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+      "symbol": "generic_lsm_path"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "symbol": "generic_lsm_setup_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "symbol": "generic_rawtp_actions"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "symbol": "generic_rawtp_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "symbol": "generic_rawtp_filter_arg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "symbol": "generic_rawtp_output"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "symbol": "generic_rawtp_setup_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "generic_usdt_actions"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_usdt_v61.native.o",
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "generic_usdt_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "generic_usdt_filter_arg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "generic_usdt_output"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v511.native.o",
+      "symbol": "generic_usdt_path"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "generic_usdt_setup_event"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+      "symbol": "ima_bprm"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+      "symbol": "ima_file"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_prog_iter.native.o",
+      "symbol": "iter"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_enforcer.native.o",
+      "symbol": "kprobe_enforcer"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_enforcer.native.o",
+      "symbol": "kprobe_multi_enforcer"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_loader_v511.native.o",
+      "symbol": "loader_kprobe"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "read_reg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_cgroup.native.o",
+      "symbol": "tg_cgroup_rmdir"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_bprm_commit_creds.native.o",
+      "symbol": "tg_kp_bprm_committing_creds"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "symbol": "tg_tp_cgrp_mkdir"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_cgroup_release_v511.native.o",
+      "symbol": "tg_tp_cgrp_release"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "symbol": "tg_tp_cgrp_rmdir"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "try_preload_arg"
+    },
+    {
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_uprobe_v61.native.o",
+      "symbol": "write_reg"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "cgroup_bpf_run_filter_skb"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "cgroup_mkdir_signal"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "cgroup_rmdir_signal"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "cgroup_skb_egress"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "cgroup_skb_ingress"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "empty_kprobe"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "hash_task_id"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "hash_u32_and_u64"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "heartbeat_capture"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lkm_seeker_kset_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lkm_seeker_mod_tree_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lkm_seeker_modtree_loop"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lkm_seeker_new_mod_only_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lkm_seeker_proc_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/lsm_check.native.o",
+      "symbol": "lsm_bpf_check"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "lsm_file_open_test"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "murmur32"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "process_execute_failed_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sched_process_fork_signal"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/kprobe_check.native.o",
+      "symbol": "security_bpf_kprobe"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "send_bin"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "send_bin_tp"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sys_dup_exit_tail"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sys_enter_init"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sys_enter_submit"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sys_exit_init"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "sys_exit_submit"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "syscall__accept4"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "syscall__init_module"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "syscall_checker"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace___debugfs_create_file"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace___register_chrdev"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_arch_prctl"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_bpf_check"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_call_usermodehelper"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_cap_capable"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_check_helper_call"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_check_map_func_compatibility"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_chmod_common"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_commit_creds"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_debugfs_create_dir"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_device_add"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_exit"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_init_module"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_mmap"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_sigaction"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_splice"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_do_truncate"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_dup"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_dup2"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_dup3"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_exec_binprm"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_execute_finished"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_fd_install"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_file_modified"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_file_update_time"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_filldir64"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_filp_close"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_inotify_find_inode"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_kallsyms_lookup_name"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_kernel_write"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_load_elf_phdrs"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_mmap_alert"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_proc_create"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_process_vm_writev"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ptrace"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_register_kprobe"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret__register_chrdev"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_arch_prctl"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_do_init_module"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_do_mmap"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_do_splice"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_dup"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_dup2"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_dup3"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_inotify_find_inode"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_kallsyms_lookup_name"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_process_vm_writev"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_ptrace"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_register_kprobe"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_ret_sock_alloc_file"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_set_fs_pwd"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_sock_alloc_file"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_switch_task_namespaces"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_sys_enter"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_sys_exit"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_utimes_common"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_vfs_read"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_vfs_readv"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "trace_vfs_utimes"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "tracepoint__exec_test"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "tracepoint__task__task_rename"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "uprobe_mem_dump_trigger"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "uprobe_seq_ops_trigger"
+    },
+    {
+      "app": "tracee",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "symbol": "uprobe_syscall_table_check"
+    }
+  ],
+  "runtime_resolved_groups": [
+    {
+      "app": "bcc",
+      "entry": {
+        "native_object": "runqlat.native.o",
+        "program": "handle_sched_wa"
+      }
+    },
+    {
+      "app": "bcc",
+      "entry": {
+        "native_object": "capable.native.o",
+        "program": "kprobe__cap_cap"
+      }
+    },
+    {
+      "app": "bcc",
+      "entry": {
+        "native_object": "opensnoop.native.o",
+        "program": "tracepoint__sys"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_host.native.o",
+        "program": "tail_handle_ipv",
+        "source_map_prefix": "cilium_calls_ho"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_host.native.o",
+        "program": "tail_handle_ipv",
+        "source_map_prefix": "cilium_calls_ne"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_lxc.native.o",
+        "program": "tail_handle_ipv",
+        "source_map_prefix": "cilium_calls_0"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_lxc.native.o",
+        "program": "tail_ipv4_ct_in",
+        "source_map_prefix": "cilium_calls_0"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_host.native.o",
+        "program": "tail_nodeport_n",
+        "source_map_prefix": "cilium_calls_ho"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_host.native.o",
+        "program": "tail_nodeport_n",
+        "source_map_prefix": "cilium_calls_ne"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_lxc.native.o",
+        "program": "tail_nodeport_n",
+        "source_map_prefix": "cilium_calls_0"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_overlay.native.o",
+        "program": "tail_nodeport_n",
+        "source_map_prefix": "cilium_calls_ov"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_wireguard.native.o",
+        "program": "tail_nodeport_n",
+        "source_map_prefix": "cilium_calls_wi"
+      }
+    },
+    {
+      "app": "cilium",
+      "entry": {
+        "native_object": "bpf_xdp.native.o",
+        "prog_type": 6,
+        "program": "tail_nodeport_n"
+      }
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "entry": {
+        "native_object": "otelcol-ebpf-profiler.native.o",
+        "program": "kprobe_unwind_p"
+      }
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "entry": {
+        "native_object": "otelcol-ebpf-profiler.native.o",
+        "program": "tracepoint__sch"
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "filter_char_buf"
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_fentry_v61.native.o",
+        "program": "generic_fentry_",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_kprobe_v61.native.o",
+        "program": "generic_kprobe_",
+        "source_has_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_lsm_core_v61.native.o",
+        "program": "generic_lsm_pro",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_rawtp_v61.native.o",
+        "program": "generic_rawtp_p",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_retkprobe_v61.native.o",
+        "program": "generic_retkpro",
+        "source_has_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_retuprobe_v61.native.o",
+        "program": "generic_retupro",
+        "source_has_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_sleepab",
+        "source_has_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_tracepoint_v61.native.o",
+        "program": "generic_tracepo",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_generic_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_uprobe_v61.native.o",
+        "program": "generic_uprobe_",
+        "source_has_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_multi_usdt_v61.native.o",
+        "program": "generic_usdt_pr",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tetragon",
+      "entry": {
+        "native_object": "bpf_cgtracker.native.o",
+        "program": "tg_cgtracker_cg",
+        "source_lacks_helper": 174
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "kernel_write_ma"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "sched_process_e"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "syscall__execve"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_ret_file_"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_ret_kerne"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_ret_vfs_r"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_ret_vfs_w"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_security_"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "trace_vfs_write"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "tracepoint__cgr"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "tracepoint__mod"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "tracepoint__raw"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "tracepoint__sch"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "uprobe__feature"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "uprobe_lkm_seek"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "vfs_write_magic"
+      }
+    },
+    {
+      "app": "tracee",
+      "entry": {
+        "native_object": "tracee.native.o",
+        "program": "vfs_writev_magi"
+      }
+    }
+  ],
+  "historical_scope": "P3 aggregate289 has no matching retained manifest snapshot; current explicit pairs are compared in full, not relabeled289."
+}
