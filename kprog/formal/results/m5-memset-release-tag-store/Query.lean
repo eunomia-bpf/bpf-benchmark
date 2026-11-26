@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore
+
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.to_statement
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.to_statement
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.statement_execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.statement_execute
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.tag_bytes
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.tag_bytes
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.storage_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.storage_after
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.resources_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.resources_after
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.view_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.view_after
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.gpr_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseTagStore.gpr_after
