@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyByteLane
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteLane.to_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteLane.to_store
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteLane.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteLane.execute
