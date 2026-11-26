@@ -49,6 +49,20 @@ for ident in tuple(map(int, sys.argv[1:])) if len(sys.argv) > 1 else (12, 9):
         row.update(status='refused', error=str(error), input_instructions=len(all_insns))
     finally:
         sys.setprofile(None)
+    if row['status'] == 'lowered':
+        metadata = json.loads((out / 'generation.metadata.json').read_text())
+        try:
+            source = worker.gen.render_program('trusted_x86', instructions, functions,
+                kind=worker.context_kind(metadata['prog_type']), exit_addr=exit_addr, rodata16=rodata,
+                program_section=metadata['section'], trusted_map_bindings=[
+                    dict(native_symbol=item['name'], value_offset=item.get('value_offset'))
+                    for item in metadata['maps']])
+            source = source.replace('#include "../x86_sim_local_bpf.h"',
+                '#include ' + json.dumps(str(ROOT / 'kprog/x86/x86_sim_local_bpf.h')))
+            (out / 'trusted_x86.bpf.c').write_text(source)
+            row['b_source_generation'] = dict(status='generated', source_bytes=len(source.encode()))
+        except ValueError as error:
+            row['b_source_generation'] = dict(status='refused', error=str(error))
     row['liveness_witnesses'] = witnesses
     row['indirect_jump_context'] = [dict(address=insn.addr, instruction=insn.raw)
         for index, insn in enumerate(all_insns) if insn.addr == 0x3580

@@ -48,7 +48,7 @@ is not a claim that all14 requests generate B or pass the stock verifier.
 Request9 remains refused: its table base is hoisted into R15 at0x3560
 before a loop; the load/add/jump at0x3579..0x3580 no longer has the adjacent
 base-LEA pattern the current lowering requires. Neither remaining condition
-is bypassed by this fix. reproduction.json and breadth.log retain every
+is bypassed by this fix. lowering-breadth.json and breadth.log retain every
 outcome and the first actual observation.
 
 Checks run under shared timing on CPUs16–17 with an8GiB address-space cap;
@@ -56,3 +56,18 @@ no guest or sole-image rebuild is needed for this B-analysis-only change.
 Full B source generation/compilation and stock acceptance remain separate
 next steps for the two advancing requests. Main-configuration coverage and
 the Tetragon/OTel performance objective remain open. Full timing is frozen.
+
+Full B source generation now also passes requests39 and62 through the normal
+generator, including definedness, map annotation and instruction rendering.
+Both sources have608,257 bytes and identical text. reproduction.json and
+source-generation.log record that next boundary; the generated sources stay
+beside their retained proof inputs. They are not stock-verifier acceptance.
+
+The next `make compile` uses request39's source through the installed normal
+stock-input wrapper, packet-bounds compiler, whole-word spill pass and BPF
+backend, with their existing flags. It records each actual command/outcome,
+the final object size and the equality to request62's source. This avoids a
+duplicate compile of identical input, without a per-program production
+policy. The finite job records its own result and wakes the lane on either
+outcome. No compiler, base or image rebuild, new LTO setting or native flag
+change is involved. Actual stock/app acceptance remains open.
