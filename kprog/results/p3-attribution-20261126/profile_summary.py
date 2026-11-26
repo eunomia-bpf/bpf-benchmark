@@ -37,7 +37,9 @@ def summarize(out):
         events = [(float(m[1]), m[2]) for line in text if (m := MEASURE.match(line))]
         end = max(t for t, event in events if event == 'finish')
         begin = max(t for t, event in events if event == 'start' and t < end)
-        windows[phase] = [begin, end]
+        # As in profile-20261123/phases.py: the final 54 s before measure_finish.
+        # Native measure_start can precede delayed native loading, unlike the 60 s workload.
+        windows[phase] = [max(begin, end - 55), end - 1]
         first = float(re.match(r'^\[(\d+\.\d+)', text[0])[1])
         selected = [p for p in snapshots if first <= float(p.stem.rsplit('-', 1)[1]) <= end]
         tables[phase] = symbols([out / 'kallsyms.txt', *selected])

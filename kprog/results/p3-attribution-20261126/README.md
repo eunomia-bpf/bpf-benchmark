@@ -81,8 +81,8 @@ recorder/wrapper statuses remain recorded; no app measurement is discarded
 or repeated. Future runs record the explicit stop request and accept 143 only
 when that stop was requested after guest completion.
 
-`profile_summary.py` uses the last completed shim measure_start/measure_finish
-pair in each phase, the captured clock conversion and phase-specific module/BPF
+`profile_summary.py` uses the final 54 seconds before the last shim
+measure_finish (the existing phases.py convention), the captured clock conversion and phase-specific module/BPF
 snapshots. It reports flat cycle-sample shares for P3, kernel hash lookup,
 program bodies, memset and the remaining work. It also counts real stack
 frames separately from perf context markers. Flat memset samples alone are
@@ -93,3 +93,12 @@ The corrected six short checks run after the profiles in
 `checks-20261126T104517Z`. PMU summary job 452715 waits for timing SH and writes
 phase-summary.json in each profile directory. These analyses and checks remain
 pending before causal attribution or a production optimization.
+
+The initial PMU summary used the complete counter-message span. Tetragon's
+native span was 131.2 s although its actual workload duration was 60.07 s:
+measure_start can precede delayed native loading. That initial summary/log is
+retained with an `initial` suffix and is not used as workload-only attribution.
+The corrected summary uses the established final 54 s convention without
+rerunning a guest. The first corrected 10 s Tetragon check completed app ok,
+288 native replacements and no native-load failure, with eBPF/native
+1374.3/1242.1 ns/call; its tracepoint costs are 1909.5/2867.2 ns/call.
