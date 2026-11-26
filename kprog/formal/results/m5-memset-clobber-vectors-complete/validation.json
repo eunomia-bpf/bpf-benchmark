@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-26T09:42:05.208539+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetClobberVectorsComplete"
+    ],
+    "exit": 0,
+    "seconds": 3.2116856575012207,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 360,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-clobber-vectors-complete/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4872808456420898,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 7,
+  "source_steps": {
+    "actual_vector_provider_calls": 64,
+    "actual_vector_stores": 64,
+    "actual_final_vector_index": 31,
+    "both_halves_observed_vectors": 32,
+    "total_actual_helper_provider_calls": 150,
+    "total_explicit_helper_source_stores": 176,
+    "actual_final_state": "original post-assignment Sskip"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetClobberVectorsComplete.lean",
+      "size_bytes": 14083,
+      "mtime_ns": 1795686060515468477
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

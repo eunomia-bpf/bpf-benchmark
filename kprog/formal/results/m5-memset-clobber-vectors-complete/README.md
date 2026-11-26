@@ -1,0 +1,7 @@
+# All64 original vector inputs and stores in the same clobbers call
+
+Sequential source composition executes all64 genuine vector-half kind6 providers and original array-slot/ulong-store paths on their actual supplied heaps. The first63 source stages retain their actual sequence continuations; final V31.hi retains the shorter original path and genuine post-assignment skip. The advancing invariant records each actual provider word and protects all prior halves by actual8-byte nonoverlap within one vector block. final_vectors proves the real imported reader of each of32 vectors returns its respective two provider words, including final V31.hi. The same original clobbers Scall composes the earlier release scans,18 GPR and4 flag pairs with these64 visits:150 genuine provider calls and176 explicit source stores. Actual ordered traces, the existing explicit cache ABI, current Resources/Storage/SP/R0/ABI, all18 GPR words,4 masked flag values,16 data bytes and24 stack-tag bytes survive. Next execute actual helper loop/break/empty-env free/return and restore its real memset caller, then actual8-local memset free/return/caller before related root/M5 recount/M6.
+
+Focused build 360 and 7 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
