@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_cont
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_cont
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_cont
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_cont
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.taken_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccLabels.fallthrough_step
