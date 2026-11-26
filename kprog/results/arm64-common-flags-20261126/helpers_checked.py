@@ -21,7 +21,7 @@ def run(command, required=True):
 spec=importlib.util.spec_from_file_location('arm_helpers_checked',ROOT/'kprog/arm64/trusted_specializer.py')
 worker=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(worker)
-source=HERE/'helpers_fixture.c'
+source=HERE/('mixed_fixture.c' if phase=='mixed' else 'helpers_fixture.c')
 bpf=BUILD/'helpers.bpf.o'
 run([ROOT/'kprog/stock-path/bin/clang',*worker.b_flags(),'-c',source,'-o',bpf])
 prepared=BUILD/'helpers.i'
@@ -40,7 +40,7 @@ plan.write_text(json.dumps(dict(version=1,maps=[dict(name=m['name'],addr=0x20000
     helpers=[dict(name=n,addr=0x100000+i*0x1000) for i,n in enumerate(
         ['bpf_map_lookup_elem','copy_from_user_nofault','copy_from_kernel_nofault','bpf_this_cpu_ptr','memset','memcmp'])])))
 rows=[]
-for entry in ['array_entry','hash_entry','lpm_entry','percpu_entry','dynamic_entry','user_entry','kernel_entry']:
+for entry in ['array_entry','hash_entry','lpm_entry','percpu_entry','dynamic_entry','user_entry','kernel_entry']+(['pid_probe_entry'] if phase=='mixed' else []):
     proof=BUILD/'helpers.proof.o'
     run([linker,'--input',obj,'--symbol',entry,'--mode','proof','--preserve-entry-abi','--output',proof])
     linked=run([linker,'--input',proof,'--symbol',entry,'--mode','kernel','--link-plan',plan,
@@ -58,5 +58,5 @@ if phase=='after':
         record['frontend_ir_unchanged']=before.extractfile('checked-simulator.bc').read()==(BUILD/'checked-simulator.bc').read_bytes()
 (HERE/f'helpers-{phase}-result.json').write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps(record,indent=2))
-if phase=='after' and (any(x['kernel_link_returncode'] for x in rows) or not record['frontend_ir_unchanged']):
+if phase in ('after','mixed') and (any(x['kernel_link_returncode'] for x in rows) or (phase=='after' and not record['frontend_ir_unchanged'])):
     raise AssertionError('ARM checked helper regression')

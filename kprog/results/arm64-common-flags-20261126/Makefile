@@ -47,3 +47,8 @@ native-link-tests:
 .PHONY: helpers-execution
 helpers-execution:
 	python3 helpers_execution.py
+
+.PHONY: helpers-mixed
+helpers-mixed:
+	python3 helpers_checked.py mixed
+	python3 helpers_execution.py mixed
