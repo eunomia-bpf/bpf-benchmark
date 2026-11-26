@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadInputs
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.initial
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.initial
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.offset
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.offset
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.tagged
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.tagged
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.selected
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.selected
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.contexts
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.contexts
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.pointer
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadInputs.pointer
