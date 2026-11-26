@@ -1,0 +1,11 @@
+[
+  "prlimit",
+  "--as=85899345920",
+  "--",
+  "make",
+  "-C",
+  "/workspaces/repository/kprog/perf/one-image",
+  "check",
+  "ORDER=otelcol-ebpf-profiler/profiling",
+  "LOGS=/workspaces/repository/kprog/results/cmov-branches-20261126/repetitions-20261126T140934Z/otel-1/guest"
+]

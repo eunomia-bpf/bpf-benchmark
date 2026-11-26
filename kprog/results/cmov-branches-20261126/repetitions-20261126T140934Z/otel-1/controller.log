@@ -1,0 +1,8 @@
+make[2]: Entering directory '/workspaces/repository/kprog/perf/one-image'
+install -d /workspaces/repository/kprog/results/cmov-branches-20261126/repetitions-20261126T140934Z/otel-1/guest
+for a in otelcol-ebpf-profiler/profiling; do \
+  log=/workspaces/repository/kprog/results/cmov-branches-20261126/repetitions-20261126T140934Z/otel-1/guest/$(date -u +%Y%m%dT%H%M%SZ)-check-$(echo $a | tr / _).log; \
+  make -f /workspaces/repository/kprog/perf/one-image/Makefile corpus APPS=$a SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1 > $log 2>&1 && rc=0 || rc=$?; \
+  echo "$(date -u +%FT%TZ) check $a rc=$rc run=$(grep -o '"artifact_run_dir": "[^"]*"' $log | tail -1 | cut -d'"' -f4)" >> /workspaces/repository/kprog/results/cmov-branches-20261126/repetitions-20261126T140934Z/otel-1/guest/check.log; \
+done
+make[2]: Leaving directory '/workspaces/repository/kprog/perf/one-image'
