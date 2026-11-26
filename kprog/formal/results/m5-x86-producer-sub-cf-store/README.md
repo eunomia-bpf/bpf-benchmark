@@ -1,0 +1,3 @@
+SAME original producer/PUSH/SUB trace executes the genuine CF header read, operand comparison, uchar cast and byte assignment. Current producer object ownership constructs store success and exact readback equals pinned external qword SUB CF for arbitrary original stack-base word and incoming flags. Every other-block load, old-caller frame and current permission/frontier maps are preserved. Other flags and RSP writeback/return remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
