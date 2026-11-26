@@ -1,0 +1,8 @@
+install -d /workspaces/repository/kprog/results/tetragon-tables-20261126/stock/probe-inputs
+taskset -c 18-19 prlimit --as=8589934592 -- vng \
+	--run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	--cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/repository/kprog/results/tetragon-tables-20261126/stock \
+	--rodir /workspaces/repository/kprog/results/tetragon-tables-20261126/stock/probe-inputs=/var/tmp/kprog-tmp/perf/cilium-headlen/ \
+	--disable-monitor --cpus 2 --memory 2G --overlay-rwdir /tmp \
+	--append 'loglevel=4 panic=30 oops=panic' \
+	--exec 'make -f kprog/results/cilium-headlen-20261119/Makefile archive-guest OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock-index.json REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock-replay'

@@ -36,6 +36,7 @@ archive-probe:
 		-Ikprog/libnativeloader/include -Imicro/programs/build-x86 \
 		-Irunner/build-llvmbpf/vendor/libbpf/prefix/include -Ivendor/libbpf/include -Ivendor/libbpf/include/uapi \
 		kprog/results/cilium-headlen-20261119/archive_stock.cpp -Wl,--gc-sections \
+		-Lrunner/build-llvmbpf/native_loader -Wl,-rpath,$(abspath runner/build-llvmbpf/native_loader) -lnative_loader \
 		runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(ARCHIVE_PROBE)
 archive-prepare:
 	python3 kprog/results/cilium-headlen-20261119/archive_stock.py prepare $(INPUTS) $(REPLAY) $(OUT)

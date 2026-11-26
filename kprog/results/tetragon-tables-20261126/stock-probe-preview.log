@@ -1,0 +1,6 @@
+install -d /var/tmp/kprog-tmp/perf/cilium-headlen/
+g++ -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+	-Ikprog/libnativeloader/include -Imicro/programs/build-x86 \
+	-Irunner/build-llvmbpf/vendor/libbpf/prefix/include -Ivendor/libbpf/include -Ivendor/libbpf/include/uapi \
+	kprog/results/cilium-headlen-20261119/archive_stock.cpp -Wl,--gc-sections \
+	runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock

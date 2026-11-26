@@ -1,0 +1,11 @@
+install -d /var/tmp/kprog-tmp/perf/cilium-headlen/
+g++ -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+	-Ikprog/libnativeloader/include -Imicro/programs/build-x86 \
+	-Irunner/build-llvmbpf/vendor/libbpf/prefix/include -Ivendor/libbpf/include -Ivendor/libbpf/include/uapi \
+	kprog/results/cilium-headlen-20261119/archive_stock.cpp -Wl,--gc-sections \
+	runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock
+kprog/results/cilium-headlen-20261119/archive_stock.cpp: In function ‘int main(int, char**)’:
+kprog/results/cilium-headlen-20261119/archive_stock.cpp:52:5: error: ‘relocate_trusted_proof’ was not declared in this scope
+   52 |     relocate_trusted_proof(object.get(), argv[1], bpf_program__name(program), companion, proof, pins, bindings);
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+make: *** [kprog/results/cilium-headlen-20261119/Makefile:35: archive-probe] Error 1

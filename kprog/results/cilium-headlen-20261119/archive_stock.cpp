@@ -1,7 +1,9 @@
 // Stock-load captured B with matching map shapes using production relocations.
 // These fresh, empty maps establish verifier acceptance, not live app binding.
-#include "../../libnativeloader/src/native_loader.cpp"
+#include "../../libnativeloader/src/native_loader_trusted.cpp"
 #include <iostream>
+
+using namespace native_loader::trusted;
 
 static int shape_map(const std::string &shape,
                      std::vector<std::unique_ptr<ScopedFd>> &pins)
@@ -49,10 +51,21 @@ try {
     if (!program || bpf_object__next_program(object.get(), program)) fail("expected one archived B entry");
     std::vector<bpf_insn> proof(bpf_program__insns(program),
                               bpf_program__insns(program)+bpf_program__insn_cnt(program));
-    relocate_trusted_proof(object.get(), argv[1], bpf_program__name(program), companion, proof, pins, bindings);
+    std::vector<ProofSubprogram> subprograms;
+    ScopedFd proof_btf(-1);
+    relocate_trusted_proof(object.get(), argv[1], bpf_program__name(program), companion,
+                           proof, pins, bindings, subprograms, proof_btf);
     std::vector<char> log(16 << 20);
     bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
     opts.log_buf = log.data(); opts.log_size = log.size(); opts.log_level = 1;
+    std::vector<bpf_func_info> functions;
+    if (subprograms.size() > 1) {
+        for (const auto &subprogram : subprograms)
+            functions.push_back({subprogram.start, subprogram.type_id});
+        opts.prog_btf_fd = proof_btf.get();
+        opts.func_info = functions.data(); opts.func_info_cnt = functions.size();
+        opts.func_info_rec_size = sizeof(bpf_func_info);
+    }
     opts.expected_attach_type = static_cast<bpf_attach_type>(json_required_u32(facts, "expected_attach_type"));
     opts.prog_flags = json_required_u32(facts, "prog_flags");
     opts.prog_ifindex = json_required_u32(facts, "prog_ifindex");
