@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.kept
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.observations
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.current
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSourceAddress.current
