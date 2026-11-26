@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.active_positions
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.active_positions
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.prepare
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.prepare
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.advance
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.advance
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.observations
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.setup
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.setup
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.inactive
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.inactive
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.finish
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferLoop.finish
