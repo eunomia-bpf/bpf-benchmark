@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.call_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.call_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.invoke
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpRhsCall.invoke
