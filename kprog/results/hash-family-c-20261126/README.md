@@ -152,3 +152,27 @@ The next step rebuilds the sole x86 image and runs the unchanged six-app
 functional check, defaults1x10s,stats-on. Image/check outcomes will be recorded
 in a fresh range-512 attempt directory. No full timing is authorized here.
 The separate Tetragon/OTel within-design optimization remains open.
+
+
+## Completed 512-size functional confirmation
+
+Source42cd0d591 rebuilt the sole x86 image as7a11cb60285a on2026-11-26.
+The unchanged six-app check completed with controller0, all six make rc0,
+app ok/error empty, samples1/workload10s/stats true. Raw publicationc5dc2391b
+and range-512-image-20261126T121638Z/guest-summary.json record:
+
+| app | native replacements | native-load failures | raw run |
+|---|---:|---:|---|
+| otelcol-ebpf-profiler/profiling | 14 | 0 | 20261126_122957_348057 |
+| bcc/set | 25 | 0 | 20261126_123242_613594 |
+| cilium/agent | 135 | 0 | 20261126_123546_793159 |
+| tetragon/observer | 288 | 0 | 20261126_123833_463916 |
+| tracee/monitor | 169 | 0 | 20261126_124300_184529 |
+| katran | 1 | 0 | 20261126_124642_748933 |
+
+No functional failure needs a fix. The512-size range task is complete.
+The old imagefb53150e89ea was already absent when the wrapper checked it;
+the removal actor is unknown. The cleanup record reflects that observation,
+not a successful redundant removal. The generic_tracepoint and
+native_tracer_entry performance task remains open. These10s counters are
+diagnostics; full timing is frozen.
