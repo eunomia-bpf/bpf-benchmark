@@ -217,3 +217,24 @@ production policy. Future compiler archives stream into48000000-byte
 parts to keep tracked evidence below the repository file limit. Raw old
 archives and compiler products remain. All LTO pieces stay together; image,
 P/common flags, kernel/workloads and full timing are unchanged.
+
+PERF 2026-11-26T18:14:13Z — Hoisted-group emission outcome
+
+Normal compile9 ran17:28:27–18:00:21Z. Eight child commands: the first
+seven return0, including whole_word_spills; final llc returns1 with repeated
+BPF stack-limit errors under the existing -bpf-stack-size=4096 setting.
+The script records1/ELFbytesnull, Make returns2, controller1. No usable
+ELF was emitted; there is no stock/result.json or verifier log because
+stock was not attempted. Generation success is not compiler or stock
+acceptance. Full commands/errors/status and20001885-byte archive part
+remain; tar/zstd/split statuses are all0. Three successful preprocessing
+commands removed six generated pieces after joining; inspected absent and
+listed in cleanup-log.md, joined/intermediate products retained.
+
+The shared stack problem remains: three earlier groups emit B but stock
+rejects R10-528/-976/-968; group9 fails emission itself. No limit is raised.
+The next diagnostic uses the preserved LLVM module embedded in the smaller
+39 baseline MIR to test a common O2 machine backend without rerunning the
+large frontend/GVN pipeline. This is a compiler control, not an adopted
+per-program policy. Production flags, P, image, LTO selection and full
+timing remain unchanged.

@@ -1,0 +1,26 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 compile.py 9 /workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted-pipeline/9
+/workspaces/repository/kprog/stock-path/bin/clang exit 0
+/workspaces/repository/kprog/stock-path/bin/clang exit 0
+/workspaces/repository/kprog/stock-path/bin/clang exit 0
+/workspaces/repository/kprog/stock-path/bin/clang exit 0
+/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds exit 0
+/workspaces/repository/kprog/stock-path/bin/clang exit 0
+/opt/virtme-ng/bin/python3 exit 0
+llc-18 exit 1
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/compile.py", line 29, in <module>
+    worker.compile_simulator(ROOT / 'kprog/stock-path/bin/clang', source, obj, run,
+  File "/workspaces/repository/kprog/x86/trusted_specializer.py", line 85, in compile_simulator
+    compile_simulator_from_frontend(clang, source, obj, run,
+  File "/workspaces/repository/kprog/x86/trusted_specializer.py", line 96, in compile_simulator_from_frontend
+    _compile_simulator_backend(clang, source, obj, run, compiled_input=lowered)
+  File "/workspaces/repository/kprog/x86/trusted_specializer.py", line 104, in _compile_simulator_backend
+    run(['llc-18', '-O1', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/compile.py", line 26, in run
+    result.check_returncode()
+  File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command '['llc-18', '-O1', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096', '-start-before=prologepilog', '-filetype=obj', '/workspaces/repository/kprog/results/tetragon-tables-20261126/request-9/trusted_x86.bpf.packed.mir', '-o', '/workspaces/repository/kprog/results/tetragon-tables-20261126/request-9/trusted_x86.bpf.o']' returned non-zero exit status 1.
+make[1]: *** [Makefile:18: compile-group] Error 1
+make[1]: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
