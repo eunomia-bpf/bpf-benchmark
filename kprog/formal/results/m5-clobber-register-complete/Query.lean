@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.step
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.step
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.iterations
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.execute
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.original
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete.original
