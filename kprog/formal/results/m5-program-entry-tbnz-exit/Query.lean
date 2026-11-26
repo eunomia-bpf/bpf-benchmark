@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryTbnzExit
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryTbnzExit.xor_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryTbnzExit.xor_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryTbnzExit.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryTbnzExit.execute
