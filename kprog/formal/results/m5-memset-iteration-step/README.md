@@ -1,0 +1,7 @@
+# Real memset store iteration retains next-iteration invariants
+
+At every one of the16 original offsets, the actual source bias/action route and both tag-word/stack-byte stores compose the actual SP=-32 false guard and both loop exits to the original saved continuation. The SAME final heap retains all actual Freeable/cache Resources, all24 zero tag-byte observations, the current header view, actual SP pointer and raw-32 bits, access/frontier and outside loads. Every other stack byte among the16 original offsets is preserved by imported disjoint-store semantics, allowing earlier stored bytes to accumulate. All store equations, current-byte readback and caller frame remain actual source evidence. Initial current Storage/Resources/View and SP domain remain explicit component inputs; original-entry/current-rights binding and the16 real counters/backedges compose next, then tag transfer/clobber/free/caller and remaining M5 before M6. The original full-call prefix remains353, fixture14 and universal ISA families0 retain their scopes. Earlier interfaces and imported semantics remain, with no new axiom/cap increase.
+
+Focused build 335 and 1 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
