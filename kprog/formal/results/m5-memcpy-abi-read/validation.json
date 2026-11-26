@@ -1,0 +1,50 @@
+{
+  "confirmed_utc": "2026-11-26T11:28:15.950472+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyAbiRead"
+    ],
+    "exit": 0,
+    "seconds": 9.920464754104614,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 381,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-abi-read/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4669554233551025,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "actual_ABI_read_guard_steps": 11,
+    "actual_current_destination_prefix_steps": 128,
+    "actual_ABI_header_offset": 704,
+    "actual_current_ABI_kind": 2
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyAbiRead.lean",
+      "size_bytes": 12273,
+      "mtime_ns": 1795692233640792862
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
