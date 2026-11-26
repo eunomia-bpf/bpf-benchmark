@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyBytePacket
+#check KProgFormal.ClightRefinement.Arm64MemcpyBytePacket.packet
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyBytePacket.packet
+#check KProgFormal.ClightRefinement.Arm64MemcpyBytePacket.current
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyBytePacket.current
