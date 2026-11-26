@@ -1,0 +1,28 @@
+{
+  "source_archive": "synthetic ARM frontend diagnostic archives",
+  "replay": "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay",
+  "requests": [
+    {
+      "request": 0,
+      "returncode": 2,
+      "stock_loaded": false,
+      "errno": 22,
+      "instructions": 100
+    },
+    {
+      "request": 1,
+      "returncode": 0,
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 102
+    },
+    {
+      "request": 2,
+      "returncode": 0,
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 102
+    }
+  ],
+  "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+}

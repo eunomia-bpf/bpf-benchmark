@@ -1,0 +1,46 @@
+{
+  "started_utc": "2026-11-26T23:39:12Z",
+  "revision": "f1a3ca8a2fb965d69e94c79e471d490687d977e5",
+  "pid": 818219,
+  "scope": "Existing sole-x86-kernel stock B loads for synthetic ARM P frontend before/direct-after/broker-after cases. ISA-neutral B only; no ARM native kernel execution, app or timing result.",
+  "command": [
+    "make",
+    "-f",
+    "kprog/results/cilium-headlen-20261119/Makefile",
+    "archive-stock",
+    "OUT=/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z",
+    "INPUTS=/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/index.json",
+    "REPLAY=/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay"
+  ],
+  "returncode": 2,
+  "results": {
+    "source_archive": "synthetic ARM frontend diagnostic archives",
+    "replay": "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay",
+    "requests": [
+      {
+        "request": 0,
+        "returncode": 2,
+        "stock_loaded": false,
+        "errno": 22,
+        "instructions": 100
+      },
+      {
+        "request": 1,
+        "returncode": 0,
+        "stock_loaded": true,
+        "errno": 0,
+        "instructions": 102
+      },
+      {
+        "request": 2,
+        "returncode": 0,
+        "stock_loaded": true,
+        "errno": 0,
+        "instructions": 102
+      }
+    ],
+    "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+  },
+  "controller_status": 1,
+  "ended_utc": "2026-11-26T23:39:17Z"
+}

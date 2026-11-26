@@ -1,0 +1,7 @@
+make: *** [kprog/results/cilium-headlen-20261119/Makefile:53: archive-guest] Error 1
+itory/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/index.json /workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay /workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z
+{"request": 0, "returncode": 2, "stock_loaded": false, "errno": 22, "instructions": 100}
+{"request": 1, "returncode": 0, "stock_loaded": true, "errno": 0, "instructions": 102}
+{"request": 2, "returncode": 0, "stock_loaded": true, "errno": 0, "instructions": 102}
+make[1]: *** [kprog/results/cilium-headlen-20261119/Makefile:45: archive-stock] Error 2
+make[1]: Leaving directory '/workspaces/repository'

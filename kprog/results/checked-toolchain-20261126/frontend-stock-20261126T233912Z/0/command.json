@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/probe-inputs/archive-stock",
+    "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/0/replay.bpf.o",
+    "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/generation.metadata.json",
+    "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/kernel.facts.json",
+    "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/verifier.log"
+  ],
+  "returncode": 2,
+  "stdout": "{\"stock_loaded\":false,\"errno\":22,\"instructions\":100}\n",
+  "stderr": ""
+}
