@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
+python3 frontend_check.py after
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend_check.py", line 24, in <module>
+    artifacts=worker.specialize(native.read_bytes(),'entry',dict(version=1,prog_type=2,section='kprobe/trusted',maps=[]),BUILD/'generated',linker)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/arm64/trusted_specializer.py", line 53, in specialize
+    output_dir.mkdir(parents=True, mode=0o700)
+  File "/usr/lib/python3.12/pathlib.py", line 1313, in mkdir
+    os.mkdir(self, mode)
+FileExistsError: [Errno 17] File exists: '/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated'
+make: *** [Makefile:28: frontend-after] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'

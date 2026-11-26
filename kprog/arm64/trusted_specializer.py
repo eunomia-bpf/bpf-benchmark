@@ -28,16 +28,17 @@ sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
 from inline_scalar import pid_source
 from inline_array import lookup_source, dynamic_lookup_source
 
-def b_flags() -> list:
+def b_flags(*, sysroot=None) -> list:
     """The B compile flags shared by generation and the checked native leg."""
     flags = ["-w", "-g", "-O2", "-mcpu=v4", "-target", "bpf",
              "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_arm64",
              "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src"]
-    sysroot = os.environ.get("KPROG_ARM64_SYSROOT")
+    if sysroot is None:
+        sysroot = os.environ.get("KPROG_ARM64_SYSROOT")
     if sysroot is None:
         flags.extend(["-I", Path("/usr/include") / sysconfig.get_config_var("MULTIARCH")])
     else:
-        flags.extend(["--sysroot=" + sysroot,
+        flags.extend(["--sysroot=" + str(sysroot),
                       "-I", Path(sysroot) / "usr/include/aarch64-linux-gnu"])
     return flags
 
@@ -74,15 +75,23 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                         '#include ' + json.dumps(str(ROOT / "kprog/arm64/arm64_sim_local_bpf.h")))
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
+    frontend = source.with_suffix(".frontend.bc")
+    clang = os.environ.get("CLANG") or str(ROOT / "kprog/stock-path/bin/clang")
     compiler_state = os.environ.get("KPROG_TRUSTED_COMPILE_STATE")
+    frontend_command = [clang, *b_flags(), "-emit-llvm", "-c", source, "-o", frontend]
     if compiler_state is None:
-        run(["clang", *b_flags(), "-c", source, "-o", obj])
+        run(frontend_command)
+        run([clang, *b_flags(), "-c", frontend, "-o", obj])
     else:
+        run([sys.executable, ROOT / "kprog/trusted_compile.py", "exec",
+             "--state", compiler_state, "--output", frontend.with_suffix(".compiler.json"),
+             "--", *frontend_command])
         run([sys.executable, ROOT / "kprog/trusted_compile.py", "submit",
-             "--state", compiler_state, "--source", source, "--output", obj, "--arch", "arm64"])
+             "--state", compiler_state, "--source", frontend, "--output", obj, "--arch", "arm64"])
     result = dict(native_object=str(native), native_proof_object=str(native_proof),
         simulator_object=str(obj), simulator_program=name + "_arm64_sim_xdp",
-        simulator_source=str(source), context_kind=kind, maps=metadata["maps"],
+        simulator_source=str(source), simulator_frontend=dict(path=str(frontend)),
+        context_kind=kind, maps=metadata["maps"],
         kernel_btf=str(os.environ.get("KPROG_KERNEL_BTF", "/sys/kernel/btf/vmlinux")),
         symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
     (output_dir / "artifacts.json").write_text(json.dumps(result, indent=2) + "\n")
@@ -142,7 +151,9 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     include_flags = [] if sysroot is None else ["--sysroot=" + sysroot]
     ir, lowered = directory / "checked-simulator.bc", directory / "checked-simulator.native.bc"
     native, proof = directory / "checked-simulator.native.o", directory / "checked-simulator.proof.o"
-    run([clang, *b_flags(), "-emit-llvm", "-c", source, "-o", ir])
+    # Use the frontend that produced B instead of recompiling C/includes
+    # after verification while producing the checked native leg.
+    shutil.copyfile(artifacts["simulator_frontend"]["path"], ir)
     arrays = [m["name"] for m in artifacts.get("maps", [])
               if m["map_type"] == 2 and m.get("value_offset") is None]
     percpu_arrays = [m["name"] for m in artifacts.get("maps", [])

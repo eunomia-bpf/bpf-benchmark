@@ -30,13 +30,9 @@ def atomic_json(path: Path, value: dict) -> None:
 
 
 def compile_command(source: Path, output: Path, arch: str, clang: str, arm64_sysroot: Path | None = None) -> list[str]:
-    if arch == 'arm64' and arm64_sysroot is not None:
-        return [clang, '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm',
-                '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64',
-                '--sysroot=' + str(arm64_sysroot),
-                '-I', str(ROOT / 'vendor/libbpf/include/uapi'),
-                '-I', str(ROOT / 'vendor/libbpf/src'),
-                '-I', str(arm64_sysroot / 'usr/include/aarch64-linux-gnu'),
+    if arch == 'arm64':
+        from arm64.trusted_specializer import b_flags
+        return [clang, *map(str, b_flags(sysroot=arm64_sysroot)),
                 '-c', str(source), '-o', str(output)]
     return [clang, '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm',
             '-bpf-stack-size=4096', '-D__TARGET_ARCH_' + arch,

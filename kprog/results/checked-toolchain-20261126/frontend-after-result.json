@@ -1,0 +1,21 @@
+{
+  "recorded_utc": "2026-11-26T23:28:58Z",
+  "phase": "after",
+  "artifacts": {
+    "native_object": "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/request.native.o",
+    "native_proof_object": "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.proof.o",
+    "simulator_object": "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.bpf.o",
+    "simulator_program": "trusted_arm64_arm64_sim_xdp",
+    "simulator_source": "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.bpf.c",
+    "simulator_frontend": {
+      "path": "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.bpf.frontend.bc"
+    },
+    "context_kind": "raw",
+    "maps": [],
+    "kernel_btf": "/sys/kernel/btf/vmlinux",
+    "symbol": "entry",
+    "native_sha256": "29c5cd1b64ea3b1ebfe9071172777f52b377d117416ec4e52de3878669983102"
+  },
+  "execution": "native_return=7\n",
+  "scope": "Actual ARM P generation/B compilation and native worker execution on Cortex-A57 with deliberate private generated-source mutation after B. B is not submitted to a stock verifier; no kernel/app/timing acceptance."
+}

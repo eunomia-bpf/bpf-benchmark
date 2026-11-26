@@ -28,7 +28,6 @@ worker = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(worker)
 source = HERE / 'abi_fixture.c'
 bpf = BUILD / 'fixture.bpf.o'
-run([ROOT / 'kprog/stock-path/bin/clang', *worker.b_flags(), '-c', source, '-o', bpf])
 artifacts = dict(simulator_source=str(source), simulator_object=str(bpf),
                  simulator_program='atomic_entry', maps=[], context_kind='raw')
 # The worker owns one canonical output directory beside its source. Its input
@@ -36,6 +35,10 @@ artifacts = dict(simulator_source=str(source), simulator_object=str(bpf),
 prepared = BUILD / 'fixture.i'
 run(['clang-18', '-E', source, '-o', prepared])
 artifacts['simulator_source'] = str(prepared)
+frontend = BUILD / 'fixture.frontend.bc'
+run([ROOT / 'kprog/stock-path/bin/clang', *worker.b_flags(), '-emit-llvm', '-c', prepared, '-o', frontend])
+run([ROOT / 'kprog/stock-path/bin/clang', *worker.b_flags(), '-c', frontend, '-o', bpf])
+artifacts['simulator_frontend'] = dict(path=str(frontend))
 result = worker.compile_checked_simulator(artifacts,
     ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link',
     Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir'))

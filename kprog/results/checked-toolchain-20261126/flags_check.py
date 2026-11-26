@@ -17,5 +17,11 @@ record=dict(recorded_utc=subprocess.check_output(['date','-u','+%Y-%m-%dT%H:%M:%
  command=command,worker_command=expected,commands_equal=command==expected,
  scope='Actual worker/broker compiler argument contract, no kernel/app/timing claim.')
 (HERE/f'flags-{phase}.json').write_text(json.dumps(record,indent=2)+'\n')
+if phase=='after':
+    sysroot=Path('/test/sysroot')
+    explicit=trusted_compile.compile_command(Path('input.bc'),Path('output.o'),'arm64','clang-18',sysroot)
+    record['explicit_sysroot_equal']=explicit==['clang-18',*map(str,worker.b_flags(sysroot=sysroot)),'-c','input.bc','-o','output.o']
+    if not record['explicit_sysroot_equal']:raise AssertionError('ARM sysroot compiler flags drift')
+    (HERE/f'flags-{phase}.json').write_text(json.dumps(record,indent=2)+'\n')
 print('worker/broker flags equal',record['commands_equal'])
 if phase=='after' and not record['commands_equal']:raise AssertionError('ARM compiler flags drift')

@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
+python3 frontend_check.py broker
+native_return=7
+python3 flags_check.py after
+worker/broker flags equal True
+make: Leaving directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'

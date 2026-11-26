@@ -1,6 +1,46 @@
 [
   {
     "command": [
+      "clang-18",
+      "-E",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_arm64",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.frontend.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
       "/workspaces/repository/kprog/stock-path/bin/clang",
       "-w",
       "-g",
@@ -18,21 +58,9 @@
       "-I",
       "/usr/include/x86_64-linux-gnu",
       "-c",
-      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.frontend.bc",
       "-o",
       "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.bpf.o"
-    ],
-    "returncode": 0,
-    "stdout": "",
-    "stderr": ""
-  },
-  {
-    "command": [
-      "clang-18",
-      "-E",
-      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
-      "-o",
-      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.i"
     ],
     "returncode": 0,
     "stdout": "",

@@ -26,3 +26,15 @@ frontend-before:
 	python3 frontend_check.py before
 frontend-after:
 	python3 frontend_check.py after
+
+.PHONY: flags-after
+flags-after:
+	python3 flags_check.py after
+
+.PHONY: frontend-broker
+frontend-broker:
+	python3 frontend_check.py broker
+
+.PHONY: frontend-stock
+frontend-stock:
+	python3 frontend_stock.py

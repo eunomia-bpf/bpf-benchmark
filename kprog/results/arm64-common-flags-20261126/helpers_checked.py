@@ -23,14 +23,17 @@ worker=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(worker)
 source=HERE/('mixed_fixture.c' if phase=='mixed' else 'helpers_fixture.c')
 bpf=BUILD/'helpers.bpf.o'
-run([ROOT/'kprog/stock-path/bin/clang',*worker.b_flags(),'-c',source,'-o',bpf])
 prepared=BUILD/'helpers.i'
 run(['clang-18','-E',source,'-o',prepared])
+frontend=BUILD/'helpers.frontend.bc'
+run([ROOT/'kprog/stock-path/bin/clang',*worker.b_flags(),'-emit-llvm','-c',prepared,'-o',frontend])
+run([ROOT/'kprog/stock-path/bin/clang',*worker.b_flags(),'-c',frontend,'-o',bpf])
 btf=Path('/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux')
 maps=[dict(name=name,map_type=kind,key_size=key_size,value_size=8,max_entries=2,value_offset=None)
       for name,kind,key_size in [('array_map',2,4),('hash_map',1,4),('lpm_map',11,8),('percpu_map',6,4)]]
 artifacts=dict(simulator_source=str(prepared),simulator_object=str(bpf),
-    simulator_program='array_entry',maps=maps,context_kind='raw',kernel_btf=str(btf))
+    simulator_program='array_entry',simulator_frontend=dict(path=str(frontend)),
+    maps=maps,context_kind='raw',kernel_btf=str(btf))
 linker=ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'
 r=worker.compile_checked_simulator(artifacts,linker,Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir'))
 obj=Path(r['native_object'])
