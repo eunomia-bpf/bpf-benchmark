@@ -684,9 +684,10 @@ static unsigned reuse_packet_data_values(Module &module) {
   }
   return count;
 }
-// The frozen TC converter maps public tc_classid/u32 to the same qdisc
-// overlay field (sk_buff.cb40 + qdisc_skb_cb.tc_classid6), with a u16 store.
-// Use that public accessor for B; P's original physical store is untouched.
+// The frozen TC converter maps public tc_classid/u32 and queue_mapping/u32
+// to physical sk_buff fields (qdisc_skb_cb.tc_classid at cb40+6, and
+// sk_buff.queue_mapping, u16 at 124) with u16 stores. Use those public
+// accessors for B; P's original physical stores are untouched.
 static unsigned canonical_tc_class_stores(Module &module) {
   unsigned count=0;
   for (auto &function:module) {
@@ -694,7 +695,7 @@ static unsigned canonical_tc_class_stores(Module &module) {
         !function.getArg(0)->getType()->isPointerTy()) continue;
     auto section=function.getSection();
     if (section!="classifier" && section!="tc" && !section.starts_with("tc/")) continue;
-    SmallVector<CallInst *,4> stores;
+    SmallVector<std::pair<CallInst *,int64_t>,4> stores;
     for (auto &instruction:instructions(function)) {
       auto *call=dyn_cast<CallInst>(&instruction);
       if (!call || !call->getType()->isVoidTy() || call->arg_size()!=2 ||
@@ -708,14 +709,16 @@ static unsigned canonical_tc_class_stores(Module &module) {
       auto *base=origin(GetPointerBaseWithConstantOffset(origin(call->getArgOperand(0)),
           offset,module.getDataLayout()));
       auto *cast=dyn_cast<CallInst>(base);
-      if (offset==46 && cast && kernel_context_cast(cast) &&
-          origin(cast->getArgOperand(0))==function.getArg(0)) stores.push_back(call);
+      if (!cast || !kernel_context_cast(cast) ||
+          origin(cast->getArgOperand(0))!=function.getArg(0)) continue;
+      if (offset==46) stores.push_back({call,offsetof(__sk_buff,tc_classid)});
+      else if (offset==124) stores.push_back({call,offsetof(__sk_buff,queue_mapping)});
     }
-    for (auto *store:stores) {
+    for (auto [store,public_offset]:stores) {
       auto *signature=FunctionType::get(store->getType(),
           {function.getArg(0)->getType(),store->getArgOperand(1)->getType()},false);
       auto *operation=InlineAsm::get(signature,"*(u32 *)($0 + "+
-          std::to_string(offsetof(__sk_buff,tc_classid))+") = $1","r,r,~{memory}",true);
+          std::to_string(public_offset)+") = $1","r,r,~{memory}",true);
       IRBuilder<> builder(store);builder.SetCurrentDebugLocation(store->getDebugLoc());
       builder.CreateCall(operation,{function.getArg(0),store->getArgOperand(1)});
       store->eraseFromParent();++count;
