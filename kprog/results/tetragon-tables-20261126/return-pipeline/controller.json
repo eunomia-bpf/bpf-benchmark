@@ -32,6 +32,35 @@
         "trusted_x86.bpf.packed.lowering.json",
         "trusted_x86.bpf.packed.mir"
       ]
+    },
+    {
+      "request": 38,
+      "started_utc": "2026-11-26T16:45:26Z",
+      "command": [
+        "taskset",
+        "-c",
+        "17",
+        "prlimit",
+        "--as=17179869184",
+        "--",
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+        "compile-group",
+        "REQUEST=38",
+        "RECORDS=/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/38"
+      ],
+      "compile_returncode": 0,
+      "ended_utc": "2026-11-26T16:57:40Z",
+      "archive_members": [
+        "trusted_x86.bpf.before.mir",
+        "trusted_x86.bpf.bounds-input.bc",
+        "trusted_x86.bpf.bounds.bc",
+        "trusted_x86.bpf.i",
+        "trusted_x86.bpf.o",
+        "trusted_x86.bpf.packed.lowering.json",
+        "trusted_x86.bpf.packed.mir"
+      ]
     }
   ]
 }
