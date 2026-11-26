@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.kept
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.observations
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.current
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferCopyTag.current
