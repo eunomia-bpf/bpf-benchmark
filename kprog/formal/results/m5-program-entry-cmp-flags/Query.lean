@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.source_order
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.source_order
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.encoded
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.encoded
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.source_value
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.source_value
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.native_values
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.native_values
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.native_other
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.native_other
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.readback
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.packet
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.packet
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.represented
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpFlags.represented
