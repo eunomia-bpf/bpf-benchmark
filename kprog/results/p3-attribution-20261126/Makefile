@@ -18,9 +18,11 @@ analyze:
 pmu-check:
 	/workspaces/.agent-state/kprog-ck/perf-tool/perf stat -a -C 0-7 -e cpu_core/cycles/ -- sleep 1
 
-.PHONY: otel-profile
+.PHONY: otel-profile slow-profiles
 otel-profile:
 	python3 $(HERE)/batch.py $(OUT) otel-profile
+slow-profiles:
+	python3 $(HERE)/batch.py $(OUT) slow-profiles
 
 .PHONY: module-control module-normal generic-control control-dry-run
 KEY_SIZES := 2 4 8 12 14 16 20 24 32 36 38 40 41 48 64 88 224 256 260

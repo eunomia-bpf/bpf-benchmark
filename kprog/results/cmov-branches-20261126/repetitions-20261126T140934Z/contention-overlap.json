@@ -1,0 +1,58 @@
+{
+  "source": "COORDINATOR 2026-11-26T14:17Z: the coordinator's arm64 QEMU TCG functional check (pid 583223, kprog/results/arm64-spark-run8-20261126) ran on CPUs 0-23 until 14:17Z and was repinned to CPUs 8-23 then. Your check guest 589066 started on CPUs 0-7 at about 14:14Z, so its first minutes shared those CPUs; the app measured in that window carries this overlap in its record.",
+  "arm64_chain_log": "/workspaces/kprog-raw/coordinator/arm64-run8-20261126/check.log",
+  "arm64_chain_log_birth_utc": "2026-11-26T13:24:07.398544564Z",
+  "arm64_chain_completed_utc": "2026-11-26T14:35:48.896918329Z",
+  "repin_precision": "Coordinator reported minute14:17Z; exact second and per-phase wallclock calibration unavailable.",
+  "scope": "Contention annotation, not a result validity gate. All six completed runs retained; no raw framework result modified.",
+  "cases": [
+    {
+      "case": "tetragon-1",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_141141_816196",
+      "started_at": "2026-11-26T14:11:41.816196+00:00",
+      "completed_at": "2026-11-26T14:14:31.312260+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Suite finishes before reported repin, within arm64 chain lifetime; preceding guest affinity not separately captured."
+    },
+    {
+      "case": "tetragon-2",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_141614_994390",
+      "started_at": "2026-11-26T14:16:14.994390+00:00",
+      "completed_at": "2026-11-26T14:19:03.251973+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Coordinator-confirmed guest CPU overlap; suite interval straddles reported14:17Z repin."
+    },
+    {
+      "case": "tetragon-3",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_142045_563999",
+      "started_at": "2026-11-26T14:20:45.563999+00:00",
+      "completed_at": "2026-11-26T14:23:34.798938+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Suite begins after reported14:17Z repin; no overlap with that reportedCPU0-7 assignment."
+    },
+    {
+      "case": "otel-1",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_142515_585891",
+      "started_at": "2026-11-26T14:25:15.585891+00:00",
+      "completed_at": "2026-11-26T14:26:08.774160+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Suite begins after reported14:17Z repin; no overlap with that reportedCPU0-7 assignment."
+    },
+    {
+      "case": "otel-2",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_142744_194949",
+      "started_at": "2026-11-26T14:27:44.194949+00:00",
+      "completed_at": "2026-11-26T14:28:37.657535+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Suite begins after reported14:17Z repin; no overlap with that reportedCPU0-7 assignment."
+    },
+    {
+      "case": "otel-3",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_143116_643668",
+      "started_at": "2026-11-26T14:31:16.643668+00:00",
+      "completed_at": "2026-11-26T14:32:09.538157+00:00",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "annotation": "Suite begins after reported14:17Z repin; no overlap with that reportedCPU0-7 assignment."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+All six repeated default10s stats-on checks, same image68655f5c6c0d. CPU overlap annotation is in contention-overlap.json; no run discarded.
+20261126_141141_816196 tetragon/observer                status=ok samples=1 s=10.0 per-call=1.697x (1972.0 / 1161.8 ns) thr=1.147x
+20261126_141614_994390 tetragon/observer                status=ok samples=1 s=10.0 per-call=1.918x (1941.1 / 1012.3 ns) thr=1.109x
+20261126_142045_563999 tetragon/observer                status=ok samples=1 s=10.0 per-call=1.127x (1492.0 / 1324.1 ns) thr=0.821x
+20261126_142515_585891 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=0.970x (3292.6 / 3395.6 ns) thr=0.967x
+20261126_142744_194949 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=1.051x (3316.9 / 3156.0 ns) thr=1.055x
+20261126_143116_643668 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=1.037x (3237.6 / 3123.1 ns) thr=0.970x

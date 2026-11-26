@@ -69,6 +69,8 @@ def collect(kind, label, app):
     case.mkdir()
     command = ['make', '-C', str(HERE), kind, 'APP=' + app, 'OUT=' + str(case)]
     if kind == 'profile':
+        if app == 'tetragon/observer':
+            command.append('PROG_NAME=generic_tracepo')
         if app == 'otelcol-ebpf-profiler/profiling':
             command.append('PROG_NAME=perf_unwind_nat')
         command = ['prlimit', '--as=42949672960', '--', *command]
@@ -103,10 +105,13 @@ def checks():
     return 0
 
 try:
-    if PHASE not in {'all', 'diagnostic', 'otel-profile'}:
+    if PHASE not in {'all', 'diagnostic', 'otel-profile', 'slow-profiles'}:
         raise ValueError('unknown collection phase: ' + PHASE)
     if PHASE == 'otel-profile':
         status |= int(collect('profile', 'otel-profile', 'otelcol-ebpf-profiler/profiling') != 0)
+    elif PHASE == 'slow-profiles':
+        for app, short in [('tetragon/observer', 'tetragon'), ('otelcol-ebpf-profiler/profiling', 'otel')]:
+            status |= int(collect('profile', short + '-profile', app) != 0)
     else:
         status |= checks()
     if PHASE == 'all':

@@ -93,3 +93,48 @@ OTel0.962x, BCC0.999x, Cilium1.091x, Tetragon1.139x, Tracee1.786x,
 Katran1.037x. The paired per-call figures and raw run IDs are in
 trial-20261126T132308Z/diagnostic-evaluator.txt. Throughput and per-call costs
 are both diagnostics here; neither changes the frozen official timing.
+
+
+## Three repeated Tetragon and OTel checks
+
+All six repetitions completed app ok/error empty, Tetragon288 and OTel14
+native replacements each, zero native-load failures, same image68655f5c6c0d.
+Per-case image/source provenance was captured under the resource locks.
+
+| app/run order | eBPF aggregate ns/call | native aggregate ns/call | eBPF/native tracepoint ns/call | workload throughput native/eBPF |
+|---|---:|---:|---:|---:|
+| Tetragon1 | 1972.0 | 1161.8 | 2976.0 / 2663.7 | 1.147x |
+| Tetragon2 | 1941.1 | 1012.3 | 2999.9 / 2339.5 | 1.109x |
+| Tetragon3 | 1492.0 | 1324.1 | 2100.8 / 3035.2 | 0.821x |
+| OTel1 | 3292.6 | 3395.6 | — | 0.967x |
+| OTel2 | 3316.9 | 3156.0 | — | 1.055x |
+| OTel3 | 3237.6 | 3123.1 | — | 0.970x |
+
+The coordinator reported an arm64 TCG guest on CPUs0-23 until14:17Z, then
+repinned to8-23. Tetragon2's guest589066 started around14:14Z; its app run
+14:16:14..14:19:03 straddles the reported repin. Tetragon1 finishes before
+14:17Z within the same arm64 chain lifetime; its earlier guest's affinity is
+not independently captured. The other four app runs begin after the reported
+repin. contention-overlap.json records the coordinator's words, the actual
+suite bounds and the limits of phase attribution. No run is discarded or
+relabelled invalid. The raw framework files remain unchanged.
+
+OTel is below eBPF cost in two of three checks and above it in one. Tetragon's
+tracepoint is below eBPF in two and above it in one, with CPU contention in
+the preceding interval. This does not establish a stable fix for either slow
+program or a causal flag speedup. Repeating just to obtain an uncontended
+number is not the next step. The remaining question is where the post-branch
+code spends its time, particularly Tetragon's kernel lock path.
+
+The next profiles keep the32GiB/8vCPU/60s stats-off cycles protocol on the
+unchanged image and capture actual generic_tracepo/perf_unwind_nat code.
+The guest also requests one CPU backtrace for each newly observed stress-ng
+parent, near workload startup. Poll/return status and request start/end guest
+uptimes are retained in stack-requests.txt; the kernel log supplies the stacks.
+This is profiling observation, with no P/flag/runner/workload change. These
+requests can perturb the guest: compare their actual intervals with the
+54s analysis windows and retain that caveat. Do not infer a quantitative lock
+caller share from a few backtraces. The kernel has MAGIC_SYSRQ and ORC support;
+missing stack evidence remains a caveat, not an app/result admission gate.
+Full timing remains frozen; memset's historical owner-specific measurements
+and raw archives remain in their existing result directory.

@@ -28,7 +28,7 @@ install -d $V $OUT
 ln -sfn $R/.cache/container-images/x86_64-runner-runtime.image.tar $V/runtime.image.tar
 ln -sfn $R/kinsn/module/x86/build/bpf_x86_native_lab.ko $V/bpf_x86_native_lab.ko
 install -d $OUT/prior-staging
-for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt; do
+for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt $V/stack-requests.txt; do
   if [ -e "$f" ]; then mv "$f" "$OUT/prior-staging/"; fi
 done
 python3 -c 'import time; print(time.time()-time.clock_gettime(time.CLOCK_MONOTONIC))' > $OUT/host-rt-minus-uptime.txt
@@ -40,6 +40,24 @@ dmesg > /var/tmp/dmesg-before.txt
 echo \$(date +%s.%N) \$(cut -d' ' -f1 /proc/uptime) > /var/tmp/clock.txt
 cp /proc/kallsyms /var/tmp/kallsyms.txt
 mkdir -p /var/tmp/linkcache
+last_stress_pid=
+(while true; do
+  u=\$(cut -d' ' -f1 /proc/uptime)
+  stress_pid=\$(pgrep -xo stress-ng)
+  stress_rc=\$?
+  printf '%s poll_rc=%s pid=%s\n' "\$u" "\$stress_rc" "\$stress_pid" >> /var/tmp/stack-requests.txt
+  if [ "\$stress_rc" = 0 ] && [ "\$stress_pid" != "\$last_stress_pid" ]; then
+    sleep 1
+    request_u=\$(cut -d' ' -f1 /proc/uptime)
+    printf '<6>profile CPU snapshot stress_pid=%s uptime=%s\n' "\$stress_pid" "\$u" > /dev/kmsg
+    echo l > /proc/sysrq-trigger
+    request_rc=\$?
+    end_u=\$(cut -d' ' -f1 /proc/uptime)
+    printf '%s end=%s request_rc=%s\n' "\$request_u" "\$end_u" "\$request_rc" >> /var/tmp/stack-requests.txt
+    last_stress_pid=\$stress_pid
+  fi
+  sleep 1
+done) &
 (while true; do
   u=\$(cut -d' ' -f1 /proc/uptime)
   awk '\$2 ~ /^[tTwW]$/ && (\$3 ~ /^bpf_prog_/ || \$NF == "[bpf_x86_native_lab]")' /proc/kallsyms > /var/tmp/kallsyms-bpf-\$u.txt
@@ -75,7 +93,7 @@ fi
 wait $P; perf_rc=$?
 printf '%s\n' "$guest_rc" > $OUT/guest-exit.txt
 printf '%s\n' "$perf_rc" > $OUT/perf-exit.txt
-for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt; do
+for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt $V/stack-requests.txt; do
   if [ -e "$f" ]; then mv "$f" "$OUT/"; fi
 done
 rm -f $V/bpf-benchmark-docker.img
