@@ -1,0 +1,51 @@
+{
+  "started_utc": "2026-11-26T20:26:30Z",
+  "compile_target": "tag-only-cache-group",
+  "source": "cbde74bd58bddcf7c374d6311082dd1e3da83034",
+  "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "scope": "Common tag-only ghost-cache invalidation control, production policy unchanged. B compilation and sole-kernel detached stock verification only; no native execution or timing.",
+  "cases": [
+    {
+      "request": 39,
+      "started_utc": "2026-11-26T20:26:30Z",
+      "command": [
+        "taskset",
+        "-c",
+        "16",
+        "prlimit",
+        "--as=17179869184",
+        "--",
+        "make",
+        "-C",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+        "tag-only-cache-group",
+        "REQUEST=39",
+        "RECORDS=/workspaces/repository/kprog/results/tetragon-tables-20261126/tag-only-cache-control/39"
+      ],
+      "compile_returncode": 0,
+      "ended_utc": "2026-11-26T20:28:16Z",
+      "archive_members": [
+        "trusted_x86.bpf.backend-input.ll",
+        "trusted_x86.bpf.before.mir",
+        "trusted_x86.bpf.bounds-input.bc",
+        "trusted_x86.bpf.bounds.bc",
+        "trusted_x86.bpf.c",
+        "trusted_x86.bpf.i",
+        "trusted_x86.bpf.o",
+        "trusted_x86.bpf.packed.lowering.json",
+        "trusted_x86.bpf.packed.mir"
+      ],
+      "archive_pipeline_status": [
+        0,
+        0,
+        0
+      ],
+      "archive_parts": [
+        {
+          "name": "compiler-evidence.tar.zst.part-aa",
+          "bytes": 9205928
+        }
+      ]
+    }
+  ]
+}
