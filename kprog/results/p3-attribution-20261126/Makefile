@@ -13,6 +13,6 @@ batch:
 checks:
 	python3 $(HERE)/batch.py $(OUT) diagnostic
 analyze:
-	python3 $(HERE)/profile_summary.py $(OUT)/tetragon-profile $(OUT)/tracee-profile
+	bash $(HERE)/analyze.sh $(OUT)
 pmu-check:
 	/workspaces/.agent-state/kprog-ck/perf-tool/perf stat -a -C 0-7 -e cpu_core/cycles/ -- sleep 1
