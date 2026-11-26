@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.result_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.result_readback
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.ctx_preserved
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.ctx_preserved
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryJccComplete.execute
