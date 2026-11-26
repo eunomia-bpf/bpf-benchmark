@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.execute
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.observations
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.observations
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.to_stores
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpOperands.to_stores
