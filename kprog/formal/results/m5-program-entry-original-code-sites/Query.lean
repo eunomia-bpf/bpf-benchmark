@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryOriginalCodeSites
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOriginalCodeSites.transport
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOriginalCodeSites.transport
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryOriginalCodeSites.from_original
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryOriginalCodeSites.from_original
