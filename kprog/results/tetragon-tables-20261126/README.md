@@ -467,3 +467,25 @@ commands/archive/status publish and every final outcome wakes the lane.
 No stock acceptance, stack reduction or production policy claim yet. Full
 timing stays frozen. Normal preprocessing cleanup will be inspected from
 this job's actual commands at callback; no raw evidence is removed.
+
+PERF 2026-11-26T20:31:39Z — Tag-only invalidation stock result
+
+Controller732629 completed1 at20:28:26Z. Normal B compile20:26:30–20:28:16Z
+has8children0 and ELF1785328bytes, archive9205928bytes/tar-zstd-split0.
+Stock20:28:21–20:28:26Z submits104076instructions and rejects insn8 at
+R10-528, processed9/errno13/rc2/stock_loadedfalse. Compared with normal39
+114694instructions, the candidate is smaller but still not accepted. The
+common ghost-pointer clear contributes to code/lifetimes; retaining the
+pointer alone does not solve stack bounds. It is NOT adopted in production.
+Exact direct R10 MEM operand spans are in tag-only-cache-outcome.json; these
+are not total-frame/feasible-path bounds. Actual source/check/launcha5f09400f,
+compiler publication1510e8cb4/stock66f1d4628 retain raw evidence.
+
+Three successful normal -E commands removed six build pieces after join,
+all verified absent and cleanup-log updated. Current compiler products and
+joined input remain, original C/source and all previous products archived.
+The archive also retains an old backend-input.ll from the earlier IR control;
+that file is not an input to this8-command normal pipeline. No kernel limit,
+production header, P/flags/image/LTO policy or benchmark setting changed.
+Phase1 remains open on the real B frame failures; no runtime gain claimed
+and full timing remains frozen.

@@ -1,2 +1,4 @@
 make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
 python3 return_pipeline.py --tag-only-cache /workspaces/repository/kprog/results/tetragon-tables-20261126/tag-only-cache-control 39
+make: *** [Makefile:80: tag-only-cache-control] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
