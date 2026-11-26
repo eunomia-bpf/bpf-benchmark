@@ -1,0 +1,415 @@
+[
+ {
+  "request": 1,
+  "symbol": "cil_xdp_entry",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 2,
+  "symbol": "tail_handle_ipv4_from_netdev",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 3,
+  "symbol": "cil_lxc_policy_egress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 4,
+  "symbol": "cil_host_policy",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 5,
+  "symbol": "tail_handle_ipv4",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 6,
+  "symbol": "tail_drop_notify",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 7,
+  "symbol": "tail_nodeport_rev_dnat_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 8,
+  "symbol": "cil_to_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 9,
+  "symbol": "cil_from_container",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 10,
+  "symbol": "cil_from_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 11,
+  "symbol": "cil_to_container",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 12,
+  "symbol": "tail_handle_ipv4_from_host",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 13,
+  "symbol": "tail_ipv4_to_endpoint",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 14,
+  "symbol": "cil_from_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 15,
+  "symbol": "tail_ipv4_ct_ingress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 17,
+  "symbol": "tail_ipv4_ct_egress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 18,
+  "symbol": "tail_nodeport_nat_egress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 20,
+  "symbol": "tail_nodeport_nat_ingress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 21,
+  "symbol": "cil_lxc_policy",
+  "packet_reject": false,
+  "was": "0",
+  "now": "4"
+ },
+ {
+  "request": 22,
+  "symbol": "cil_to_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 23,
+  "symbol": "tail_drop_notify",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 24,
+  "symbol": "cil_to_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 25,
+  "symbol": "tail_no_service_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "68"
+ },
+ {
+  "request": 26,
+  "symbol": "cil_to_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 27,
+  "symbol": "tail_handle_ipv4_cont",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 29,
+  "symbol": "tail_handle_arp",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 30,
+  "symbol": "tail_drop_notify",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 31,
+  "symbol": "tail_handle_arp",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 32,
+  "symbol": "tail_no_service_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "68"
+ },
+ {
+  "request": 33,
+  "symbol": "tail_drop_notify",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 34,
+  "symbol": "tail_nodeport_nat_ingress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 35,
+  "symbol": "tail_ipv4_ct_ingress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 36,
+  "symbol": "tail_handle_ipv4_from_netdev",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 37,
+  "symbol": "cil_from_container",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 38,
+  "symbol": "cil_host_policy",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 39,
+  "symbol": "tail_ipv4_to_endpoint",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 40,
+  "symbol": "cil_from_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 41,
+  "symbol": "tail_no_service_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "68"
+ },
+ {
+  "request": 42,
+  "symbol": "cil_from_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 43,
+  "symbol": "cil_to_container",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 44,
+  "symbol": "tail_nodeport_nat_egress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 45,
+  "symbol": "tail_handle_ipv4",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 46,
+  "symbol": "tail_handle_ipv4_from_host",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 47,
+  "symbol": "cil_lxc_policy",
+  "packet_reject": false,
+  "was": "0",
+  "now": "4"
+ },
+ {
+  "request": 48,
+  "symbol": "cil_to_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 50,
+  "symbol": "tail_nodeport_nat_ingress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 51,
+  "symbol": "cil_lxc_policy_egress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 52,
+  "symbol": "cil_host_policy",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 53,
+  "symbol": "tail_handle_ipv4_cont",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 54,
+  "symbol": "tail_drop_notify",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 55,
+  "symbol": "tail_ipv4_ct_egress",
+  "packet_reject": false,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 56,
+  "symbol": "cil_to_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "0"
+ },
+ {
+  "request": 57,
+  "symbol": "tail_nodeport_rev_dnat_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 58,
+  "symbol": "tail_no_service_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "68"
+ },
+ {
+  "request": 59,
+  "symbol": "tail_handle_ipv4_from_host",
+  "packet_reject": true,
+  "was": "0",
+  "now": "1"
+ },
+ {
+  "request": 61,
+  "symbol": "tail_nodeport_nat_egress_ipv4",
+  "packet_reject": true,
+  "was": "0",
+  "now": "2"
+ },
+ {
+  "request": 62,
+  "symbol": "cil_from_host",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 63,
+  "symbol": "tail_handle_ipv4_from_netdev",
+  "packet_reject": true,
+  "was": "0",
+  "now": "3"
+ },
+ {
+  "request": 64,
+  "symbol": "cil_from_netdev",
+  "packet_reject": false,
+  "was": "0",
+  "now": "3"
+ }
+]

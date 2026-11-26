@@ -532,3 +532,58 @@ instruction 51 (`if r2 <= r1 goto LBB0_4`) jumps *past* `LBB0_2` to 115, `LBB0_2
 `LBB0_12` via the call at 106, and the read at 126 is inside `LBB0_4` (115-...), reached from 51 and from the
 `LBB0_13` continuation at 114. Both Bs have the bound at 48-51 in exactly the same shape, which is why the
 placement story could not explain a program that one base rejects and the other accepts.
+
+## kdata4: the pass no longer fires at all, and the two gates that stop it (omp 2026-11-26T06:3xZ)
+
+`checked-corpus-20261125-kdata4` holds 22 packet rejections over 64 Cilium requests, in eight IPv4
+programs (`tail_no_service_ipv4` 4, `tail_handle_ipv4_from_host` 3, `tail_nodeport_nat_ingress_ipv4` 3,
+`tail_handle_ipv4_from_netdev` 3, `tail_nodeport_nat_egress_ipv4` 3, `tail_nodeport_rev_dnat_ipv4` 2,
+`tail_ipv4_to_endpoint` 2, `tail_handle_ipv4_cont` 2). The pass reports
+`packet length predicates lowered=0` in every one of the 22.
+
+`c3c89a8d3` (2026-11-23, "read kernel memory through a probe-read callee") changed the IR the matcher
+sees: every constant displacement in B is now
+`%v = call fastcc i64 @kprog_x86_mem_load_fixed_into(ptr %slot, ptr %base, i64 %disp, i8 %width)`, a
+`noinline` subprogram, instead of a `LoadInst` or the inline-asm `"$0 = *(u32 *)($1 + $2)"` read. Two
+gates then stop the pass, and both are needed:
+
+1. **`field()` (`:551-581`) accepts only a `LoadInst` or that inline-asm form** — a call to the
+   subprogram returns false at `:562-565`, so neither `skb->len` (112) nor `skb->data_len` (116) is
+   recognized and `headlen` never becomes true.
+2. **`current_headlen()` (`:613-650`) blocks on the callee and on the allocas' lifetime markers.** With
+   the call at `:562-565` widened, `headlen` matches and the walk still returns false at
+   `llvm.lifetime.end.p0` (`call->onlyReadsMemory()` is 0 for an intrinsic that names an alloca) and at
+   the `kprog_x86_mem_load_fixed_into` call itself.
+
+Measured on request 12's archived `trusted_x86.bpf.bounds-input.bc`. The comparison is
+`%65 = icmp ugt i32 %63, 33` with `%62 = sub i32 %58, %61`, `%58` = the 112 read and `%61` = the 116
+read; instrumentation of the real pass prints `sub32?=1 len112=1 len116=1 c32=1 headlen=1` for it, and
+`cur_len`/`cur_dl` turn from 0 to 1 once the lifetime marker and the callee stop blocking the walk.
+
+A copy of the current source with those two widenings lowers every one of the 22 (`1` for requests
+7/12/13/27/39/46/53/59, up to `68` for 25/32/41/58), and the emitted bytecode carries the bound beside
+the original scalar guard, e.g. request 12:
+
+```
+58: w8 -= w0                 ; the original len - data_len
+60: r7 = *(u32 *)(r6 + 0x4c) ; data
+61: r1 = *(u32 *)(r6 + 0x50) ; data_end
+63: if w8 < 0x22 goto LBB0_2
+64: r2 = r7
+65: r2 += 0x22
+66: if r2 <= r1 goto LBB0_4  ; data + 34 <= data_end
+```
+
+Nothing else changes: the same binary lowers `0` on all 14 OTel and the one Katran archived inputs and on
+the 37 installing Cilium requests whose input is archived (26 of them already lower > 0 and keep their
+counts).
+
+`kprog/x86/packet_bounds_ir.cpp` is frozen; the six open lines in `kprog/docs/freeze-open.tsv` all
+expired 2026-11-21 and none names this shape. Opening it for this change is the coordinator's call.
+Not yet proven: that the 22 patched B programs are accepted by the stock verifier — that needs a guest
+load, and the host lacks the apps' extern symbols.
+
+The patch itself and the per-request counts are in `kdata4/`: `packet_bounds_ir.kdata4.cpp`
+(sha256 `21a77da5655e7dde890b5ccbb95e69f7af5525efc1c700dc8d1591f8df73e81b`, the current source plus the
+two widenings) and `lowered.json` (one row per archived request: `was` = the installed compiler's count,
+`now` = the patched build's).
