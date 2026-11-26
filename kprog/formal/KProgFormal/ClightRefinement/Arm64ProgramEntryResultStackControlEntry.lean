@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControl
 import KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCodeOrigin
 
 set_option Elab.async false
 set_option linter.unusedSimpArgs false
@@ -45,8 +46,7 @@ private def finish (target : Expr) (facts : Array Expr) : MetaM Expr := do
     (`cell,`cell),(`ready,`ready),(`providers,`providers),(`le,`temps),(`k,`k),
     (`ctxBlock,`ctxBlock),(`ctxOffset,`ctxOfs),(`old,`old),(`reads,`reads),
     (`branch,`branch),
-    (`conditionOffset,`conditionOffset),(`branchDecoded,`branchDecoded),
-    (`sites,`sites)]
+    (`conditionOffset,`conditionOffset),(`branchDecoded,`branchDecoded)]
   for arg in args do
     let name := (← arg.mvarId!.getDecl).userName
     if let some (_,actual) := renames.find? (fun pair => pair.1 == name) then
@@ -71,6 +71,8 @@ private def finish (target : Expr) (facts : Array Expr) : MetaM Expr := do
     #[initial,origins,fields,pc,program,cmpWord,← localValue `cmpFetched]
   let branchFetched ← mkAppM ``Arm64ProgramEntryControlAdmission.fetch_next
     #[initial,origins,fields,pc,program,branchWord,← localValue `branchFetched]
+  let currentSites ← mkAppM ``Arm64ProgramEntryCodeOrigin.sites
+    #[← localValue `code,← localValue `conditionOffset,← localValue `sites]
   let prefixTrace ← mkAppM ``CC.Eapp #[← mkAppM ``List.flatten #[← localValue `traces],← localValue `trace]
   for arg in args do
     let name := (← arg.mvarId!.getDecl).userName
@@ -79,6 +81,7 @@ private def finish (target : Expr) (facts : Array Expr) : MetaM Expr := do
     if name == `noError then arg.mvarId!.assign noError
     if name == `cmpFetched then arg.mvarId!.assign cmpFetched
     if name == `branchFetched then arg.mvarId!.assign branchFetched
+    if name == `sites then arg.mvarId!.assign currentSites
   unless ← isDefEq result target do throwError "actual reached caller result differs"
   let mut candidates := #[]
   for decl in ← getLCtx do
@@ -174,58 +177,12 @@ private def mapPrefix (target oldProof : Expr) (facts : Array Expr) : MetaM Expr
     if let some item := next then pending := pending.push item
   return ← instantiateMVars result
 
-/-- Reuse the original fourteen-call/98-provider prefix witness once. Every
-original existential/effect/frame/cache/code fact remains; its new continuation
-consumes actual reached data and derives current error/code fetch from the
-original fourteen-word program, without invoking the old source-only callback. -/
-theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
-    (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
-    (abiLocal : TailLocal initial 6)
-    (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
-    (context : Arm64Registers.ValueRep addresses (.Vptr ctxBlock ctxOfs) ctxWord)
-    (values : Fin 31 → BitVec 64) (provider : Arm64ProducerGprInputs.ProviderAt world initial values)
-    (flags : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.ProviderAt world initial flags)
-    (vectors : Fin 64 → BitVec 64) (vectorProvider : Arm64ProducerVectorInputs.ProviderAt world initial vectors)
+/-- One complete original prefix contract, sharing all actual witnesses and
+source/native/effect/frame/cache observations across physical code origins. -/
+def Result (initial : CC.Mem) (ctxBlock : CC.Block) (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
+    (abiLocal : TailLocal initial 6) (addresses : Arm64Registers.PointerOrigins)
     (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State)
-    (native : Arm64ProgramEntryRegisterView.NativeBindings origins ctxWord values flags vectors s)
-    (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
-    (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
-      (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i)))
-    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
-    (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
-    (firstDecoded : first.decoded = .DPI (.Move_wide_imm
-      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
-    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
-      (Arm64MovKeep.Native.fields 1 (((fields 1).setWidth 64).setWidth 16) 1 false)))
-    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
-    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
-    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
-    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
-    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
-    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
-    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
-    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
-    (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
-    (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
-    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
-      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
-    (fourteenthDecoded : fourteenth.decoded = .DPI (.Move_wide_imm
-      (Arm64MovImmediate.Wide.fields 2 (16#16) 0 false false)))
-    (noError : read_err s.machine = .None)
-    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
-    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
-    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
-    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
-    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
-    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
-    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
-    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
-    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
-    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
-    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
-    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
-    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding)
-    (fourteenthFetched : fetch_inst (read_pc s.machine + 52#64) s.machine = some fourteenth.encoding) :
+    (fields : Fin 3 → BitVec 32) (code : Arm64ProgramEntryCodeOrigin.Origin (Arm64ProgramEntryControlAdmission.afterFourteen s origins fields)) : Prop :=
     ∃ entry : HeaderLocal initial, ∃ header : (j : Fin 12) → HeaderSourceLocal initial j,
     ∃ ready temps, ∃ traces : List CC.Trace,
       traces.length = 98 ∧
@@ -579,7 +536,8 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
         (branch : Reference.AArch64.Instruction) (conditionOffset : BitVec 19)
         (branchDecoded : branch.decoded = .BR (.Cond_branch_imm (Arm64ProgramEntryJccNative.fields (12#4) conditionOffset)))
         (branchFetched : fetch_inst (read_pc s.machine + 60#64) s.machine = some branch.encoding)
-        (sites : Arm64ProgramEntryPostMemoryBranchSites.Sites sourceState conditionOffset),
+        (sites : Arm64ProgramEntryPostMemoryBranchSites.Sites code.state conditionOffset),
+      let currentSites := Arm64ProgramEntryCodeOrigin.sites code conditionOffset sites
       ∃ gprs helperFlags helperVectors trace live, ∃ lr : HeaderSourceLocal initial 4, ∃ stored returned,
         Arm64ProgramEntryTerminalFree.FreeResult initial stored returned ∧
         CC.Star (CC.Step2 world)
@@ -589,9 +547,62 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
             gprs helperFlags helperVectors (Arm64MemsetLossSetup.byte (fields 0)))) k returned) ∧
         FrameBelow initial.nextblock initial returned ∧
         Arm64ProgramEntrySourceReturnNative.Facts (Arm64ProgramEntryPostMemoryCmpView.native sourceState gprs helperFlags)
-          conditionOffset (Arm64ProgramEntryPostMemoryBranchSites.chosenOffset sourceState gprs helperFlags conditionOffset sites)
-          (Arm64ProgramEntryPostMemoryBranchSites.admission sourceState gprs helperFlags conditionOffset sites)
-          live (.Vptr entry.block 0) lr.block := by
+          conditionOffset (Arm64ProgramEntryPostMemoryBranchSites.chosenOffset sourceState gprs helperFlags conditionOffset currentSites)
+          (Arm64ProgramEntryPostMemoryBranchSites.admission sourceState gprs helperFlags conditionOffset currentSites)
+          live (.Vptr entry.block 0) lr.block
+
+/-- Consume one original prefix and the same reached helper/source execution,
+resolving both real code sites at the actual target from one code origin. -/
+theorem entry_with_code (initial : CC.Mem) (ctxBlock : CC.Block)
+    (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
+    (abiLocal : TailLocal initial 6)
+    (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
+    (context : Arm64Registers.ValueRep addresses (.Vptr ctxBlock ctxOfs) ctxWord)
+    (values : Fin 31 → BitVec 64) (provider : Arm64ProducerGprInputs.ProviderAt world initial values)
+    (flags : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.ProviderAt world initial flags)
+    (vectors : Fin 64 → BitVec 64) (vectorProvider : Arm64ProducerVectorInputs.ProviderAt world initial vectors)
+    (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State)
+    (native : Arm64ProgramEntryRegisterView.NativeBindings origins ctxWord values flags vectors s)
+    (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
+    (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
+      (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i)))
+    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
+    (firstDecoded : first.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
+      (Arm64MovKeep.Native.fields 1 (((fields 1).setWidth 64).setWidth 16) 1 false)))
+    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
+    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
+    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
+    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
+    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
+    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
+    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
+    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
+    (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
+    (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
+    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (fourteenthDecoded : fourteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 2 (16#16) 0 false false)))
+    (noError : read_err s.machine = .None)
+    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
+    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
+    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
+    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
+    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
+    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
+    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
+    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
+    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
+    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
+    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
+    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
+    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding)
+    (fourteenthFetched : fetch_inst (read_pc s.machine + 52#64) s.machine = some fourteenth.encoding)
+    (code : Arm64ProgramEntryCodeOrigin.Origin (Arm64ProgramEntryControlAdmission.afterFourteen s origins fields)) :
+    Result initial ctxBlock ctxOfs k abiLocal addresses origins s fields code := by
   have control := Arm64ProgramEntryControlAdmission.admission s origins fields
     first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
     imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded
@@ -609,5 +620,135 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     let proof ← mapPrefix (← Lean.Elab.Tactic.getMainTarget) evidence.toExpr #[]
     (← Lean.Elab.Tactic.getMainGoal).assign proof
     Lean.Elab.Tactic.setGoals []
+
+
+/-- Preserve the previous current-code interface and its exact prefix contract. -/
+theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
+    (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
+    (abiLocal : TailLocal initial 6)
+    (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
+    (context : Arm64Registers.ValueRep addresses (.Vptr ctxBlock ctxOfs) ctxWord)
+    (values : Fin 31 → BitVec 64) (provider : Arm64ProducerGprInputs.ProviderAt world initial values)
+    (flags : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.ProviderAt world initial flags)
+    (vectors : Fin 64 → BitVec 64) (vectorProvider : Arm64ProducerVectorInputs.ProviderAt world initial vectors)
+    (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State)
+    (native : Arm64ProgramEntryRegisterView.NativeBindings origins ctxWord values flags vectors s)
+    (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
+    (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
+      (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i)))
+    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
+    (firstDecoded : first.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
+      (Arm64MovKeep.Native.fields 1 (((fields 1).setWidth 64).setWidth 16) 1 false)))
+    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
+    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
+    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
+    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
+    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
+    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
+    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
+    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
+    (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
+    (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
+    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (fourteenthDecoded : fourteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 2 (16#16) 0 false false)))
+    (noError : read_err s.machine = .None)
+    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
+    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
+    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
+    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
+    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
+    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
+    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
+    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
+    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
+    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
+    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
+    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
+    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding)
+    (fourteenthFetched : fetch_inst (read_pc s.machine + 52#64) s.machine = some fourteenth.encoding) :
+    Result initial ctxBlock ctxOfs k abiLocal addresses origins s fields (Arm64ProgramEntryCodeOrigin.current _) := by
+  exact entry_with_code initial ctxBlock ctxOfs k abiLocal addresses ctxWord context values provider flags flagProvider vectors vectorProvider
+      origins s native fields old reads first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
+      imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded
+      ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded thirteenthDecoded fourteenthDecoded noError firstFetched keepFetched
+      thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched
+      thirteenthFetched fourteenthFetched
+    (Arm64ProgramEntryCodeOrigin.current _)
+
+/-- Bind both genuine successor BL/RET/continuation sites to the original
+program anchor; actual fourteen-word admission supplies their target transport. -/
+theorem original_code_entry (initial : CC.Mem) (ctxBlock : CC.Block)
+    (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
+    (abiLocal : TailLocal initial 6)
+    (addresses : Arm64Registers.PointerOrigins) (ctxWord : BitVec 64)
+    (context : Arm64Registers.ValueRep addresses (.Vptr ctxBlock ctxOfs) ctxWord)
+    (values : Fin 31 → BitVec 64) (provider : Arm64ProducerGprInputs.ProviderAt world initial values)
+    (flags : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.ProviderAt world initial flags)
+    (vectors : Fin 64 → BitVec 64) (vectorProvider : Arm64ProducerVectorInputs.ProviderAt world initial vectors)
+    (origins : Reference.Provenance.AArch64.Origins) (s : Reference.AArch64.State)
+    (native : Arm64ProgramEntryRegisterView.NativeBindings origins ctxWord values flags vectors s)
+    (fields : Fin 3 → BitVec 32) (old : ctxBlock.toNat < initial.nextblock.toNat)
+    (reads : ∀ i : Fin 3, CC.Mem.loadv .Mint32 initial (.Vptr ctxBlock
+      (CC.Integers.Ptrofs.add ctxOfs (CC.Integers.Ptrofs.repr (contextOffset i)))) = some (.Vint (fields i)))
+    (first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth : Reference.AArch64.Instruction) (imm : BitVec 16) (column : Fin 4) (negate : Bool)
+    (literal : (fields 0).setWidth 64 = Arm64MovImmediate.Wide.literal imm column false negate)
+    (firstDecoded : first.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (keepDecoded : keep.decoded = .DPI (.Move_wide_imm
+      (Arm64MovKeep.Native.fields 1 (((fields 1).setWidth 64).setWidth 16) 1 false)))
+    (thirdDecoded : third.decoded = .DPI (.Add_sub_imm (Arm64AddImmediate.Native.fields 2 (16#12) false)))
+    (fourthDecoded : fourth.decoded = .DPR (.Add_sub_shifted_reg Arm64AddRegisterNative.fields))
+    (fifthDecoded : fifth.decoded = .DPR (.Data_processing_three_source Arm64Mul.Native.fields))
+    (sixthDecoded : sixth.decoded = .DPR (.Add_sub_shifted_reg Arm64Compare.Native.fields))
+    (seventhDecoded : seventh.decoded = .DPR (.Conditional_select (Arm64Select.Native.fields 5 1 2 (0#4))))
+    (eighthDecoded : eighth.decoded = .DPR (.Conditional_select Arm64Cneg.Native.fields))
+    (ninthDecoded : ninth.decoded = .DPR (.Logical_shifted_reg Arm64Orn.Native.fields))
+    (tenthDecoded : tenth.decoded = .DPSFP (.Conversion_between_FP_and_Int Arm64Fmov.Native.fields))
+    (eleventhDecoded : eleventh.decoded = .DPSFP (.Advanced_simd_two_reg_misc Arm64Cnt.Native.fields))
+    (twelfthDecoded : twelfth.decoded = .DPSFP (.Advanced_simd_across_lanes Arm64Uaddlv.Native.fields))
+    (thirteenthDecoded : thirteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 1 imm column false negate)))
+    (fourteenthDecoded : fourteenth.decoded = .DPI (.Move_wide_imm
+      (Arm64MovImmediate.Wide.fields 2 (16#16) 0 false false)))
+    (noError : read_err s.machine = .None)
+    (firstFetched : fetch_inst (read_pc s.machine) s.machine = some first.encoding)
+    (keepFetched : fetch_inst (read_pc s.machine + 4#64) s.machine = some keep.encoding)
+    (thirdFetched : fetch_inst (read_pc s.machine + 8#64) s.machine = some third.encoding)
+    (fourthFetched : fetch_inst (read_pc s.machine + 12#64) s.machine = some fourth.encoding)
+    (fifthFetched : fetch_inst (read_pc s.machine + 16#64) s.machine = some fifth.encoding)
+    (sixthFetched : fetch_inst (read_pc s.machine + 20#64) s.machine = some sixth.encoding)
+    (seventhFetched : fetch_inst (read_pc s.machine + 24#64) s.machine = some seventh.encoding)
+    (eighthFetched : fetch_inst (read_pc s.machine + 28#64) s.machine = some eighth.encoding)
+    (ninthFetched : fetch_inst (read_pc s.machine + 32#64) s.machine = some ninth.encoding)
+    (tenthFetched : fetch_inst (read_pc s.machine + 36#64) s.machine = some tenth.encoding)
+    (eleventhFetched : fetch_inst (read_pc s.machine + 40#64) s.machine = some eleventh.encoding)
+    (twelfthFetched : fetch_inst (read_pc s.machine + 44#64) s.machine = some twelfth.encoding)
+    (thirteenthFetched : fetch_inst (read_pc s.machine + 48#64) s.machine = some thirteenth.encoding)
+    (fourteenthFetched : fetch_inst (read_pc s.machine + 52#64) s.machine = some fourteenth.encoding) :
+    let control := Arm64ProgramEntryControlAdmission.admission s origins fields
+      first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
+      imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded
+      seventhDecoded eighthDecoded ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded thirteenthDecoded fourteenthDecoded
+      noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched
+      eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched thirteenthFetched fourteenthFetched
+    Result initial ctxBlock ctxOfs k abiLocal addresses origins s fields (Arm64ProgramEntryCodeOrigin.original s origins fields control.1 control.2.2) := by
+  have control := Arm64ProgramEntryControlAdmission.admission s origins fields
+    first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
+    imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded
+    seventhDecoded eighthDecoded ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded thirteenthDecoded fourteenthDecoded
+    noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched
+    eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched thirteenthFetched fourteenthFetched
+  exact entry_with_code initial ctxBlock ctxOfs k abiLocal addresses ctxWord context values provider flags flagProvider vectors vectorProvider
+      origins s native fields old reads first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
+      imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded
+      ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded thirteenthDecoded fourteenthDecoded noError firstFetched keepFetched
+      thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched
+      thirteenthFetched fourteenthFetched
+    (Arm64ProgramEntryCodeOrigin.original s origins fields control.1 control.2.2)
 
 end KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControlEntry
