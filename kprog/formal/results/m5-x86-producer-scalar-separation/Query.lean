@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.X86ProducerScalarSeparation
+#check KProgFormal.ClightRefinement.X86ProducerScalarSeparation.separate
+#print axioms KProgFormal.ClightRefinement.X86ProducerScalarSeparation.separate

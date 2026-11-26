@@ -1,0 +1,9 @@
+KProgFormal.ClightRefinement.X86ProducerScalarSeparation.separate {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  (ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer) (i j : Fin 8)
+  (different : i ≠ j) : (ready.scalars i).block ≠ (ready.scalars j).block
+'KProgFormal.ClightRefinement.X86ProducerScalarSeparation.separate' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
