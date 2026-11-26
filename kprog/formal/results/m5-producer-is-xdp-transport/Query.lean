@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpTransport
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpTransport.setup_observed
+#print axioms Arm64ProducerIsXdpTransport.setup_observed
+#check Arm64ProducerIsXdpTransport.first_provider
+#print axioms Arm64ProducerIsXdpTransport.first_provider
