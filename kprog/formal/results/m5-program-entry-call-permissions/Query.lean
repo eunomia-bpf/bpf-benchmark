@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCallPermissions
+open KProgFormal.ClightRefinement.Arm64ProgramEntryCallPermissions
+#check of_call
+#print axioms of_call
