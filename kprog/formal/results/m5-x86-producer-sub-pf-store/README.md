@@ -1,0 +1,3 @@
+The SAME original provider/PUSH/SUB trace continues through the actual flag loop exits to the original PF pointer read, nibble-fold/parity-table expression, uchar cast and fifth byte store. Current rights construct success, allocator separation protects CF/ZF/SF/OF, and all five readbacks equal pinned external SUB flags. Full caller/access/frontier and outside-five-object load frames retained. AF store and RSP writeback/full149 remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.
