@@ -102,3 +102,35 @@ The corrected summary uses the established final 54 s convention without
 rerunning a guest. The first corrected 10 s Tetragon check completed app ok,
 288 native replacements and no native-load failure, with eBPF/native
 1374.3/1242.1 ns/call; its tracepoint costs are 1909.5/2867.2 ns/call.
+
+
+## Repeats, PMU result and generic-helper control
+
+All three corrected Tetragon checks completed app ok, 288 native replacements
+and zero native-load failures. In order, eBPF/native aggregate ns/call are
+1374.3/1242.1, 1147.7/856.9 and 1111.2/1647.4; the native tracepoint is
+2867.2, 1967.3 and 3866.2 ns/call. The unchanged-image spread is retained.
+The first two OTel checks are app ok, 14 replacements and no native-load
+failures; the third is still running. The corrected workload-only PMU
+summaries are published in 5986a5341. Tetragon native P3 hash is 0.254% of
+guest-kernel cycle samples, with 83.15% in the BPF resilient queued-spinlock
+slow path; baseline also has 75.66% in that lock routine. Tracee P3 hash is
+10.189%. These flat samples identify symbols without their callers.
+
+The memset weights and their caller-attribution limit are recorded in
+`../memset-calls-20261126/README.md`: Tetragon native 0.0123% and Tracee native
+1.3364% of guest-kernel cycle samples. Guest chains contain no actual frames.
+
+The next causal control uses `generic_control.py` through `make generic-control`.
+It holds timing EX, then image EX for each module rebuild (image SH during
+checks). It recompiles the sole existing module output with 19 symbol-name
+macros, so the existing loader selects `__htab_map_lookup_elem`; there is no
+new production knob. It records and compares the module .text dumps before
+running the control, runs the same default three Tetragon then three OTel
+checks, and rebuilds the normal module in a finally block before releasing
+the resource. The image, application P objects, optimization flags and frozen
+benchmark entry/settings stay the same. Symbol tables and text dumps are raw
+evidence, not second build products. No module binary is copied or retained.
+Each control check is published as it completes. This control is needed to
+separate helper selection from the large observed temporal/call-mix variation;
+no P3 causal conclusion or production optimization is claimed yet.

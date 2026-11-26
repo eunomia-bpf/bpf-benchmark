@@ -49,3 +49,38 @@ nonzero status came from its intentional recorder stop (perf child 143),
 not an app failure. The final phase-resolved memset weight and denominator
 will be recorded here after the queued PMU summary; sample inventory alone
 is not a memset weight or a performance conclusion.
+
+## Workload-window weights, 2026-11-26
+
+The completed analysis is in
+`../p3-attribution-20261126/collection-20261126T104107Z/{tetragon,tracee}-profile/phase-summary.json`.
+It uses the final 54 s of each workload (finish minus 55 s through finish
+minus 1 s), following the earlier profile analysis. The native measurement
+counter interval also contains delayed loading and is longer than the actual
+60 s workload; the retained `phase-summary-initial.json` is not the workload
+weight. `__pi_memset*` aliases are included below.
+
+| app / phase | guest-kernel samples | memset samples | memset / guest kernel | P bodies | P3 hash routines | kernel hash lookup |
+|---|---:|---:|---:|---:|---:|---:|
+| Tetragon baseline | 1,066,792 | 541 | 0.0507% | 26,222 | 0 | 5,221 |
+| Tetragon native | 1,017,494 | 125 | 0.0123% | 13,500 | 2,580 | 0 |
+| Tracee baseline | 1,115,701 | 8,219 | 0.7367% | 91,132 | 0 | 94,944 |
+| Tracee native | 1,074,961 | 14,366 | 1.3364% | 142,879 | 109,527 | 517 |
+
+These are flat cycle samples, not call counts. Although recording requested
+callchains, the guest samples contain context markers without actual chain
+frames. Therefore the profile cannot distinguish memset called from P from
+memset called elsewhere in the kernel. If every native memset sample were
+assigned to P, its fraction of the known P-body + P3-hash + memset samples
+would be 0.771% for Tetragon and 5.385% for Tracee. These are generous upper
+bounds on sampled weight: other P-called kernel helpers are omitted from
+those denominators. They are not exact P caller attribution or statistical
+confidence bounds. The static call-site inventory alone does not justify a
+memset lowering change.
+
+Tetragon's native profile instead has 846,061 samples in
+`resilient_queued_spin_lock_slowpath` (83.15% of guest-kernel samples), versus
+807,186 in baseline (75.66%). P3 hash routines account for 0.254% of native
+guest-kernel samples; Tracee's account for 10.189%. Without guest stack
+frames the flat lock samples do not identify the locking caller. Raw data
+and all initial analyses are retained; full timing remains frozen.
