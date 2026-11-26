@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ClobberVectorsComplete
+
+open KProgFormal.ClightRefinement
+#check Arm64ClobberVectorsComplete.step
+#print axioms Arm64ClobberVectorsComplete.step
+#check Arm64ClobberVectorsComplete.execute
+#print axioms Arm64ClobberVectorsComplete.execute
+#check Arm64ClobberVectorsComplete.final_vectors
+#print axioms Arm64ClobberVectorsComplete.final_vectors
+#check Arm64ClobberVectorsComplete.original
+#print axioms Arm64ClobberVectorsComplete.original
