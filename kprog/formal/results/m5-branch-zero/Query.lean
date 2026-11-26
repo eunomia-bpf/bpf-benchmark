@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64BranchZero
+#check KProgFormal.ClightRefinement.Arm64BranchZero.condition_value
+#print axioms KProgFormal.ClightRefinement.Arm64BranchZero.condition_value
+#check KProgFormal.ClightRefinement.Arm64BranchZero.execute
+#print axioms KProgFormal.ClightRefinement.Arm64BranchZero.execute
