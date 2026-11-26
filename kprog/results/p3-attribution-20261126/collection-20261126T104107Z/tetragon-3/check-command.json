@@ -1,0 +1,17 @@
+[
+  "flock",
+  "-x",
+  "/workspaces/.agent-state/kprog-lanes/locks/timing",
+  "flock",
+  "-s",
+  "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "prlimit",
+  "--as=85899345920",
+  "--",
+  "make",
+  "-C",
+  "kprog/perf/one-image",
+  "check",
+  "ORDER=tetragon/observer",
+  "LOGS=/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z/tetragon-3/guest"
+]
