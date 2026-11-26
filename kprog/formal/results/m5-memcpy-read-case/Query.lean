@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadCase
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadCase.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadCase.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadCase.value_read
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadCase.value_read
