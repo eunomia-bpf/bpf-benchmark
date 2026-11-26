@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryUaddlvStackRightsPrefixNative
+import KProgFormal.ClightRefinement.Arm64ProgramEntryComplete
+open KProgFormal.ClightRefinement
+#check Arm64ProgramEntryUaddlvStackRightsPrefixNative.entry_corresponds
+#print axioms Arm64ProgramEntryUaddlvStackRightsPrefixNative.entry_corresponds
+#check Arm64ProgramEntryCallPermissions.of_call
+#print axioms Arm64ProgramEntryCallPermissions.of_call
+#check Arm64ProgramEntryComplete.compose
+#print axioms Arm64ProgramEntryComplete.compose
