@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_calls.py fab61404f
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_calls.py", line 79, in <module>
+    raise AssertionError(failures)
+AssertionError: [{'case': 'table_external_stack', 'private_results_dead': True, 'expected': False}]
+make: *** [Makefile:6: check-calls] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

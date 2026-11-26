@@ -1,0 +1,12 @@
+{
+  "pid": 642075,
+  "started_utc": "2026-11-26T16:45:26Z",
+  "source": "ae0a2546d47890cef3958d2c66fa63ea8ca9dcf3",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "return-pipeline"
+  ],
+  "resources": "Two simultaneous 16GiB-AS compiles on CPUs16/17 under timingSH; then one2vCPU/2GiB detached stock guest on18-19 under timingSH/imageSH."
+}

@@ -46,7 +46,7 @@
   },
   {
     "case": "callee_defines_return",
-    "private_results_dead": false,
+    "private_results_dead": true,
     "expected": true
   },
   {
@@ -61,22 +61,32 @@
   },
   {
     "case": "callee_nested_return",
-    "private_results_dead": false,
+    "private_results_dead": true,
     "expected": true
   },
   {
     "case": "callee_defines_flags",
-    "private_results_dead": false,
+    "private_results_dead": true,
     "expected": true
   },
   {
     "case": "redirected_return",
-    "private_results_dead": false,
+    "private_results_dead": true,
     "expected": true
   },
   {
     "case": "unresolved_return",
     "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "table_private_stack",
+    "private_results_dead": true,
+    "expected": true
+  },
+  {
+    "case": "table_external_stack",
+    "private_results_dead": true,
     "expected": false
   }
 ]

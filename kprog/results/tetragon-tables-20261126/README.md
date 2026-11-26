@@ -125,3 +125,34 @@ stock verification. The separate ten hoisted-base/finite-target cases remain
 open. No main-config app acceptance or runtime gain is claimed. P, image,
 kernel, workload, common flags and combined LTO selection are unchanged;
 full timing stays frozen.
+
+PERF 2026-11-26T16:50:44Z — Stack-alias boundary and remaining breadth
+
+Forward correction after fab61404f: return-fact extraction requires an
+actual integer RSP offset. An external/scalar alias is represented by False;
+Python dictionary lookup would otherwise equate False with private offset0
+and incorrectly reuse the outer return address. Two actual relocated-table
+fixtures exercise the whole lower_relative_tables path. The18 total cases
+pass; fab61404f incorrectly accepts table_external_stack, as retained in
+check-return-stack-alias-before.log/call-checks-before.json. No runtime
+check is added. All14 real cases still lower after this correction, and all
+recorded original RET stack offsets are integers (return-paths.json and
+breadth-status.json). Their generated sources therefore remain unchanged.
+
+Fresh breadth9/20/25/32/47/50/55/72/77/83 confirms all ten finite-target
+failures at0x3580. Their proof object bytes equal request9. The full context
+now includes LEA R15 at0x3560, loop entry0x356b, load0x3579/add0x357d.
+This class needs a proof for the persistent table base across the loop;
+merely accepting a nonadjacent LEA would lose that obligation. No production
+change for it is included. hoisted-breadth.json/log retain these failures;
+reproduction.json again names the successful14-case stage, also preserved
+as reproduction-return-paths.json.
+
+Finite job642075, source ae0a2546d, compiles new groups12 and38 under
+separate16GiB address-space limits on CPUs16 and17 with shared timing lock,
+then stock-loads successful compiler products using the existing detached
+Make entry, sole kernel and2vCPU/2GiB guest on18-19. Per-stage archives,
+commands, statuses and publication log live in return-pipeline. This source
+change affects only rejecting unknown RSP facts; the14 accepted sources
+have integer RET offsets. Compilation/stock results remain pending here.
+All raw data is retained, and full timing remains frozen.

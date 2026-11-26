@@ -1,0 +1,1063 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 return_paths.py 
+[
+  {
+    "request": 12,
+    "lowering_error": "relative table computation has live register or flag results",
+    "stack_bytes": 248,
+    "returns": [
+      {
+        "pc": 878,
+        "context": [],
+        "stack": 0,
+        "destinations": [
+          {
+            "context": [],
+            "target": null
+          }
+        ]
+      },
+      {
+        "pc": 961,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 3669,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 3696,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 7938,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 7954,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 8370,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 8632,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 8808,
+        "context": [
+          651
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 656
+          }
+        ]
+      },
+      {
+        "pc": 1504,
+        "context": [
+          658
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 663
+          }
+        ]
+      },
+      {
+        "pc": 3669,
+        "context": [
+          658,
+          1488
+        ],
+        "stack": -208,
+        "destinations": [
+          {
+            "context": [
+              658
+            ],
+            "target": 1493
+          }
+        ]
+      },
+      {
+        "pc": 3696,
+        "context": [
+          658,
+          1488
+        ],
+        "stack": -208,
+        "destinations": [
+          {
+            "context": [
+              658
+            ],
+            "target": 1493
+          }
+        ]
+      },
+      {
+        "pc": 1625,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 6844,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 6862,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 7310,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 7405,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 7426,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 7711,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 7901,
+        "context": [
+          727
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 732
+          }
+        ]
+      },
+      {
+        "pc": 1762,
+        "context": [
+          739
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 744
+          }
+        ]
+      },
+      {
+        "pc": 3036,
+        "context": [
+          739,
+          1677
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              739
+            ],
+            "target": 1682
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          739,
+          1677,
+          2730
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              739,
+              1677
+            ],
+            "target": 2735
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          739,
+          1677,
+          2953
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              739,
+              1677
+            ],
+            "target": 2958
+          }
+        ]
+      },
+      {
+        "pc": 4195,
+        "context": [
+          739,
+          1687
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              739
+            ],
+            "target": 1692
+          }
+        ]
+      },
+      {
+        "pc": 3567,
+        "context": [
+          739,
+          1697
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              739
+            ],
+            "target": 1702
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          739,
+          1697,
+          3480
+        ],
+        "stack": -160,
+        "destinations": [
+          {
+            "context": [
+              739,
+              1697
+            ],
+            "target": 3485
+          }
+        ]
+      },
+      {
+        "pc": 6800,
+        "context": [
+          739,
+          1719
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              739
+            ],
+            "target": 1724
+          }
+        ]
+      },
+      {
+        "pc": 1827,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 5277,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 5294,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 5715,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 5818,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 5845,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 6109,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 6285,
+        "context": [
+          746
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 751
+          }
+        ]
+      },
+      {
+        "pc": 1892,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 4232,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 4249,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 4670,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 4773,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 4800,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 5064,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 5240,
+        "context": [
+          753
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 758
+          }
+        ]
+      },
+      {
+        "pc": 1919,
+        "context": [
+          764
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 769
+          }
+        ]
+      },
+      {
+        "pc": 2027,
+        "context": [
+          764
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 769
+          }
+        ]
+      },
+      {
+        "pc": 3036,
+        "context": [
+          764,
+          1953
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              764
+            ],
+            "target": 1958
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          764,
+          1953,
+          2730
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              764,
+              1953
+            ],
+            "target": 2735
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          764,
+          1953,
+          2953
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              764,
+              1953
+            ],
+            "target": 2958
+          }
+        ]
+      },
+      {
+        "pc": 3873,
+        "context": [
+          764,
+          1963
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              764
+            ],
+            "target": 1968
+          }
+        ]
+      },
+      {
+        "pc": 3881,
+        "context": [
+          764,
+          1963
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              764
+            ],
+            "target": 1968
+          }
+        ]
+      },
+      {
+        "pc": 4195,
+        "context": [
+          764,
+          1977
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              764
+            ],
+            "target": 1982
+          }
+        ]
+      },
+      {
+        "pc": 3567,
+        "context": [
+          764,
+          1991
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              764
+            ],
+            "target": 1996
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          764,
+          1991,
+          3480
+        ],
+        "stack": -160,
+        "destinations": [
+          {
+            "context": [
+              764,
+              1991
+            ],
+            "target": 3485
+          }
+        ]
+      },
+      {
+        "pc": 2119,
+        "context": [
+          796
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 801
+          }
+        ]
+      },
+      {
+        "pc": 2170,
+        "context": [
+          796
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 801
+          }
+        ]
+      },
+      {
+        "pc": 2193,
+        "context": [
+          796
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 801
+          }
+        ]
+      },
+      {
+        "pc": 3036,
+        "context": [
+          796,
+          2080
+        ],
+        "stack": -128,
+        "destinations": [
+          {
+            "context": [
+              796
+            ],
+            "target": 2085
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          796,
+          2080,
+          2730
+        ],
+        "stack": -192,
+        "destinations": [
+          {
+            "context": [
+              796,
+              2080
+            ],
+            "target": 2735
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          796,
+          2080,
+          2953
+        ],
+        "stack": -192,
+        "destinations": [
+          {
+            "context": [
+              796,
+              2080
+            ],
+            "target": 2958
+          }
+        ]
+      },
+      {
+        "pc": 3567,
+        "context": [
+          796,
+          2131
+        ],
+        "stack": -128,
+        "destinations": [
+          {
+            "context": [
+              796
+            ],
+            "target": 2136
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          796,
+          2131,
+          3480
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              796,
+              2131
+            ],
+            "target": 3485
+          }
+        ]
+      },
+      {
+        "pc": 3669,
+        "context": [
+          796,
+          2183
+        ],
+        "stack": -128,
+        "destinations": [
+          {
+            "context": [
+              796
+            ],
+            "target": 2188
+          }
+        ]
+      },
+      {
+        "pc": 3696,
+        "context": [
+          796,
+          2183
+        ],
+        "stack": -128,
+        "destinations": [
+          {
+            "context": [
+              796
+            ],
+            "target": 2188
+          }
+        ]
+      },
+      {
+        "pc": 1762,
+        "context": [
+          808
+        ],
+        "stack": -96,
+        "destinations": [
+          {
+            "context": [],
+            "target": 813
+          }
+        ]
+      },
+      {
+        "pc": 3036,
+        "context": [
+          808,
+          1677
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              808
+            ],
+            "target": 1682
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          808,
+          1677,
+          2730
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              808,
+              1677
+            ],
+            "target": 2735
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          808,
+          1677,
+          2953
+        ],
+        "stack": -176,
+        "destinations": [
+          {
+            "context": [
+              808,
+              1677
+            ],
+            "target": 2958
+          }
+        ]
+      },
+      {
+        "pc": 4195,
+        "context": [
+          808,
+          1687
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              808
+            ],
+            "target": 1692
+          }
+        ]
+      },
+      {
+        "pc": 3567,
+        "context": [
+          808,
+          1697
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              808
+            ],
+            "target": 1702
+          }
+        ]
+      },
+      {
+        "pc": 8934,
+        "context": [
+          808,
+          1697,
+          3480
+        ],
+        "stack": -160,
+        "destinations": [
+          {
+            "context": [
+              808,
+              1697
+            ],
+            "target": 3485
+          }
+        ]
+      },
+      {
+        "pc": 6800,
+        "context": [
+          808,
+          1719
+        ],
+        "stack": -112,
+        "destinations": [
+          {
+            "context": [
+              808
+            ],
+            "target": 1724
+          }
+        ]
+      }
+    ]
+  }
+]
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

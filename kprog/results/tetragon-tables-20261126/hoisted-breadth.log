@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 reproduce.py 9 20 25 32 47 50 55 72 77 83
+9 refused unresolved finite indirect target at 0x3580: jmp    rax
+20 refused unresolved finite indirect target at 0x3580: jmp    rax
+25 refused unresolved finite indirect target at 0x3580: jmp    rax
+32 refused unresolved finite indirect target at 0x3580: jmp    rax
+47 refused unresolved finite indirect target at 0x3580: jmp    rax
+50 refused unresolved finite indirect target at 0x3580: jmp    rax
+55 refused unresolved finite indirect target at 0x3580: jmp    rax
+72 refused unresolved finite indirect target at 0x3580: jmp    rax
+77 refused unresolved finite indirect target at 0x3580: jmp    rax
+83 refused unresolved finite indirect target at 0x3580: jmp    rax
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

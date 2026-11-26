@@ -107,4 +107,28 @@ read_flags:
     movzbl %al,%eax
     ret
 .size read_flags,.-read_flags
+
+.macro table_entry name, external
+.globl \name
+.type \name,@function
+\name:
+    mov $0,%ecx
+    lea .Ltable_\name(%rip),%r8
+    movslq (%r8,%rcx,4),%rdx
+    add %r8,%rdx
+    jmp *%rdx
+.Lcase_\name:
+    .if \external
+    mov %rdi,%rsp
+    .endif
+    mov $0,%eax
+    ret
+.size \name,.-\name
+.pushsection .rodata
+.Ltable_\name:
+    .long .Lcase_\name - .Ltable_\name
+.popsection
+.endm
+table_entry table_private_stack, 0
+table_entry table_external_stack, 1
 .section .note.GNU-stack,"",@progbits

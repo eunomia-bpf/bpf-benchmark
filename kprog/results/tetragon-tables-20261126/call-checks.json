@@ -78,5 +78,15 @@
     "case": "unresolved_return",
     "private_results_dead": false,
     "expected": false
+  },
+  {
+    "case": "table_private_stack",
+    "private_results_dead": true,
+    "expected": true
+  },
+  {
+    "case": "table_external_stack",
+    "private_results_dead": false,
+    "expected": false
   }
 ]

@@ -325,7 +325,8 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     for (_, pc), state in states.items():
         if by_addr[pc].mnemonic != 'ret':
             continue
-        destinations = state.pointers.get(state.aliases[rsp])
+        stack = state.aliases[rsp]
+        destinations = state.pointers.get(stack) if type(stack) is int else None
         if not isinstance(destinations, frozenset) or not destinations:
             return_destinations[pc] = None
         elif return_destinations.get(pc, set()) is not None:

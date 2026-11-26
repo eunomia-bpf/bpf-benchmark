@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "prog_type": 2,
+  "section": "kprobe/trusted",
+  "maps": [
+    {
+      "name": "tg_stats_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 14336,
+      "map_type": 6
+    },
+    {
+      "name": "tg_conf_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 48,
+      "map_type": 2
+    },
+    {
+      "name": "socktrack_map",
+      "value_offset": null,
+      "max_entries": 32000,
+      "map_flags": 0,
+      "key_size": 8,
+      "value_size": 16,
+      "map_type": 9
+    },
+    {
+      "name": "data_heap",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 32768,
+      "map_type": 6
+    },
+    {
+      "name": "tcpmon_map",
+      "value_offset": null,
+      "max_entries": 2,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4,
+      "map_type": 4
+    },
+    {
+      "name": "fdinstall_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 4104,
+      "map_type": 9
+    },
+    {
+      "name": "tg_ipv6_ext_heap",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 8,
+      "map_type": 6
+    },
+    {
+      "name": "kprobe_calls",
+      "value_offset": null,
+      "max_entries": 13,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4,
+      "map_type": 3
+    },
+    {
+      "name": "tg_errmetrics_map",
+      "value_offset": null,
+      "max_entries": 1024,
+      "map_flags": 0,
+      "key_size": 12,
+      "value_size": 4,
+      "map_type": 10
+    },
+    {
+      "name": "retprobe_map",
+      "value_offset": null,
+      "max_entries": 1024,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 24,
+      "map_type": 1
+    },
+    {
+      "name": "tg_rb_events",
+      "value_offset": null,
+      "max_entries": 131072,
+      "map_flags": 0,
+      "key_size": 0,
+      "value_size": 0,
+      "map_type": 27
+    },
+    {
+      "name": "buffer_heap_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4352,
+      "map_type": 6
+    },
+    {
+      "name": "config_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 736,
+      "map_type": 2
+    },
+    {
+      "name": "process_call_heap",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 25632,
+      "map_type": 6
+    }
+  ],
+  "kernel_kfunc_context": false
+}

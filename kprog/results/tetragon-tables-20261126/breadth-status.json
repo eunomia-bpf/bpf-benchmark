@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-11-26T16:50:44Z",
+  "all14_lower_after_integer_stack_guard": true,
+  "all_recorded_returns_have_integer_stack_offset": true,
+  "finite_target_requests": [
+    9,
+    20,
+    25,
+    32,
+    47,
+    50,
+    55,
+    72,
+    77,
+    83
+  ],
+  "all_finite_target_proof_bytes_equal_to_request9": true,
+  "finite_target_error": "unresolved finite indirect target at 0x3580: jmp    rax",
+  "finite_target_cause": "LEA r15 at0x3560 precedes loop entry0x356b; MOVSXD0x3579/ADD0x357d/JMP0x3580 is outside the current adjacent-LEA table recognizer. No production change for this class."
+}

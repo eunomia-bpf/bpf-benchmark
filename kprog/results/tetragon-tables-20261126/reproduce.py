@@ -1,5 +1,6 @@
 """Replay two retained Tetragon generation refusals at the table-lowering boundary."""
 import json
+import re
 from pathlib import Path
 import sys
 import tarfile
@@ -64,9 +65,10 @@ for ident in tuple(map(int, sys.argv[1:])) if len(sys.argv) > 1 else (12, 9):
         except ValueError as error:
             row['b_source_generation'] = dict(status='refused', error=str(error))
     row['liveness_witnesses'] = witnesses
+    unresolved = re.search(r'unresolved finite indirect target at (0x[0-9a-f]+)', row.get('error', ''))
     row['indirect_jump_context'] = [dict(address=insn.addr, instruction=insn.raw)
-        for index, insn in enumerate(all_insns) if insn.addr == 0x3580
-        for insn in all_insns[max(0, index - 6):index + 2]] if ident == 9 else []
+        for index, insn in enumerate(all_insns) if insn.addr == int(unresolved[1], 16)
+        for insn in all_insns[max(0, index - 12):index + 2]] if unresolved else []
     results.append(row)
 (HERE / 'reproduction.json').write_text(json.dumps(results, indent=2) + '\n')
 for row in results:
