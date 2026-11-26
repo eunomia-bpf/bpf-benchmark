@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.step
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.step
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.iterations
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.execute
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.original
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagComplete.original
