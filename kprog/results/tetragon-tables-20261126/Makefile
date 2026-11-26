@@ -33,7 +33,8 @@ hoisted-pipeline:
 	python3 return_pipeline.py $(CURDIR)/hoisted-pipeline 9
 
 .PHONY: backend-o2-group backend-o2-control
+BACKEND_OUT ?= $(CURDIR)/backend-o2-control
 backend-o2-group:
 	python3 backend_control.py $(REQUEST) $(RECORDS)
 backend-o2-control:
-	python3 return_pipeline.py --backend-o2 $(CURDIR)/backend-o2-control 39
+	python3 return_pipeline.py --backend-o2 $(BACKEND_OUT) 39

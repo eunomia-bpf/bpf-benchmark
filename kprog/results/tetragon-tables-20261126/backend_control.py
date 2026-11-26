@@ -34,6 +34,9 @@ try:
         for line in source:
             if line == '...\n':
                 break
+            if line == '\n':
+                destination.write(line)
+                continue
             if not line.startswith('  '):
                 raise ValueError('invalid indentation in baseline LLVM module')
             destination.write(line[2:])
