@@ -1,0 +1,18 @@
+{
+  "object_bytes": 1791576,
+  "sections": [
+    {
+      "section": ".text",
+      "instructions": 40,
+      "direct_fp_memory_references": 0,
+      "minimum_offset": null
+    },
+    {
+      "section": "kprobe/trusted",
+      "instructions": 96418,
+      "direct_fp_memory_references": 37175,
+      "minimum_offset": -1424
+    }
+  ],
+  "scope": "Static direct R10 memory operands only; not a verifier result or a total frame measurement."
+}
