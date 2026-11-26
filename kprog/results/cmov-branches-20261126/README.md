@@ -39,3 +39,41 @@ performance improvement or that generic_tracepoint has been fixed. Review the
 six app results, then take the necessary affected-app repetitions. Full timing,
 workloads, paper and settings remain frozen. C5/C6 remain deferred; C7/C8 and
 direct-native hash-walk unrolling remain excluded.
+
+
+## First six-app result
+
+Image68655f5c6c0d completed the frozen six-app functional check at
+2026-11-26T13:55:27Z. All six make rc0/app ok/error empty; native replacements
+OTel14/BCC25/Cilium135/Tetragon288/Tracee169/Katran1, failures0 each.
+Raw results are published in b6d8e5b56 and trial-20261126T132308Z.
+The old image7a11cb60285a was already absent when the cleanup wrapper
+checked; its remover is unknown. The sole current image is68655f5c6c0d.
+
+| app | previous eBPF/native ns per call | candidate eBPF/native ns per call |
+|---|---:|---:|
+| otelcol-ebpf-profiler/profiling | 3506.3 / 3726.9 | 3326.1 / 3463.1 |
+| bcc/set | 107.0 / 101.0 | 103.4 / 100.6 |
+| cilium/agent | 898.5 / 687.2 | 743.1 / 616.3 |
+| tetragon/observer | 1250.0 / 1599.1 | 1272.2 / 687.3 |
+| tracee/monitor | 397.3 / 180.9 | 379.8 / 161.3 |
+| katran | 182.6 / 168.5 | 176.3 / 161.4 |
+
+Tetragon's native generic_tracepoint is1545.3 ns versus eBPF1716.1 (previous
+native3733.2); OTel native3463.1 remains slower than eBPF3326.1. Every native
+absolute aggregate cost is below the previous single check, while the eBPF
+costs also vary; normalized ratios are not uniformly improved. These are
+single10s diagnostics, not causal speedups or a no-regression declaration.
+Three Tetragon then three OTel default checks follow on the unchanged image.
+The diagnostic collector now records source/image under the same timing/image
+locks as each check, so later rebuilds cannot silently change its provenance.
+
+The actual offline result is286/286, zero lookup-metadata stops. The current
+x86 and arm64 catalogs have exactly the same286 distinct(object,symbol) pairs:
+BCC26/Katran3/Tracee96/Cilium61/Tetragon76/OTel24. entry-census.json preserves
+both sets, including compiler-internal text symbols. Older offline logs say289;
+they do not include the matching manifest snapshot, so the three historical
+pair identities cannot be established from those aggregate receipts alone.
+This count difference is retained as a provenance limitation. It is not a
+functional load failure: all loaded app programs still install natively with
+the same replacement counts and zero failures. No program is excluded.
