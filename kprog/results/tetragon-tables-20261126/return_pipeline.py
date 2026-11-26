@@ -10,8 +10,13 @@ from datetime import datetime, timezone
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / 'return-pipeline'
-REQUESTS = tuple(map(int, sys.argv[2:])) if len(sys.argv) > 2 else (12, 38)
+arguments = sys.argv[1:]
+BACKEND_CONTROL = arguments[:1] == ['--backend-o2']
+if BACKEND_CONTROL:
+    arguments = arguments[1:]
+OUT = Path(arguments[0]) if arguments else HERE / 'return-pipeline'
+REQUESTS = tuple(map(int, arguments[1:])) if len(arguments) > 1 else (12, 38)
+COMPILE_TARGET = 'backend-o2-group' if BACKEND_CONTROL else 'compile-group'
 LOCKS = Path('/workspaces/.agent-state/kprog-lanes/locks')
 ARCHIVES = Path('/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests')
 
@@ -38,12 +43,12 @@ def compile_case(ident, cpu):
     destination = OUT / str(ident)
     destination.mkdir()
     command = ['taskset', '-c', str(cpu), 'prlimit', '--as=17179869184', '--',
-        'make', '-C', HERE, 'compile-group', 'REQUEST=' + str(ident), 'RECORDS=' + str(destination)]
+        'make', '-C', HERE, COMPILE_TARGET, 'REQUEST=' + str(ident), 'RECORDS=' + str(destination)]
     row = dict(request=ident, started_utc=now(), command=list(map(str, command)))
     row['compile_returncode'] = run(command, destination / 'compile.log')
     row['ended_utc'] = now()
     case = HERE / ('request-' + str(ident))
-    members = [p.name for p in case.glob('trusted_x86.bpf.*') if p.suffix in {'.i', '.bc', '.mir', '.json', '.o'}]
+    members = [p.name for p in case.glob('trusted_x86.bpf.*') if p.suffix in {'.i', '.bc', '.mir', '.json', '.o', '.ll'}]
     row['archive_members'] = sorted(members)
     if members:
         archive = subprocess.Popen(['tar', '-C', str(case), '-cf', '-', *sorted(members)], stdout=subprocess.PIPE)
@@ -62,9 +67,11 @@ def compile_case(ident, cpu):
 
 OUT.mkdir()  # Preserve an earlier run if this finite recipe is invoked twice.
 status = 1
-record = dict(started_utc=now(), source=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+record = dict(started_utc=now(), compile_target=COMPILE_TARGET,
+              source=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
               kernel_source=subprocess.check_output(['git', '-C', 'vendor/linux-framework', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-              scope='B compilation and sole-kernel detached stock verification only; no native execution or timing.', cases=[])
+              scope=('Common B machine-backend O2 control, production policy unchanged. ' if BACKEND_CONTROL else '') +
+                    'B compilation and sole-kernel detached stock verification only; no native execution or timing.', cases=[])
 try:
     with (LOCKS / 'timing').open('a') as timing:
         fcntl.flock(timing, fcntl.LOCK_SH)
