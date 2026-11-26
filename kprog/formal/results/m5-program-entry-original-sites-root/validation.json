@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-26T23:45:58.966411+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 7.312320709228516,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1368,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-original-sites-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1625757217407227,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22011,
+      "sha256": "0dc2cd93f3e7dfaf6861edd8e689bf93733322d409564f84996ade722708ec06"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 6819,
+      "sha256": "cbb7bd0f0f547349f76dea5384fa6019bb5acd5fdd239f1cde5b724dda49d88c"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exposes original_code_entry: both genuine BL/RET/decoded-continuation code sites bind to the original program anchored at original PC+56, then actual fourteen-word admission transports their independent real BL offsets and Instructions to the actual reached successor. A shared Result retains every original 98-provider/fourteen-call prefix observation and SAME pointer/MOV/Reached/source trace/helper execution, original source return/freeList/caller/resultWord and four actual admitted native suffix Facts. The current entry interface keeps the exact previously published full type; the component query proves that concrete contract with the Lean kernel. Physical native memory/helper/environment execution and independent global input/output and universal handler/operand/fault/dispatcher domains remain ordered in M5 before recount/M6.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

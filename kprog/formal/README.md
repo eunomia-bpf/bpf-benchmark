@@ -47,10 +47,14 @@ original 98-provider/fourteen-call entry witness supplies those same reached
 resources and the actual source-prefix trace to this complete continuation.
 Its fourteen admitted native words derive the current PC, error and unchanged
 program; CMP and B.GT fetch at original PC+56/+60 feed the four-step
-CMP/B.GT/BL/RET suffix. The same provider values select genuine code at two
-actual successor sites. Public theorem types expose the live source heap and
-code domains; the worklist orders original-program site binding, native helper
-memory and whole-program input/output correspondence next.
+CMP/B.GT/BL/RET suffix. Both real successor BL/RET/continuation certificates
+bind once to that original program anchor and transport to the actual reached
+machine. The same provider values select the correct site, retaining its real
+BL offset and decoded instructions. One shared entry-result contract retains
+all original prefix observations, and the previous entry interface keeps its
+exact published type. Public theorem types expose the live source heap and
+code domains; the worklist orders physical native memory/helper execution and
+whole-program input/output correspondence next.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
