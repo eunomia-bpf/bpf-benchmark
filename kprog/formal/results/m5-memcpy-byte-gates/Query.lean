@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyByteGates
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteGates.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteGates.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteGates.to_byte
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteGates.to_byte
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteGates.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteGates.kept
