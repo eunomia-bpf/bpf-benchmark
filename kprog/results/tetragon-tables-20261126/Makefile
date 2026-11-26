@@ -12,3 +12,9 @@ compile:
 .PHONY: return-paths
 return-paths:
 	python3 return_paths.py $(REQUESTS)
+
+.PHONY: compile-group return-pipeline
+compile-group:
+	python3 compile.py $(REQUEST) $(RECORDS)
+return-pipeline:
+	python3 return_pipeline.py

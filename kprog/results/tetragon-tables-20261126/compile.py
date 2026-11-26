@@ -9,14 +9,17 @@ ROOT = HERE.parents[2]
 sys.path.insert(0, str(ROOT / 'kprog/x86'))
 import trusted_specializer as worker
 
-case = HERE / 'request-39'
+ident = int(sys.argv[1]) if len(sys.argv) > 1 else 39
+records = Path(sys.argv[2]) if len(sys.argv) > 2 else HERE
+records.mkdir(parents=True, exist_ok=True)
+case = HERE / ('request-' + str(ident))
 source, obj = case / 'trusted_x86.bpf.c', case / 'trusted_x86.bpf.o'
 status = 1
 object_bytes = None
 def run(command):
     command = list(map(str, command))
     result = subprocess.run(command, text=True, capture_output=True)
-    with (HERE / 'compile-commands.jsonl').open('a') as log:
+    with (records / 'compile-commands.jsonl').open('a') as log:
         log.write(json.dumps(dict(command=command, returncode=result.returncode,
                                   stdout=result.stdout, stderr=result.stderr)) + '\n')
     print(command[0], 'exit', result.returncode, flush=True)
@@ -28,16 +31,18 @@ try:
     object_bytes = obj.stat().st_size
     status = 0
 finally:
-    record = dict(returncode=status, request_id=39,
-        source_equal_to_request62=source.read_text() == (HERE / 'request-62/trusted_x86.bpf.c').read_text(),
+    record = dict(returncode=status, request_id=ident,
         object_bytes=object_bytes,
         scope='Normal B compilation only; stock-verifier and app acceptance remain separate.')
-    (HERE / 'compile-status.json').write_text(json.dumps(record, indent=2) + '\n')
-    lane = Path('/workspaces/.agent-state/kprog-lanes/perf')
-    with (lane / 'resume-msg.md').open('a') as message:
-        message.write(f'\nTetragon table B compilation ended status {status}. Read {HERE}/compile-status.json, '
-            'compile-commands.jsonl and compile.log; record the actual result, continue the phase1 pipeline '
-            'within design, retain all raw evidence and leave full timing frozen.\n')
-    stop = lane / 'STOP'
-    if stop.exists() and stop.read_text().startswith('PERF table compilation:'):
-        stop.unlink()
+    if ident == 39:
+        record['source_equal_to_request62'] = source.read_text() == (HERE / 'request-62/trusted_x86.bpf.c').read_text()
+    (records / 'compile-status.json').write_text(json.dumps(record, indent=2) + '\n')
+    if len(sys.argv) == 1:
+        lane = Path('/workspaces/.agent-state/kprog-lanes/perf')
+        with (lane / 'resume-msg.md').open('a') as message:
+            message.write(f'\nTetragon table B compilation ended status {status}. Read {HERE}/compile-status.json, '
+                'compile-commands.jsonl and compile.log; record the actual result, continue the phase1 pipeline '
+                'within design, retain all raw evidence and leave full timing frozen.\n')
+        stop = lane / 'STOP'
+        if stop.exists() and stop.read_text().startswith('PERF table compilation:'):
+            stop.unlink()
