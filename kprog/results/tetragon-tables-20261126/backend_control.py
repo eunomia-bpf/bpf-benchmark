@@ -1,4 +1,4 @@
-"""Test one common O2 machine backend after the normal O1 IR optimizer.
+"""Test one common O2 post-bounds IR and machine backend.
 
 This control changes no production policy and does not reprocess generated C.
 Canonical case products are replaced in place; their baseline is archived.
@@ -30,9 +30,10 @@ def run(command):
     process.check_returncode()
 
 try:
-    # MIR embeds IR after machine passes have already coalesced lifetime
-    # operands. Produce input before those passes, with the normal IR flags.
-    run([ROOT / 'kprog/stock-path/bin/clang', *worker.COMPILE_FLAGS,
+    # Keep the existing frontend and bounds IR; optimize only the post-bounds
+    # stage. All cases use this one recipe, without per-program flag selection.
+    ir_flags = [flag for flag in worker.COMPILE_FLAGS if flag != '-O1'] + ['-O2']
+    run([ROOT / 'kprog/stock-path/bin/clang', *ir_flags,
          '-emit-llvm', '-S', case / 'trusted_x86.bpf.bounds.bc', '-o', ir])
     flags = ['llc-18', '-O2', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096']
     run([*flags, '-stop-before=prologepilog', ir, '-o', before])
@@ -41,5 +42,5 @@ try:
     object_bytes, status = obj.stat().st_size, 0
 finally:
     (records / 'compile-status.json').write_text(json.dumps(dict(returncode=status,
-        request_id=ident, object_bytes=object_bytes, backend_level=2,
+        request_id=ident, object_bytes=object_bytes, ir_level=2, backend_level=2,
         scope=__doc__), indent=2) + '\n')

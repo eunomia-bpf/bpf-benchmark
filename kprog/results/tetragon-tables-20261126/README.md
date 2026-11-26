@@ -260,3 +260,21 @@ products remain archived; current case products are replaced in place.
 The next retry retains this input-stage correction explicitly. No frontend
 source reprocessing, P/image change, per-program flag policy or limit raise;
 all LTO pieces and full timing stay as before.
+
+PERF 2026-11-26T18:44:46Z — Proper machine-only control, no improvement
+
+backend-o2-ir-stage completes normal O1 IR emission, O2 pre-PEI, existing
+packing and O2 final emission (all4commands0); ELF1939680bytes. Its entire
+ELF is byte-for-byte equal to the archived normal39 baseline, including
+917232-byte kprobe/trusted and320-byte .text code sections. Stock submits
+114694 instructions and rejects insn2 at R10-528/errno13, processed3, just
+as baseline. backend-o2-instruction-comparison.json records the comparison.
+No production backend policy is changed by this control.
+
+The next fixed recipe tests O2 IR optimization after the existing bounds
+canonicalization, followed by the same O2 machine pipeline. Original C
+frontend staysO1; generated C is not reprocessed, all cases use the same
+post-bounds policy, and P/runtime image/all LTO pieces remain unchanged.
+This tests the IR stage that the machine-only control left unchanged.
+Archive/raw baseline and both failed input controls are retained. Full
+timing remains frozen; no stock acceptance is claimed.

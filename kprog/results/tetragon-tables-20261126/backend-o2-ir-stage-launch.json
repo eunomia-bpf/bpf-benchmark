@@ -1,0 +1,15 @@
+{
+  "pid": 687086,
+  "started_utc": "2026-11-26T18:34:29Z",
+  "source": "c57efd5dd0b638f10fa4128b3c0e5795a86a3af0",
+  "out": "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-ir-stage",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "backend-o2-control",
+    "BACKEND_OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-ir-stage"
+  ],
+  "resources": "One AS16GiB CPU16/timingSH compiler; sole-kernel2GiB/2vCPU stock CPU18-19/timingSH+imageSH.",
+  "scope": "Normal O1 IR emission from preserved bounds.bc, before instruction selection; fixed O2 machine pipeline. Production policy/P/image/allLTO unchanged."
+}
