@@ -1,0 +1,29 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 stage_acceptance.py /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance
+0 bcc blk_account_io_merge_bio generated generated
+1 bcc block_rq_complete generated generated
+2 bcc block_rq_insert generated generated
+3 bcc block_rq_issue generated generated
+4 bcc fentry_vfs_create generated generated
+5 bcc fentry_vfs_fsync generated generated
+6 bcc fentry_vfs_open generated generated
+7 bcc fentry_vfs_read generated generated
+8 bcc fentry_vfs_write generated generated
+9 bcc handle_sched_switch generated generated
+10 bcc handle_switch generated generated
+11 bcc inet_sock_set_state generated generated
+12 bcc kprobe_vfs_create generated generated
+13 bcc kprobe_vfs_fsync generated generated
+14 bcc kprobe_vfs_open generated generated
+15 bcc kprobe_vfs_read generated generated
+16 bcc kprobe_vfs_write generated generated
+17 bcc sched_switch generated generated
+18 bcc sched_wakeup generated generated
+19 bcc sched_wakeup_new generated generated
+20 bcc sys_enter generated generated
+21 bcc sys_exit generated generated
+22 bcc tcp_v4_connect generated generated
+23 bcc tcp_v4_connect_ret generated generated
+24 bcc tcp_v6_connect generated generated
+25 bcc tcp_v6_connect_ret generated generated
+26 cilium cil_from_container generated generated

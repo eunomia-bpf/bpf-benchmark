@@ -54,3 +54,10 @@ unsplit-group:
 	python3 unsplit_control.py $(REQUEST) $(RECORDS)
 unsplit-control:
 	python3 return_pipeline.py --unsplit $(UNSPLIT_OUT) 39
+
+.PHONY: stage-acceptance-smoke stage-acceptance
+STAGE_OUT ?= $(CURDIR)/stage-acceptance
+stage-acceptance-smoke:
+	python3 stage_acceptance.py smoke
+stage-acceptance:
+	python3 stage_acceptance.py $(STAGE_OUT)

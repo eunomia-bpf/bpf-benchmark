@@ -356,3 +356,43 @@ flags, image and runtime LTO stay unchanged. Four source-group representative
 replays are in progress; full timing remains frozen.
 
 PERF 2026-11-26T19:44:05Z: after the external-RSP integer guard, representatives9/12/38/39 all regenerate B C and each source text is byte-for-byte unchanged. return-stack-breadth.json/log records these four distinct-source classes, not a new full24replay or stock acceptance. The earlier full24replay after the LEA fix remains separately retained. No B rebuild or native/image change is justified by identical source text. All finite controls and their publications have completed; current compiler controls are diagnostics only and none is adopted.
+
+PERF 2026-11-26T19:55:54Z — Full-stage acceptance audit launched
+
+The coordinator's18:17Z request checks whether06d05f8f0's four persistent-base
+proof conditions reject an input previously accepted. stage_acceptance.py
+wraps the unchanged restore-529-20261121/offline_link.py: it retains every
+current explicit(object,symbol), its real proof/kernel commands and stand-in
+link plan, and additionally renders complete B C from a preserve-entry
+proof with both pre06d and current generator/ABI/table modules. Historical
+Python comes from Git into memory; no checkout/source copy or tool rebuild.
+Both renderings use identical ELF-derived section/context and map/global
+externs. This is offline generation/link compatibility, not B compilation,
+stock acceptance or live map/context binding; .text helper entries are
+retained and labeled with their actual section, not called real app loads.
+
+P3's older289/289 aggregate lacks its matching manifest snapshot. The
+current stage has286explicit pairs plus49runtime-resolved groups, as already
+recorded by the cmov trial census. The full current explicit set is checked
+once without renaming its count289; all49unresolved entries are retained
+in catalog.json. The three historical pair identities cannot be reconstructed
+from the aggregate receipt alone. This scope limitation remains explicit.
+
+Both historical/current generation pass the existing tiny call fixture with
+identical1556-byte C; actual smoke/dry Make logs are retained. Finite
+controller715897 started2026-11-26T19:54:29Z onCPU16/AS16GiB under
+existing shared timing/image locks. Input stage278MiB is captured in
+compressed parts<=48000000bytes; one canonical proof/kernel output set is
+replaced in place and each completed pair's evidence is archived first.
+Journal/progress update per pair; each application is published, then the
+final acceptance comparison and any regression IDs are published/wake the
+lane. First26BCCpairs link and render before/current with unchanged texts.
+No final no-regression conclusion yet; all LTO/nativeP/image/settings stay
+unchanged and full timing remains frozen.
+
+The five queued compiler callbacks were reread in callback-audit-20261126T195326Z.json; actual
+statuses still match the committed outcomes. Firstcontrol failed in its
+MIR input reader before commands, retry finalemitter1, machineO2 emits the
+identical normalELF then stockR10-528, postIR2 stockR10-1304, uninterrupted
+O1 stockR10-808. No preprocessing command/newpiece cleanup occurred in any
+of these controls; original9cleanup is already committed and rechecked.

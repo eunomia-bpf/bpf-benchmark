@@ -1,0 +1,168 @@
+{
+  "recorded_utc": "2026-11-26T19:53:26Z",
+  "cases": [
+    {
+      "directory": "backend-o2-control",
+      "controller_status": 1,
+      "ended_utc": "2026-11-26T18:20:14Z",
+      "compile_status": {
+        "returncode": 1,
+        "request_id": 39,
+        "object_bytes": null,
+        "backend_level": 2,
+        "scope": "Test one common O2 machine backend using the existing post-IR module.\n\nThis control changes no production policy and does not rerun frontend/GVN.\nCanonical case products are replaced in place; their baseline is archived.\n"
+      },
+      "child_returncodes": [],
+      "compile_command_file_exists": false,
+      "compile_log_bytes": 621,
+      "publication_log_bytes": 5622,
+      "stock": null,
+      "verifier_log": null,
+      "preprocessing_commands": 0,
+      "new_preprocessing_cleanup": false
+    },
+    {
+      "directory": "backend-o2-retry-20261126T182605Z",
+      "controller_status": 1,
+      "ended_utc": "2026-11-26T18:27:26Z",
+      "compile_status": {
+        "returncode": 1,
+        "request_id": 39,
+        "object_bytes": null,
+        "backend_level": 2,
+        "scope": "Test one common O2 machine backend using the existing post-IR module.\n\nThis control changes no production policy and does not rerun frontend/GVN.\nCanonical case products are replaced in place; their baseline is archived.\n"
+      },
+      "child_returncodes": [
+        0,
+        0,
+        1
+      ],
+      "compile_command_file_exists": true,
+      "compile_log_bytes": 1332,
+      "publication_log_bytes": 6345,
+      "stock": null,
+      "verifier_log": null,
+      "preprocessing_commands": 0,
+      "new_preprocessing_cleanup": false
+    },
+    {
+      "directory": "backend-o2-ir-stage",
+      "controller_status": 1,
+      "ended_utc": "2026-11-26T18:35:02Z",
+      "compile_status": {
+        "returncode": 0,
+        "request_id": 39,
+        "object_bytes": 1939680,
+        "backend_level": 2,
+        "scope": "Test one common O2 machine backend after the normal O1 IR optimizer.\n\nThis control changes no production policy and does not reprocess generated C.\nCanonical case products are replaced in place; their baseline is archived.\n"
+      },
+      "child_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "compile_command_file_exists": true,
+      "compile_log_bytes": 417,
+      "publication_log_bytes": 6791,
+      "stock": {
+        "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+        "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-ir-stage/replay",
+        "requests": [
+          {
+            "request": 39,
+            "returncode": 2,
+            "stock_loaded": false,
+            "errno": 13,
+            "instructions": 114694
+          }
+        ],
+        "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+      },
+      "verifier_log": "arg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (7b) *(u64 *)(r10 -480) = r0       ; R0=0 R10=fp0 fp-480=0\n2: (7b) *(u64 *)(r10 -528) = r0\ninvalid write to stack R10 off=-528 size=8\nprocessed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "preprocessing_commands": 0,
+      "new_preprocessing_cleanup": false
+    },
+    {
+      "directory": "postbounds-o2-control",
+      "controller_status": 1,
+      "ended_utc": "2026-11-26T18:51:25Z",
+      "compile_status": {
+        "returncode": 0,
+        "request_id": 39,
+        "object_bytes": 1647536,
+        "ir_level": 2,
+        "backend_level": 2,
+        "scope": "Test one common O2 post-bounds IR and machine backend.\n\nThis control changes no production policy and does not reprocess generated C.\nCanonical case products are replaced in place; their baseline is archived.\n"
+      },
+      "child_returncodes": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "compile_command_file_exists": true,
+      "compile_log_bytes": 419,
+      "publication_log_bytes": 6767,
+      "stock": {
+        "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+        "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/replay",
+        "requests": [
+          {
+            "request": 39,
+            "returncode": 2,
+            "stock_loaded": false,
+            "errno": 13,
+            "instructions": 88947
+          }
+        ],
+        "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+      },
+      "verifier_log": "arg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (b7) r0 = 0                        ; R0=0\n1: (7b) *(u64 *)(r10 -1304) = r0\ninvalid write to stack R10 off=-1304 size=8\nprocessed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "preprocessing_commands": 0,
+      "new_preprocessing_cleanup": false
+    },
+    {
+      "directory": "unsplit-control",
+      "controller_status": 1,
+      "ended_utc": "2026-11-26T19:38:48Z",
+      "compile_status": {
+        "returncode": 0,
+        "request_id": 39,
+        "object_bytes": 1791576,
+        "ir_level": 1,
+        "backend_level": 1,
+        "input": "trusted_x86.bpf.bounds.bc",
+        "generated_artifacts": [
+          "trusted_x86.bpf.o"
+        ],
+        "untouched_intermediates": "Existing backend-input.ll and MIR files are archived for provenance, not produced by this control.",
+        "scope": "Diagnose uninterrupted normal-O1 B emission from preserved bounds IR.\n\nThis bypasses only the MIR serialization/packing boundary in a result-local\ncontrol. Production policy, frontend input, native P and LTO are unchanged.\n"
+      },
+      "child_returncodes": [
+        0
+      ],
+      "compile_command_file_exists": true,
+      "compile_log_bytes": 351,
+      "publication_log_bytes": 6190,
+      "stock": {
+        "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+        "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/unsplit-control/replay",
+        "requests": [
+          {
+            "request": 39,
+            "returncode": 2,
+            "stock_loaded": false,
+            "errno": 13,
+            "instructions": 96458
+          }
+        ],
+        "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+      },
+      "verifier_log": "arg#0 reference type('UNKNOWN ') size cannot be determined: -22\n0: R1=ctx() R10=fp0\n0: (bf) r6 = r1                       ; R1=ctx() R6=ctx()\n1: (bf) r2 = r10                      ; R2=fp0 R10=fp0\n2: (07) r2 += -312                    ; R2=fp-312\n3: (7b) *(u64 *)(r10 -312) = r2       ; R2=fp-312 R10=fp0 fp-312=fp-312\n4: (bf) r1 = r2                       ; R1=fp-312 R2=fp-312\n5: (bc) w1 = w1                       ; R1=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n6: (bf) r2 = r1                       ; R1=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n7: (63) *(u32 *)(r10 -312) = r2       ; R2=scalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-312=mmmmscalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n8: (79) r1 = *(u64 *)(r10 -312)       ; R1=scalar() R10=fp0 fp-312=mmmmscalar(id=1,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n9: (7b) *(u64 *)(r10 -320) = r1       ; R1=scalar(id=2) R10=fp0 fp-320=scalar(id=2)\n10: (18) r7 = 0xffff8c3045abb930      ; R7=map_value(map=kprog_unspec,ks=4,vs=8)\n12: (79) r1 = *(u64 *)(r7 +0)         ; R1=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n13: (79) r2 = *(u64 *)(r7 +0)         ; R2=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n14: (79) r3 = *(u64 *)(r7 +0)         ; R3=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n15: (79) r4 = *(u64 *)(r7 +0)         ; R4=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n16: (79) r5 = *(u64 *)(r7 +0)         ; R5=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n17: (79) r0 = *(u64 *)(r7 +0)         ; R0=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n18: (7b) *(u64 *)(r10 -16) = r2       ; R2=scalar(id=3) R10=fp0 fp-16=scalar(id=3)\n19: (7b) *(u64 *)(r10 -24) = r0       ; R0=scalar(id=4) R10=fp0 fp-24=scalar(id=4)\n20: (7b) *(u64 *)(r10 -32) = r5       ; R5=scalar(id=5) R10=fp0 fp-32=scalar(id=5)\n21: (7b) *(u64 *)(r10 -40) = r4       ; R4=scalar(id=6) R10=fp0 fp-40=scalar(id=6)\n22: (7b) *(u64 *)(r10 -48) = r3       ; R3=scalar(id=7) R10=fp0 fp-48=scalar(id=7)\n23: (7b) *(u64 *)(r10 -56) = r1       ; R1=scalar(id=8) R10=fp0 fp-56=scalar(id=8)\n24: (79) r1 = *(u64 *)(r7 +0)         ; R1=scalar() R7=map_value(map=kprog_unspec,ks=4,vs=8)\n25: (7b) *(u64 *)(r10 -328) = r1      ; R1=scalar(id=9) R10=fp0 fp-328=scalar(id=9)\n26: (bf) r1 = r10                     ; R1=fp0 R10=fp0\n27: (07) r1 += -8                     ; R1=fp-8\n28: (7b) *(u64 *)(r10 -808) = r6\ninvalid write to stack R10 off=-808 size=8\nprocessed 28 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "preprocessing_commands": 0,
+      "new_preprocessing_cleanup": false
+    }
+  ],
+  "conclusion": "All five callbacks already consumed/committed. No new preprocessing cleanup, no compiler policy adopted, no stock acceptance. Full timing frozen."
+}
