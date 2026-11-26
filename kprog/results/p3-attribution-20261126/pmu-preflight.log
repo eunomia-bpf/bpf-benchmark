@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+/workspaces/.agent-state/kprog-ck/perf-tool/perf stat -a -C 0-7 -e cpu_core/cycles/ -- sleep 1
+
+ Performance counter stats for 'system wide':
+
+        5821273005      cpu_core/cycles/                                                      
+
+       1.001465636 seconds time elapsed
+
+make: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
