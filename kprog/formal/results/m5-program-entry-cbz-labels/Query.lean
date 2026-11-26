@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_cont
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_cont
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzLabels.taken_step
