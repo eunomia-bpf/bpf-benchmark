@@ -194,18 +194,24 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
     candidates = []
-    for position, window in enumerate(zip(insns, insns[1:], insns[2:])):
-        lea, load, add = window
-        if (lea.mnemonic != 'lea' or lea.reloc_symbol not in rodata or
-                not getattr(rodata[lea.reloc_symbol], 'code_relocations', ()) or
-                lea.reloc_type != 'R_X86_64_PC32' or '[rip' not in lea.raw.lower() or
-                load.mnemonic != 'movsxd' or add.mnemonic != 'add'):
+    bases = {}
+    for position, (load, add) in enumerate(zip(insns, insns[1:])):
+        if (load.mnemonic == 'lea' and load.reloc_symbol in rodata and
+                getattr(rodata[load.reloc_symbol], 'code_relocations', ()) and
+                load.reloc_type == 'R_X86_64_PC32' and '[rip' in load.raw.lower()):
+            register = decode.reg_info(load.operands[0])
+            if register is not None and register[1] == 64:
+                bases[register[0]] = load
+        if load.mnemonic != 'movsxd' or add.mnemonic != 'add' or not decode.is_mem(load.operands[1]):
+            continue
+        memory_base, index, scale, displacement = decode.parse_mem_terms(load.operands[1])
+        lea = bases.get(memory_base)
+        if lea is None:
             continue
         base = decode.reg_info(lea.operands[0])
         destination = decode.reg_info(load.operands[0])
         if base is None or destination is None or base[1] != 64 or destination[1] != 64:
             continue
-        memory_base, index, scale, displacement = decode.parse_mem_terms(load.operands[1])
         address_registers = [decode.reg_info(token) for token in re.findall(r'[a-z][a-z0-9]*', load.operands[1].lower())
                              if decode.reg_info(token) is not None]
         index_info = next((name for name, info in decode.REGS.items()
@@ -219,7 +225,7 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
             continue
         scheduled = []
         jump = None
-        for instruction in insns[position+3:]:
+        for instruction in insns[position+2:]:
             if instruction.mnemonic == 'jmp':
                 if decode.reg_info(instruction.operands[0]) == destination:
                     jump = instruction
@@ -229,9 +235,15 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
             scheduled.append(instruction)
         if jump is None:
             continue
-        candidates.append(dict(window=(lea, load, add, jump), scheduled=tuple(scheduled), symbol=lea.reloc_symbol,
+        candidates.append(dict(window=(lea, load, add, jump), lea=lea, scheduled=tuple(scheduled), symbol=lea.reloc_symbol,
                                base=lea.symbol_offset, scratch=(base[0], destination[0]),
-                               index=index_info, absolute=False))
+                               index=index_info, absolute=False, persistent=lea.end_addr != load.addr))
+    persistent = {c['lea'].addr for c in candidates if c['persistent']}
+    for candidate in candidates:
+        if candidate['lea'].addr in persistent:
+            candidate['persistent'] = True
+            candidate['window'] = candidate['window'][1:]
+            candidate['scratch'] = candidate['scratch'][1:]
     for lea, jump in zip(insns, insns[1:]):
         if (lea.mnemonic != 'lea' or lea.reloc_symbol not in rodata or
                 not getattr(rodata[lea.reloc_symbol], 'absolute_code_relocations', ()) or
@@ -249,8 +261,11 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
                 memory_base != base[0] or index_info is None or index == base[0] or
                 scale != 3 or displacement != 0):
             continue
-        candidates.append(dict(window=(lea, jump), scheduled=(), symbol=lea.reloc_symbol,
-                               base=lea.symbol_offset, scratch=(base[0],), index=index_info, absolute=True))
+        if lea.addr in persistent:
+            raise ValueError('persistent code-table base has mixed table encodings')
+        candidates.append(dict(window=(lea, jump), lea=lea, scheduled=(), symbol=lea.reloc_symbol,
+                               base=lea.symbol_offset, scratch=(base[0],), index=index_info, absolute=True,
+                               persistent=False))
     entries = set(function_starts)
     for insn in insns:
         target = decode.code_address(insn)
@@ -289,11 +304,13 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     full = (1 << 64) - 1
 
     def captured(candidate):
-        lea = candidate['window'][0]
+        anchor = candidate['window'][0]
+        lea = candidate['lea']
         calculation = candidate['window'][-2]
         index = candidate['index']
-        destination = lea.operands[0] if candidate['absolute'] else candidate['window'][1].operands[0]
-        return replace(lea, mnemonic='mov', operands=(destination, index),
+        destination = (lea.operands[0] if candidate['absolute'] else
+                       candidate['window'][0 if candidate['persistent'] else 1].operands[0])
+        return replace(anchor, mnemonic='mov', operands=(destination, index),
             reloc_symbol=None, reloc_type=None, reloc_target=None, symbol_offset=0,
             end_addr=calculation.end_addr, code_table=candidate['choices'],
             effects=NativeEffects(((decode.reg_info(index)[0], full),),
@@ -315,11 +332,11 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     # Use the existing stack/return-address analysis on the original image.
     # Unioning contexts overapproximates returns, without assuming that a RET
     # must resume at the instruction following a structural CALL.
-    states = {}
+    states, cfg_edges = {}, set()
     targets = dict(call_targets)
     targets.update({pc: frozenset(('code', target) for target in choices)
                     for pc, choices in table_targets.items()})
-    decode.check_definedness(insns, targets, exit_addr, decode, incoming_states=states)
+    decode.check_definedness(insns, targets, exit_addr, decode, incoming_states=states, cfg_edges=cfg_edges)
     rsp = list(dict.fromkeys(info[0] for info in decode.REGS.values())).index('X86_RSP')
     return_destinations = {}
     for (_, pc), state in states.items():
@@ -341,8 +358,37 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
             initial=private, return_destinations=return_destinations)
 
     replacements, removed = {}, set()
+    predecessors = {}
+    for source, target in cfg_edges:
+        predecessors.setdefault(target, set()).add(source)
     for candidate in candidates:
-        lea, jump = candidate['window'][0], candidate['window'][-1]
+        anchor, jump = candidate['window'][0], candidate['window'][-1]
+        lea = candidate['lea']
+        if candidate['persistent']:
+            # A syntax candidate is insufficient: every original path to the
+            # load must reach this LEA before any other definition of its base.
+            base = decode.reg_info(lea.operands[0])[0]
+            if (any(value is None for value in return_destinations.values()) or
+                    not any(pc == anchor.addr for _, pc in states)):
+                raise ValueError('persistent code-table base lacks a complete native CFG')
+            pending, visited = deque(predecessors.get(anchor.addr, ())), set()
+            while pending:
+                pc = pending.popleft()
+                if pc == lea.addr or pc in visited:
+                    continue
+                visited.add(pc)
+                if (pc == insns[0].addr or pc not in predecessors or by_addr[pc].effects is None or
+                        dict(by_addr[pc].effects.writes).get(base, 0)):
+                    raise ValueError('persistent code-table base has another reaching definition')
+                pending.extend(predecessors[pc])
+            if not private_results_dead(provisional_insns, [following[lea.addr]], (base,), 0,
+                    decode, exit_addr, call_targets, table_targets, return_destinations=return_destinations):
+                raise ValueError('persistent code-table base has an observable use')
+            # Retain the address as a CFG entry/return destination even when
+            # its now-private data definition disappears from B.
+            replacements[lea.addr] = replace(lea, mnemonic='nop', operands=(),
+                reloc_symbol=None, reloc_type=None, reloc_target=None, symbol_offset=0,
+                effects=NativeEffects((), (), 0, 0))
         add = candidate['window'][-2]
         if entries.intersection((*(i.addr for i in candidate['window'][1:]), *(i.addr for i in candidate['scheduled']))):
             raise ValueError('relative table computation has an external CFG entry')
@@ -365,7 +411,7 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
                     private[-1] & ~effects.flags_written,)
         if not dead(candidate, private):
             raise ValueError('relative table computation has live register or flag results')
-        replacements[lea.addr] = captured(candidate)
+        replacements[anchor.addr] = captured(candidate)
         replacements[jump.addr] = dispatch(candidate)
         removed.update(i.addr for i in candidate['window'][1:-1])
     return [replacements.get(insn.addr, insn) for insn in insns if insn.addr not in removed]

@@ -180,3 +180,40 @@ compiler evidence remain. The own cleanup-log line was committed in
 7949ec26a; no additional removal occurred. return-pipeline-outcome.json
 records the actual outcomes and this reinspection. Raw compiler evidence
 publications are e1797f3c5/1fd28da00, stock publication99841361e.
+
+PERF 2026-11-26T17:20:28Z — Persistent table bases
+
+The request9 probe establishes that its persistent R15 base has no other
+observation after dispatch substitution. Production now recognizes a
+nonadjacent LEA as a candidate only: the existing original-image ABI
+analysis exports actual CFG edges, including stack-tracked RET destinations.
+A backwards walk from each load must encounter that LEA on every rooted
+path before another write to the base. Unknown return CFGs remain refused.
+A separate forward private-state proof over the proposed dispatches rejects
+any other use of the base. Target and ADD-flag liveness remains checked on
+the original image. The LEA becomes a NOP in B so its code identity stays
+valid for entry/branch/return references; P/native bytes are untouched.
+Shared adjacent/nonadjacent uses are checked together. There is no new
+runtime guard, application selection, ISA value interpreter or compile flag.
+
+All26 actual assembly/link cases pass:18 existing call/table cases plus8
+persistent-base cases. Both a loop and a shared base are accepted. Another
+reaching definition, a bypass, a callee clobber, a RET that skips the LEA,
+an external base observation and live ADD flags are refused. Prior7949ec26a
+fails both positive persistent cases. Initial fixture-link/layout errors
+and intermediate expectation failures remain in their logs; final linked
+proofs and exact errors are retained.
+
+All24 retained Tetragon requests now lower and fully render B source. The
+ten former finite-target refusals have identical717038-byte generated C
+(4917→4900 instructions each); the previous14 source texts are unchanged.
+all24-generation.json, all24-source-groups.json and all26-checks.log record
+the result. This closes generation for these24 captures, not phase1 stock
+or application acceptance: the three earlier source groups failed the
+stock stack checks above. The new9 group still needs normal compilation
+and stock verification. The same finite driver can now run a selected
+evidence group/destination; make hoisted-pipeline does that for9, not a
+production policy. Future compiler archives stream into48000000-byte
+parts to keep tracked evidence below the repository file limit. Raw old
+archives and compiler products remain. All LTO pieces stay together; image,
+P/common flags, kernel/workloads and full timing are unchanged.

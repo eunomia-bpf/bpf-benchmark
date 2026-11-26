@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 
+8 actual persistent-table cases passed
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o",
+    "--symbol",
+    "changed_base",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/changed_base/test.proof.o"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "native-link: entry=changed_base (31 bytes), 1 reachable symbol(s) total\n  - changed_base (vaddr 0x22, 31 bytes) [entry]\nError: nested PC32 code relocation in section:SectionIndex(7):.rodata.changed_base has no relative jump-table base\n"
+}

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o",
+    "--symbol",
+    "live_flags",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/live_flags/test.proof.o"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=live_flags (28 bytes), 1 reachable symbol(s) total\n  - live_flags (vaddr 0x83, 28 bytes) [entry]\nnative-link: wrote proof object 32 bytes, 1 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/live_flags/test.proof.o\n"
+}

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o",
+    "--symbol",
+    "hoisted_loop",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/hoisted_loop/test.proof.o"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=hoisted_loop (34 bytes), 1 reachable symbol(s) total\n  - hoisted_loop (vaddr 0x0, 34 bytes) [entry]\nnative-link: wrote proof object 38 bytes, 1 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/hoisted_loop/test.proof.o\n"
+}

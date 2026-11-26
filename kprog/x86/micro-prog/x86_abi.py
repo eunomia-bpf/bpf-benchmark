@@ -32,7 +32,7 @@ class State:
     constants: tuple[int | None, ...]
 
 def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_value_offsets=None,
-                      return_sites_by_pc=None, incoming_states=None):
+                      return_sites_by_pc=None, incoming_states=None, cfg_edges=None):
     regs = (*dict.fromkeys((r[0] for r in decode.REGS.values())), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
 
@@ -101,6 +101,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
 
     def push(context, addr, state, backedge=False):
         nonlocal lowest_stack
+        if cfg_edges is not None:
+            cfg_edges.add((current_pc, addr))
         if type(state.aliases[rsp]) is int:
             lowest_stack = min(lowest_stack, state.aliases[rsp])
         if addr == exit_addr:
@@ -140,6 +142,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
 
     while queue:
         context, addr = queue.popleft()
+        current_pc = addr
         incoming = states[context, addr]
         insn = by_addr[addr]
         op, args = (insn.mnemonic, insn.operands)

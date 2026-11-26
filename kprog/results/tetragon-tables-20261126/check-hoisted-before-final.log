@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 7949ec26a
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_hoisted.py", line 56, in <module>
+    raise AssertionError([row for row in rows if not row['passed']])
+AssertionError: [{'case': 'hoisted_loop', 'expected_error': None, 'actual_error': 'unresolved finite indirect target at 0x18: jmp    rax', 'passed': False}, {'case': 'shared_base', 'expected_error': None, 'actual_error': 'unresolved finite indirect target at 0x21: jmp    rax', 'passed': False}]
+make: *** [Makefile:29: check-hoisted] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o",
+    "--symbol",
+    "bypassed_base",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/bypassed_base/test.proof.o"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=bypassed_base (33 bytes), 1 reachable symbol(s) total\n  - bypassed_base (vaddr 0x47, 33 bytes) [entry]\nnative-link: wrote proof object 37 bytes, 1 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/bypassed_base/test.proof.o\n"
+}

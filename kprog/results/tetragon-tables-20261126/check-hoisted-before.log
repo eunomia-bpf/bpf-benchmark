@@ -1,0 +1,10 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 7949ec26a
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_hoisted.py", line 45, in <module>
+    assert any(i.code_table is not None for i in lowered)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+make: *** [Makefile:29: check-hoisted] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

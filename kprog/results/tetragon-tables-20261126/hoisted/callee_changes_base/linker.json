@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--input",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o",
+    "--symbol",
+    "callee_changes_base",
+    "--mode",
+    "proof",
+    "--preserve-entry-abi",
+    "--output",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/callee_changes_base/test.proof.o"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=callee_changes_base (29 bytes), 2 reachable symbol(s) total\n  - callee_changes_base (vaddr 0xcc, 29 bytes) [entry]\n  - change_base (vaddr 0xe9, 8 bytes)\nnative-link: wrote proof object 41 bytes, 1 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/callee_changes_base/test.proof.o\n"
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "case": "hoisted_loop",
+    "expected_error": null,
+    "actual_error": "unresolved finite indirect target at 0x18: jmp    rax",
+    "passed": false
+  },
+  {
+    "case": "shared_base",
+    "expected_error": null,
+    "actual_error": "unresolved finite indirect target at 0x21: jmp    rax",
+    "passed": false
+  },
+  {
+    "case": "changed_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "unresolved finite indirect target at 0x17: jmp    rax",
+    "passed": true
+  },
+  {
+    "case": "bypassed_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "unresolved finite indirect target at 0x1c: jmp    rax",
+    "passed": true
+  },
+  {
+    "case": "redirected_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "table dispatch not lowered",
+    "passed": true
+  },
+  {
+    "case": "callee_changes_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "unresolved finite indirect target at 0x18: jmp    rax",
+    "passed": true
+  },
+  {
+    "case": "observed_base",
+    "expected_error": "persistent code-table base has an observable use",
+    "actual_error": "unresolved finite indirect target at 0x16: jmp    rax",
+    "passed": true
+  },
+  {
+    "case": "live_flags",
+    "expected_error": "relative table computation has live register or flag results",
+    "actual_error": "unresolved finite indirect target at 0x13: jmp    rax",
+    "passed": true
+  }
+]

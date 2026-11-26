@@ -1,0 +1,12 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_hoisted.py", line 38, in <module>
+    raise RuntimeError(linked.stderr)
+RuntimeError: native-link: entry=hoisted_loop (34 bytes), 1 reachable symbol(s) total
+  - hoisted_loop (vaddr 0x0, 34 bytes) [entry]
+Error: relative jump table section:SectionIndex(5):.rodata:table_0 targets code outside the included symbols
+
+make: *** [Makefile:29: check-hoisted] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

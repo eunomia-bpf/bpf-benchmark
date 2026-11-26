@@ -1,0 +1,109 @@
+{
+  "recorded_utc": "2026-11-26T17:20:28Z",
+  "all24_full_b_source_generation": true,
+  "previous14_source_comparisons": [
+    {
+      "request": 12,
+      "unchanged": true
+    },
+    {
+      "request": 16,
+      "unchanged": true
+    },
+    {
+      "request": 23,
+      "unchanged": true
+    },
+    {
+      "request": 33,
+      "unchanged": true
+    },
+    {
+      "request": 38,
+      "unchanged": true
+    },
+    {
+      "request": 39,
+      "unchanged": true
+    },
+    {
+      "request": 41,
+      "unchanged": true
+    },
+    {
+      "request": 49,
+      "unchanged": true
+    },
+    {
+      "request": 58,
+      "unchanged": true
+    },
+    {
+      "request": 62,
+      "unchanged": true
+    },
+    {
+      "request": 64,
+      "unchanged": true
+    },
+    {
+      "request": 71,
+      "unchanged": true
+    },
+    {
+      "request": 75,
+      "unchanged": true
+    },
+    {
+      "request": 80,
+      "unchanged": true
+    }
+  ],
+  "classes": [
+    {
+      "requests": [
+        12,
+        16,
+        23,
+        33,
+        41,
+        49,
+        58,
+        71,
+        75,
+        80
+      ],
+      "source_bytes": 371430
+    },
+    {
+      "requests": [
+        38,
+        64
+      ],
+      "source_bytes": 370458
+    },
+    {
+      "requests": [
+        39,
+        62
+      ],
+      "source_bytes": 608257
+    },
+    {
+      "requests": [
+        9,
+        20,
+        25,
+        32,
+        47,
+        50,
+        55,
+        72,
+        77,
+        83
+      ],
+      "source_bytes": 717038
+    }
+  ],
+  "stock_scope": "The three earlier groups failed stock stack bounds. The new717038-byte group9 has not been compiled/stock-loaded yet."
+}

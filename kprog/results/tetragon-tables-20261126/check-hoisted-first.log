@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_hoisted.py", line 32, in <module>
+    subprocess.run([linker, '--input', HERE / 'hoisted.o', '--symbol', name, '--mode', 'proof',
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '[PosixPath('/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link'), '--input', PosixPath('/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted.o'), '--symbol', 'hoisted_loop', '--mode', 'proof', '--preserve-entry-abi', '--output', PosixPath('/workspaces/repository/kprog/results/tetragon-tables-20261126/hoisted/hoisted_loop/test.proof.o')]' returned non-zero exit status 1.
+make: *** [Makefile:29: check-hoisted] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

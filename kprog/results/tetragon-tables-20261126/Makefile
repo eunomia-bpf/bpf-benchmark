@@ -18,3 +18,16 @@ compile-group:
 	python3 compile.py $(REQUEST) $(RECORDS)
 return-pipeline:
 	python3 return_pipeline.py
+
+.PHONY: probe-hoisted
+probe-hoisted:
+	python3 hoisted_probe.py
+
+.PHONY: check-hoisted
+check-hoisted:
+	$(CC) -c hoisted.S -o hoisted.o
+	python3 check_hoisted.py $(REVISION)
+
+.PHONY: hoisted-pipeline
+hoisted-pipeline:
+	python3 return_pipeline.py $(CURDIR)/hoisted-pipeline 9

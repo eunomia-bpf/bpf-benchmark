@@ -1,0 +1,16 @@
+[
+  {
+    "request_id": 9,
+    "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/9.success.tar.gz",
+    "historical_error": "unresolved finite indirect target at 0x3580: jmp    rax",
+    "status": "lowered",
+    "input_instructions": 4917,
+    "output_instructions": 4899,
+    "b_source_generation": {
+      "status": "generated",
+      "source_bytes": 716841
+    },
+    "liveness_witnesses": [],
+    "indirect_jump_context": []
+  }
+]

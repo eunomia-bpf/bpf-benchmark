@@ -1,4 +1,4 @@
-"""Finite normal B compilation and detached stock loads of the two new text groups."""
+"""Finite normal B compilation and detached stock loads of generated text groups."""
 import fcntl
 import json
 from pathlib import Path
@@ -10,7 +10,8 @@ from datetime import datetime, timezone
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-OUT = HERE / 'return-pipeline'
+OUT = Path(sys.argv[1]) if len(sys.argv) > 1 else HERE / 'return-pipeline'
+REQUESTS = tuple(map(int, sys.argv[2:])) if len(sys.argv) > 2 else (12, 38)
 LOCKS = Path('/workspaces/.agent-state/kprog-lanes/locks')
 ARCHIVES = Path('/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests')
 
@@ -45,8 +46,18 @@ def compile_case(ident, cpu):
     members = [p.name for p in case.glob('trusted_x86.bpf.*') if p.suffix in {'.i', '.bc', '.mir', '.json', '.o'}]
     row['archive_members'] = sorted(members)
     if members:
-        subprocess.run(['tar', '-I', 'zstd -T1 -3', '-cf', str(destination / 'compiler-evidence.tar.zst'),
-            '-C', str(case), *sorted(members)], check=True)
+        archive = subprocess.Popen(['tar', '-C', str(case), '-cf', '-', *sorted(members)], stdout=subprocess.PIPE)
+        compressed = subprocess.Popen(['zstd', '-T1', '-3'], stdin=archive.stdout, stdout=subprocess.PIPE)
+        archive.stdout.close()
+        split = subprocess.run(['split', '-b', '48000000', '-', str(destination / 'compiler-evidence.tar.zst.part-')],
+            stdin=compressed.stdout)
+        compressed.stdout.close()
+        statuses = [archive.wait(), compressed.wait(), split.returncode]
+        row['archive_pipeline_status'] = statuses
+        if any(statuses):
+            raise RuntimeError('compiler archive tar/zstd/split failed: ' + repr(statuses))
+        row['archive_parts'] = [dict(name=p.name, bytes=p.stat().st_size)
+                               for p in sorted(destination.glob('compiler-evidence.tar.zst.part-*'))]
     return row
 
 OUT.mkdir()  # Preserve an earlier run if this finite recipe is invoked twice.
@@ -57,8 +68,9 @@ record = dict(started_utc=now(), source=subprocess.check_output(['git', 'rev-par
 try:
     with (LOCKS / 'timing').open('a') as timing:
         fcntl.flock(timing, fcntl.LOCK_SH)
-        with ThreadPoolExecutor(max_workers=2) as pool:
-            for future in as_completed([pool.submit(compile_case, 12, 16), pool.submit(compile_case, 38, 17)]):
+        with ThreadPoolExecutor(max_workers=min(2, len(REQUESTS))) as pool:
+            for future in as_completed([pool.submit(compile_case, ident, 16 + index % 2)
+                                       for index, ident in enumerate(REQUESTS)]):
                 row = future.result()
                 record['cases'].append(row)
                 write(OUT / 'controller.json', record)
@@ -88,7 +100,7 @@ try:
                 fcntl.flock(image, fcntl.LOCK_SH)
                 record['stock_returncode'] = run(command, stock / 'guest.log')
             record['stock_ended_utc'] = now()
-        status = 0 if len(successful) == 2 and record.get('stock_returncode') == 0 else 1
+        status = 0 if len(successful) == len(REQUESTS) and record.get('stock_returncode') == 0 else 1
 finally:
     record.update(ended_utc=now(), controller_status=status)
     if sys.exc_info()[1] is not None:

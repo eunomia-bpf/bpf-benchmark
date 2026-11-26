@@ -1,0 +1,50 @@
+[
+  {
+    "case": "hoisted_loop",
+    "expected_error": null,
+    "actual_error": null,
+    "passed": true
+  },
+  {
+    "case": "shared_base",
+    "expected_error": null,
+    "actual_error": null,
+    "passed": true
+  },
+  {
+    "case": "changed_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "persistent code-table base has another reaching definition",
+    "passed": true
+  },
+  {
+    "case": "bypassed_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "persistent code-table base has another reaching definition",
+    "passed": true
+  },
+  {
+    "case": "redirected_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "persistent code-table base has another reaching definition",
+    "passed": true
+  },
+  {
+    "case": "callee_changes_base",
+    "expected_error": "persistent code-table base has another reaching definition",
+    "actual_error": "persistent code-table base has another reaching definition",
+    "passed": true
+  },
+  {
+    "case": "observed_base",
+    "expected_error": "persistent code-table base has an observable use",
+    "actual_error": "persistent code-table base has an observable use",
+    "passed": true
+  },
+  {
+    "case": "live_flags",
+    "expected_error": "relative table computation has live register or flag results",
+    "actual_error": "relative table computation has live register or flag results",
+    "passed": true
+  }
+]
