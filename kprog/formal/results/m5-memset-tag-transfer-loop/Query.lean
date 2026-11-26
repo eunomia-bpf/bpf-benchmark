@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.active_positions
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.active_positions
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.guard_true
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.guard_true
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.prepare
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.prepare
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.advance
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.advance
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.guard_false
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.guard_false
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.observations
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.setup
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.setup
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.inactive
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.inactive
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.outer_exit
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.outer_exit
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.finish
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop.finish

@@ -1,0 +1,59 @@
+{
+  "confirmed_utc": "2026-11-26T07:09:43.200938+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetTagTransferLoop"
+    ],
+    "exit": 0,
+    "seconds": 3.559652090072632,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 341,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-tag-transfer-loop/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8894052505493164,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 10,
+  "source_steps": {
+    "counter_domain": 16,
+    "active_counters": [
+      0,
+      8
+    ],
+    "inactive_counters": 14,
+    "true_loop_guard": 4,
+    "position_and_alignment_branch": 8,
+    "to_actual_store_body": 12,
+    "inactive_iteration_with_backedge": 15,
+    "false_loop_guard": 5,
+    "outer_exit_to_original_clobbers": 3,
+    "total_exit": 8
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetTagTransferLoop.lean",
+      "size_bytes": 19400,
+      "mtime_ns": 1795676913670600385
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
