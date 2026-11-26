@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/stock/probe-inputs/archive-stock",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/replay/38/replay.bpf.o",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/stock/38/generation.metadata.json",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/stock/38/kernel.facts.json",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/stock/38/verifier.log"
+  ],
+  "returncode": 2,
+  "stdout": "{\"stock_loaded\":false,\"errno\":13,\"instructions\":406458}\n",
+  "stderr": ""
+}

@@ -1,0 +1,21 @@
+{
+  "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+  "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/replay",
+  "requests": [
+    {
+      "request": 12,
+      "returncode": 2,
+      "stock_loaded": false,
+      "errno": 13,
+      "instructions": 412628
+    },
+    {
+      "request": 38,
+      "returncode": 2,
+      "stock_loaded": false,
+      "errno": 13,
+      "instructions": 406458
+    }
+  ],
+  "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+}
