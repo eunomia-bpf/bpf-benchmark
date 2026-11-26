@@ -1,0 +1,24 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+python3 /workspaces/repository/kprog/results/hash-family-c-20261126/collect.py /workspaces/repository/kprog/results/cmov-branches-20261126/repetitions-20261126T140934Z/tetragon-2
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Frozen functional check; no full timing claim.",
+  "checks": [
+    {
+      "app": "tetragon/observer",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_141614_994390",
+      "apps": [
+        {
+          "app": "tetragon/observer",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 288,
+      "native_load_failures": 0
+    }
+  ]
+}
+make[1]: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
