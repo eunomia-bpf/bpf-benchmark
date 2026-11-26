@@ -1,0 +1,87 @@
+{
+  "prog_type": 2,
+  "expected_attach_type": 0,
+  "prog_flags": 0,
+  "prog_ifindex": 0,
+  "attach_btf_id": 0,
+  "attach_btf_obj_id": 0,
+  "attach_prog_id": 0,
+  "gpl_compatible": 1,
+  "source_btf_id": 4572,
+  "token_present": 0,
+  "id": 548,
+  "maps": [
+    {
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 8,
+      "map_type": 6,
+      "id": 4307
+    },
+    {
+      "max_entries": 32768,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 896,
+      "map_type": 1,
+      "id": 3552
+    },
+    {
+      "max_entries": 32000,
+      "map_flags": 0,
+      "key_size": 8,
+      "value_size": 16,
+      "map_type": 9,
+      "id": 4120
+    },
+    {
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 4104,
+      "map_type": 9,
+      "id": 4302
+    },
+    {
+      "max_entries": 1024,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 24,
+      "map_type": 1,
+      "id": 4118
+    },
+    {
+      "max_entries": 13,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4,
+      "map_type": 3,
+      "id": 4124
+    },
+    {
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4352,
+      "map_type": 6,
+      "id": 4299
+    },
+    {
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 736,
+      "map_type": 2,
+      "id": 4125
+    },
+    {
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 25632,
+      "map_type": 6,
+      "id": 4119
+    }
+  ]
+}

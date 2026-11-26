@@ -47,5 +47,19 @@
         }
       ]
     }
-  ]
+  ],
+  "stock_command": [
+    "make",
+    "-f",
+    "kprog/results/cilium-headlen-20261119/Makefile",
+    "archive-stock",
+    "OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/tag-only-cache-control/stock",
+    "INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/tag-only-cache-control/stock-index.json",
+    "REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/tag-only-cache-control/replay"
+  ],
+  "stock_started_utc": "2026-11-26T20:28:21Z",
+  "stock_returncode": 2,
+  "stock_ended_utc": "2026-11-26T20:28:26Z",
+  "ended_utc": "2026-11-26T20:28:26Z",
+  "controller_status": 1
 }
