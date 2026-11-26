@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpBodyView
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpBodyView.entry_setup_represents
+#print axioms Arm64ProducerIsXdpBodyView.entry_setup_represents
