@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyPostStore
+#check KProgFormal.ClightRefinement.Arm64MemcpyPostStore.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPostStore.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyPostStore.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPostStore.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyPostStore.after_write
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPostStore.after_write
+#check KProgFormal.ClightRefinement.Arm64MemcpyPostStore.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPostStore.kept
