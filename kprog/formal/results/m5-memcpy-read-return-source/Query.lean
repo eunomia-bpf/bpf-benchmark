@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.kept
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.result_read
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadReturnSource.result_read
