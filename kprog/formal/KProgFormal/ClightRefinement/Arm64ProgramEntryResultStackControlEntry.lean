@@ -1,4 +1,5 @@
 import KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControl
+import KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission
 
 set_option Elab.async false
 set_option linter.unusedSimpArgs false
@@ -43,9 +44,9 @@ private def finish (target : Expr) (facts : Array Expr) : MetaM Expr := do
     (`first,`repeatResult),(`second,`constantResult),(`abi,`abiLocal),(`reached,`reached),
     (`cell,`cell),(`ready,`ready),(`providers,`providers),(`le,`temps),(`k,`k),
     (`ctxBlock,`ctxBlock),(`ctxOffset,`ctxOfs),(`old,`old),(`reads,`reads),
-    (`noError,`codeNoError),(`cmpFetched,`cmpFetched),(`branch,`branch),
+    (`branch,`branch),
     (`conditionOffset,`conditionOffset),(`branchDecoded,`branchDecoded),
-    (`branchFetched,`branchFetched),(`sites,`sites)]
+    (`sites,`sites)]
   for arg in args do
     let name := (← arg.mvarId!.getDecl).userName
     if let some (_,actual) := renames.find? (fun pair => pair.1 == name) then
@@ -56,11 +57,28 @@ private def finish (target : Expr) (facts : Array Expr) : MetaM Expr := do
   let setup := mkApp3 (mkConst ``Arm64ProgramEntryBodyView.nativeSetup)
     (← localValue `s) (← localValue `origins) (← localValue `fields)
   let prefixNative := mkApp (mkConst ``Arm64ProgramEntryRepeatMovAdmission.afterTwelve) setup
+  let control ← localValue `control
+  let pc ← mkAppM ``And.left #[control]
+  let tail ← mkAppM ``And.right #[control]
+  let noError ← mkAppM ``And.left #[tail]
+  let program ← mkAppM ``And.right #[tail]
+  let initial ← localValue `s
+  let origins ← localValue `origins
+  let fields ← localValue `fields
+  let cmpWord ← mkAppM ``Reference.AArch64.Instruction.encoding #[mkConst ``Arm64ProgramEntryCmpNative.instruction]
+  let branchWord ← mkAppM ``Reference.AArch64.Instruction.encoding #[← localValue `branch]
+  let cmpFetched ← mkAppM ``Arm64ProgramEntryControlAdmission.fetch_current
+    #[initial,origins,fields,pc,program,cmpWord,← localValue `cmpFetched]
+  let branchFetched ← mkAppM ``Arm64ProgramEntryControlAdmission.fetch_next
+    #[initial,origins,fields,pc,program,branchWord,← localValue `branchFetched]
   let prefixTrace ← mkAppM ``CC.Eapp #[← mkAppM ``List.flatten #[← localValue `traces],← localValue `trace]
   for arg in args do
     let name := (← arg.mvarId!.getDecl).userName
     if name == `native then arg.mvarId!.assign prefixNative
     if name == `prefixTrace then arg.mvarId!.assign prefixTrace
+    if name == `noError then arg.mvarId!.assign noError
+    if name == `cmpFetched then arg.mvarId!.assign cmpFetched
+    if name == `branchFetched then arg.mvarId!.assign branchFetched
   unless ← isDefEq result target do throwError "actual reached caller result differs"
   let mut candidates := #[]
   for decl in ← getLCtx do
@@ -158,7 +176,8 @@ private def mapPrefix (target oldProof : Expr) (facts : Array Expr) : MetaM Expr
 
 /-- Reuse the original fourteen-call/98-provider prefix witness once. Every
 original existential/effect/frame/cache/code fact remains; its new continuation
-consumes actual reached data, without invoking the old source-only callback. -/
+consumes actual reached data and derives current error/code fetch from the
+original fourteen-word program, without invoking the old source-only callback. -/
 theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
     (ctxOfs : CC.Integers.Ptrofs) (k : CC.Cont)
     (abiLocal : TailLocal initial 6)
@@ -556,11 +575,10 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
           abiLocal (fields 0) constantAfter cell),
       CC.isCallCont k = true →
       let sourceState := (Reference.AArch64.step (Arm64ProgramEntryRepeatMovAdmission.afterThirteen origins (nativeSetup s origins fields))).state
-      ∀ (codeNoError : read_err sourceState.machine = .None)
-        (cmpFetched : fetch_inst (read_pc sourceState.machine) sourceState.machine = some Arm64ProgramEntryCmpNative.instruction.encoding)
+      ∀ (cmpFetched : fetch_inst (read_pc s.machine + 56#64) s.machine = some Arm64ProgramEntryCmpNative.instruction.encoding)
         (branch : Reference.AArch64.Instruction) (conditionOffset : BitVec 19)
         (branchDecoded : branch.decoded = .BR (.Cond_branch_imm (Arm64ProgramEntryJccNative.fields (12#4) conditionOffset)))
-        (branchFetched : fetch_inst (read_pc sourceState.machine + 4#64) sourceState.machine = some branch.encoding)
+        (branchFetched : fetch_inst (read_pc s.machine + 60#64) s.machine = some branch.encoding)
         (sites : Arm64ProgramEntryPostMemoryBranchSites.Sites sourceState conditionOffset),
       ∃ gprs helperFlags helperVectors trace live, ∃ lr : HeaderSourceLocal initial 4, ∃ stored returned,
         Arm64ProgramEntryTerminalFree.FreeResult initial stored returned ∧
@@ -574,6 +592,12 @@ theorem entry_corresponds (initial : CC.Mem) (ctxBlock : CC.Block)
           conditionOffset (Arm64ProgramEntryPostMemoryBranchSites.chosenOffset sourceState gprs helperFlags conditionOffset sites)
           (Arm64ProgramEntryPostMemoryBranchSites.admission sourceState gprs helperFlags conditionOffset sites)
           live (.Vptr entry.block 0) lr.block := by
+  have control := Arm64ProgramEntryControlAdmission.admission s origins fields
+    first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
+    imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded
+    seventhDecoded eighthDecoded ninthDecoded tenthDecoded eleventhDecoded twelfthDecoded thirteenthDecoded fourteenthDecoded
+    noError firstFetched keepFetched thirdFetched fourthFetched fifthFetched sixthFetched seventhFetched
+    eighthFetched ninthFetched tenthFetched eleventhFetched twelfthFetched thirteenthFetched fourteenthFetched
   have original := Arm64ProgramEntryResultStackRights.entry_corresponds initial ctxBlock ctxOfs k abiLocal addresses ctxWord context values provider flags flagProvider vectors vectorProvider
       origins s native fields old reads first keep third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth
       imm column negate literal firstDecoded keepDecoded thirdDecoded fourthDecoded fifthDecoded sixthDecoded seventhDecoded eighthDecoded
