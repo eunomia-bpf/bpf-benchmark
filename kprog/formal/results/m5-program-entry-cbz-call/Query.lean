@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.native_word
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.native_word
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.native_other
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.native_other
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.invoke
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzCall.invoke
