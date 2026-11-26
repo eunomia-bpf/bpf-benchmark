@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpVectorInputs
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpVectorInputs.entry_initialized
+#print axioms Arm64ProducerIsXdpVectorInputs.entry_initialized

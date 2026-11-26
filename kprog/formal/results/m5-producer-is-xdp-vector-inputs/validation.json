@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-26T17:46:02.770752+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProducerIsXdpVectorInputs"
+    ],
+    "exit": 0,
+    "seconds": 7.235362768173218,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 203,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-producer-is-xdp-vector-inputs/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5459156036376953,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "actual_provider_outcomes": 98,
+    "GPR_outcomes": 30,
+    "NZCV_outcomes": 4,
+    "vector_half_outcomes": 64,
+    "abi_kind": 2,
+    "is_xdp": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerIsXdpVectorInputs.lean",
+      "size_bytes": 6391,
+      "mtime_ns": 1795714780859409907
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
