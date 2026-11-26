@@ -1,0 +1,39 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/mask-resume-20261126T054032Z",
+  "build": {
+    "command": [
+      "env",
+      "LEAN_NUM_THREADS=1",
+      "LEAN_IMPORT_WORKERS=1",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 1688.2971294249874,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "env",
+      "LEAN_NUM_THREADS=1",
+      "LEAN_IMPORT_WORKERS=1",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-sub-cf-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 9.408122866007034,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}
