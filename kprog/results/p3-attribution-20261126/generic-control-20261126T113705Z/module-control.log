@@ -1,0 +1,18 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+make -C /workspaces/repository/kprog/perf/direct-native module OUT=/workspaces/repository/kinsn/module/x86/build KCFLAGS='-Dkprog_htab_elem_k2=kprog_htab_control_k2 -Dkprog_htab_elem_k4=kprog_htab_control_k4 -Dkprog_htab_elem_k8=kprog_htab_control_k8 -Dkprog_htab_elem_k12=kprog_htab_control_k12 -Dkprog_htab_elem_k14=kprog_htab_control_k14 -Dkprog_htab_elem_k16=kprog_htab_control_k16 -Dkprog_htab_elem_k20=kprog_htab_control_k20 -Dkprog_htab_elem_k24=kprog_htab_control_k24 -Dkprog_htab_elem_k32=kprog_htab_control_k32 -Dkprog_htab_elem_k36=kprog_htab_control_k36 -Dkprog_htab_elem_k38=kprog_htab_control_k38 -Dkprog_htab_elem_k40=kprog_htab_control_k40 -Dkprog_htab_elem_k41=kprog_htab_control_k41 -Dkprog_htab_elem_k48=kprog_htab_control_k48 -Dkprog_htab_elem_k64=kprog_htab_control_k64 -Dkprog_htab_elem_k88=kprog_htab_control_k88 -Dkprog_htab_elem_k224=kprog_htab_control_k224 -Dkprog_htab_elem_k256=kprog_htab_control_k256 -Dkprog_htab_elem_k260=kprog_htab_control_k260'
+make[2]: Entering directory '/workspaces/repository/kprog/perf/direct-native'
+install -d /workspaces/repository/kinsn/module/x86/build
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/perf/direct-native MO=/workspaces/repository/kinsn/module/x86/build ARCH=x86 modules
+make[3]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[4]: Entering directory '/workspaces/repository/kinsn/module/x86/build'
+  GEN     Makefile
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_x86_native_lab.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[4]: Leaving directory '/workspaces/repository/kinsn/module/x86/build'
+make[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[2]: Leaving directory '/workspaces/repository/kprog/perf/direct-native'
+make[1]: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
