@@ -5,6 +5,9 @@ LOCKS := /workspaces/.agent-state/kprog-lanes/locks
 .PHONY: check offline module-arm64 loaders key-sizes
 key-sizes:
 	cd $(ROOT) && python3 $(HERE)/key_sizes.py > $(HERE)/key-sizes.json
+.PHONY: key-sizes-arm64
+key-sizes-arm64:
+	cd $(ROOT) && python3 $(HERE)/key_sizes.py arm64 > $(HERE)/key-sizes-arm64.json
 check:
 	$(MAKE) -C $(ROOT)/kprog/results/hash-c-lto-20261120 check OUT=$(HERE)/host
 offline:

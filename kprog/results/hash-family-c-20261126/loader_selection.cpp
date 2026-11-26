@@ -37,6 +37,7 @@ int main()
         ++cases;
     }
     symbols.clear();
+    symbols["fixture_nonempty"] = 1; // Keep the cache initialized while omitting the target.
     bool failed = false;
     try { htab_lookup_elem_kernel_addr(14); }
     catch (const std::runtime_error &) { failed = true; }

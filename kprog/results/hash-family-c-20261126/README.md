@@ -33,3 +33,21 @@ The attempted recursive image dry-run entered the kernel link recipe despite
 `make -n` (GNU make executes recursive recipes). Its process group was stopped
 before publication; the log stays in `image-dry-run.log`. The normal image
 build below replaces any partial build output in the canonical base.
+
+## Corpus key-size census
+
+The staged x86 objects' DWARF map declarations contain hash-family keys of
+2, 4, 8, 12, 14, 16, 20, 24, 32, 36, 38, 40, 41, 48, 64, 88, 224, 256 and
+260 bytes (`key-sizes.json`, with each map and object). The module now emits
+exactly these 19 routines instead of 66; 88 and 260 were absent from the first
+set. The first image build was stopped before publication to include these
+sizes in the one guest confirmation. Its raw log is `image-first.log`.
+The guarded host driver is extended through 260 bytes for this actual corpus
+boundary. The first census attempts exposed pointer-width and section-symbol
+handling gaps in the census script; both failed logs are retained.
+
+The loader-selection fixture invokes each production loader's selection code
+for all four map types, with specialized, zero and absent symbols. Its first
+missing-generic test accidentally cleared the initialized cache and caused a
+real kallsyms reread; retaining an unrelated sentinel tests the intended missing
+symbol case. `loader-selection-first.log` preserves that fixture failure.

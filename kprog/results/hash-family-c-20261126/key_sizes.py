@@ -1,5 +1,6 @@
 """Read hash map key sizes from the staged native objects' DWARF map types."""
 import json
+import sys
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
 
@@ -25,7 +26,8 @@ def size(die):
     raise ValueError('key has no DWARF size: ' + die.tag)
 
 rows = []
-for obj in sorted(Path('vendor/build/native-bpf/x86/stage').glob('*/*.native.o')):
+stage = Path('vendor/build/native-bpf') / (sys.argv[1] if len(sys.argv) > 1 else 'x86') / 'stage'
+for obj in sorted(stage.glob('*/*.native.o')):
     with obj.open('rb') as source:
         elf = ELFFile(source)
         names = {s.name for s in elf.get_section_by_name('.symtab').iter_symbols()
