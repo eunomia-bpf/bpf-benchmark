@@ -1,0 +1,126 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-sanitize-link-runtime",
+      "-mno-red-zone",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-DX86_SIM_STACK_VALUE_WORDS(M)=M(0) M(1) M(2) M(3) M(4) M(5) M(6) M(7)",
+      "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c",
+      "-lubsan",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "{\"tag_alias_partial_release_cases\":72}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-sanitize-link-runtime",
+      "-mno-red-zone",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-DX86_SIM_STACK_VALUE_WORDS(M)=M(0) M(1) M(2) M(3) M(4) M(5) M(6) M(7)",
+      "-DX86_SIM_USE_STATE_STRUCT",
+      "-DX86_SIM_STACK_BYTES=64U",
+      "-include",
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h",
+      "-include",
+      "/workspaces/repository/kprog/results/tetragon-tables-20261126/cache_tag_only.h",
+      "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c",
+      "-lubsan",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c:4:9: warning: 'X86_SIM_USE_STATE_STRUCT' macro redefined [-Wmacro-redefined]\n    4 | #define X86_SIM_USE_STATE_STRUCT\n      |         ^\n<command line>:2:9: note: previous definition is here\n    2 | #define X86_SIM_USE_STATE_STRUCT 1\n      |         ^\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "{\"tag_alias_partial_release_cases\":72}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-sanitize-link-runtime",
+      "-mno-red-zone",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-DX86_SIM_STACK_VALUE_WORDS(M)=M(1) M(5)",
+      "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c",
+      "-lubsan",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "{\"tag_alias_partial_release_cases\":72}\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "-fno-sanitize-link-runtime",
+      "-mno-red-zone",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-DX86_SIM_STACK_VALUE_WORDS(M)=M(1) M(5)",
+      "-DX86_SIM_USE_STATE_STRUCT",
+      "-DX86_SIM_STACK_BYTES=64U",
+      "-include",
+      "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h",
+      "-include",
+      "/workspaces/repository/kprog/results/tetragon-tables-20261126/cache_tag_only.h",
+      "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c",
+      "-lubsan",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/results/sparse-stack-cache-20261119/oracle.c:4:9: warning: 'X86_SIM_USE_STATE_STRUCT' macro redefined [-Wmacro-redefined]\n    4 | #define X86_SIM_USE_STATE_STRUCT\n      |         ^\n<command line>:2:9: note: previous definition is here\n    2 | #define X86_SIM_USE_STATE_STRUCT 1\n      |         ^\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/table-cache/oracle"
+    ],
+    "returncode": 0,
+    "stdout": "{\"tag_alias_partial_release_cases\":72}\n",
+    "stderr": ""
+  }
+]

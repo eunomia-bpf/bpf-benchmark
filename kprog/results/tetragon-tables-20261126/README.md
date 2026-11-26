@@ -491,3 +491,33 @@ Phase1 remains open on the real B frame failures; no runtime gain claimed
 and full timing remains frozen.
 
 PERF 2026-11-26T20:46:23Z: duplicate tag-only callback matches09cd90f09; eight commands0, stock104076/insn8R10-528/processed9/errno13 remain. Six preprocessing pieces still absent. Joined .i and both bitcode files match their archived members by direct bytes; current tracked artifacts are published as completion of that same build, no rerun/newcleanup. New read-only tag-only MIR audit finds packed peak84objects/672declaredlivebytes at bb10267 (normal127objects/1012bytes), near native loop0x11d2; both are conservative CFG counts, not feasible-path minima. Remaining pointer fields stay live after full tag-onlyclear. This motivates testing tag-only RANGEinvalidations with baseline fullclear/release, production header unchanged.
+
+PERF 2026-11-26T20:56:46Z — Refined range-only control result
+
+The result-side prototype cache_tag_only.h now applies tag-only invalidation
+ONLYto existing range erasure. Full cache clears and frame release use the
+unchanged production pointer+tag clear. It adds no branch, changes no raw
+native byte or sourceP flag, and is not installed in the productionI header.
+The old all-tag-only prototype remains exactly recorded by a5f09400f and
+its original launch recipes/archives; the source is one evolving result
+prototype, not a new production mode or per-app selection.
+
+Existing hostoracle again matches72scenarios in each4full/sparse and
+original/refined modes withUBSan0 (cache-range-check.json). This is still
+focused observable coverage, not complete formal equivalence. NormalO1
+finite controller741124 started20:48:32Z, eight compiler children0,
+ELF1769552bytes. Stock20:50:21–20:50:26Z submits102264instructions,
+rejects insn7 R10-944, processed8/errno13/rc2/controller1. No adoption or
+stock/app/native gain; refinement has not solved the512byte stack limit.
+Direct R10 MEM offset diagnostics and full commands are retained separately
+in cache-range-outcome.json, not reported as total frame.
+
+The current canonical request39compiler products replace the previous
+control in place; exact C/IR/MIR/object are archived by the controller,
+source-before archive retains prior canonical C, and all old source/header
+versions remain in Git/raw launch recipes. Three successful -E commands
+removed six normal generated pieces after join; absent pieces verified and
+cleanup-log updated. All raw inputs/measurements/logs/archives stay.
+ProductionI/P/compilerflags/image/kernel/base and all LTO policy unchanged;
+full timing frozen. The ordered ARM source audit has only queried compiler
+capability so far (unsupported cortex-x925 tune), no build or timing.

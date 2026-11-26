@@ -13,7 +13,7 @@ def run(command):
     result = subprocess.run(list(map(str, command)), text=True, capture_output=True)
     commands.append(dict(command=list(map(str, command)), returncode=result.returncode,
                          stdout=result.stdout, stderr=result.stderr))
-    (HERE / 'cache-tag-check-commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+    (HERE / 'cache-range-check-commands.json').write_text(json.dumps(commands, indent=2) + '\n')
     result.check_returncode()
     return result.stdout
 
@@ -29,9 +29,9 @@ for mode, words in [('full', range(8)), ('sparse', [1, 5])]:
                       '-include', HERE / 'cache_tag_only.h']
         run([*flags, ROOT / 'kprog/results/sparse-stack-cache-20261119/oracle.c',
              '-lubsan', '-o', BUILD / 'oracle'])
-        observations[mode + ('-tag-only' if control else '-normal')] = json.loads(run([BUILD / 'oracle']))
-    if observations[mode + '-normal'] != observations[mode + '-tag-only']:
+        observations[mode + ('-range-tag-only' if control else '-normal')] = json.loads(run([BUILD / 'oracle']))
+    if observations[mode + '-normal'] != observations[mode + '-range-tag-only']:
         raise AssertionError(observations)
-(HERE / 'cache-tag-check.json').write_text(json.dumps(dict(observations=observations,
+(HERE / 'cache-range-check.json').write_text(json.dumps(dict(observations=observations,
     scope='Existing shared-C oracle: all provenance tags, sparse/full words, direct/aliased writes, partial writes, release/replant. No stock/app acceptance or complete formal-equivalence claim.'), indent=2) + '\n')
 print(json.dumps(observations))

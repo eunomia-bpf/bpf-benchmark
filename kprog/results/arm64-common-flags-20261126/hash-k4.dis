@@ -1,0 +1,61 @@
+
+/workspaces/repository/kinsn/module/arm64/build/bpf_x86_native_lab.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+00000000000002c8 <kprog_htab_elem_k4>:
+     2c8:	d503201f 	nop
+     2cc:	d503201f 	nop
+     2d0:	b9434003 	ldr	w3, [x0, #832]
+     2d4:	5297de62 	mov	w2, #0xbef3                	// #48883
+     2d8:	72bbd5a2 	movk	w2, #0xdead, lsl #16
+     2dc:	b9400024 	ldr	w4, [x1]
+     2e0:	0b020063 	add	w3, w3, w2
+     2e4:	b9433805 	ldr	w5, [x0, #824]
+     2e8:	0b040064 	add	w4, w3, w4
+     2ec:	13834862 	ror	w2, w3, #18
+     2f0:	4b0203e2 	neg	w2, w2
+     2f4:	510004a5 	sub	w5, w5, #0x1
+     2f8:	4a020084 	eor	w4, w4, w2
+     2fc:	13825446 	ror	w6, w2, #21
+     300:	4b060084 	sub	w4, w4, w6
+     304:	4a040063 	eor	w3, w3, w4
+     308:	13841c86 	ror	w6, w4, #7
+     30c:	4b060063 	sub	w3, w3, w6
+     310:	4a030042 	eor	w2, w2, w3
+     314:	13834066 	ror	w6, w3, #16
+     318:	4b060042 	sub	w2, w2, w6
+     31c:	4a020084 	eor	w4, w4, w2
+     320:	13827046 	ror	w6, w2, #28
+     324:	4b060084 	sub	w4, w4, w6
+     328:	4a040063 	eor	w3, w3, w4
+     32c:	13844884 	ror	w4, w4, #18
+     330:	4b040063 	sub	w3, w3, w4
+     334:	f940e000 	ldr	x0, [x0, #448]
+     338:	4a030042 	eor	w2, w2, w3
+     33c:	13832063 	ror	w3, w3, #8
+     340:	4b030042 	sub	w2, w2, w3
+     344:	0a0200a4 	and	w4, w5, w2
+     348:	8b041005 	add	x5, x0, x4, lsl #4
+     34c:	f94000a0 	ldr	x0, [x5]
+     350:	36000080 	tbz	w0, #0, 360 <kprog_htab_elem_k4+0x98>
+     354:	1400000b 	b	380 <kprog_htab_elem_k4+0xb8>
+     358:	f9400000 	ldr	x0, [x0]
+     35c:	37000120 	tbnz	w0, #0, 380 <kprog_htab_elem_k4+0xb8>
+     360:	b9402803 	ldr	w3, [x0, #40]
+     364:	6b03005f 	cmp	w2, w3
+     368:	54ffff81 	b.ne	358 <kprog_htab_elem_k4+0x90>  // b.any
+     36c:	b9403006 	ldr	w6, [x0, #48]
+     370:	b9400023 	ldr	w3, [x1]
+     374:	6b0300df 	cmp	w6, w3
+     378:	54ffff01 	b.ne	358 <kprog_htab_elem_k4+0x90>  // b.any
+     37c:	d65f03c0 	ret
+     380:	eb40049f 	cmp	x4, x0, lsr #1
+     384:	54fffe41 	b.ne	34c <kprog_htab_elem_k4+0x84>  // b.any
+     388:	d2800000 	mov	x0, #0x0                   	// #0
+     38c:	d65f03c0 	ret
+
+Disassembly of section .init.text:
+
+Disassembly of section .exit.text:

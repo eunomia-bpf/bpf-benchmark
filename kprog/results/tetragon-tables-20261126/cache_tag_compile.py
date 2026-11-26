@@ -23,7 +23,7 @@ if control not in text:
     if text.count(include) != 1:
         raise ValueError('canonical generated source does not have its unique shared-I include')
     source.write_text(text.replace(include, include + '\n' + control, 1))
-(records / 'control.json').write_text(json.dumps(dict(recipe='Tag-only ghost-cache clear; unused pointer retained until replacement.',
+(records / 'control.json').write_text(json.dumps(dict(recipe='Ranged ghost-cache invalidation clears tag only; full clears/frame release retain original pointer clearing.',
     source_before_bytes=len(original), source_control_bytes=source.stat().st_size,
     control_header=str(HERE / 'cache_tag_only.h'), scope='Result-only normal-O1 B compiler control, one recipe for all requested cases; no production header/P/native/image change.'), indent=2) + '\n')
 os.execv(sys.executable, [sys.executable, str(HERE / 'compile.py'), str(ident), str(records)])

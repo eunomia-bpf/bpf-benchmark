@@ -1,0 +1,138 @@
+{
+  "recorded_utc": "2026-11-26T20:56:46Z",
+  "controller": {
+    "started_utc": "2026-11-26T20:48:32Z",
+    "compile_target": "tag-only-cache-group",
+    "source": "8dafdcff5d1309051171c1a4026b945eb9fb46ba",
+    "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+    "scope": "Common ranged tag-only ghost-cache invalidation control, production policy unchanged. B compilation and sole-kernel detached stock verification only; no native execution or timing.",
+    "cases": [
+      {
+        "request": 39,
+        "started_utc": "2026-11-26T20:48:32Z",
+        "command": [
+          "taskset",
+          "-c",
+          "16",
+          "prlimit",
+          "--as=17179869184",
+          "--",
+          "make",
+          "-C",
+          "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+          "tag-only-cache-group",
+          "REQUEST=39",
+          "RECORDS=/workspaces/repository/kprog/results/tetragon-tables-20261126/range-tag-cache-control/39"
+        ],
+        "compile_returncode": 0,
+        "ended_utc": "2026-11-26T20:50:16Z",
+        "archive_members": [
+          "trusted_x86.bpf.backend-input.ll",
+          "trusted_x86.bpf.before.mir",
+          "trusted_x86.bpf.bounds-input.bc",
+          "trusted_x86.bpf.bounds.bc",
+          "trusted_x86.bpf.c",
+          "trusted_x86.bpf.i",
+          "trusted_x86.bpf.o",
+          "trusted_x86.bpf.packed.lowering.json",
+          "trusted_x86.bpf.packed.mir"
+        ],
+        "archive_pipeline_status": [
+          0,
+          0,
+          0
+        ],
+        "archive_parts": [
+          {
+            "name": "compiler-evidence.tar.zst.part-aa",
+            "bytes": 9496684
+          }
+        ]
+      }
+    ],
+    "stock_command": [
+      "make",
+      "-f",
+      "kprog/results/cilium-headlen-20261119/Makefile",
+      "archive-stock",
+      "OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/range-tag-cache-control/stock",
+      "INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/range-tag-cache-control/stock-index.json",
+      "REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/range-tag-cache-control/replay"
+    ],
+    "stock_started_utc": "2026-11-26T20:50:21Z",
+    "stock_returncode": 2,
+    "stock_ended_utc": "2026-11-26T20:50:26Z",
+    "ended_utc": "2026-11-26T20:50:26Z",
+    "controller_status": 1
+  },
+  "compile": {
+    "returncode": 0,
+    "request_id": 39,
+    "object_bytes": 1769552,
+    "scope": "Normal B compilation only; stock-verifier and app acceptance remain separate.",
+    "source_equal_to_request62": false
+  },
+  "child_returncodes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "stock": {
+    "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+    "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/range-tag-cache-control/replay",
+    "requests": [
+      {
+        "request": 39,
+        "returncode": 2,
+        "stock_loaded": false,
+        "errno": 13,
+        "instructions": 102264
+      }
+    ],
+    "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+  },
+  "first_bad_instruction": 7,
+  "first_bad_offset": -944,
+  "processed": 8,
+  "object_sections": [
+    {
+      "section": ".text",
+      "instructions": 40,
+      "direct_MEM_fp_references": 0,
+      "minimum_offset": null
+    },
+    {
+      "section": "kprobe/trusted",
+      "instructions": 102224,
+      "direct_MEM_fp_references": 32379,
+      "minimum_offset": -1240
+    }
+  ],
+  "preprocessing_cleanup": [
+    {
+      "source": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.c",
+      "expanded": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.i",
+      "returncode": 0,
+      "both_absent": true
+    },
+    {
+      "source": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.c",
+      "expanded": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.i",
+      "returncode": 0,
+      "both_absent": true
+    },
+    {
+      "source": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.c",
+      "expanded": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.i",
+      "returncode": 0,
+      "both_absent": true
+    }
+  ],
+  "adopted": false,
+  "scope": "Result-only range tag clear, baseline full clear and frame release. NativeP/header/flags/image unchanged. Static direct R10 MEM operands are not total-frame or feasible-path bounds."
+}

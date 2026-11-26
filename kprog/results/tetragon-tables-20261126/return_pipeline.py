@@ -13,7 +13,7 @@ ROOT = HERE.parents[2]
 arguments = sys.argv[1:]
 CONTROLS = {'--backend-o2': ('backend-o2-group', 'Common post-bounds IR/machine O2 control'),
             '--unsplit': ('unsplit-group', 'Common uninterrupted O1 backend control'),
-            '--tag-only-cache': ('tag-only-cache-group', 'Common tag-only ghost-cache invalidation control')}
+            '--tag-only-cache': ('tag-only-cache-group', 'Common ranged tag-only ghost-cache invalidation control')}
 control = CONTROLS.get(arguments[0]) if arguments else None
 if control:
     arguments = arguments[1:]
