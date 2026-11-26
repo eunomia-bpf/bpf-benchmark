@@ -134,3 +134,32 @@ evidence, not second build products. No module binary is copied or retained.
 Each control check is published as it completes. This control is needed to
 separate helper selection from the large observed temporal/call-mix variation;
 no P3 causal conclusion or production optimization is claimed yet.
+
+
+## Completed unchanged-image checks
+
+All six checks are app ok/error empty with zero native-load failures: Tetragon
+288 replacements each, OTel 14 each. Each is stats on, 1 x 10 s.
+
+| app / raw run | eBPF ns/call | native ns/call | eBPF / native |
+|---|---:|---:|---:|
+| tetragon / 20261126_110044_568071 | 1374.3 | 1242.1 | 1.106x |
+| tetragon / 20261126_110852_804800 | 1147.7 | 856.9 | 1.339x |
+| tetragon / 20261126_111433_299444 | 1111.2 | 1647.4 | 0.675x |
+| otel / 20261126_111900_412998 | 3998.5 | 3720.0 | 1.075x |
+| otel / 20261126_112553_192230 | 3683.5 | 3907.9 | 0.943x |
+| otel / 20261126_113434_250961 | 3612.3 | 3479.6 | 1.038x |
+
+These diagnostic ratios are not official timing. No steady P3 penalty is
+established by this temporal comparison. The generic-helper control remains
+necessary for attribution.
+
+The first control attempt, generic-control-20261126T113558Z, stopped before
+any app: Make propagated result OUT into the module build. Its canonical
+module snapshot therefore still had all specialized symbols. Accidental
+build outputs were removed in bebc8dd77 with an exact cleanup inventory and
+all raw evidence retained; the sole canonical module stayed unchanged. The
+result Makefile now pins the canonical module OUT explicitly. The corrected
+finite controller470513 is generic-control-20261126T113705Z; it owns the
+resource locks for the control and normal module rebuild and wakes this lane
+after publishing its outcome.
