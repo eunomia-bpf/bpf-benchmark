@@ -42,8 +42,8 @@ def prepare {initial before pointerWritten markWritten markAfter constantWritten
   have pointerTail := Arm64ProducerTailFrame.of_kept entry 0 pointer.local_load
   have pointerResources := Arm64ProgramEntryResourceTransport.resources resources pointerTail
     (fun block _ => congrArg (CC.PMap.get block) pointer.access)
-  have firstBound := Arm64MemsetInputs.bound_after first bound
-  have finalBound := Arm64MemsetInputs.bound_after second firstBound
+  have firstBound := Arm64ProgramEntryOrdinaryRights.next_bound first bound
+  have finalBound := Arm64ProgramEntryOrdinaryRights.next_bound second firstBound
   have currentResources := Arm64ProgramEntryOrdinaryRights.resources second firstBound
     (Arm64ProgramEntryOrdinaryRights.resources first bound pointerResources)
   have fullTail := (pointerTail.trans (Arm64ProducerTailFrame.of_kept entry 1 first.kept)).trans
@@ -52,8 +52,8 @@ def prepare {initial before pointerWritten markWritten markAfter constantWritten
   have actualR0 : Arm64EntryMemory.gpr pointerWritten.nextblock pointerWritten (.Vptr entry.block 0) 0 =
       some (.Vlong (-32#64),.Vint ((4#8).setWidth 32)) := by
     simpa only [pointer.nextblock,eq_self,ite_true,Fin.val_zero] using pointer.gpr 0
-  have currentR0 := (Arm64MemsetInputs.other second firstBound 0 (by decide)).trans
-    ((Arm64MemsetInputs.other first bound 0 (by decide)).trans actualR0)
+  have currentR0 := (Arm64ProgramEntryOrdinaryRights.gpr_other second firstBound 0 (by decide)).trans
+    ((Arm64ProgramEntryOrdinaryRights.gpr_other first bound 0 (by decide)).trans actualR0)
   have currentTags (j : Fin 24) : CC.Mem.load .Mint8unsigned constantAfter currentView.tags.block (j.val : Int) = some (.Vint 0) :=
     (fullTail.tail 2 ⟨view.tags.block,view.tags.binding⟩ .Mint8unsigned (j.val : Int)).trans (tagBytes j)
   have spFirst : (first.storage bound).spValue = pointer.storage.spValue := ordinary_sp first bound
