@@ -1,0 +1,7 @@
+# Complete original memset tag-transfer execution
+
+One same-heap invariant composes every actual transfer-loop iteration after the sixteen original memset byte writes. Counters0 and8 execute the genuine s106 body, each with its actual volatile tag-word read and store; the other fourteen counters execute the original inactive branch and backedge. Actual counter16 executes the original guard and outer exit to the genuine program_clobbers call. Both selected stores transport current Resources, complete architectural Storage/SP, all31 GPR observations, the actual HeaderView and ABI, all24 zero tag bytes and all16 previously written data values. The original full-call theorem composes the already proved actual input/allocation/read and sixteen byte-write route with this complete transfer execution; it retains the original callee-domain and provider contracts without an extra initializer or execution witness. Original clobber/provider/free/return and caller composition follow before the related root batch, remaining M5/O1/O2/O4/recount and M6. Original C, exports, imported semantics and prior public interfaces remain.
+
+Focused build 343 and 4 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
