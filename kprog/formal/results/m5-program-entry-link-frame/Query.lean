@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.storage
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.storage
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.tailFrame
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.tailFrame
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.gpr
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.gpr
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.flag
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.flag
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.memory
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.memory
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.packet
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkFrame.packet
