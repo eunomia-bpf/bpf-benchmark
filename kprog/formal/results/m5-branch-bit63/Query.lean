@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64BranchBit63
+#check KProgFormal.ClightRefinement.Arm64BranchBit63.masked_bit
+#print axioms KProgFormal.ClightRefinement.Arm64BranchBit63.masked_bit
+#check KProgFormal.ClightRefinement.Arm64BranchBit63.condition_value
+#print axioms KProgFormal.ClightRefinement.Arm64BranchBit63.condition_value
+#check KProgFormal.ClightRefinement.Arm64BranchBit63.execute
+#print axioms KProgFormal.ClightRefinement.Arm64BranchBit63.execute
