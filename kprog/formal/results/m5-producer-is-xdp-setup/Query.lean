@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpSetup
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpSetup.observed
+#print axioms Arm64ProducerIsXdpSetup.observed
