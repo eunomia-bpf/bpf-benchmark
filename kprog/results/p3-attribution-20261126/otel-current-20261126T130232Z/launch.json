@@ -1,0 +1,15 @@
+{
+  "pid": 522263,
+  "source": "d1374c709c3d06f81ac04258239745fec67b9b9f",
+  "command": [
+    "prlimit",
+    "--as=42949672960",
+    "--",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/p3-attribution-20261126",
+    "otel-profile",
+    "OUT=/workspaces/repository/kprog/results/p3-attribution-20261126/otel-current-20261126T130232Z"
+  ],
+  "started": "2026-11-26T13:02:32.039091+00:00"
+}
