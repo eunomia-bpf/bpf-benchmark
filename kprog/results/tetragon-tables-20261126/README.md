@@ -331,3 +331,5 @@ are not outputs of this control. Prior generated artifacts remain in their
 committed archives; the canonical B object is replaced in place. Dry Make
 commands are retained in unsplit-dry-run.log. Production B/P flags, image,
 all LTO components and frozen full timing stay unchanged.
+
+PERF 2026-11-26T19:39:25Z: uninterrupted-O1 controller708379 compiled39 at19:37:29–19:37:39Z, one child0/ELF1791576. Static executable sections have96458instructions including40in .text, directFP memory offsets reach-1424. The archive9350013bytes has tar/zstd/split all0. Stock and final publication remain pending; this is no verifier acceptance or production-policy change. Recipe/fresh24replay publishedd3532f653, exact launch texts retained because the job started from18d696405 while that publication ran.
