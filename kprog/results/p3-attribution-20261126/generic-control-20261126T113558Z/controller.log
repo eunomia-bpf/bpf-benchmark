@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+python3 /workspaces/repository/kprog/results/p3-attribution-20261126/generic_control.py /workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/p3-attribution-20261126/generic_control.py", line 88, in <module>
+    raise RuntimeError('control symbol substitution failed')
+RuntimeError: control symbol substitution failed

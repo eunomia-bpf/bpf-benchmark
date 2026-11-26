@@ -1,0 +1,1 @@
+savedcmd_Module.symvers :=  /workspaces/.agent-state/kprog-ck/build-x86/scripts/mod/modpost -M -m -b  -a      -o Module.symvers -T modules.order -i /workspaces/.agent-state/kprog-ck/build-x86/Module.symvers -e 

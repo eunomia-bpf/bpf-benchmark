@@ -1,0 +1,4 @@
+{"time": "2026-11-26T11:35:58.818785+00:00", "event": "acquiring_resources"}
+{"time": "2026-11-26T11:35:58.838486+00:00", "event": "command", "argv": ["prlimit", "--as=8589934592", "--", "taskset", "-c", "18-19", "make", "-C", "/workspaces/repository/kprog/results/p3-attribution-20261126", "module-control", "-j2"], "log": "/workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/module-control.log"}
+{"time": "2026-11-26T11:36:00.773641+00:00", "event": "command", "argv": ["prlimit", "--as=8589934592", "--", "taskset", "-c", "18-19", "make", "-C", "/workspaces/repository/kprog/results/p3-attribution-20261126", "module-normal", "-j2"], "log": "/workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/module-normal.log"}
+{"time": "2026-11-26T11:36:02.458898+00:00", "event": "finished", "returncode": 1, "normal_module_restored": true}

@@ -1,0 +1,18 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+make -C /workspaces/repository/kprog/perf/direct-native module
+make[2]: Entering directory '/workspaces/repository/kprog/perf/direct-native'
+install -d /workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/perf/direct-native MO=/workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z ARCH=x86 modules
+make[3]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[4]: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z'
+  GEN     Makefile
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_x86_native_lab.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[4]: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z'
+make[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[2]: Leaving directory '/workspaces/repository/kprog/perf/direct-native'
+make[1]: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
