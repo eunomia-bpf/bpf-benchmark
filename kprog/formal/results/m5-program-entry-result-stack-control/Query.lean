@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControl
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControl.compose
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackControl.compose
