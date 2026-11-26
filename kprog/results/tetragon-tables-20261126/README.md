@@ -424,3 +424,46 @@ manifest snapshot, so three old pair identities are unknown. The49groups
 are retained in catalog.json, not resolved or skipped at app runtime by
 this audit. No source/policy/flag/image change or new preprocessing/removal
 occurred. Full timing stays frozen and all LTO pieces remain together.
+
+PERF 2026-11-26T20:27:50Z — Unchanged refusal attribution, then B spill lifetime control
+
+The case188error above is an offline metadata limitation, not evidence of a
+new parser/control-flow defect. Its final call has an ELF relocation to
+bpf_copy_from_user_str, a typed kernel function rather than a numbered BPF
+helper. Supplying that existing kfunc ABI from sole-kernel83e0fabe355d BTF
+(void*,u32,const void*,u64)->s32 lets BOTH pre06d/current render identical
+80928-byte C from the same archived proof. preload-kfunc-result.json and
+preload-kfunc-evidence.tar.gz retain the actual BTF signature, proof, source
+bytes and both old failures. No production code/metadata selector changed.
+The full-run285/286count is retained; this is one focused supplemental replay,
+not a rewritten full sweep or stock/app acceptance.
+
+The archived normal39spill audit now locates its static peak: bb.2406 /
+IRblock4827, DILocation832, native indexedstore at0x463. Before packing134
+spill objects occupy1012declared bytes; after packing127objects also1012,
+182live32bit halves in either case. The IR witness clears per-word ghost
+tags AND pointer representatives conditionally. Source arena304bytes is
+separate. These conservative CFG counts are not a feasible-path minimum
+frame, but identify ghost-cache invalidation as the next lifetime control
+instead of another arbitrary compiler optimization level. Exact block, live
+slots/debug locations/IR/source context are retained in spill-peaks.json
+and spill-peak-source.json; original counts match spill-liveness.json.
+
+Result-only cache_tag_only.h tests clearing the validity tag while retaining
+the unused pointer until a later STACKsave replaces it. The existing
+shared-C oracle reports72tag/alias/partial-write/release/replant cases in
+each of four modes (full/sparse, original/tag-only), identical observations
+and UBSan0. This is a focused observation test, not a complete formal proof
+or production adoption. Source/header contracts and real stock outcome
+remain to be assessed if it helps. Only the result fixture's canonical C
+includes the control header; production shared-I header, P/flags/image and
+all LTO pieces stay unchanged. Its original C is retained in source-before
+archive and Git. Compiler-evidence archives now include the exact generatedC.
+
+Finite normal-O1 compiler/stock controller732629 started2026-11-26T20:26:30Z
+in tag-only-cache-control. Same compiler stages/flags, one16GiB-AS CPU16
+worker then sole-kernel2GiB/2vCPU stockCPU18-19 under existing locks. Raw
+commands/archive/status publish and every final outcome wakes the lane.
+No stock acceptance, stack reduction or production policy claim yet. Full
+timing stays frozen. Normal preprocessing cleanup will be inspected from
+this job's actual commands at callback; no raw evidence is removed.

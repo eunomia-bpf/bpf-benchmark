@@ -1,0 +1,17 @@
+{
+  "observations": {
+    "full-normal": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "full-tag-only": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "sparse-normal": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "sparse-tag-only": {
+      "tag_alias_partial_release_cases": 72
+    }
+  },
+  "scope": "Existing shared-C oracle: all provenance tags, sparse/full words, direct/aliased writes, partial writes, release/replant. No stock/app acceptance or complete formal-equivalence claim."
+}

@@ -12,7 +12,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 arguments = sys.argv[1:]
 CONTROLS = {'--backend-o2': ('backend-o2-group', 'Common post-bounds IR/machine O2 control'),
-            '--unsplit': ('unsplit-group', 'Common uninterrupted O1 backend control')}
+            '--unsplit': ('unsplit-group', 'Common uninterrupted O1 backend control'),
+            '--tag-only-cache': ('tag-only-cache-group', 'Common tag-only ghost-cache invalidation control')}
 control = CONTROLS.get(arguments[0]) if arguments else None
 if control:
     arguments = arguments[1:]
@@ -50,7 +51,7 @@ def compile_case(ident, cpu):
     row['compile_returncode'] = run(command, destination / 'compile.log')
     row['ended_utc'] = now()
     case = HERE / ('request-' + str(ident))
-    members = [p.name for p in case.glob('trusted_x86.bpf.*') if p.suffix in {'.i', '.bc', '.mir', '.json', '.o', '.ll'}]
+    members = [p.name for p in case.glob('trusted_x86.bpf.*') if p.suffix in {'.c', '.i', '.bc', '.mir', '.json', '.o', '.ll'}]
     row['archive_members'] = sorted(members)
     if members:
         archive = subprocess.Popen(['tar', '-C', str(case), '-cf', '-', *sorted(members)], stdout=subprocess.PIPE)

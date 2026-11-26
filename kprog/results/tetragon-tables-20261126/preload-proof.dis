@@ -1,0 +1,608 @@
+
+/proc/self/fd/3:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <try_preload_arg>:
+   0:	55                                              	push   rbp
+   1:	41 57                                           	push   r15
+   3:	41 56                                           	push   r14
+   5:	53                                              	push   rbx
+   6:	48 83 ec 38                                     	sub    rsp,0x38
+   a:	89 fb                                           	mov    ebx,edi
+   c:	83 e3 07                                        	and    ebx,0x7
+   f:	4c 8b 36                                        	mov    r14,QWORD PTR [rsi]
+  12:	41 8b 44 9e 18                                  	mov    eax,DWORD PTR [r14+rbx*4+0x18]
+  17:	a9 00 01 00 00                                  	test   eax,0x100
+  1c:	75 11                                           	jne    2f <try_preload_arg+0x2f>
+  1e:	31 c0                                           	xor    eax,eax
+  20:	48 83 c4 38                                     	add    rsp,0x38
+  24:	5b                                              	pop    rbx
+  25:	41 5e                                           	pop    r14
+  27:	41 5f                                           	pop    r15
+  29:	5d                                              	pop    rbp
+  2a:	e9 52 09 00 00                                  	jmp    981 <read_reg+0x116>
+  2f:	48 8b 7e 08                                     	mov    rdi,QWORD PTR [rsi+0x8]
+  33:	84 c0                                           	test   al,al
+  35:	78 5d                                           	js     94 <try_preload_arg+0x94>
+  37:	c7 44 24 10 00 00 00 00                         	mov    DWORD PTR [rsp+0x10],0x0
+  3f:	4c 8d 3c 5b                                     	lea    r15,[rbx+rbx*2]
+  43:	4b 8d 04 fe                                     	lea    rax,[r14+r15*8]
+  47:	48 05 00 02 00 00                               	add    rax,0x200
+  4d:	43 0f b6 94 fe 11 02 00 00                      	movzx  edx,BYTE PTR [r14+r15*8+0x211]
+  56:	31 c9                                           	xor    ecx,ecx
+  58:	83 fa 02                                        	cmp    edx,0x2
+  5b:	0f 8f 16 03 00 00                               	jg     377 <try_preload_arg+0x377>
+  61:	83 fa 01                                        	cmp    edx,0x1
+  64:	0f 84 80 03 00 00                               	je     3ea <try_preload_arg+0x3ea>
+  6a:	83 fa 02                                        	cmp    edx,0x2
+  6d:	0f 85 00 04 00 00                               	jne    473 <try_preload_arg+0x473>
+  73:	43 8b 84 fe 08 02 00 00                         	mov    eax,DWORD PTR [r14+r15*8+0x208]
+  7b:	25 ff 0f 00 00                                  	and    eax,0xfff
+  80:	48 01 c7                                        	add    rdi,rax
+  83:	48 85 ff                                        	test   rdi,rdi
+  86:	0f 89 e4 06 00 00                               	jns    770 <try_preload_arg+0x770>
+  8c:	48 8b 07                                        	mov    rax,QWORD PTR [rdi]
+  8f:	e9 59 03 00 00                                  	jmp    3ed <try_preload_arg+0x3ed>
+  94:	c7 44 24 10 00 00 00 00                         	mov    DWORD PTR [rsp+0x10],0x0
+  9c:	41 0f b6 84 9e c2 02 00 00                      	movzx  eax,BYTE PTR [r14+rbx*4+0x2c2]
+  a5:	c0 e0 03                                        	shl    al,0x3
+  a8:	b1 40                                           	mov    cl,0x40
+  aa:	28 c1                                           	sub    cl,al
+  ac:	41 0f b7 b4 9e c0 02 00 00                      	movzx  esi,WORD PTR [r14+rbx*4+0x2c0]
+  b5:	0f b6 d1                                        	movzx  edx,cl
+  b8:	e8 ae 07 00 00                                  	call   86b <read_reg>
+  bd:	48 89 44 24 08                                  	mov    QWORD PTR [rsp+0x8],rax
+  c2:	41 8b 6c 9e 04                                  	mov    ebp,DWORD PTR [r14+rbx*4+0x4]
+  c7:	83 fb 04                                        	cmp    ebx,0x4
+  ca:	0f 87 78 06 00 00                               	ja     748 <try_preload_arg+0x748>
+  d0:	48 8d 04 9b                                     	lea    rax,[rbx+rbx*4]
+  d4:	c1 e0 04                                        	shl    eax,0x4
+  d7:	66 41 83 7c 06 76 00                            	cmp    WORD PTR [r14+rax*1+0x76],0x0
+  de:	0f 84 64 06 00 00                               	je     748 <try_preload_arg+0x748>
+  e4:	49 8d 1c 06                                     	lea    rbx,[r14+rax*1]
+  e8:	48 83 c3 70                                     	add    rbx,0x70
+  ec:	48 89 5c 24 18                                  	mov    QWORD PTR [rsp+0x18],rbx
+  f1:	48 8d 44 24 08                                  	lea    rax,[rsp+0x8]
+  f6:	48 89 44 24 20                                  	mov    QWORD PTR [rsp+0x20],rax
+  fb:	c6 44 24 28 01                                  	mov    BYTE PTR [rsp+0x28],0x1
+ 100:	48 8d 44 24 10                                  	lea    rax,[rsp+0x10]
+ 105:	48 89 44 24 30                                  	mov    QWORD PTR [rsp+0x30],rax
+ 10a:	48 8b 05 9c 38 00 00                            	mov    rax,QWORD PTR [rip+0x389c]        # 39ad <read_reg+0x3142>
+			10d: R_X86_64_REX_GOTPCRELX	CONFIG_ITER_NUM-0x4
+ 111:	80 38 00                                        	cmp    BYTE PTR [rax],0x0
+ 114:	0f 84 16 06 00 00                               	je     730 <try_preload_arg+0x730>
+ 11a:	66 83 7b 06 00                                  	cmp    WORD PTR [rbx+0x6],0x0
+ 11f:	0f 84 23 06 00 00                               	je     748 <try_preload_arg+0x748>
+ 125:	8b 13                                           	mov    edx,DWORD PTR [rbx]
+ 127:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 12c:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 131:	66 83 7b 04 00                                  	cmp    WORD PTR [rbx+0x4],0x0
+ 136:	74 1d                                           	je     155 <try_preload_arg+0x155>
+ 138:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 13d:	be 08 00 00 00                                  	mov    esi,0x8
+ 142:	e8 9c 38 00 00                                  	call   39e3 <read_reg+0x3178>
+			143: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 147:	41 be 01 00 00 00                               	mov    r14d,0x1
+ 14d:	85 c0                                           	test   eax,eax
+ 14f:	0f 88 18 02 00 00                               	js     36d <try_preload_arg+0x36d>
+ 155:	66 83 7b 0e 00                                  	cmp    WORD PTR [rbx+0xe],0x0
+ 15a:	0f 84 e8 05 00 00                               	je     748 <try_preload_arg+0x748>
+ 160:	8b 53 08                                        	mov    edx,DWORD PTR [rbx+0x8]
+ 163:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 168:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 16d:	66 83 7b 0c 00                                  	cmp    WORD PTR [rbx+0xc],0x0
+ 172:	74 1d                                           	je     191 <try_preload_arg+0x191>
+ 174:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 179:	be 08 00 00 00                                  	mov    esi,0x8
+ 17e:	e8 9c 38 00 00                                  	call   3a1f <read_reg+0x31b4>
+			17f: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 183:	41 be 02 00 00 00                               	mov    r14d,0x2
+ 189:	85 c0                                           	test   eax,eax
+ 18b:	0f 88 dc 01 00 00                               	js     36d <try_preload_arg+0x36d>
+ 191:	66 83 7b 16 00                                  	cmp    WORD PTR [rbx+0x16],0x0
+ 196:	0f 84 ac 05 00 00                               	je     748 <try_preload_arg+0x748>
+ 19c:	8b 53 10                                        	mov    edx,DWORD PTR [rbx+0x10]
+ 19f:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 1a4:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 1a9:	66 83 7b 14 00                                  	cmp    WORD PTR [rbx+0x14],0x0
+ 1ae:	74 1d                                           	je     1cd <try_preload_arg+0x1cd>
+ 1b0:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 1b5:	be 08 00 00 00                                  	mov    esi,0x8
+ 1ba:	e8 9c 38 00 00                                  	call   3a5b <read_reg+0x31f0>
+			1bb: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 1bf:	41 be 03 00 00 00                               	mov    r14d,0x3
+ 1c5:	85 c0                                           	test   eax,eax
+ 1c7:	0f 88 a0 01 00 00                               	js     36d <try_preload_arg+0x36d>
+ 1cd:	66 83 7b 1e 00                                  	cmp    WORD PTR [rbx+0x1e],0x0
+ 1d2:	0f 84 70 05 00 00                               	je     748 <try_preload_arg+0x748>
+ 1d8:	8b 53 18                                        	mov    edx,DWORD PTR [rbx+0x18]
+ 1db:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 1e0:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 1e5:	66 83 7b 1c 00                                  	cmp    WORD PTR [rbx+0x1c],0x0
+ 1ea:	74 1d                                           	je     209 <try_preload_arg+0x209>
+ 1ec:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 1f1:	be 08 00 00 00                                  	mov    esi,0x8
+ 1f6:	e8 9c 38 00 00                                  	call   3a97 <read_reg+0x322c>
+			1f7: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 1fb:	41 be 04 00 00 00                               	mov    r14d,0x4
+ 201:	85 c0                                           	test   eax,eax
+ 203:	0f 88 64 01 00 00                               	js     36d <try_preload_arg+0x36d>
+ 209:	66 83 7b 26 00                                  	cmp    WORD PTR [rbx+0x26],0x0
+ 20e:	0f 84 34 05 00 00                               	je     748 <try_preload_arg+0x748>
+ 214:	8b 53 20                                        	mov    edx,DWORD PTR [rbx+0x20]
+ 217:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 21c:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 221:	66 83 7b 24 00                                  	cmp    WORD PTR [rbx+0x24],0x0
+ 226:	74 1d                                           	je     245 <try_preload_arg+0x245>
+ 228:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 22d:	be 08 00 00 00                                  	mov    esi,0x8
+ 232:	e8 9c 38 00 00                                  	call   3ad3 <read_reg+0x3268>
+			233: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 237:	41 be 05 00 00 00                               	mov    r14d,0x5
+ 23d:	85 c0                                           	test   eax,eax
+ 23f:	0f 88 28 01 00 00                               	js     36d <try_preload_arg+0x36d>
+ 245:	66 83 7b 2e 00                                  	cmp    WORD PTR [rbx+0x2e],0x0
+ 24a:	0f 84 f8 04 00 00                               	je     748 <try_preload_arg+0x748>
+ 250:	8b 53 28                                        	mov    edx,DWORD PTR [rbx+0x28]
+ 253:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 258:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 25d:	66 83 7b 2c 00                                  	cmp    WORD PTR [rbx+0x2c],0x0
+ 262:	74 1d                                           	je     281 <try_preload_arg+0x281>
+ 264:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 269:	be 08 00 00 00                                  	mov    esi,0x8
+ 26e:	e8 9c 38 00 00                                  	call   3b0f <read_reg+0x32a4>
+			26f: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 273:	41 be 06 00 00 00                               	mov    r14d,0x6
+ 279:	85 c0                                           	test   eax,eax
+ 27b:	0f 88 ec 00 00 00                               	js     36d <try_preload_arg+0x36d>
+ 281:	66 83 7b 36 00                                  	cmp    WORD PTR [rbx+0x36],0x0
+ 286:	0f 84 bc 04 00 00                               	je     748 <try_preload_arg+0x748>
+ 28c:	8b 53 30                                        	mov    edx,DWORD PTR [rbx+0x30]
+ 28f:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 294:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 299:	66 83 7b 34 00                                  	cmp    WORD PTR [rbx+0x34],0x0
+ 29e:	74 1d                                           	je     2bd <try_preload_arg+0x2bd>
+ 2a0:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 2a5:	be 08 00 00 00                                  	mov    esi,0x8
+ 2aa:	e8 9c 38 00 00                                  	call   3b4b <read_reg+0x32e0>
+			2ab: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 2af:	41 be 07 00 00 00                               	mov    r14d,0x7
+ 2b5:	85 c0                                           	test   eax,eax
+ 2b7:	0f 88 b0 00 00 00                               	js     36d <try_preload_arg+0x36d>
+ 2bd:	66 83 7b 3e 00                                  	cmp    WORD PTR [rbx+0x3e],0x0
+ 2c2:	0f 84 80 04 00 00                               	je     748 <try_preload_arg+0x748>
+ 2c8:	8b 53 38                                        	mov    edx,DWORD PTR [rbx+0x38]
+ 2cb:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 2d0:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 2d5:	66 83 7b 3c 00                                  	cmp    WORD PTR [rbx+0x3c],0x0
+ 2da:	74 19                                           	je     2f5 <try_preload_arg+0x2f5>
+ 2dc:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 2e1:	41 be 08 00 00 00                               	mov    r14d,0x8
+ 2e7:	be 08 00 00 00                                  	mov    esi,0x8
+ 2ec:	e8 9c 38 00 00                                  	call   3b8d <read_reg+0x3322>
+			2ed: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 2f1:	85 c0                                           	test   eax,eax
+ 2f3:	78 78                                           	js     36d <try_preload_arg+0x36d>
+ 2f5:	66 83 7b 46 00                                  	cmp    WORD PTR [rbx+0x46],0x0
+ 2fa:	0f 84 48 04 00 00                               	je     748 <try_preload_arg+0x748>
+ 300:	8b 53 40                                        	mov    edx,DWORD PTR [rbx+0x40]
+ 303:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 308:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 30d:	66 83 7b 44 00                                  	cmp    WORD PTR [rbx+0x44],0x0
+ 312:	74 19                                           	je     32d <try_preload_arg+0x32d>
+ 314:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 319:	be 08 00 00 00                                  	mov    esi,0x8
+ 31e:	e8 9c 38 00 00                                  	call   3bbf <read_reg+0x3354>
+			31f: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 323:	41 be 09 00 00 00                               	mov    r14d,0x9
+ 329:	85 c0                                           	test   eax,eax
+ 32b:	78 40                                           	js     36d <try_preload_arg+0x36d>
+ 32d:	66 83 7b 4e 00                                  	cmp    WORD PTR [rbx+0x4e],0x0
+ 332:	0f 84 10 04 00 00                               	je     748 <try_preload_arg+0x748>
+ 338:	8b 53 48                                        	mov    edx,DWORD PTR [rbx+0x48]
+ 33b:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 340:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 345:	66 83 7b 4c 00                                  	cmp    WORD PTR [rbx+0x4c],0x0
+ 34a:	0f 84 f8 03 00 00                               	je     748 <try_preload_arg+0x748>
+ 350:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 355:	be 08 00 00 00                                  	mov    esi,0x8
+ 35a:	e8 9c 38 00 00                                  	call   3bfb <read_reg+0x3390>
+			35b: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 35f:	41 be 0a 00 00 00                               	mov    r14d,0xa
+ 365:	85 c0                                           	test   eax,eax
+ 367:	0f 89 db 03 00 00                               	jns    748 <try_preload_arg+0x748>
+ 36d:	44 89 74 24 10                                  	mov    DWORD PTR [rsp+0x10],r14d
+ 372:	e9 d1 03 00 00                                  	jmp    748 <try_preload_arg+0x748>
+ 377:	83 fa 03                                        	cmp    edx,0x3
+ 37a:	0f 84 a1 00 00 00                               	je     421 <try_preload_arg+0x421>
+ 380:	83 fa 04                                        	cmp    edx,0x4
+ 383:	0f 85 ea 00 00 00                               	jne    473 <try_preload_arg+0x473>
+ 389:	43 8b 94 fe 08 02 00 00                         	mov    edx,DWORD PTR [r14+r15*8+0x208]
+ 391:	81 e2 ff 0f 00 00                               	and    edx,0xfff
+ 397:	48 01 fa                                        	add    rdx,rdi
+ 39a:	48 c7 c1 de ff ff ff                            	mov    rcx,0xffffffffffffffde
+ 3a1:	48 85 d2                                        	test   rdx,rdx
+ 3a4:	0f 89 c9 00 00 00                               	jns    473 <try_preload_arg+0x473>
+ 3aa:	48 8b 12                                        	mov    rdx,QWORD PTR [rdx]
+ 3ad:	48 89 54 24 18                                  	mov    QWORD PTR [rsp+0x18],rdx
+ 3b2:	43 8b 94 fe 0c 02 00 00                         	mov    edx,DWORD PTR [r14+r15*8+0x20c]
+ 3ba:	81 e2 ff 0f 00 00                               	and    edx,0xfff
+ 3c0:	48 01 d7                                        	add    rdi,rdx
+ 3c3:	48 85 ff                                        	test   rdi,rdi
+ 3c6:	0f 89 a7 00 00 00                               	jns    473 <try_preload_arg+0x473>
+ 3cc:	48 8b 0f                                        	mov    rcx,QWORD PTR [rdi]
+ 3cf:	43 0f b6 94 fe 13 02 00 00                      	movzx  edx,BYTE PTR [r14+r15*8+0x213]
+ 3d8:	c4 e2 e9 f7 c9                                  	shlx   rcx,rcx,rdx
+ 3dd:	48 8b 10                                        	mov    rdx,QWORD PTR [rax]
+ 3e0:	48 03 54 24 18                                  	add    rdx,QWORD PTR [rsp+0x18]
+ 3e5:	48 01 ca                                        	add    rdx,rcx
+ 3e8:	eb 5f                                           	jmp    449 <try_preload_arg+0x449>
+ 3ea:	48 8b 00                                        	mov    rax,QWORD PTR [rax]
+ 3ed:	48 89 44 24 18                                  	mov    QWORD PTR [rsp+0x18],rax
+ 3f2:	43 0f b6 84 fe 10 02 00 00                      	movzx  eax,BYTE PTR [r14+r15*8+0x210]
+ 3fb:	c4 e2 f9 f7 4c 24 18                            	shlx   rcx,QWORD PTR [rsp+0x18],rax
+ 402:	43 80 bc fe 12 02 00 00 00                      	cmp    BYTE PTR [r14+r15*8+0x212],0x0
+ 40b:	74 61                                           	je     46e <try_preload_arg+0x46e>
+ 40d:	c4 e2 fa f7 c9                                  	sarx   rcx,rcx,rax
+ 412:	48 89 4c 24 08                                  	mov    QWORD PTR [rsp+0x8],rcx
+ 417:	83 fb 04                                        	cmp    ebx,0x4
+ 41a:	76 65                                           	jbe    481 <try_preload_arg+0x481>
+ 41c:	e9 5f 03 00 00                                  	jmp    780 <try_preload_arg+0x780>
+ 421:	43 8b 8c fe 08 02 00 00                         	mov    ecx,DWORD PTR [r14+r15*8+0x208]
+ 429:	81 e1 ff 0f 00 00                               	and    ecx,0xfff
+ 42f:	48 01 cf                                        	add    rdi,rcx
+ 432:	48 c7 c1 de ff ff ff                            	mov    rcx,0xffffffffffffffde
+ 439:	48 85 ff                                        	test   rdi,rdi
+ 43c:	79 35                                           	jns    473 <try_preload_arg+0x473>
+ 43e:	48 8b 17                                        	mov    rdx,QWORD PTR [rdi]
+ 441:	48 89 54 24 18                                  	mov    QWORD PTR [rsp+0x18],rdx
+ 446:	48 03 10                                        	add    rdx,QWORD PTR [rax]
+ 449:	48 8d 7c 24 18                                  	lea    rdi,[rsp+0x18]
+ 44e:	be 08 00 00 00                                  	mov    esi,0x8
+ 453:	e8 9c 38 00 00                                  	call   3cf4 <read_reg+0x3489>
+			454: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 458:	85 c0                                           	test   eax,eax
+ 45a:	74 96                                           	je     3f2 <try_preload_arg+0x3f2>
+ 45c:	48 63 c8                                        	movsxd rcx,eax
+ 45f:	48 89 4c 24 08                                  	mov    QWORD PTR [rsp+0x8],rcx
+ 464:	83 fb 04                                        	cmp    ebx,0x4
+ 467:	76 18                                           	jbe    481 <try_preload_arg+0x481>
+ 469:	e9 12 03 00 00                                  	jmp    780 <try_preload_arg+0x780>
+ 46e:	c4 e2 fb f7 c9                                  	shrx   rcx,rcx,rax
+ 473:	48 89 4c 24 08                                  	mov    QWORD PTR [rsp+0x8],rcx
+ 478:	83 fb 04                                        	cmp    ebx,0x4
+ 47b:	0f 87 ff 02 00 00                               	ja     780 <try_preload_arg+0x780>
+ 481:	48 8d 04 9b                                     	lea    rax,[rbx+rbx*4]
+ 485:	c1 e0 04                                        	shl    eax,0x4
+ 488:	66 41 83 7c 06 76 00                            	cmp    WORD PTR [r14+rax*1+0x76],0x0
+ 48f:	0f 84 eb 02 00 00                               	je     780 <try_preload_arg+0x780>
+ 495:	4d 8d 3c 06                                     	lea    r15,[r14+rax*1]
+ 499:	49 83 c7 70                                     	add    r15,0x70
+ 49d:	4c 89 7c 24 18                                  	mov    QWORD PTR [rsp+0x18],r15
+ 4a2:	48 8d 44 24 08                                  	lea    rax,[rsp+0x8]
+ 4a7:	48 89 44 24 20                                  	mov    QWORD PTR [rsp+0x20],rax
+ 4ac:	c6 44 24 28 01                                  	mov    BYTE PTR [rsp+0x28],0x1
+ 4b1:	48 8d 44 24 10                                  	lea    rax,[rsp+0x10]
+ 4b6:	48 89 44 24 30                                  	mov    QWORD PTR [rsp+0x30],rax
+ 4bb:	48 8b 05 9c 38 00 00                            	mov    rax,QWORD PTR [rip+0x389c]        # 3d5e <read_reg+0x34f3>
+			4be: R_X86_64_REX_GOTPCRELX	CONFIG_ITER_NUM-0x4
+ 4c2:	80 38 00                                        	cmp    BYTE PTR [rax],0x0
+ 4c5:	0f 84 8b 02 00 00                               	je     756 <try_preload_arg+0x756>
+ 4cb:	66 41 83 7f 06 00                               	cmp    WORD PTR [r15+0x6],0x0
+ 4d1:	0f 84 a9 02 00 00                               	je     780 <try_preload_arg+0x780>
+ 4d7:	41 8b 17                                        	mov    edx,DWORD PTR [r15]
+ 4da:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 4df:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 4e4:	66 41 83 7f 04 00                               	cmp    WORD PTR [r15+0x4],0x0
+ 4ea:	74 1c                                           	je     508 <try_preload_arg+0x508>
+ 4ec:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 4f1:	be 08 00 00 00                                  	mov    esi,0x8
+ 4f6:	e8 9c 38 00 00                                  	call   3d97 <read_reg+0x352c>
+			4f7: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 4fb:	bd 01 00 00 00                                  	mov    ebp,0x1
+ 500:	85 c0                                           	test   eax,eax
+ 502:	0f 88 22 02 00 00                               	js     72a <try_preload_arg+0x72a>
+ 508:	66 41 83 7f 0e 00                               	cmp    WORD PTR [r15+0xe],0x0
+ 50e:	0f 84 6c 02 00 00                               	je     780 <try_preload_arg+0x780>
+ 514:	41 8b 57 08                                     	mov    edx,DWORD PTR [r15+0x8]
+ 518:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 51d:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 522:	66 41 83 7f 0c 00                               	cmp    WORD PTR [r15+0xc],0x0
+ 528:	74 1c                                           	je     546 <try_preload_arg+0x546>
+ 52a:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 52f:	be 08 00 00 00                                  	mov    esi,0x8
+ 534:	e8 9c 38 00 00                                  	call   3dd5 <read_reg+0x356a>
+			535: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 539:	bd 02 00 00 00                                  	mov    ebp,0x2
+ 53e:	85 c0                                           	test   eax,eax
+ 540:	0f 88 e4 01 00 00                               	js     72a <try_preload_arg+0x72a>
+ 546:	66 41 83 7f 16 00                               	cmp    WORD PTR [r15+0x16],0x0
+ 54c:	0f 84 2e 02 00 00                               	je     780 <try_preload_arg+0x780>
+ 552:	41 8b 57 10                                     	mov    edx,DWORD PTR [r15+0x10]
+ 556:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 55b:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 560:	66 41 83 7f 14 00                               	cmp    WORD PTR [r15+0x14],0x0
+ 566:	74 1c                                           	je     584 <try_preload_arg+0x584>
+ 568:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 56d:	be 08 00 00 00                                  	mov    esi,0x8
+ 572:	e8 9c 38 00 00                                  	call   3e13 <read_reg+0x35a8>
+			573: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 577:	bd 03 00 00 00                                  	mov    ebp,0x3
+ 57c:	85 c0                                           	test   eax,eax
+ 57e:	0f 88 a6 01 00 00                               	js     72a <try_preload_arg+0x72a>
+ 584:	66 41 83 7f 1e 00                               	cmp    WORD PTR [r15+0x1e],0x0
+ 58a:	0f 84 f0 01 00 00                               	je     780 <try_preload_arg+0x780>
+ 590:	41 8b 57 18                                     	mov    edx,DWORD PTR [r15+0x18]
+ 594:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 599:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 59e:	66 41 83 7f 1c 00                               	cmp    WORD PTR [r15+0x1c],0x0
+ 5a4:	74 1c                                           	je     5c2 <try_preload_arg+0x5c2>
+ 5a6:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 5ab:	be 08 00 00 00                                  	mov    esi,0x8
+ 5b0:	e8 9c 38 00 00                                  	call   3e51 <read_reg+0x35e6>
+			5b1: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 5b5:	bd 04 00 00 00                                  	mov    ebp,0x4
+ 5ba:	85 c0                                           	test   eax,eax
+ 5bc:	0f 88 68 01 00 00                               	js     72a <try_preload_arg+0x72a>
+ 5c2:	66 41 83 7f 26 00                               	cmp    WORD PTR [r15+0x26],0x0
+ 5c8:	0f 84 b2 01 00 00                               	je     780 <try_preload_arg+0x780>
+ 5ce:	41 8b 57 20                                     	mov    edx,DWORD PTR [r15+0x20]
+ 5d2:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 5d7:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 5dc:	66 41 83 7f 24 00                               	cmp    WORD PTR [r15+0x24],0x0
+ 5e2:	74 1c                                           	je     600 <try_preload_arg+0x600>
+ 5e4:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 5e9:	be 08 00 00 00                                  	mov    esi,0x8
+ 5ee:	e8 9c 38 00 00                                  	call   3e8f <read_reg+0x3624>
+			5ef: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 5f3:	bd 05 00 00 00                                  	mov    ebp,0x5
+ 5f8:	85 c0                                           	test   eax,eax
+ 5fa:	0f 88 2a 01 00 00                               	js     72a <try_preload_arg+0x72a>
+ 600:	66 41 83 7f 2e 00                               	cmp    WORD PTR [r15+0x2e],0x0
+ 606:	0f 84 74 01 00 00                               	je     780 <try_preload_arg+0x780>
+ 60c:	41 8b 57 28                                     	mov    edx,DWORD PTR [r15+0x28]
+ 610:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 615:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 61a:	66 41 83 7f 2c 00                               	cmp    WORD PTR [r15+0x2c],0x0
+ 620:	74 1c                                           	je     63e <try_preload_arg+0x63e>
+ 622:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 627:	be 08 00 00 00                                  	mov    esi,0x8
+ 62c:	e8 9c 38 00 00                                  	call   3ecd <read_reg+0x3662>
+			62d: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 631:	bd 06 00 00 00                                  	mov    ebp,0x6
+ 636:	85 c0                                           	test   eax,eax
+ 638:	0f 88 ec 00 00 00                               	js     72a <try_preload_arg+0x72a>
+ 63e:	66 41 83 7f 36 00                               	cmp    WORD PTR [r15+0x36],0x0
+ 644:	0f 84 36 01 00 00                               	je     780 <try_preload_arg+0x780>
+ 64a:	41 8b 57 30                                     	mov    edx,DWORD PTR [r15+0x30]
+ 64e:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 653:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 658:	66 41 83 7f 34 00                               	cmp    WORD PTR [r15+0x34],0x0
+ 65e:	74 1c                                           	je     67c <try_preload_arg+0x67c>
+ 660:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 665:	be 08 00 00 00                                  	mov    esi,0x8
+ 66a:	e8 9c 38 00 00                                  	call   3f0b <read_reg+0x36a0>
+			66b: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 66f:	bd 07 00 00 00                                  	mov    ebp,0x7
+ 674:	85 c0                                           	test   eax,eax
+ 676:	0f 88 ae 00 00 00                               	js     72a <try_preload_arg+0x72a>
+ 67c:	66 41 83 7f 3e 00                               	cmp    WORD PTR [r15+0x3e],0x0
+ 682:	0f 84 f8 00 00 00                               	je     780 <try_preload_arg+0x780>
+ 688:	41 8b 57 38                                     	mov    edx,DWORD PTR [r15+0x38]
+ 68c:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 691:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 696:	66 41 83 7f 3c 00                               	cmp    WORD PTR [r15+0x3c],0x0
+ 69c:	74 18                                           	je     6b6 <try_preload_arg+0x6b6>
+ 69e:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 6a3:	bd 08 00 00 00                                  	mov    ebp,0x8
+ 6a8:	be 08 00 00 00                                  	mov    esi,0x8
+ 6ad:	e8 9c 38 00 00                                  	call   3f4e <read_reg+0x36e3>
+			6ae: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 6b2:	85 c0                                           	test   eax,eax
+ 6b4:	78 74                                           	js     72a <try_preload_arg+0x72a>
+ 6b6:	66 41 83 7f 46 00                               	cmp    WORD PTR [r15+0x46],0x0
+ 6bc:	0f 84 be 00 00 00                               	je     780 <try_preload_arg+0x780>
+ 6c2:	41 8b 57 40                                     	mov    edx,DWORD PTR [r15+0x40]
+ 6c6:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 6cb:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 6d0:	66 41 83 7f 44 00                               	cmp    WORD PTR [r15+0x44],0x0
+ 6d6:	74 18                                           	je     6f0 <try_preload_arg+0x6f0>
+ 6d8:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 6dd:	be 08 00 00 00                                  	mov    esi,0x8
+ 6e2:	e8 9c 38 00 00                                  	call   3f83 <read_reg+0x3718>
+			6e3: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 6e7:	bd 09 00 00 00                                  	mov    ebp,0x9
+ 6ec:	85 c0                                           	test   eax,eax
+ 6ee:	78 3a                                           	js     72a <try_preload_arg+0x72a>
+ 6f0:	66 41 83 7f 4e 00                               	cmp    WORD PTR [r15+0x4e],0x0
+ 6f6:	0f 84 84 00 00 00                               	je     780 <try_preload_arg+0x780>
+ 6fc:	41 8b 57 48                                     	mov    edx,DWORD PTR [r15+0x48]
+ 700:	48 03 54 24 08                                  	add    rdx,QWORD PTR [rsp+0x8]
+ 705:	48 89 54 24 08                                  	mov    QWORD PTR [rsp+0x8],rdx
+ 70a:	66 41 83 7f 4c 00                               	cmp    WORD PTR [r15+0x4c],0x0
+ 710:	74 6e                                           	je     780 <try_preload_arg+0x780>
+ 712:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 717:	be 08 00 00 00                                  	mov    esi,0x8
+ 71c:	e8 9c 38 00 00                                  	call   3fbd <read_reg+0x3752>
+			71d: R_X86_64_PLT32	bpf_copy_from_user-0x4
+ 721:	bd 0a 00 00 00                                  	mov    ebp,0xa
+ 726:	85 c0                                           	test   eax,eax
+ 728:	79 56                                           	jns    780 <try_preload_arg+0x780>
+ 72a:	89 6c 24 10                                     	mov    DWORD PTR [rsp+0x10],ebp
+ 72e:	eb 50                                           	jmp    780 <try_preload_arg+0x780>
+ 730:	48 8d 35 c9 f8 ff ff                            	lea    rsi,[rip+0xfffffffffffff8c9]        # 0 <try_preload_arg>
+ 737:	48 8d 54 24 18                                  	lea    rdx,[rsp+0x18]
+ 73c:	bf 0a 00 00 00                                  	mov    edi,0xa
+ 741:	31 c9                                           	xor    ecx,ecx
+ 743:	e8 9c 38 00 00                                  	call   3fe4 <read_reg+0x3779>
+			744: R_X86_64_PLT32	bpf_loop-0x4
+ 748:	83 fd 06                                        	cmp    ebp,0x6
+ 74b:	0f 84 83 00 00 00                               	je     7d4 <try_preload_arg+0x7d4>
+ 751:	e9 c8 f8 ff ff                                  	jmp    1e <try_preload_arg+0x1e>
+ 756:	48 8d 35 a3 f8 ff ff                            	lea    rsi,[rip+0xfffffffffffff8a3]        # 0 <try_preload_arg>
+ 75d:	48 8d 54 24 18                                  	lea    rdx,[rsp+0x18]
+ 762:	bf 0a 00 00 00                                  	mov    edi,0xa
+ 767:	31 c9                                           	xor    ecx,ecx
+ 769:	e8 9c 38 00 00                                  	call   400a <read_reg+0x379f>
+			76a: R_X86_64_PLT32	bpf_loop-0x4
+ 76e:	eb 10                                           	jmp    780 <try_preload_arg+0x780>
+ 770:	31 c9                                           	xor    ecx,ecx
+ 772:	48 89 4c 24 08                                  	mov    QWORD PTR [rsp+0x8],rcx
+ 777:	83 fb 04                                        	cmp    ebx,0x4
+ 77a:	0f 86 01 fd ff ff                               	jbe    481 <try_preload_arg+0x481>
+ 780:	41 8b 5c 9e 04                                  	mov    ebx,DWORD PTR [r14+rbx*4+0x4]
+ 785:	48 8d 44 24 08                                  	lea    rax,[rsp+0x8]
+ 78a:	48 85 c0                                        	test   rax,rax
+ 78d:	79 17                                           	jns    7a6 <try_preload_arg+0x7a6>
+ 78f:	48 85 c0                                        	test   rax,rax
+ 792:	79 2e                                           	jns    7c2 <try_preload_arg+0x7c2>
+ 794:	48 8b 00                                        	mov    rax,QWORD PTR [rax]
+ 797:	48 89 44 24 08                                  	mov    QWORD PTR [rsp+0x8],rax
+ 79c:	83 fb 06                                        	cmp    ebx,0x6
+ 79f:	74 33                                           	je     7d4 <try_preload_arg+0x7d4>
+ 7a1:	e9 78 f8 ff ff                                  	jmp    1e <try_preload_arg+0x1e>
+ 7a6:	48 8d 7c 24 08                                  	lea    rdi,[rsp+0x8]
+ 7ab:	be 08 00 00 00                                  	mov    esi,0x8
+ 7b0:	48 89 fa                                        	mov    rdx,rdi
+ 7b3:	e8 9c 38 00 00                                  	call   4054 <read_reg+0x37e9>
+			7b4: R_X86_64_PLT32	bpf_probe_read_user-0x4
+ 7b8:	83 fb 06                                        	cmp    ebx,0x6
+ 7bb:	74 17                                           	je     7d4 <try_preload_arg+0x7d4>
+ 7bd:	e9 5c f8 ff ff                                  	jmp    1e <try_preload_arg+0x1e>
+ 7c2:	48 c7 44 24 08 00 00 00 00                      	mov    QWORD PTR [rsp+0x8],0x0
+ 7cb:	83 fb 06                                        	cmp    ebx,0x6
+ 7ce:	0f 85 4a f8 ff ff                               	jne    1e <try_preload_arg+0x1e>
+ 7d4:	48 8b 5c 24 08                                  	mov    rbx,QWORD PTR [rsp+0x8]
+ 7d9:	8b 6c 24 10                                     	mov    ebp,DWORD PTR [rsp+0x10]
+ 7dd:	e8 9c 38 00 00                                  	call   407e <read_reg+0x3813>
+			7de: R_X86_64_PLT32	bpf_get_current_pid_tgid-0x4
+ 7e2:	48 89 44 24 18                                  	mov    QWORD PTR [rsp+0x18],rax
+ 7e7:	c7 44 24 14 00 00 00 00                         	mov    DWORD PTR [rsp+0x14],0x0
+ 7ef:	48 8b 3d 9c 38 00 00                            	mov    rdi,QWORD PTR [rip+0x389c]        # 4092 <read_reg+0x3827>
+			7f2: R_X86_64_REX_GOTPCRELX	heap_ro_zero-0x4
+ 7f6:	48 8d 74 24 14                                  	lea    rsi,[rsp+0x14]
+ 7fb:	e8 9c 38 00 00                                  	call   409c <read_reg+0x3831>
+			7fc: R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+ 800:	48 85 c0                                        	test   rax,rax
+ 803:	0f 84 15 f8 ff ff                               	je     1e <try_preload_arg+0x1e>
+ 809:	4c 8b 35 9c 38 00 00                            	mov    r14,QWORD PTR [rip+0x389c]        # 40ac <read_reg+0x3841>
+			80c: R_X86_64_REX_GOTPCRELX	sleepable_preload-0x4
+ 810:	4c 8d 7c 24 18                                  	lea    r15,[rsp+0x18]
+ 815:	4c 89 f7                                        	mov    rdi,r14
+ 818:	4c 89 fe                                        	mov    rsi,r15
+ 81b:	48 89 c2                                        	mov    rdx,rax
+ 81e:	31 c9                                           	xor    ecx,ecx
+ 820:	e8 9c 38 00 00                                  	call   40c1 <read_reg+0x3856>
+			821: R_X86_64_PLT32	bpf_map_update_elem-0x4
+ 825:	4c 89 f7                                        	mov    rdi,r14
+ 828:	4c 89 fe                                        	mov    rsi,r15
+ 82b:	e8 9c 38 00 00                                  	call   40cc <read_reg+0x3861>
+			82c: R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+ 830:	48 85 c0                                        	test   rax,rax
+ 833:	0f 84 e5 f7 ff ff                               	je     1e <try_preload_arg+0x1e>
+ 839:	85 ed                                           	test   ebp,ebp
+ 83b:	75 27                                           	jne    864 <try_preload_arg+0x864>
+ 83d:	48 89 c7                                        	mov    rdi,rax
+ 840:	48 83 c7 04                                     	add    rdi,0x4
+ 844:	be 00 10 00 00                                  	mov    esi,0x1000
+ 849:	48 89 da                                        	mov    rdx,rbx
+ 84c:	31 c9                                           	xor    ecx,ecx
+ 84e:	48 89 c3                                        	mov    rbx,rax
+ 851:	e8 9c 38 00 00                                  	call   40f2 <read_reg+0x3887>
+			852: R_X86_64_PLT32	bpf_copy_from_user_str-0x4
+ 856:	89 c1                                           	mov    ecx,eax
+ 858:	48 89 d8                                        	mov    rax,rbx
+ 85b:	85 c9                                           	test   ecx,ecx
+ 85d:	79 05                                           	jns    864 <try_preload_arg+0x864>
+ 85f:	bd ff ff ff ff                                  	mov    ebp,0xffffffff
+ 864:	89 28                                           	mov    DWORD PTR [rax],ebp
+ 866:	e9 b3 f7 ff ff                                  	jmp    1e <try_preload_arg+0x1e>
+
+000000000000086b <read_reg>:
+ 86b:	c4 e3 7b f0 ce 03                               	rorx   ecx,esi,0x3
+ 871:	31 c0                                           	xor    eax,eax
+ 873:	83 f9 07                                        	cmp    ecx,0x7
+ 876:	7e 35                                           	jle    8ad <read_reg+0x42>
+ 878:	83 f9 0b                                        	cmp    ecx,0xb
+ 87b:	7e 54                                           	jle    8d1 <read_reg+0x66>
+ 87d:	83 f9 0d                                        	cmp    ecx,0xd
+ 880:	0f 8e b0 00 00 00                               	jle    936 <read_reg+0xcb>
+ 886:	83 f9 0e                                        	cmp    ecx,0xe
+ 889:	0f 84 db 00 00 00                               	je     96a <read_reg+0xff>
+ 88f:	83 f9 10                                        	cmp    ecx,0x10
+ 892:	0f 84 ba 00 00 00                               	je     952 <read_reg+0xe7>
+ 898:	83 f9 13                                        	cmp    ecx,0x13
+ 89b:	0f 85 df 00 00 00                               	jne    980 <read_reg+0x115>
+ 8a1:	48 81 c7 98 00 00 00                            	add    rdi,0x98
+ 8a8:	e9 c7 00 00 00                                  	jmp    974 <read_reg+0x109>
+ 8ad:	83 f9 03                                        	cmp    ecx,0x3
+ 8b0:	7f 3b                                           	jg     8ed <read_reg+0x82>
+ 8b2:	83 f9 01                                        	cmp    ecx,0x1
+ 8b5:	7f 5f                                           	jg     916 <read_reg+0xab>
+ 8b7:	85 c9                                           	test   ecx,ecx
+ 8b9:	0f 84 b5 00 00 00                               	je     974 <read_reg+0x109>
+ 8bf:	83 f9 01                                        	cmp    ecx,0x1
+ 8c2:	0f 85 b8 00 00 00                               	jne    980 <read_reg+0x115>
+ 8c8:	48 83 c7 08                                     	add    rdi,0x8
+ 8cc:	e9 a3 00 00 00                                  	jmp    974 <read_reg+0x109>
+ 8d1:	83 f9 09                                        	cmp    ecx,0x9
+ 8d4:	7f 30                                           	jg     906 <read_reg+0x9b>
+ 8d6:	83 f9 08                                        	cmp    ecx,0x8
+ 8d9:	74 6b                                           	je     946 <read_reg+0xdb>
+ 8db:	83 f9 09                                        	cmp    ecx,0x9
+ 8de:	0f 85 9c 00 00 00                               	jne    980 <read_reg+0x115>
+ 8e4:	48 83 c7 48                                     	add    rdi,0x48
+ 8e8:	e9 87 00 00 00                                  	jmp    974 <read_reg+0x109>
+ 8ed:	83 f9 05                                        	cmp    ecx,0x5
+ 8f0:	7f 34                                           	jg     926 <read_reg+0xbb>
+ 8f2:	83 f9 04                                        	cmp    ecx,0x4
+ 8f5:	74 61                                           	je     958 <read_reg+0xed>
+ 8f7:	83 f9 05                                        	cmp    ecx,0x5
+ 8fa:	0f 85 80 00 00 00                               	jne    980 <read_reg+0x115>
+ 900:	48 83 c7 28                                     	add    rdi,0x28
+ 904:	eb 6e                                           	jmp    974 <read_reg+0x109>
+ 906:	83 f9 0a                                        	cmp    ecx,0xa
+ 909:	74 41                                           	je     94c <read_reg+0xe1>
+ 90b:	83 f9 0b                                        	cmp    ecx,0xb
+ 90e:	75 70                                           	jne    980 <read_reg+0x115>
+ 910:	48 83 c7 58                                     	add    rdi,0x58
+ 914:	eb 5e                                           	jmp    974 <read_reg+0x109>
+ 916:	83 f9 02                                        	cmp    ecx,0x2
+ 919:	74 43                                           	je     95e <read_reg+0xf3>
+ 91b:	83 f9 03                                        	cmp    ecx,0x3
+ 91e:	75 60                                           	jne    980 <read_reg+0x115>
+ 920:	48 83 c7 18                                     	add    rdi,0x18
+ 924:	eb 4e                                           	jmp    974 <read_reg+0x109>
+ 926:	83 f9 06                                        	cmp    ecx,0x6
+ 929:	74 39                                           	je     964 <read_reg+0xf9>
+ 92b:	83 f9 07                                        	cmp    ecx,0x7
+ 92e:	75 50                                           	jne    980 <read_reg+0x115>
+ 930:	48 83 c7 38                                     	add    rdi,0x38
+ 934:	eb 3e                                           	jmp    974 <read_reg+0x109>
+ 936:	83 f9 0c                                        	cmp    ecx,0xc
+ 939:	74 35                                           	je     970 <read_reg+0x105>
+ 93b:	83 f9 0d                                        	cmp    ecx,0xd
+ 93e:	75 40                                           	jne    980 <read_reg+0x115>
+ 940:	48 83 c7 68                                     	add    rdi,0x68
+ 944:	eb 2e                                           	jmp    974 <read_reg+0x109>
+ 946:	48 83 c7 40                                     	add    rdi,0x40
+ 94a:	eb 28                                           	jmp    974 <read_reg+0x109>
+ 94c:	48 83 c7 50                                     	add    rdi,0x50
+ 950:	eb 22                                           	jmp    974 <read_reg+0x109>
+ 952:	48 83 ef 80                                     	sub    rdi,0xffffffffffffff80
+ 956:	eb 1c                                           	jmp    974 <read_reg+0x109>
+ 958:	48 83 c7 20                                     	add    rdi,0x20
+ 95c:	eb 16                                           	jmp    974 <read_reg+0x109>
+ 95e:	48 83 c7 10                                     	add    rdi,0x10
+ 962:	eb 10                                           	jmp    974 <read_reg+0x109>
+ 964:	48 83 c7 30                                     	add    rdi,0x30
+ 968:	eb 0a                                           	jmp    974 <read_reg+0x109>
+ 96a:	48 83 c7 70                                     	add    rdi,0x70
+ 96e:	eb 04                                           	jmp    974 <read_reg+0x109>
+ 970:	48 83 c7 60                                     	add    rdi,0x60
+ 974:	b8 40 00 00 00                                  	mov    eax,0x40
+ 979:	29 d0                                           	sub    eax,edx
+ 97b:	c4 e2 f8 f5 07                                  	bzhi   rax,QWORD PTR [rdi],rax
+ 980:	c3                                              	ret

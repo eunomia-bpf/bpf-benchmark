@@ -1,0 +1,65 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 preload_kfunc.py
+{
+  "recorded_utc": "2026-11-26T20:16:45Z",
+  "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "case": 188,
+  "symbol": "try_preload_arg",
+  "supplied_kernel_function": {
+    "name": "bpf_copy_from_user_str",
+    "present": true,
+    "weak": false,
+    "result": {
+      "type": "__s32",
+      "pointer": false,
+      "size": 4
+    },
+    "arguments": [
+      {
+        "type": "void *",
+        "pointer": true,
+        "size": 8
+      },
+      {
+        "type": "__u32",
+        "pointer": false,
+        "size": 4
+      },
+      {
+        "type": "const void *",
+        "pointer": true,
+        "size": 8
+      },
+      {
+        "type": "__u64",
+        "pointer": false,
+        "size": 8
+      }
+    ],
+    "forwards": []
+  },
+  "original_before": {
+    "status": "refused",
+    "error_type": "ValueError",
+    "error": "ABI CFG target 0x40f2 is not an instruction",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/tetragon-tables-20261126/stage_acceptance.py\", line 74, in generate\n    text = generator.render_program(name, insns, functions, exit_addr=end, rodata16=rodata, **options)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"06d05f8f0^:kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1879, in render_program\n  File \"06d05f8f0^:kprog/x86/micro-prog/x86_abi.py\", line 656, in check_definedness\n  File \"06d05f8f0^:kprog/x86/micro-prog/x86_abi.py\", line 109, in push\nValueError: ABI CFG target 0x40f2 is not an instruction\n"
+  },
+  "original_current": {
+    "status": "refused",
+    "error_type": "ValueError",
+    "error": "ABI CFG target 0x40f2 is not an instruction",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/tetragon-tables-20261126/stage_acceptance.py\", line 74, in generate\n    text = generator.render_program(name, insns, functions, exit_addr=end, rodata16=rodata, **options)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1879, in render_program\n    stack_bytes = check_definedness(all_insns, targets, exit_addr,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 666, in check_definedness\n    push(child, target, State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants)))\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 115, in push\n    raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')\nValueError: ABI CFG target 0x40f2 is not an instruction\n"
+  },
+  "typed_before": {
+    "status": "generated",
+    "source_bytes": 80928
+  },
+  "typed_current": {
+    "status": "generated",
+    "source_bytes": 80928
+  },
+  "typed_source_identical": true,
+  "scope": "Same archived .text helper proof with the existing target-kernel kfunc ABI metadata. Offline C generation only, no production change or stock/app acceptance."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

@@ -2,6 +2,7 @@
 #define X86_SIM_STACK_BYTES 304U
 #define X86_SIM_STACK_VALUE_WORDS(M) M(1) M(2) M(3) M(4) M(5) M(6) M(7) M(8) M(9) M(10) M(11) M(12) M(13) M(14) M(15) M(17) M(18) M(19) M(20) M(21) M(22) M(23) M(24) M(25) M(26) M(27) M(28) M(31)
 #include "/workspaces/repository/kprog/x86/x86_sim_local_bpf.h"
+#include "/workspaces/repository/kprog/results/tetragon-tables-20261126/cache_tag_only.h"
 
 #if defined(__bpf__) || defined(__BPF__)
 static __attribute__((always_inline)) inline void

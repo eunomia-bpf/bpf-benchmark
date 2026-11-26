@@ -61,3 +61,20 @@ stage-acceptance-smoke:
 	python3 stage_acceptance.py smoke
 stage-acceptance:
 	python3 stage_acceptance.py $(STAGE_OUT)
+
+.PHONY: preload-kfunc
+preload-kfunc:
+	python3 preload_kfunc.py
+
+.PHONY: spill-peaks
+spill-peaks:
+	taskset -c 16 prlimit --as=8589934592 -- python3 spill_liveness.py peaks
+
+.PHONY: cache-tag-check tag-only-cache-group tag-only-cache-control
+TAG_CACHE_OUT ?= $(CURDIR)/tag-only-cache-control
+cache-tag-check:
+	python3 cache_tag_check.py
+tag-only-cache-group:
+	python3 cache_tag_compile.py $(REQUEST) $(RECORDS)
+tag-only-cache-control:
+	python3 return_pipeline.py --tag-only-cache $(TAG_CACHE_OUT) 39

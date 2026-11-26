@@ -47,7 +47,7 @@ def inspect(text):
             width = 8 if operation is not None and operation[1] in {'STD', 'LDD'} else 4
             if operation is None or slots[slot] < width:
                 raise ValueError('unsupported spill access: ' + line)
-            accesses[n].append((slot, store is not None, (3 if width == 8 else 1) << (2*slot)))
+            accesses[n].append((slot, store is not None, (3 if width == 8 else 1) << (2*slot), line))
     entry, outgoing = dict.fromkeys(blocks, 0), dict.fromkeys(blocks, 0)
     queue, queued = deque(reversed(blocks)), set(blocks)
     while queue:
@@ -56,20 +56,31 @@ def inspect(text):
         for child in blocks[n]['successors']:
             live |= entry[child]
         outgoing[n] = live
-        for slot, store, mask in reversed(accesses[n]):
+        for slot, store, mask, line in reversed(accesses[n]):
             live = live & ~mask if store else live | mask
         if entry[n] != live:
             entry[n] = live
             for parent in parents[n]-queued:
                 queue.append(parent); queued.add(parent)
-    neighbors, peak = dict.fromkeys(slots, 0), 0
+    neighbors, peak, witness = dict.fromkeys(slots, 0), 0, None
+
+    def observe(live, block, line):
+        nonlocal peak, witness
+        count = objects(live).bit_count()
+        if count > peak:
+            peak = count
+            selected = [bit//2 for bit in bits(objects(live))]
+            witness = dict(block=block, label=blocks[block]['label'], access=line.strip(),
+                successors=blocks[block]['successors'], live_slots=selected,
+                live_object_bytes=sum(slots[i] for i in selected),
+                live_32bit_halves=live.bit_count(), block_lines=blocks[block]['lines'])
     for n in blocks:
         live = outgoing[n]
-        peak = max(peak, objects(live).bit_count())
-        for slot, store, mask in reversed(accesses[n]):
+        observe(live, n, '<block exit>')
+        for slot, store, mask, line in reversed(accesses[n]):
             neighbors[slot] |= objects(live) & ~(1 << (2*slot))
             live = live & ~mask if store else live | mask
-            peak = max(peak, objects(live).bit_count())
+            observe(live, n, line)
     # Live-in values also interfere even if this function has no defining store.
     initial = objects(entry[next(iter(blocks))])
     for bit in bits(initial):
@@ -86,16 +97,26 @@ def inspect(text):
         colors[slot] = color
     return dict(blocks=len(blocks),spill_objects=len(slots),peak_live_spill_objects=peak,
         greedy_colors_ignoring_size_classes=max(colors.values(), default=-1)+1,
+        peak_witness=witness,
         scope='Static CFG liveness/interference. Colors ignore size classes and escaped/default storage; not an emitted layout or a verifier result.')
 
 rows = []
 for stage in ('before', 'packed'):
     path = HERE.relative_to(ROOT) / 'request-39' / ('trusted_x86.bpf.' + stage + '.mir')
     text = subprocess.check_output(['git', 'show', 'fab61404f:' + str(path)], cwd=ROOT, text=True)
+    metadata = dict(re.findall(r'^\s*!(\d+) = (.+)$', text, re.M))
     text = next(document for document in text.split('\n---\n') if 'body:             |' in document)
     if stage == 'before':
         text, _ = remove_dead_frame_addresses(text)
         text, _ = narrow_scalar_storage(text)
-    rows.append(dict(revision='fab61404f',path=str(path),stage=stage,**inspect(text)))
-(HERE / 'spill-liveness.json').write_text(json.dumps(rows, indent=2) + '\n')
+    result = inspect(text)
+    if sys.argv[1:] == ['peaks']:
+        witness = result['peak_witness']
+        locations = set(re.findall(r'debug-location !(\d+)', '\n'.join(witness['block_lines'])))
+        witness['debug_locations'] = {n: metadata[n] for n in sorted(locations, key=int)}
+    else:
+        result.pop('peak_witness')
+    rows.append(dict(revision='fab61404f',path=str(path),stage=stage,**result))
+output = 'spill-peaks.json' if sys.argv[1:] == ['peaks'] else 'spill-liveness.json'
+(HERE / output).write_text(json.dumps(rows, indent=2) + '\n')
 print(json.dumps(rows, indent=2))
