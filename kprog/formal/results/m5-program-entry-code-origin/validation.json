@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-26T23:42:01.678106+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProgramEntryCodeOrigin"
+    ],
+    "exit": 0,
+    "seconds": 3.933182716369629,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 724,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-code-origin/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5462181568145752,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "code_observations": [
+      "program",
+      "physical PC"
+    ],
+    "actual_branch_sites": 2,
+    "compatibility": "current code resolves to identical certificate",
+    "original_transport": "existing from_original"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryCodeOrigin.lean",
+      "size_bytes": 2702,
+      "mtime_ns": 1795736424141052905
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
