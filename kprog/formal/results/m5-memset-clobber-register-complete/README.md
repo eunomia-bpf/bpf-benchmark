@@ -5,3 +5,5 @@ Sequential composition executes all18 original kind6 provider/GPR word-and-tag p
 Focused build 354 and 7 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
 
 Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+Continue from `Arm64MemsetClobberRegisterComplete.stage 18` with the four actual NZCV provider calls and masked byte stores. Author `results/m5-memset-clobber-flags/Proof.lean` for `Arm64MemsetClobberFlags`, then execute all 64 original vector-half provider calls and stores before the helper and caller return. The next related root batch covers that complete original handler and caller.
