@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryPostMemoryControlNative
+open KProgFormal.ClightRefinement.Arm64ProgramEntryPostMemoryControlNative
+#check prefixValue
+#print axioms prefixValue
+#check complete
+#print axioms complete
