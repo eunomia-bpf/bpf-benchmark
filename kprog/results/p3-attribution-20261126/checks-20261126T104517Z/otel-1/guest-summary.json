@@ -1,0 +1,21 @@
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Frozen functional check; no full timing claim.",
+  "checks": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_111900_412998",
+      "apps": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 14,
+      "native_load_failures": 0
+    }
+  ]
+}
