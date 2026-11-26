@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.Flag.frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.Flag.frame
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.Flag.tail_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.Flag.tail_frame
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadCurrent.execute
