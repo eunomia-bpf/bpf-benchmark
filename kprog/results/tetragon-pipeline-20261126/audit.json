@@ -1,0 +1,419 @@
+{
+  "profile_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150046_350964",
+  "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+  "kernel_ringbuf_output": "0xffffffff904d2120",
+  "same_load_output": {
+    "original": {
+      "program_id": 709,
+      "entry": "0xffffffffc09d49d4",
+      "jit_bytes": 1881,
+      "xlated_bytes": 3160,
+      "ringbuf_map_address": "0xffff8a76cd461600",
+      "call_setup": [
+        "ffffffffc09d4f91:\txor    %r15d,%r15d",
+        "ffffffffc09d4f94:\tmovabs $0xffff8a76cd461600,%rdi",
+        "ffffffffc09d4f9e:\tmov    %r13,%rsi",
+        "ffffffffc09d4fa1:\tmov    %r14,%rdx",
+        "ffffffffc09d4fa4:\txor    %ecx,%ecx",
+        "ffffffffc09d4fa6:\tpush   %r9",
+        "ffffffffc09d4fa8:\tcall   0xffffffff904d2120",
+        "ffffffffc09d4fad:\tpop    %r9"
+      ],
+      "length_clamp": [
+        "ffffffffc09d4e61:\tpop    %r9",
+        "ffffffffc09d4e63:\tmov    0x4(%r13),%r14d",
+        "ffffffffc09d4e67:\tadd    $0x90,%r14",
+        "ffffffffc09d4e6e:\tand    $0x7fff,%r14",
+        "ffffffffc09d4e75:\tcmp    $0x2328,%r14",
+        "ffffffffc09d4e7c:\tjb     0xffffffffc09d4e84",
+        "ffffffffc09d4e7e:\tmov    $0x2328,%r14d",
+        "ffffffffc09d4e84:\txor    %edi,%edi",
+        "ffffffffc09d4e86:\tmov    %edi,-0x70(%r9)"
+      ]
+    },
+    "native": {
+      "program_id": 710,
+      "entry": "0xffffffffc09d5164",
+      "jit_bytes": 1189,
+      "xlated_bytes": 16,
+      "ringbuf_map_address": "0xffff8a76cd461600",
+      "call_setup": [
+        "ffffffffc09d54be:\tlock incq (%rax)",
+        "ffffffffc09d54c2:\tjmp    0xffffffffc09d551c",
+        "ffffffffc09d54c4:\tmovabs $0xffff8a76cd461600,%rdi",
+        "ffffffffc09d54ce:\tmov    %r14,%rsi",
+        "ffffffffc09d54d1:\tmov    %r15,%rdx",
+        "ffffffffc09d54d4:\txor    %ecx,%ecx",
+        "ffffffffc09d54d6:\tcall   0xffffffff904d2120",
+        "ffffffffc09d54db:\ttest   %rax,%rax"
+      ],
+      "length_clamp": [
+        "ffffffffc09d53cc:\tmov    %rcx,0x50(%rax)",
+        "ffffffffc09d53d0:\tmov    $0x90,%eax",
+        "ffffffffc09d53d5:\tadd    0x4(%r14),%eax",
+        "ffffffffc09d53d9:\tand    $0x7fff,%eax",
+        "ffffffffc09d53de:\tcmp    $0x2328,%eax",
+        "ffffffffc09d53e3:\tmov    $0x2328,%r15d",
+        "ffffffffc09d53e9:\tcmovb  %eax,%r15d",
+        "ffffffffc09d53ed:\tmovl   $0x0,0x14(%rsp)",
+        "ffffffffc09d53f5:\tmovabs $0xffff8a75dad66800,%rdi"
+      ]
+    }
+  },
+  "counter_captures": [
+    {
+      "case": "tetragon-1",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_141141_816196",
+      "phases": {
+        "baseline": [
+          {
+            "bytes_jited": 17665,
+            "bytes_xlated": 28816,
+            "id": 210,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 15684,
+            "bytes_xlated": 26888,
+            "id": 211,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 12216,
+            "bytes_xlated": 19944,
+            "id": 212,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 5427,
+            "bytes_xlated": 9656,
+            "id": 213,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 14942,
+            "bytes_xlated": 26568,
+            "id": 214,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 14157514,
+            "run_time_ns_delta": 42132640712,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1881,
+            "bytes_xlated": 3160,
+            "id": 215,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 14003,
+            "bytes_xlated": 16,
+            "id": 704,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 19213740,
+            "run_time_ns_delta": 51180199450,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 20378,
+            "bytes_xlated": 16,
+            "id": 706,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 13478,
+            "bytes_xlated": 16,
+            "id": 708,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 10666,
+            "bytes_xlated": 16,
+            "id": 710,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 4126,
+            "bytes_xlated": 16,
+            "id": 712,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1189,
+            "bytes_xlated": 16,
+            "id": 714,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          }
+        ]
+      }
+    },
+    {
+      "case": "tetragon-2",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_141614_994390",
+      "phases": {
+        "baseline": [
+          {
+            "bytes_jited": 14942,
+            "bytes_xlated": 26568,
+            "id": 210,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 13431409,
+            "run_time_ns_delta": 40293384150,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 15684,
+            "bytes_xlated": 26888,
+            "id": 211,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 12216,
+            "bytes_xlated": 19944,
+            "id": 212,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 17665,
+            "bytes_xlated": 28816,
+            "id": 213,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 5427,
+            "bytes_xlated": 9656,
+            "id": 214,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1881,
+            "bytes_xlated": 3160,
+            "id": 215,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 13478,
+            "bytes_xlated": 16,
+            "id": 704,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 10666,
+            "bytes_xlated": 16,
+            "id": 706,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1189,
+            "bytes_xlated": 16,
+            "id": 708,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 20378,
+            "bytes_xlated": 16,
+            "id": 710,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 14003,
+            "bytes_xlated": 16,
+            "id": 712,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 20165790,
+            "run_time_ns_delta": 47178858261,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 4126,
+            "bytes_xlated": 16,
+            "id": 714,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          }
+        ]
+      }
+    },
+    {
+      "case": "tetragon-3",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_142045_563999",
+      "phases": {
+        "baseline": [
+          {
+            "bytes_jited": 12216,
+            "bytes_xlated": 19944,
+            "id": 210,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 17665,
+            "bytes_xlated": 28816,
+            "id": 211,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1881,
+            "bytes_xlated": 3160,
+            "id": 212,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 15684,
+            "bytes_xlated": 26888,
+            "id": 213,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 5427,
+            "bytes_xlated": 9656,
+            "id": 214,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 14942,
+            "bytes_xlated": 26568,
+            "id": 215,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 17572507,
+            "run_time_ns_delta": 36916485774,
+            "type": "tracepoint"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 10666,
+            "bytes_xlated": 16,
+            "id": 704,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 4126,
+            "bytes_xlated": 16,
+            "id": 706,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 13478,
+            "bytes_xlated": 16,
+            "id": 708,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 14003,
+            "bytes_xlated": 16,
+            "id": 710,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 17166955,
+            "run_time_ns_delta": 52105012710,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1189,
+            "bytes_xlated": 16,
+            "id": 712,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 20378,
+            "bytes_xlated": 16,
+            "id": 714,
+            "name": "generic_tracepo",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          }
+        ]
+      }
+    }
+  ]
+}
