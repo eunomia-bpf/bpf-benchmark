@@ -1,0 +1,311 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_arm64",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/helpers_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-E",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/helpers_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llvm-nm-18",
+      "-u",
+      "-j",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "__kprog_array_lookup\n__kprog_probe_read_kernel\n__kprog_probe_read_user\narray_map\nbpf_map_lookup_elem\nhash_map\nlpm_map\npercpu_map\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "array_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=array_entry (36 bytes), 1 reachable symbol(s) total\n  - array_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "array_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=array_entry (36 bytes), 1 reachable symbol(s) total\n  - array_entry (vaddr 0x0, 36 bytes) [entry]\nError: arm64 helper call __kprog_array_lookup has no helper address\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "hash_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=hash_entry (36 bytes), 1 reachable symbol(s) total\n  - hash_entry (vaddr 0x24, 36 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "hash_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=hash_entry (36 bytes), 1 reachable symbol(s) total\n  - hash_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "lpm_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=lpm_entry (36 bytes), 1 reachable symbol(s) total\n  - lpm_entry (vaddr 0x48, 36 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "lpm_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=lpm_entry (36 bytes), 1 reachable symbol(s) total\n  - lpm_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "percpu_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=percpu_entry (36 bytes), 1 reachable symbol(s) total\n  - percpu_entry (vaddr 0x6c, 36 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "percpu_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=percpu_entry (36 bytes), 1 reachable symbol(s) total\n  - percpu_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "dynamic_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=dynamic_entry (24 bytes), 1 reachable symbol(s) total\n  - dynamic_entry (vaddr 0x90, 24 bytes) [entry]\nnative-link: wrote proof object 28 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "dynamic_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=dynamic_entry (24 bytes), 1 reachable symbol(s) total\n  - dynamic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote 36 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "user_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=user_entry (40 bytes), 1 reachable symbol(s) total\n  - user_entry (vaddr 0xa8, 40 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "user_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=user_entry (40 bytes), 1 reachable symbol(s) total\n  - user_entry (vaddr 0x0, 40 bytes) [entry]\nError: arm64 helper call __kprog_probe_read_user has no helper address\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "--symbol",
+      "kernel_entry",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=kernel_entry (40 bytes), 1 reachable symbol(s) total\n  - kernel_entry (vaddr 0xd0, 40 bytes) [entry]\nnative-link: wrote proof object 44 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers.proof.o",
+      "--symbol",
+      "kernel_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=kernel_entry (40 bytes), 1 reachable symbol(s) total\n  - kernel_entry (vaddr 0x0, 40 bytes) [entry]\nError: arm64 helper call __kprog_probe_read_kernel has no helper address\n"
+  }
+]

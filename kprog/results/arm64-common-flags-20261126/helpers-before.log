@@ -1,0 +1,56 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 helpers_checked.py before
+{
+  "recorded_utc": "2026-11-26T22:52:13Z",
+  "phase": "before",
+  "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+  "undefined": [
+    "__kprog_array_lookup",
+    "__kprog_probe_read_kernel",
+    "__kprog_probe_read_user",
+    "array_map",
+    "bpf_map_lookup_elem",
+    "hash_map",
+    "lpm_map",
+    "percpu_map"
+  ],
+  "rows": [
+    {
+      "entry": "array_entry",
+      "kernel_link_returncode": 1,
+      "error": "native-link: arm64 entry=array_entry (36 bytes), 1 reachable symbol(s) total\n  - array_entry (vaddr 0x0, 36 bytes) [entry]\nError: arm64 helper call __kprog_array_lookup has no helper address\n"
+    },
+    {
+      "entry": "hash_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=hash_entry (36 bytes), 1 reachable symbol(s) total\n  - hash_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "lpm_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=lpm_entry (36 bytes), 1 reachable symbol(s) total\n  - lpm_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "percpu_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=percpu_entry (36 bytes), 1 reachable symbol(s) total\n  - percpu_entry (vaddr 0x0, 36 bytes) [entry]\nnative-link: wrote 52 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "dynamic_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=dynamic_entry (24 bytes), 1 reachable symbol(s) total\n  - dynamic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote 36 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "user_entry",
+      "kernel_link_returncode": 1,
+      "error": "native-link: arm64 entry=user_entry (40 bytes), 1 reachable symbol(s) total\n  - user_entry (vaddr 0x0, 40 bytes) [entry]\nError: arm64 helper call __kprog_probe_read_user has no helper address\n"
+    },
+    {
+      "entry": "kernel_entry",
+      "kernel_link_returncode": 1,
+      "error": "native-link: arm64 entry=kernel_entry (40 bytes), 1 reachable symbol(s) total\n  - kernel_entry (vaddr 0x0, 40 bytes) [entry]\nError: arm64 helper call __kprog_probe_read_kernel has no helper address\n"
+    }
+  ],
+  "scope": "Actual ARM checked worker compile/proof/kernel-link diagnostic with sole ARM BTF and synthetic map addresses. No stock B, kernel execution, application or timing result."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
