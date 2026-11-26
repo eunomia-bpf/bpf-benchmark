@@ -1,0 +1,149 @@
+[
+  {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_115759_412096",
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 3846.969614477865,
+      "calls": 6644184,
+      "time_ns": 25559973961,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 6644184,
+          "time_ns": 25559973961,
+          "ids": [
+            17
+          ],
+          "ns_per_call": 3846.969614477865,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 3897.871788165795,
+      "calls": 6714232,
+      "time_ns": 26171215492,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 6714232,
+          "time_ns": 26171215492,
+          "ids": [
+            48
+          ],
+          "ns_per_call": 3897.871788165795,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    }
+  },
+  {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_120024_840035",
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 3492.766614436308,
+      "calls": 7024012,
+      "time_ns": 24533234613,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 7024012,
+          "time_ns": 24533234613,
+          "ids": [
+            17
+          ],
+          "ns_per_call": 3492.766614436308,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 3938.3996039802973,
+      "calls": 6746129,
+      "time_ns": 26568951782,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 6746129,
+          "time_ns": 26568951782,
+          "ids": [
+            48
+          ],
+          "ns_per_call": 3938.3996039802973,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    }
+  },
+  {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_120307_011373",
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "metadata": {
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "bpf_stats": true
+    },
+    "baseline": {
+      "ns_per_call": 3756.9299569256664,
+      "calls": 6958204,
+      "time_ns": 26141485054,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 6958204,
+          "time_ns": 26141485054,
+          "ids": [
+            17
+          ],
+          "ns_per_call": 3756.9299569256664,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    },
+    "post_rejit": {
+      "ns_per_call": 4635.303540397367,
+      "calls": 3707098,
+      "time_ns": 17183524484,
+      "retained": 1,
+      "records": 13,
+      "groups": {
+        "native_tracer_e:perf_event": {
+          "calls": 3707098,
+          "time_ns": 17183524484,
+          "ids": [
+            48
+          ],
+          "ns_per_call": 4635.303540397367,
+          "call_share": 1.0,
+          "time_share": 1.0
+        }
+      }
+    }
+  }
+]

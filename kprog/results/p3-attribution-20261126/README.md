@@ -163,3 +163,16 @@ result Makefile now pins the canonical module OUT explicitly. The corrected
 finite controller470513 is generic-control-20261126T113705Z; it owns the
 resource locks for the control and normal module rebuild and wakes this lane
 after publishing its outcome.
+
+
+## Completed generic-helper control
+
+The corrected control finished controller0 and rebuilt the normal module
+identically. All six checks passed with no native-load failures. The per-app
+comparison and causal limits are in [control-summary.md](control-summary.md).
+The generic helper does not remove Tetragon's slow tracepoint or consistently
+improve OTel; this does not constitute a fix of either slow program.
+Both uncompressed profiles have now been removed after the coordinator
+requested SHA256/size comparisons against their committed archive members
+passed. Per-profile profile-archive-verification.json and cleanup-log.md
+record the removal; every raw sample remains in the archives.

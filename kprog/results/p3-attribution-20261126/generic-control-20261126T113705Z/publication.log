@@ -1,0 +1,57 @@
+ M CLAUDE.md
+ M corpus/results/tet-manifest-ab-20261116/manifest.json
+ M kprog/arm64/arm64_sim_direct.h
+ M kprog/arm64/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c
+ M kprog/arm64/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c
+ M kprog/arm64/micro-prog/bitmap_popcount_scan.bpf.c
+ M kprog/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_string_search_prefix_scan.bpf.c
+ M kprog/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c
+ M kprog/arm64/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c
+ M kprog/arm64/micro-prog/cilium_policy_guard_tree_filter.bpf.c
+ M kprog/arm64/micro-prog/cilium_socket_lb_service_select.bpf.c
+ M kprog/arm64/micro-prog/flow_5tuple_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/flow_record_field_scan.bpf.c
+ M kprog/arm64/micro-prog/katran_lb_consistent_hash_select.bpf.c
+ M kprog/arm64/micro-prog/otel_stack_frame_unwind_scan.bpf.c
+ M kprog/arm64/micro-prog/packed_header_bitfield_decode.bpf.c
+ M kprog/arm64/micro-prog/packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/packet_record_bounds_window.bpf.c
+ M kprog/arm64/micro-prog/packet_toeplitz_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/packet_vlan_tcpopt_parser.bpf.c
+ M kprog/arm64/micro-prog/payload_prefix_memcmp_scan.bpf.c
+ M kprog/arm64/micro-prog/simple.bpf.c
+ M kprog/arm64/micro-prog/simple_packet.bpf.c
+ M kprog/arm64/micro-prog/siphash_rotate64_mixer.bpf.c
+ M kprog/arm64/micro-prog/sorted_rule_binary_search.bpf.c
+ M kprog/arm64/micro-prog/tc_packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c
+ M kprog/arm64/micro-prog/trace_event_type_switch_dispatch.bpf.c
+ M kprog/arm64/micro-prog/tracee_http_method_prefix_detect.bpf.c
+ M kprog/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c
+ M kprog/arm64/micro-prog/unchecked_packet_read.bpf.c
+ M kprog/test/native_load_fault/Makefile
+ M kprog/test/native_load_fault/guest.py
+ M kprog/test/native_load_fault/native.c
+ M kprog/test/native_load_fault/native_load_fault_module.c
+ M kprog/test/native_load_fault/probe.cpp
+ M kprog/test/native_load_fault/recovery_host.c
+ M vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h
+ M vendor/bpf/tetragon/bpf/include/vmlinux_generated_arm64.h
+[master 94f41ca78] Record generic hash control module lifecycle
+ 12 files changed, 2731 insertions(+)
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/after-symbols.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/after-text.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/before-symbols.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/before-text.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/control-symbols.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/control-text.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/controller-exit.txt
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/controller.log
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/journal.jsonl
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/module-control.log
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/module-evidence.json
+ create mode 100644 kprog/results/p3-attribution-20261126/generic-control-20261126T113705Z/module-normal.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   1808b6da8..94f41ca78  master -> master
