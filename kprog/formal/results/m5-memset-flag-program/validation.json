@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-26T17:31:23.444011+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetFlagProgram"
+    ],
+    "exit": 0,
+    "seconds": 4.21431827545166,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 473,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-flag-program/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.5916996002197266,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "helper_providers": 150,
+    "helper_stores": 176,
+    "actual_memset_locals_freed": 8,
+    "actual_following_pointer_calls": 2,
+    "actual_pointer_steps": 114,
+    "actual_length_MOV_steps": 207,
+    "is_xdp_header_offset": 696
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetFlagProgram.lean",
+      "size_bytes": 5916,
+      "mtime_ns": 1795714197577086984
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

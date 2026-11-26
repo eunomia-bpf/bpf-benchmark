@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64MemsetFlagProgram
+open KProgFormal.ClightRefinement
+#check Arm64MemsetFlagProgram.execute
+#print axioms Arm64MemsetFlagProgram.execute
