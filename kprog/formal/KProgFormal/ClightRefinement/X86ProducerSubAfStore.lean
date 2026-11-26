@@ -94,7 +94,7 @@ structure Route (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) (lhs : BitV
     (.State handler statement (following binding k memory lhs cfBlock word middle)
       (allocation memory).1 (inputTemps binding k memory lhs cfBlock word middle zfBlock sfBlock ofBlock pfBlock) current)
 
-/-- Every intervening original skip/sequence transition is checked by the
+/-- Every intervening original control transition is checked by the
 existing Clight step relation, with current heap and temporaries retained. -/
 def source_route (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) (lhs : BitVec 64)
     (cfBlock : CC.Block) (word : BitVec 64) (middle : CC.Mem) (zfBlock sfBlock ofBlock pfBlock : CC.Block) (current : CC.Mem) :
@@ -255,8 +255,8 @@ variable {before : CC.Mem} {ctxBlock : CC.Block} {ctxOffset : CC.Integers.Ptrofs
     {cache : X86ProducerPushCachePrefix.Result metadata}
 
 /-- The original AF body follows the SAME CF/ZF/SF/OF/PF writes. Current rights construct
-the actual source store, and derived allocation separation protects all three
-earlier bytes. All six external flag projections and caller frames remain. -/
+the actual source store, and derived allocation separation protects all
+preceding bytes. All six external flag projections and caller frames remain. -/
 theorem execute (complete : X86ProducerPushComplete.Result cache)
     (header : X86ProducerEntryReady.HeaderReads ready) :
     let k := X86ProducerSubLhs.bodyCont complete

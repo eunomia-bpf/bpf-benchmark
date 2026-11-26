@@ -94,7 +94,7 @@ structure Route (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) (lhs : BitV
     (.State handler statement (following binding k memory lhs cfBlock word middle)
       (allocation memory).1 (inputTemps binding k memory lhs cfBlock word middle zfBlock sfBlock ofBlock) current)
 
-/-- Every intervening original skip/sequence transition is checked by the
+/-- Every intervening original control transition is checked by the
 existing Clight step relation, with current heap and temporaries retained. -/
 def source_route (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem) (lhs : BitVec 64)
     (cfBlock : CC.Block) (word : BitVec 64) (middle : CC.Mem) (zfBlock sfBlock ofBlock : CC.Block) (current : CC.Mem) :
@@ -164,7 +164,7 @@ private theorem evaluate_value (e : CC.Env) (le : CC.TempEnv) (memory : CC.Mem)
     CC.Integers.Int64.ltu,CC.Integers.MI.ltu,BitVec.ult,
     X86ShiftFlagPF.bit,X86ShiftFlagPF.index,shiftNat,lowNat]
 
-/-- Exact original pointer read, comparison, uchar cast and byte assignment.
+/-- Exact original pointer read, parity expression, uchar cast and byte assignment.
 The compositional caller below constructs the store from current ownership. -/
 theorem at_site (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont) (memory after : CC.Mem)
     (bindingBlock pfBlock : CC.Block) (value : BitVec 64)
@@ -205,8 +205,8 @@ variable {before : CC.Mem} {ctxBlock : CC.Block} {ctxOffset : CC.Integers.Ptrofs
     {cache : X86ProducerPushCachePrefix.Result metadata}
 
 /-- The original PF body follows the SAME CF/ZF/SF/OF writes. Current rights construct
-the actual source store, and derived allocation separation protects all three
-earlier bytes. All five external flag projections and caller frames remain. -/
+the actual source store, and derived allocation separation protects all
+preceding bytes. All five external flag projections and caller frames remain. -/
 theorem execute (complete : X86ProducerPushComplete.Result cache)
     (header : X86ProducerEntryReady.HeaderReads ready) :
     let k := X86ProducerSubLhs.bodyCont complete
