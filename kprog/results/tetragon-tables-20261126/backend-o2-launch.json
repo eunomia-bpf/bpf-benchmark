@@ -1,0 +1,13 @@
+{
+  "pid": 679900,
+  "started_utc": "2026-11-26T18:20:08Z",
+  "source": "04d9a36e07e3c538fab9ffab7861b92d5632b0bf",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "backend-o2-control"
+  ],
+  "resources": "One16GiB-AS control worker on CPU16/timingSH, then sole-kernel2GiB/2vCPU stock guest on18-19/timingSH+imageSH.",
+  "scope": "Common B backend control from baseline39 embedded LLVM IR. Production flags/P/image unchanged; old39 compiler archive retains the baseline products."
+}

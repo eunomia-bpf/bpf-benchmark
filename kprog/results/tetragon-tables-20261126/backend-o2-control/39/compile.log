@@ -1,0 +1,8 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 backend_control.py 39 /workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-control/39
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend_control.py", line 38, in <module>
+    raise ValueError('invalid indentation in baseline LLVM module')
+ValueError: invalid indentation in baseline LLVM module
+make[1]: *** [Makefile:37: backend-o2-group] Error 1
+make[1]: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

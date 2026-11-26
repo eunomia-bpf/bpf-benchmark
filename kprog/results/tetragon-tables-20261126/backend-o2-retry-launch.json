@@ -1,0 +1,16 @@
+{
+  "pid": 682780,
+  "started_utc": "2026-11-26T18:26:05Z",
+  "source": "2449c5f7b4a55324a3b504a6ffe3438eeda6fcda",
+  "working_diff": "",
+  "out": "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-retry-20261126T182605Z",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "backend-o2-control",
+    "BACKEND_OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-retry-20261126T182605Z"
+  ],
+  "resources": "AS16GiB CPU16/timingSH, then sole-kernel2GiB/2vCPU stock guest CPU18-19/timingSH+imageSH.",
+  "scope": "Fixed MIR literal reader; exact working patch retained while shared Git publication is in progress. No production policy change."
+}

@@ -1,0 +1,15 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 backend_control.py 39 /workspaces/repository/kprog/results/tetragon-tables-20261126/backend-o2-retry-20261126T182605Z/39
+llc-18 exit 0
+/opt/virtme-ng/bin/python3 exit 0
+llc-18 exit 1
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend_control.py", line 48, in <module>
+    run([*flags, '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/backend_control.py", line 27, in run
+    process.check_returncode()
+  File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command '['llc-18', '-O2', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096', '-start-before=prologepilog', '-filetype=obj', '/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.packed.mir', '-o', '/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.o']' returned non-zero exit status 1.
+make[1]: *** [Makefile:38: backend-o2-group] Error 1
+make[1]: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

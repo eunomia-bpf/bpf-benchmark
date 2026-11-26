@@ -1,6 +1,6 @@
-"""Test one common O2 machine backend using the existing post-IR module.
+"""Test one common O2 machine backend after the normal O1 IR optimizer.
 
-This control changes no production policy and does not rerun frontend/GVN.
+This control changes no production policy and does not reprocess generated C.
 Canonical case products are replaced in place; their baseline is archived.
 """
 import json
@@ -10,6 +10,9 @@ import sys
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+sys.path.insert(0, str(ROOT / 'kprog/x86'))
+import trusted_specializer as worker
+
 ident, records = int(sys.argv[1]), Path(sys.argv[2])
 records.mkdir(parents=True, exist_ok=True)
 case = HERE / ('request-' + str(ident))
@@ -27,21 +30,10 @@ def run(command):
     process.check_returncode()
 
 try:
-    # Decode the MIR's literal LLVM-module document, without changing IR.
-    with before.open() as source, ir.open('w') as destination:
-        if next(source) != '--- |\n':
-            raise ValueError('baseline MIR has no literal LLVM module')
-        for line in source:
-            if line == '...\n':
-                break
-            if line == '\n':
-                destination.write(line)
-                continue
-            if not line.startswith('  '):
-                raise ValueError('invalid indentation in baseline LLVM module')
-            destination.write(line[2:])
-        else:
-            raise ValueError('baseline LLVM module is not terminated')
+    # MIR embeds IR after machine passes have already coalesced lifetime
+    # operands. Produce input before those passes, with the normal IR flags.
+    run([ROOT / 'kprog/stock-path/bin/clang', *worker.COMPILE_FLAGS,
+         '-emit-llvm', '-S', case / 'trusted_x86.bpf.bounds.bc', '-o', ir])
     flags = ['llc-18', '-O2', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096']
     run([*flags, '-stop-before=prologepilog', ir, '-o', before])
     run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])

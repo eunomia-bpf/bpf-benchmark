@@ -238,3 +238,25 @@ The next diagnostic uses the preserved LLVM module embedded in the smaller
 large frontend/GVN pipeline. This is a compiler control, not an adopted
 per-program policy. Production flags, P, image, LTO selection and full
 timing remain unchanged.
+
+PERF 2026-11-26T18:31:35Z — Backend control input correction
+
+First control backend-o2-control stopped before LLVM: the MIR literal reader
+rejected a valid unindented blank line. Fixed in2449c5f7b; all initial
+records remain. Retry backend-o2-retry-20261126T182605Z ran the O2 machine
+backend and packing, but final emission failed stack diagnostics. This
+recreated354 eight-byte non-spill objects (plus304-byte native storage),
+where the baseline MIR had one8-byte object plus304. The embedded IR has
+355 allocas but lifetime.start references only2 distinct objects; original
+bounds IR references359. Counts/commands are in backend-input-lifetimes.json
+and per-case records. Recompiling a post-machine-pass IR snapshot changes
+allocation/lifetime information, so this failure does not isolate backend
+level. No stock guest ran and no production policy was adopted.
+
+The corrected control emits LLVM IR from the preserved bounds.bc using the
+normal O1 compiler flags, before instruction selection, then uses the same
+fixed O2 machine backend and existing spill packing. All prior inputs and
+products remain archived; current case products are replaced in place.
+The next retry retains this input-stage correction explicitly. No frontend
+source reprocessing, P/image change, per-program flag policy or limit raise;
+all LTO pieces and full timing stay as before.
