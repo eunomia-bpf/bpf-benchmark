@@ -1,0 +1,56 @@
+{
+  "confirmed_utc": "2026-11-26T09:07:00.434582+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetClobberRegisterComplete"
+    ],
+    "exit": 0,
+    "seconds": 2.0168678760528564,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 354,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-clobber-register-complete/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4612936973571777,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 7,
+  "source_steps": {
+    "actual_register_provider_calls": 18,
+    "actual_register_word_and_tag_stores": 36,
+    "prior_actual_byte_provider_calls": 64,
+    "prior_byte_scan_indices": 160,
+    "prior_tag_scan_indices": 20,
+    "prior_actual_tag_rmw_stores": 8,
+    "internal_transitions_per_register_pair": 22,
+    "external_provider_transitions_per_pair": 1,
+    "earlier_data_bytes_preserved": 16,
+    "stack_tag_bytes_preserved": 24
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetClobberRegisterComplete.lean",
+      "size_bytes": 11332,
+      "mtime_ns": 1795683970654391475
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

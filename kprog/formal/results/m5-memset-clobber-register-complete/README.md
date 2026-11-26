@@ -1,0 +1,7 @@
+# All18 original GPR clobber providers and36 stores in the original call
+
+Sequential composition executes all18 original kind6 provider/GPR word-and-tag pairs, entering each genuine linked call and consuming its actual trace, word and supplied heap under the existing explicit cache ABI. Each pair performs its two real inline stores. An advancing source invariant retains the exact returned words of every preceding pair, and the final invariant reads registers1 through18 as their recorded provider words with zero scalar tags. The complete same-packet route now starts at the original memset clobbers call, executes the160-index byte scan with64 providers/stores and20-index tag scan with8 RMW stores, then all18 GPR providers and36 stores to the actual flag tail. Actual resources, Storage/SP/R0/ABI,16 earlier data bytes,24 stack-tag bytes, ordered external traces and caller frames survive the full route. Saved outer temps stay distinct from helper temps; cache changes remain permitted by the stated ABI. Next execute the4 original masked flag inputs/stores and64 vector-half inputs/stores, then helper and memset freeing/return and real caller before the related root/M5 recount/M6.
+
+Focused build 354 and 7 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
