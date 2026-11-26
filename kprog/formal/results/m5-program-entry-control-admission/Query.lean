@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.admission
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.admission
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.fetch_current
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.fetch_current
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.fetch_next
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryControlAdmission.fetch_next
