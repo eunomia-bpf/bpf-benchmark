@@ -106,12 +106,12 @@ int main(void)
     unsigned char *arena=mmap(NULL,page*2,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     assert(arena!=MAP_FAILED && !mprotect(arena+page,page,PROT_NONE));
     unsigned seeds[]={0,1,0xffffffffU,0x12345678U};
-    for(unsigned size=0;size<=260;++size) {
+    for(unsigned size=0;size<=512;++size) {
         unsigned char *key=arena+page-size;
         for(unsigned i=0;i<size;++i) key[i]=(unsigned char)(i*37+size);
         for(unsigned s=0;s<4;++s) {
             assert(__kprog_hash_bytes(key,size,seeds[s])==hash(key,size,seeds[s]));++hash_cases;
-            if(size && size<=260) for(unsigned count=1;count<=64;count*=2) shape(key,size,seeds[s],count);
+            if(size) for(unsigned count=1;count<=64;count*=2) shape(key,size,seeds[s],count);
         }
     }
     assert(entry_unknown(arena)==map_c && generic_calls==589);

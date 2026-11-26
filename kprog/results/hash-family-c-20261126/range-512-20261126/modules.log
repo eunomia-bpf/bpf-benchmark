@@ -1,0 +1,29 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+make -C /workspaces/repository/kprog/perf/direct-native module OUT=/workspaces/repository/kinsn/module/x86/build
+make[1]: Entering directory '/workspaces/repository/kprog/perf/direct-native'
+install -d /workspaces/repository/kinsn/module/x86/build
+make -C /workspaces/.agent-state/kprog-ck/build-arm64 M=/workspaces/repository/kprog/perf/direct-native MO=/workspaces/repository/kinsn/module/arm64/build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[1]: Entering directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/perf/direct-native MO=/workspaces/repository/kinsn/module/x86/build ARCH=x86 modules
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[2]: Entering directory '/workspaces/repository/kinsn/module/arm64/build'
+make[3]: Entering directory '/workspaces/repository/kinsn/module/x86/build'
+  GEN     Makefile
+  CC [M]  bpf_x86_native_lab.o
+  GEN     Makefile
+  CC [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_x86_native_lab.mod.o
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[3]: Leaving directory '/workspaces/repository/kinsn/module/x86/build'
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/perf/direct-native'
+  LD [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_arm64_native_lab.mod.o
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kinsn/module/arm64/build'
+make[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

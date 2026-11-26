@@ -1,0 +1,22 @@
+[
+  {
+    "arch": "x86",
+    "module": "kinsn/module/x86/build/bpf_x86_native_lab.ko",
+    "bytes": 5555112,
+    "entries": 512,
+    "minimum": 1,
+    "maximum": 512,
+    "exported": 512,
+    "layout": "#define KPROG_HASH_LAYOUT 448,824,832,16,0,0,0,40,48"
+  },
+  {
+    "arch": "arm64",
+    "module": "kinsn/module/arm64/build/bpf_arm64_native_lab.ko",
+    "bytes": 8360328,
+    "entries": 512,
+    "minimum": 1,
+    "maximum": 512,
+    "exported": 512,
+    "layout": "#define KPROG_HASH_LAYOUT 448,824,832,16,0,0,0,40,48"
+  }
+]

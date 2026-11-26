@@ -1,0 +1,125 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/hash-c-lto-20261120/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/helpers.txt",
+      "--array-map",
+      "map_a",
+      "--array-map",
+      "map_same",
+      "--array-map",
+      "map_b"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=0\nnative unspecified inputs frozen=0\nnative simulator operations lowered=5\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-mgeneral-regs-only",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/helpers.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/helpers.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llvm-link-18",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/native.bc",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/helpers.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/linked.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: Linking two modules of different target triples: '/var/tmp/kprog-tmp/perf/hash-c-lto/helpers.bc' is 'x86_64-pc-linux-gnu' whereas 'llvm-link' is 'x86_64-unknown-linux-gnu'\n\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-march=native",
+      "-mgeneral-regs-only",
+      "-mno-red-zone",
+      "-fomit-frame-pointer",
+      "-fno-stack-protector",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/linked.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "gcc",
+      "-O3",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=all",
+      "-I/workspaces/repository/vendor/linux-framework/include",
+      "-DBUCKETS=448",
+      "-DCOUNT=824",
+      "-DSEED=832",
+      "-DSTRIDE=16",
+      "-DHEAD=0",
+      "-DHASH_NODE=0",
+      "-DNEXT=0",
+      "-DHASH_OFFSET=40",
+      "-DKEY_OFFSET=48",
+      "/workspaces/repository/kprog/results/hash-c-lto-20261120/driver.c",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/execute"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/execute"
+    ],
+    "returncode": 0,
+    "stdout": "2052 kernel hash oracle cases, 286748 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llvm-nm-18",
+      "--undefined-only",
+      "/var/tmp/kprog-tmp/perf/hash-c-lto/native.o"
+    ],
+    "returncode": 0,
+    "stdout": "                 U bpf_map_lookup_elem\n                 U map_a\n                 U map_b\n                 U map_c\n                 U map_same\n",
+    "stderr": ""
+  }
+]

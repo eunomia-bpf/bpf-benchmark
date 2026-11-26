@@ -126,3 +126,29 @@ repair or repeat run is needed after this confirmation. These are functional
 diagnostics; the full x86 timing run stays frozen and no speedup is inferred.
 The cleanup record was already committed in 2a35bf339; this check reused the
 published image and removed no image or raw data.
+
+
+## Application-independent key range, 2026-11-26
+
+Coordinator11:06Z and the operator's11:03Z words replace the historical
+19-size corpus census above with one general mechanism: every key size from
+1 through 512 bytes (MAX_BPF_STACK). The same C source emits all 512 entries
+on x86 and arm64. Both loaders explicitly use the kernel lookup above 512;
+there is no app/program list or selection configuration. Missing specialized
+symbols within the range retain the existing kernel lookup behavior.
+
+`range-512-20261126` records the subset checks: both modules build and export
+exactly all 512 sizes, with BTF layout448,824,832,16,0,0,0,40,48; x86 module
+5,555,112 B, arm64 module8,360,328 B. Both loader libraries build. Each loader
+selection fixture passes72 specialized/zero/absent cases across the four map
+types and sizes1,14,511,512,513,1024, including an available but deliberately
+ignored symbol above512, plus the missing-generic error. The guarded kernel
+oracle now covers every size0..512:2052 hash cases,286748 element/value lookup
+cases,one nulls restart,589 generic calls and560 same-map aliases. Its initial
+invocation also refreshed the existing host receipt; the subsequent scoped
+receipt is in range-512-20261126/host. Prior receipts remain in Git history.
+
+The next step rebuilds the sole x86 image and runs the unchanged six-app
+functional check, defaults1x10s,stats-on. Image/check outcomes will be recorded
+in a fresh range-512 attempt directory. No full timing is authorized here.
+The separate Tetragon/OTel within-design optimization remains open.

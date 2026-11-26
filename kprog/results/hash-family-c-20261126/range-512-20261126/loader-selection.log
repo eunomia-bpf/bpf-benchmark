@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+install -d /var/tmp/kprog-tmp/perf/hash-family
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/micro/programs/build-x86 -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp -Wl,--gc-sections -L/workspaces/repository/runner/build-llvmbpf/native_loader -Wl,-rpath,/workspaces/repository/runner/build-llvmbpf/native_loader -lnative_loader -lbpf -lelf -lz -o /var/tmp/kprog-tmp/perf/hash-family/direct
+/var/tmp/kprog-tmp/perf/hash-family/direct
+72 specialized/zero/absent target cases; missing generic fails
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/micro/programs/build-x86 -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi -DTRUSTED /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp -Wl,--gc-sections -L/workspaces/repository/runner/build-llvmbpf/native_loader -Wl,-rpath,/workspaces/repository/runner/build-llvmbpf/native_loader -lnative_loader -lbpf -lelf -lz -o /var/tmp/kprog-tmp/perf/hash-family/trusted
+/var/tmp/kprog-tmp/perf/hash-family/trusted
+72 specialized/zero/absent target cases; missing generic fails
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

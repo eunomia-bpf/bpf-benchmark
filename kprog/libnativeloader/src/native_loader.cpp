@@ -1289,9 +1289,12 @@ uint64_t helper_kernel_addr(int helper_id)
 
 uint64_t htab_lookup_elem_kernel_addr(uint32_t key_size)
 {
-    uint64_t specialized = kallsyms_lookup("kprog_htab_elem_k" + std::to_string(key_size));
-    if (specialized != 0) {
-        return specialized;
+    // MAX_BPF_STACK: one application-independent range on both architectures.
+    if (key_size >= 1 && key_size <= 512) {
+        uint64_t specialized = kallsyms_lookup("kprog_htab_elem_k" + std::to_string(key_size));
+        if (specialized != 0) {
+            return specialized;
+        }
     }
     uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
     if (addr == 0) {
