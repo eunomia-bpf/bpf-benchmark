@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubSignSetup
+#check KProgFormal.ClightRefinement.X86ProducerSubSignSetup.source_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignSetup.source_call
+#check KProgFormal.ClightRefinement.X86ProducerSubSignSetup.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignSetup.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubSignSetup.arguments
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignSetup.arguments
