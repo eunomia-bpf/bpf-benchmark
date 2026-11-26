@@ -1,0 +1,13 @@
+{
+  "command": [
+    "python3",
+    "tools/check_x86_divide_handler.py"
+  ],
+  "exit": 0,
+  "seconds": 72.16324424743652,
+  "cpu": 17,
+  "workers": 1,
+  "nice": 0,
+  "address_space_bytes": 34359738368,
+  "timing_lock": "shared"
+}
