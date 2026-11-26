@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpRawSetup
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpRawSetup.entry_initialized
+#print axioms Arm64ProducerIsXdpRawSetup.entry_initialized
