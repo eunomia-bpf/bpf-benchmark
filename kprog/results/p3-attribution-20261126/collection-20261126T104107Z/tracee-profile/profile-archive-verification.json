@@ -14,5 +14,19 @@
     0,
     0
   ],
-  "uncompressed_copy_removed_at": "2026-11-26T12:12:49.932177+00:00"
+  "uncompressed_copy_removed_at": "2026-11-26T12:12:49.932177+00:00",
+  "subsequent_analysis": [
+    {
+      "reason": "Re-extracted for host QEMU PID ownership analysis; identical archive retained.",
+      "removed_at": "2026-11-26T13:00:41.863333+00:00",
+      "size": 586578196,
+      "sha256": "1e58609f8a5d43f60eadb83a0ca1c58a9cf2e490aec23f7f3134e773a79452b7",
+      "archive_sha256": "1e58609f8a5d43f60eadb83a0ca1c58a9cf2e490aec23f7f3134e773a79452b7",
+      "pipeline_status": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
 }

@@ -62,9 +62,9 @@ weight. `__pi_memset*` aliases are included below.
 
 | app / phase | guest-kernel samples | memset samples | memset / guest kernel | P bodies | P3 hash routines | kernel hash lookup |
 |---|---:|---:|---:|---:|---:|---:|
-| Tetragon baseline | 1,066,792 | 541 | 0.0507% | 26,222 | 0 | 5,221 |
-| Tetragon native | 1,017,494 | 125 | 0.0123% | 13,500 | 2,580 | 0 |
-| Tracee baseline | 1,115,701 | 8,219 | 0.7367% | 91,132 | 0 | 94,944 |
+| Tetragon baseline | 1,061,409 | 541 | 0.0510% | 26,222 | 0 | 5,221 |
+| Tetragon native | 1,005,186 | 125 | 0.0124% | 13,500 | 2,580 | 0 |
+| Tracee baseline | 1,113,997 | 8,219 | 0.7378% | 91,132 | 0 | 94,944 |
 | Tracee native | 1,074,961 | 14,366 | 1.3364% | 142,879 | 109,527 | 517 |
 
 These are flat cycle samples, not call counts. Although recording requested
@@ -79,8 +79,23 @@ confidence bounds. The static call-site inventory alone does not justify a
 memset lowering change.
 
 Tetragon's native profile instead has 846,061 samples in
-`resilient_queued_spin_lock_slowpath` (83.15% of guest-kernel samples), versus
-807,186 in baseline (75.66%). P3 hash routines account for 0.254% of native
+`resilient_queued_spin_lock_slowpath` (84.17% of guest-kernel samples), versus
+807,186 in baseline (76.05%). P3 hash routines account for 0.257% of native
 guest-kernel samples; Tracee's account for 10.189%. Without guest stack
 frames the flat lock samples do not identify the locking caller. Raw data
 and all initial analyses are retained; full timing remains frozen.
+
+
+## QEMU ownership correction
+
+The table above now selects the identified host QEMU PID from PERF_RECORD_SAMPLE:
+Tetragon447917, Tracee449816. The initial CPU-wide summaries also included
+samples with PID0, which cannot be attributed to this QEMU. Their original
+values are retained in phase-summary-all-guests.json. The owner-specific
+sample total plus the separately counted other-owner samples exactly equals
+the initial total in every phase. No app run or raw sample is discarded.
+
+The memset counts and known P-body/hash counts are unchanged by this selection;
+the guest-kernel denominators change slightly. The large Tetragon lock count
+belongs to its own QEMU, so the attribution check does not remove that hotspot.
+Guest stack frames remain absent, preventing exact caller attribution.

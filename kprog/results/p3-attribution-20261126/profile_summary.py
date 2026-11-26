@@ -5,12 +5,9 @@ import functools
 import json
 from pathlib import Path
 import re
-import subprocess
 import sys
+from pmu_owner import records, sample
 
-PERF = '/workspaces/.agent-state/kprog-ck/perf-tool/perf'
-SAMPLE = re.compile(r'^\d+ (\d+) \S+ \[\S+\]: PERF_RECORD_SAMPLE\(IP, 0x([45])\): \S+ 0x([0-9a-f]+) ')
-FRAME = re.compile(r'^\.\.\.\.\.\s+\d+: ([0-9a-f]+)')
 PROGRAM = re.compile(r'^bpf_prog_[0-9a-f]{16}_')
 MEASURE = re.compile(r'^\[(\d+\.\d+) .*socket: cmd=measure_(start|finish) ')
 LOOKUPS = {'__htab_map_lookup_elem', 'htab_map_hash', 'lookup_nulls_elem_raw', 'jhash',
@@ -31,6 +28,11 @@ def summarize(out):
     guest_rt, guest_up = map(float, (out / 'clock.txt').read_text().split())
     host_offset = float((out / 'host-rt-minus-uptime.txt').read_text())
     windows, tables = {}, {}
+    owners = json.loads((out / 'pmu-owners.json').read_text())['owners']
+    candidates = [row['pid'] for row in owners if row['pid'] and 'qemu-system-x86' in row['comms']]
+    if len(candidates) != 1:
+        raise ValueError('expected one identified QEMU host PID: ' + str(candidates))
+    owner = candidates[0]
     snapshots = sorted(out.glob('kallsyms-bpf-*.txt'), key=lambda p: float(p.stem.rsplit('-', 1)[1]))
     for phase in ('baseline', 'post_rejit'):
         log = next((run / 'details/shim-logs').glob('*.' + phase + '.log'))
@@ -66,42 +68,34 @@ def summarize(out):
     counts = {p: collections.Counter() for p in windows}
     functions = {p: collections.Counter() for p in windows}
     chains = {p: collections.Counter() for p in windows}
-    current = None
-    def finish():
-        if current is None: return
-        phase, name, category, frame_seen, bpf = current
+    other_owners = {p: collections.Counter() for p in windows}
+    for kind, misc, offset, size, data in records(out / 'host-perf.data'):
+        if kind != 9 or misc & 7 not in (4, 5): continue
+        identifier, address, pid, tid, time, cpu, frames = sample(data, offset, size)
+        uptime = time / 1e9 + host_offset - guest_rt + guest_up
+        phase = next((p for p, (a, b) in windows.items() if a <= uptime < b), None)
+        if phase is None: continue
+        if pid != owner:
+            other_owners[phase][pid] += 1
+            continue
+        name, _ = resolve(phase, address)
+        category = group(name)
+        real_frames = [ip for ip in frames if ip < 0xfffffffffffff001]
+        bpf = bool(PROGRAM.match(name)) or any(PROGRAM.match(resolve(phase, ip)[0]) for ip in real_frames)
         counts[phase][category] += 1
         functions[phase][name] += 1
-        chains[phase]['samples_with_noncontext_chain_frame'] += int(frame_seen)
+        chains[phase]['samples_with_noncontext_chain_frame'] += int(bool(real_frames))
         chains[phase]['samples_with_bpf_body_or_chain'] += int(bpf)
         chains[phase]['memset_samples_with_bpf_caller'] += int(category == 'memset' and bpf)
-
-    with (out / 'summary-perf.log').open('w') as errors:
-        process = subprocess.Popen([PERF, 'report', '-D', '-i', str(out / 'host-perf.data')],
-                                   stdout=subprocess.PIPE, stderr=errors, text=True)
-        for line in process.stdout:
-            if 'PERF_RECORD_' in line:
-                finish(); current = None
-                if not (match := SAMPLE.match(line)): continue
-                uptime = int(match[1]) / 1e9 + host_offset - guest_rt + guest_up
-                phase = next((p for p, (a, b) in windows.items() if a <= uptime < b), None)
-                if phase is None: continue
-                name, _ = resolve(phase, int(match[3], 16))
-                current = [phase, name, group(name), False, bool(PROGRAM.match(name))]
-            elif current is not None and (match := FRAME.match(line)):
-                address = int(match[1], 16)
-                if address >= 0xfffffffffffff001: continue  # PERF_CONTEXT_MAX (-4095).
-                current[3] = True
-                current[4] |= bool(PROGRAM.match(resolve(current[0], address)[0]))
-        finish()
-        if process.wait(): raise RuntimeError('perf dump failed; see summary-perf.log')
-    result = dict(run=str(run), event='cpu_core/cycles/', period=1000000, windows=windows, phases={})
+    result = dict(run=str(run), event='cpu_core/cycles/', period=1000000, windows=windows,
+                  qemu_host_pid=owner, sample_scope='Identified QEMU host PID; other guest samples counted separately.', phases={})
     for phase, counter in counts.items():
         total = counter.total()
         kernel = total - counter['guest_user']
         result['phases'][phase] = dict(total_samples=total, kernel_samples=kernel,
             groups=dict(counter), kernel_sample_shares={k: v / kernel for k, v in counter.items() if k != 'guest_user'},
-            callchains=dict(chains[phase]), functions=dict(functions[phase].most_common()))
+            callchains=dict(chains[phase]), functions=dict(functions[phase].most_common()),
+            other_owner_samples=dict(other_owners[phase]))
     (out / 'phase-summary.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps({k: v for k, v in result.items() if k != 'phases'}, indent=2), flush=True)
     for phase, values in result['phases'].items():

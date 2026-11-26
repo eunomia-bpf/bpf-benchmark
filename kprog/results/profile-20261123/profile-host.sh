@@ -28,12 +28,15 @@ install -d $V $OUT
 ln -sfn $R/.cache/container-images/x86_64-runner-runtime.image.tar $V/runtime.image.tar
 ln -sfn $R/kinsn/module/x86/build/bpf_x86_native_lab.ko $V/bpf_x86_native_lab.ko
 install -d $OUT/prior-staging
-for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh; do
+for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt; do
   if [ -e "$f" ]; then mv "$f" "$OUT/prior-staging/"; fi
 done
 python3 -c 'import time; print(time.time()-time.clock_gettime(time.CLOCK_MONOTONIC))' > $OUT/host-rt-minus-uptime.txt
+git -C $R rev-parse HEAD > $OUT/profile-source.txt
+docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current > $OUT/profile-image.txt
 cat > $V/guest.sh <<EOF
 sysctl -w net.core.bpf_jit_kallsyms=1 >/dev/null
+dmesg > /var/tmp/dmesg-before.txt
 echo \$(date +%s.%N) \$(cut -d' ' -f1 /proc/uptime) > /var/tmp/clock.txt
 cp /proc/kallsyms /var/tmp/kallsyms.txt
 mkdir -p /var/tmp/linkcache
@@ -49,6 +52,9 @@ mkdir -p /var/tmp/linkcache
   sleep 30
 done) &
 make -f $M guest APPS=$APP SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_STATS=0 NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/$D/manifest.json BENCH_PASSES= SKIP_REJIT_MODE=norejit NATIVE_LOADER_MODE=post
+guest_result=\$?
+dmesg > /var/tmp/dmesg-after.txt
+exit \$guest_result
 EOF
 make -C $R kvm-host-cpu
 if [ -n "${EVENT:-}" ]; then SAMPLING="-e $EVENT -c ${PERIOD:-2000}"; else SAMPLING="-e cpu_core/cycles/ -F 1999"; fi
@@ -69,7 +75,7 @@ fi
 wait $P; perf_rc=$?
 printf '%s\n' "$guest_rc" > $OUT/guest-exit.txt
 printf '%s\n' "$perf_rc" > $OUT/perf-exit.txt
-for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh; do
+for f in $V/kallsyms*.txt $V/clock.txt $V/modules.txt $V/linkcache $V/progdump $V/guest.sh $V/dmesg-*.txt; do
   if [ -e "$f" ]; then mv "$f" "$OUT/"; fi
 done
 rm -f $V/bpf-benchmark-docker.img

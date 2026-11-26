@@ -1,0 +1,3 @@
+make: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+EVENT=cpu_core/cycles/ PERIOD=1000000 bash /workspaces/repository/kprog/results/profile-20261123/profile-host.sh otelcol-ebpf-profiler/profiling /workspaces/repository/kprog/results/p3-attribution-20261126/otel-profile-next perf_unwind_nat
+make: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126'

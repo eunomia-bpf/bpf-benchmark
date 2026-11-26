@@ -2,12 +2,13 @@ ROOT := /workspaces/repository
 HERE := $(ROOT)/kprog/results/p3-attribution-20261126
 APP ?= tetragon/observer
 OUT ?= $(HERE)
+PROG_NAME ?=
 
 .PHONY: diagnostic profile batch checks analyze pmu-check
 diagnostic:
 	python3 $(HERE)/diagnostic.py $(APP) $(OUT)
 profile:
-	EVENT=cpu_core/cycles/ PERIOD=1000000 bash $(ROOT)/kprog/results/profile-20261123/profile-host.sh $(APP) $(OUT)
+	EVENT=cpu_core/cycles/ PERIOD=1000000 bash $(ROOT)/kprog/results/profile-20261123/profile-host.sh $(APP) $(OUT) $(PROG_NAME)
 batch:
 	python3 $(HERE)/batch.py $(OUT)
 checks:
@@ -16,6 +17,10 @@ analyze:
 	bash $(HERE)/analyze.sh $(OUT)
 pmu-check:
 	/workspaces/.agent-state/kprog-ck/perf-tool/perf stat -a -C 0-7 -e cpu_core/cycles/ -- sleep 1
+
+.PHONY: otel-profile
+otel-profile:
+	python3 $(HERE)/batch.py $(OUT) otel-profile
 
 .PHONY: module-control module-normal generic-control control-dry-run
 KEY_SIZES := 2 4 8 12 14 16 20 24 32 36 38 40 41 48 64 88 224 256 260

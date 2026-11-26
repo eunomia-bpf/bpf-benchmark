@@ -176,3 +176,31 @@ Both uncompressed profiles have now been removed after the coordinator
 requested SHA256/size comparisons against their committed archive members
 passed. Per-profile profile-archive-verification.json and cleanup-log.md
 record the removal; every raw sample remains in the archives.
+
+
+## Owner-specific PMU analysis
+
+The host CPU-wide capture contains guest samples from host PID0 as well as the
+identified QEMU process. pmu_owner.py inventories PERF_RECORD_COMM and the
+sample PID/TID fields. The sole identified QEMU owner is447917 for Tetragon
+and449816 for Tracee. profile_summary.py now reads the captured sample layout
+directly and separates other-owner sample counts before resolving the target
+QEMU's IPs. Each owner-specific phase total plus other-owner count equals the
+old total exactly. Previous results remain in phase-summary-all-guests.json.
+
+The Tetragon lock hotspot persists in its own QEMU: native846061 samples,
+84.17% of1005186 kernel samples; baseline807186,76.05% of1061409. Native P3hash
+is2580,0.257%. Native memset is125,0.0124%. Tracee native counts/denominator
+are unchanged; baseline denominator becomes1113997. Updated weights and the
+unchanged caller limits are recorded in memset-calls-20261126/README.md.
+No exact P caller or causal performance fix is established by these flat
+samples. The uncompressed files were re-extracted for this check and removed
+again only after archive size/SHA256 comparisons passed; raw archives remain.
+
+The512-size image7a11cb60285a six-app functional check passed with zero native
+load failures (4ce03654f). The next OTel cycles profile uses this current image,
+keeps the32GiB guest/60s profile protocol, and captures kernel messages before
+and after the workload plus the existing perf_unwind_nat JIT dumps. This can
+resolve whether the older irq_work_queue/cache-miss observations persist or
+come from a kernel warning/error path. No speculative production flag/header
+change or full timing run has been made.

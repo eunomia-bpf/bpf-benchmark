@@ -1,0 +1,66 @@
+{
+  "scope": "All guest samples on recorded host CPUs, before ownership selection.",
+  "samples": 11420689,
+  "owners": [
+    {
+      "pid": 0,
+      "samples": 6085571,
+      "comms": [],
+      "example": {
+        "tid": 0,
+        "time": 86449957879690,
+        "cpu": 0,
+        "ip": "0x55c8338be8b0",
+        "identifier": 92
+      }
+    },
+    {
+      "pid": 447917,
+      "samples": 5335118,
+      "comms": [
+        "kvm-nx-lpage-re",
+        "qemu-system-x86"
+      ],
+      "example": {
+        "tid": 447919,
+        "time": 86450076004526,
+        "cpu": 0,
+        "ip": "0xffffffff87f91d72",
+        "identifier": 92
+      }
+    }
+  ]
+}
+{
+  "scope": "All guest samples on recorded host CPUs, before ownership selection.",
+  "samples": 7954464,
+  "owners": [
+    {
+      "pid": 449816,
+      "samples": 5812248,
+      "comms": [
+        "kvm-nx-lpage-re",
+        "qemu-system-x86"
+      ],
+      "example": {
+        "tid": 449818,
+        "time": 86943829337358,
+        "cpu": 0,
+        "ip": "0xffffffff9569168a",
+        "identifier": 141
+      }
+    },
+    {
+      "pid": 0,
+      "samples": 2142216,
+      "comms": [],
+      "example": {
+        "tid": 0,
+        "time": 86943890098742,
+        "cpu": 0,
+        "ip": "0xffffffff81e93bc0",
+        "identifier": 141
+      }
+    }
+  ]
+}
