@@ -1,0 +1,751 @@
+[118.117089 pid=1959 tid=1959] shim_init pid=1959 exe=/usr/local/bin/capable
+[118.117501 pid=1959 tid=1984] socket: listening on /var/run/bpfrejit/shim-1959.sock
+[118.117452 pid=1974 tid=1974] shim_init pid=1974 exe=/usr/local/bin/tcpconnect
+[118.117444 pid=1962 tid=1962] shim_init pid=1962 exe=/usr/local/bin/biosnoop
+[118.117805 pid=1959 tid=1959] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.117593 pid=1971 tid=1971] shim_init pid=1971 exe=/usr/local/bin/syscount
+[118.118028 pid=1959 tid=1959] native-loader skipped feature probe program name= insn_cnt=2
+[118.117459 pid=1977 tid=1977] shim_init pid=1977 exe=/usr/local/bin/tcplife
+[118.117439 pid=1965 tid=1965] shim_init pid=1965 exe=/usr/local/bin/vfsstat
+[118.118094 pid=1974 tid=1974] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.118083 pid=1962 tid=1988] socket: listening on /var/run/bpfrejit/shim-1962.sock
+[118.118205 pid=1971 tid=1990] socket: listening on /var/run/bpfrejit/shim-1971.sock
+[118.118519 pid=1959 tid=1959]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=81
+[118.118482 pid=1965 tid=1995] socket: listening on /var/run/bpfrejit/shim-1965.sock
+[118.118492 pid=1977 tid=1977] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.118387 pid=1974 tid=1986] socket: listening on /var/run/bpfrejit/shim-1974.sock
+[118.118922 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=2
+[118.118906 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=2
+[118.118872 pid=1959 tid=1959] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.118861 pid=1962 tid=1962] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.117856 pid=1968 tid=1968] shim_init pid=1968 exe=/usr/local/bin/opensnoop
+[118.119161 pid=1959 tid=1959] native-loader skipped feature probe program name= insn_cnt=2
+[118.119157 pid=1977 tid=1994] socket: listening on /var/run/bpfrejit/shim-1977.sock
+[118.119095 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=2
+[118.119272 pid=1968 tid=1997] socket: listening on /var/run/bpfrejit/shim-1968.sock
+[118.119146 pid=1974 tid=1974]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=82
+[118.118822 pid=1980 tid=1980] shim_init pid=1980 exe=/usr/local/bin/runqlat
+[118.121252 pid=1962 tid=1962]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=84
+[118.121341 pid=1968 tid=1968] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.121291 pid=1977 tid=1977]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=83
+[118.119194 pid=1991 tid=1991] shim_init pid=1991 exe=/usr/bin/dash
+[118.121297 pid=1959 tid=1959]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=85
+[118.121738 pid=1977 tid=1977] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.121609 pid=1962 tid=1962] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.121539 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=2
+[118.121475 pid=1980 tid=1999] socket: listening on /var/run/bpfrejit/shim-1980.sock
+[118.121463 pid=1974 tid=1974] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.125235 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=2
+[118.126500 pid=1962 tid=1962]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=87
+[118.126441 pid=1965 tid=1965] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.125264 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=2
+[118.125232 pid=1968 tid=1968]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=86
+[118.126524 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=2
+[118.126648 pid=1968 tid=1968] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.126633 pid=1974 tid=1974]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=89
+[118.126611 pid=1977 tid=1977]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=88
+[118.126708 pid=1965 tid=1965] native-loader skipped feature probe program name= insn_cnt=2
+[118.126723 pid=1971 tid=1971] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.126760 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=2
+[118.126826 pid=1968 tid=1968]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=91
+[118.127953 pid=1965 tid=1965]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=90
+[118.128137 pid=1965 tid=1965] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.128574 pid=1965 tid=1965] native-loader skipped feature probe program name= insn_cnt=2
+[118.128791 pid=1965 tid=1965]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=92
+[118.129035 pid=1980 tid=1980] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.129197 pid=1959 tid=1959] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=4490 attach_prog_fd=4490
+[118.129274 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=2
+[118.132162 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=2
+[118.132119 pid=1959 tid=1959] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.132052 pid=1971 tid=1971]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=93
+[118.134300 pid=1968 tid=1968] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=3505 attach_prog_fd=3505
+[118.134278 pid=1962 tid=1962] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=14977 attach_prog_fd=14977
+[118.133463 pid=1971 tid=1971] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.133458 pid=1959 tid=1959]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=94
+[118.133410 pid=1980 tid=1980]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=95
+[118.139124 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=2
+[118.139117 pid=1968 tid=1968] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.139050 pid=1959 tid=1959] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.139293 pid=1971 tid=1971]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=97
+[118.139324 pid=1959 tid=1959]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=62
+[118.139134 pid=1980 tid=1980] BPF_PROG_LOAD type=26 (tracing) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=23 attach_btf_id=74175 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.139452 pid=1959 tid=1959] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=start
+[118.139754 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=2
+[118.139639 pid=1968 tid=1968]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=96
+[118.139889 pid=1980 tid=1980]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=98
+[118.139868 pid=1968 tid=1968] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.139934 pid=1962 tid=1962] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.139996 pid=1959 tid=1959]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=64
+[118.139975 pid=1968 tid=1968]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=63
+[118.140015 pid=1980 tid=1980] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.140088 pid=1959 tid=1959] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[118.140079 pid=1962 tid=1962]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=99
+[118.140068 pid=1968 tid=1968] BPF_MAP_CREATE type=1 key_size=4 value_size=16 max_entries=10240 name=start
+[118.140748 pid=1959 tid=1959]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=65
+[118.140741 pid=1962 tid=1962] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.140822 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=2
+[118.140904 pid=1962 tid=1962]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=67
+[118.140896 pid=1968 tid=1968]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=66
+[118.140956 pid=1959 tid=1959] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[118.141083 pid=1962 tid=1962] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[118.141067 pid=1968 tid=1968] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[118.141059 pid=1959 tid=1959]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=68
+[118.141169 pid=1980 tid=1980]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=100
+[118.141149 pid=1962 tid=1962]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=70
+[118.141149 pid=1968 tid=1968]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=69
+[118.141259 pid=1962 tid=1962] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=infobyreq
+[118.141240 pid=1968 tid=1968] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.141246 pid=1959 tid=1959] BPF_MAP_CREATE type=7 key_size=4 value_size=1016 max_entries=1024 name=stackmap
+[118.141310 pid=1968 tid=1968]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=71
+[118.141461 pid=1962 tid=1962]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=72
+[118.141444 pid=1968 tid=1968] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=918b4f57cc8f3b1e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.141620 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=5
+[118.141612 pid=1962 tid=1962] BPF_MAP_CREATE type=1 key_size=8 value_size=24 max_entries=10240 name=start
+[118.141594 pid=1959 tid=1959]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=73
+[118.141691 pid=1959 tid=1959] BPF_MAP_CREATE type=1 key_size=16 value_size=44 max_entries=10240 name=info
+[118.141820 pid=1962 tid=1962]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=74
+[118.141781 pid=1977 tid=1977] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=42956 attach_prog_fd=42956
+[118.141771 pid=1968 tid=1968]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=101
+[118.141931 pid=1959 tid=1959]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=75
+[118.143617 pid=1965 tid=1965] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=1813 attach_prog_fd=1813
+[118.143727 pid=1968 tid=1968] BPF_MAP_CREATE type=2 key_size=4 value_size=13 max_entries=1 name=opensnoo.rodata
+[118.143682 pid=1962 tid=1962] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[118.143691 pid=1977 tid=1977] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.143677 pid=1959 tid=1959] BPF_MAP_CREATE type=1 key_size=16 value_size=8 max_entries=10240 name=seen
+[118.143799 pid=1965 tid=1965] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.145198 pid=1968 tid=1968]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=77
+[118.145179 pid=1965 tid=1965]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=103
+[118.145173 pid=1962 tid=1962]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=76
+[118.145164 pid=1977 tid=1977]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=102
+[118.145357 pid=1959 tid=1959]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=78
+[118.145398 pid=1965 tid=1965] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.145392 pid=1977 tid=1977] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.145389 pid=1962 tid=1962] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.145497 pid=1962 tid=1962]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=81
+[118.145485 pid=1965 tid=1965]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=79
+[118.145482 pid=1977 tid=1977]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=80
+[118.145504 pid=1959 tid=1959] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.145563 pid=1965 tid=1965] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.145560 pid=1977 tid=1977] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=birth
+[118.145628 pid=1962 tid=1962] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.145623 pid=1965 tid=1965]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=83
+[118.145600 pid=1959 tid=1959]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=82
+[118.145751 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=5
+[118.145750 pid=1977 tid=1977]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=84
+[118.145737 pid=1965 tid=1965] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=06ffeef05d7e610c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.145856 pid=1977 tid=1977] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=idents
+[118.145813 pid=1959 tid=1959] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f24bde511ad423d2 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.145877 pid=1965 tid=1965] native-loader skipped feature probe program name= insn_cnt=5
+[118.145977 pid=1962 tid=1962]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=104
+[118.146036 pid=1965 tid=1965]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=105
+[118.146111 pid=1965 tid=1965] BPF_MAP_CREATE type=2 key_size=4 value_size=40 max_entries=1 name=vfsstat_.bss
+[118.146090 pid=1962 tid=1962] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=biosnoop.rodata
+[118.145945 pid=1959 tid=1959] native-loader skipped feature probe program name= insn_cnt=5
+[118.144688 pid=1974 tid=1974] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=34427 attach_prog_fd=34427
+[118.146134 pid=1977 tid=1977]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=85
+[118.146197 pid=1962 tid=1962]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=87
+[118.146190 pid=1965 tid=1965]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=86
+[118.146265 pid=1974 tid=1974] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.146249 pid=1977 tid=1977] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[118.146322 pid=1959 tid=1959]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=106
+[118.146370 pid=1974 tid=1974]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=107
+[118.146368 pid=1962 tid=1962] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=biosnoo.kconfig
+[118.146409 pid=1977 tid=1977]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=88
+[118.146394 pid=1959 tid=1959] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=capable_.rodata
+[118.146472 pid=1977 tid=1977] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.146468 pid=1974 tid=1974] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.146463 pid=1962 tid=1962]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=89
+[118.146552 pid=1959 tid=1959]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=91
+[118.149921 pid=1980 tid=1980] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=33140 attach_prog_fd=33140
+[118.149991 pid=1959 tid=1959] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=capable.kconfig
+[118.147859 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.147310 pid=1965 tid=1965] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_read insn_cnt=6 hash=ca9822ef332acdf2 license=GPL expected_attach=24 attach_btf_id=123744 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.147122 pid=1971 tid=1971] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=30954 attach_prog_fd=30954
+[118.146565 pid=1977 tid=1977]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=92
+[118.146552 pid=1974 tid=1974]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=90
+[118.150197 pid=1980 tid=1980] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.150206 pid=1971 tid=1971] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[118.150186 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=6
+[118.150178 pid=1977 tid=1977] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.150145 pid=1974 tid=1974] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=sockets
+[118.150143 pid=1959 tid=1959]   MAP_CREATE -> fd=14 errno=0 kernel_map_id=93
+[118.150327 pid=1980 tid=1980]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=109
+[118.150317 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=5
+[118.150307 pid=1968 tid=1968]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=108
+[118.150410 pid=1974 tid=1974]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=94
+[118.150456 pid=1980 tid=1980] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.150483 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=d1065e8f646a994e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.150543 pid=1977 tid=1977]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=112
+[118.151230 pid=1980 tid=1980]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=95
+[118.151224 pid=1974 tid=1974] BPF_MAP_CREATE type=1 key_size=12 value_size=8 max_entries=8192 name=ipv4_count
+[118.151222 pid=1977 tid=1977] BPF_MAP_CREATE type=2 key_size=4 value_size=4106 max_entries=1 name=tcplife_.rodata
+[118.151330 pid=1977 tid=1977]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=96
+[118.151596 pid=1971 tid=1971]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=110
+[118.151621 pid=1980 tid=1980] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[118.151577 pid=1959 tid=1959] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=38 hash=870f49dfc7705d8c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.151428 pid=1974 tid=1974]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=97
+[118.152260 pid=1980 tid=1980]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=98
+[118.152254 pid=1974 tid=1974] BPF_MAP_CREATE type=1 key_size=36 value_size=8 max_entries=8192 name=ipv6_count
+[118.152252 pid=1971 tid=1971] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[118.153279 pid=1971 tid=1971]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=99
+[118.153272 pid=1980 tid=1980] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=10240 name=start
+[118.153397 pid=1974 tid=1974]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=100
+[118.156359 pid=1962 tid=1962] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.156222 pid=1974 tid=1974] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[118.153778 pid=1977 tid=1977] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.153524 pid=1980 tid=1980]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=101
+[118.153400 pid=1971 tid=1971] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[118.156472 pid=1980 tid=1980] BPF_MAP_CREATE type=1 key_size=4 value_size=120 max_entries=10240 name=hists
+[118.156488 pid=1974 tid=1974]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=102
+[118.156512 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=6
+[118.156579 pid=1974 tid=1974] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.156733 pid=1974 tid=1974]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=103
+[118.156709 pid=1977 tid=1977]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=115
+[118.156714 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=6
+[118.156791 pid=1962 tid=1962]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=116
+[118.156830 pid=1977 tid=1977] BPF_PROG_LOAD type=5 (tracepoint) name=inet_sock_set_s insn_cnt=309 hash=8e43f6c8f4b557f0 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.156851 pid=1974 tid=1974] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.156893 pid=1962 tid=1962] BPF_PROG_LOAD type=2 (kprobe) name=blk_account_io_ insn_cnt=31 hash=e873fdad705e3f0f license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.156882 pid=1980 tid=1980]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=104
+[118.156935 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=5
+[118.156985 pid=1980 tid=1980] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.157033 pid=1974 tid=1974]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=117
+[118.157145 pid=1980 tid=1980]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=105
+[118.157273 pid=1980 tid=1980] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.157381 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=5
+[118.157565 pid=1980 tid=1980]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=120
+[118.157744 pid=1980 tid=1980] BPF_MAP_CREATE type=2 key_size=4 value_size=12 max_entries=1 name=runqlat_.rodata
+[118.157804 pid=1980 tid=1980]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=106
+[118.157880 pid=1980 tid=1980] BPF_MAP_CREATE type=2 key_size=4 value_size=120 max_entries=1 name=runqlat_.bss
+[118.157936 pid=1980 tid=1980]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=107
+[118.159151 pid=1971 tid=1971]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=108
+[118.159353 pid=1971 tid=1971] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=start
+[118.159852 pid=1974 tid=1974] BPF_MAP_CREATE type=2 key_size=4 value_size=280 max_entries=1 name=tcpconne.rodata
+[118.160207 pid=1971 tid=1971]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=110
+[118.160146 pid=1974 tid=1974]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=109
+[118.162956 pid=1974 tid=1974] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=tcpconne.bss
+[118.162939 pid=1971 tid=1971] BPF_MAP_CREATE type=1 key_size=4 value_size=32 max_entries=8192 name=data
+[118.163091 pid=1974 tid=1974]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=111
+[118.163373 pid=1971 tid=1971]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=112
+[118.163288 pid=1980 tid=1980] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.165464 pid=1974 tid=1974] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.165682 pid=1971 tid=1971] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[118.165753 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=6
+[118.165792 pid=1971 tid=1971]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=113
+[118.165971 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=6
+[118.165964 pid=1980 tid=1980]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=121
+[118.165940 pid=1971 tid=1971] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.166361 pid=1974 tid=1974]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=122
+[118.166285 pid=1980 tid=1980] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup insn_cnt=32 hash=664da210f6a9400d license=GPL expected_attach=23 attach_btf_id=74175 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.166334 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=5
+[118.166503 pid=1974 tid=1974] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect insn_cnt=32 hash=9b37d763eeafa7fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.166504 pid=1971 tid=1971]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=123
+[118.166974 pid=1971 tid=1971] BPF_MAP_CREATE type=2 key_size=4 value_size=48 max_entries=1 name=syscount.rodata
+[118.167186 pid=1971 tid=1971]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=114
+[118.171631 pid=1971 tid=1971] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.171788 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=6
+[118.171902 pid=1971 tid=1971]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=126
+[118.171979 pid=1971 tid=1971] BPF_PROG_LOAD type=5 (tracepoint) name=sys_enter insn_cnt=31 hash=a88ae21d0f87b8fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.330051 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[118.332331 pid=1968 tid=1968] native-loader jit-info original fd=10 id=113 type=5 name=tracepoint__sys tag=bcec44e26ffb6bdd jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0601f2c ksym1=0x0
+[118.335145 pid=1968 tid=1968] native-loader jit-info native fd=15 id=128 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=187 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06019d0 ksym1=0x0
+[118.336237 pid=1968 tid=1968] native-loader replaced prog=tracepoint__sys original_fd=10 native_fd=15 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1968_d1065e8f646a994e.bpf
+[118.336387 pid=1968 tid=1968]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=128
+[118.336494 pid=1968 tid=1968] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.336592 pid=1968 tid=1968]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=115
+[118.336686 pid=1968 tid=1968] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.336819 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=2
+[118.337092 pid=1968 tid=1968]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=129
+[118.337257 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=67e42c98e01a90ee license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.346563 pid=1968 tid=1968] native-loader jit-info original fd=10 id=130 type=5 name=tracepoint__sys tag=faeb442ee60dc635 jited_len=141 xlated_len=240 nr_jited_ksyms=1 ksym0=0xffffffffc0601764 ksym1=0x0
+[118.347435 pid=1968 tid=1968] native-loader jit-info native fd=17 id=131 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=187 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0601be8 ksym1=0x0
+[118.347589 pid=1968 tid=1968] native-loader replaced prog=tracepoint__sys original_fd=10 native_fd=17 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1968_67e42c98e01a90ee.bpf
+[118.347763 pid=1968 tid=1968]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=131
+[118.348043 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.356902 pid=1968 tid=1968] native-loader jit-info original fd=10 id=132 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc0602b90 ksym1=0x0
+[118.358046 pid=1968 tid=1968] native-loader jit-info native fd=19 id=133 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=307 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0602e1c ksym1=0x0
+[118.360079 pid=1980 tid=1980] native-loader jit-info original fd=12 id=124 type=26 name=sched_wakeup tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0602a14 ksym1=0x0
+[118.359087 pid=1959 tid=1959] native-loader jit-info original fd=15 id=114 type=2 name=kprobe__cap_cap tag=b5856c95ecd0282a jited_len=143 xlated_len=232 nr_jited_ksyms=1 ksym0=0xffffffffc0601fdc ksym1=0x0
+[118.358167 pid=1968 tid=1968] native-loader replaced prog=tracepoint__sys original_fd=10 native_fd=19 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1968_3ee7b67cec664f61.bpf
+[118.360286 pid=1980 tid=1980] native-loader jit-info native fd=19 id=135 type=26 name=sched_wakeup tag=59f4a931744dcdc6 jited_len=151 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060328c ksym1=0x0
+[118.360273 pid=1968 tid=1968]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=133
+[118.360374 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.360355 pid=1980 tid=1980] native-loader replaced prog=sched_wakeup original_fd=12 native_fd=19 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1980_664da210f6a9400d.bpf
+[118.360710 pid=1959 tid=1959] native-loader jit-info native fd=24 id=134 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=176 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06030a8 ksym1=0x0
+[118.360462 pid=1980 tid=1980]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=135
+[118.363095 pid=1980 tid=1980] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.363236 pid=1980 tid=1980]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=116
+[118.363356 pid=1980 tid=1980] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.363510 pid=1980 tid=1980] native-loader skipped feature probe program name= insn_cnt=2
+[118.363578 pid=1959 tid=1959] native-loader replaced prog=kprobe__cap_cap original_fd=15 native_fd=24 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1959_870f49dfc7705d8c.bpf
+[118.363825 pid=1959 tid=1959]   PROG_LOAD -> fd=24 errno=0 kernel_prog_id=134
+[118.363961 pid=1980 tid=1980]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=137
+[118.364370 pid=1980 tid=1980] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup_ne insn_cnt=32 hash=664da210f6a9400d license=GPL expected_attach=23 attach_btf_id=74176 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.364025 pid=1959 tid=1959] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.364457 pid=1959 tid=1959]   MAP_CREATE -> fd=15 errno=0 kernel_map_id=117
+[118.365791 pid=1968 tid=1968] native-loader jit-info original fd=10 id=136 type=5 name=tracepoint__sys tag=ae739a47b4daed15 jited_len=602 xlated_len=792 nr_jited_ksyms=1 ksym0=0xffffffffc0603450 ksym1=0x0
+[118.365279 pid=1977 tid=1977] native-loader jit-info original fd=11 id=119 type=5 name=inet_sock_set_s tag=7cdf701b320f8e4e jited_len=1501 xlated_len=2240 nr_jited_ksyms=1 ksym0=0xffffffffc0602294 ksym1=0x0
+[118.366212 pid=1959 tid=1959] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.366308 pid=1968 tid=1968] native-loader jit-info native fd=21 id=140 type=5 name=tracepoint__sys tag=59f4a931744dcdc6 jited_len=307 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060408c ksym1=0x0
+[118.366346 pid=1977 tid=1977] native-loader jit-info native fd=17 id=139 type=5 name=inet_sock_set_s tag=59f4a931744dcdc6 jited_len=1611 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06036e0 ksym1=0x0
+[118.366345 pid=1959 tid=1959] native-loader skipped feature probe program name= insn_cnt=2
+[118.366394 pid=1968 tid=1968] native-loader replaced prog=tracepoint__sys original_fd=10 native_fd=21 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1968_3ee7b67cec664f61.bpf
+[118.366435 pid=1977 tid=1977] native-loader replaced prog=inet_sock_set_s original_fd=11 native_fd=17 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1977_8e43f6c8f4b557f0.bpf
+[118.366428 pid=1959 tid=1959]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=141
+[118.366521 pid=1959 tid=1959] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=142 hash=e09b549328e1631b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.366566 pid=1968 tid=1968]   PROG_LOAD -> fd=21 errno=0 kernel_prog_id=140
+[118.366520 pid=1977 tid=1977]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=139
+[118.367613 pid=1968 tid=1968] perf_event_open type=2 config=728 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=10 errno=0
+[118.367469 pid=1977 tid=1977] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.368219 pid=1977 tid=1977]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=118
+[118.368251 pid=1968 tid=1968] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.368344 pid=1968 tid=1968] native-loader skipped feature probe program name= insn_cnt=2
+[118.368320 pid=1977 tid=1977] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.368468 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=2
+[118.368566 pid=1977 tid=1977]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=144
+[118.368857 pid=1968 tid=1968]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=143
+[118.368937 pid=1968 tid=1968] BPF_LINK_CREATE prog_fd=16 target_fd=4294967295 attach_type=41 flags=0
+[118.369017 pid=1968 tid=1968]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.369663 pid=1968 tid=1968] BPF_LINK_CREATE prog_fd=15 target_fd=10 attach_type=41 flags=0
+[118.369273 pid=1977 tid=1977] perf_event_open type=2 config=2207 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=11 errno=0
+[118.369751 pid=1968 tid=1968] BPF_TASK_FD_QUERY target_fd=10 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=128 probe_offset=0 probe_addr=0 symbol=sys_enter_open
+[118.369840 pid=1968 tid=1968]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=25
+[118.370021 pid=1977 tid=1977] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.371056 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=10
+[118.371252 pid=1968 tid=1968] perf_event_open type=2 config=726 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=18 errno=0
+[118.371494 pid=1968 tid=1968] BPF_LINK_CREATE prog_fd=17 target_fd=18 attach_type=41 flags=0
+[118.371662 pid=1977 tid=1977] native-loader skipped feature probe program name= insn_cnt=2
+[118.371795 pid=1968 tid=1968] BPF_TASK_FD_QUERY target_fd=18 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=131 probe_offset=0 probe_addr=0 symbol=sys_enter_openat
+[118.371969 pid=1968 tid=1968]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=26
+[118.371937 pid=1977 tid=1977]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=145
+[118.372115 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=18
+[118.372080 pid=1977 tid=1977] BPF_LINK_CREATE prog_fd=13 target_fd=4294967295 attach_type=41 flags=0
+[118.372235 pid=1977 tid=1977]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.373059 pid=1977 tid=1977] BPF_LINK_CREATE prog_fd=17 target_fd=11 attach_type=41 flags=0
+[118.373165 pid=1977 tid=1977] BPF_TASK_FD_QUERY target_fd=11 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=139 probe_offset=0 probe_addr=0 symbol=inet_sock_set_state
+[118.373258 pid=1977 tid=1977]   LINK_CREATE -> fd=13 errno=0 kernel_link_id=27
+[118.373376 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=11
+[118.373914 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=15 errno=0
+[118.374247 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=15
+[118.374334 pid=1968 tid=1968] perf_event_open type=2 config=727 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=22 errno=0
+[118.374567 pid=1968 tid=1968] BPF_LINK_CREATE prog_fd=19 target_fd=22 attach_type=41 flags=0
+[118.374575 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=16 errno=0
+[118.375002 pid=1968 tid=1968] BPF_TASK_FD_QUERY target_fd=22 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=133 probe_offset=0 probe_addr=0 symbol=sys_exit_open
+[118.375017 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=16
+[118.376176 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=18 errno=0
+[118.376059 pid=1980 tid=1980] native-loader jit-info original fd=12 id=138 type=26 name=sched_wakeup_ne tag=07887b23a665c882 jited_len=121 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0601824 ksym1=0x0
+[118.375313 pid=1968 tid=1968]   LINK_CREATE -> fd=23 errno=0 kernel_link_id=28
+[118.376259 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=22
+[118.376240 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=18
+[118.376238 pid=1980 tid=1980] native-loader jit-info native fd=21 id=146 type=26 name=sched_wakeup_ne tag=59f4a931744dcdc6 jited_len=151 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06044d4 ksym1=0x0
+[118.376389 pid=1980 tid=1980] native-loader replaced prog=sched_wakeup_ne original_fd=12 native_fd=21 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1980_664da210f6a9400d.bpf
+[118.376385 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=19 errno=0
+[118.376482 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=19
+[118.376534 pid=1980 tid=1980]   PROG_LOAD -> fd=21 errno=0 kernel_prog_id=146
+[118.376567 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=20 errno=0
+[118.376617 pid=1959 tid=1959] native-loader jit-info original fd=15 id=142 type=2 name=kprobe__cap_cap tag=7c9faa2569d54b09 jited_len=383 xlated_len=616 nr_jited_ksyms=1 ksym0=0xffffffffc0604330 ksym1=0x0
+[118.376669 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=20
+[118.376711 pid=1959 tid=1959] native-loader jit-info native fd=27 id=147 type=2 name=kprobe__cap_cap tag=59f4a931744dcdc6 jited_len=600 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604694 ksym1=0x0
+[118.376750 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=21 errno=0
+[118.376786 pid=1959 tid=1959] native-loader replaced prog=kprobe__cap_cap original_fd=15 native_fd=27 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1959_e09b549328e1631b.bpf
+[118.376846 pid=1968 tid=1968] perf_event_open type=2 config=725 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=24 errno=0
+[118.376893 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=21
+[118.376980 pid=1980 tid=1980] BPF_PROG_LOAD type=26 (tracing) name=sched_switch insn_cnt=257 hash=b10d44abfbb937d0 license=GPL expected_attach=23 attach_btf_id=74169 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.376977 pid=1968 tid=1968] BPF_LINK_CREATE prog_fd=21 target_fd=24 attach_type=41 flags=0
+[118.377040 pid=1968 tid=1968] BPF_TASK_FD_QUERY target_fd=24 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=140 probe_offset=0 probe_addr=0 symbol=sys_exit_openat
+[118.377016 pid=1959 tid=1959]   PROG_LOAD -> fd=27 errno=0 kernel_prog_id=147
+[118.377054 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=22 errno=0
+[118.377457 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=22
+[118.377536 pid=1977 tid=1977] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=23 errno=0
+[118.377915 pid=1971 tid=1971] native-loader jit-info original fd=11 id=127 type=5 name=sys_enter tag=b384d88950b7bbb9 jited_len=108 xlated_len=168 nr_jited_ksyms=1 ksym0=0xffffffffc0601928 ksym1=0x0
+[118.377635 pid=1968 tid=1968]   LINK_CREATE -> fd=25 errno=0 kernel_link_id=29
+[118.377621 pid=1977 tid=1977] PERF_EVENT_IOC_ENABLE event_fd=23
+[118.378079 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=24
+[118.378070 pid=1971 tid=1971] native-loader jit-info native fd=17 id=149 type=5 name=sys_enter tag=59f4a931744dcdc6 jited_len=144 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0604e3c ksym1=0x0
+[118.378191 pid=1971 tid=1971] native-loader replaced prog=sys_enter original_fd=11 native_fd=17 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1971_a88ae21d0f87b8fa.bpf
+[118.378273 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=27 errno=0
+[118.378381 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=27
+[118.378331 pid=1971 tid=1971]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=149
+[118.378504 pid=1971 tid=1971] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.378478 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=28 errno=0
+[118.378560 pid=1971 tid=1971]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=119
+[118.378733 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=28
+[118.378672 pid=1971 tid=1971] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.378864 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=2
+[118.378862 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=29 errno=0
+[118.378920 pid=1971 tid=1971]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=150
+[118.379050 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=29
+[118.379030 pid=1971 tid=1971] BPF_PROG_LOAD type=5 (tracepoint) name=sys_exit insn_cnt=116 hash=b73a9e8ecdbe64c4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.379160 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=30 errno=0
+[118.379301 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=30
+[118.379429 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=31 errno=0
+[118.379579 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=31
+[118.379719 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=32 errno=0
+[118.379903 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=32
+[118.380013 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=33 errno=0
+[118.380163 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=33
+[118.380792 pid=1968 tid=1968] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=34 errno=0
+[118.380946 pid=1968 tid=1968] PERF_EVENT_IOC_ENABLE event_fd=34
+[118.386206 pid=1980 tid=1980] native-loader jit-info original fd=12 id=148 type=26 name=sched_switch tag=f872909b2c4482c9 jited_len=935 xlated_len=1632 nr_jited_ksyms=2 ksym0=0xffffffffc0601ed0 ksym1=0xffffffffc0604a6c
+[118.386381 pid=1962 tid=1962] native-loader jit-info original fd=13 id=118 type=2 name=blk_account_io_ tag=9793ccc672393419 jited_len=121 xlated_len=200 nr_jited_ksyms=1 ksym0=0xffffffffc06021fc ksym1=0x0
+[118.386546 pid=1980 tid=1980] native-loader jit-info native fd=23 id=152 type=26 name=sched_switch tag=59f4a931744dcdc6 jited_len=1275 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605194 ksym1=0x0
+[118.386517 pid=1962 tid=1962] native-loader jit-info native fd=20 id=153 type=2 name=blk_account_io_ tag=59f4a931744dcdc6 jited_len=147 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060596c ksym1=0x0
+[118.386638 pid=1980 tid=1980] native-loader replaced prog=sched_switch original_fd=12 native_fd=23 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1980_b10d44abfbb937d0.bpf
+[118.386619 pid=1962 tid=1962] native-loader replaced prog=blk_account_io_ original_fd=13 native_fd=20 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1962_e873fdad705e3f0f.bpf
+[118.386767 pid=1980 tid=1980]   PROG_LOAD -> fd=23 errno=0 kernel_prog_id=152
+[118.386840 pid=1962 tid=1962]   PROG_LOAD -> fd=20 errno=0 kernel_prog_id=153
+[118.386912 pid=1962 tid=1962] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.387172 pid=1962 tid=1962]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=120
+[118.387150 pid=1980 tid=1980] BPF_LINK_CREATE prog_fd=19 target_fd=0 attach_type=23 flags=0
+[118.387255 pid=1962 tid=1962] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.387571 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=2
+[118.387552 pid=1980 tid=1980]   LINK_CREATE -> fd=12 errno=0 kernel_link_id=30
+[118.387638 pid=1980 tid=1980] BPF_LINK_CREATE prog_fd=21 target_fd=0 attach_type=23 flags=0
+[118.387667 pid=1962 tid=1962]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=154
+[118.388130 pid=1962 tid=1962] BPF_PROG_LOAD type=26 (tracing) name=block_rq_insert insn_cnt=165 hash=7a3cc784f2afd7b0 license=GPL expected_attach=23 attach_btf_id=73507 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.388213 pid=1980 tid=1980]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=31
+[118.388248 pid=1971 tid=1971] native-loader jit-info original fd=11 id=151 type=5 name=sys_exit tag=9a38fb8da7b8b8f7 jited_len=406 xlated_len=656 nr_jited_ksyms=1 ksym0=0xffffffffc0604fe4 ksym1=0x0
+[118.388350 pid=1971 tid=1971] native-loader jit-info native fd=19 id=155 type=5 name=sys_exit tag=59f4a931744dcdc6 jited_len=798 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0605b0c ksym1=0x0
+[118.388440 pid=1971 tid=1971] native-loader replaced prog=sys_exit original_fd=11 native_fd=19 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1971_b73a9e8ecdbe64c4.bpf
+[118.388540 pid=1971 tid=1971]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=155
+[118.388788 pid=1980 tid=1980] BPF_LINK_CREATE prog_fd=23 target_fd=0 attach_type=23 flags=0
+[118.389040 pid=1980 tid=1980]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=32
+[118.389003 pid=1971 tid=1971] perf_event_open type=2 config=371 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=11 errno=0
+[118.389106 pid=1971 tid=1971] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.389189 pid=1971 tid=1971] native-loader skipped feature probe program name= insn_cnt=2
+[118.389252 pid=1971 tid=1971]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=157
+[118.389323 pid=1971 tid=1971] BPF_LINK_CREATE prog_fd=14 target_fd=4294967295 attach_type=41 flags=0
+[118.389371 pid=1971 tid=1971]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.389432 pid=1971 tid=1971] BPF_LINK_CREATE prog_fd=19 target_fd=11 attach_type=41 flags=0
+[118.389483 pid=1971 tid=1971] BPF_TASK_FD_QUERY target_fd=11 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=155 probe_offset=0 probe_addr=0 symbol=sys_exit
+[118.389537 pid=1971 tid=1971]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=33
+[118.389584 pid=1971 tid=1971] PERF_EVENT_IOC_ENABLE event_fd=11
+[118.389787 pid=1971 tid=1971] perf_event_open type=2 config=372 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=15 errno=0
+[118.389853 pid=1971 tid=1971] BPF_LINK_CREATE prog_fd=17 target_fd=15 attach_type=41 flags=0
+[118.389909 pid=1971 tid=1971] BPF_TASK_FD_QUERY target_fd=15 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=149 probe_offset=0 probe_addr=0 symbol=sys_enter
+[118.389968 pid=1971 tid=1971]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=34
+[118.391580 pid=1971 tid=1971] PERF_EVENT_IOC_ENABLE event_fd=15
+[118.391853 pid=1965 tid=1965] native-loader jit-info original fd=8 id=111 type=26 name=fentry_vfs_read tag=8aac7fd4c2e97bf7 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0601e88 ksym1=0x0
+[118.392484 pid=1965 tid=1965] native-loader jit-info native fd=12 id=158 type=26 name=fentry_vfs_read tag=59f4a931744dcdc6 jited_len=34 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060606c ksym1=0x0
+[118.392574 pid=1965 tid=1965] native-loader replaced prog=fentry_vfs_read original_fd=8 native_fd=12 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1965_ca9822ef332acdf2.bpf
+[118.392704 pid=1965 tid=1965]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=158
+[118.393601 pid=1965 tid=1965] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_writ insn_cnt=6 hash=d0c2d468d90e10ba license=GPL expected_attach=24 attach_btf_id=123764 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.397734 pid=1965 tid=1965] native-loader jit-info original fd=8 id=159 type=26 name=fentry_vfs_writ tag=ce6b1d10515738d0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0602154 ksym1=0x0
+[118.397821 pid=1965 tid=1965] native-loader jit-info native fd=14 id=160 type=26 name=fentry_vfs_writ tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06061a8 ksym1=0x0
+[118.397947 pid=1965 tid=1965] native-loader replaced prog=fentry_vfs_writ original_fd=8 native_fd=14 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1965_d0c2d468d90e10ba.bpf
+[118.397964 pid=1962 tid=1962] native-loader jit-info original fd=13 id=156 type=26 name=block_rq_insert tag=05b8822023cd42b7 jited_len=354 xlated_len=648 nr_jited_ksyms=1 ksym0=0xffffffffc0602890 ksym1=0x0
+[118.398034 pid=1965 tid=1965]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=160
+[118.398024 pid=1962 tid=1962] native-loader jit-info native fd=24 id=161 type=26 name=block_rq_insert tag=59f4a931744dcdc6 jited_len=487 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06062d8 ksym1=0x0
+[118.398110 pid=1962 tid=1962] native-loader replaced prog=block_rq_insert original_fd=13 native_fd=24 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1962_7a3cc784f2afd7b0.bpf
+[118.398284 pid=1962 tid=1962]   PROG_LOAD -> fd=24 errno=0 kernel_prog_id=161
+[118.398678 pid=1962 tid=1962] BPF_PROG_LOAD type=26 (tracing) name=block_rq_issue insn_cnt=117 hash=bcc1df550d6af5d3 license=GPL expected_attach=23 attach_btf_id=73508 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.398937 pid=1965 tid=1965] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_fsyn insn_cnt=6 hash=cc6d44cf3357ea62 license=GPL expected_attach=24 attach_btf_id=123710 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.403226 pid=1965 tid=1965] native-loader jit-info original fd=8 id=163 type=26 name=fentry_vfs_fsyn tag=4153521805e1f9e0 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc0602190 ksym1=0x0
+[118.403369 pid=1965 tid=1965] native-loader jit-info native fd=16 id=164 type=26 name=fentry_vfs_fsyn tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0606848 ksym1=0x0
+[118.403459 pid=1965 tid=1965] native-loader replaced prog=fentry_vfs_fsyn original_fd=8 native_fd=16 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1965_cc6d44cf3357ea62.bpf
+[118.403616 pid=1965 tid=1965]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=164
+[118.404472 pid=1965 tid=1965] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_open insn_cnt=6 hash=c826085eb7cf6f2a license=GPL expected_attach=24 attach_btf_id=123734 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.406972 pid=1962 tid=1962] native-loader jit-info original fd=13 id=162 type=26 name=block_rq_issue tag=89355e738c3e8a16 jited_len=440 xlated_len=824 nr_jited_ksyms=1 ksym0=0xffffffffc0606678 ksym1=0x0
+[118.407067 pid=1962 tid=1962] native-loader jit-info native fd=26 id=166 type=26 name=block_rq_issue tag=59f4a931744dcdc6 jited_len=399 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06069ec ksym1=0x0
+[118.407173 pid=1962 tid=1962] native-loader replaced prog=block_rq_issue original_fd=13 native_fd=26 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1962_bcc1df550d6af5d3.bpf
+[118.407308 pid=1962 tid=1962]   PROG_LOAD -> fd=26 errno=0 kernel_prog_id=166
+[118.407761 pid=1962 tid=1962] BPF_PROG_LOAD type=26 (tracing) name=block_rq_comple insn_cnt=114 hash=5979a2ca13e1d758 license=GPL expected_attach=23 attach_btf_id=73505 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.408851 pid=1965 tid=1965] native-loader jit-info original fd=8 id=165 type=26 name=fentry_vfs_open tag=88848b4f70304f6c jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc060698c ksym1=0x0
+[118.408969 pid=1965 tid=1965] native-loader jit-info native fd=18 id=168 type=26 name=fentry_vfs_open tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0606ed0 ksym1=0x0
+[118.409075 pid=1965 tid=1965] native-loader replaced prog=fentry_vfs_open original_fd=8 native_fd=18 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1965_c826085eb7cf6f2a.bpf
+[118.409230 pid=1965 tid=1965]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=168
+[118.410193 pid=1965 tid=1965] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_crea insn_cnt=6 hash=8656aae1a3bb4f12 license=GPL expected_attach=24 attach_btf_id=123695 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.414990 pid=1965 tid=1965] native-loader jit-info original fd=8 id=169 type=26 name=fentry_vfs_crea tag=31fa7fcc5d9b6166 jited_len=40 xlated_len=48 nr_jited_ksyms=1 ksym0=0xffffffffc060700c ksym1=0x0
+[118.415173 pid=1965 tid=1965] native-loader jit-info native fd=20 id=170 type=26 name=fentry_vfs_crea tag=59f4a931744dcdc6 jited_len=35 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc060704c ksym1=0x0
+[118.415361 pid=1965 tid=1965] native-loader replaced prog=fentry_vfs_crea original_fd=8 native_fd=20 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1965_8656aae1a3bb4f12.bpf
+[118.415512 pid=1965 tid=1965]   PROG_LOAD -> fd=20 errno=0 kernel_prog_id=170
+[118.415822 pid=1962 tid=1962] native-loader jit-info original fd=13 id=167 type=26 name=block_rq_comple tag=94563ffd43a60f7b jited_len=437 xlated_len=712 nr_jited_ksyms=1 ksym0=0xffffffffc0606cc8 ksym1=0x0
+[118.415940 pid=1962 tid=1962] native-loader jit-info native fd=27 id=171 type=26 name=block_rq_comple tag=59f4a931744dcdc6 jited_len=512 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc06071a4 ksym1=0x0
+[118.415919 pid=1965 tid=1965] BPF_LINK_CREATE prog_fd=12 target_fd=0 attach_type=24 flags=0
+[118.415988 pid=1962 tid=1962] native-loader replaced prog=block_rq_comple original_fd=13 native_fd=27 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1962_5979a2ca13e1d758.bpf
+[118.416130 pid=1962 tid=1962]   PROG_LOAD -> fd=27 errno=0 kernel_prog_id=171
+[118.417200 pid=1965 tid=1965]   LINK_CREATE -> fd=8 errno=0 kernel_link_id=35
+[118.417388 pid=1965 tid=1965] BPF_LINK_CREATE prog_fd=14 target_fd=0 attach_type=24 flags=0
+[118.418623 pid=1965 tid=1965]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=36
+[118.418748 pid=1965 tid=1965] BPF_LINK_CREATE prog_fd=16 target_fd=0 attach_type=24 flags=0
+[118.420289 pid=1965 tid=1965]   LINK_CREATE -> fd=19 errno=0 kernel_link_id=37
+[118.420400 pid=1965 tid=1965] BPF_LINK_CREATE prog_fd=18 target_fd=0 attach_type=24 flags=0
+[118.421843 pid=1965 tid=1965]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=38
+[118.422009 pid=1965 tid=1965] BPF_LINK_CREATE prog_fd=20 target_fd=0 attach_type=24 flags=0
+[118.423545 pid=1965 tid=1965]   LINK_CREATE -> fd=22 errno=0 kernel_link_id=39
+[118.440527 pid=1974 tid=1974] native-loader jit-info original fd=13 id=125 type=2 name=tcp_v4_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0602af0 ksym1=0x0
+[118.440789 pid=1974 tid=1974] native-loader jit-info native fd=20 id=172 type=2 name=tcp_v4_connect tag=59f4a931744dcdc6 jited_len=135 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0607930 ksym1=0x0
+[118.440917 pid=1974 tid=1974] native-loader replaced prog=tcp_v4_connect original_fd=13 native_fd=20 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1974_9b37d763eeafa7fa.bpf
+[118.441085 pid=1974 tid=1974]   PROG_LOAD -> fd=20 errno=0 kernel_prog_id=172
+[118.441192 pid=1974 tid=1974] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[118.441260 pid=1974 tid=1974]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=121
+[118.441371 pid=1974 tid=1974] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.441502 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=2
+[118.441597 pid=1974 tid=1974]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=173
+[118.441738 pid=1974 tid=1974] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect_ insn_cnt=167 hash=9928e6ae2f001c9a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.450792 pid=1974 tid=1974] native-loader jit-info original fd=13 id=174 type=2 name=tcp_v4_connect_ tag=fc9b115ea84ee0a5 jited_len=493 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc0607afc ksym1=0x0
+[118.450930 pid=1974 tid=1974] native-loader jit-info native fd=22 id=175 type=2 name=tcp_v4_connect_ tag=59f4a931744dcdc6 jited_len=744 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0607d0c ksym1=0x0
+[118.451044 pid=1974 tid=1974] native-loader replaced prog=tcp_v4_connect_ original_fd=13 native_fd=22 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1974_9928e6ae2f001c9a.bpf
+[118.451221 pid=1974 tid=1974]   PROG_LOAD -> fd=22 errno=0 kernel_prog_id=175
+[118.451339 pid=1974 tid=1974] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect insn_cnt=32 hash=9b37d763eeafa7fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.459793 pid=1974 tid=1974] native-loader jit-info original fd=13 id=176 type=2 name=tcp_v6_connect tag=120cbe8ad1ac7784 jited_len=110 xlated_len=184 nr_jited_ksyms=1 ksym0=0xffffffffc0601dfc ksym1=0x0
+[118.460010 pid=1974 tid=1974] native-loader jit-info native fd=24 id=177 type=2 name=tcp_v6_connect tag=59f4a931744dcdc6 jited_len=135 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0608198 ksym1=0x0
+[118.460351 pid=1974 tid=1974] native-loader replaced prog=tcp_v6_connect original_fd=13 native_fd=24 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1974_9b37d763eeafa7fa.bpf
+[118.460562 pid=1974 tid=1974]   PROG_LOAD -> fd=24 errno=0 kernel_prog_id=177
+[118.460755 pid=1974 tid=1974] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect_ insn_cnt=170 hash=597c5385273447d9 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.470449 pid=1974 tid=1974] native-loader jit-info original fd=13 id=178 type=2 name=tcp_v6_connect_ tag=e66c43a4971e2c50 jited_len=496 xlated_len=752 nr_jited_ksyms=1 ksym0=0xffffffffc0608348 ksym1=0x0
+[118.470809 pid=1974 tid=1974] native-loader jit-info native fd=26 id=179 type=2 name=tcp_v6_connect_ tag=59f4a931744dcdc6 jited_len=927 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0608588 ksym1=0x0
+[118.470918 pid=1974 tid=1974] native-loader replaced prog=tcp_v6_connect_ original_fd=13 native_fd=26 manifest=/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json source=/tmp/bpfrejit_1974_597c5385273447d9.bpf
+[118.471059 pid=1974 tid=1974]   PROG_LOAD -> fd=26 errno=0 kernel_prog_id=179
+[118.473236 pid=1974 tid=1974] perf_event_open type=8 config=0 config1=94244458890704 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=13 errno=0
+[118.473547 pid=1974 tid=1974] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.473693 pid=1974 tid=1974] native-loader skipped feature probe program name= insn_cnt=2
+[118.473792 pid=1974 tid=1974]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=180
+[118.473879 pid=1974 tid=1974] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[118.473970 pid=1974 tid=1974]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.474062 pid=1974 tid=1974] BPF_LINK_CREATE prog_fd=20 target_fd=13 attach_type=41 flags=0
+[118.474160 pid=1974 tid=1974] BPF_TASK_FD_QUERY target_fd=13 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=172 probe_offset=0 probe_addr=18446744072080357248 symbol=tcp_v4_connect
+[118.474250 pid=1974 tid=1974]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=40
+[118.474337 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=13
+[118.474828 pid=1959 tid=1959] perf_event_open type=8 config=0 config1=93887338240768 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=15 errno=0
+[118.474948 pid=1959 tid=1959] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.475077 pid=1959 tid=1959] native-loader skipped feature probe program name= insn_cnt=2
+[118.475185 pid=1959 tid=1959]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=181
+[118.475275 pid=1959 tid=1959] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[118.475367 pid=1974 tid=1974] perf_event_open type=8 config=1 config1=94244458741424 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=19 errno=0
+[118.475364 pid=1959 tid=1959]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.475464 pid=1959 tid=1959] BPF_LINK_CREATE prog_fd=24 target_fd=15 attach_type=41 flags=0
+[118.475461 pid=1974 tid=1974] BPF_LINK_CREATE prog_fd=22 target_fd=19 attach_type=41 flags=0
+[118.475575 pid=1974 tid=1974] BPF_TASK_FD_QUERY target_fd=19 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=175 probe_offset=0 probe_addr=18446744072080357248 symbol=tcp_v4_connect
+[118.475568 pid=1959 tid=1959] BPF_TASK_FD_QUERY target_fd=15 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=134 probe_offset=0 probe_addr=18446744072074963648 symbol=cap_capable
+[118.475644 pid=1974 tid=1974]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=42
+[118.475708 pid=1959 tid=1959]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=41
+[118.475753 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=19
+[118.475787 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=15
+[118.477599 pid=1959 tid=1959] perf_event_open type=8 config=1 config1=93887338237904 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=19 errno=0
+[118.477596 pid=1974 tid=1974] perf_event_open type=8 config=0 config1=94244458740576 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=23 errno=0
+[118.477701 pid=1974 tid=1974] BPF_LINK_CREATE prog_fd=24 target_fd=23 attach_type=41 flags=0
+[118.477701 pid=1959 tid=1959] BPF_LINK_CREATE prog_fd=27 target_fd=19 attach_type=41 flags=0
+[118.477808 pid=1974 tid=1974] BPF_TASK_FD_QUERY target_fd=23 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=177 probe_offset=0 probe_addr=18446744072081154336 symbol=tcp_v6_connect
+[118.477800 pid=1959 tid=1959] BPF_TASK_FD_QUERY target_fd=19 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=147 probe_offset=0 probe_addr=18446744072074963648 symbol=cap_capable
+[118.477887 pid=1974 tid=1974]   LINK_CREATE -> fd=25 errno=0 kernel_link_id=44
+[118.477885 pid=1959 tid=1959]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=43
+[118.477985 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=23
+[118.477984 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=19
+[118.478076 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=22 errno=0
+[118.478190 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=22
+[118.478294 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=23 errno=0
+[118.478394 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=23
+[118.478493 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=25 errno=0
+[118.478595 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=25
+[118.478624 pid=1974 tid=1974] perf_event_open type=8 config=1 config1=94244458825152 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=27 errno=0
+[118.478697 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=26 errno=0
+[118.478802 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=26
+[118.478799 pid=1974 tid=1974] BPF_LINK_CREATE prog_fd=26 target_fd=27 attach_type=41 flags=0
+[118.478895 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=28 errno=0
+[118.478889 pid=1974 tid=1974] BPF_TASK_FD_QUERY target_fd=27 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=179 probe_offset=0 probe_addr=18446744072081154336 symbol=tcp_v6_connect
+[118.478985 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=28
+[118.478975 pid=1974 tid=1974]   LINK_CREATE -> fd=28 errno=0 kernel_link_id=45
+[118.479080 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=29 errno=0
+[118.479069 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=27
+[118.479195 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=30 errno=0
+[118.479175 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=29
+[118.479375 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=30
+[118.479289 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=30 errno=0
+[118.479560 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=30
+[118.479550 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=31 errno=0
+[118.479659 pid=1959 tid=1959] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=31 errno=0
+[118.479757 pid=1959 tid=1959] PERF_EVENT_IOC_ENABLE event_fd=31
+[118.479746 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=31
+[118.479850 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=32 errno=0
+[118.480014 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=32
+[118.480198 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=33 errno=0
+[118.480453 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=33
+[118.480596 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=34 errno=0
+[118.480781 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=34
+[118.480907 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=35 errno=0
+[118.481092 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=35
+[118.481231 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=36 errno=0
+[118.481413 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=36
+[118.481549 pid=1974 tid=1974] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=37 errno=0
+[118.481859 pid=1974 tid=1974] PERF_EVENT_IOC_ENABLE event_fd=37
+[118.513952 pid=1962 tid=1962] perf_event_open type=8 config=0 config1=94187107383040 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=blk_account_io_merge_bio kprobe_addr=0 -> fd=13 errno=0
+[118.514473 pid=1962 tid=1962] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[118.514677 pid=1962 tid=1962] native-loader skipped feature probe program name= insn_cnt=2
+[118.514857 pid=1962 tid=1962]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=182
+[118.514972 pid=1962 tid=1962] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[118.515070 pid=1962 tid=1962]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[118.515165 pid=1962 tid=1962] BPF_LINK_CREATE prog_fd=20 target_fd=13 attach_type=41 flags=0
+[118.515275 pid=1962 tid=1962] BPF_TASK_FD_QUERY target_fd=13 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=153 probe_offset=0 probe_addr=18446744072075521360 symbol=blk_account_io_merge_bio
+[118.515364 pid=1962 tid=1962]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=46
+[118.515459 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=13
+[118.515547 pid=1962 tid=1962] BPF_LINK_CREATE prog_fd=26 target_fd=0 attach_type=23 flags=0
+[118.515870 pid=1962 tid=1962]   LINK_CREATE -> fd=19 errno=0 kernel_link_id=47
+[118.515996 pid=1962 tid=1962] BPF_LINK_CREATE prog_fd=27 target_fd=0 attach_type=23 flags=0
+[118.516264 pid=1962 tid=1962]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=48
+[118.516418 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=23 errno=0
+[118.516546 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=23
+[118.516649 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=25 errno=0
+[118.516748 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=25
+[118.516847 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=28 errno=0
+[118.516944 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=28
+[118.517043 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=29 errno=0
+[118.517151 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=29
+[118.517261 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=30 errno=0
+[118.517370 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=30
+[118.517479 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=31 errno=0
+[118.517588 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=31
+[118.517694 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=32 errno=0
+[118.517790 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=32
+[118.517882 pid=1962 tid=1962] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=33 errno=0
+[118.517980 pid=1962 tid=1962] PERF_EVENT_IOC_ENABLE event_fd=33
+[118.564641 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[118.766052 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[118.967450 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[119.168879 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[119.370520 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[119.571892 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[119.773473 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[119.974721 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[120.175653 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[120.376910 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[120.578402 pid=1959 tid=1984] socket: cmd=list_progs len=22
+[120.579378 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[120.780557 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[120.982095 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[121.183398 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[121.384795 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[121.586036 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[121.787125 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[121.988737 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[122.189983 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[122.391301 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[122.592698 pid=1962 tid=1988] socket: cmd=list_progs len=22
+[122.593697 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[122.794728 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[122.996003 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[123.199309 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[123.400805 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[123.602396 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[123.803754 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[124.005294 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[124.206514 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[124.407671 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[124.608948 pid=1965 tid=1995] socket: cmd=list_progs len=22
+[124.610727 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[124.811797 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[125.012989 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[125.214222 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[125.415526 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[125.616838 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[125.818121 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[126.019464 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[126.220770 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[126.422029 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[126.623400 pid=1968 tid=1997] socket: cmd=list_progs len=22
+[126.624467 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[126.825704 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[127.027598 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[127.228942 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[127.430104 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[127.631655 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[127.833133 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[128.034556 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[128.235900 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[128.438080 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[128.639183 pid=1971 tid=1990] socket: cmd=list_progs len=22
+[128.640312 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[128.841432 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[129.042832 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[129.244237 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[129.445905 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[129.647721 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[129.849034 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[130.050282 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[130.251610 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[130.453136 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[130.655116 pid=1974 tid=1986] socket: cmd=list_progs len=22
+[130.656445 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[130.857523 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[131.058681 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[131.259827 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[131.461331 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[131.664255 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[131.865346 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[132.066606 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[132.268259 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[132.469614 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[132.670927 pid=1977 tid=1994] socket: cmd=list_progs len=22
+[132.671782 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[132.873063 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[133.074622 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[133.276109 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[133.477533 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[133.678849 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[133.880088 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[134.081385 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[134.282740 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[134.484808 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[134.686277 pid=1980 tid=1999] socket: cmd=list_progs len=22
+[145.703959 pid=1959 tid=1984] socket: cmd=measure_start len=25
+[145.704760 pid=1962 tid=1988] socket: cmd=measure_start len=25
+[145.705485 pid=1965 tid=1995] socket: cmd=measure_start len=25
+[145.707613 pid=1968 tid=1997] socket: cmd=measure_start len=25
+[145.708291 pid=1971 tid=1990] socket: cmd=measure_start len=25
+[145.708956 pid=1974 tid=1986] socket: cmd=measure_start len=25
+[145.709649 pid=1977 tid=1994] socket: cmd=measure_start len=25
+[145.710290 pid=1980 tid=1999] socket: cmd=measure_start len=25
+[156.729794 pid=1959 tid=1984] socket: cmd=measure_finish len=26
+[156.730193 pid=1962 tid=1988] socket: cmd=measure_finish len=26
+[156.730618 pid=1965 tid=1995] socket: cmd=measure_finish len=26
+[156.730864 pid=1968 tid=1997] socket: cmd=measure_finish len=26
+[156.731147 pid=1971 tid=1990] socket: cmd=measure_finish len=26
+[156.731371 pid=1974 tid=1986] socket: cmd=measure_finish len=26
+[156.732861 pid=1977 tid=1994] socket: cmd=measure_finish len=26
+[156.733195 pid=1980 tid=1999] socket: cmd=measure_finish len=26
+[156.733462 pid=1959 tid=1959] PERF_EVENT_IOC_DISABLE event_fd=15
+[156.970061 pid=1959 tid=1959] PERF_EVENT_IOC_DISABLE event_fd=19
+[157.199107 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=23
+[157.199382 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=25
+[157.199583 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=28
+[157.199731 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=29
+[157.199865 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=30
+[157.199987 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=31
+[157.200165 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=32
+[157.200281 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=33
+[157.200392 pid=1962 tid=1962] PERF_EVENT_IOC_DISABLE event_fd=13
+[157.420462 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=27
+[157.420670 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=28
+[157.420822 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=29
+[157.420976 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=30
+[157.421146 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=31
+[157.421288 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=32
+[157.421429 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=33
+[157.421608 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=34
+[157.421740 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=10
+[157.610363 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=18
+[158.150114 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=22
+[158.280191 pid=1968 tid=1968] PERF_EVENT_IOC_DISABLE event_fd=24
+[158.838501 pid=1971 tid=1971] PERF_EVENT_IOC_DISABLE event_fd=15
+[159.141413 pid=1971 tid=1971] PERF_EVENT_IOC_DISABLE event_fd=11
+[159.554477 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=30
+[159.554918 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=31
+[159.555063 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=32
+[159.555173 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=33
+[159.555308 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=34
+[159.555464 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=35
+[159.555627 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=36
+[159.555784 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=37
+[159.555897 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=13
+[159.760105 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=19
+[159.970106 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=23
+[160.150210 pid=1974 tid=1974] PERF_EVENT_IOC_DISABLE event_fd=27
+[160.370246 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=15
+[160.370717 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=16
+[160.370865 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=18
+[160.371159 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=19
+[160.371327 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=20
+[160.371485 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=21
+[160.371649 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=22
+[160.371769 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=23
+[160.371883 pid=1977 tid=1977] PERF_EVENT_IOC_DISABLE event_fd=11

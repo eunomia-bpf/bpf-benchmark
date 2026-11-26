@@ -1,0 +1,39 @@
+WARNING: No swap limit support
+WARNING: IPv4 forwarding is disabled
+Loaded image: bpf-benchmark/kprog:current
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+IT_CORPUS_APPS=cilium/agent BPFREJIT_CORPUS_BPF_STATS=1 \
+  BPFREJIT_SHIM_NATIVE_LOADER=post \
+  BPFREJIT_SHIM_NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/cilium/manifest.json \
+  BPFREJIT_BENCH_PASSES= \
+  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
+  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=norejit \
+  make -C /workspaces/repository __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \
+  X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current X86_RUNNER_RUNTIME_IMAGE_TAR=/var/tmp/runtime.image.tar \
+  SAMPLES=1 WORKLOAD_DURATION=10
+make[1]: Entering directory '/workspaces/repository'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
+for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
+docker info >/dev/null
+install -d "/workspaces/repository/corpus/results"
+"/workspaces/repository/runner/scripts/bpfrejit-install" --image "bpf-benchmark/kprog:current" "/var/tmp/runtime.image.tar"
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="a98412bc" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e SAMPLES="1"      -e FUZZ_ROUNDS="1000"  -e WORKLOAD_DURATION="10" -e KEEP_WORKDIRS="all"  -e BPFREJIT_CORPUS_APPS="cilium/agent" -e SKIP_REJIT="norejit"           -e BPFREJIT_CORPUS_BPF_STATS="1" -e BPFREJIT_SHIM_NATIVE_LOADER="post" -e BPFREJIT_SHIM_NATIVE_MANIFEST="/opt/bpf-benchmark/native-bpf/x86_64/cilium/manifest.json"  -e BPFREJIT_NATIVE_LOADER_SO="/usr/local/lib/bpfrejit/libnative_loader.so"  -w "/workspaces/repository" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/workspaces/repository/corpus/results:/workspaces/repository/corpus/results" "bpf-benchmark/kprog:current" python3 -m corpus.driver
+{"app": "cilium/agent", "event": "app_start", "runner": "cilium", "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "measurement_start", "phase": "baseline", "runner": "cilium", "samples": 1, "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "measurement_done", "phase": "baseline", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "event": "rejit_skipped", "runner": "cilium"}
+{"app": "cilium/agent", "event": "measurement_start", "phase": "post_rejit", "runner": "cilium", "samples": 1, "workload": "cilium_endpoint_pktgen"}
+{"app": "cilium/agent", "event": "measurement_done", "phase": "post_rejit", "runner": "cilium", "status": "ok"}
+{"app": "cilium/agent", "error": "", "event": "app_done", "status": "ok"}
+{
+  "status": "ok",
+  "artifact_run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_134349_303403",
+  "artifact_metadata": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_134349_303403/metadata.json"
+}
+make[1]: Leaving directory '/workspaces/repository'
+rm -f /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img
+make[1]: Leaving directory '/workspaces/repository/kprog/perf/one-image'
