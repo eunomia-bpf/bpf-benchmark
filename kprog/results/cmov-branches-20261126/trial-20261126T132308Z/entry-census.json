@@ -109,6 +109,20 @@
           "vfsstat.native.o",
           "kprobe_vfs_write"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "runqlat.native.o",
+          "program": "handle_sched_wa"
+        },
+        {
+          "native_object": "capable.native.o",
+          "program": "kprobe__cap_cap"
+        },
+        {
+          "native_object": "opensnoop.native.o",
+          "program": "tracepoint__sys"
+        }
       ]
     },
     {
@@ -360,6 +374,58 @@
           "cilium_placeholders.native.o",
           "cil_lxc_policy_egress"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_ho"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_ne"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_ipv4_ct_in",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ho"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ne"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_overlay.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ov"
+        },
+        {
+          "native_object": "bpf_wireguard.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_wi"
+        },
+        {
+          "native_object": "bpf_xdp.native.o",
+          "prog_type": 6,
+          "program": "tail_nodeport_n"
+        }
       ]
     },
     {
@@ -379,7 +445,8 @@
           "xdp_root.native.o",
           "xdp_root"
         ]
-      ]
+      ],
+      "without_explicit_symbol": []
     },
     {
       "app": "otelcol-ebpf-profiler",
@@ -482,6 +549,16 @@
           "otelcol-ebpf-profiler.native.o",
           "uprobe__generic"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "otelcol-ebpf-profiler.native.o",
+          "program": "kprobe_unwind_p"
+        },
+        {
+          "native_object": "otelcol-ebpf-profiler.native.o",
+          "program": "tracepoint__sch"
+        }
       ]
     },
     {
@@ -793,6 +870,92 @@
           "bpf_prog_iter.native.o",
           "iter"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "filter_char_buf"
+        },
+        {
+          "native_object": "bpf_generic_fentry_v61.native.o",
+          "program": "generic_fentry_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_kprobe_v61.native.o",
+          "program": "generic_kprobe_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_kprobe_v61.native.o",
+          "program": "generic_kprobe_",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_lsm_core_v61.native.o",
+          "program": "generic_lsm_pro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_rawtp_v61.native.o",
+          "program": "generic_rawtp_p",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_retkprobe_v61.native.o",
+          "program": "generic_retkpro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_retkprobe_v61.native.o",
+          "program": "generic_retkpro",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_retuprobe_v61.native.o",
+          "program": "generic_retupro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_retuprobe_v61.native.o",
+          "program": "generic_retupro",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_usdt_v61.native.o",
+          "program": "generic_sleepab",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "generic_sleepab",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_tracepoint_v61.native.o",
+          "program": "generic_tracepo",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_uprobe_v61.native.o",
+          "program": "generic_uprobe_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_uprobe_v61.native.o",
+          "program": "generic_uprobe_",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "generic_usdt_pr",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_cgtracker.native.o",
+          "program": "tg_cgtracker_cg",
+          "source_lacks_helper": 174
+        }
       ]
     },
     {
@@ -1184,6 +1347,76 @@
           "tracee.native.o",
           "uprobe_syscall_table_check"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "tracee.native.o",
+          "program": "kernel_write_ma"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "sched_process_e"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "syscall__execve"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_file_"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_kerne"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_vfs_r"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_vfs_w"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_security_"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_vfs_write"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__cgr"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__mod"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__raw"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__sch"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "uprobe__feature"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "uprobe_lkm_seek"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "vfs_write_magic"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "vfs_writev_magi"
+        }
       ]
     }
   ],
@@ -1297,6 +1530,20 @@
           "vfsstat.native.o",
           "kprobe_vfs_write"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "runqlat.native.o",
+          "program": "handle_sched_wa"
+        },
+        {
+          "native_object": "capable.native.o",
+          "program": "kprobe__cap_cap"
+        },
+        {
+          "native_object": "opensnoop.native.o",
+          "program": "tracepoint__sys"
+        }
       ]
     },
     {
@@ -1548,6 +1795,58 @@
           "cilium_placeholders.native.o",
           "cil_lxc_policy_egress"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_ho"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_ne"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_handle_ipv",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_ipv4_ct_in",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ho"
+        },
+        {
+          "native_object": "bpf_host.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ne"
+        },
+        {
+          "native_object": "bpf_lxc.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_0"
+        },
+        {
+          "native_object": "bpf_overlay.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_ov"
+        },
+        {
+          "native_object": "bpf_wireguard.native.o",
+          "program": "tail_nodeport_n",
+          "source_map_prefix": "cilium_calls_wi"
+        },
+        {
+          "native_object": "bpf_xdp.native.o",
+          "prog_type": 6,
+          "program": "tail_nodeport_n"
+        }
       ]
     },
     {
@@ -1567,7 +1866,8 @@
           "xdp_root.native.o",
           "xdp_root"
         ]
-      ]
+      ],
+      "without_explicit_symbol": []
     },
     {
       "app": "otelcol-ebpf-profiler",
@@ -1670,6 +1970,16 @@
           "otelcol-ebpf-profiler.native.o",
           "uprobe__generic"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "otelcol-ebpf-profiler.native.o",
+          "program": "kprobe_unwind_p"
+        },
+        {
+          "native_object": "otelcol-ebpf-profiler.native.o",
+          "program": "tracepoint__sch"
+        }
       ]
     },
     {
@@ -1981,6 +2291,92 @@
           "bpf_prog_iter.native.o",
           "iter"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "filter_char_buf"
+        },
+        {
+          "native_object": "bpf_generic_fentry_v61.native.o",
+          "program": "generic_fentry_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_kprobe_v61.native.o",
+          "program": "generic_kprobe_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_kprobe_v61.native.o",
+          "program": "generic_kprobe_",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_lsm_core_v61.native.o",
+          "program": "generic_lsm_pro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_rawtp_v61.native.o",
+          "program": "generic_rawtp_p",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_retkprobe_v61.native.o",
+          "program": "generic_retkpro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_retkprobe_v61.native.o",
+          "program": "generic_retkpro",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_retuprobe_v61.native.o",
+          "program": "generic_retupro",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_retuprobe_v61.native.o",
+          "program": "generic_retupro",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_usdt_v61.native.o",
+          "program": "generic_sleepab",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "generic_sleepab",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_tracepoint_v61.native.o",
+          "program": "generic_tracepo",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_generic_uprobe_v61.native.o",
+          "program": "generic_uprobe_",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_uprobe_v61.native.o",
+          "program": "generic_uprobe_",
+          "source_has_helper": 174
+        },
+        {
+          "native_object": "bpf_multi_usdt_v61.native.o",
+          "program": "generic_usdt_pr",
+          "source_lacks_helper": 174
+        },
+        {
+          "native_object": "bpf_cgtracker.native.o",
+          "program": "tg_cgtracker_cg",
+          "source_lacks_helper": 174
+        }
       ]
     },
     {
@@ -2372,8 +2768,78 @@
           "tracee.native.o",
           "uprobe_syscall_table_check"
         ]
+      ],
+      "without_explicit_symbol": [
+        {
+          "native_object": "tracee.native.o",
+          "program": "kernel_write_ma"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "sched_process_e"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "syscall__execve"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_file_"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_kerne"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_vfs_r"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_ret_vfs_w"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_security_"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "trace_vfs_write"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__cgr"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__mod"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__raw"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "tracepoint__sch"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "uprobe__feature"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "uprobe_lkm_seek"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "vfs_write_magic"
+        },
+        {
+          "native_object": "tracee.native.o",
+          "program": "vfs_writev_magi"
+        }
       ]
     }
   ],
-  "scope": "Current manifest symbol-pair census; x86 and arm64 sets agree. Older289-entry receipts lack the corresponding manifest snapshot; no historical identity claim."
+  "scope": "Current explicit-symbol offline census; x86/arm64 sets agree. The existing offline script omits manifest entries without an explicit symbol (49 groups); all actual app loads were checked in the guest. Historical289-entry receipts lack a matching manifest snapshot."
 }

@@ -1,0 +1,7 @@
+Existing 05-29 evaluator, six completed candidate trial runs only. Functional 1x10s stats-on diagnostics; full timing frozen.
+20261126_133854_656249 otelcol-ebpf-profiler/profiling  status=ok samples=1 s=10.0 per-call=0.960x (3326.1 / 3463.1 ns) thr=0.962x
+20261126_134104_669361 bcc/set                          status=ok samples=1 s=10.0 per-call=1.028x (103.4 / 100.6 ns) thr=0.999x
+20261126_134349_303403 cilium/agent                     status=ok samples=1 s=10.0 per-call=1.206x (743.1 / 616.3 ns) thr=1.091x
+20261126_134622_072320 tetragon/observer                status=ok samples=1 s=10.0 per-call=1.851x (1272.2 / 687.3 ns) thr=1.139x
+20261126_135041_770165 tracee/monitor                   status=ok samples=1 s=10.0 per-call=2.354x (379.8 / 161.3 ns) thr=1.786x
+20261126_135422_527630 katran                           status=ok samples=1 s=10.0 per-call=1.092x (176.3 / 161.4 ns) thr=1.037x

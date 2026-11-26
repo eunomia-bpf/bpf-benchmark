@@ -77,3 +77,19 @@ pair identities cannot be established from those aggregate receipts alone.
 This count difference is retained as a provenance limitation. It is not a
 functional load failure: all loaded app programs still install natively with
 the same replacement counts and zero failures. No program is excluded.
+
+
+Offline scope: the existing script processes only entries with an explicit
+symbol. The current manifest also contains49 groups without one (BCC3,
+Tracee17,Cilium10,Tetragon17,OTel2), where the runtime loader resolves the
+source program against the object's matching symbols. These groups are
+recorded in entry-census.json; they are not excluded from native installation.
+The guest functional check is the evidence for all actual app loads, including
+these cases. The286/286 figure is the explicit-symbol offline subset.
+
+
+The same existing05-29 evaluator reports workload throughput native/eBPF:
+OTel0.962x, BCC0.999x, Cilium1.091x, Tetragon1.139x, Tracee1.786x,
+Katran1.037x. The paired per-call figures and raw run IDs are in
+trial-20261126T132308Z/diagnostic-evaluator.txt. Throughput and per-call costs
+are both diagnostics here; neither changes the frozen official timing.
