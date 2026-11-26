@@ -82,3 +82,9 @@ final ELF; uncompressed artifacts stay locally. The normal preprocessing
 cleanup is recorded in cleanup-log.md. The first launch failed before Make
 because an optional /usr/bin/time wrapper was unavailable; its log and
 launch metadata remain separate from this successful compilation.
+
+The subsequent detached stock replay reaches the sole kernel with114,694
+instructions and rejects request39 at instruction2 for an R10-528 write.
+It therefore advances into the existing B stack-pressure class; no stock
+acceptance or checked-native installation is claimed. See stock/README.md
+and the full verifier log. Request62 is not separately stock-loaded.

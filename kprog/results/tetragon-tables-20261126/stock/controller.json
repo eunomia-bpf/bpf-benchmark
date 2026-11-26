@@ -1,0 +1,22 @@
+{
+  "command": [
+    "flock",
+    "-s",
+    "/workspaces/.agent-state/kprog-lanes/locks/timing",
+    "flock",
+    "-s",
+    "/workspaces/.agent-state/kprog-lanes/locks/image",
+    "make",
+    "-f",
+    "kprog/results/cilium-headlen-20261119/Makefile",
+    "archive-stock",
+    "OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock",
+    "INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock-index.json",
+    "REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/stock-replay"
+  ],
+  "source": "17ec51e3e373ba72fd87b7bd333a3c1210583856",
+  "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "started_utc": "2026-11-26T16:14:51Z",
+  "returncode": 2,
+  "finished_utc": "2026-11-26T16:14:55Z"
+}

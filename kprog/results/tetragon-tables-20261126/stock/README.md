@@ -34,3 +34,20 @@ The stock-preview.log dry-run and probe build log are retained. The actual
 guest outcome and verifier log will be recorded separately; the preceding
 compiler success is not a verifier acceptance claim. All existing LTO pieces
 stay enabled for the normal pipeline, and full timing remains frozen.
+
+The actual sole-kernel replay ran16:14:51–16:14:55Z, source17ec51e3e and
+kernel83e0fabe355d. The harness reaches BPF_PROG_LOAD with114,694 relocated
+instructions and returns2/errno13/stock_loaded=false. The verifier rejects
+instruction2, `*(u64 *)(r10 -528) = r0`, with
+`invalid write to stack R10 off=-528 size=8` after processing3 instructions.
+The preceding BTF argument warning is retained in the same full log; it does
+not prevent instruction analysis. controller.json, guest.log, result.json and
+39/{command.json,verifier.log} retain the complete outcomes.
+
+Thus request39 advances into the existing B stack-pressure class, rather
+than gaining stock acceptance. Request62 has the same generated C but was
+not separately stock-loaded. No checked native program or app was installed
+by this detached test. The next phase1 work remains the12 return-register
+table refusals, the hoisted-base/finite-target class, and the B stack work
+already recorded for the verification lane. No kernel limit is raised and
+no program or failed result is excluded.
