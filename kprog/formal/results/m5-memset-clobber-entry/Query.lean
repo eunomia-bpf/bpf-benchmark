@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64MemsetClobberEntry
+
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.entry_valid
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.call_step
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.enter
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.enter
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberEntry.execute

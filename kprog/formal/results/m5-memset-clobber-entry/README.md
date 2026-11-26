@@ -1,0 +1,7 @@
+# Original memset clobber call and release-loop entry
+
+The same completed byte-write and tag-transfer packet executes its genuine program_clobbers call, resolves the actual linked C helper and preserves the exact original memset return continuation. FunctionEntry2 binds the real entry parameter and both undef-temporary declaration chunks. The helper has no local variables, so entry keeps the identical heap and empty local environment while memset's eight locals remain live. Actual bias96 and current SP=-32 reads select the real release branch and initialize its independent byte counter0. Twenty real helper-body transitions, plus call and function entry, reach the original byte-release loop in22. Current header/SP observations come from the same packet's HeaderView and Storage, with the entire heap unchanged on this prefix. The following actual160 byte-index and20 word-index scans, selected64 byte writes/eight tag writes, original provider/clobber/free/return and caller composition continue before the related root batch and remaining M5/O1/O2/O4/recount/M6. Original C, exports, imported semantics and prior public interfaces remain.
+
+Focused build 344 and 5 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
