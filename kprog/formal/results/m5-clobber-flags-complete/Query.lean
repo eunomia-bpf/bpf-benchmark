@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ClobberFlagsComplete
+
+open KProgFormal.ClightRefinement
+#check Arm64ClobberFlagsComplete.step
+#print axioms Arm64ClobberFlagsComplete.step
+#check Arm64ClobberFlagsComplete.execute
+#print axioms Arm64ClobberFlagsComplete.execute
+#check Arm64ClobberFlagsComplete.final_flags
+#print axioms Arm64ClobberFlagsComplete.final_flags
+#check Arm64ClobberFlagsComplete.original
+#print axioms Arm64ClobberFlagsComplete.original
