@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 abi_probe.py
+checked-before undefined ['__aarch64_ldadd8_acq_rel', 'bpf_ktime_get_ns', 'bpf_tail_call'] proof 0 native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total
+  - atomic_entry (vaddr 0x0, 24 bytes) [entry]
+native-link: wrote proof object 28 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o
+
+producer-policy undefined ['bpf_ktime_get_ns', 'bpf_tail_call'] proof 0 native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total
+  - atomic_entry (vaddr 0x0, 24 bytes) [entry]
+native-link: wrote proof object 28 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o
+
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

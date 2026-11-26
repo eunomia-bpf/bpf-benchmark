@@ -13,3 +13,7 @@ atomic-probe:
 .PHONY: atomic-ir-audit
 atomic-ir-audit:
 	python3 atomic_ir_audit.py
+
+.PHONY: abi-probe
+abi-probe:
+	python3 abi_probe.py

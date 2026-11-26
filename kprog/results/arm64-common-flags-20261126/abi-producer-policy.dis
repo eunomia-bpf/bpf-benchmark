@@ -1,0 +1,94 @@
+
+/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000000 <atomic_entry>:
+   0:	aa0003e8 	mov	x8, x0
+   4:	c85ffd00 	ldaxr	x0, [x8]
+   8:	91000409 	add	x9, x0, #0x1
+   c:	c80afd09 	stlxr	w10, x9, [x8]
+  10:	35ffffaa 	cbnz	w10, 4 <atomic_entry+0x4>
+  14:	d65f03c0 	ret
+  18:	d503201f 	nop
+  1c:	d503201f 	nop
+
+0000000000000020 <tail_entry>:
+  20:	d10203ff 	sub	sp, sp, #0x80
+  24:	f90013fd 	str	x29, [sp, #32]
+  28:	a90373fe 	stp	x30, x28, [sp, #48]
+  2c:	a90467fb 	stp	x27, x25, [sp, #64]
+  30:	a9055ff8 	stp	x24, x23, [sp, #80]
+  34:	a90657f6 	stp	x22, x21, [sp, #96]
+  38:	a9074ff4 	stp	x20, x19, [sp, #112]
+  3c:	aa0103f3 	mov	x19, x1
+  40:	aa0003f4 	mov	x20, x0
+  44:	f9400056 	ldr	x22, [x2]
+  48:	f9400457 	ldr	x23, [x2, #8]
+  4c:	f9400858 	ldr	x24, [x2, #16]
+  50:	f9400c59 	ldr	x25, [x2, #24]
+  54:	f940105b 	ldr	x27, [x2, #32]
+  58:	f940145c 	ldr	x28, [x2, #40]
+  5c:	f940185d 	ldr	x29, [x2, #48]
+  60:	f9401c49 	ldr	x9, [x2, #56]
+  64:	f9402048 	ldr	x8, [x2, #64]
+  68:	a90023e9 	stp	x9, x8, [sp]
+  6c:	f9402449 	ldr	x9, [x2, #72]
+  70:	f9402848 	ldr	x8, [x2, #80]
+  74:	a90123e9 	stp	x9, x8, [sp, #16]
+  78:	f9402c48 	ldr	x8, [x2, #88]
+  7c:	f90017e8 	str	x8, [sp, #40]
+  80:	94000000 	bl	0 <bpf_ktime_get_ns>
+			80: R_AARCH64_CALL26	bpf_ktime_get_ns
+  84:	aa0003f5 	mov	x21, x0
+  88:	aa1403e0 	mov	x0, x20
+  8c:	aa1303e1 	mov	x1, x19
+  90:	120012a2 	and	w2, w21, #0x1f
+  94:	94000000 	bl	0 <bpf_tail_call>
+			94: R_AARCH64_CALL26	bpf_tail_call
+  98:	910006a9 	add	x9, x21, #0x1
+  9c:	ca1602a8 	eor	x8, x21, x22
+  a0:	91000eaa 	add	x10, x21, #0x3
+  a4:	a9474ff4 	ldp	x20, x19, [sp, #112]
+  a8:	ca170129 	eor	x9, x9, x23
+  ac:	ca19014a 	eor	x10, x10, x25
+  b0:	8b080128 	add	x8, x9, x8
+  b4:	91000aa9 	add	x9, x21, #0x2
+  b8:	ca180129 	eor	x9, x9, x24
+  bc:	a9455ff8 	ldp	x24, x23, [sp, #80]
+  c0:	8b0a0129 	add	x9, x9, x10
+  c4:	910016aa 	add	x10, x21, #0x5
+  c8:	8b090108 	add	x8, x8, x9
+  cc:	910012a9 	add	x9, x21, #0x4
+  d0:	ca1c014a 	eor	x10, x10, x28
+  d4:	a94373fe 	ldp	x30, x28, [sp, #48]
+  d8:	ca1b0129 	eor	x9, x9, x27
+  dc:	a94467fb 	ldp	x27, x25, [sp, #64]
+  e0:	8b0a0129 	add	x9, x9, x10
+  e4:	91001aaa 	add	x10, x21, #0x6
+  e8:	ca1d014a 	eor	x10, x10, x29
+  ec:	8b0a0129 	add	x9, x9, x10
+  f0:	a9402fea 	ldp	x10, x11, [sp]
+  f4:	8b090108 	add	x8, x8, x9
+  f8:	91001ea9 	add	x9, x21, #0x7
+  fc:	ca0a0129 	eor	x9, x9, x10
+ 100:	910022aa 	add	x10, x21, #0x8
+ 104:	ca0b014a 	eor	x10, x10, x11
+ 108:	f9400beb 	ldr	x11, [sp, #16]
+ 10c:	8b0a0129 	add	x9, x9, x10
+ 110:	910026aa 	add	x10, x21, #0x9
+ 114:	ca0b014a 	eor	x10, x10, x11
+ 118:	a941f7eb 	ldp	x11, x29, [sp, #24]
+ 11c:	8b0a0129 	add	x9, x9, x10
+ 120:	91002aaa 	add	x10, x21, #0xa
+ 124:	ca0b014a 	eor	x10, x10, x11
+ 128:	8b0a0129 	add	x9, x9, x10
+ 12c:	f94017ea 	ldr	x10, [sp, #40]
+ 130:	8b090108 	add	x8, x8, x9
+ 134:	91002ea9 	add	x9, x21, #0xb
+ 138:	a94657f6 	ldp	x22, x21, [sp, #96]
+ 13c:	ca0a0129 	eor	x9, x9, x10
+ 140:	8b090100 	add	x0, x8, x9
+ 144:	910203ff 	add	sp, sp, #0x80
+ 148:	d65f03c0 	ret

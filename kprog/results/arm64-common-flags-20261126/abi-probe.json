@@ -1,0 +1,93 @@
+{
+  "recorded_utc": "2026-11-26T22:27:51Z",
+  "revision": "7978854671b9ddc62a56929908cffcd2709cbe23",
+  "rows": [
+    {
+      "name": "checked-before",
+      "command": [
+        "clang-18",
+        "-target",
+        "aarch64-unknown-linux-gnu",
+        "-O3",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-c",
+        "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "undefined": [
+        "__aarch64_ldadd8_acq_rel",
+        "bpf_ktime_get_ns",
+        "bpf_tail_call"
+      ],
+      "proof_command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.o",
+        "--symbol",
+        "atomic_entry",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o"
+      ],
+      "proof_returncode": 0,
+      "proof_stdout": "",
+      "proof_stderr": "native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total\n  - atomic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote proof object 28 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o\n"
+    },
+    {
+      "name": "producer-policy",
+      "command": [
+        "clang-18",
+        "-target",
+        "aarch64-unknown-linux-gnu",
+        "-O3",
+        "-foptimize-sibling-calls",
+        "-fomit-frame-pointer",
+        "-mgeneral-regs-only",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-mtune=neoverse-n1",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-c",
+        "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "undefined": [
+        "bpf_ktime_get_ns",
+        "bpf_tail_call"
+      ],
+      "proof_command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.o",
+        "--symbol",
+        "atomic_entry",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o"
+      ],
+      "proof_returncode": 0,
+      "proof_stdout": "",
+      "proof_stderr": "native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total\n  - atomic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote proof object 28 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.proof.o\n"
+    }
+  ],
+  "scope": "Compiler/ABI compatibility diagnostic only. Canonical diagnostic object replaced in place after archiving; production flags/builds/image unchanged. No app or performance claim."
+}

@@ -41,3 +41,17 @@ references. The initial mnemonic parser also included ordinary loads;
 its complete output is retained compressed as atomic-probe-initial.json.gz,
 and the corrected atomic-only output is atomic-probe.json. No production
 P/I/flags, module, linker, image or timing changed; full timing stays frozen.
+
+2026-11-26T22:29:53Z: phase1 ARM compiler-policy audit found the checked-native helper/
+final flags omit -ffixed-x26 and -mno-outline-atomics already used by P.
+abi-probe.json compares actual flags on one pressure/atomic fixture.
+Without them, x26 is loaded from input before bpf_tail_call and restored
+only on return. The existing linker tail-call template reads [x26] as the
+native frame counter (main.rs1432), so ordinary C callee-save preservation
+is insufficient at that call site. The same object has an undefined
+__aarch64_ldadd8_acq_rel compiler-runtime call. Producer-policy flags avoid
+both. Proof emission succeeds for both, retaining the former relocation;
+this is not kernel-link acceptance. Actual checked-worker/compiler and
+kernel-link reproduction follows before a production repair. No app P,
+image or performance setting changed; this concerns the main checked path,
+not the existing direct ARM run8 timing. OMP simulation/micro WIP untouched.
