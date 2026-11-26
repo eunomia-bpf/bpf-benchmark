@@ -366,3 +366,8 @@ import KProgFormal.ClightRefinement.X86SubFlagValues
 import KProgFormal.ClightRefinement.X86ProducerSubCfStore
 import KProgFormal.ClightRefinement.X86ProducerSubZfSource
 import KProgFormal.ClightRefinement.X86ProducerSubZfStore
+import KProgFormal.ClightRefinement.X86ProducerScalarSeparation
+import KProgFormal.ClightRefinement.X86ProducerSubSfStore
+import KProgFormal.ClightRefinement.X86ProducerSubOfStore
+import KProgFormal.ClightRefinement.X86ProducerSubPfStore
+import KProgFormal.ClightRefinement.X86ProducerSubAfStore

@@ -1,0 +1,39 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/V/sub-rest-flags-20261126T064522Z",
+  "build": {
+    "command": [
+      "env",
+      "LEAN_NUM_THREADS=1",
+      "LEAN_IMPORT_WORKERS=1",
+      "lake",
+      "build",
+      "+KProgFormal"
+    ],
+    "exit": 0,
+    "seconds": 3.548753412993392,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  },
+  "public": {
+    "command": [
+      "env",
+      "LEAN_NUM_THREADS=1",
+      "LEAN_IMPORT_WORKERS=1",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-x86-producer-sub-all-flags-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 8.860538922002888,
+    "cpus": "12-15",
+    "shared_timing": true,
+    "memory_limit": 34359738368,
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512
+  }
+}
