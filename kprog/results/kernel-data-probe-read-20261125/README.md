@@ -91,3 +91,47 @@ at verification-preparation, 0 failed. Rejections: 98 "invalid write to stack" (
 too complex", 5 "source proof exceeds the BPF instruction limit" (the message of aef6e51ed), 2 + 1 ctx/sock type, 1
 unbounded memory access, 1 too large. Class G "invalid mem access 'scalar'" (9 on 11-24) is gone. Verifier
 statistics of the 50 accepted B: time median 892 us, max 461405 us; processed instructions median 342, max 110811.
+
+## The five Cilium context-lower failures: one shape (omp 2026-11-26T08:5xZ)
+
+All five fail with the same message from `kprog/build/socket-context-lower.cpp:168`,
+`trusted_x86_x86_sim_xdp: dynamic public context offset`, and the installed compiler
+reproduces it on the host:
+
+```
+context-lower <request>/generated/checked-simulator.linked.bc --public-layout ... --physical-layout ... -o out.bc
+trusted_x86_x86_sim_xdp: dynamic public context offset
+```
+
+The pass walks every load and store, keeps the ones whose underlying object is the
+function's first argument (`getUnderlyingObjects(Pointer)` contains `%0`), and then
+requires `GetPointerBaseWithConstantOffset` to return `%0` itself. The offending
+access has a run-time index:
+
+```
+%838 = getelementptr inbounds i8, ptr %0, i64 %812
+%812 = add i64 %811, 8
+%839 = load volatile i8, ptr %838, align 1
+```
+
+`%812` is a `switch` index built from the simulator's own stack addresses — the guest
+x86 `movzx edi, WORD PTR [rax+0x8]` at `trusted_x86.bpf.c:805` (request 49) computes
+its effective address as `ptrtoint(Packet) - ptrtoint(%78) + register`, and the
+simulator adds that difference to `%0`. So the "context" pointer the pass sees is the
+simulator's whole stack image addressed through the context argument, and the offset is
+a run-time value that a constant-offset rule cannot name.
+
+Two facts make this a bounded gap rather than a wrong-B defect:
+
+- The verifier accepts all five. `verify.stderr` reports `processed` instructions and
+  no rejection (e.g. request 16: `processed 81935 insns (limit 1000000)`), and
+  `verify.stdout` records `{"phase":"verify","status":0}`; the failure is the checked
+  simulator's context-lowering step, after B is proven.
+- The five are the snat/fwd and policy tail-call targets (`tail_handle_snat_fwd_ipv4`
+  ×3, `tail_ipv4_policy` ×2), so the class is one program family, not a scattering.
+
+The recorded pass result stands: these five fall back to eBPF, which is what
+`kdata4/run-codes.tsv` says. Widening the pass to rewrite a run-time context offset
+would need a rule the current source does not have — `Match` is chosen by constant
+`Offset` — and it is frozen, so the change belongs with whoever opens
+`kprog/build/socket-context-lower.cpp`.
