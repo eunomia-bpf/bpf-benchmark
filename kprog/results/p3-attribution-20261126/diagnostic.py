@@ -9,7 +9,7 @@ out = Path(target)
 out.mkdir(parents=True, exist_ok=True)
 command = ['flock', '-x', '/workspaces/.agent-state/kprog-lanes/locks/timing',
            'flock', '-s', '/workspaces/.agent-state/kprog-lanes/locks/image',
-           'prlimit', '--as=85899345920', '--', 'make', '-C', 'kprog/perf/one-image',
+           'prlimit', '--as=85899345920', '--', 'make', '-C', '/workspaces/repository/kprog/perf/one-image',
            'check', 'ORDER=' + app, 'LOGS=' + str(out / 'guest')]
 (out / 'check-command.json').write_text(json.dumps(command, indent=2) + '\n')
 with (out / 'controller.log').open('w') as log:

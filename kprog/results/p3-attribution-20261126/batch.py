@@ -11,6 +11,7 @@ import traceback
 ROOT = Path('/workspaces/repository')
 HERE = ROOT / 'kprog/results/p3-attribution-20261126'
 OUT = Path(sys.argv[1]).resolve()
+PHASE = sys.argv[2] if len(sys.argv) > 2 else 'all'
 LANE = Path('/workspaces/.agent-state/kprog-lanes/perf')
 OUT.mkdir(parents=True, exist_ok=True)
 os.chdir(ROOT)
@@ -92,12 +93,20 @@ def collect(kind, label, app):
     return status
 
 status = 0
-try:
+def checks():
     for app, short in [('tetragon/observer', 'tetragon'), ('otelcol-ebpf-profiler/profiling', 'otel')]:
         for repetition in range(1, 4):
-            status |= int(collect('diagnostic', f'{short}-{repetition}', app) != 0)
-    for app, short in [('tetragon/observer', 'tetragon'), ('tracee/monitor', 'tracee')]:
-        status |= int(collect('profile', short + '-profile', app) != 0)
+            if collect('diagnostic', f'{short}-{repetition}', app) != 0:
+                return 1  # A failed launcher stops its dependent checks; raw errors remain.
+    return 0
+
+try:
+    if PHASE not in {'all', 'diagnostic'}:
+        raise ValueError('unknown collection phase: ' + PHASE)
+    status |= checks()
+    if PHASE == 'all':
+        for app, short in [('tetragon/observer', 'tetragon'), ('tracee/monitor', 'tracee')]:
+            status |= int(collect('profile', short + '-profile', app) != 0)
 except Exception:
     status = 1
     (OUT / 'exception.txt').write_text(traceback.format_exc())

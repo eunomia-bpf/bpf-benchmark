@@ -27,3 +27,12 @@ and PMU samples in P3 routines, the kernel hash lookup family, program bodies,
 memset and other kernel work. `memset-calls-20261126` receives the observed
 memset weight with the denominator and attribution limits. Implementation
 changes wait for this evidence; workload/framework definitions stay fixed.
+
+The first collection's six diagnostic launches returned an immediate Make
+path error: its relative entry path was resolved from this result directory.
+No application ran in those six attempts; their logs and summaries are kept.
+The absolute entry path fixes this wrapper error. The independent Tetragon and
+Tracee profiles continue, then retry-checks.sh runs the required three
+Tetragon and three OTel checks. A launcher failure now stops dependent check
+launches while retaining their error; it does not discard measurements or
+block independent profiles.
