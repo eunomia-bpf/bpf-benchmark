@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpInitialized
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpInitialized.entry_initialized
+#print axioms Arm64ProducerIsXdpInitialized.entry_initialized
