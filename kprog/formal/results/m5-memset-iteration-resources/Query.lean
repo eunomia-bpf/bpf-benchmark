@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemsetIterationResources
+
+#check KProgFormal.ClightRefinement.Arm64MemsetIterationResources.field
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetIterationResources.field
+#check KProgFormal.ClightRefinement.Arm64MemsetIterationResources.resources
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetIterationResources.resources
+#check KProgFormal.ClightRefinement.Arm64MemsetIterationResources.after_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetIterationResources.after_stores
