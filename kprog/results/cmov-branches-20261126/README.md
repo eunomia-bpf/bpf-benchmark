@@ -128,8 +128,8 @@ code spends its time, particularly Tetragon's kernel lock path.
 
 The next profiles keep the32GiB/8vCPU/60s stats-off cycles protocol on the
 unchanged image and capture actual generic_tracepo/perf_unwind_nat code.
-The guest also requests one CPU backtrace for each newly observed stress-ng
-parent, near workload startup. Poll/return status and request start/end guest
+The guest also requests one CPU backtrace for each newly observed oldest stress-ng
+PID, near workload startup. Poll/return status and request start/end guest
 uptimes are retained in stack-requests.txt; the kernel log supplies the stacks.
 This is profiling observation, with no P/flag/runner/workload change. These
 requests can perturb the guest: compare their actual intervals with the

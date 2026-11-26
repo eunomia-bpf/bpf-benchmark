@@ -4,7 +4,7 @@ cd /workspaces/repository
 out=$1
 lane=/workspaces/.agent-state/kprog-lanes/perf
 function wake_lane() {
-    printf '\nP3 workload-window PMU analysis ended (status %s). Read %s/{tetragon-profile,tracee-profile}/phase-summary.json and analysis-publication.log. The corrected short-check collector448885 may still be running; inspect its journal. Determine the evidenced cause, record memset weight/denominator, and implement/verify only a within-design fix. Full timing stays frozen.\n' "$?" "$out" >> "$lane/resume-msg.md"
+    printf '\nP3 workload-window PMU analysis ended (status %s). Read %s/*-profile/phase-summary.json and analysis-publication.log. Check collector/image provenance and any CPU backtrace intervals; determine the evidenced cause and implement/verify only a common within-design fix. Full timing stays frozen.\n' "$?" "$out" >> "$lane/resume-msg.md"
     python3 - "$lane/STOP" <<'PY'
 from pathlib import Path
 import sys
@@ -14,11 +14,14 @@ if p.exists() and p.read_text().startswith('PERF P3 attribution:'):
 PY
 }
 trap wake_lane EXIT
-python3 kprog/results/p3-attribution-20261126/pmu_owner.py "$out/tetragon-profile" "$out/tracee-profile" > "$out/ownership-inventory.log"
-python3 kprog/results/p3-attribution-20261126/profile_summary.py "$out/tetragon-profile" "$out/tracee-profile"
-paths=("$out/tetragon-profile/phase-summary.json" "$out/tetragon-profile/summary-perf.log"
-       "$out/tracee-profile/phase-summary.json" "$out/tracee-profile/summary-perf.log"
-       "$out/tetragon-profile/pmu-owners.json" "$out/tracee-profile/pmu-owners.json" "$out/ownership-inventory.log")
+cases=("$out"/*-profile)
+python3 kprog/results/p3-attribution-20261126/pmu_owner.py "${cases[@]}" > "$out/ownership-inventory.log"
+python3 kprog/results/p3-attribution-20261126/profile_summary.py "${cases[@]}"
+paths=("$out/ownership-inventory.log")
+for case in "${cases[@]}"; do
+    paths+=("$case/phase-summary.json" "$case/pmu-owners.json")
+    if [ -f "$case/summary-perf.log" ]; then paths+=("$case/summary-perf.log"); fi
+done
 for f in "$out"/*/phase-summary-initial.json "$out/analysis-initial.log"; do
     if [ -f "$f" ]; then paths+=("$f"); fi
 done
