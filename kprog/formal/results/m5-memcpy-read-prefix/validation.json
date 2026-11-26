@@ -1,0 +1,49 @@
+{
+  "confirmed_utc": "2026-11-26T13:21:44.250976+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix"
+    ],
+    "exit": 0,
+    "seconds": 1.944319486618042,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 402,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-read-prefix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5591816902160645,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_control_prefix_steps": 101,
+    "actual_call_to_byte_case_steps": 179,
+    "actual_reader_local_objects": 13
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyReadPrefix.lean",
+      "size_bytes": 7437,
+      "mtime_ns": 1795698750340061782
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

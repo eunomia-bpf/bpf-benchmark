@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix.route
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix.route
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadPrefix.original
