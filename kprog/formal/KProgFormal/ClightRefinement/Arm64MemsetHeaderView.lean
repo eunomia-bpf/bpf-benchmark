@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Arm64ProducerAbiBodyView
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpBodyView
 import KProgFormal.ClightRefinement.Arm64MemsetStackInputs
 import KProgFormal.ClightRefinement.Arm64ProducerTailFrame
 
@@ -27,6 +27,9 @@ structure Ready (initial memory : CC.Mem) (entry : HeaderLocal initial) where
   view : View initial memory entry
   resources : Arm64ProgramEntryResources.Resources initial memory entry
   access : memory.access = (allocation initial).2.access
+  isXdp : ∃ cell : TailLocal initial 5,
+    CC.Mem.load CC.Mptr memory entry.block 696 = some (.Vptr cell.block 0) ∧
+    CC.Mem.load .Mint8unsigned memory cell.block 0 = some (.Vint 0)
 
 private noncomputable def canonical_tag (initial : CC.Mem) (source : TailLocal initial 2) : StackTagLocal initial := by
   let actual := Classical.choice (stack_tag_local initial)
@@ -132,12 +135,16 @@ theorem entry_setup_represents (initial : CC.Mem) (ctxBlock : CC.Block)
         before.nextblock = (Arm64ProgramEntryAllocation.allocation initial).2.nextblock ∧
         CC.Mem.load .Mint8unsigned after kind.block 0 = some (.Vint 2) ∧
         CC.Mem.load CC.Mptr after entry.block 704 = some (.Vptr kind.block 0) ∧
-        Nonempty (View initial after entry) := by
+        Nonempty (View initial after entry) ∧
+        ∃ cell : TailLocal initial 5,
+          CC.Mem.load CC.Mptr after entry.block 696 = some (.Vptr cell.block 0) ∧
+          CC.Mem.load .Mint8unsigned after cell.block 0 = some (.Vint 0) := by
+  let cell : TailLocal initial 5 := Classical.choice (tail_local initial 5)
   obtain ⟨entry,cells,sources,localVector,before,temps,after,traces,length,run,pointers,vectorPointers,
-    tailReads,storage,result,registers,resources,data,access,next,abi,abiPointer⟩ :=
-    Arm64ProducerAbiBodyView.entry_setup_represents initial ctxBlock ctxOfs k kind addresses ctxWord context
+    tailReads,storage,result,registers,resources,data,access,next,abi,abiPointer,isXdp,isXdpPointer⟩ :=
+    Arm64ProducerIsXdpBodyView.entry_setup_represents initial ctxBlock ctxOfs k kind cell addresses ctxWord context
       values provider flags flagProvider vectors vectorProvider origins s native fields old reads
   exact ⟨entry,cells,sources,localVector,before,temps,after,traces,length,run,pointers,vectorPointers,
-    tailReads,storage,result,registers,resources,data,access,next,abi,abiPointer,⟨of_header sources tailReads⟩⟩
+    tailReads,storage,result,registers,resources,data,access,next,abi,abiPointer,⟨of_header sources tailReads⟩,cell,isXdpPointer,isXdp⟩
 
 end KProgFormal.ClightRefinement.Arm64MemsetHeaderView

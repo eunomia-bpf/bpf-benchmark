@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackPrefix
+import KProgFormal.ClightRefinement.Arm64ProgramEntryMovStackRightsPrefix
+open KProgFormal.ClightRefinement
+#check Arm64MemsetHeaderView.entry_setup_represents
+#print axioms Arm64MemsetHeaderView.entry_setup_represents
+#check Arm64MemsetHeaderView.Ready.isXdp
+#print axioms Arm64MemsetHeaderView.Ready.isXdp
+#check Arm64ProgramEntryMovStackRightsPrefix.entry_pair
+#print axioms Arm64ProgramEntryMovStackRightsPrefix.entry_pair
+#check Arm64ProgramEntryResultStackPrefix.entry_corresponds
+#print axioms Arm64ProgramEntryResultStackPrefix.entry_corresponds

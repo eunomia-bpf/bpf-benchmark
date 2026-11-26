@@ -93,7 +93,7 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
       ∀ (tags : StackTagLocal initial) (i : Fin 24),
         CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0) := by
   obtain ⟨entry, cells, sources, localVector, before, temps, ready, traces, length, entryRun,
-      pointers, vectorPointers, tailReads, storage, result, registers, resources, ⟨data⟩, readyAccess, beforeNext,abi,abiPointer,⟨initialView⟩⟩ :=
+      pointers, vectorPointers, tailReads, storage, result, registers, resources, ⟨data⟩, readyAccess, beforeNext,abi,abiPointer,⟨initialView⟩,isXdpCell,isXdpPointer,isXdpZero⟩ :=
     Arm64MemsetHeaderView.entry_setup_represents initial ctxBlock ctxOfs k kind addresses ctxWord context
       values provider flags flagProvider vectors vectorProvider origins s native fields old reads
   have readyNext : ready.nextblock = (Arm64Producer.allocation initial).2.nextblock :=
@@ -111,7 +111,7 @@ theorem entry_pair (initial : CC.Mem) (ctxBlock : CC.Block)
       Arm64Program._sp_valid = some (.Vint 0) := by
     rw [result.nextblock]
     exact (Arm64ProgramEntryColdRead.cold_cache_reads result data cells pointers false).2
-  refine ⟨entry, cells, ready, temps, traces, length, readyNext, entryRun, result.ctx, ⟨⟨initialView,resources,readyAccess⟩⟩, ?_⟩
+  refine ⟨entry, cells, ready, temps, traces, length, readyNext, entryRun, result.ctx, ⟨⟨initialView,resources,readyAccess,⟨isXdpCell,isXdpPointer,isXdpZero⟩⟩⟩, ?_⟩
   intro supplied trace origin outcome
   obtain ⟨firstWritten, middle, secondWritten, after, finalStorage, finalWord, finalTag, pair,
       finalRegisters, frame, firstFree, firstFreeFrame, firstContents, middleNext, firstReleased,
