@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ClobberFlagState
+
+open KProgFormal.ClightRefinement
+#check Arm64ClobberFlagState.written
+#print axioms Arm64ClobberFlagState.written
+#check Arm64ClobberFlagState.caller_written
+#print axioms Arm64ClobberFlagState.caller_written
