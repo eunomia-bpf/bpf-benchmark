@@ -1,0 +1,94 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+python3 /workspaces/repository/kprog/results/hash-family-c-20261126/collect.py /workspaces/repository/kprog/results/hash-family-c-20261126/range-512-image-20261126T121638Z
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Frozen functional check; no full timing claim.",
+  "checks": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_122957_348057",
+      "apps": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 14,
+      "native_load_failures": 0
+    },
+    {
+      "app": "bcc/set",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_123242_613594",
+      "apps": [
+        {
+          "app": "bcc/set",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 25,
+      "native_load_failures": 0
+    },
+    {
+      "app": "cilium/agent",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_123546_793159",
+      "apps": [
+        {
+          "app": "cilium/agent",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 135,
+      "native_load_failures": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_123833_463916",
+      "apps": [
+        {
+          "app": "tetragon/observer",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 288,
+      "native_load_failures": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_124300_184529",
+      "apps": [
+        {
+          "app": "tracee/monitor",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 169,
+      "native_load_failures": 0
+    },
+    {
+      "app": "katran",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_124642_748933",
+      "apps": [
+        {
+          "app": "katran",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 1,
+      "native_load_failures": 0
+    }
+  ]
+}
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
