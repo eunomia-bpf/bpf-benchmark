@@ -11,6 +11,7 @@ import sys
 PERF = '/workspaces/.agent-state/kprog-ck/perf-tool/perf'
 SAMPLE = re.compile(r'^\d+ (\d+) \S+ \[\S+\]: PERF_RECORD_SAMPLE\(IP, 0x([45])\): \S+ 0x([0-9a-f]+) ')
 FRAME = re.compile(r'^\.\.\.\.\.\s+\d+: ([0-9a-f]+)')
+PROGRAM = re.compile(r'^bpf_prog_[0-9a-f]{16}_')
 MEASURE = re.compile(r'^\[(\d+\.\d+) .*socket: cmd=measure_(start|finish) ')
 LOOKUPS = {'__htab_map_lookup_elem', 'htab_map_hash', 'lookup_nulls_elem_raw', 'jhash',
            'htab_map_lookup_elem', 'htab_lru_map_lookup_elem', 'htab_percpu_map_lookup_elem',
@@ -53,11 +54,12 @@ def summarize(out):
         return (names[starts[index]], address - starts[index]) if index >= 0 else ('[unmapped]', 0)
 
     def group(name):
+        canonical = name.removeprefix('__pi_')
         if name.startswith('kprog_htab_elem_k'): return 'p3_hash'
         if name.partition('.')[0] in LOOKUPS: return 'kernel_hash_lookup'
-        if name.startswith(('memset', '__memset')): return 'memset'
-        if name.startswith(('memcmp', '__memcmp')): return 'memcmp'
-        if name.startswith('bpf_prog_'): return 'program_body'
+        if canonical.startswith(('memset', '__memset')): return 'memset'
+        if canonical.startswith(('memcmp', '__memcmp')): return 'memcmp'
+        if PROGRAM.match(name): return 'program_body'
         if name == '[user]': return 'guest_user'
         return 'other_kernel'
 
@@ -85,12 +87,12 @@ def summarize(out):
                 phase = next((p for p, (a, b) in windows.items() if a <= uptime < b), None)
                 if phase is None: continue
                 name, _ = resolve(phase, int(match[3], 16))
-                current = [phase, name, group(name), False, name.startswith('bpf_prog_')]
+                current = [phase, name, group(name), False, bool(PROGRAM.match(name))]
             elif current is not None and (match := FRAME.match(line)):
                 address = int(match[1], 16)
                 if address >= 0xfffffffffffff001: continue  # PERF_CONTEXT_MAX (-4095).
                 current[3] = True
-                current[4] |= resolve(current[0], address)[0].startswith('bpf_prog_')
+                current[4] |= bool(PROGRAM.match(resolve(current[0], address)[0]))
         finish()
         if process.wait(): raise RuntimeError('perf dump failed; see summary-perf.log')
     result = dict(run=str(run), event='cpu_core/cycles/', period=1000000, windows=windows, phases={})
