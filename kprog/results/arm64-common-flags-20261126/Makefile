@@ -17,3 +17,9 @@ atomic-ir-audit:
 .PHONY: abi-probe
 abi-probe:
 	python3 abi_probe.py
+
+.PHONY: abi-checked-before abi-checked-after
+abi-checked-before:
+	python3 abi_checked.py before
+abi-checked-after:
+	python3 abi_checked.py after

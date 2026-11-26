@@ -1,0 +1,28 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 abi_checked.py after
+{
+  "recorded_utc": "2026-11-26T22:35:42Z",
+  "phase": "after",
+  "native_flags": [
+    "-target",
+    "aarch64-unknown-linux-gnu",
+    "-O3",
+    "-mtune=neoverse-n1",
+    "-mno-outline-atomics",
+    "-ffixed-x26",
+    "-foptimize-sibling-calls",
+    "-fomit-frame-pointer",
+    "-mgeneral-regs-only",
+    "-fno-stack-protector",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables"
+  ],
+  "kernel_link_returncode": 0,
+  "kernel_link_stderr": "native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total\n  - atomic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote 28 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.relocs\nnative-link: wrote ABI metadata, 1 load site(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.abi\n",
+  "execution_returncode": 0,
+  "execution_stdout": "atomic_cases=64 values_ok=1 counter_pointer_ok=1\n",
+  "execution_stderr": "",
+  "scope": "Actual checked compiler/proof/kernel-link diagnostic and Cortex-A57 userspace atomic/ABI observer. No stock B admission, real kernel tail-call execution, application, image or timing result.",
+  "frontend_ir_unchanged": true
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

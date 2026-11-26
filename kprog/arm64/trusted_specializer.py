@@ -95,7 +95,10 @@ AARCH64_LAYOUT = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:6
 # the arena by name; both spellings are named so a body that gains a tag
 # typedef keeps matching.
 AARCH64_STACK_ARENA = "union.anon"
-AARCH64_HELPER_FLAGS = ["-target", AARCH64_TRIPLE, "-O3", "-foptimize-sibling-calls",
+# Match P's architecture policy: x26 belongs to the native tail frame, and
+# kernel linking has no userspace outline-atomic runtime.
+AARCH64_HELPER_FLAGS = ["-target", AARCH64_TRIPLE, "-O3", "-mtune=neoverse-n1",
+                         "-mno-outline-atomics", "-ffixed-x26", "-foptimize-sibling-calls",
                          "-fomit-frame-pointer", "-mgeneral-regs-only",
                          "-fno-stack-protector", "-fno-asynchronous-unwind-tables",
                          "-fno-unwind-tables"]

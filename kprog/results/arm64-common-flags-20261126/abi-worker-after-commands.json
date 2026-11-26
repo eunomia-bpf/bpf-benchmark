@@ -1,0 +1,99 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_arm64",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-E",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/fixture.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "aarch64-linux-gnu-objdump",
+      "-dr",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o:     file format elf64-littleaarch64\n\n\nDisassembly of section .text:\n\n0000000000000000 <atomic_entry>:\n   0:\taa0003e8 \tmov\tx8, x0\n   4:\tc85ffd00 \tldaxr\tx0, [x8]\n   8:\t91000409 \tadd\tx9, x0, #0x1\n   c:\tc80afd09 \tstlxr\tw10, x9, [x8]\n  10:\t35ffffaa \tcbnz\tw10, 4 <atomic_entry+0x4>\n  14:\td65f03c0 \tret\n\n0000000000000018 <tail_entry>:\n  18:\td10203ff \tsub\tsp, sp, #0x80\n  1c:\ta90373fe \tstp\tx30, x28, [sp, #48]\n  20:\ta90467fb \tstp\tx27, x25, [sp, #64]\n  24:\ta9055ff8 \tstp\tx24, x23, [sp, #80]\n  28:\ta90657f6 \tstp\tx22, x21, [sp, #96]\n  2c:\ta9074ff4 \tstp\tx20, x19, [sp, #112]\n  30:\tf9400056 \tldr\tx22, [x2]\n  34:\tf9400457 \tldr\tx23, [x2, #8]\n  38:\taa0103f3 \tmov\tx19, x1\n  3c:\tf9400848 \tldr\tx8, [x2, #16]\n  40:\taa0003f4 \tmov\tx20, x0\n  44:\ta90223fd \tstp\tx29, x8, [sp, #32]\n  48:\tf9400c59 \tldr\tx25, [x2, #24]\n  4c:\tf9401049 \tldr\tx9, [x2, #32]\n  50:\tf940145c \tldr\tx28, [x2, #40]\n  54:\tf940185d \tldr\tx29, [x2, #48]\n  58:\tf9401c58 \tldr\tx24, [x2, #56]\n  5c:\tf940205b \tldr\tx27, [x2, #64]\n  60:\tf940244a \tldr\tx10, [x2, #72]\n  64:\tf9402848 \tldr\tx8, [x2, #80]\n  68:\ta9002be8 \tstp\tx8, x10, [sp]\n  6c:\tf9402c48 \tldr\tx8, [x2, #88]\n  70:\ta90127e8 \tstp\tx8, x9, [sp, #16]\n  74:\t94000000 \tbl\t0 <bpf_ktime_get_ns>\n\t\t\t74: R_AARCH64_CALL26\tbpf_ktime_get_ns\n  78:\taa0003f5 \tmov\tx21, x0\n  7c:\taa1403e0 \tmov\tx0, x20\n  80:\taa1303e1 \tmov\tx1, x19\n  84:\t120012a2 \tand\tw2, w21, #0x1f\n  88:\t94000000 \tbl\t0 <bpf_tail_call>\n\t\t\t88: R_AARCH64_CALL26\tbpf_tail_call\n  8c:\tf94017f1 \tldr\tx17, [sp, #40]\n  90:\t91000aab \tadd\tx11, x21, #0x2\n  94:\t910012a9 \tadd\tx9, x21, #0x4\n  98:\ta9400fe0 \tldp\tx0, x3, [sp]\n  9c:\t910022aa \tadd\tx10, x21, #0x8\n  a0:\tca11016b \teor\tx11, x11, x17\n  a4:\ta94147e1 \tldp\tx1, x17, [sp, #16]\n  a8:\t91001aac \tadd\tx12, x21, #0x6\n  ac:\t91000ead \tadd\tx13, x21, #0x3\n  b0:\t910016ae \tadd\tx14, x21, #0x5\n  b4:\t91001eaf \tadd\tx15, x21, #0x7\n  b8:\t910006b0 \tadd\tx16, x21, #0x1\n  bc:\tca1d018c \teor\tx12, x12, x29\n  c0:\tca1b014a \teor\tx10, x10, x27\n  c4:\tca110129 \teor\tx9, x9, x17\n  c8:\t91002ab2 \tadd\tx18, x21, #0xa\n  cc:\tca1c01ce \teor\tx14, x14, x28\n  d0:\tca170210 \teor\tx16, x16, x23\n  d4:\tca1801ef \teor\tx15, x15, x24\n  d8:\tca1901ad \teor\tx13, x13, x25\n  dc:\t910026b1 \tadd\tx17, x21, #0x9\n  e0:\tca000252 \teor\tx18, x18, x0\n  e4:\t91002ea0 \tadd\tx0, x21, #0xb\n  e8:\t8b0a0129 \tadd\tx9, x9, x10\n  ec:\t8b0c016a \tadd\tx10, x11, x12\n  f0:\tca1602a8 \teor\tx8, x21, x22\n  f4:\tca030231 \teor\tx17, x17, x3\n  f8:\tca010000 \teor\tx0, x0, x1\n  fc:\t8b090149 \tadd\tx9, x10, x9\n 100:\t8b0f01aa \tadd\tx10, x13, x15\n 104:\t8b0e020b \tadd\tx11, x16, x14\n 108:\t8b0a016a \tadd\tx10, x11, x10\n 10c:\t8b080248 \tadd\tx8, x18, x8\n 110:\t8b00022b \tadd\tx11, x17, x0\n 114:\ta9474ff4 \tldp\tx20, x19, [sp, #112]\n 118:\t8b090149 \tadd\tx9, x10, x9\n 11c:\ta94657f6 \tldp\tx22, x21, [sp, #96]\n 120:\t8b0b0108 \tadd\tx8, x8, x11\n 124:\ta9455ff8 \tldp\tx24, x23, [sp, #80]\n 128:\tf94013fd \tldr\tx29, [sp, #32]\n 12c:\ta94467fb \tldp\tx27, x25, [sp, #64]\n 130:\t8b090100 \tadd\tx0, x8, x9\n 134:\ta94373fe \tldp\tx30, x28, [sp, #48]\n 138:\t910203ff \tadd\tsp, sp, #0x80\n 13c:\td65f03c0 \tret\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.proof.o",
+      "--symbol",
+      "atomic_entry",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/empty-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.relocs",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.abi"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total\n  - atomic_entry (vaddr 0x0, 24 bytes) [entry]\nnative-link: wrote 28 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.relocs\nnative-link: wrote ABI metadata, 1 load site(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/linked.abi\n"
+  },
+  {
+    "command": [
+      "aarch64-linux-gnu-gcc",
+      "-O2",
+      "-static",
+      "-ffixed-x26",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_driver.c",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/execute"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "qemu-aarch64-static",
+      "-cpu",
+      "cortex-a57",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/execute"
+    ],
+    "returncode": 0,
+    "stdout": "atomic_cases=64 values_ok=1 counter_pointer_ok=1\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,24 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 abi_checked.py before
+{
+  "recorded_utc": "2026-11-26T22:33:54Z",
+  "phase": "before",
+  "native_flags": [
+    "-target",
+    "aarch64-unknown-linux-gnu",
+    "-O3",
+    "-foptimize-sibling-calls",
+    "-fomit-frame-pointer",
+    "-mgeneral-regs-only",
+    "-fno-stack-protector",
+    "-fno-asynchronous-unwind-tables",
+    "-fno-unwind-tables"
+  ],
+  "kernel_link_returncode": 1,
+  "kernel_link_stderr": "native-link: arm64 entry=atomic_entry (24 bytes), 1 reachable symbol(s) total\n  - atomic_entry (vaddr 0x0, 24 bytes) [entry]\nError: arm64 helper call __aarch64_ldadd8_acq_rel has no helper address\n",
+  "execution_returncode": 1,
+  "execution_stdout": "atomic_cases=64 values_ok=1 counter_pointer_ok=0\n",
+  "execution_stderr": "",
+  "scope": "Actual checked compiler/proof/kernel-link diagnostic and Cortex-A57 userspace atomic/ABI observer. No stock B admission, real kernel tail-call execution, application, image or timing result."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

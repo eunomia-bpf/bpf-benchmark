@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 abi_checked.py before
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/arm64-common-flags-20261126/abi_checked.py", line 39, in <module>
+    result = worker.compile_checked_simulator(artifacts,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/arm64/trusted_specializer.py", line 145, in compile_checked_simulator
+    run([compiler, ir, "-o", lowered, "--helper-list", helper_list,
+  File "/workspaces/repository/kprog/arm64/trusted_specializer.py", line 133, in run
+    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)
+subprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.bc', '-o', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.bc', '--helper-list', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.helpers.txt', '--stack-arena', 'union.anon', '--arch', 'aarch64-unknown-linux-gnu', '--data-layout', 'e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128']' returned non-zero exit status 1.
+make: *** [Makefile:23: abi-checked-before] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
