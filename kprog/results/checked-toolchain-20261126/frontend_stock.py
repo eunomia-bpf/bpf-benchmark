@@ -10,7 +10,8 @@ import traceback
 HERE=Path(__file__).resolve().parent
 ROOT=HERE.parents[2]
 LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
-OUT=HERE/'frontend-stock'
+token=subprocess.check_output(['date','-u','+%Y%m%dT%H%M%SZ'],text=True).strip()
+OUT=HERE/('frontend-stock-'+token)
 OUT.mkdir()
 record=dict(started_utc=subprocess.check_output(['date','-u','+%Y-%m-%dT%H:%M:%SZ'],text=True).strip(),
  revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),pid=os.getpid(),
@@ -35,8 +36,10 @@ try:
  with Path('/workspaces/.agent-state/kprog-lanes/locks/timing').open('a') as timing,Path('/workspaces/.agent-state/kprog-lanes/locks/image').open('a') as image:
   fcntl.flock(timing,fcntl.LOCK_SH);fcntl.flock(image,fcntl.LOCK_SH)
   with (OUT/'guest.log').open('w') as log:r=subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
- record['returncode']=r.returncode;status=r.returncode
- if (OUT/'result.json').exists():record['results']=json.loads((OUT/'result.json').read_text())
+ record['returncode']=r.returncode
+ record['results']=json.loads((OUT/'result.json').read_text())
+ rows=record['results']['requests']
+ status=0 if r.returncode==0 and len(rows)==3 and all(row['returncode']==0 for row in rows) else 1
 except Exception:
  record['exception']=traceback.format_exc()
 finally:
