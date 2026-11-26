@@ -68,6 +68,7 @@ def summarize(out):
     counts = {p: collections.Counter() for p in windows}
     functions = {p: collections.Counter() for p in windows}
     chains = {p: collections.Counter() for p in windows}
+    ips = {p: collections.Counter() for p in windows}
     other_owners = {p: collections.Counter() for p in windows}
     for kind, misc, offset, size, data in records(out / 'host-perf.data'):
         if kind != 9 or misc & 7 not in (4, 5): continue
@@ -83,6 +84,7 @@ def summarize(out):
         real_frames = [ip for ip in frames if ip < 0xfffffffffffff001]
         bpf = bool(PROGRAM.match(name)) or any(PROGRAM.match(resolve(phase, ip)[0]) for ip in real_frames)
         counts[phase][category] += 1
+        ips[phase][address] += 1
         functions[phase][name] += 1
         chains[phase]['samples_with_noncontext_chain_frame'] += int(bool(real_frames))
         chains[phase]['samples_with_bpf_body_or_chain'] += int(bpf)
@@ -95,11 +97,13 @@ def summarize(out):
         result['phases'][phase] = dict(total_samples=total, kernel_samples=kernel,
             groups=dict(counter), kernel_sample_shares={k: v / kernel for k, v in counter.items() if k != 'guest_user'},
             callchains=dict(chains[phase]), functions=dict(functions[phase].most_common()),
+            ip_samples={hex(ip): n for ip, n in ips[phase].most_common()},
             other_owner_samples=dict(other_owners[phase]))
     (out / 'phase-summary.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps({k: v for k, v in result.items() if k != 'phases'}, indent=2), flush=True)
     for phase, values in result['phases'].items():
         print(phase, values['groups'], values['callchains'], flush=True)
 
-for target in sys.argv[1:]:
-    summarize(Path(target))
+if __name__ == '__main__':
+    for target in sys.argv[1:]:
+        summarize(Path(target))

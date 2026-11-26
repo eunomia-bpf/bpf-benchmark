@@ -1,0 +1,33 @@
+{
+  "scope": "All guest samples on recorded host CPUs, before ownership selection.",
+  "samples": 6132253,
+  "owners": [
+    {
+      "pid": 522509,
+      "samples": 5866138,
+      "comms": [
+        "kvm-nx-lpage-re",
+        "qemu-system-x86"
+      ],
+      "example": {
+        "tid": 522511,
+        "time": 94940251495541,
+        "cpu": 2,
+        "ip": "0xffffffffaf011c5c",
+        "identifier": 192
+      }
+    },
+    {
+      "pid": 0,
+      "samples": 266115,
+      "comms": [],
+      "example": {
+        "tid": 0,
+        "time": 94940252878419,
+        "cpu": 0,
+        "ip": "0x2ec21c5",
+        "identifier": 190
+      }
+    }
+  ]
+}
