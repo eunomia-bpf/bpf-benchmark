@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSpCheck.kept
