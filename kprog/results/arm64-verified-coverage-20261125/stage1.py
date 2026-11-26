@@ -30,8 +30,8 @@ parser.add_argument('--app', action='append', default=[])
 parser.add_argument('--out', type=Path, required=True)
 parser.add_argument('--root', type=Path,
                     default=ROOT / 'vendor/build/native-bpf/arm64/7.0.0-rc2+/native')
-parser.add_argument('--compiler', type=Path, default=Path('/tmp/cc_compile-sim-ir'))
-parser.add_argument('--context-compiler', type=Path, default=Path('/tmp/cc_context-lower'))
+parser.add_argument('--compiler', type=Path, default=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir'))
+parser.add_argument('--context-compiler', type=Path, default=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower'))
 parser.add_argument('--native-link', type=Path,
                     default=ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
 parser.add_argument('--jobs', type=int, default=12)

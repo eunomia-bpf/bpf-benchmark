@@ -38,7 +38,7 @@ run(['clang-18', '-E', source, '-o', prepared])
 artifacts['simulator_source'] = str(prepared)
 result = worker.compile_checked_simulator(artifacts,
     ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link',
-    Path('/tmp/cc_compile-sim-ir'))
+    Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir'))
 obj, proof = Path(result['native_object']), Path(result['native_proof_object'])
 assembly = run(['aarch64-linux-gnu-objdump', '-dr', obj]).stdout
 (HERE / ('abi-worker-' + phase + '.dis')).write_text(assembly)

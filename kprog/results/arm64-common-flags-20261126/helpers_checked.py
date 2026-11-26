@@ -32,7 +32,7 @@ maps=[dict(name=name,map_type=kind,key_size=key_size,value_size=8,max_entries=2,
 artifacts=dict(simulator_source=str(prepared),simulator_object=str(bpf),
     simulator_program='array_entry',maps=maps,context_kind='raw',kernel_btf=str(btf))
 linker=ROOT/'kprog/x86/native_lab/native_link/target/release/native-link'
-r=worker.compile_checked_simulator(artifacts,linker,Path('/tmp/cc_compile-sim-ir'))
+r=worker.compile_checked_simulator(artifacts,linker,Path('/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir'))
 obj=Path(r['native_object'])
 undefined=run(['llvm-nm-18','-u','-j',obj]).stdout.splitlines()
 plan=BUILD/'helpers-plan.json'

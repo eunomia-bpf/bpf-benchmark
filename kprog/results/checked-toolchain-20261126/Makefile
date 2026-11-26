@@ -14,3 +14,9 @@ compare:
 .PHONY: regressions
 regressions:
 	python3 regressions.py
+
+.PHONY: consolidate arm-regressions
+consolidate:
+	flock /workspaces/.agent-state/kprog-lanes/locks/image python3 consolidate.py
+arm-regressions:
+	$(MAKE) -C ../arm64-common-flags-20261126 abi-checked-after helpers-mixed
