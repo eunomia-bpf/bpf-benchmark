@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64FlagRhsRegister
+#check KProgFormal.ClightRefinement.Arm64FlagRhsRegister.enter
+#print axioms KProgFormal.ClightRefinement.Arm64FlagRhsRegister.enter
+#check KProgFormal.ClightRefinement.Arm64FlagRhsRegister.execute
+#print axioms KProgFormal.ClightRefinement.Arm64FlagRhsRegister.execute
