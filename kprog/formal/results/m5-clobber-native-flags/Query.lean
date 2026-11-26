@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ClobberNativeFlags
+#check KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.masked_scalar
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.masked_scalar
+#check KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.native_values
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.native_values
+#check KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.native_other
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.native_other
+#check KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.represented
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberNativeFlags.represented
