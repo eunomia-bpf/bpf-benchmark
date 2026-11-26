@@ -33,6 +33,58 @@ entry caller_discards_return, empty
 end caller_discards_return
 entry caller_uses_return, empty
 end caller_uses_return
+entry callee_defines_return, quiet
+end callee_defines_return
+entry callee_partial_return, partial
+end callee_partial_return
+entry callee_conditional_return, conditional
+end callee_conditional_return
+entry callee_nested_return, nested
+end callee_nested_return
+entry callee_defines_flags, clear_flags
+    setc %al
+    movzbl %al,%eax
+end callee_defines_flags
+entry redirected_return, skip_return
+    mov %rdx,%rax
+end redirected_return
+entry unresolved_return, lose_return
+end unresolved_return
+
+.type lose_return,@function
+lose_return:
+    movq $0,(%rsp)
+    ret
+.size lose_return,.-lose_return
+
+.type partial,@function
+partial:
+    mov $0,%al
+    ret
+.size partial,.-partial
+.type conditional,@function
+conditional:
+    test %edi,%edi
+    jz 1f
+    mov $0,%eax
+1:  ret
+.size conditional,.-conditional
+.type nested,@function
+nested:
+    call quiet
+    ret
+.size nested,.-nested
+.type clear_flags,@function
+clear_flags:
+    xor %eax,%eax
+    ret
+.size clear_flags,.-clear_flags
+.type skip_return,@function
+skip_return:
+    add $8,%rsp
+    xor %eax,%eax
+    ret
+.size skip_return,.-skip_return
 
 .type empty,@function
 empty:

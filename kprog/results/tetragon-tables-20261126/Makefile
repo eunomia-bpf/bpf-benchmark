@@ -8,3 +8,7 @@ check-calls:
 .PHONY: compile
 compile:
 	python3 compile.py
+
+.PHONY: return-paths
+return-paths:
+	python3 return_paths.py $(REQUESTS)

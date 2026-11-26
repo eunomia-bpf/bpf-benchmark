@@ -1,0 +1,36 @@
+{
+  "recorded_utc": "2026-11-26T16:40:39Z",
+  "scope": "Exact generated-text comparison, no per-program production selection.",
+  "classes": [
+    {
+      "requests": [
+        12,
+        16,
+        23,
+        33,
+        41,
+        49,
+        58,
+        71,
+        75,
+        80
+      ],
+      "source_bytes": 371430
+    },
+    {
+      "requests": [
+        38,
+        64
+      ],
+      "source_bytes": 370458
+    },
+    {
+      "requests": [
+        39,
+        62
+      ],
+      "source_bytes": 608257
+    }
+  ],
+  "request39_source_unchanged_since_compilation": true
+}

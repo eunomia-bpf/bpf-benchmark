@@ -1,0 +1,77 @@
+[
+  {
+    "case": "unused_local",
+    "private_results_dead": true,
+    "expected": true
+  },
+  {
+    "case": "callee_reads_register",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "caller_reads_register",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "callee_reads_flags",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "caller_reads_flags",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "unresolved_external",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "known_helper",
+    "private_results_dead": true,
+    "expected": true
+  },
+  {
+    "case": "caller_discards_return",
+    "private_results_dead": true,
+    "expected": true
+  },
+  {
+    "case": "caller_uses_return",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "callee_defines_return",
+    "private_results_dead": false,
+    "expected": true
+  },
+  {
+    "case": "callee_partial_return",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "callee_conditional_return",
+    "private_results_dead": false,
+    "expected": false
+  },
+  {
+    "case": "callee_nested_return",
+    "private_results_dead": false,
+    "expected": true
+  },
+  {
+    "case": "callee_defines_flags",
+    "private_results_dead": false,
+    "expected": true
+  },
+  {
+    "case": "redirected_return",
+    "private_results_dead": false,
+    "expected": true
+  }
+]

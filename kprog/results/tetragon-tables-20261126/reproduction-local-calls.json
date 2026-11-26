@@ -1,0 +1,30 @@
+[
+  {
+    "request_id": 39,
+    "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/39.success.tar.gz",
+    "historical_error": "relative table computation has live register or flag results",
+    "status": "lowered",
+    "input_instructions": 4252,
+    "output_instructions": 4244,
+    "b_source_generation": {
+      "status": "generated",
+      "source_bytes": 608257
+    },
+    "liveness_witnesses": [],
+    "indirect_jump_context": []
+  },
+  {
+    "request_id": 62,
+    "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/62.success.tar.gz",
+    "historical_error": "relative table computation has live register or flag results",
+    "status": "lowered",
+    "input_instructions": 4252,
+    "output_instructions": 4244,
+    "b_source_generation": {
+      "status": "generated",
+      "source_bytes": 608257
+    },
+    "liveness_witnesses": [],
+    "indirect_jump_context": []
+  }
+]

@@ -78,7 +78,8 @@ def readonly_relocations(elf, section_index, symbol):
     return tuple(sorted(result)), tuple(sorted(maps)), tuple(sorted(absolute))
 
 
-def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets, *, initial=None):
+def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets, *, initial=None,
+                         return_destinations=None):
     """Check the bit masks of private definitions across the actual native CFG."""
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
@@ -140,12 +141,24 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
         live = tuple(mask & ~writes.get(reg, 0) for reg, mask in zip(scratch, live[:-1])) + (
             live[-1] & ~flags_written,)
         if insn.mnemonic == 'ret':
-            if observes_return and any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
+            if return_destinations is None:
+                if observes_return and any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
+                    return False
+                continue
+            destinations = return_destinations.get(addr)
+            if destinations is None:
+                if any(live):
+                    return False
+                continue
+            if None in destinations and any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
                 return False
-            continue
         if not any(live):
             continue
-        if insn.addr in table_targets:
+        if insn.mnemonic == 'ret':
+            children = tuple(target for target in destinations if target is not None)
+        elif local_target is not None and return_destinations is not None:
+            children = (local_target,)
+        elif insn.addr in table_targets:
             children = table_targets[insn.addr]
         elif insn.mnemonic == 'jmp':
             if not decode.has_direct_branch_target(insn.operands[0]):
@@ -161,7 +174,7 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
             if child != exit_addr and child not in by_addr:
                 raise ValueError('table liveness has an unknown CFG successor')
             pending.append((child, live, observes_return))
-        if local_target is not None:
+        if local_target is not None and return_destinations is None:
             # Check the actual callee and keep old masks in the continuation,
             # crediting no callee kills. Only the caller observes its return.
             pending.append((local_target, live, False))
@@ -299,13 +312,32 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     interiors = {i.addr for c in candidates for i in c['window'][1:-1]}
     provisional_insns = [provisional.get(i.addr, i) for i in insns if i.addr not in interiors]
     call_targets = decode.indirect_targets(provisional_insns, exit_addr, function_starts)
+    # Use the existing stack/return-address analysis on the original image.
+    # Unioning contexts overapproximates returns, without assuming that a RET
+    # must resume at the instruction following a structural CALL.
+    states = {}
+    targets = dict(call_targets)
+    targets.update({pc: frozenset(('code', target) for target in choices)
+                    for pc, choices in table_targets.items()})
+    decode.check_definedness(insns, targets, exit_addr, decode, incoming_states=states)
+    rsp = list(dict.fromkeys(info[0] for info in decode.REGS.values())).index('X86_RSP')
+    return_destinations = {}
+    for (_, pc), state in states.items():
+        if by_addr[pc].mnemonic != 'ret':
+            continue
+        destinations = state.pointers.get(state.aliases[rsp])
+        if not isinstance(destinations, frozenset) or not destinations:
+            return_destinations[pc] = None
+        elif return_destinations.get(pc, set()) is not None:
+            return_destinations.setdefault(pc, set()).update(d.target for d in destinations)
 
     def dead(candidate, private):
         add = candidate['window'][-2]
         if add.effects is None:
             raise ValueError('relative table lowering requires native instruction effects')
         return private_results_dead(insns, [target for _, target in candidate['choices']],
-            candidate['scratch'], add.effects.flags_written, decode, exit_addr, call_targets, table_targets, initial=private)
+            candidate['scratch'], add.effects.flags_written, decode, exit_addr, call_targets, table_targets,
+            initial=private, return_destinations=return_destinations)
 
     replacements, removed = {}, set()
     for candidate in candidates:

@@ -88,3 +88,40 @@ instructions and rejects request39 at instruction2 for an R10-528 write.
 It therefore advances into the existing B stack-pressure class; no stock
 acceptance or checked-native installation is claimed. See stock/README.md
 and the full verifier log. Request62 is not separately stock-loaded.
+
+PERF 2026-11-26T16:41:11Z — Actual return destinations
+
+The successful eight-stage request39 compile and its later stock R10-528
+rejection remain the actual callback result. The next common refinement
+uses the existing ABI analysis on the original native image to collect
+return-address destinations, including the outer-return sentinel. Liveness
+now follows known local callees through their actual writes and those return
+edges. Unioning contexts adds possible paths; it cannot invent a kill.
+Unknown return addresses refuse live private state. Other callers of the
+liveness routine retain the prior conservative behavior. Full RAX reads at
+callers and outer returns remain full-width observations. No callee ABI
+clobber assumption, runtime guard, app selection or compiler flag is added.
+
+The original request12 caller tests full RAX at0x301. The old unchanged
+continuation masks therefore refused the RET at0x5e0 even though the actual
+filter_32ty_map call defines its result. return-paths.json records72
+context-specific RET facts and a248-byte native stack extent from the
+existing ABI analysis; this is not the generated B verifier stack usage.
+
+All16 assembled/linked cases pass, including the original nine, full and
+partial return writes, a conditional non-write path, nested calls, flag
+kills, a deliberately redirected return and an unknown return. Prior source
+ea8b962bc fails four positive cases; both before logs and earlier fixture
+records are retained. These tests use actual native-link effects and ABI
+return facts, not a substitute instruction model.
+
+All14 retained liveness cases now complete lowering and full B C rendering.
+Exact source groups are12/16/23/33/41/49/58/71/75/80 (371430bytes),
+38/64 (370458bytes), and39/62 (608257bytes). The39 source is unchanged
+from its successful compilation. reproduction-local-calls.json retains the
+previous outcome; reproduction.json and reproduce-return-paths.log are the
+new breadth result. New groups12 and38 still need normal B compilation and
+stock verification. The separate ten hoisted-base/finite-target cases remain
+open. No main-config app acceptance or runtime gain is claimed. P, image,
+kernel, workload, common flags and combined LTO selection are unchanged;
+full timing stays frozen.
