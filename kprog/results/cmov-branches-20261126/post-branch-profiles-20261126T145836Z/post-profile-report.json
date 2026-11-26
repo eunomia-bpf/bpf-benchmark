@@ -4,6 +4,7 @@
       "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150046_350964",
       "app_status": "ok",
       "app_error": "",
+      "collector_source": "c3c019be288b03013ebcda1ad4a0d8b5ac128178",
       "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
       "qemu_host_pid": 603861,
       "windows": {
@@ -153,12 +154,127 @@
           "lock_samples": 891733,
           "lock_kernel_share": 0.7803716276232757
         }
-      }
+      },
+      "module_snapshots": [
+        {
+          "file": "kallsyms-bpf-6.64.txt",
+          "key_size_count": 0,
+          "first_key_size": null,
+          "last_key_size": null,
+          "missing_1_to_512_count": 512
+        },
+        {
+          "file": "kallsyms-bpf-37.76.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-68.22.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-98.66.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-129.16.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-159.65.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-190.71.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-222.06.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-253.20.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-284.44.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-316.69.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-349.43.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-380.54.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-411.78.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-445.58.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-478.96.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        }
+      ]
     },
     "otel": {
       "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150829_887964",
       "app_status": "ok",
       "app_error": "",
+      "collector_source": "4adf04879998257fd8236fb834491ff2116c2ad7",
       "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
       "qemu_host_pid": 605604,
       "windows": {
@@ -312,10 +428,113 @@
           "lock_samples": 0,
           "lock_kernel_share": 0.0
         }
-      }
+      },
+      "module_snapshots": [
+        {
+          "file": "kallsyms-bpf-4.09.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-34.62.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-64.87.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-95.08.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-126.10.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-157.12.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-187.92.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-218.67.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-249.85.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-281.89.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        },
+        {
+          "file": "kallsyms-bpf-314.00.txt",
+          "key_size_count": 512,
+          "first_key_size": 1,
+          "last_key_size": 512,
+          "missing_1_to_512_count": 0
+        }
+      ]
     }
   },
   "scope": "Own QEMU guest samples, final54s workload windows; stats off. No per-call inference.",
+  "between_collector_sources": {
+    "commits": [
+      "4adf04879998257fd8236fb834491ff2116c2ad7 Record P3 attribution tetragon-profile"
+    ],
+    "changed_paths": [
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/details/apps/tetragon__observer.json",
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/details/progress.json",
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/details/result.json",
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/details/shim-logs/tetragon__observer.baseline.log",
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/details/shim-logs/tetragon__observer.post_rejit.log",
+      "corpus/results/x86_kvm_corpus_20261126_150046_350964/metadata.json",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/archive.log",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/archive.txt",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/command.json",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/evidence.tar.zst.part-aa",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/evidence.tar.zst.part-ab",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/make.log",
+      "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/status.json"
+    ]
+  },
+  "captured_otel_native_unwinder": {
+    "file": "/workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/progdump/314.00/prog-28-perf_unwind_nat.jited.bin",
+    "cmov_instructions": 0
+  },
   "tetragon_root_instruction_comparison": {
     "old": "/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z/tetragon-profile/linkcache/native_kernel_link_cache/025c0e981641eb7f.proof.o",
     "new": "/workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/9117db37f534f8ab.proof.o",

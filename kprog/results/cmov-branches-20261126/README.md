@@ -158,6 +158,19 @@ case, and owner/phase summaries in4129de340. post-profile-report.py reproduces
 the compact report from the captured summaries, stacks and code. These are
 stats-off60s profiles, not the frozen timing or per-call measurements.
 
+Collector provenance, rechecked on the completion callbacks: Tetragon records
+c3c019be2; OTel records4adf04879. The only intervening commit is publication
+of the Tetragon capture, with no collector or production source change. Both
+record the same image68655f5c6c0d under the image lock. All15 Tetragon and11
+OTel snapshots after module loading contain every key-size symbol1..512;
+Tetragon's earlier6.64s snapshot and the initial full-kallsyms snapshots
+precede module loading and contain none. The actual
+captured OTel native unwinder has zero cmov instructions. The compact report
+retains the source delta, per-snapshot coverage and all backtrace request
+intervals. These receipts agree with the published interpretation; neither
+callback introduces a new run, changed image, or new evidence for a further
+production patch.
+
 | own-QEMU guest-kernel cycle samples | Tetragon eBPF | Tetragon native | OTel eBPF | OTel native |
 |---|---:|---:|---:|---:|
 | denominator | 1,148,978 | 1,142,703 | 573,204 | 560,026 |
