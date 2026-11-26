@@ -84,3 +84,20 @@ The retry launches both controller and callback with `setsid nohup`, retains
 outputs in a fresh attempt directory, and records the controller's own exit
 status separately. The frozen image and functional-check Make targets remain
 unchanged. All first-attempt records are retained.
+
+## Detached retry outcome, 2026-11-26T07:10Z
+
+`retry-20261126T065149Z/image.log` confirms the image build and tar export
+completed, publishing x86 image fb53150e89ea. The controller then exited 1:
+its redundant `docker image rm` reported the previous image 17aaf1ff3dda was
+already absent. The actor that removed it is not established. No guest check
+started (`checks=[]`); this is a cleanup-step failure, not an application
+functional failure. The previous image is absent and only the current x86
+image remains alongside the arm64 image.
+
+The wrapper now lists images successfully before deciding whether removal
+is needed, and retains the image lock through publication and cleanup.
+`check.sh` runs the frozen functional target against the image already built;
+it avoids a redundant image rebuild. The check keeps the default six apps,
+one 10-second sample and stats on. Its outer address-space limit is 80 GiB;
+no benchmark setting changes. Full timing remains frozen.
