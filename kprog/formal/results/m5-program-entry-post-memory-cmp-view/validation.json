@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-26T22:56:59.759515+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProgramEntryPostMemoryCmpView"
+    ],
+    "exit": 0,
+    "seconds": 3.6900997161865234,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 719,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-post-memory-cmp-view/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6353468894958496,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 8,
+  "source_steps": {
+    "derived_cmp_operands": [
+      "X3 = gprs2",
+      "X4 = gprs3"
+    ],
+    "native_suffix_steps": 4,
+    "view_origin": "same original NZCV/X3/X4 input observers"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryPostMemoryCmpView.lean",
+      "size_bytes": 7166,
+      "mtime_ns": 1795733672800511413
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
