@@ -16,9 +16,8 @@ Raw check results and guest logs will be retained here as they complete.
 
 Source 655ae2755: host check passes 1,032 kernel hash oracle cases, 143,388
 C/native lookups, one nulls restart, 589 generic calls and 560 same-map alias
-cases (`host/report.json`). This includes 112 size/seed/bucket combinations
-for the LTO fixture's 8- and 16-byte maps; the guarded driver also covers every
-key size through 256 bytes. Both element and value returns are checked.
+cases (`host/report.json`). This reuses the requested LTO driver and its 8- and 16-byte fixture maps;
+the guarded driver also covers every key size through 256 bytes. Both element and value returns are checked.
 
 Whole-stage offline links: x86 289/289; arm64 287/289. The two existing arm64
 BCC ADR_GOT failures remain (`biosnoop.native.o:block_rq_insert` is the example).
@@ -29,3 +28,8 @@ the follow-up adds their declarations before the image build.
 `run.sh` rebuilds the sole x86 image under the image lock, removes the replaced
 image, then runs the unchanged six-app functional target with its default
 one 10-second sample. Build concurrency is two; no timing setting changes.
+
+The attempted recursive image dry-run entered the kernel link recipe despite
+`make -n` (GNU make executes recursive recipes). Its process group was stopped
+before publication; the log stays in `image-dry-run.log`. The normal image
+build below replaces any partial build output in the canonical base.

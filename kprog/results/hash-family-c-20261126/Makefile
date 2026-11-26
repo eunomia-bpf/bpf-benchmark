@@ -2,7 +2,9 @@ ROOT := /workspaces/repository
 HERE := $(ROOT)/kprog/results/hash-family-c-20261126
 LOCKS := /workspaces/.agent-state/kprog-lanes/locks
 
-.PHONY: check offline module-arm64 loaders
+.PHONY: check offline module-arm64 loaders key-sizes
+key-sizes:
+	cd $(ROOT) && python3 $(HERE)/key_sizes.py > $(HERE)/key-sizes.json
 check:
 	$(MAKE) -C $(ROOT)/kprog/results/hash-c-lto-20261120 check OUT=$(HERE)/host
 offline:
