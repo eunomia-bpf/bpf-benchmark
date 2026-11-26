@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackRights
+open KProgFormal.ClightRefinement.Arm64ProgramEntryResultStackRights
+#check Reached
+#print axioms Reached
+#check entry_corresponds
+#print axioms entry_corresponds
