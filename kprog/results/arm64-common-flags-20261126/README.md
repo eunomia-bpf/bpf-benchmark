@@ -19,3 +19,25 @@ CPU-helper-call fix on these paths. This is source/code evidence, not a
 live profile or performance result. No codegen flag, helper/module/linker,
 image or workload changed. Remaining ARM diagnosis needs the actual costly
 program path, with the common one-flag-set/all-LTO policy and frozen settings.
+
+2026-11-26T21:24:25Z: the current ARM flags select baseline Armv8 and inline LL/SC
+atomics. atomic-probe.json captures one fixed +lse comparison: add/or/and
+lower to LSE instructions accepted by the existing decoder; XOR, exchange
+and CAS have no existing model. The complete 112-object embedded-IR census
+(atomic-ir-audit.json) contains only add/or/and: BCC6 adds, Cilium13 adds,
+Tetragon667 adds/13 ORs/1 AND; the other three apps have none. These are
+static IR sites, distinct from emitted instruction counts. For example,
+runqlat handle_switch and Cilium __ct_lookup/__policy_account use seq_cst
+adds. The kernel JIT selects LSE on capable hardware. This is a concrete
+codegen asymmetry, not measured hot-path weight or a slowdown attribution.
+
+The common +lse flag is NOT adopted: the frozen ARM functional entry runs
+QEMU cortex-a57, which does not support LSE. Changing that CPU would change
+the frozen framework. No helper dispatch, weakened atomic memory ordering,
+per-app flag selection or CPU override was added. Unsupported hypothetical
+XOR/exchange/CAS is a capability observation, not an actual current-catalog
+regression. atomic-conclusion.json records the exact frozen CPU/JIT source
+references. The initial mnemonic parser also included ordinary loads;
+its complete output is retained compressed as atomic-probe-initial.json.gz,
+and the corrected atomic-only output is atomic-probe.json. No production
+P/I/flags, module, linker, image or timing changed; full timing stays frozen.

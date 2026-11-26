@@ -1,0 +1,131 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 atomic_ir_audit.py
+vendor/build/native-bpf/arm64/stage/bcc/biosnoop.native.o 0
+vendor/build/native-bpf/arm64/stage/bcc/capable.native.o 0
+vendor/build/native-bpf/arm64/stage/bcc/opensnoop.native.o 0
+vendor/build/native-bpf/arm64/stage/bcc/runqlat.native.o 1
+vendor/build/native-bpf/arm64/stage/bcc/syscount.native.o 2
+vendor/build/native-bpf/arm64/stage/bcc/tcpconnect.native.o 2
+vendor/build/native-bpf/arm64/stage/bcc/tcplife.native.o 0
+vendor/build/native-bpf/arm64/stage/bcc/vfsstat.native.o 1
+vendor/build/native-bpf/arm64/stage/cilium/bpf_alignchecker.native.o 0
+vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o 3
+vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o 4
+vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o 2
+vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o 0
+vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o 2
+vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o 2
+vendor/build/native-bpf/arm64/stage/cilium/cilium_placeholders.native.o 0
+vendor/build/native-bpf/arm64/stage/katran/balancer.native.o 0
+vendor/build/native-bpf/arm64/stage/katran/healthchecking.native.o 0
+vendor/build/native-bpf/arm64/stage/katran/healthchecking_ipip.native.o 0
+vendor/build/native-bpf/arm64/stage/katran/xdp_root.native.o 0
+vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_mkdir.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_mkdir_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_release.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_release_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_rmdir.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_rmdir_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgtracker.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_enforcer.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_bprm_commit_creds.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v310.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v53.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v511.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v53.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v61.native.o 1
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit_v310.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_fmodret_enforcer.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v310.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_file_v511.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_file_v61.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output.native.o 8
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output_v511.native.o 8
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output_v61.native.o 8
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_loader.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_loader_v511.native.o 7
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_enforcer.native.o 0
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v53.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retuprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retuprobe_v61.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_uprobe_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_uprobe_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v511.native.o 10
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o 11
+vendor/build/native-bpf/arm64/stage/tetragon/bpf_prog_iter.native.o 0
+vendor/build/native-bpf/arm64/stage/tracee/kprobe_check.native.o 0
+vendor/build/native-bpf/arm64/stage/tracee/lsm_check.native.o 0
+vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o 0
+{
+  "bcc": {
+    "atomicrmw add": 6
+  },
+  "cilium": {
+    "atomicrmw add": 13
+  },
+  "katran": {},
+  "otelcol-ebpf-profiler": {},
+  "tetragon": {
+    "atomicrmw add": 667,
+    "atomicrmw or": 13,
+    "atomicrmw and": 1
+  },
+  "tracee": {}
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

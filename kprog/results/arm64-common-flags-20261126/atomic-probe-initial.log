@@ -1,0 +1,30 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 atomic_probe.py
+flags ['-x', 'c', '-S', '-', '-o', '-'] atomic instructions 12
+ldaxr	x0, [x8] decoder accepted
+stlxr	w10, x9, [x8] decoder accepted
+ldaxr	x0, [x8] decoder accepted
+stlxr	w10, x9, [x8] decoder accepted
+ldaxr	x0, [x8] decoder accepted
+stlxr	w10, x9, [x8] decoder accepted
+ldaxr	x0, [x8] decoder accepted
+stlxr	w10, x9, [x8] decoder accepted
+ldaxr	x0, [x8] decoder accepted
+stlxr	w9, x1, [x8] decoder accepted
+ldaxr	x0, [x8] decoder accepted
+stlxr	w9, x1, [x8] decoder accepted
+flags ['-march=armv8-a+lse', '-x', 'c', '-S', '-', '-o'] atomic instructions 6
+ldaddal	x1, x0, [x0] decoder accepted
+ldsetal	x1, x0, [x0] decoder accepted
+ldclral	x8, x0, [x0] decoder accepted
+ldeoral	x1, x0, [x0] unsupported arm64 instruction: ldeoral	x1, x0, [x0]
+swpal	x1, x0, [x0] unsupported arm64 instruction: swpal	x1, x0, [x0]
+casal	x8, x1, [x0] unsupported arm64 instruction: casal	x8, x1, [x0]
+staged object count 112
+bcc {'ldr': 359, 'ldrb': 75, 'ldaxr': 3, 'stlxr': 3, 'ldrsw': 3, 'ldrh': 15, 'ldxr': 12, 'stxr': 12}
+cilium {'ldr': 6108, 'ldrb': 2038, 'ldrh': 1266, 'ldaxr': 94, 'stlxr': 94, 'ldrsb': 7}
+katran {'ldr': 224, 'ldrb': 100, 'ldrh': 71, 'ldrsb': 2}
+otelcol-ebpf-profiler {'ldr': 12843, 'ldrb': 2662, 'ldrh': 597, 'ldrsw': 30, 'ldrsh': 4, 'ldrsb': 24}
+tetragon {'ldr': 184917, 'ldrb': 15088, 'ldaxr': 538, 'stlxr': 538, 'ldrsh': 111, 'ldrh': 11673, 'ldrsw': 214, 'ldrsb': 105}
+tracee {'ldr': 51250, 'ldrb': 10886, 'ldrh': 5223, 'ldrsb': 121, 'ldrsw': 21}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

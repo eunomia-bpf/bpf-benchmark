@@ -1,0 +1,4838 @@
+{
+  "recorded_utc": "2026-11-26T21:23:14Z",
+  "revision": "d2bda6f56348bfcdefef3adceb6c9e77c1b8073a",
+  "by_app": {
+    "bcc": {
+      "atomicrmw add": 6
+    },
+    "cilium": {
+      "atomicrmw add": 13
+    },
+    "katran": {},
+    "otelcol-ebpf-profiler": {},
+    "tetragon": {
+      "atomicrmw add": 667,
+      "atomicrmw or": 13,
+      "atomicrmw and": 1
+    },
+    "tracee": {}
+  },
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/biosnoop.native.o",
+      "bitcode_bytes": 862956,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/capable.native.o",
+      "bitcode_bytes": 854296,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/opensnoop.native.o",
+      "bitcode_bytes": 15244,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/runqlat.native.o",
+      "bitcode_bytes": 876404,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "handle_switch",
+          "operation": "atomicrmw add",
+          "ir": "%125 = atomicrmw add ptr %124, i32 1 seq_cst, align 4, !dbg !30965"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/syscount.native.o",
+      "bitcode_bytes": 860208,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "sys_exit",
+          "operation": "atomicrmw add",
+          "ir": "%91 = atomicrmw add ptr %90, i64 1 seq_cst, align 8, !dbg !30772"
+        },
+        {
+          "function": "sys_exit",
+          "operation": "atomicrmw add",
+          "ir": "%103 = atomicrmw add ptr %101, i64 %102 seq_cst, align 8, !dbg !30784"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/tcpconnect.native.o",
+      "bitcode_bytes": 866784,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "count_v4",
+          "operation": "atomicrmw add",
+          "ir": "%33 = atomicrmw add ptr %31, i64 %32 monotonic, align 8, !dbg !31026"
+        },
+        {
+          "function": "count_v6",
+          "operation": "atomicrmw add",
+          "ir": "%33 = atomicrmw add ptr %31, i64 %32 monotonic, align 8, !dbg !31052"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/tcplife.native.o",
+      "bitcode_bytes": 885072,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/vfsstat.native.o",
+      "bitcode_bytes": 10788,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "inc_stats",
+          "operation": "atomicrmw add",
+          "ir": "%9 = atomicrmw add ptr %7, i64 %8 monotonic, align 8, !dbg !195"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_alignchecker.native.o",
+      "bitcode_bytes": 121108,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "bitcode_bytes": 683224,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%84 = atomicrmw add ptr %83, i64 1 seq_cst, align 8, !dbg !10877"
+        },
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%89 = atomicrmw add ptr %86, i64 %88 seq_cst, align 8, !dbg !10882"
+        },
+        {
+          "function": "handle_l2_announcement",
+          "operation": "atomicrmw add",
+          "ir": "%65 = atomicrmw add ptr %64, i64 1 seq_cst, align 8, !dbg !17839"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "bitcode_bytes": 703832,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%84 = atomicrmw add ptr %83, i64 1 seq_cst, align 8, !dbg !11611"
+        },
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%89 = atomicrmw add ptr %86, i64 %88 seq_cst, align 8, !dbg !11616"
+        },
+        {
+          "function": "__policy_account",
+          "operation": "atomicrmw add",
+          "ir": "%103 = atomicrmw add ptr %102, i64 1 seq_cst, align 8, !dbg !15546"
+        },
+        {
+          "function": "__policy_account",
+          "operation": "atomicrmw add",
+          "ir": "%107 = atomicrmw add ptr %105, i64 %106 seq_cst, align 8, !dbg !15550"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "bitcode_bytes": 639464,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%84 = atomicrmw add ptr %83, i64 1 seq_cst, align 8, !dbg !11025"
+        },
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%89 = atomicrmw add ptr %86, i64 %88 seq_cst, align 8, !dbg !11030"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o",
+      "bitcode_bytes": 144692,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "bitcode_bytes": 638720,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%84 = atomicrmw add ptr %83, i64 1 seq_cst, align 8, !dbg !10918"
+        },
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%89 = atomicrmw add ptr %86, i64 %88 seq_cst, align 8, !dbg !10923"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "bitcode_bytes": 456672,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%84 = atomicrmw add ptr %83, i64 1 seq_cst, align 8, !dbg !7987"
+        },
+        {
+          "function": "__ct_lookup",
+          "operation": "atomicrmw add",
+          "ir": "%89 = atomicrmw add ptr %86, i64 %88 seq_cst, align 8, !dbg !7992"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/cilium_placeholders.native.o",
+      "bitcode_bytes": 2996,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/balancer.native.o",
+      "bitcode_bytes": 105716,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/healthchecking.native.o",
+      "bitcode_bytes": 33324,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/healthchecking_ipip.native.o",
+      "bitcode_bytes": 12376,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/katran/xdp_root.native.o",
+      "bitcode_bytes": 5400,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "bitcode_bytes": 628052,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup.native.o",
+      "bitcode_bytes": 871528,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_mkdir.native.o",
+      "bitcode_bytes": 901344,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32267"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32270"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32272"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32274"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32276"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32278"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32280"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "bitcode_bytes": 904804,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32387"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32390"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32392"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32394"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32396"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32398"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32400"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_release.native.o",
+      "bitcode_bytes": 898148,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32172"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32175"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32177"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32179"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32181"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32183"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32185"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_release_v511.native.o",
+      "bitcode_bytes": 901592,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32292"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32295"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32297"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32299"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32301"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32303"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32305"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_rmdir.native.o",
+      "bitcode_bytes": 898128,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32172"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32175"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32177"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32179"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32181"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32183"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32185"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "bitcode_bytes": 901572,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32292"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32295"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32297"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32299"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32301"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32303"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32305"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_cgtracker.native.o",
+      "bitcode_bytes": 881244,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_enforcer.native.o",
+      "bitcode_bytes": 8176,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_bprm_commit_creds.native.o",
+      "bitcode_bytes": 880356,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event.native.o",
+      "bitcode_bytes": 1001344,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !34002"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !34005"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !34007"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !34009"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !34011"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !34013"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !34015"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v310.native.o",
+      "bitcode_bytes": 990636,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !33903"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !33906"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !33908"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !33910"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !33912"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !33914"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !33916"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v511.native.o",
+      "bitcode_bytes": 1024244,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !34778"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !34781"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !34783"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !34785"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !34787"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !34789"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !34791"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v53.native.o",
+      "bitcode_bytes": 1016164,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !34529"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !34532"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !34534"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !34536"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !34538"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !34540"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !34542"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v61.native.o",
+      "bitcode_bytes": 1024672,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "update_mb_bitset",
+          "operation": "atomicrmw or",
+          "ir": "%15 = atomicrmw or ptr %10, i64 %14 seq_cst, align 8, !dbg !33795"
+        },
+        {
+          "function": "update_mb_bitset",
+          "operation": "atomicrmw or",
+          "ir": "%28 = atomicrmw or ptr %25, i64 %27 seq_cst, align 8, !dbg !33804"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !34065"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !34777"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !34780"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !34782"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !34784"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !34786"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !34788"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !34790"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update.native.o",
+      "bitcode_bytes": 21388,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v511.native.o",
+      "bitcode_bytes": 26240,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v53.native.o",
+      "bitcode_bytes": 23796,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_map_update_v61.native.o",
+      "bitcode_bytes": 26016,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "__execve_map_update_idx",
+          "operation": "atomicrmw and",
+          "ir": "%38 = atomicrmw and ptr %31, i64 %37 seq_cst, align 8, !dbg !898"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit.native.o",
+      "bitcode_bytes": 884684,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !31745"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !31748"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !31750"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !31752"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !31754"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !31756"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !31758"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit_v310.native.o",
+      "bitcode_bytes": 884684,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !31745"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !31748"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !31750"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !31752"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !31754"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !31756"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !31758"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_exit_v511.native.o",
+      "bitcode_bytes": 888500,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !31871"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !31874"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !31876"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !31878"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !31880"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !31882"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !31884"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fmodret_enforcer.native.o",
+      "bitcode_bytes": 7828,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork.native.o",
+      "bitcode_bytes": 931440,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32985"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32988"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32990"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32992"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32994"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32996"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32998"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v310.native.o",
+      "bitcode_bytes": 911560,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32359"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32362"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32364"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32366"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32368"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32370"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32372"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v511.native.o",
+      "bitcode_bytes": 935052,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !33109"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !33112"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !33114"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !33116"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !33118"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !33120"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !33122"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry.native.o",
+      "bitcode_bytes": 1205040,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40720"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40743"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40765"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !40849"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !40852"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !40854"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !40856"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !40858"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !40860"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !40862"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v511.native.o",
+      "bitcode_bytes": 1313584,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36879"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36882"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36884"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36886"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36888"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36890"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36892"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44367"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44393"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44415"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v53.native.o",
+      "bitcode_bytes": 1297868,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36725"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36728"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36730"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36732"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36734"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36736"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36738"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !43867"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !43893"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !43915"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fentry_v61.native.o",
+      "bitcode_bytes": 1297712,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36671"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36674"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36676"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36678"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36680"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36682"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36684"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !39881"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44159"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44185"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44207"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit.native.o",
+      "bitcode_bytes": 1104328,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !38174"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !38197"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !38219"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !38303"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !38306"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !38308"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !38310"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !38312"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !38314"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !38316"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v511.native.o",
+      "bitcode_bytes": 1177904,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36557"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36560"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36562"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36564"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36566"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36568"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36570"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40702"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40759"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40781"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v53.native.o",
+      "bitcode_bytes": 1166576,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36347"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36350"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36352"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36354"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36356"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36358"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36360"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40354"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40411"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40433"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_fexit_v61.native.o",
+      "bitcode_bytes": 1179408,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36564"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36567"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36569"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36571"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36573"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36575"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36577"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40709"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40766"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40788"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe.native.o",
+      "bitcode_bytes": 1229296,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !41089"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !41215"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !41237"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !41322"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !41325"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !41327"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !41329"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !41331"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !41333"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !41335"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v511.native.o",
+      "bitcode_bytes": 1338064,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37153"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37156"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37158"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37160"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37162"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37164"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37166"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44714"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44843"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44865"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v53.native.o",
+      "bitcode_bytes": 1322324,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36999"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37002"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37004"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37006"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37008"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37010"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37012"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44214"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44343"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44365"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v61.native.o",
+      "bitcode_bytes": 1321216,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36945"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36948"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36950"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36952"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36954"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36956"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36958"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40155"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44506"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44635"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44657"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core.native.o",
+      "bitcode_bytes": 1295108,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36437"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36440"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36442"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36444"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36446"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36448"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36450"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !43794"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !43821"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !43843"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core_v511.native.o",
+      "bitcode_bytes": 1311284,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36637"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36640"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36642"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36644"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36646"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36648"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36650"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44337"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44364"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44386"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_core_v61.native.o",
+      "bitcode_bytes": 1294340,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36429"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36432"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36434"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36436"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36438"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36440"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36442"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !39811"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44129"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44156"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44178"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+      "bitcode_bytes": 883188,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+      "bitcode_bytes": 882804,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+      "bitcode_bytes": 882844,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+      "bitcode_bytes": 882460,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output.native.o",
+      "bitcode_bytes": 917148,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32501"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32504"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32506"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32508"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32510"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32512"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32514"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !32533"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output_v511.native.o",
+      "bitcode_bytes": 927088,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32811"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32814"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32816"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32818"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32820"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32822"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32824"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !32843"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_lsm_output_v61.native.o",
+      "bitcode_bytes": 926524,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !32796"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !32799"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !32801"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !32803"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !32805"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !32807"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !32809"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !32828"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp.native.o",
+      "bitcode_bytes": 1203516,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40663"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40686"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40708"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !40792"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !40795"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !40797"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !40799"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !40801"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !40803"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !40805"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v511.native.o",
+      "bitcode_bytes": 1311636,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36640"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36643"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36645"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36647"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36649"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36651"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36653"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44303"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44329"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44351"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v53.native.o",
+      "bitcode_bytes": 1295912,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36486"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36489"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36491"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36493"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36495"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36497"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36499"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !43803"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !43829"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !43851"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_rawtp_v61.native.o",
+      "bitcode_bytes": 1295756,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36432"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36435"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36437"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36439"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36441"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36443"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36445"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !39817"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44095"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44121"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44143"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe.native.o",
+      "bitcode_bytes": 1106152,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !38153"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !38176"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !38198"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !38325"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !38328"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !38330"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !38332"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !38334"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !38336"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !38338"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v511.native.o",
+      "bitcode_bytes": 1178996,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36370"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36373"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36375"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36377"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36379"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36381"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36383"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40670"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40727"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40749"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v53.native.o",
+      "bitcode_bytes": 1167680,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36160"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36163"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36165"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36167"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36169"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36171"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36173"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40322"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40379"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40401"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retkprobe_v61.native.o",
+      "bitcode_bytes": 1180460,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36377"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36380"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36382"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36384"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36386"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36388"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36390"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40677"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40734"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40756"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe.native.o",
+      "bitcode_bytes": 1106152,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !38153"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !38176"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !38198"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !38325"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !38328"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !38330"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !38332"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !38334"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !38336"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !38338"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v511.native.o",
+      "bitcode_bytes": 1178336,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36343"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36346"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36348"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36350"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36352"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36354"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36356"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40643"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40700"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40722"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v53.native.o",
+      "bitcode_bytes": 1167028,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36133"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36136"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36138"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36140"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36142"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36144"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36146"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40295"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40352"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40374"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_retuprobe_v61.native.o",
+      "bitcode_bytes": 1179804,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36350"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36353"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36355"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36357"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36359"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36361"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36363"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40650"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40707"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40729"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint.native.o",
+      "bitcode_bytes": 1205620,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40792"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40917"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40939"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !41024"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !41027"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !41029"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !41031"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !41033"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !41035"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !41037"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v511.native.o",
+      "bitcode_bytes": 1313076,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36819"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36822"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36824"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36826"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36828"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36830"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36832"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44409"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44537"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44559"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v53.native.o",
+      "bitcode_bytes": 1297332,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36665"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36668"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36670"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36672"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36674"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36676"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36678"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !43909"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44037"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44059"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_tracepoint_v61.native.o",
+      "bitcode_bytes": 1314640,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36809"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36812"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36814"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36816"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36818"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36820"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36822"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40085"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44399"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44527"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44549"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe.native.o",
+      "bitcode_bytes": 1257164,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !41249"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !41293"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !41315"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !41399"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !41402"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !41404"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !41406"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !41408"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !41410"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !41412"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v511.native.o",
+      "bitcode_bytes": 1366324,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37350"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37353"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37355"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37357"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37359"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37361"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37363"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44878"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44925"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44947"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v53.native.o",
+      "bitcode_bytes": 1350176,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37184"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37187"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37189"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37191"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37193"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37195"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37197"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44366"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44413"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44435"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_uprobe_v61.native.o",
+      "bitcode_bytes": 1349004,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37130"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37133"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37135"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37137"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37139"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37141"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37143"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40340"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44658"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44705"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44727"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt.native.o",
+      "bitcode_bytes": 1229784,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40800"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40823"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40845"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !41122"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !41125"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !41127"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !41129"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !41131"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !41133"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !41135"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v511.native.o",
+      "bitcode_bytes": 1338108,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36723"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36726"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36728"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36730"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36732"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36734"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36736"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44451"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44477"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44499"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v53.native.o",
+      "bitcode_bytes": 1322080,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36557"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36560"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36562"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36564"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36566"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36568"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36570"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !43939"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !43965"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !43987"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_usdt_v61.native.o",
+      "bitcode_bytes": 1327160,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36648"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36651"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36653"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36655"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36657"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36659"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36661"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40033"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44376"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44402"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44424"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_loader.native.o",
+      "bitcode_bytes": 885144,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !31764"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !31767"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !31769"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !31771"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !31773"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !31775"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !31777"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_loader_v511.native.o",
+      "bitcode_bytes": 888952,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !31885"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !31888"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !31890"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !31892"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !31894"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !31896"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !31898"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_enforcer.native.o",
+      "bitcode_bytes": 8200,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v511.native.o",
+      "bitcode_bytes": 1338644,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37167"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37170"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37172"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37174"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37176"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37178"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37180"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44728"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44857"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44879"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v53.native.o",
+      "bitcode_bytes": 1322912,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37013"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37016"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37018"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37020"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37022"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37024"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37026"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44228"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44357"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44379"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_kprobe_v61.native.o",
+      "bitcode_bytes": 1321800,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36959"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36962"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36964"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36966"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36968"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36970"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36972"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40169"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44520"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44649"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44671"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v511.native.o",
+      "bitcode_bytes": 1179552,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36384"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36387"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36389"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36391"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36393"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36395"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36397"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40684"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40741"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40763"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v53.native.o",
+      "bitcode_bytes": 1168236,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36174"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36177"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36179"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36181"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36183"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36185"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36187"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40336"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40393"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40415"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retkprobe_v61.native.o",
+      "bitcode_bytes": 1181020,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36391"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36394"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36396"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36398"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36400"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36402"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36404"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40691"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40748"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40770"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retuprobe_v511.native.o",
+      "bitcode_bytes": 1178900,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36357"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36360"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36362"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36364"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36366"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36368"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36370"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40657"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40714"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40736"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_retuprobe_v61.native.o",
+      "bitcode_bytes": 1180364,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36364"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36367"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36369"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36371"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36373"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36375"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36377"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !40664"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !40721"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !40743"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_uprobe_v511.native.o",
+      "bitcode_bytes": 1366952,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37366"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37369"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37371"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37373"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37375"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37377"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37379"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44894"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44941"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44963"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_uprobe_v61.native.o",
+      "bitcode_bytes": 1349632,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !37146"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !37149"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !37151"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !37153"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !37155"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !37157"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !37159"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40356"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44674"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44721"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44743"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v511.native.o",
+      "bitcode_bytes": 1338752,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36739"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36742"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36744"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36746"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36748"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36750"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36752"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44467"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44493"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44515"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "bitcode_bytes": 1327796,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": [
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%19 = atomicrmw add ptr %18, i64 1 seq_cst, align 8, !dbg !36664"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%27 = atomicrmw add ptr %26, i64 1 seq_cst, align 8, !dbg !36667"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%35 = atomicrmw add ptr %34, i64 1 seq_cst, align 8, !dbg !36669"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%43 = atomicrmw add ptr %42, i64 1 seq_cst, align 8, !dbg !36671"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%51 = atomicrmw add ptr %50, i64 1 seq_cst, align 8, !dbg !36673"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%59 = atomicrmw add ptr %58, i64 1 seq_cst, align 8, !dbg !36675"
+        },
+        {
+          "function": "event_output_update_error_metric",
+          "operation": "atomicrmw add",
+          "ir": "%67 = atomicrmw add ptr %66, i64 1 seq_cst, align 8, !dbg !36677"
+        },
+        {
+          "function": "__update_mb_task",
+          "operation": "atomicrmw or",
+          "ir": "%34 = atomicrmw or ptr %31, i64 %33 seq_cst, align 8, !dbg !40049"
+        },
+        {
+          "function": "policy_stats_update",
+          "operation": "atomicrmw add",
+          "ir": "%14 = atomicrmw add ptr %13, i64 1 seq_cst, align 8, !dbg !44392"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%17 = atomicrmw add ptr %15, i32 %16 seq_cst, align 4, !dbg !44418"
+        },
+        {
+          "function": "enforcer_update_missed_notifications",
+          "operation": "atomicrmw add",
+          "ir": "%57 = atomicrmw add ptr %55, i32 %56 seq_cst, align 4, !dbg !44440"
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_prog_iter.native.o",
+      "bitcode_bytes": 846112,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tracee/kprobe_check.native.o",
+      "bitcode_bytes": 6660,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tracee/lsm_check.native.o",
+      "bitcode_bytes": 5756,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o",
+      "bitcode_bytes": 880864,
+      "command": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "operations": []
+    }
+  ],
+  "scope": "Static complete staged-object IR census, not hot-path attribution, candidate recompilation, stock acceptance or performance measurement. Production flags/builds/image unchanged."
+}
