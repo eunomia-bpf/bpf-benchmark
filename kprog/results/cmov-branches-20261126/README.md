@@ -207,6 +207,14 @@ trie_lookup_elem166,028 and copy_from_user_nofault97,471 samples, versus
 functions. The stats-off profiles have no invocation counts with which to
 turn these flat sample differences into ns/call.
 
+The earlier same-image generic-helper control is retained in
+../p3-attribution-20261126/control-summary.md: disabling P3 did not remove
+the slow tracepoint (native5,446.9/9,465.8/2,428.7ns/call), or consistently
+improve OTel. Together with the current small Tetragon hash weight, this is
+evidence against assigning the large tracepoint regression to the key-size
+C call. Sequential starts, call-mix differences and large temporal spread
+prevent a precise causal estimate or blanket exoneration of every cost.
+
 Decision: retain the one common cmov flag and general1..512 hash mechanism.
 No further production patch follows from these captures: changing the
 ring-buffer algorithm/workload is outside the authorized header/flag/linker
