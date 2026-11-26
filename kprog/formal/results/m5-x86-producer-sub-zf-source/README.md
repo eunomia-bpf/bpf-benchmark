@@ -1,0 +1,3 @@
+SAME original provider/PUSH/SUB/actual CF store now executes the real skip and sequence rules to the next original ZF header-pointer load on the actual post-store heap. Exact source operands/binding/continuations, external CF readback and full current memory rights/other-block/caller frames are retained. The ZF header read/comparison/cast/store remain next source work, not assumed incoming observations. All5 remaining flag stores/RSP writeback/fullstate/full149 remain open.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

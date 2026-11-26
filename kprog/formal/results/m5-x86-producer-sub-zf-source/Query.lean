@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.X86ProducerSubZfSource
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.source_pointer
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.source_pointer
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.executes
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.executes
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.binding
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.binding
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.operands
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.operands
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubZfSource.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubZfSource.from_call

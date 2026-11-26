@@ -1,0 +1,130 @@
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.source_pointer :
+  KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerLoad =
+    CC.Stmt.Sset KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerTemp
+      KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerExpr
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.source_pointer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.executes (binding : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) (current : CC.Mem) :
+  KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.X86ProducerLayout.ge
+    (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate binding k memory lhs cfBlock word current).count
+    (KProgFormal.ClightRefinement.X86ProducerSubZfSource.start binding k memory lhs cfBlock word current)
+    (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+      KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerLoad
+      (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate binding k memory lhs cfBlock word
+          current).continuation
+      (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation memory).fst
+      (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate binding k memory lhs cfBlock word current).output
+      current)
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.executes' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.binding (block : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) (current : CC.Mem) :
+  CC.PTree.get X86_program_profile_bpf.___x86_bind
+      (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate block k memory lhs cfBlock word current).output =
+    some (CC.Val.Vptr block 0)
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.binding' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.operands (block : CC.Block) (k : CC.Cont) (memory : CC.Mem)
+  (lhs : BitVec 64) (cfBlock : CC.Block) (word : BitVec 64) (current : CC.Mem) :
+  have output :=
+    (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate block k memory lhs cfBlock word current).output;
+  CC.PTree.get X86_program_profile_bpf.___x86_sub_a__1 output = some (CC.Val.Vlong lhs) ∧
+    CC.PTree.get X86_program_profile_bpf.___x86_sub_b__1 output = some (CC.Val.Vlong 32#64) ∧
+      CC.PTree.get X86_program_profile_bpf.___x86_sub_r__1 output = some (CC.Val.Vlong (lhs - 32#64)) ∧
+        CC.PTree.get X86_program_profile_bpf.___x86_sub_sign__1 output = some (CC.Val.Vlong 9223372036854775808#64)
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.operands' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.execute {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache)
+  (header : KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready) :
+  have k := KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete;
+  have lhs := ready.stackOutcome.value - 8#64;
+  ∃ after,
+    CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer
+          KProgFormal.ClightRefinement.X86ProducerBindLoop.firstCall
+          (CC.Cont.Kseq KProgFormal.ClightRefinement.X86ProducerContextSource.followingCalls outer)
+          (KProgFormal.ClightRefinement.X86ProducerCacheAllocation.allocation
+              KProgFormal.ClightRefinement.X86ProducerLayout.ge.genv_cenv before).fst
+          ready.output ready.after)
+        CC.E0
+        (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+          KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerLoad
+          (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate ready.entry.block k complete.after lhs
+              (ready.scalars 0).block (ready.scalarValues 0) after).continuation
+          (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).fst
+          (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate ready.entry.block k complete.after lhs
+              (ready.scalars 0).block (ready.scalarValues 0) after).output
+          after) ∧
+      (∀ (flags : X86.Flags),
+          CC.Mem.load CC.Chunk.Mint8unsigned after (ready.scalars 0).block 0 =
+            some (CC.Val.Vint (if (X86.Flags.sub X86.Size.q lhs (32#64) flags).cf = true then 1 else 0))) ∧
+        (∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+            block ≠ (ready.scalars 0).block →
+              CC.Mem.load chunk after block offset =
+                CC.Mem.load chunk (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd block
+                  offset) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock
+              (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd after ∧
+            after.access = (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.access ∧
+              after.nextblock =
+                (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.execute' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubZfSource.from_call (before : CC.Mem) (ctxBlock : CC.Block)
+  (ctxOffset : CC.Integers.Ptrofs) (outer : CC.Cont)
+  (inputs6 : KProgFormal.ClightRefinement.X86ProducerRaxPrefix.Inputs before)
+  (inputs1 : KProgFormal.ClightRefinement.X86ProducerStackBaseProvider.Inputs before) :
+  ∃ ready rsp metadata cache complete after,
+    KProgFormal.ClightRefinement.X86ProducerEntryReady.HeaderReads ready ∧
+      have k := KProgFormal.ClightRefinement.X86ProducerSubLhs.bodyCont complete;
+      have lhs := ready.stackOutcome.value - 8#64;
+      CC.Star (CC.Step2 KProgFormal.ClightRefinement.X86ProducerLayout.ge)
+          (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.X86ProducerHeaderSource.producer)
+            [CC.Val.Vptr ctxBlock ctxOffset] outer before)
+          ready.trace
+          (CC.State.State KProgFormal.ClightRefinement.X86ProducerSubBody.handler
+            KProgFormal.ClightRefinement.X86ProducerSubZfSource.pointerLoad
+            (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate ready.entry.block k complete.after lhs
+                (ready.scalars 0).block (ready.scalarValues 0) after).continuation
+            (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).fst
+            (KProgFormal.ClightRefinement.X86ProducerSubZfSource.certificate ready.entry.block k complete.after lhs
+                (ready.scalars 0).block (ready.scalarValues 0) after).output
+            after) ∧
+        (∀ (flags : X86.Flags),
+            CC.Mem.load CC.Chunk.Mint8unsigned after (ready.scalars 0).block 0 =
+              some (CC.Val.Vint (if (X86.Flags.sub X86.Size.q lhs (32#64) flags).cf = true then 1 else 0))) ∧
+          (∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+              block ≠ (ready.scalars 0).block →
+                CC.Mem.load chunk after block offset =
+                  CC.Mem.load chunk (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+                    block offset) ∧
+            KProgFormal.ClightRefinement.FrameBelow before.nextblock
+                (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd after ∧
+              after.access = (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.access ∧
+                after.nextblock =
+                  (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubZfSource.from_call' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
