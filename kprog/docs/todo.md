@@ -52,6 +52,7 @@
      2. perf：两个比 eBPF 慢的程序在设计之内用通用的办法修好（对所有应用都成立的头文件、编译参数、链接器改动）。Tetragon generic_tracepoint 原生 671.1 对 eBPF 536.8 ns（11-25），2609.4 对 1530.7 ns（P3 镜像）；OTel native_tracer_entry 0.940x、0.904x。用已经采到的 Tetragon、Tracee 采样和 OTel 采样找原因，手段是头文件、编译参数（所有应用一组）、链接器。memset 的分量同时记进 memset-calls-20261126。
      3. 协调者：x86 定下来以后，arm64 镜像带上 P3 重建，在 Spark 上按冻结入口计时六个应用，每个应用 3 次、广度优先。Spark 单次测试之后立刻恢复 DeepSeek（运营者 11-08）。arm64 的 BCC 0.956x、Katran 0.954x 按第 2 条同样处理。
      4. 协调者：设计之内的项都落定后，x86 按冻结入口跑一次，每个应用 3 次、广度优先。这次运行就是“可以复现”的那份数据；每个应用报它历史上最好的数字，并写明镜像、提交和复跑命令。
+     3a. 协调者 2026-11-26T18:09Z：arm64 run 8 已出数字（kprog/results/arm64-spark-run8-20261126，1c7ce0863；六个应用 12 次运行 rc 0）。每次调用 OTel 1.055x、BCC 0.971x、Cilium 1.020x、Tetragon 1.435x、Tracee 1.645x、Katran 0.993x。BCC、Katran 低于 1；Cilium 每次调用低于 run 7 的 1.035x，stats 关吞吐 1.009x 低于 run 7 的 1.124x，BCC stats 关吞吐 1.021x 低于 run 7 的 1.071x（运营者 11-26：“要确保每一个应用的数字都是最好的, 不能倒退.”）。perf 在 Tetragon 表生成之后接这一项，办法对所有应用成立（头文件、arm64 同一组编译参数、链接器）。
      5. 暂缓（设计之外）：C5 pid_tgid、uid_gid、ktime_get_boot_ns 写成 C；C6 hashrnd、n_buckets 常量化（运营者 11-22 “先不急着做”）。
      6. 不做（过于复杂）：C7 时钟整段内联、C8 多 map 汇合点按形状绑定、直接原生配置里把 hash 遍历整段展开（C4 只留在 LTO 配置里）。
    - perf（协调者 2026-11-26T10:21Z 交给它）：P3 镜像 fb53150e89ea 的 10 秒检查里，Tetragon 原生一侧每次调用 1150.8 ns，11-25 的两次 10 秒检查是 316.6 ns、396.0 ns（每次调用诊断值 1.880x、3.238x → 0.989x）；OTel 原生 3531.5 ns → 4220.0 ns（0.940x → 0.904x）。先确认是否来自 P3，再在设计之内修（头文件、编译参数、链接器）；同一次 Tetragon、Tracee 宿主 PMU 采样给出 memset 的分量。
