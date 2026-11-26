@@ -1,0 +1,7 @@
+# Integrate the complete original entry witness and derived control entrance
+
+The root now exports the original complete 98-provider/fourteen-call entry witness with its actual reached pointer/MOV/resources/source-prefix trace feeding complete helper/source return/freeList/caller and four admitted native suffix Facts. The original prefix theorem is used once and every unchanged existential/effect/frame/cache/source/native observation is retained. Original fourteen-word admission derives current PC=initial PC+56, error=None and unchanged program. Original CMP/branch fetches at initial PC+56/+60 transport to that actual successor, so the public continuation consumes derived current code/error facts. The source observer stays the original resultWord; two genuine successor BL/RET/continuation certificates remain explicit. Actual physical native helper/memory/environment execution, complete global input/output observations and universal handler/operand/fault/dispatcher domains remain in the ordered M5 worklist before recount/M6.
+
+Full current lake build 1366 jobs and4 root public type/axiom queries pass under shared timing, CPU17, one worker,32GiB and original200000/512 caps. Full build also holds exclusive formal-full-check. The actual public log exposes the existing external-call/inline-assembly and imported signed-GT dependencies. V owns unified make check.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.

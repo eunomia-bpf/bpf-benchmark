@@ -42,11 +42,15 @@ AArch64 source/caller/native fixture prefixes are also integrated.
 
 The complete original AArch64 source return retains both memory helpers,
 provider traces, caller memory and its scalar result observer. Actual pointer
-and MOV effects derive helper inputs, resources and source temporaries. Its admitted
-CMP/B.GT/BL/RET native suffix selects genuine code at two actual successor
-sites from the same provider values. Public theorem types expose the live
-source heap and code domains; the worklist orders native helper memory and
-whole-program input/output correspondence next.
+and MOV effects derive helper inputs, resources and source temporaries. The
+original 98-provider/fourteen-call entry witness supplies those same reached
+resources and the actual source-prefix trace to this complete continuation.
+Its fourteen admitted native words derive the current PC, error and unchanged
+program; CMP and B.GT fetch at original PC+56/+60 feed the four-step
+CMP/B.GT/BL/RET suffix. The same provider values select genuine code at two
+actual successor sites. Public theorem types expose the live source heap and
+code domains; the worklist orders original-program site binding, native helper
+memory and whole-program input/output correspondence next.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-26T23:35:00.890921+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 7.969942569732666,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1366,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-control-entry-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1996676921844482,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22011,
+      "sha256": "0dc2cd93f3e7dfaf6861edd8e689bf93733322d409564f84996ade722708ec06"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 6522,
+      "sha256": "1e9a64a89882cc9dabfa5d0e303dd8a6f032845e4b24c18ccf744eee65640523"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root now exports the original complete 98-provider/fourteen-call entry witness with its actual reached pointer/MOV/resources/source-prefix trace feeding complete helper/source return/freeList/caller and four admitted native suffix Facts. The original prefix theorem is used once and every unchanged existential/effect/frame/cache/source/native observation is retained. Original fourteen-word admission derives current PC=initial PC+56, error=None and unchanged program. Original CMP/branch fetches at initial PC+56/+60 transport to that actual successor, so the public continuation consumes derived current code/error facts. The source observer stays the original resultWord; two genuine successor BL/RET/continuation certificates remain explicit. Actual physical native helper/memory/environment execution, complete global input/output observations and universal handler/operand/fault/dispatcher domains remain in the ordered M5 worklist before recount/M6.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
