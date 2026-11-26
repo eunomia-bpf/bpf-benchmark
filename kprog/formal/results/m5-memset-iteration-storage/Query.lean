@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetIterationStorage
+
+#check KProgFormal.ClightRefinement.Arm64MemsetIterationStorage.storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetIterationStorage.storage
+#check KProgFormal.ClightRefinement.Arm64MemsetIterationStorage.sp_value
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetIterationStorage.sp_value
