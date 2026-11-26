@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64MemsetPointerComplete
+#check KProgFormal.ClightRefinement.Arm64MemsetPointerComplete.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPointerComplete.original
