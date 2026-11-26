@@ -1,0 +1,803 @@
+{
+  "recorded_utc": "2026-11-26T21:30:42Z",
+  "revision": "d2bda6f56",
+  "source": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.packed.mir",
+  "command": [
+    "llc-18",
+    "-O1",
+    "-march=bpf",
+    "-mcpu=v4",
+    "-bpf-stack-size=4096",
+    "-start-before=prologepilog",
+    "-stop-after=prologepilog",
+    "-x=mir",
+    "-o",
+    "-",
+    "-"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "functions": [
+    {
+      "name": "trusted_x86_x86_sim_xdp",
+      "objects": [
+        {
+          "id": 0,
+          "kind": "spill-slot",
+          "offset": -8,
+          "size": 8
+        },
+        {
+          "id": 1,
+          "kind": "default",
+          "offset": -16,
+          "size": 8
+        },
+        {
+          "id": 2,
+          "kind": "default",
+          "offset": -320,
+          "size": 304
+        },
+        {
+          "id": 3,
+          "kind": "spill-slot",
+          "offset": -328,
+          "size": 8
+        },
+        {
+          "id": 4,
+          "kind": "spill-slot",
+          "offset": -336,
+          "size": 8
+        },
+        {
+          "id": 5,
+          "kind": "spill-slot",
+          "offset": -344,
+          "size": 8
+        },
+        {
+          "id": 6,
+          "kind": "spill-slot",
+          "offset": -352,
+          "size": 8
+        },
+        {
+          "id": 7,
+          "kind": "spill-slot",
+          "offset": -360,
+          "size": 8
+        },
+        {
+          "id": 8,
+          "kind": "spill-slot",
+          "offset": -368,
+          "size": 8
+        },
+        {
+          "id": 9,
+          "kind": "spill-slot",
+          "offset": -376,
+          "size": 8
+        },
+        {
+          "id": 10,
+          "kind": "spill-slot",
+          "offset": -384,
+          "size": 8
+        },
+        {
+          "id": 11,
+          "kind": "spill-slot",
+          "offset": -392,
+          "size": 8
+        },
+        {
+          "id": 12,
+          "kind": "spill-slot",
+          "offset": -400,
+          "size": 8
+        },
+        {
+          "id": 13,
+          "kind": "spill-slot",
+          "offset": -408,
+          "size": 8
+        },
+        {
+          "id": 14,
+          "kind": "spill-slot",
+          "offset": -416,
+          "size": 8
+        },
+        {
+          "id": 15,
+          "kind": "spill-slot",
+          "offset": -424,
+          "size": 8
+        },
+        {
+          "id": 16,
+          "kind": "spill-slot",
+          "offset": -432,
+          "size": 8
+        },
+        {
+          "id": 17,
+          "kind": "spill-slot",
+          "offset": -440,
+          "size": 8
+        },
+        {
+          "id": 18,
+          "kind": "spill-slot",
+          "offset": -448,
+          "size": 8
+        },
+        {
+          "id": 19,
+          "kind": "spill-slot",
+          "offset": -456,
+          "size": 8
+        },
+        {
+          "id": 20,
+          "kind": "spill-slot",
+          "offset": -464,
+          "size": 8
+        },
+        {
+          "id": 21,
+          "kind": "spill-slot",
+          "offset": -472,
+          "size": 8
+        },
+        {
+          "id": 22,
+          "kind": "spill-slot",
+          "offset": -480,
+          "size": 8
+        },
+        {
+          "id": 23,
+          "kind": "spill-slot",
+          "offset": -488,
+          "size": 8
+        },
+        {
+          "id": 24,
+          "kind": "spill-slot",
+          "offset": -496,
+          "size": 8
+        },
+        {
+          "id": 25,
+          "kind": "spill-slot",
+          "offset": -504,
+          "size": 8
+        },
+        {
+          "id": 26,
+          "kind": "spill-slot",
+          "offset": -512,
+          "size": 8
+        },
+        {
+          "id": 27,
+          "kind": "spill-slot",
+          "offset": -520,
+          "size": 8
+        },
+        {
+          "id": 28,
+          "kind": "spill-slot",
+          "offset": -528,
+          "size": 8
+        },
+        {
+          "id": 29,
+          "kind": "spill-slot",
+          "offset": -536,
+          "size": 8
+        },
+        {
+          "id": 30,
+          "kind": "spill-slot",
+          "offset": -544,
+          "size": 8
+        },
+        {
+          "id": 31,
+          "kind": "spill-slot",
+          "offset": -552,
+          "size": 8
+        },
+        {
+          "id": 32,
+          "kind": "spill-slot",
+          "offset": -560,
+          "size": 8
+        },
+        {
+          "id": 33,
+          "kind": "spill-slot",
+          "offset": -568,
+          "size": 8
+        },
+        {
+          "id": 34,
+          "kind": "spill-slot",
+          "offset": -576,
+          "size": 8
+        },
+        {
+          "id": 35,
+          "kind": "spill-slot",
+          "offset": -584,
+          "size": 8
+        },
+        {
+          "id": 36,
+          "kind": "spill-slot",
+          "offset": -592,
+          "size": 8
+        },
+        {
+          "id": 37,
+          "kind": "spill-slot",
+          "offset": -600,
+          "size": 8
+        },
+        {
+          "id": 38,
+          "kind": "spill-slot",
+          "offset": -608,
+          "size": 8
+        },
+        {
+          "id": 39,
+          "kind": "spill-slot",
+          "offset": -616,
+          "size": 8
+        },
+        {
+          "id": 40,
+          "kind": "spill-slot",
+          "offset": -624,
+          "size": 8
+        },
+        {
+          "id": 41,
+          "kind": "spill-slot",
+          "offset": -632,
+          "size": 8
+        },
+        {
+          "id": 42,
+          "kind": "spill-slot",
+          "offset": -640,
+          "size": 8
+        },
+        {
+          "id": 43,
+          "kind": "spill-slot",
+          "offset": -648,
+          "size": 8
+        },
+        {
+          "id": 44,
+          "kind": "spill-slot",
+          "offset": -656,
+          "size": 8
+        },
+        {
+          "id": 45,
+          "kind": "spill-slot",
+          "offset": -664,
+          "size": 8
+        },
+        {
+          "id": 46,
+          "kind": "spill-slot",
+          "offset": -672,
+          "size": 8
+        },
+        {
+          "id": 47,
+          "kind": "spill-slot",
+          "offset": -680,
+          "size": 8
+        },
+        {
+          "id": 48,
+          "kind": "spill-slot",
+          "offset": -688,
+          "size": 8
+        },
+        {
+          "id": 49,
+          "kind": "spill-slot",
+          "offset": -696,
+          "size": 8
+        },
+        {
+          "id": 50,
+          "kind": "spill-slot",
+          "offset": -704,
+          "size": 8
+        },
+        {
+          "id": 51,
+          "kind": "spill-slot",
+          "offset": -712,
+          "size": 8
+        },
+        {
+          "id": 52,
+          "kind": "spill-slot",
+          "offset": -720,
+          "size": 8
+        },
+        {
+          "id": 53,
+          "kind": "spill-slot",
+          "offset": -728,
+          "size": 8
+        },
+        {
+          "id": 54,
+          "kind": "spill-slot",
+          "offset": -736,
+          "size": 8
+        },
+        {
+          "id": 55,
+          "kind": "spill-slot",
+          "offset": -744,
+          "size": 8
+        },
+        {
+          "id": 56,
+          "kind": "spill-slot",
+          "offset": -752,
+          "size": 8
+        },
+        {
+          "id": 57,
+          "kind": "spill-slot",
+          "offset": -760,
+          "size": 8
+        },
+        {
+          "id": 58,
+          "kind": "spill-slot",
+          "offset": -768,
+          "size": 8
+        },
+        {
+          "id": 59,
+          "kind": "spill-slot",
+          "offset": -776,
+          "size": 8
+        },
+        {
+          "id": 60,
+          "kind": "spill-slot",
+          "offset": -784,
+          "size": 8
+        },
+        {
+          "id": 61,
+          "kind": "spill-slot",
+          "offset": -792,
+          "size": 8
+        },
+        {
+          "id": 62,
+          "kind": "spill-slot",
+          "offset": -800,
+          "size": 8
+        },
+        {
+          "id": 63,
+          "kind": "spill-slot",
+          "offset": -808,
+          "size": 8
+        },
+        {
+          "id": 64,
+          "kind": "spill-slot",
+          "offset": -816,
+          "size": 8
+        },
+        {
+          "id": 65,
+          "kind": "spill-slot",
+          "offset": -824,
+          "size": 8
+        },
+        {
+          "id": 66,
+          "kind": "spill-slot",
+          "offset": -832,
+          "size": 8
+        },
+        {
+          "id": 67,
+          "kind": "spill-slot",
+          "offset": -840,
+          "size": 8
+        },
+        {
+          "id": 68,
+          "kind": "spill-slot",
+          "offset": -848,
+          "size": 8
+        },
+        {
+          "id": 69,
+          "kind": "spill-slot",
+          "offset": -856,
+          "size": 8
+        },
+        {
+          "id": 70,
+          "kind": "spill-slot",
+          "offset": -864,
+          "size": 8
+        },
+        {
+          "id": 71,
+          "kind": "spill-slot",
+          "offset": -872,
+          "size": 8
+        },
+        {
+          "id": 72,
+          "kind": "spill-slot",
+          "offset": -880,
+          "size": 8
+        },
+        {
+          "id": 73,
+          "kind": "spill-slot",
+          "offset": -888,
+          "size": 8
+        },
+        {
+          "id": 74,
+          "kind": "spill-slot",
+          "offset": -896,
+          "size": 8
+        },
+        {
+          "id": 75,
+          "kind": "spill-slot",
+          "offset": -904,
+          "size": 8
+        },
+        {
+          "id": 76,
+          "kind": "spill-slot",
+          "offset": -912,
+          "size": 8
+        },
+        {
+          "id": 77,
+          "kind": "spill-slot",
+          "offset": -920,
+          "size": 8
+        },
+        {
+          "id": 78,
+          "kind": "spill-slot",
+          "offset": -928,
+          "size": 8
+        },
+        {
+          "id": 79,
+          "kind": "spill-slot",
+          "offset": -936,
+          "size": 8
+        },
+        {
+          "id": 80,
+          "kind": "spill-slot",
+          "offset": -944,
+          "size": 8
+        },
+        {
+          "id": 81,
+          "kind": "spill-slot",
+          "offset": -952,
+          "size": 8
+        },
+        {
+          "id": 82,
+          "kind": "spill-slot",
+          "offset": -960,
+          "size": 8
+        },
+        {
+          "id": 83,
+          "kind": "spill-slot",
+          "offset": -968,
+          "size": 8
+        },
+        {
+          "id": 84,
+          "kind": "spill-slot",
+          "offset": -976,
+          "size": 8
+        },
+        {
+          "id": 85,
+          "kind": "spill-slot",
+          "offset": -984,
+          "size": 8
+        },
+        {
+          "id": 86,
+          "kind": "spill-slot",
+          "offset": -992,
+          "size": 8
+        },
+        {
+          "id": 87,
+          "kind": "spill-slot",
+          "offset": -1000,
+          "size": 8
+        },
+        {
+          "id": 88,
+          "kind": "spill-slot",
+          "offset": -1008,
+          "size": 8
+        },
+        {
+          "id": 89,
+          "kind": "spill-slot",
+          "offset": -1016,
+          "size": 8
+        },
+        {
+          "id": 90,
+          "kind": "spill-slot",
+          "offset": -1024,
+          "size": 8
+        },
+        {
+          "id": 91,
+          "kind": "spill-slot",
+          "offset": -1032,
+          "size": 8
+        },
+        {
+          "id": 92,
+          "kind": "spill-slot",
+          "offset": -1040,
+          "size": 8
+        },
+        {
+          "id": 93,
+          "kind": "spill-slot",
+          "offset": -1048,
+          "size": 8
+        },
+        {
+          "id": 94,
+          "kind": "spill-slot",
+          "offset": -1056,
+          "size": 8
+        },
+        {
+          "id": 95,
+          "kind": "spill-slot",
+          "offset": -1064,
+          "size": 8
+        },
+        {
+          "id": 96,
+          "kind": "spill-slot",
+          "offset": -1072,
+          "size": 8
+        },
+        {
+          "id": 97,
+          "kind": "spill-slot",
+          "offset": -1080,
+          "size": 8
+        },
+        {
+          "id": 98,
+          "kind": "spill-slot",
+          "offset": -1088,
+          "size": 8
+        },
+        {
+          "id": 99,
+          "kind": "spill-slot",
+          "offset": -1096,
+          "size": 8
+        },
+        {
+          "id": 100,
+          "kind": "spill-slot",
+          "offset": -1104,
+          "size": 8
+        },
+        {
+          "id": 101,
+          "kind": "spill-slot",
+          "offset": -1112,
+          "size": 8
+        },
+        {
+          "id": 102,
+          "kind": "spill-slot",
+          "offset": -1120,
+          "size": 8
+        },
+        {
+          "id": 103,
+          "kind": "spill-slot",
+          "offset": -1128,
+          "size": 8
+        },
+        {
+          "id": 104,
+          "kind": "spill-slot",
+          "offset": -1136,
+          "size": 8
+        },
+        {
+          "id": 105,
+          "kind": "spill-slot",
+          "offset": -1144,
+          "size": 8
+        },
+        {
+          "id": 106,
+          "kind": "spill-slot",
+          "offset": -1152,
+          "size": 8
+        },
+        {
+          "id": 107,
+          "kind": "spill-slot",
+          "offset": -1160,
+          "size": 8
+        },
+        {
+          "id": 108,
+          "kind": "spill-slot",
+          "offset": -1168,
+          "size": 8
+        },
+        {
+          "id": 109,
+          "kind": "spill-slot",
+          "offset": -1176,
+          "size": 8
+        },
+        {
+          "id": 110,
+          "kind": "spill-slot",
+          "offset": -1184,
+          "size": 8
+        },
+        {
+          "id": 111,
+          "kind": "spill-slot",
+          "offset": -1192,
+          "size": 8
+        },
+        {
+          "id": 112,
+          "kind": "spill-slot",
+          "offset": -1200,
+          "size": 8
+        },
+        {
+          "id": 113,
+          "kind": "spill-slot",
+          "offset": -1208,
+          "size": 8
+        },
+        {
+          "id": 114,
+          "kind": "spill-slot",
+          "offset": -1216,
+          "size": 8
+        },
+        {
+          "id": 115,
+          "kind": "spill-slot",
+          "offset": -1224,
+          "size": 8
+        },
+        {
+          "id": 116,
+          "kind": "spill-slot",
+          "offset": -1232,
+          "size": 8
+        },
+        {
+          "id": 117,
+          "kind": "spill-slot",
+          "offset": -1240,
+          "size": 8
+        }
+      ],
+      "first_lines": [
+        "  bb.0 (%ir-block.1):",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -400",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -416",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -432",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -440",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -448",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -488",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -944",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -952",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -960",
+        "    $r0 = MOV_ri 0",
+        "    STD killed $r0, $r10, -968",
+        "    $r6 = COPY $r1",
+        "    $r2 = MOV_rr $r10",
+        "    $r2 = ADD_ri $r2, -320, debug-location !7999",
+        "    STD $r2, $r10, -320, debug-location !7999 :: (volatile store (s64) into %ir.356)",
+        "    INLINEASM &\"r1 = $1\\0Aw1 = w1\\0A$0 = r1\", 1 /* sideeffect attdialect */, 131082 /* regdef:GPR */, def $r2, 131081 /* reguse:GPR */, killed $r2, 12 /* clobber */, implicit-def dead early-clobber $r1, debug-location !7999",
+        "    STW32 $w2, $r10, -320, implicit killed $r2, debug-location !7999 :: (volatile store (s32) into %ir.356, align 8)",
+        "    $r1 = LDD $r10, -320, debug-location !7999 :: (volatile dereferenceable load (s64) from %ir.356)"
+      ],
+      "frame_info": "frameInfo:\n  isFrameAddressTaken: false\n  isReturnAddressTaken: false\n  hasStackMap:     false\n  hasPatchPoint:   false\n  stackSize:       1240\n  offsetAdjustment: 0\n  maxAlignment:    8\n  adjustsStack:    true\n  hasCalls:        true\n  stackProtector:  ''\n  functionContext: ''\n  maxCallFrameSize: 0\n  cvBytesOfCalleeSavedRegisters: 0\n  hasOpaqueSPAdjustment: false\n  hasVAStart:      false\n  hasMustTailInVarArgFunc: false\n  hasTailCall:     false\n  localFrameSize:  0\n  savePoint:       ''\n  restorePoint:    ''\n"
+    },
+    {
+      "name": "kprog_x86_mem_load_fixed_into",
+      "objects": [],
+      "first_lines": [
+        "  bb.0 (%ir-block.4):",
+        "    $r5 = COPY $r2",
+        "    $r6 = COPY $r1",
+        "    $r5 = ADD_rr killed $r5, killed $r3, debug-location !16808",
+        "    JSGT_ri_32 $w4, 3, %bb.3, debug-location !16809",
+        "    JMP %bb.1, debug-location !16809",
+        "  bb.1 (%ir-block.4):",
+        "    JEQ_ri_32 $w4, 1, %bb.5, debug-location !16809",
+        "    JMP %bb.2, debug-location !16809",
+        "  bb.2 (%ir-block.4):",
+        "    JEQ_ri_32 killed $w4, 2, %bb.6, debug-location !16809",
+        "    JMP %bb.9, debug-location !16809",
+        "  bb.3 (%ir-block.4):",
+        "    JEQ_ri_32 $w4, 4, %bb.7, debug-location !16809",
+        "    JMP %bb.4, debug-location !16809",
+        "  bb.4 (%ir-block.4):",
+        "    JEQ_ri_32 killed $w4, 8, %bb.8, debug-location !16809",
+        "    JMP %bb.9, debug-location !16809",
+        "  bb.5 (%ir-block.7):",
+        "    $r1 = COPY $r6, debug-location !16810",
+        "    $w2 = MOV_ri_32 1, debug-location !16810",
+        "    $r3 = COPY killed $r5, debug-location !16810",
+        "    JAL 113, implicit-def dead $r0, implicit-def dead $r1, implicit-def dead $r2, implicit-def dead $r3, implicit-def dead $r4, implicit-def dead $r5, implicit $r11, implicit $r1, implicit $w2, implicit $r3, debug-location !16810",
+        "    $r0 = LDD killed $r6, 0, debug-location !16812 :: (load (s64) from %ir.0, !tbaa !8001)",
+        "    $r0 = AND_ri killed $r0, 255, debug-location !16813",
+        "    JMP %bb.10, debug-location !16814",
+        "  bb.6 (%ir-block.11):",
+        "    $r1 = COPY $r6, debug-location !16815"
+      ],
+      "frame_info": "frameInfo:\n  isFrameAddressTaken: false\n  isReturnAddressTaken: false\n  hasStackMap:     false\n  hasPatchPoint:   false\n  stackSize:       0\n  offsetAdjustment: 0\n  maxAlignment:    1\n  adjustsStack:    true\n  hasCalls:        true\n  stackProtector:  ''\n  functionContext: ''\n  maxCallFrameSize: 0\n  cvBytesOfCalleeSavedRegisters: 0\n  hasOpaqueSPAdjustment: false\n  hasVAStart:      false\n  hasMustTailInVarArgFunc: false\n  hasTailCall:     false\n  localFrameSize:  0\n  savePoint:       ''\n  restorePoint:    ''\n"
+    }
+  ],
+  "raw_mir": "range-frame-layout.mir.gz",
+  "scope": "Existing completed candidate after PEI only, no codegen-policy change, object replacement, stock replay, native execution or timing. Layout is specific to this compiled control, not a semantic lower bound."
+}

@@ -1,0 +1,89 @@
+{
+  "recorded_utc": "2026-11-26T21:37:00Z",
+  "revision": "d2bda6f56",
+  "frame_bytes": 1240,
+  "non_spill_bytes": 312,
+  "spill_bytes": 928,
+  "ordered_object_shapes_match": true,
+  "first_rejected_offset": -944,
+  "object_mapping": [
+    {
+      "input_object": {
+        "id": 438,
+        "kind": "spill-slot",
+        "size": 8
+      },
+      "emitted_object": {
+        "id": 80,
+        "kind": "spill-slot",
+        "offset": -944,
+        "size": 8
+      }
+    }
+  ],
+  "entry_prefix_before_pei": [
+    "",
+    "  bb.0 (%ir-block.1):",
+    "    successors: %bb.3338(0x30000000), %bb.1(0x50000000)",
+    "    liveins: $r1",
+    "  ",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.364, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.367, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.370, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.372, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.374, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.380, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.438, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.440, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.442, 0",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, %stack.444, 0",
+    "    $r6 = COPY $r1",
+    "    $r2 = MOV_rr %stack.354"
+  ],
+  "entry_prefix_after_pei": [
+    "  bb.0 (%ir-block.1):",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -400",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -416",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -432",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -440",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -448",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -488",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -944",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -952",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -960",
+    "    $r0 = MOV_ri 0",
+    "    STD killed $r0, $r10, -968",
+    "    $r6 = COPY $r1",
+    "    $r2 = MOV_rr $r10",
+    "    $r2 = ADD_ri $r2, -320, debug-location !7999",
+    "    STD $r2, $r10, -320, debug-location !7999 :: (volatile store (s64) into %ir.356)",
+    "    INLINEASM &\"r1 = $1\\0Aw1 = w1\\0A$0 = r1\", 1 /* sideeffect attdialect */, 131082 /* regdef:GPR */, def $r2, 131081 /* reguse:GPR */, killed $r2, 12 /* clobber */, implicit-def dead early-clobber $r1, debug-location !7999",
+    "    STW32 $w2, $r10, -320, implicit killed $r2, debug-location !7999 :: (volatile store (s32) into %ir.356, align 8)",
+    "    $r1 = LDD $r10, -320, debug-location !7999 :: (volatile dereferenceable load (s64) from %ir.356)"
+  ],
+  "packing_pair": {
+    "low": 438,
+    "high": 439,
+    "rewritten_accesses": 40
+  },
+  "conclusion": "First rejected write initializes a packed scalar word (old438/439), not a native304-byte arena store. Existing packer initializes unread sibling halves before full-word reads. Actual remaining frame1240 includes312nonspill+928spill. Removing this initializer alone leaves an oversized frame and can make packed reads uninitialized; no deletion/adoption inferred. Conservative CFG liveness is not a feasible-path minimum."
+}

@@ -101,9 +101,9 @@ def inspect(text):
         scope='Static CFG liveness/interference. Colors ignore size classes and escaped/default storage; not an emitted layout or a verifier result.')
 
 mode = sys.argv[1:]
-if mode not in [[], ['peaks'], ['tag-only-peaks']]:
-    raise SystemExit('usage: spill_liveness.py [peaks|tag-only-peaks]')
-revision = '09cd90f09' if mode == ['tag-only-peaks'] else 'fab61404f'
+if mode not in [[], ['peaks'], ['tag-only-peaks'], ['range-peaks']]:
+    raise SystemExit('usage: spill_liveness.py [peaks|tag-only-peaks|range-peaks]')
+revision = 'd2bda6f56' if mode == ['range-peaks'] else '09cd90f09' if mode == ['tag-only-peaks'] else 'fab61404f'
 rows = []
 for stage in ('before', 'packed'):
     path = HERE.relative_to(ROOT) / 'request-39' / ('trusted_x86.bpf.' + stage + '.mir')
@@ -121,6 +121,6 @@ for stage in ('before', 'packed'):
     else:
         result.pop('peak_witness')
     rows.append(dict(revision=revision,path=str(path),stage=stage,**result))
-output = 'tag-only-spill-peaks.json' if mode == ['tag-only-peaks'] else 'spill-peaks.json' if mode else 'spill-liveness.json'
+output = 'range-spill-peaks.json' if mode == ['range-peaks'] else 'tag-only-spill-peaks.json' if mode == ['tag-only-peaks'] else 'spill-peaks.json' if mode else 'spill-liveness.json'
 (HERE / output).write_text(json.dumps(rows, indent=2) + '\n')
 print(json.dumps(rows, indent=2))

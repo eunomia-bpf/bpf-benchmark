@@ -1,0 +1,116 @@
+{
+  "recorded_utc": "2026-11-26T21:35:04Z",
+  "callback": "range-tag-cache-control controller1",
+  "published_outcome": "d2bda6f56",
+  "controller_matches": true,
+  "compile_matches": true,
+  "stock_matches": true,
+  "preprocess_checks": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.c",
+        "-o",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.i"
+      ],
+      "returncode": 0,
+      "paths": [
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.c",
+          "exists": false
+        },
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece0.i",
+          "exists": false
+        }
+      ]
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.c",
+        "-o",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.i"
+      ],
+      "returncode": 0,
+      "paths": [
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.c",
+          "exists": false
+        },
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece1.i",
+          "exists": false
+        }
+      ]
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.c",
+        "-o",
+        "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.i"
+      ],
+      "returncode": 0,
+      "paths": [
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.c",
+          "exists": false
+        },
+        {
+          "path": "/workspaces/repository/kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.piece2.i",
+          "exists": false
+        }
+      ]
+    }
+  ],
+  "scope": "Duplicate callback audit only. Existing result and cleanup confirmed; no compile, stock or timing rerun."
+}

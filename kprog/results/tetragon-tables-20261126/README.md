@@ -521,3 +521,34 @@ cleanup-log updated. All raw inputs/measurements/logs/archives stay.
 ProductionI/P/compilerflags/image/kernel/base and all LTO policy unchanged;
 full timing frozen. The ordered ARM source audit has only queried compiler
 capability so far (unsupported cortex-x925 tune), no build or timing.
+
+2026-11-26T21:37:54Z: range-tag-cache callback reinspection matches published d2bda6f56.
+Controller1; all8compilerchildren0/ELF1769552; stock102264instructions,
+insn7 R10-944,processed8/errno13. range-callback-audit.json checks exact
+controller/compile/stock receipt equality and all6preprocess paths absent.
+The existing cleanup entry was already committed; no new deletion or rerun.
+
+Phase1 frame attribution: range-spill-peaks.json reports123liveobjects/904
+bytes before packing,113/904 after,189live32bit halves, at bb10267 near
+native0x11d2 (same loop as the earlier tag-only control). Normal packed
+peak127/1012bytes and tag-only84/672bytes remain separately recorded.
+These are conservative CFG witnesses, not feasible-path memory minima.
+
+range-frame-layout.json and compressed raw MIR retain the actual PEI pass
+from the archived d2bda6f56 input: frame1240bytes,312nonspill+928spill.
+The object at-944 maps by matching ordered metadata and entry stores to
+old scalar pair438/439, initialized by the existing whole-word packer.
+It is not the304-byte native arena. range-frame-attribution.json records
+the mapping and complete entry evidence. Removing that initializer alone
+would leave the oversized frame and uninitialized whole-word reads; no
+such change made. The final object's direct memory references already
+reached-1240, consistent with this layout.
+
+u32_flow.py queries the existing local scalar-width transfer rules with
+cross-block must facts and direct, nonescaping spill slots. Both actual
+normal fab61404f MIR (26337blocks) and range d2bda6f56 MIR (23073blocks)
+add zero width facts. No global-width compiler change is justified by this
+census. No emitted B/object, production compiler/header, nativeP, image,
+benchmark setting or timing changed. The initial analysis setup failed on
+a list/set operation; its log is retained, corrected runs both exit0.
+All raw results remain; phase1 stack coverage stays open/full timing frozen.

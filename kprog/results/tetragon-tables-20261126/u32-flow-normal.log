@@ -1,0 +1,18 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+taskset -c 16 prlimit --as=8589934592 -- python3 u32_flow.py fab61404f u32-flow-normal
+{
+  "recorded_utc": "2026-11-26T21:36:36Z",
+  "revision": "fab61404f",
+  "source": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.before.mir",
+  "blocks": 26337,
+  "rounds": [
+    {
+      "known_slots": 15,
+      "discovered": []
+    }
+  ],
+  "local_only": [],
+  "cross_block_additions": [],
+  "scope": "Read-only must-width opportunity census, reuses existing local transfer rules and direct nonescaping spill eligibility. No storage rewrite, emitted B, accepted frame or performance gain."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

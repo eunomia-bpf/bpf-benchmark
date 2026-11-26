@@ -1,0 +1,15 @@
+{
+  "recorded_utc": "2026-11-26T21:35:33Z",
+  "revision": "d2bda6f56",
+  "source": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.before.mir",
+  "blocks": 23073,
+  "rounds": [
+    {
+      "known_slots": 20,
+      "discovered": []
+    }
+  ],
+  "local_only": [],
+  "cross_block_additions": [],
+  "scope": "Read-only must-width opportunity census, reuses existing local transfer rules and direct nonescaping spill eligibility. No storage rewrite, emitted B, accepted frame or performance gain."
+}

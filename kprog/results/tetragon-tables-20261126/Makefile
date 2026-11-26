@@ -82,3 +82,19 @@ tag-only-cache-control:
 .PHONY: tag-only-spill-peaks
 tag-only-spill-peaks:
 	taskset -c 16 prlimit --as=8589934592 -- python3 spill_liveness.py tag-only-peaks
+
+.PHONY: range-spill-peaks
+range-spill-peaks:
+	taskset -c 16 prlimit --as=8589934592 -- python3 spill_liveness.py range-peaks
+
+.PHONY: range-frame-layout
+range-frame-layout:
+	taskset -c 16 prlimit --as=8589934592 -- python3 frame_layout.py
+
+.PHONY: u32-flow
+u32-flow:
+	taskset -c 16 prlimit --as=8589934592 -- python3 u32_flow.py
+
+.PHONY: u32-flow-normal
+u32-flow-normal:
+	taskset -c 16 prlimit --as=8589934592 -- python3 u32_flow.py fab61404f u32-flow-normal

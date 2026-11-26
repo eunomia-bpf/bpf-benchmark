@@ -1,0 +1,85 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+taskset -c 16 prlimit --as=8589934592 -- python3 frame_layout.py
+trusted_x86_x86_sim_xdp 118 frameInfo:
+  isFrameAddressTaken: false
+  isReturnAddressTaken: false
+  hasStackMap:     false
+  hasPatchPoint:   false
+  stackSize:       1240
+  offsetAdjustment: 0
+  maxAlignment:    8
+  adjustsStack:    true
+  hasCalls:        true
+  stackProtector:  ''
+  functionContext: ''
+  maxCallFrameSize: 0
+  cvBytesOfCalleeSavedRegisters: 0
+  hasOpaqueSPAdjustment: false
+  hasVAStart:      false
+  hasMustTailInVarArgFunc: false
+  hasTailCall:     false
+  localFrameSize:  0
+  savePoint:       ''
+  restorePoint:    ''
+
+first rejected offset objects [{'id': 80, 'kind': 'spill-slot', 'offset': -944, 'size': 8}]
+  bb.0 (%ir-block.1):
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -400
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -416
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -432
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -440
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -448
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -488
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -944
+    $r0 = MOV_ri 0
+    STD killed $r0, $r10, -952
+    $r0 = MOV_ri 0
+kprog_x86_mem_load_fixed_into 0 frameInfo:
+  isFrameAddressTaken: false
+  isReturnAddressTaken: false
+  hasStackMap:     false
+  hasPatchPoint:   false
+  stackSize:       0
+  offsetAdjustment: 0
+  maxAlignment:    1
+  adjustsStack:    true
+  hasCalls:        true
+  stackProtector:  ''
+  functionContext: ''
+  maxCallFrameSize: 0
+  cvBytesOfCalleeSavedRegisters: 0
+  hasOpaqueSPAdjustment: false
+  hasVAStart:      false
+  hasMustTailInVarArgFunc: false
+  hasTailCall:     false
+  localFrameSize:  0
+  savePoint:       ''
+  restorePoint:    ''
+
+first rejected offset objects []
+  bb.0 (%ir-block.4):
+    $r5 = COPY $r2
+    $r6 = COPY $r1
+    $r5 = ADD_rr killed $r5, killed $r3, debug-location !16808
+    JSGT_ri_32 $w4, 3, %bb.3, debug-location !16809
+    JMP %bb.1, debug-location !16809
+  bb.1 (%ir-block.4):
+    JEQ_ri_32 $w4, 1, %bb.5, debug-location !16809
+    JMP %bb.2, debug-location !16809
+  bb.2 (%ir-block.4):
+    JEQ_ri_32 killed $w4, 2, %bb.6, debug-location !16809
+    JMP %bb.9, debug-location !16809
+  bb.3 (%ir-block.4):
+    JEQ_ri_32 $w4, 4, %bb.7, debug-location !16809
+    JMP %bb.4, debug-location !16809
+  bb.4 (%ir-block.4):
+    JEQ_ri_32 killed $w4, 8, %bb.8, debug-location !16809
+    JMP %bb.9, debug-location !16809
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

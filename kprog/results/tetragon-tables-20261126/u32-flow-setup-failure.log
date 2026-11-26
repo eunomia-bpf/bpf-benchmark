@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+taskset -c 16 prlimit --as=8589934592 -- python3 u32_flow.py
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/u32_flow.py", line 61, in <module>
+    for child in blocks[n]['successors'] - queued:
+                 ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+TypeError: unsupported operand type(s) for -: 'list' and 'set'
+make: *** [Makefile:96: u32-flow] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
