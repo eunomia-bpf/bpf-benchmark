@@ -18,6 +18,8 @@ def size(die):
     die = base(die)
     if 'DW_AT_byte_size' in die.attributes:
         return die.attributes['DW_AT_byte_size'].value
+    if die.tag == 'DW_TAG_pointer_type':
+        return die.cu['address_size']
     if die.tag == 'DW_TAG_array_type':
         return count(die) * size(die.get_DIE_from_attribute('DW_AT_type'))
     raise ValueError('key has no DWARF size: ' + die.tag)
