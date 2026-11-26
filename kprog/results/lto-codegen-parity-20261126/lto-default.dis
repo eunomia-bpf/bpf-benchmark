@@ -1,0 +1,40 @@
+
+/var/tmp/kprog-tmp/perf/lto-codegen-parity/lto.o:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000000000000 <entry>:
+       0: 31 c9                        	xorl	%ecx, %ecx
+       2: 48 39 b7 f8 00 00 00         	cmpq	%rsi, 0xf8(%rdi)
+       9: 0f 92 c1                     	setb	%cl
+       c: c1 e1 05                     	shll	$0x5, %ecx
+       f: 48 8d 41 1f                  	leaq	0x1f(%rcx), %rax
+      13: 48 8d 51 0f                  	leaq	0xf(%rcx), %rdx
+      17: 48 39 34 d7                  	cmpq	%rsi, (%rdi,%rdx,8)
+      1b: 4c 8d 41 10                  	leaq	0x10(%rcx), %r8
+      1f: 4c 0f 43 c1                  	cmovaeq	%rcx, %r8
+      23: 48 0f 43 c2                  	cmovaeq	%rdx, %rax
+      27: 41 8d 0c 00                  	leal	(%r8,%rax), %ecx
+      2b: d1 e9                        	shrl	%ecx
+      2d: 48 8d 51 01                  	leaq	0x1(%rcx), %rdx
+      31: 48 39 34 cf                  	cmpq	%rsi, (%rdi,%rcx,8)
+      35: 49 0f 43 d0                  	cmovaeq	%r8, %rdx
+      39: 48 0f 43 c1                  	cmovaeq	%rcx, %rax
+      3d: 48 8d 0c 02                  	leaq	(%rdx,%rax), %rcx
+      41: 48 d1 e9                     	shrq	%rcx
+      44: 4c 8d 41 01                  	leaq	0x1(%rcx), %r8
+      48: 48 39 34 cf                  	cmpq	%rsi, (%rdi,%rcx,8)
+      4c: 4c 0f 43 c2                  	cmovaeq	%rdx, %r8
+      50: 48 0f 42 c8                  	cmovbq	%rax, %rcx
+      54: 49 8d 14 08                  	leaq	(%r8,%rcx), %rdx
+      58: 48 d1 ea                     	shrq	%rdx
+      5b: 4c 8d 4a 01                  	leaq	0x1(%rdx), %r9
+      5f: 48 39 34 d7                  	cmpq	%rsi, (%rdi,%rdx,8)
+      63: 4d 0f 43 c8                  	cmovaeq	%r8, %r9
+      67: 48 0f 42 d1                  	cmovbq	%rcx, %rdx
+      6b: 4c 01 ca                     	addq	%r9, %rdx
+      6e: 48 d1 ea                     	shrq	%rdx
+      71: 48 8d 42 01                  	leaq	0x1(%rdx), %rax
+      75: 48 39 34 d7                  	cmpq	%rsi, (%rdi,%rdx,8)
+      79: 49 0f 43 c1                  	cmovaeq	%r9, %rax
+      7d: c3                           	retq

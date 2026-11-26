@@ -1,0 +1,25 @@
+{
+  "recorded_utc": "2026-11-26T21:46:01Z",
+  "revision": "0cdbfff33411f3491223d10e0b34606ed39a0e9b",
+  "rows": [
+    {
+      "name": "p",
+      "cmov_instructions": 0,
+      "execution": "16384 cases passed\n",
+      "object_bytes": 14240
+    },
+    {
+      "name": "lto-default",
+      "cmov_instructions": 9,
+      "execution": "16384 cases passed\n",
+      "object_bytes": 4136
+    },
+    {
+      "name": "lto-common-option",
+      "cmov_instructions": 0,
+      "execution": "16384 cases passed\n",
+      "object_bytes": 4240
+    }
+  ],
+  "scope": "Existing native compiler codegen/host semantic regression only. No app, image, runtime, benchmark or timing change; no speedup claim."
+}
