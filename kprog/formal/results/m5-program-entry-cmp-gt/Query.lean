@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.signed_gt
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.signed_gt
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.choice_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.choice_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.wide_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.wide_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.comparison_eval
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.comparison_eval
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpGt.execute
