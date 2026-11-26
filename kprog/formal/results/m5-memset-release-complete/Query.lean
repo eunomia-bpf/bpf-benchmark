@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete
+
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.Inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.Inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.step
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.iterations
+#check KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetReleaseComplete.execute
