@@ -1,0 +1,35 @@
+{
+  "recorded_utc": "2026-11-26T23:42:58Z",
+  "controller_status": 1,
+  "cases": [
+    {
+      "request": 0,
+      "returncode": 2,
+      "stock_loaded": false,
+      "errno": 22,
+      "instructions": 100,
+      "phase": "before",
+      "verifier_log": "kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/verifier.log"
+    },
+    {
+      "request": 1,
+      "returncode": 0,
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 102,
+      "phase": "direct_after",
+      "verifier_log": "kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/verifier.log"
+    },
+    {
+      "request": 2,
+      "returncode": 0,
+      "stock_loaded": true,
+      "errno": 0,
+      "instructions": 102,
+      "phase": "broker_after",
+      "verifier_log": "kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/verifier.log"
+    }
+  ],
+  "cause": "Pre-fix B used bare clang and retained reserved private-input markers; shared stock wrapper forces ordinary input header. Current direct/broker B accepted. Native source mutation regression is independently fixed by frontend IR reuse.",
+  "scope": "Sole x86-kernel B stock acceptance for a tiny generated ARM program plus separate native usermode execution; no native ARM kernel installation, app coverage or timing claim."
+}

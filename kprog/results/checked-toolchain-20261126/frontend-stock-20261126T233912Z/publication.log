@@ -1,0 +1,24 @@
+[master 5ce4aa01b] Record ARM frontend B stock subset
+ 20 files changed, 130 insertions(+)
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/command.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/generation.metadata.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/kernel.facts.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/verifier.log
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/command.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/generation.metadata.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/kernel.facts.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/verifier.log
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/command.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/generation.metadata.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/kernel.facts.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/verifier.log
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/controller.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/guest.log
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/index.json
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/publication.log
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/0/replay.bpf.o
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/1/replay.bpf.o
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/2/replay.bpf.o
+ create mode 100644 kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/result.json
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   f1a3ca8a2..5ce4aa01b  master -> master
