@@ -83,3 +83,11 @@ off=22 size=1 ... R8 offset is outside of the packet"). r=0 means no comparison 
 B. P makes that comparison before the TTL update (Cilium's revalidate_data before ipv4_dec_ttl), so B lacks a
 verifier-visible form of P's bounds check on this path. Most of the 22 are jiffies_64 programs that reached the
 verifier for the first time in kdata4.
+
+## Tracee kdata4 (18:57Z–02:0xZ)
+
+Tracee 169 requests: **50** installed checked-sim-c (classfg-20261124T070800Z: 49), 114 fell back at verification, 5
+at verification-preparation, 0 failed. Rejections: 98 "invalid write to stack" (class F), 10 "sequence of jumps is
+too complex", 5 "source proof exceeds the BPF instruction limit" (the message of aef6e51ed), 2 + 1 ctx/sock type, 1
+unbounded memory access, 1 too large. Class G "invalid mem access 'scalar'" (9 on 11-24) is gone. Verifier
+statistics of the 50 accepted B: time median 892 us, max 461405 us; processed instructions median 342, max 110811.
