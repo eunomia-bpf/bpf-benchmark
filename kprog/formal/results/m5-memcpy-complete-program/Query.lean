@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyCompleteProgram
+
+open KProgFormal.ClightRefinement
+#check Arm64MemcpyCompleteProgram.returned
+#print axioms Arm64MemcpyCompleteProgram.returned
+#check Arm64MemcpyCompleteProgram.execute
+#print axioms Arm64MemcpyCompleteProgram.execute
