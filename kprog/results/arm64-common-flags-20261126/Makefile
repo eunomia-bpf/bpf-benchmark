@@ -37,3 +37,13 @@ helpers-before:
 	python3 helpers_checked.py before
 helpers-after:
 	python3 helpers_checked.py after
+
+.PHONY: native-link-build native-link-tests
+native-link-build:
+	cargo build --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release -j 1
+native-link-tests:
+	cargo test --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release -j 1
+
+.PHONY: helpers-execution
+helpers-execution:
+	python3 helpers_execution.py

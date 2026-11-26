@@ -2436,9 +2436,10 @@ fn rewrite_arm64_pass(
                 }
             }
 
-            // Helpers are called by name (vendor/bpf/native-helpers.h); P makes no indirect call.
+            // Common C lookup bodies call the kernel map operation through BLR.
+            // Keep that AAPCS call and forget caller-saved map identities.
             if !proof_mode && insn & 0xffff_fc1f == 0xd63f_0000 {
-                bail!("arm64 indirect call in {} at byte offset {off:#x}: helpers are called by name", sym.name);
+                arm64_call_clobber_map_regs(&mut reg_map_names);
             }
 
             if a64_is_adr_or_adrp(insn) {

@@ -26,6 +26,7 @@ sys.modules[_SPEC.name] = gen
 _SPEC.loader.exec_module(gen)
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
 from inline_scalar import pid_source
+from inline_array import lookup_source, dynamic_lookup_source
 
 def b_flags() -> list:
     """The B compile flags shared by generation and the checked native leg."""
@@ -144,20 +145,40 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
     run([clang, *b_flags(), "-emit-llvm", "-c", source, "-o", ir])
     arrays = [m["name"] for m in artifacts.get("maps", [])
               if m["map_type"] == 2 and m.get("value_offset") is None]
+    percpu_arrays = [m["name"] for m in artifacts.get("maps", [])
+                     if m["map_type"] == 6 and m.get("value_offset") is None]
+    lpms = [(m["name"], m["key_size"]) for m in artifacts.get("maps", [])
+            if m["map_type"] == 11 and m.get("value_offset") is None]
+    hashes = [(m["name"], m["key_size"]) for m in artifacts.get("maps", [])
+              if m["map_type"] == 1 and m.get("value_offset") is None]
     helper_list = directory / "checked-simulator.helpers.txt"
     run([compiler, ir, "-o", lowered, "--helper-list", helper_list,
-         *[arg for name in arrays for arg in ("--array-map", name)],
+         *[arg for name in arrays + percpu_arrays + [name for name, _ in lpms + hashes]
+           for arg in ("--array-map", name)],
          "--stack-arena", AARCH64_STACK_ARENA, "--arch", AARCH64_TRIPLE,
          "--data-layout", AARCH64_LAYOUT])
     helpers = helper_list.read_text().splitlines() if helper_list.exists() else []
     undefined = set(run(["llvm-nm-18", "-u", "-j", lowered]).splitlines())
+    helper_sources = []
     helper_irs = []
+    if helpers or artifacts.get("maps"):
+        helper = directory / "checked-simulator.helpers.c"
+        kernel_btf = artifacts.get("kernel_btf", "/sys/kernel/btf/vmlinux")
+        text = lookup_source(kernel_btf, lpms, hashes, percpu_arrays) if artifacts.get("maps") or "__kprog_array_lookup" in helpers else ""
+        if artifacts.get("maps"):
+            text += dynamic_lookup_source(kernel_btf)
+        if any(name.startswith("__kprog_probe_read_") for name in helpers):
+            text += '#include ' + json.dumps(str(ROOT / "kprog/x86/micro-prog/inline_probe.c")) + '\n'
+        helper.write_text(text)
+        helper_sources.append(helper)
     if "bpf_get_current_pid_tgid" in undefined:
         pid_helper = directory / "checked-simulator.pid.c"
         pid_helper.write_text(pid_source(artifacts.get("kernel_btf", "/sys/kernel/btf/vmlinux")))
-        pid_ir = pid_helper.with_suffix(".bc")
-        run([clang, *AARCH64_HELPER_FLAGS, *include_flags, "-emit-llvm", "-c", pid_helper, "-o", pid_ir])
-        helper_irs.append(pid_ir)
+        helper_sources.append(pid_helper)
+    for helper in helper_sources:
+        helper_ir = helper.with_suffix(".bc")
+        run([clang, *AARCH64_HELPER_FLAGS, *include_flags, "-emit-llvm", "-c", helper, "-o", helper_ir])
+        helper_irs.append(helper_ir)
     if helper_irs:
         linked = directory / "checked-simulator.linked.bc"
         run(["llvm-link-18", lowered, *helper_irs, "-o", linked])

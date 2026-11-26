@@ -1,0 +1,65 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 helpers_checked.py after
+{
+  "recorded_utc": "2026-11-26T22:55:48Z",
+  "phase": "after",
+  "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+  "undefined": [
+    "array_map",
+    "bpf_this_cpu_ptr",
+    "copy_from_kernel_nofault",
+    "copy_from_user_nofault",
+    "hash_map",
+    "lpm_map",
+    "memset",
+    "percpu_map"
+  ],
+  "rows": [
+    {
+      "entry": "array_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=array_entry (200 bytes), 3 reachable symbol(s) total\n  - array_entry (vaddr 0x0, 200 bytes) [entry]\n  - __kprog_lpm_key_8 (vaddr 0xc8, 184 bytes)\n  - __kprog_hash_key_4 (vaddr 0x180, 248 bytes)\nnative-link: wrote 676 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "hash_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=hash_entry (132 bytes), 3 reachable symbol(s) total\n  - hash_entry (vaddr 0x0, 132 bytes) [entry]\n  - __kprog_lpm_key_8 (vaddr 0x84, 184 bytes)\n  - __kprog_hash_key_4 (vaddr 0x13c, 248 bytes)\nnative-link: wrote 604 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "lpm_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=lpm_entry (104 bytes), 2 reachable symbol(s) total\n  - lpm_entry (vaddr 0x0, 104 bytes) [entry]\n  - __kprog_lpm_key_8 (vaddr 0x68, 184 bytes)\nnative-link: wrote 316 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "percpu_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=percpu_entry (72 bytes), 1 reachable symbol(s) total\n  - percpu_entry (vaddr 0x0, 72 bytes) [entry]\nnative-link: wrote 92 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "dynamic_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=dynamic_entry (96 bytes), 1 reachable symbol(s) total\n  - dynamic_entry (vaddr 0x0, 96 bytes) [entry]\nnative-link: wrote 100 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "user_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=user_entry (56 bytes), 1 reachable symbol(s) total\n  - user_entry (vaddr 0x0, 56 bytes) [entry]\nnative-link: wrote 68 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    },
+    {
+      "entry": "kernel_entry",
+      "kernel_link_returncode": 0,
+      "error": "native-link: arm64 entry=kernel_entry (56 bytes), 1 reachable symbol(s) total\n  - kernel_entry (vaddr 0x0, 56 bytes) [entry]\nnative-link: wrote 68 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-linked.relocs\n"
+    }
+  ],
+  "scope": "Actual ARM checked worker compile/proof/kernel-link diagnostic with sole ARM BTF and synthetic map addresses. No stock B, kernel execution, application or timing result.",
+  "frontend_ir_unchanged": true
+}
+python3 helpers_execution.py
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/arm64-common-flags-20261126/helpers_execution.py", line 11, in <module>
+    from inline_array import field_offset,hash_layout
+  File "/workspaces/repository/kprog/x86/micro-prog/inline_array.py", line 6, in <module>
+    from kernel_function_abi import KernelTypes, Type
+ModuleNotFoundError: No module named 'kernel_function_abi'
+make: *** [Makefile:49: helpers-execution] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

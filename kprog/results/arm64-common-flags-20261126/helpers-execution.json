@@ -1,0 +1,48 @@
+{
+  "recorded_utc": "2026-11-26T22:56:01Z",
+  "kernel_btf": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+  "fields": {
+    "ARRAY_STRIDE": 288,
+    "ARRAY_MASK": 292,
+    "ARRAY_VALUES": 304,
+    "ARRAY_PPTRS": 304,
+    "ARRAY_LIMIT": 68,
+    "MAP_KIND": 56,
+    "MAP_OPS": 32,
+    "OPS_LOOKUP": 96,
+    "HASH_BUCKETS": 448,
+    "HASH_COUNT": 824,
+    "HASH_SEED": 832,
+    "HASH_HEAD": 0
+  },
+  "commands": [
+    {
+      "command": [
+        "aarch64-linux-gnu-gcc",
+        "-O2",
+        "-static",
+        "-ffixed-x26",
+        "-I/var/tmp/kprog-tmp/perf/arm64-codegen-abi",
+        "/workspaces/repository/kprog/results/arm64-common-flags-20261126/helpers_driver.c",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/checked-simulator.native.o",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-execute"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/helpers-execute"
+      ],
+      "returncode": 0,
+      "stdout": "23 cases passed (ARRAY/PERCPU/dynamic, empty HASH/LPM, nofault success/error/zeroing)\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "Actual checked-native machine code on QEMU Cortex-A57 with synthetic kernel-layout maps/nofault stubs; empty HASH/LPM only. No kernel/stock/app/timing acceptance."
+}
