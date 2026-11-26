@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ModifiedNoneCall
+#check KProgFormal.ClightRefinement.Arm64Modified.NoneCall.entry_bound
+#print axioms KProgFormal.ClightRefinement.Arm64Modified.NoneCall.entry_bound
+#check KProgFormal.ClightRefinement.Arm64Modified.NoneCall.enter_read
+#print axioms KProgFormal.ClightRefinement.Arm64Modified.NoneCall.enter_read
+#check KProgFormal.ClightRefinement.Arm64Modified.NoneCall.read_prefix_bound
+#print axioms KProgFormal.ClightRefinement.Arm64Modified.NoneCall.read_prefix_bound
+#check KProgFormal.ClightRefinement.Arm64Modified.NoneCall.return_bound
+#print axioms KProgFormal.ClightRefinement.Arm64Modified.NoneCall.return_bound
+#check KProgFormal.ClightRefinement.Arm64Modified.NoneCall.execute
+#print axioms KProgFormal.ClightRefinement.Arm64Modified.NoneCall.execute
