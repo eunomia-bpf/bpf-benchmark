@@ -1,1 +1,0 @@
-savedcmd_bpf_x86_native_lab.ko := ld -r -m elf_x86_64 -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T /workspaces/.agent-state/kprog-ck/build-x86/scripts/module.lds -o bpf_x86_native_lab.ko bpf_x86_native_lab.o bpf_x86_native_lab.mod.o .module-common.o

@@ -20,9 +20,9 @@ pmu-check:
 .PHONY: module-control module-normal generic-control control-dry-run
 KEY_SIZES := 2 4 8 12 14 16 20 24 32 36 38 40 41 48 64 88 224 256 260
 module-control:
-	$(MAKE) -C $(ROOT)/kprog/perf/direct-native module KCFLAGS='$(foreach N,$(KEY_SIZES),-Dkprog_htab_elem_k$(N)=kprog_htab_control_k$(N))'
+	$(MAKE) -C $(ROOT)/kprog/perf/direct-native module OUT=$(ROOT)/kinsn/module/x86/build KCFLAGS='$(foreach N,$(KEY_SIZES),-Dkprog_htab_elem_k$(N)=kprog_htab_control_k$(N))'
 module-normal:
-	$(MAKE) -C $(ROOT)/kprog/perf/direct-native module
+	$(MAKE) -C $(ROOT)/kprog/perf/direct-native module OUT=$(ROOT)/kinsn/module/x86/build
 generic-control:
 	python3 $(HERE)/generic_control.py $(OUT)
 control-dry-run:

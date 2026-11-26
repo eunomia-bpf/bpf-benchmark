@@ -129,7 +129,11 @@ finally:
     (OUT / 'controller-exit.txt').write_text(str(status) + '\n')
     journal('finished', returncode=status, normal_module_restored=normal_restored)
     try:
-        publish([p for p in OUT.iterdir() if p.is_file() and p.name != 'publication.log'],
+        names = ['launch.json', 'controller.log', 'controller-exit.txt', 'journal.jsonl',
+                 'module-control.log', 'module-normal.log', 'module-evidence.json', 'exception.txt',
+                 'before-symbols.txt', 'before-text.txt', 'control-symbols.txt', 'control-text.txt',
+                 'after-symbols.txt', 'after-text.txt']
+        publish([OUT / name for name in names if (OUT / name).is_file()],
                 'Record generic hash control module lifecycle', OUT / 'publication.log')
     except Exception:
         status = 1

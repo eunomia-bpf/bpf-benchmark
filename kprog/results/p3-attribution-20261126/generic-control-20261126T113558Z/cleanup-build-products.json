@@ -1,0 +1,106 @@
+{
+  "time": "2026-11-26T11:36:49.781888+00:00",
+  "reason": "Result OUT leaked into direct-native module OUT. Unintended second module build; canonical module unchanged. Remove only rebuildable products, preserve all experiment logs/symbol/text evidence.",
+  "removed": [
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/..module-common.o.cmd",
+      "size": 75207,
+      "sha256": "91c3050738dbe51fea2bc3b6aba38a2daf5c895ade4a27fa3d4489c30057802a"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.Module.symvers.cmd",
+      "size": 211,
+      "sha256": "b620c595bcfce1303b8408ab66cee04ec509f0f45c787a2679cd9888e589f710"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.bpf_x86_native_lab.ko.cmd",
+      "size": 263,
+      "sha256": "b697e1a64bea82f5b4e34d3e37035a79490bc9cb6cbb739b37b9b2905b6ebd1f"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.bpf_x86_native_lab.mod.cmd",
+      "size": 134,
+      "sha256": "560498d4379c0f15a67deec22cf7509eb75d67caf9a4d6a1cdfe0a15a01debb9"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.bpf_x86_native_lab.mod.o.cmd",
+      "size": 73618,
+      "sha256": "e0e85fa393247945deac90413ba30b846cb9f9cfbf06a65ae7388bba070463b7"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.bpf_x86_native_lab.o.cmd",
+      "size": 91583,
+      "sha256": "946238bb2ede417be57368e14e363842967e66a9438b67f96c87f625a0c2ae45"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.bpf_x86_native_lab.o.d",
+      "size": 52238,
+      "sha256": "05613228d6c90d1e741ce94597541d83c92c6d66ad8c2ff52a370d8f4a035863"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.gitignore",
+      "size": 39,
+      "sha256": "d84c55de4ab10a0b54fe0976dfe6f87046a21aa281aa146387d5091b84427c0d"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.module-common.o",
+      "size": 13384,
+      "sha256": "6e87dfb75e46e1f399f40ebc5c378630e51f4d27f48c017cfe9ebd9df2f1df3e"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.modules.order.cmd",
+      "size": 78,
+      "sha256": "8c4b2302ba048cc2c9ba9062d24f7a41007258fb09a7a05fe36e085f1c17d83e"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/.native_hash_layout.h.cmd",
+      "size": 386,
+      "sha256": "228d0efd7babb1f18b61c224e7fe66eb32766ba67ec5855814ab34da3518b0a1"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/Makefile",
+      "size": 421,
+      "sha256": "52b58a44c9404aead1be1bcdef7fe4b00fbc9e6c1631d2c502cd6ac8f8262f7e"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/Module.symvers",
+      "size": 1311,
+      "sha256": "a254c28e87fc859d05fd15879eafd787095f4a42041580615a0b0d8a4e8837fe"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/bpf_x86_native_lab.ko",
+      "size": 751456,
+      "sha256": "60ef395dc6ee4749eb8859f722d7fecea39d4239958e8f3f5f6c0c5734ce9b5a"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/bpf_x86_native_lab.mod",
+      "size": 23,
+      "sha256": "f11399e071f5409f48390786d933723fbc054686716df35fc30b5d99b7a566dc"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/bpf_x86_native_lab.mod.c",
+      "size": 3678,
+      "sha256": "397bc46d5eb66fc360b471a6e84df916527cfa4fba82aeab9969e60041be2946"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/bpf_x86_native_lab.mod.o",
+      "size": 167760,
+      "sha256": "c82c29da31fe732725aafc6771d7b1da6054fb9275fdaec082705b3885e3931b"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/bpf_x86_native_lab.o",
+      "size": 585968,
+      "sha256": "cd935b51db90cee491445966b87c42a6095871d562dd5228c3cf9bd89d47caee"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/modules.order",
+      "size": 21,
+      "sha256": "a7a6082e25c6dcb1c6e628a2501b7bed32cf0cdc03d26ffb5b53ebd69d819af4"
+    },
+    {
+      "path": "kprog/results/p3-attribution-20261126/generic-control-20261126T113558Z/native_hash_layout.h",
+      "size": 53,
+      "sha256": "d165209bc991e87382902fee5f72518de9fe936389635b62ac75425ca279ece7"
+    }
+  ]
+}
