@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCbzPrefix
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzPrefix.cast_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzPrefix.cast_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCbzPrefix.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCbzPrefix.execute
