@@ -1,0 +1,39 @@
+make: Entering directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'
+python3 capture.py
+archived 5 context equal True
+python3 default_ir.py before
+[
+  {
+    "case": "private",
+    "bytes": 6728,
+    "helpers": []
+  },
+  {
+    "case": "array",
+    "bytes": 3816,
+    "helpers": [
+      "__kprog_array_lookup"
+    ]
+  },
+  {
+    "case": "probe",
+    "bytes": 12040,
+    "helpers": [
+      "__kprog_probe_read_kernel",
+      "__kprog_probe_read_user"
+    ]
+  },
+  {
+    "case": "hash",
+    "bytes": 4664,
+    "helpers": [
+      "__kprog_array_lookup"
+    ]
+  },
+  {
+    "case": "pid",
+    "bytes": 3188,
+    "helpers": []
+  }
+]
+make: Leaving directory '/workspaces/repository/kprog/results/checked-toolchain-20261126'

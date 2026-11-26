@@ -1,0 +1,165 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/native-private-stack-20261119/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/private/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/private/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/private/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/private/helpers.txt"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=5\nnative unspecified inputs frozen=0\nnative simulator operations lowered=0\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/checked-array-c-20261119/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/array/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/array/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/array/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/array/helpers.txt",
+      "--array-map",
+      "counts"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=0\nnative unspecified inputs frozen=0\nnative simulator operations lowered=3\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/checked-probe-c-20261119/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/probe/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/probe/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/probe/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/probe/helpers.txt"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=0\nnative unspecified inputs frozen=0\nnative simulator operations lowered=5\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/hash-c-lto-20261120/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/hash/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/hash/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/hash/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/hash/helpers.txt",
+      "--array-map",
+      "map_a",
+      "--array-map",
+      "map_same",
+      "--array-map",
+      "map_b"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=0\nnative unspecified inputs frozen=0\nnative simulator operations lowered=5\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O1",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/repository/kprog/results/pid-c-lto-20261120/fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/pid/input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/pid/input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/pid/native.bc",
+      "--helper-list",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/pid/helpers.txt"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native private stack accesses normalized=0\nnative unspecified inputs frozen=0\nnative simulator operations lowered=3\n"
+  }
+]

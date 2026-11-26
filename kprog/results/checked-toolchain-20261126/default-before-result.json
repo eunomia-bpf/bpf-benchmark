@@ -1,0 +1,39 @@
+{
+  "recorded_utc": "2026-11-26T23:16:20Z",
+  "phase": "before",
+  "rows": [
+    {
+      "case": "private",
+      "bytes": 6728,
+      "helpers": []
+    },
+    {
+      "case": "array",
+      "bytes": 3816,
+      "helpers": [
+        "__kprog_array_lookup"
+      ]
+    },
+    {
+      "case": "probe",
+      "bytes": 12040,
+      "helpers": [
+        "__kprog_probe_read_kernel",
+        "__kprog_probe_read_user"
+      ]
+    },
+    {
+      "case": "hash",
+      "bytes": 4664,
+      "helpers": [
+        "__kprog_array_lookup"
+      ]
+    },
+    {
+      "case": "pid",
+      "bytes": 3188,
+      "helpers": []
+    }
+  ],
+  "scope": "Actual default x86 compiler lowering on five existing regression fixtures; IR compatibility only, not complete request or stock/app acceptance."
+}
