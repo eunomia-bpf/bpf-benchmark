@@ -1,0 +1,7 @@
+{
+  "recipe": "Ranged ghost-cache invalidation clears tag only; full clears/frame release retain original pointer clearing.",
+  "source_before_bytes": 608347,
+  "source_control_bytes": 608347,
+  "control_header": "/workspaces/repository/kprog/results/tetragon-tables-20261126/cache_tag_only.h",
+  "scope": "Result-only normal-O1 B compiler control, one recipe for all requested cases; no production header/P/native/image change."
+}
