@@ -1,0 +1,290 @@
+{
+  "recorded_utc": "2026-11-26T22:19:22Z",
+  "controller_status": 1,
+  "previous_outcome_revision": "26a4dffa7",
+  "archive_pipeline": [
+    [
+      "cat",
+      "kprog/results/lto-codegen-parity-20261126/guest-20261126T220327Z/guest-evidence.tar.zst.part-aa"
+    ],
+    [
+      "zstd",
+      "-d",
+      "-c"
+    ]
+  ],
+  "archive_returncodes": [
+    0,
+    0
+  ],
+  "cases": [
+    {
+      "name": "compat-kernel-fault",
+      "member": "20261126T220327Z/compat-kernel-fault/service.tar.gz",
+      "service_bytes": 447500,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [],
+      "self_check_returncode": 1
+    },
+    {
+      "name": "control",
+      "member": "20261126T220327Z/control/service.tar.gz",
+      "service_bytes": 413341,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-fault",
+      "member": "20261126T220327Z/kernel-fault/service.tar.gz",
+      "service_bytes": 445786,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [],
+      "self_check_returncode": 1
+    },
+    {
+      "name": "kernel-null",
+      "member": "20261126T220327Z/kernel-null/service.tar.gz",
+      "service_bytes": 427330,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-stack",
+      "member": "20261126T220327Z/kernel-stack/service.tar.gz",
+      "service_bytes": 474824,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-string-fault",
+      "member": "20261126T220327Z/kernel-string-fault/service.tar.gz",
+      "service_bytes": 448725,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [],
+      "self_check_returncode": 1
+    },
+    {
+      "name": "kernel-string-null",
+      "member": "20261126T220327Z/kernel-string-null/service.tar.gz",
+      "service_bytes": 430757,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-string-stack",
+      "member": "20261126T220327Z/kernel-string-stack/service.tar.gz",
+      "service_bytes": 533607,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-user-address",
+      "member": "20261126T220327Z/kernel-user-address/service.tar.gz",
+      "service_bytes": 424017,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-zero-null",
+      "member": "20261126T220327Z/kernel-zero-null/service.tar.gz",
+      "service_bytes": 421550,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "kernel-zero-stack",
+      "member": "20261126T220327Z/kernel-zero-stack/service.tar.gz",
+      "service_bytes": 441777,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "user-null",
+      "member": "20261126T220327Z/user-null/service.tar.gz",
+      "service_bytes": 488785,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    },
+    {
+      "name": "user-zero-null",
+      "member": "20261126T220327Z/user-zero-null/service.tar.gz",
+      "service_bytes": 496687,
+      "archived_raw_bytes_equal": true,
+      "receipts_match_published_outcome": true,
+      "native_commands_match_published_outcome": true,
+      "stock_b_passed": [
+        true
+      ],
+      "execution_paths": [
+        "checked-sim-c"
+      ],
+      "backend_options": [
+        true
+      ],
+      "observed_retvals": [
+        2
+      ],
+      "self_check_returncode": 0
+    }
+  ],
+  "scope": "Duplicate callback reinspection only. Complete archived service files compared directly to persistent raw bytes, receipts and commands compared semantically to published outcomes. No rerun, new compiler/helper change, failed-case exclusion or timing action."
+}
