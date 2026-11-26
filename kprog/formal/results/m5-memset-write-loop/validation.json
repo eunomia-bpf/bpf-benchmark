@@ -1,0 +1,56 @@
+{
+  "confirmed_utc": "2026-11-26T06:46:13.049953+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetWriteLoop"
+    ],
+    "exit": 0,
+    "seconds": 3.4299299716949463,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 339,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-write-loop/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.062347888946533,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 7,
+  "source_steps": {
+    "sequential_original_iterations": 16,
+    "actual_source_stores_per_iteration": 2,
+    "accumulated_byte_readbacks": 16,
+    "retained_tag_byte_observations": 24,
+    "final_false_guard_exit": 5,
+    "original_input_prefix": 162,
+    "original_initializer": 4,
+    "original_loop_head_prefix": 166,
+    "each_loop_entry": 187,
+    "post_body_wrapper_counter": 7
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetWriteLoop.lean",
+      "size_bytes": 19444,
+      "mtime_ns": 1795675518011258261
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

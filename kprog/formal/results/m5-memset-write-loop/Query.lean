@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64MemsetWriteLoop
+
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.of_inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.of_inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.initialized
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.initialized
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.step
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.iterations
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.original_entry
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.original_entry
+#check KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.original
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetWriteLoop.original
