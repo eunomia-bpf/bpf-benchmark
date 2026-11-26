@@ -17,12 +17,20 @@ python3 /workspaces/repository/kprog/results/hash-c-lto-20261120/check.py /works
   "helpers": [
     "__kprog_array_lookup"
   ],
-  "execution": "1032 kernel hash oracle cases, 143388 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases",
+  "execution": "1044 kernel hash oracle cases, 145628 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases",
   "undefined_symbols": "                 U bpf_map_lookup_elem\n                 U map_a\n                 U map_b\n                 U map_c\n                 U map_same\n",
   "raw": "/workspaces/repository/kprog/results/hash-family-c-20261126/host",
   "scope": "Kernel-header hash oracle, native helper C and installed compiler ABI, including mixed key shapes/generic retention/nulls restart. No stock/app/performance result."
 }
 make[1]: Leaving directory '/workspaces/repository/kprog/results/hash-c-lto-20261120'
-python3 /workspaces/repository/kprog/results/restore-529-20261121/offline_link.py /workspaces/repository/vendor/build/native-bpf/x86/stage x86 > /workspaces/repository/kprog/results/hash-family-c-20261126/offline-x86.log
-python3 /workspaces/repository/kprog/results/restore-529-20261121/offline_link.py /workspaces/repository/vendor/build/native-bpf/arm64/stage arm64 > /workspaces/repository/kprog/results/hash-family-c-20261126/offline-arm64.log
+install -d /var/tmp/kprog-tmp/perf/hash-family
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/micro/programs/build-x86 -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o /var/tmp/kprog-tmp/perf/hash-family/direct
+/var/tmp/kprog-tmp/perf/hash-family/direct
+12 specialized/zero/absent target cases; missing generic fails
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/micro/programs/build-x86 -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi -DTRUSTED /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o /var/tmp/kprog-tmp/perf/hash-family/trusted
+/usr/bin/ld: /tmp/ccdXSc9N.o: in function `native_loader::trusted::configure_lookup_site_for_shape(native_loader::trusted::CompanionLoad::LookupSite&, native_loader::trusted::NativeMapShape const&, native_loader::trusted::BpfArrayOffsets const&, native_loader::trusted::BpfHtabOffsets const&, unsigned long)':
+loader_selection.cpp:(.text._ZN13native_loader7trusted31configure_lookup_site_for_shapeERNS0_13CompanionLoad10LookupSiteERKNS0_14NativeMapShapeERKNS0_15BpfArrayOffsetsERKNS0_14BpfHtabOffsetsEm+0x6f): undefined reference to `native_loader::internal::roundup_pow2_mask(unsigned int)'
+/usr/bin/ld: loader_selection.cpp:(.text._ZN13native_loader7trusted31configure_lookup_site_for_shapeERNS0_13CompanionLoad10LookupSiteERKNS0_14NativeMapShapeERKNS0_15BpfArrayOffsetsERKNS0_14BpfHtabOffsetsEm+0xa3): undefined reference to `native_loader::internal::roundup_pow2_mask(unsigned int)'
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:32: loader-selection] Error 1
 make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

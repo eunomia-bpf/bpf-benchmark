@@ -16,7 +16,7 @@ Raw check results and guest logs will be retained here as they complete.
 
 Source 655ae2755: host check passes 1,032 kernel hash oracle cases, 143,388
 C/native lookups, one nulls restart, 589 generic calls and 560 same-map alias
-cases (`host/report.json`). This reuses the requested LTO driver and its 8- and 16-byte fixture maps;
+cases (`host-first/report.json`). This reuses the requested LTO driver and its 8- and 16-byte fixture maps;
 the guarded driver also covers every key size through 256 bytes. Both element and value returns are checked.
 
 Whole-stage offline links: x86 289/289; arm64 287/289. The two existing arm64
@@ -51,3 +51,20 @@ for all four map types, with specialized, zero and absent symbols. Its first
 missing-generic test accidentally cleared the initialized cache and caused a
 real kallsyms reread; retaining an unrelated sentinel tests the intended missing
 symbol case. `loader-selection-first.log` preserves that fixture failure.
+
+## Final host subset
+
+The 260-byte driver passes 1,044 kernel hash oracle cases, 145,628 lookups,
+one nulls restart, 589 generic calls and 560 same-map alias cases
+(`host/report.json`). Both production loader-selection fixtures pass 12
+specialized/zero/absent target cases plus missing-generic failure. Both modules
+export exactly the 19 corpus key-size entries, with layout constants from
+that architecture's boot kernel BTF (`module-coverage.json`). The final arm64
+module build is warning-free. The two fixture setup failures remain in their
+original logs; neither was a production lookup failure.
+
+`finish.sh` is a finite callback for the running build/check controller. It
+collects each app's status, native replacements and native-load failures,
+commits the raw app/counter/shim records under the git lock, and wakes the
+stopped perf lane to review the outcome and complete its todo record. It also
+wakes the lane on failure. The full timing target is never invoked.

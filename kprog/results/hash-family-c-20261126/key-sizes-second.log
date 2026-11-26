@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+cd /workspaces/repository && python3 /workspaces/repository/kprog/results/hash-family-c-20261126/key_sizes.py > /workspaces/repository/kprog/results/hash-family-c-20261126/key-sizes.json
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/hash-family-c-20261126/key_sizes.py", line 50, in <module>
+    assert not remaining, (obj, sorted(remaining))
+           ^^^^^^^^^^^^^
+AssertionError: (PosixPath('vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o'), [''])
+make: *** [Makefile:7: key-sizes] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

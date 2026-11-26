@@ -33,3 +33,6 @@ loader-selection:
 	$(TEST_BUILD)/direct
 	$(CXX) $(TEST_FLAGS) -DTRUSTED $(HERE)/loader_selection.cpp $(TEST_LIBS) -o $(TEST_BUILD)/trusted
 	$(TEST_BUILD)/trusted
+.PHONY: collect
+collect:
+	python3 $(HERE)/collect.py

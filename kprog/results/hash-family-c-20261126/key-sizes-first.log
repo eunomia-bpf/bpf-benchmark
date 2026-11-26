@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+cd /workspaces/repository && python3 /workspaces/repository/kprog/results/hash-family-c-20261126/key_sizes.py > /workspaces/repository/kprog/results/hash-family-c-20261126/key-sizes.json
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/hash-family-c-20261126/key_sizes.py", line 45, in <module>
+    key = size(pointee('key')) if 'key' in members else count(pointee('key_size'))
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/results/hash-family-c-20261126/key_sizes.py", line 23, in size
+    raise ValueError('key has no DWARF size: ' + die.tag)
+ValueError: key has no DWARF size: DW_TAG_pointer_type
+make: *** [Makefile:7: key-sizes] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

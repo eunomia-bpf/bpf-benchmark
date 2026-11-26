@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+install -d /var/tmp/kprog-tmp/perf/hash-family
+g++ -std=c++20 -O1 -ffunction-sections -fdata-sections -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/micro/programs/build-x86 -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o /var/tmp/kprog-tmp/perf/hash-family/direct
+/var/tmp/kprog-tmp/perf/hash-family/direct
+direct: /workspaces/repository/kprog/results/hash-family-c-20261126/loader_selection.cpp:43: int main(): Assertion `failed' failed.
+make: *** [Makefile:28: loader-selection] Aborted (core dumped)
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'

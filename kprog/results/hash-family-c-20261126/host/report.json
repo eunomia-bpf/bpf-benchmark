@@ -13,7 +13,7 @@
   "helpers": [
     "__kprog_array_lookup"
   ],
-  "execution": "1032 kernel hash oracle cases, 143388 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases",
+  "execution": "1044 kernel hash oracle cases, 145628 C/native lookup cases, 1 nulls restart, 589 generic calls, 560 same-map alias cases",
   "undefined_symbols": "                 U bpf_map_lookup_elem\n                 U map_a\n                 U map_b\n                 U map_c\n                 U map_same\n",
   "raw": "/workspaces/repository/kprog/results/hash-family-c-20261126/host",
   "scope": "Kernel-header hash oracle, native helper C and installed compiler ABI, including mixed key shapes/generic retention/nulls restart. No stock/app/performance result."
