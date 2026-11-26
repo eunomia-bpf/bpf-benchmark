@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagTransfer
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.source
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.observations
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.after_bytes
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransfer.after_bytes

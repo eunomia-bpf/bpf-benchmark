@@ -1,0 +1,7 @@
+# Original memset tag-transfer readers and loop entry
+
+From the actual post-byte-loop effects, the original program_tag(entry,0) and program_pointer(entry,0) internal calls each execute their genuine 28-step reader and real return. The actual tag4 branch, current bias-field load96, source pointer-to-long casts, destination64 calculation, original length16 copy and independent transfer counter0 initialization reach the original transfer-loop head in79 source transitions, with the entire current heap unchanged. The same completed sixteen-byte Invariant packet directly supplies the true R0, entry and length observations; its actual sequence transition plus this prefix executes80 transitions. Exact source setters preserve entry, original byte-loop counter, length and byte, and establish the three transfer inputs. Actual source bindings and local-name unshadowing derive from the same eight-local memset allocation, with no new source-run/helper-result premise. Standard imported semantics and all previous interfaces/proof caps remain. The subsequent original alignment loop, genuine tag-word stores and clobber/free/caller execution compose next before related root and remaining M5/recount/M6.
+
+Focused build 340 and 4 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
