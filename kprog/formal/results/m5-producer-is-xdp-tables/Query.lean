@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProducerIsXdpTables
+open KProgFormal.ClightRefinement
+#check Arm64ProducerIsXdpTables.entry_initialized
+#print axioms Arm64ProducerIsXdpTables.entry_initialized
