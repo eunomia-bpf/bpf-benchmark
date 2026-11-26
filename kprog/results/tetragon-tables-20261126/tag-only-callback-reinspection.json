@@ -1,0 +1,35 @@
+{
+  "recorded_utc": "2026-11-26T20:46:23Z",
+  "already_published_outcome": "09cd90f09",
+  "controller_matches_outcome": true,
+  "child_returncodes": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "cleanup_rechecked": true,
+  "archive_checked_products": [
+    {
+      "file": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.bounds-input.bc",
+      "bytes": 6720124,
+      "archive_member_matches": true
+    },
+    {
+      "file": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.bounds.bc",
+      "bytes": 3119488,
+      "archive_member_matches": true
+    },
+    {
+      "file": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.i",
+      "bytes": 5220311,
+      "archive_member_matches": true
+    }
+  ],
+  "new_preprocessing_or_cleanup": false,
+  "scope": "Duplicate callback reinspection, no compilation or stock rerun."
+}

@@ -100,23 +100,27 @@ def inspect(text):
         peak_witness=witness,
         scope='Static CFG liveness/interference. Colors ignore size classes and escaped/default storage; not an emitted layout or a verifier result.')
 
+mode = sys.argv[1:]
+if mode not in [[], ['peaks'], ['tag-only-peaks']]:
+    raise SystemExit('usage: spill_liveness.py [peaks|tag-only-peaks]')
+revision = '09cd90f09' if mode == ['tag-only-peaks'] else 'fab61404f'
 rows = []
 for stage in ('before', 'packed'):
     path = HERE.relative_to(ROOT) / 'request-39' / ('trusted_x86.bpf.' + stage + '.mir')
-    text = subprocess.check_output(['git', 'show', 'fab61404f:' + str(path)], cwd=ROOT, text=True)
+    text = subprocess.check_output(['git', 'show', revision + ':' + str(path)], cwd=ROOT, text=True)
     metadata = dict(re.findall(r'^\s*!(\d+) = (.+)$', text, re.M))
     text = next(document for document in text.split('\n---\n') if 'body:             |' in document)
     if stage == 'before':
         text, _ = remove_dead_frame_addresses(text)
         text, _ = narrow_scalar_storage(text)
     result = inspect(text)
-    if sys.argv[1:] == ['peaks']:
+    if mode:
         witness = result['peak_witness']
         locations = set(re.findall(r'debug-location !(\d+)', '\n'.join(witness['block_lines'])))
         witness['debug_locations'] = {n: metadata[n] for n in sorted(locations, key=int)}
     else:
         result.pop('peak_witness')
-    rows.append(dict(revision='fab61404f',path=str(path),stage=stage,**result))
-output = 'spill-peaks.json' if sys.argv[1:] == ['peaks'] else 'spill-liveness.json'
+    rows.append(dict(revision=revision,path=str(path),stage=stage,**result))
+output = 'tag-only-spill-peaks.json' if mode == ['tag-only-peaks'] else 'spill-peaks.json' if mode else 'spill-liveness.json'
 (HERE / output).write_text(json.dumps(rows, indent=2) + '\n')
 print(json.dumps(rows, indent=2))

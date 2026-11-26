@@ -78,3 +78,7 @@ tag-only-cache-group:
 	python3 cache_tag_compile.py $(REQUEST) $(RECORDS)
 tag-only-cache-control:
 	python3 return_pipeline.py --tag-only-cache $(TAG_CACHE_OUT) 39
+
+.PHONY: tag-only-spill-peaks
+tag-only-spill-peaks:
+	taskset -c 16 prlimit --as=8589934592 -- python3 spill_liveness.py tag-only-peaks

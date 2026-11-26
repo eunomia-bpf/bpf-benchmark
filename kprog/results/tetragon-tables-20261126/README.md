@@ -489,3 +489,5 @@ that file is not an input to this8-command normal pipeline. No kernel limit,
 production header, P/flags/image/LTO policy or benchmark setting changed.
 Phase1 remains open on the real B frame failures; no runtime gain claimed
 and full timing remains frozen.
+
+PERF 2026-11-26T20:46:23Z: duplicate tag-only callback matches09cd90f09; eight commands0, stock104076/insn8R10-528/processed9/errno13 remain. Six preprocessing pieces still absent. Joined .i and both bitcode files match their archived members by direct bytes; current tracked artifacts are published as completion of that same build, no rerun/newcleanup. New read-only tag-only MIR audit finds packed peak84objects/672declaredlivebytes at bb10267 (normal127objects/1012bytes), near native loop0x11d2; both are conservative CFG counts, not feasible-path minima. Remaining pointer fields stay live after full tag-onlyclear. This motivates testing tag-only RANGEinvalidations with baseline fullclear/release, production header unchanged.
