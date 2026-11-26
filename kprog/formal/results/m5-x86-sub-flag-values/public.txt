@@ -1,0 +1,25 @@
+KProgFormal.ClightRefinement.X86SubFlagValues.cf (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  (X86.Flags.sub X86.Size.q lhs rhs flags).cf = decide (lhs.toNat < rhs.toNat)
+'KProgFormal.ClightRefinement.X86SubFlagValues.cf' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.zf (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  (X86.Flags.sub X86.Size.q lhs rhs flags).zf = (lhs == rhs)
+'KProgFormal.ClightRefinement.X86SubFlagValues.zf' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.af (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  (X86.Flags.sub X86.Size.q lhs rhs flags).af = (lhs ^^^ rhs ^^^ lhs - rhs).getLsbD 4
+'KProgFormal.ClightRefinement.X86SubFlagValues.af' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.pf_sf (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  (X86.Flags.sub X86.Size.q lhs rhs flags).pf = X86.Value.parity8 (lhs - rhs) ∧
+    (X86.Flags.sub X86.Size.q lhs rhs flags).sf = (lhs - rhs).getLsbD 63
+'KProgFormal.ClightRefinement.X86SubFlagValues.pf_sf' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.sf_source (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  KProgFormal.ClightRefinement.X86ShiftFlagSF.bit (lhs - rhs) 9223372036854775808#64 =
+    CC.Val.Vint (if (X86.Flags.sub X86.Size.q lhs rhs flags).sf = true then 1 else 0)
+'KProgFormal.ClightRefinement.X86SubFlagValues.sf_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.pf_source (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  KProgFormal.ClightRefinement.X86ShiftFlagPF.bit (lhs - rhs) =
+    CC.Val.Vint (if (X86.Flags.sub X86.Size.q lhs rhs flags).pf = true then 1 else 0)
+'KProgFormal.ClightRefinement.X86SubFlagValues.pf_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.X86SubFlagValues.of_source (lhs rhs : BitVec 64) (flags : X86.Flags) :
+  KProgFormal.ClightRefinement.X86ShiftFlagSF.bit ((lhs ^^^ rhs) &&& (lhs ^^^ lhs - rhs)) 9223372036854775808#64 =
+    CC.Val.Vint (if (X86.Flags.sub X86.Size.q lhs rhs flags).of = true then 1 else 0)
+'KProgFormal.ClightRefinement.X86SubFlagValues.of_source' depends on axioms: [propext, Classical.choice, Quot.sound]
