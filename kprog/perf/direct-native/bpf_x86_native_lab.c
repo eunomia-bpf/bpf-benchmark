@@ -42,6 +42,7 @@ __KPROG_HASH_CODE
  * Small keys and the larger string keys used by the corpus share the same C.
  */
 #define KPROG_HTAB_KEY(N) \
+void *kprog_htab_elem_k##N(void *map, const void *key); \
 noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
 { return __kprog_hash_elem(map, key, N, KPROG_HASH_LAYOUT); } \
 EXPORT_SYMBOL_GPL(kprog_htab_elem_k##N);

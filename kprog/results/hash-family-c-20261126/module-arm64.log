@@ -1,0 +1,603 @@
+make: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+make -C /workspaces/.agent-state/kprog-ck/build-arm64 M=/workspaces/repository/kprog/perf/direct-native MO=/workspaces/repository/kinsn/module/arm64/build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules
+make[1]: Entering directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make[2]: Entering directory '/workspaces/repository/kinsn/module/arm64/build'
+  GEN     Makefile
+  BTF     native_hash_layout.h
+  CC [M]  bpf_x86_native_lab.o
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k1’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k2’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k3’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k4’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k5’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k6’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k7’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k8’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:51:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   51 | KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k9’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k10’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k11’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k12’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k13’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k14’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k15’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k16’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:52:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   52 | KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k17’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k18’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k19’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k20’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k21’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k22’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k23’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k24’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:53:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   53 | KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k25’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k26’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k27’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k28’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k29’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k30’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k31’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k32’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:54:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   54 | KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k33’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k34’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k35’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k36’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k37’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k38’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k39’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k40’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:55:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   55 | KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k41’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k42’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k43’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k44’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k45’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k46’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k47’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k48’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:56:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   56 | KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k49’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k50’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k51’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k52’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k53’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k54’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k55’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k56’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:57:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   57 | KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k57’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k58’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k59’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k60’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:49:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   49 | KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k61’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k62’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:19: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                   ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k63’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:37: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                     ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k64’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:50:55: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   50 | KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+      |                                                       ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:58:1: note: in expansion of macro ‘KPROG_HTAB_KEYS_8’
+   58 | KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+      | ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k224’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:59:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   59 | KPROG_HTAB_KEY(224)
+      | ^~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:45:16: warning: no previous prototype for ‘kprog_htab_elem_k256’ [-Wmissing-prototypes]
+   45 | noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+      |                ^~~~~~~~~~~~~~~~~
+/workspaces/repository/kprog/perf/direct-native/bpf_x86_native_lab.c:60:1: note: in expansion of macro ‘KPROG_HTAB_KEY’
+   60 | KPROG_HTAB_KEY(256)
+      | ^~~~~~~~~~~~~~
+  LD [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_arm64_native_lab.mod.o
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[2]: Leaving directory '/workspaces/repository/kinsn/module/arm64/build'
+make[1]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
