@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.store_exit
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.store_exit
+#check KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.with_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.with_stores
+#check KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.sp_at_base
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackBaseBackedge.sp_at_base
