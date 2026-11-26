@@ -1,0 +1,55 @@
+ .../apps/otelcol-ebpf-profiler__profiling.json     |   737 ++
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../otelcol-ebpf-profiler__profiling.baseline.log  |   475 +
+ ...otelcol-ebpf-profiler__profiling.post_rejit.log |   494 +
+ .../metadata.json                                  |    40 +
+ .../details/apps/bcc__set.json                     |   545 +
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../details/shim-logs/bcc__set.baseline.log        |   632 +
+ .../details/shim-logs/bcc__set.post_rejit.log      |   752 ++
+ .../metadata.json                                  |    40 +
+ .../details/apps/cilium__agent.json                |  1171 ++
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../details/shim-logs/cilium__agent.baseline.log   |  1291 ++
+ .../details/shim-logs/cilium__agent.post_rejit.log |  1831 +++
+ .../metadata.json                                  |    40 +
+ .../details/apps/tetragon__observer.json           |  5016 ++++++++
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../shim-logs/tetragon__observer.baseline.log      | 10362 ++++++++++++++++
+ .../shim-logs/tetragon__observer.post_rejit.log    | 12123 +++++++++++++++++++
+ .../metadata.json                                  |    40 +
+ .../details/apps/tracee__monitor.json              |  3111 +++++
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../details/shim-logs/tracee__monitor.baseline.log |  1822 +++
+ .../shim-logs/tracee__monitor.post_rejit.log       |  2412 ++++
+ .../metadata.json                                  |    40 +
+ .../details/apps/katran.json                       |   355 +
+ .../details/progress.json                          |     5 +
+ .../details/result.json                            |    64 +
+ .../details/shim-logs/katran.baseline.log          |    66 +
+ .../details/shim-logs/katran.post_rejit.log        |    73 +
+ .../metadata.json                                  |    40 +
+ .../check-20261126T071525Z/check-image.txt         |     1 +
+ .../check-20261126T071525Z/collect.log             |    94 +
+ .../check-20261126T071525Z/completed.txt           |     1 +
+ .../check-20261126T071525Z/controller-exit.txt     |     1 +
+ .../check-20261126T071525Z/controller.log          |     0
+ .../check-20261126T071525Z/finish-controller.log   |     0
+ .../check-20261126T071525Z/guest-check.log         |     8 +
+ .../check-20261126T071525Z/guest-summary.json      |    91 +
+ ...1822Z-check-otelcol-ebpf-profiler_profiling.log |    39 +
+ .../guest/20261126T072101Z-check-bcc_set.log       |    39 +
+ .../guest/20261126T072403Z-check-cilium_agent.log  |    39 +
+ .../20261126T072654Z-check-tetragon_observer.log   |    39 +
+ .../20261126T073133Z-check-tracee_monitor.log      |    39 +
+ .../guest/20261126T073532Z-check-katran.log        |    39 +
+ .../check-20261126T071525Z/guest/check.log         |     6 +
+ .../check-20261126T071525Z/publication-status.txt  |    43 +
+ .../check-20261126T071525Z/publication.log         |     0
+ .../check-20261126T071525Z/raw-paths.txt           |    36 +
+ 54 files changed, 44437 insertions(+)

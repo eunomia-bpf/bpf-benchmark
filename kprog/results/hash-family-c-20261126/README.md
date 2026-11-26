@@ -101,3 +101,28 @@ is needed, and retains the image lock through publication and cleanup.
 it avoids a redundant image rebuild. The check keeps the default six apps,
 one 10-second sample and stats on. Its outer address-space limit is 80 GiB;
 no benchmark setting changes. Full timing remains frozen.
+
+## Completed six-app functional confirmation, 2026-11-26T07:38:26Z
+
+The unchanged `make -C kprog/perf/one-image check` completed on image
+fb53150e89ea, one 10-second sample per app with stats on. Controller exit is 0.
+Every raw run has metadata status `completed`, suite/app status `ok`, and an
+empty app error. `check-20261126T071525Z/guest-summary.json` agrees with all
+six raw app records and shim logs. Raw records were pushed in ce6ab9416.
+
+| App | Make rc | App status | Native replacements | Native-load failures | Raw run |
+|---|---:|---|---:|---:|---|
+| otelcol-ebpf-profiler/profiling | 0 | ok | 14 | 0 | [x86_kvm_corpus_20261126_072004_258004](../../../corpus/results/x86_kvm_corpus_20261126_072004_258004) |
+| bcc/set | 0 | ok | 25 | 0 | [x86_kvm_corpus_20261126_072235_795145](../../../corpus/results/x86_kvm_corpus_20261126_072235_795145) |
+| cilium/agent | 0 | ok | 135 | 0 | [x86_kvm_corpus_20261126_072536_648665](../../../corpus/results/x86_kvm_corpus_20261126_072536_648665) |
+| tetragon/observer | 0 | ok | 288 | 0 | [x86_kvm_corpus_20261126_072843_366158](../../../corpus/results/x86_kvm_corpus_20261126_072843_366158) |
+| tracee/monitor | 0 | ok | 169 | 0 | [x86_kvm_corpus_20261126_073319_240233](../../../corpus/results/x86_kvm_corpus_20261126_073319_240233) |
+| katran | 0 | ok | 1 | 0 | [x86_kvm_corpus_20261126_073722_681565](../../../corpus/results/x86_kvm_corpus_20261126_073722_681565) |
+
+P3's requested implementation, host checks, both-ISA builds/offline links and
+x86 guest functional confirmation are complete. The earlier arm64 offline
+result remains 287/289 with its two existing BCC ADR_GOT cases. No functional
+repair or repeat run is needed after this confirmation. These are functional
+diagnostics; the full x86 timing run stays frozen and no speedup is inferred.
+The cleanup record was already committed in 2a35bf339; this check reused the
+published image and removed no image or raw data.
