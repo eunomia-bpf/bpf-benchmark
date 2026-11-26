@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-26T23:53:32.547246+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte"
+    ],
+    "exit": 0,
+    "seconds": 2.2367312908172607,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 301,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-physical-byte/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.494990587234497,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "source_stack_capacity": 160,
+    "source_bias": 96,
+    "native_bytes_written": 1,
+    "memory_operation": "imported MemoryMode.write checked",
+    "uninitialized": "source Vundef; native byte contents arbitrary",
+    "native_trace": "one real memory write; previous history retained"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetPhysicalByte.lean",
+      "size_bytes": 7304,
+      "mtime_ns": 1795737111376062313
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

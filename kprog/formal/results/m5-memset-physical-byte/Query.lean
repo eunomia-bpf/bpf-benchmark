@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte
+
+#check KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.address_injective
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.address_injective
+#check KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.store
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.store
