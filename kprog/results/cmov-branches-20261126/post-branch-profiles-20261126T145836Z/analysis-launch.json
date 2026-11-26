@@ -1,0 +1,24 @@
+{
+  "pid": 607920,
+  "source": "1eb6d77978175110005daf09d64b9b7ce53f713e",
+  "command": [
+    "flock",
+    "-s",
+    "/workspaces/.agent-state/kprog-lanes/locks/timing",
+    "taskset",
+    "-c",
+    "16-17",
+    "nice",
+    "-n",
+    "19",
+    "prlimit",
+    "--as=8589934592",
+    "--",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/p3-attribution-20261126",
+    "analyze",
+    "OUT=/workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z"
+  ],
+  "started": "2026-11-26T15:15:01.879250+00:00"
+}

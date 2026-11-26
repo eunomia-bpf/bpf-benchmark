@@ -1,0 +1,41 @@
+make: Entering directory '/workspaces/repository/kprog/results/p3-attribution-20261126'
+bash /workspaces/repository/kprog/results/p3-attribution-20261126/analyze.sh /workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z
+{
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150829_887964",
+  "event": "cpu_core/cycles/",
+  "period": 1000000,
+  "windows": {
+    "baseline": [
+      158.714341,
+      212.714341
+    ],
+    "post_rejit": [
+      286.21534,
+      340.21534
+    ]
+  },
+  "qemu_host_pid": 605604,
+  "sample_scope": "Identified QEMU host PID; other guest samples counted separately."
+}
+baseline {'other_kernel': 460038, 'program_body': 69498, 'kernel_hash_lookup': 39961, 'guest_user': 687047, 'memcmp': 3374, 'memset': 333} {'samples_with_noncontext_chain_frame': 0, 'samples_with_bpf_body_or_chain': 69498, 'memset_samples_with_bpf_caller': 0}
+post_rejit {'guest_user': 707342, 'other_kernel': 462813, 'p3_hash': 33648, 'kernel_hash_lookup': 5798, 'program_body': 55790, 'memcmp': 570, 'memset': 1407} {'samples_with_noncontext_chain_frame': 0, 'samples_with_bpf_body_or_chain': 55790, 'memset_samples_with_bpf_caller': 0}
+{
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150046_350964",
+  "event": "cpu_core/cycles/",
+  "period": 1000000,
+  "windows": {
+    "baseline": [
+      201.475634,
+      255.475634
+    ],
+    "post_rejit": [
+      411.128006,
+      465.128006
+    ]
+  },
+  "qemu_host_pid": 603861,
+  "sample_scope": "Identified QEMU host PID; other guest samples counted separately."
+}
+baseline {'guest_user': 162630, 'other_kernel': 1092526, 'program_body': 45005, 'kernel_hash_lookup': 9163, 'memset': 935, 'memcmp': 1349} {'samples_with_noncontext_chain_frame': 0, 'samples_with_bpf_body_or_chain': 45005, 'memset_samples_with_bpf_caller': 0}
+post_rejit {'other_kernel': 1119992, 'program_body': 18201, 'guest_user': 133673, 'p3_hash': 4287, 'memset': 223} {'samples_with_noncontext_chain_frame': 0, 'samples_with_bpf_body_or_chain': 18201, 'memset_samples_with_bpf_caller': 0}
+make: Leaving directory '/workspaces/repository/kprog/results/p3-attribution-20261126'

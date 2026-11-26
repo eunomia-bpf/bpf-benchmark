@@ -1,0 +1,73 @@
+## master...origin/master
+ M CLAUDE.md
+ M corpus/results/tet-manifest-ab-20261116/manifest.json
+ M kprog/arm64/arm64_sim_direct.h
+ M kprog/arm64/micro-prog/bcc_runqlat_log2_histogram_bucket.bpf.c
+ M kprog/arm64/micro-prog/bcc_tcpconnect_ipv4_tuple_filter.bpf.c
+ M kprog/arm64/micro-prog/bitmap_popcount_scan.bpf.c
+ M kprog/arm64/micro-prog/bpf_local_call_fanout_dispatch.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_comm_key_fnv_hash.bpf.c
+ M kprog/arm64/micro-prog/bpftrace_string_search_prefix_scan.bpf.c
+ M kprog/arm64/micro-prog/cgroup_skb_hash_chain.bpf.c
+ M kprog/arm64/micro-prog/cilium_ct_nat_tuple_rewrite.bpf.c
+ M kprog/arm64/micro-prog/cilium_policy_guard_tree_filter.bpf.c
+ M kprog/arm64/micro-prog/cilium_socket_lb_service_select.bpf.c
+ M kprog/arm64/micro-prog/flow_5tuple_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/flow_record_field_scan.bpf.c
+ M kprog/arm64/micro-prog/katran_lb_consistent_hash_select.bpf.c
+ M kprog/arm64/micro-prog/otel_stack_frame_unwind_scan.bpf.c
+ M kprog/arm64/micro-prog/packed_header_bitfield_decode.bpf.c
+ M kprog/arm64/micro-prog/packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/packet_record_bounds_window.bpf.c
+ M kprog/arm64/micro-prog/packet_toeplitz_rss_hash.bpf.c
+ M kprog/arm64/micro-prog/packet_vlan_tcpopt_parser.bpf.c
+ M kprog/arm64/micro-prog/payload_prefix_memcmp_scan.bpf.c
+ M kprog/arm64/micro-prog/simple.bpf.c
+ M kprog/arm64/micro-prog/simple_packet.bpf.c
+ M kprog/arm64/micro-prog/siphash_rotate64_mixer.bpf.c
+ M kprog/arm64/micro-prog/sorted_rule_binary_search.bpf.c
+ M kprog/arm64/micro-prog/tc_packet_checksum_fold.bpf.c
+ M kprog/arm64/micro-prog/tetragon_process_event_arg_filter.bpf.c
+ M kprog/arm64/micro-prog/trace_event_type_switch_dispatch.bpf.c
+ M kprog/arm64/micro-prog/tracee_http_method_prefix_detect.bpf.c
+ M kprog/arm64/micro-prog/tracee_syscall_name_table_lookup.bpf.c
+ M kprog/arm64/micro-prog/unchecked_packet_read.bpf.c
+ M kprog/test/native_load_fault/Makefile
+ M kprog/test/native_load_fault/guest.py
+ M kprog/test/native_load_fault/native.c
+ M kprog/test/native_load_fault/native_load_fault_module.c
+ M kprog/test/native_load_fault/probe.cpp
+ M kprog/test/native_load_fault/recovery_host.c
+ M vendor/bpf/bcc/libbpf-tools/arm64/vmlinux.h
+ M vendor/bpf/tetragon/bpf/include/vmlinux_generated_arm64.h
+ .../apps/otelcol-ebpf-profiler__profiling.json     | 737 ++++++++++++++++
+ .../details/progress.json                          |   5 +
+ .../details/result.json                            |  64 ++
+ .../otelcol-ebpf-profiler__profiling.baseline.log  | 929 ++++++++++++++++++++
+ ...otelcol-ebpf-profiler__profiling.post_rejit.log | 964 +++++++++++++++++++++
+ .../metadata.json                                  |  40 +
+ .../otel-profile/archive.log                       |   0
+ .../otel-profile/archive.txt                       |   2 +
+ .../otel-profile/command.json                      |  12 +
+ .../otel-profile/evidence.tar.zst.part-aa          | Bin 0 -> 46137344 bytes
+ .../otel-profile/evidence.tar.zst.part-ab          | Bin 0 -> 9902903 bytes
+ .../otel-profile/make.log                          |   8 +
+ .../otel-profile/status.json                       |   5 +
+ 13 files changed, 2766 insertions(+)
+[master c4609076f] Record P3 attribution otel-profile
+ 13 files changed, 2766 insertions(+)
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/details/apps/otelcol-ebpf-profiler__profiling.json
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/details/progress.json
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/details/result.json
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/details/shim-logs/otelcol-ebpf-profiler__profiling.baseline.log
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log
+ create mode 100644 corpus/results/x86_kvm_corpus_20261126_150829_887964/metadata.json
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/archive.log
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/archive.txt
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/command.json
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/evidence.tar.zst.part-ab
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/make.log
+ create mode 100644 kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/status.json
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   4adf04879..c4609076f  master -> master

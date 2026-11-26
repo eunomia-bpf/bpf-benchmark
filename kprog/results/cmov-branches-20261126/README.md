@@ -126,6 +126,16 @@ program or a causal flag speedup. Repeating just to obtain an uncontended
 number is not the next step. The remaining question is where the post-branch
 code spends its time, particularly Tetragon's kernel lock path.
 
+The per-program mix is retained in tetragon-comparison.json. Native tracepoint
+calls are41.91–42.55% of calls but96.87–97.55% of measured BPF time; its
+native kprobe group costs55.8–58.8ns/call and return probes50.7–51.7ns/call.
+The paired eBPF tracepoints account for45.93–48.53% of calls and68.33–72.48%
+of time; eBPF kprobes cost1,260.4–1,436.8ns/call. Thus the aggregate native
+win is not evidence that generic_tracepoint is fixed. OTel's retained
+stats-on counters are entirely native_tracer_e:perf_event in both phases;
+tail-unwinder work is charged to that entry. The PMU profiles below separate
+the actual unwinder bodies and helper work within that accounting.
+
 The next profiles keep the32GiB/8vCPU/60s stats-off cycles protocol on the
 unchanged image and capture actual generic_tracepo/perf_unwind_nat code.
 The guest also requests one CPU backtrace for each newly observed oldest stress-ng
@@ -138,3 +148,72 @@ caller share from a few backtraces. The kernel has MAGIC_SYSRQ and ORC support;
 missing stack evidence remains a caveat, not an app/result admission gate.
 Full timing remains frozen; memset's historical owner-specific measurements
 and raw archives remain in their existing result directory.
+
+## Post-branch profile attribution
+
+Both profiles in post-branch-profiles-20261126T145836Z completed app ok/error
+empty on image68655f5c6c0d (Tetragon150046_350964, OTel150829_887964).
+The collection and PMU analysis returned0; raw archives were published per
+case, and owner/phase summaries in4129de340. post-profile-report.py reproduces
+the compact report from the captured summaries, stacks and code. These are
+stats-off60s profiles, not the frozen timing or per-call measurements.
+
+| own-QEMU guest-kernel cycle samples | Tetragon eBPF | Tetragon native | OTel eBPF | OTel native |
+|---|---:|---:|---:|---:|
+| denominator | 1,148,978 | 1,142,703 | 573,204 | 560,026 |
+| program body | 45,005 | 18,201 | 69,498 | 55,790 |
+| key-size C hash routines | 0 | 4,287 | 0 | 33,648 |
+| kernel hash lookup family | 9,163 | 0 | 39,961 | 5,798 |
+| memset, all guest kernel callers | 935 | 223 | 333 | 1,407 |
+| remaining kernel work | 1,092,526 | 1,119,992 | 460,038 | 462,813 |
+
+memcmp is a separate group (Tetragon1,349/0; OTel3,374/570), so it is not
+included in the remaining-work row. Guest-user and PID0 samples are excluded
+from these denominators and retained separately in the summaries. Host PMU
+callchains still contain no actual guest frames. In particular, the memset
+row does not identify calls from P; memset-calls-20261126 states that limit.
+
+Tetragon's lock slow path has705,990/891,733 samples, or61.445%/78.037%
+of the paired kernel denominators. The independent guest CPU snapshots
+identify __bpf_ringbuf_reserve -> bpf_ringbuf_output as the caller in both
+phases. At407.372s, seven native CPUs have that chain through
+bpf_prog_59f4a931744dcdc6_generic_tracepo+0x377/0x4a5, with the same lock
+address ffffcc368409d080. This is native code: captured program710 has a
+1,189-byte JIT image and the16-byte MOV-r0-zero/EXIT placeholder, rather
+than the original eBPF body. The kernel source ringbuf.c:463/613 takes its
+shared reserve lock in that helper. A snapshot can stop a lock holder and
+perturb its peers, so seven stacks are qualitative caller evidence, not a
+quantitative attribution of all lock samples. The actual requests finish
+before both54s PMU windows (baseline201.476..255.476, native411.128..465.128);
+post-profile-report.json retains all request intervals and intersections.
+
+The main generic_tracepoint_event proof object's2,975 disassembled
+instructions/relocations are identical to the pre-flag capture; neither
+contains cmov. Thus the flag is not a code-level explanation for that
+program's changing short-check cost. Hash and memset account for only0.375%
+and0.0195% of this native kernel profile. The evidence localizes the large
+remaining cost to shared kernel locking, but does not establish why every
+lock wait differs between starts or make a per-invocation PMU claim.
+
+OTel's captured native unwinder has46,624 samples against56,655 in the
+paired eBPF unwinder; the previous pre-flag profile had90,083/59,003.
+array_map_lookup_elem has6,006 native samples now, compared with28,912 in
+the previous native profile. native-annotation.txt shows branches in the
+formerly load-dependent cmov search regions. This supports the common
+compiler change's intended mechanism; profiles from separate starts do not
+establish a precise causal speedup. Remaining native work includes
+trie_lookup_elem166,028 and copy_from_user_nofault97,471 samples, versus
+158,721/96,673 in the paired eBPF phase. Both paths still use those kernel
+functions. The stats-off profiles have no invocation counts with which to
+turn these flat sample differences into ns/call.
+
+Decision: retain the one common cmov flag and general1..512 hash mechanism.
+No further production patch follows from these captures: changing the
+ring-buffer algorithm/workload is outside the authorized header/flag/linker
+scope; selecting by app or specializing multi-map merge points would violate
+the stated general-mechanism/C8 limits. Do not tune memset expansion from its
+small observed weight. All six functional checks and all six repetitions
+passed, but each slow program still loses one of its three paired short
+checks. The uniform performance objective remains open. Full timing remains
+frozen; no extra settings, per-program routes, or repeat-until-win runs were
+introduced.

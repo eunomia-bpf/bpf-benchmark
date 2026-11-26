@@ -1,0 +1,277 @@
+QEMU 605604 baseline window [158.714341, 212.714341] image kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/otel-profile/progdump/187.92/prog-7-perf_unwind_nat.jited.bin bytes 21868 samples 56655
+Sample IPs may skid; counts locate instruction regions, not exact instruction latency.
+
+---- 994 samples at +0x462
+      4    442: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      8    447: test   %rax,%rax
+      0    44a: je     0xffffffffc0602ba1
+     50    44c: mov    -0x118(%rbp),%rdx
+     18    453: mov    %rdx,%rdi
+     36    456: and    $0xffff,%rdi
+      4    45d: movzwq 0x0(%rax),%rsi
+    994    462: mov    -0x60(%rbp),%ebx
+      1    465: mov    %r15,%rcx
+
+---- 731 samples at +0x13d2
+      2   13ae: mov    %r15,%rdi
+      0   13b1: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      4   13b6: test   %rax,%rax
+      0   13b9: je     0xffffffffc0604196
+     57   13bf: mov    -0x158(%rbp),%rdi
+     24   13c6: and    $0xffff,%rdi
+     32   13cd: movzwq 0x0(%rax),%rsi
+    731   13d2: mov    -0x60(%rbp),%ebx
+      2   13d5: cmp    %rdi,%rsi
+
+---- 699 samples at +0x4b13
+     32   4af7: shl    $0x3,%rax
+      0   4afb: add    %rdi,%rax
+      2   4afe: mov    0x0(%rax),%rax
+    399   4b02: add    %gs:0xffffffffb22b0028,%rax
+      4   4b0b: jmp    0xffffffffc06071fb
+      0   4b0d: xor    %eax,%eax
+     11   4b0f: mov    0x0(%rax),%rdi
+    699   4b13: add    $0x1,%rdi
+      3   4b17: mov    %rdi,0x0(%rax)
+
+---- 631 samples at +0x898
+      0    874: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      3    879: test   %rax,%rax
+      0    87c: je     0xffffffffc0602ba1
+     77    882: mov    -0x118(%rbp),%rdx
+      2    889: mov    %rdx,%rdi
+      0    88c: and    $0xffff,%rdi
+      3    893: movzwq 0x0(%rax),%rsi
+    631    898: mov    -0x60(%rbp),%r13d
+      2    89c: mov    %rbx,%rcx
+
+---- 612 samples at +0x4715
+      0   46f4: add    $0x1,%rdi
+      0   46f8: mov    %rdi,0x0(%rax)
+      0   46fc: mov    -0x108(%rbp),%rbx
+      0   4703: mov    $0xfaf,%r15d
+      0   4709: xor    %r14d,%r14d
+      0   470c: jmp    0xffffffffc0607a95
+     89   4711: mov    0x4(%rax),%r14d
+    612   4715: movzbq 0x2(%rax),%rdi
+    204   471a: test   %rdi,%rdi
+
+---- 593 samples at +0x2273
+     74   2257: shl    $0x3,%rax
+     35   225b: add    %rdi,%rax
+      3   225e: mov    0x0(%rax),%rax
+    386   2262: add    %gs:0xffffffffb22b0028,%rax
+      2   226b: jmp    0xffffffffc060495b
+      0   226d: xor    %eax,%eax
+     12   226f: mov    0x0(%rax),%rdi
+    593   2273: add    $0x1,%rdi
+      1   2277: mov    %rdi,0x0(%rax)
+
+---- 577 samples at +0x2817
+      0   27f3: mov    %r15,%rdi
+      0   27f6: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      3   27fb: test   %rax,%rax
+      0   27fe: je     0xffffffffc06055db
+     30   2804: mov    -0x158(%rbp),%rdi
+      5   280b: and    $0xffff,%rdi
+     27   2812: movzwq 0x0(%rax),%rsi
+    577   2817: mov    -0x60(%rbp),%ebx
+      2   281a: cmp    %rdi,%rsi
+
+---- 535 samples at +0x3c70
+      1   3c4c: mov    %r15,%rdi
+      0   3c4f: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      4   3c54: test   %rax,%rax
+      0   3c57: je     0xffffffffc0606a34
+     30   3c5d: mov    -0x158(%rbp),%rdi
+      6   3c64: and    $0xffff,%rdi
+     19   3c6b: movzwq 0x0(%rax),%rsi
+    535   3c70: mov    -0x60(%rbp),%ebx
+      1   3c73: cmp    %rdi,%rsi
+
+---- 531 samples at +0x921
+      0    8fd: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      2    902: test   %rax,%rax
+      0    905: je     0xffffffffc0602ba1
+     78    90b: mov    -0x118(%rbp),%rdx
+      2    912: mov    %rdx,%rdi
+      0    915: and    $0xffff,%rdi
+      1    91c: movzwq 0x0(%rax),%rsi
+    531    921: mov    -0x60(%rbp),%r15d
+      0    925: cmp    %rdi,%rsi
+
+---- 518 samples at +0x36a4
+     66   3688: shl    $0x3,%rax
+     37   368c: add    %rdi,%rax
+      4   368f: mov    0x0(%rax),%rax
+    381   3693: add    %gs:0xffffffffb22b0028,%rax
+      0   369c: jmp    0xffffffffc0605d8c
+      0   369e: xor    %eax,%eax
+     15   36a0: mov    0x0(%rax),%rdi
+    518   36a4: add    $0x1,%rdi
+      0   36a8: mov    %rdi,0x0(%rax)
+
+---- 517 samples at +0x9a4
+     31    980: mov    %rax,%rdi
+      0    983: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      0    988: test   %rax,%rax
+      0    98b: je     0xffffffffc0602ba1
+     85    991: mov    -0x118(%rbp),%rdi
+      5    998: and    $0xffff,%rdi
+      0    99f: movzwq 0x0(%rax),%rsi
+    517    9a4: mov    -0x60(%rbp),%r13d
+      0    9a8: cmp    %rdi,%rsi
+
+---- 511 samples at +0x4fef
+     66   4fd3: shl    $0x3,%rax
+     25   4fd7: add    %rdi,%rax
+      6   4fda: mov    0x0(%rax),%rax
+    318   4fde: add    %gs:0xffffffffb22b0028,%rax
+      0   4fe7: jmp    0xffffffffc06076d7
+      0   4fe9: xor    %eax,%eax
+     11   4feb: mov    0x0(%rax),%rdi
+    511   4fef: add    $0x1,%rdi
+      2   4ff3: mov    %rdi,0x0(%rax)
+
+---- 489 samples at +0x703
+      0    6df: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      8    6e4: test   %rax,%rax
+      0    6e7: je     0xffffffffc0602ba1
+     36    6ed: mov    -0x118(%rbp),%rdx
+      6    6f4: mov    %rdx,%rdi
+      7    6f7: and    $0xffff,%rdi
+     10    6fe: movzwq 0x0(%rax),%rsi
+    489    703: mov    -0x60(%rbp),%r15d
+      0    707: mov    %r13,%rcx
+
+---- 483 samples at +0x812
+      1    7ee: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      8    7f3: test   %rax,%rax
+      0    7f6: je     0xffffffffc0602ba1
+     79    7fc: mov    -0x118(%rbp),%rdx
+      4    803: mov    %rdx,%rdi
+      0    806: and    $0xffff,%rdi
+      1    80d: movzwq 0x0(%rax),%rsi
+    483    812: mov    -0x60(%rbp),%r15d
+      1    816: mov    %rbx,%rcx
+
+---- 478 samples at +0xa31
+      2    a0d: mov    %rax,%rdi
+      7    a10: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      2    a15: test   %rax,%rax
+      0    a18: je     0xffffffffc0602ba1
+     83    a1e: mov    -0x118(%rbp),%rdi
+      1    a25: and    $0xffff,%rdi
+      0    a2c: movzwq 0x0(%rax),%rsi
+    478    a31: mov    -0x60(%rbp),%r15d
+      0    a35: cmp    %rdi,%rsi
+
+---- 457 samples at +0x15ae
+      6   158a: mov    %r15,%rdi
+      1   158d: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      6   1592: test   %rax,%rax
+      0   1595: je     0xffffffffc0604196
+     97   159b: mov    -0x158(%rbp),%rdi
+      3   15a2: and    $0xffff,%rdi
+      0   15a9: movzwq 0x0(%rax),%rsi
+    457   15ae: mov    -0x60(%rbp),%ebx
+      0   15b1: cmp    %rdi,%rsi
+
+---- 455 samples at +0x1623
+      0   15ff: mov    %r15,%rdi
+      7   1602: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      1   1607: test   %rax,%rax
+      0   160a: je     0xffffffffc0604196
+     88   1610: mov    -0x158(%rbp),%rdi
+      1   1617: and    $0xffff,%rdi
+      0   161e: movzwq 0x0(%rax),%rsi
+    455   1623: mov    -0x60(%rbp),%r13d
+      0   1627: cmp    %rdi,%rsi
+
+---- 450 samples at +0x288c
+      0   2868: mov    %r15,%rdi
+      6   286b: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      1   2870: test   %rax,%rax
+      0   2873: je     0xffffffffc06055db
+     29   2879: mov    -0x158(%rbp),%rdi
+      8   2880: and    $0xffff,%rdi
+      4   2887: movzwq 0x0(%rax),%rsi
+    450   288c: mov    -0x60(%rbp),%r13d
+      1   2890: cmp    %rdi,%rsi
+
+---- 435 samples at +0x1535
+      1   1511: mov    %r15,%rdi
+     13   1514: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      3   1519: test   %rax,%rax
+      0   151c: je     0xffffffffc0604196
+     66   1522: mov    -0x158(%rbp),%rdi
+      2   1529: and    $0xffff,%rdi
+      0   1530: movzwq 0x0(%rax),%rsi
+    435   1535: mov    -0x60(%rbp),%r13d
+      0   1539: cmp    %rdi,%rsi
+
+---- 405 samples at +0x1711
+      1   16ed: mov    %r15,%rdi
+      7   16f0: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      4   16f5: test   %rax,%rax
+      0   16f8: je     0xffffffffc0604196
+     89   16fe: mov    -0x158(%rbp),%rdi
+      1   1705: and    $0xffff,%rdi
+      0   170c: movzwq 0x0(%rax),%rsi
+    405   1711: mov    -0x60(%rbp),%r13d
+      0   1715: cmp    %rdi,%rsi
+
+---- 404 samples at +0x54d0
+     18   54be: pop    %r14
+      1   54c0: pop    %r13
+      6   54c2: pop    %rbx
+     10   54c3: pop    %rax
+      6   54c4: pop    %rax
+     29   54c5: add    $0x158,%rsp
+     12   54cc: mov    0x48(%rcx),%rcx
+    404   54d0: add    $0xc,%rcx
+     61   54d4: jmp    0xffffffffb00132e0
+
+---- 399 samples at +0x4b02
+      0   4ae7: add    $0x130,%rdi
+      0   4aee: mov    0x0(%rsi),%eax
+    102   4af1: cmp    $0x63,%rax
+      0   4af5: jae    0xffffffffc06071f9
+     32   4af7: shl    $0x3,%rax
+      0   4afb: add    %rdi,%rax
+      2   4afe: mov    0x0(%rax),%rax
+    399   4b02: add    %gs:0xffffffffb22b0028,%rax
+      4   4b0b: jmp    0xffffffffc06071fb
+
+---- 397 samples at +0xabb
+      0    a97: mov    %rax,%rdi
+      6    a9a: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      2    a9f: test   %rax,%rax
+      0    aa2: je     0xffffffffc0602ba1
+     82    aa8: mov    -0x118(%rbp),%rdi
+      5    aaf: and    $0xffff,%rdi
+      0    ab6: movzwq 0x0(%rax),%rsi
+    397    abb: mov    -0x60(%rbp),%r13d
+      0    abf: cmp    %rdi,%rsi
+
+---- 393 samples at +0x169c
+      7   1678: mov    %r15,%rdi
+      0   167b: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      1   1680: test   %rax,%rax
+      0   1683: je     0xffffffffc0604196
+     81   1689: mov    -0x158(%rbp),%rdi
+      3   1690: and    $0xffff,%rdi
+      0   1697: movzwq 0x0(%rax),%rsi
+    393   169c: mov    -0x60(%rbp),%ebx
+      0   169f: cmp    %rdi,%rsi
+
+---- 388 samples at +0x29f3
+      7   29cf: mov    %r15,%rdi
+      3   29d2: call   0xffffffffaf4b8a20 ; bpf_map_lookup_elem+0x0
+      3   29d7: test   %rax,%rax
+      0   29da: je     0xffffffffc06055db
+     64   29e0: mov    -0x158(%rbp),%rdi
+      1   29e7: and    $0xffff,%rdi
+      0   29ee: movzwq 0x0(%rax),%rsi
+    388   29f3: mov    -0x60(%rbp),%ebx
+      1   29f6: cmp    %rdi,%rsi

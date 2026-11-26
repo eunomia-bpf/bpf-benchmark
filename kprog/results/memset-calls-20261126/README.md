@@ -99,3 +99,36 @@ The memset counts and known P-body/hash counts are unchanged by this selection;
 the guest-kernel denominators change slightly. The large Tetragon lock count
 belongs to its own QEMU, so the attribution check does not remove that hotspot.
 Guest stack frames remain absent, preventing exact caller attribution.
+
+## Post-branch Tetragon and OTel profile, 2026-11-26
+
+The later common-compiler image68655f5c6c0d profiles are in
+`../cmov-branches-20261126/post-branch-profiles-20261126T145836Z/`.
+Both apps completed ok. Event cpu_core/cycles/, period1,000,000, stats off,
+same32GiB/8vCPU/60s profile protocol; the analysis selects each identified
+QEMU host PID and the final54s workload window in each phase.
+
+| app / phase | QEMU PID | memset samples | all own guest-kernel samples | memset share |
+|---|---:|---:|---:|---:|
+| Tetragon eBPF | 603861 | 935 | 1,148,978 | 0.08138% |
+| Tetragon native | 603861 | 223 | 1,142,703 | 0.01952% |
+| OTel eBPF | 605604 | 333 | 573,204 | 0.05809% |
+| OTel native | 605604 | 1,407 | 560,026 | 0.25124% |
+
+These are flat samples in kernel memset, including the __pi_memset alias,
+from all callers in the selected guest. They are not exact P-only weights:
+the host callchains still contain zero real guest frames. Guest CPU
+snapshots now identify Tetragon's dominant lock caller as ring-buffer reserve,
+not memset, but do not supply a statistical memset caller denominator.
+All snapshot requests completed before the selected windows. The earlier
+Tracee native14,366/1,074,961=1.3364% and Tetragon125/1,005,186=0.0124%
+measurements above remain their original captures; no new Tracee profile was
+needed for the x86 cmov search change. Keep both image-specific Tetragon
+observations rather than replacing the earlier result.
+
+The latest Tetragon native profile has891,733 lock-slowpath samples
+(78.037% of its kernel denominator), compared with223 memset samples.
+These data do not support a blanket memset expansion change as the fix for
+the slow tracepoint. No memset compile threshold or per-program policy was
+added. The common compiler change and all remaining performance limits are
+recorded in the cmov-branches result README; full timing stays frozen.

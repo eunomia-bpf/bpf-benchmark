@@ -1,0 +1,333 @@
+{
+  "profiles": {
+    "tetragon": {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150046_350964",
+      "app_status": "ok",
+      "app_error": "",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "qemu_host_pid": 603861,
+      "windows": {
+        "baseline": [
+          201.475634,
+          255.475634
+        ],
+        "post_rejit": [
+          411.128006,
+          465.128006
+        ]
+      },
+      "stack_requests": [
+        {
+          "start": 138.57,
+          "end": 138.62,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 198.65,
+          "end": 198.67,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 282.41,
+          "end": 282.48,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 407.37,
+          "end": 407.4,
+          "returncode": 0,
+          "intersecting_windows": []
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "total_samples": 1311608,
+          "kernel_samples": 1148978,
+          "groups": {
+            "guest_user": 162630,
+            "other_kernel": 1092526,
+            "program_body": 45005,
+            "kernel_hash_lookup": 9163,
+            "memset": 935,
+            "memcmp": 1349
+          },
+          "kernel_sample_shares": {
+            "other_kernel": 0.9508676406336762,
+            "program_body": 0.03916959245520802,
+            "kernel_hash_lookup": 0.007974913357784047,
+            "memset": 0.0008137666691616375,
+            "memcmp": 0.001174086884170106
+          },
+          "callchains": {
+            "samples_with_noncontext_chain_frame": 0,
+            "samples_with_bpf_body_or_chain": 45005,
+            "memset_samples_with_bpf_caller": 0
+          },
+          "other_owner_samples": {
+            "0": 25219
+          },
+          "top_functions": {
+            "resilient_queued_spin_lock_slowpath": 705990,
+            "[user]": 162630,
+            "asm_exc_page_fault": 42221,
+            "copy_from_kernel_nofault": 35988,
+            "__bpf_ringbuf_reserve": 33529,
+            "bpf_probe_read_compat": 21678,
+            "bpf_ringbuf_commit": 19091,
+            "pvclock_clocksource_read_nowd": 14066,
+            "copy_from_user_nofault": 13606,
+            "bpf_prog_8b9485845fb23856_generic_kprobe_process_event": 8253,
+            "copy_from_kernel_nofault_allowed": 8010,
+            "__raw_callee_save___pv_queued_spin_unlock": 7549,
+            "bpf_prog_e5d5ef3c2ed705cf_generic_kprobe_process_filter": 6139,
+            "_raw_spin_lock": 5966,
+            "bpf_prog_5327b3645f7f6962_generic_tracepoint_output": 5620,
+            "bpf_prog_f22858da8378af75_generic_tracepoint_process_event": 5174,
+            "bpf_prog_d9601a7cf35a5c65_generic_tracepoint_event": 5031,
+            "htab_map_hash": 4413,
+            "_copy_to_iter": 4291,
+            "entry_SYSCALL_64": 4168,
+            "clear_bhb_loop": 3976,
+            "switch_mm_irqs_off": 3712,
+            "asm_sysvec_irq_work": 3546,
+            "trace_syscall_enter": 3467,
+            "bpf_prog_93c5f592a9cdde6a_generic_kprobe_event": 3375
+          },
+          "lock_samples": 705990,
+          "lock_kernel_share": 0.61445040723147
+        },
+        "post_rejit": {
+          "total_samples": 1276376,
+          "kernel_samples": 1142703,
+          "groups": {
+            "other_kernel": 1119992,
+            "program_body": 18201,
+            "guest_user": 133673,
+            "p3_hash": 4287,
+            "memset": 223
+          },
+          "kernel_sample_shares": {
+            "other_kernel": 0.9801251943855928,
+            "program_body": 0.01592802329214153,
+            "p3_hash": 0.003751631001231291,
+            "memset": 0.0001951513210344245
+          },
+          "callchains": {
+            "samples_with_noncontext_chain_frame": 0,
+            "samples_with_bpf_body_or_chain": 18201,
+            "memset_samples_with_bpf_caller": 0
+          },
+          "other_owner_samples": {
+            "0": 163
+          },
+          "top_functions": {
+            "resilient_queued_spin_lock_slowpath": 891733,
+            "[user]": 133673,
+            "__bpf_ringbuf_reserve": 25981,
+            "bpf_ringbuf_commit": 12752,
+            "pvclock_clocksource_read_nowd": 9518,
+            "bpf_prog_acce632fa2867084_generic_tracepo": 7315,
+            "__raw_callee_save___pv_queued_spin_unlock": 6378,
+            "bpf_prog_59f4a931744dcdc6_generic_tracepo": 6314,
+            "_raw_spin_lock": 6131,
+            "_copy_to_iter": 4715,
+            "clear_bhb_loop": 4007,
+            "bpf_prog_acce632fa2867084_generic_kprobe_": 3947,
+            "entry_SYSCALL_64": 3858,
+            "kprog_htab_elem_k4": 3239,
+            "trace_syscall_enter": 3135,
+            "switch_mm_irqs_off": 2804,
+            "do_syscall_64": 2762,
+            "_copy_from_iter": 2635,
+            "trace_call_bpf": 2613,
+            "_raw_spin_lock_bh": 2146,
+            "_raw_spin_lock_irqsave": 2146,
+            "asm_sysvec_irq_work": 2051,
+            "__refill_objects_node": 2048,
+            "native_apic_msr_write": 1819,
+            "__pi_memcpy": 1648
+          },
+          "lock_samples": 891733,
+          "lock_kernel_share": 0.7803716276232757
+        }
+      }
+    },
+    "otel": {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_150829_887964",
+      "app_status": "ok",
+      "app_error": "",
+      "image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+      "qemu_host_pid": 605604,
+      "windows": {
+        "baseline": [
+          158.714341,
+          212.714341
+        ],
+        "post_rejit": [
+          286.21534,
+          340.21534
+        ]
+      },
+      "stack_requests": [
+        {
+          "start": 94.4,
+          "end": 94.45,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 154.33,
+          "end": 154.36,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 221.22,
+          "end": 221.25,
+          "returncode": 0,
+          "intersecting_windows": []
+        },
+        {
+          "start": 282.27,
+          "end": 282.29,
+          "returncode": 0,
+          "intersecting_windows": []
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "total_samples": 1260251,
+          "kernel_samples": 573204,
+          "groups": {
+            "other_kernel": 460038,
+            "program_body": 69498,
+            "kernel_hash_lookup": 39961,
+            "guest_user": 687047,
+            "memcmp": 3374,
+            "memset": 333
+          },
+          "kernel_sample_shares": {
+            "other_kernel": 0.8025729059811166,
+            "program_body": 0.12124479242992024,
+            "kernel_hash_lookup": 0.06971514504434721,
+            "memcmp": 0.005886211540742912,
+            "memset": 0.0005809450038729666
+          },
+          "callchains": {
+            "samples_with_noncontext_chain_frame": 0,
+            "samples_with_bpf_body_or_chain": 69498,
+            "memset_samples_with_bpf_caller": 0
+          },
+          "other_owner_samples": {
+            "0": 1452
+          },
+          "top_functions": {
+            "[user]": 687047,
+            "trie_lookup_elem": 158721,
+            "copy_from_user_nofault": 96673,
+            "bpf_prog_1600221a15411be1_perf_unwind_native": 56655,
+            "asm_sysvec_apic_timer_interrupt": 32519,
+            "lapic_next_deadline": 27693,
+            "lookup_nulls_elem_raw": 17277,
+            "htab_map_hash": 16773,
+            "pvclock_clocksource_read_nowd": 15087,
+            "sync_regs": 14856,
+            "asm_exc_page_fault": 13049,
+            "native_apic_msr_eoi": 10889,
+            "bpf_map_lookup_elem": 9086,
+            "its_return_thunk": 8761,
+            "array_map_lookup_elem": 7733,
+            "bpf_prog_ee37ab900524f2f1_perf_unwind_v8": 6914,
+            "bpf_probe_read_user": 6594,
+            "__check_object_size": 5943,
+            "__htab_map_lookup_elem": 4242,
+            "bpf_prog_1e32ec934f932167_native_tracer_entry": 4096,
+            "memcmp": 3374,
+            "clockevents_program_event": 2577,
+            "__sysvec_apic_timer_interrupt": 2459,
+            "check_stack_object": 2266,
+            "perf_output_begin": 2264
+          },
+          "lock_samples": 0,
+          "lock_kernel_share": 0.0
+        },
+        "post_rejit": {
+          "total_samples": 1267368,
+          "kernel_samples": 560026,
+          "groups": {
+            "guest_user": 707342,
+            "other_kernel": 462813,
+            "p3_hash": 33648,
+            "kernel_hash_lookup": 5798,
+            "program_body": 55790,
+            "memcmp": 570,
+            "memset": 1407
+          },
+          "kernel_sample_shares": {
+            "other_kernel": 0.8264134165199473,
+            "p3_hash": 0.060082924721352224,
+            "kernel_hash_lookup": 0.010353090749358066,
+            "program_body": 0.09962037476831433,
+            "memcmp": 0.001017809887398085,
+            "memset": 0.0025123833536300102
+          },
+          "callchains": {
+            "samples_with_noncontext_chain_frame": 0,
+            "samples_with_bpf_body_or_chain": 55790,
+            "memset_samples_with_bpf_caller": 0
+          },
+          "other_owner_samples": {
+            "0": 310
+          },
+          "top_functions": {
+            "[user]": 707342,
+            "trie_lookup_elem": 166028,
+            "copy_from_user_nofault": 97471,
+            "bpf_prog_acce632fa2867084_perf_unwind_nat": 46624,
+            "asm_sysvec_apic_timer_interrupt": 31831,
+            "lapic_next_deadline": 28087,
+            "kprog_htab_elem_k8": 17388,
+            "pvclock_clocksource_read_nowd": 14849,
+            "kprog_htab_elem_k16": 14805,
+            "sync_regs": 14569,
+            "asm_exc_page_fault": 12485,
+            "native_apic_msr_eoi": 10776,
+            "its_return_thunk": 8718,
+            "bpf_map_lookup_elem": 8020,
+            "bpf_probe_read_user": 6795,
+            "__check_object_size": 6034,
+            "array_map_lookup_elem": 6006,
+            "bpf_prog_acce632fa2867084_perf_unwind_v8": 5192,
+            "clockevents_program_event": 2625,
+            "perf_output_begin": 2367,
+            "__sysvec_apic_timer_interrupt": 2325,
+            "check_stack_object": 2174,
+            "bpf_prog_acce632fa2867084_native_tracer_e": 2134,
+            "htab_map_hash": 2124,
+            "__raw_callee_save___pv_queued_spin_unlock": 2085
+          },
+          "lock_samples": 0,
+          "lock_kernel_share": 0.0
+        }
+      }
+    }
+  },
+  "scope": "Own QEMU guest samples, final54s workload windows; stats off. No per-call inference.",
+  "tetragon_root_instruction_comparison": {
+    "old": "/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z/tetragon-profile/linkcache/native_kernel_link_cache/025c0e981641eb7f.proof.o",
+    "new": "/workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/9117db37f534f8ab.proof.o",
+    "symbol": "generic_tracepoint_event",
+    "identical": true,
+    "instruction_counts": [
+      2975,
+      2975
+    ],
+    "cmov_counts": [
+      0,
+      0
+    ]
+  }
+}

@@ -1,0 +1,1200 @@
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-hgn98) (gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #30 SMP PREEMPT_DYNAMIC Wed Nov 25 13:20:23 UTC 2026
+[    0.000000] Command line: virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=/var/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/run virtme_rw_overlay9=/usr/local virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAvdmFyL3RtcC9ndWVzdC5zaA==` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+[    0.000000] x86/split lock detection: #DB: warning on user-space bus_locks
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000000a0000-0x00000000000effff]
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff]  device reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bffdffff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x00000000bffe0000-0x00000000bfffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000c0000000-0x00000000feffbfff]
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000ff000000-0x00000000fffbffff]
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff]  device reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000083fffffff]  System RAM
+[    0.000000] printk: legacy bootconsole [earlyser0] enabled
+[    0.000000] NX (Execute Disable) protection: active
+[    0.000000] APIC: Static calls initialized
+[    0.000000] SMBIOS 3.0.0 present.
+[    0.000000] DMI: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[    0.000000] DMI: Memory slots populated: 2/2
+[    0.000000] Hypervisor detected: KVM
+[    0.000000] last_pfn = 0xbffe0 max_arch_pfn = 0x400000000
+[    0.000000] kvm-clock: Using msrs 4b564d01 and 4b564d00
+[    0.000000] kvm-clock: using sched offset of 228778989 cycles
+[    0.000003] clocksource: kvm-clock: mask: 0xffffffffffffffff max_cycles: 0x1cd42e4dffb, max_idle_ns: 881590591483 ns
+[    0.000006] tsc: Detected 3686.400 MHz processor
+[    0.000169] e820: update [mem 0x00000000-0x00000fff] System RAM ==> device reserved
+[    0.000172] e820: remove [mem 0x000a0000-0x000fffff] System RAM
+[    0.000176] last_pfn = 0x840000 max_arch_pfn = 0x400000000
+[    0.000205] MTRR map: 4 entries (3 fixed + 1 variable; max 19), built from 8 variable MTRRs
+[    0.000207] x86/PAT: Configuration [0-7]: WB  WC  UC- UC  WB  WP  UC- WT  
+[    0.000547] last_pfn = 0xbffe0 max_arch_pfn = 0x400000000
+[    0.003959] found SMP MP-table at [mem 0x000f5440-0x000f544f]
+[    0.003971] Using GB pages for direct mapping
+[    0.004039] RAMDISK: [mem 0xbf37a000-0xbffdffff]
+[    0.004057] ACPI: Early table checksum verification disabled
+[    0.004060] ACPI: RSDP 0x00000000000F51F0 000014 (v00 BOCHS )
+[    0.004065] ACPI: RSDT 0x00000000BFFE1F22 000034 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004070] ACPI: FACP 0x00000000BFFE1D9E 000074 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004075] ACPI: DSDT 0x00000000BFFE0040 001D5E (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004078] ACPI: FACS 0x00000000BFFE0000 000040
+[    0.004080] ACPI: APIC 0x00000000BFFE1E12 0000B0 (v03 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004082] ACPI: HPET 0x00000000BFFE1EC2 000038 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004084] ACPI: WAET 0x00000000BFFE1EFA 000028 (v01 BOCHS  BXPC     00000001 BXPC 00000001)
+[    0.004086] ACPI: Reserving FACP table memory at [mem 0xbffe1d9e-0xbffe1e11]
+[    0.004087] ACPI: Reserving DSDT table memory at [mem 0xbffe0040-0xbffe1d9d]
+[    0.004088] ACPI: Reserving FACS table memory at [mem 0xbffe0000-0xbffe003f]
+[    0.004089] ACPI: Reserving APIC table memory at [mem 0xbffe1e12-0xbffe1ec1]
+[    0.004090] ACPI: Reserving HPET table memory at [mem 0xbffe1ec2-0xbffe1ef9]
+[    0.004090] ACPI: Reserving WAET table memory at [mem 0xbffe1efa-0xbffe1f21]
+[    0.004399] No NUMA configuration found
+[    0.004400] Faking a node at [mem 0x0000000000000000-0x000000083fffffff]
+[    0.004405] NODE_DATA(0) allocated [mem 0x83ffd5500-0x83fffffff]
+[    0.005191] ACPI: PM-Timer IO Port: 0x608
+[    0.005201] ACPI: LAPIC_NMI (acpi_id[0xff] dfl dfl lint[0x1])
+[    0.005232] IOAPIC[0]: apic_id 0, version 17, address 0xfec00000, GSI 0-23
+[    0.005234] ACPI: INT_SRC_OVR (bus 0 bus_irq 0 global_irq 2 dfl dfl)
+[    0.005236] ACPI: INT_SRC_OVR (bus 0 bus_irq 5 global_irq 5 high level)
+[    0.005237] ACPI: INT_SRC_OVR (bus 0 bus_irq 9 global_irq 9 high level)
+[    0.005238] ACPI: INT_SRC_OVR (bus 0 bus_irq 10 global_irq 10 high level)
+[    0.005238] ACPI: INT_SRC_OVR (bus 0 bus_irq 11 global_irq 11 high level)
+[    0.005241] ACPI: Using ACPI (MADT) for SMP configuration information
+[    0.005242] ACPI: HPET id: 0x8086a201 base: 0xfed00000
+[    0.005244] TSC deadline timer available
+[    0.005246] CPU topo: Max. logical packages:   1
+[    0.005247] CPU topo: Max. logical nodes:      1
+[    0.005247] CPU topo: Num. nodes per package:  1
+[    0.005249] CPU topo: Max. logical dies:       1
+[    0.005249] CPU topo: Max. dies per package:   1
+[    0.005252] CPU topo: Max. threads per core:   1
+[    0.005253] CPU topo: Num. cores per package:     8
+[    0.005253] CPU topo: Num. threads per package:   8
+[    0.005254] CPU topo: Allowing 8 present CPUs plus 0 hotplug CPUs
+[    0.005270] kvm-guest: APIC: eoi() replaced with kvm_guest_apic_eoi_write()
+[    0.005283] kvm-guest: KVM setup pv remote TLB flush
+[    0.005286] kvm-guest: setup PV sched yield
+[    0.005291] PM: hibernation: Registered nosave memory: [mem 0x00000000-0x00000fff]
+[    0.005292] PM: hibernation: Registered nosave memory: [mem 0x0009f000-0x000fffff]
+[    0.005293] PM: hibernation: Registered nosave memory: [mem 0xbffe0000-0xffffffff]
+[    0.005294] [gap 0xc0000000-0xfeffbfff] available for PCI devices
+[    0.005296] Booting paravirtualized kernel on KVM
+[    0.005297] clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.009741] Zone ranges:
+[    0.009742]   DMA      [mem 0x0000000000001000-0x0000000000ffffff]
+[    0.009744]   DMA32    [mem 0x0000000001000000-0x00000000ffffffff]
+[    0.009745]   Normal   [mem 0x0000000100000000-0x000000083fffffff]
+[    0.009747]   Device   empty
+[    0.009748] Movable zone start for each node
+[    0.009749] Early memory node ranges
+[    0.009750]   node   0: [mem 0x0000000000001000-0x000000000009efff]
+[    0.009751]   node   0: [mem 0x0000000000100000-0x00000000bffdffff]
+[    0.009752]   node   0: [mem 0x0000000100000000-0x000000083fffffff]
+[    0.009754] Initmem setup node 0 [mem 0x0000000000001000-0x000000083fffffff]
+[    0.009967] On node 0, zone DMA: 1 pages in unavailable ranges
+[    0.009978] On node 0, zone DMA: 97 pages in unavailable ranges
+[    0.015555] On node 0, zone Normal: 32 pages in unavailable ranges
+[    0.015569] setup_percpu: NR_CPUS:8192 nr_cpumask_bits:8 nr_cpu_ids:8 nr_node_ids:1
+[    0.015909] percpu: Embedded 61 pages/cpu s212992 r8192 d28672 u262144
+[    0.015913] pcpu-alloc: s212992 r8192 d28672 u262144 alloc=1*2097152
+[    0.015915] pcpu-alloc: [0] 0 1 2 3 4 5 6 7 
+[    0.015946] kvm-guest: PV spinlocks enabled
+[    0.015948] PV qspinlock hash table entries: 256 (order: 0, 4096 bytes, linear)
+[    0.015951] Kernel command line: virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=/var/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/run virtme_rw_overlay9=/usr/local virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 quiet loglevel=0 panic=-1 virtme.exec=`YmFzaCAvdmFyL3RtcC9ndWVzdC5zaA==` virtme_chdir=workspaces/repository virtme_root_user=1 quiet loglevel=1 loglevel=4 panic=30 oops=panic init=/opt/virtme-ng/lib/python3.12/site-packages/virtme/guest/bin/virtme-ng-init
+[    0.016190] Unknown kernel command line parameters "virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=/var/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/run virtme_rw_overlay9=/usr/local virtme_console=ttyS0 virtme_chdir=workspaces/repository virtme_root_user=1", will be passed to user space.
+[    0.016202] random: crng init done
+[    0.016203] printk: log buffer data + meta data: 2097152 + 7340032 = 9437184 bytes
+[    0.019911] Dentry cache hash table entries: 4194304 (order: 13, 33554432 bytes, linear)
+[    0.021778] Inode-cache hash table entries: 2097152 (order: 12, 16777216 bytes, linear)
+[    0.021888] software IO TLB: area num 8.
+[    0.034691] Fallback order for Node 0: 0 
+[    0.034697] Built 1 zonelists, mobility grouping on.  Total pages: 8388478
+[    0.034699] Policy zone: Normal
+[    0.034701] mem auto-init: stack:off, heap alloc:off, heap free:off
+[    0.043454] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=8, Nodes=1
+[    0.052962] ftrace: allocating 51961 entries in 204 pages
+[    0.052966] ftrace: allocated 204 pages with 4 groups
+[    0.053394] Dynamic Preempt: lazy
+[    0.053611] rcu: Preemptible hierarchical RCU implementation.
+[    0.053613] rcu: 	RCU restricting CPUs from NR_CPUS=8192 to nr_cpu_ids=8.
+[    0.053614] 	Trampoline variant of Tasks RCU enabled.
+[    0.053615] 	Rude variant of Tasks RCU enabled.
+[    0.053616] 	Tracing variant of Tasks RCU enabled.
+[    0.053616] rcu: RCU calculated value of scheduler-enlistment delay is 10 jiffies.
+[    0.053617] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=8
+[    0.053624] RCU Tasks: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.053629] RCU Tasks Rude: Setting shift to 3 and lim to 1 rcu_task_cb_adjust=1 rcu_task_cpu_ids=8.
+[    0.056400] NR_IRQS: 524544, nr_irqs: 488, preallocated irqs: 16
+[    0.056589] rcu: srcu_init: Setting srcu_struct sizes based on contention.
+[    0.056715] Console: colour *CGA 80x25
+[    0.056751] printk: legacy console [ttyS0] enabled
+[    0.056752] printk: legacy bootconsole [earlyser0] disabled
+[    0.056768] ACPI: Core revision 20251212
+[    0.056884] clocksource: hpet: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604467 ns
+[    0.056973] APIC: Switch to symmetric I/O mode setup
+[    0.057110] x2apic enabled
+[    0.057302] APIC: Switched APIC routing to: physical x2apic
+[    0.057304] kvm-guest: APIC: send_IPI_mask() replaced with kvm_send_ipi_mask()
+[    0.057308] kvm-guest: APIC: send_IPI_mask_allbutself() replaced with kvm_send_ipi_mask_allbutself()
+[    0.057309] kvm-guest: setup PV IPIs
+[    0.057995] ..TIMER: vector=0x30 apic1=0 pin1=2 apic2=-1 pin2=-1
+[    0.058011] clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.058015] Calibrating delay loop (skipped) preset value.. 7372.80 BogoMIPS (lpj=36864000)
+[    0.058139] x86/cpu: User Mode Instruction Prevention (UMIP) activated
+[    0.058199] Last level iTLB entries: 4KB 0, 2MB 0, 4MB 0
+[    0.058200] Last level dTLB entries: 4KB 0, 2MB 0, 4MB 0, 1GB 0
+[    0.058205] mitigations: Enabled attack vectors: user_kernel, user_user, guest_host, guest_guest, SMT mitigations: auto
+[    0.058208] Speculative Store Bypass: Mitigation: Speculative Store Bypass disabled via prctl
+[    0.058210] Spectre V2 : Mitigation: Enhanced / Automatic IBRS
+[    0.058210] ITS: Mitigation: Aligned branch/return thunks
+[    0.058211] Spectre V1 : Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+[    0.058213] Spectre V2 : mitigation: Enabling conditional Indirect Branch Prediction Barrier
+[    0.058215] active return thunk: its_return_thunk
+[    0.058218] Spectre V2 : Spectre BHI mitigation: SW BHB clearing on syscall and VM exit
+[    0.058234] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
+[    0.058236] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'
+[    0.058236] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'
+[    0.058236] x86/fpu: Supporting XSAVE feature 0x200: 'Protection Keys User registers'
+[    0.058237] x86/fpu: xstate_offset[2]:  576, xstate_sizes[2]:  256
+[    0.058238] x86/fpu: xstate_offset[9]:  832, xstate_sizes[9]:    8
+[    0.058239] x86/fpu: Enabled xstate features 0x207, context size is 840 bytes, using 'compacted' format.
+[    0.073280] Freeing SMP alternatives memory: 48K
+[    0.073286] pid_max: default: 32768 minimum: 301
+[    0.073391] landlock: Up and running.
+[    0.073391] Yama: becoming mindful.
+[    0.073397] SELinux:  Initializing.
+[    0.073632] LSM support for eBPF active
+[    0.073717] Mount-cache hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.073770] Mountpoint-cache hash table entries: 65536 (order: 7, 524288 bytes, linear)
+[    0.073835] VFS: Finished mounting rootfs on nullfs
+[    0.074256] smpboot: CPU0: Intel(R) Core(TM) Ultra 9 285K (family: 0x6, model: 0xc6, stepping: 0x2)
+[    0.074387] Performance Events: unsupported CPU family 6 model 198 no PMU driver, software events only.
+[    0.074427] signal: max sigframe size: 3632
+[    0.074447] rcu: Hierarchical SRCU implementation.
+[    0.074447] rcu: 	Max phase no-delay instances is 1000.
+[    0.074480] Timer migration: 1 hierarchy levels; 8 children per group; 1 crossnode level
+[    0.076177] smp: Bringing up secondary CPUs ...
+[    0.076252] smpboot: x86: Booting SMP configuration:
+[    0.076252] .... node  #0, CPUs:      #1 #2 #3 #4 #5 #6 #7
+[    0.077396] smp: Brought up 1 node, 8 CPUs
+[    0.077396] smpboot: Total of 8 processors activated (58982.40 BogoMIPS)
+[    0.089743] node 0 deferred pages initialised in 20ms
+[    0.091127] Memory: 32829084K/33553912K available (16491K kernel code, 9695K rwdata, 12592K rodata, 4020K init, 7320K bss, 714744K reserved, 0K cma-reserved)
+[    0.091127] devtmpfs: initialized
+[    0.091127] x86/mm: Memory block size: 128MB
+[    0.098026] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns
+[    0.098026] posixtimers hash table entries: 4096 (order: 4, 65536 bytes, linear)
+[    0.098029] futex hash table entries: 2048 (131072 bytes on 1 NUMA nodes, total 128 KiB, linear).
+[    0.098499] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+[    0.098608] DMA: preallocated 4096 KiB GFP_KERNEL pool for atomic allocations
+[    0.098611] DMA: preallocated 4096 KiB GFP_KERNEL|GFP_DMA pool for atomic allocations
+[    0.098613] DMA: preallocated 4096 KiB GFP_KERNEL|GFP_DMA32 pool for atomic allocations
+[    0.098620] audit: initializing netlink subsys (disabled)
+[    0.098625] audit: type=2000 audit(1795705620.730:1): state=initialized audit_enabled=0 res=1
+[    0.098625] thermal_sys: Registered thermal governor 'fair_share'
+[    0.098625] thermal_sys: Registered thermal governor 'step_wise'
+[    0.098625] thermal_sys: Registered thermal governor 'user_space'
+[    0.098625] cpuidle: using governor ladder
+[    0.098625] cpuidle: using governor menu
+[    0.098625] acpiphp: ACPI Hot Plug PCI Controller Driver version: 0.5
+[    0.098625] PCI: Using configuration type 1 for base access
+[    0.098625] kprobes: kprobe jump-optimization is enabled. All kprobes are optimized if possible.
+[    0.098625] HugeTLB: registered 1.00 GiB page size, pre-allocated 0 pages
+[    0.098625] HugeTLB: 16380 KiB vmemmap can be freed for a 1.00 GiB page
+[    0.098625] HugeTLB: registered 2.00 MiB page size, pre-allocated 0 pages
+[    0.098625] HugeTLB: 28 KiB vmemmap can be freed for a 2.00 MiB page
+[    0.101316] ACPI: Added _OSI(Module Device)
+[    0.101317] ACPI: Added _OSI(Processor Device)
+[    0.101318] ACPI: Added _OSI(Processor Aggregator Device)
+[    0.101558] ACPI: 1 ACPI AML tables successfully acquired and loaded
+[    0.118047] ACPI: \_SB_: platform _OSC: OS support mask [00227eff]
+[    0.118176] ACPI: Interpreter enabled
+[    0.118184] ACPI: PM: (supports S0 S4 S5)
+[    0.118185] ACPI: Using IOAPIC for interrupt routing
+[    0.118200] PCI: Using host bridge windows from ACPI; if necessary, use "pci=nocrs" and report a bug
+[    0.118201] PCI: Using E820 reservations for host bridge windows
+[    0.118272] ACPI: Enabled 2 GPEs in block 00 to 0F
+[    0.119527] ACPI: PCI Root Bridge [PCI0] (domain 0000 [bus 00-ff])
+[    0.119531] acpi PNP0A03:00: _OSC: OS supports [ASPM ClockPM Segments MSI HPX-Type3]
+[    0.119533] acpi PNP0A03:00: _OSC: not requesting OS control; OS requires [ExtendedConfig ASPM ClockPM MSI]
+[    0.119535] acpi PNP0A03:00: _OSC: platform retains control of PCIe features (AE_ERROR)
+[    0.119538] acpi PNP0A03:00: fail to add MMCONFIG information, can't access extended configuration space under this bridge
+[    0.119725] acpiphp: Slot [2] registered
+[    0.119737] acpiphp: Slot [3] registered
+[    0.119748] acpiphp: Slot [4] registered
+[    0.119758] acpiphp: Slot [5] registered
+[    0.119770] acpiphp: Slot [6] registered
+[    0.119780] acpiphp: Slot [7] registered
+[    0.119791] acpiphp: Slot [8] registered
+[    0.119802] acpiphp: Slot [9] registered
+[    0.119812] acpiphp: Slot [10] registered
+[    0.119823] acpiphp: Slot [11] registered
+[    0.119834] acpiphp: Slot [12] registered
+[    0.119844] acpiphp: Slot [13] registered
+[    0.119855] acpiphp: Slot [14] registered
+[    0.119866] acpiphp: Slot [15] registered
+[    0.119881] acpiphp: Slot [16] registered
+[    0.119894] acpiphp: Slot [17] registered
+[    0.119905] acpiphp: Slot [18] registered
+[    0.119915] acpiphp: Slot [19] registered
+[    0.119926] acpiphp: Slot [20] registered
+[    0.119936] acpiphp: Slot [21] registered
+[    0.119946] acpiphp: Slot [22] registered
+[    0.119957] acpiphp: Slot [23] registered
+[    0.119967] acpiphp: Slot [24] registered
+[    0.119978] acpiphp: Slot [25] registered
+[    0.119988] acpiphp: Slot [26] registered
+[    0.119998] acpiphp: Slot [27] registered
+[    0.120009] acpiphp: Slot [28] registered
+[    0.120019] acpiphp: Slot [29] registered
+[    0.120030] acpiphp: Slot [30] registered
+[    0.120041] acpiphp: Slot [31] registered
+[    0.120050] PCI host bridge to bus 0000:00
+[    0.120051] pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]
+[    0.120053] pci_bus 0000:00: root bus resource [io  0x0d00-0xffff window]
+[    0.120054] pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]
+[    0.120055] pci_bus 0000:00: root bus resource [mem 0xc0000000-0xfebfffff window]
+[    0.120056] pci_bus 0000:00: root bus resource [mem 0x380000000000-0x38007fffffff window]
+[    0.120057] pci_bus 0000:00: root bus resource [bus 00-ff]
+[    0.120094] pci 0000:00:00.0: [8086:1237] type 00 class 0x060000 conventional PCI endpoint
+[    0.120543] pci 0000:00:01.0: [8086:7000] type 00 class 0x060100 conventional PCI endpoint
+[    0.121026] pci 0000:00:01.1: [8086:7010] type 00 class 0x010180 conventional PCI endpoint
+[    0.121807] pci 0000:00:01.1: BAR 4 [io  0xc240-0xc24f]
+[    0.121844] pci 0000:00:01.1: BAR 0 [io  0x01f0-0x01f7]: legacy IDE quirk
+[    0.121845] pci 0000:00:01.1: BAR 1 [io  0x03f6]: legacy IDE quirk
+[    0.121845] pci 0000:00:01.1: BAR 2 [io  0x0170-0x0177]: legacy IDE quirk
+[    0.121846] pci 0000:00:01.1: BAR 3 [io  0x0376]: legacy IDE quirk
+[    0.121987] pci 0000:00:01.3: [8086:7113] type 00 class 0x068000 conventional PCI endpoint
+[    0.122330] pci 0000:00:01.3: quirk: [io  0x0600-0x063f] claimed by PIIX4 ACPI
+[    0.122339] pci 0000:00:01.3: quirk: [io  0x0700-0x070f] claimed by PIIX4 SMB
+[    0.122628] pci 0000:00:02.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.128954] pci 0000:00:02.0: BAR 0 [io  0xc000-0xc03f]
+[    0.128967] pci 0000:00:02.0: BAR 1 [mem 0xfebf6000-0xfebf6fff]
+[    0.128996] pci 0000:00:02.0: BAR 4 [mem 0x380000000000-0x380000003fff 64bit pref]
+[    0.129832] pci 0000:00:03.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.131391] pci 0000:00:03.0: BAR 0 [io  0xc040-0xc07f]
+[    0.131399] pci 0000:00:03.0: BAR 1 [mem 0xfebf7000-0xfebf7fff]
+[    0.131428] pci 0000:00:03.0: BAR 4 [mem 0x380000004000-0x380000007fff 64bit pref]
+[    0.132231] pci 0000:00:04.0: [1af4:1009] type 00 class 0x000200 conventional PCI endpoint
+[    0.133783] pci 0000:00:04.0: BAR 0 [io  0xc080-0xc0bf]
+[    0.133792] pci 0000:00:04.0: BAR 1 [mem 0xfebf8000-0xfebf8fff]
+[    0.133821] pci 0000:00:04.0: BAR 4 [mem 0x380000008000-0x38000000bfff 64bit pref]
+[    0.134509] pci 0000:00:05.0: [8086:25ab] type 00 class 0x088000 conventional PCI endpoint
+[    0.135228] pci 0000:00:05.0: BAR 0 [mem 0xfebf9000-0xfebf900f]
+[    0.135745] pci 0000:00:06.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.138020] pci 0000:00:06.0: BAR 0 [io  0xc0c0-0xc0ff]
+[    0.138029] pci 0000:00:06.0: BAR 1 [mem 0xfebfa000-0xfebfafff]
+[    0.138058] pci 0000:00:06.0: BAR 4 [mem 0x38000000c000-0x38000000ffff 64bit pref]
+[    0.138842] pci 0000:00:07.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.139835] pci 0000:00:07.0: BAR 0 [io  0xc100-0xc13f]
+[    0.139843] pci 0000:00:07.0: BAR 1 [mem 0xfebfb000-0xfebfbfff]
+[    0.139872] pci 0000:00:07.0: BAR 4 [mem 0x380000010000-0x380000013fff 64bit pref]
+[    0.140628] pci 0000:00:08.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.141666] pci 0000:00:08.0: BAR 0 [io  0xc140-0xc17f]
+[    0.141674] pci 0000:00:08.0: BAR 1 [mem 0xfebfc000-0xfebfcfff]
+[    0.141703] pci 0000:00:08.0: BAR 4 [mem 0x380000014000-0x380000017fff 64bit pref]
+[    0.142510] pci 0000:00:09.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.143521] pci 0000:00:09.0: BAR 0 [io  0xc180-0xc1bf]
+[    0.143529] pci 0000:00:09.0: BAR 1 [mem 0xfebfd000-0xfebfdfff]
+[    0.143558] pci 0000:00:09.0: BAR 4 [mem 0x380000018000-0x38000001bfff 64bit pref]
+[    0.144319] pci 0000:00:0a.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.145324] pci 0000:00:0a.0: BAR 0 [io  0xc1c0-0xc1ff]
+[    0.145332] pci 0000:00:0a.0: BAR 1 [mem 0xfebfe000-0xfebfefff]
+[    0.145360] pci 0000:00:0a.0: BAR 4 [mem 0x38000001c000-0x38000001ffff 64bit pref]
+[    0.146164] pci 0000:00:0b.0: [1af4:1003] type 00 class 0x078000 conventional PCI endpoint
+[    0.147256] pci 0000:00:0b.0: BAR 0 [io  0xc200-0xc23f]
+[    0.147264] pci 0000:00:0b.0: BAR 1 [mem 0xfebff000-0xfebfffff]
+[    0.147293] pci 0000:00:0b.0: BAR 4 [mem 0x380000020000-0x380000023fff 64bit pref]
+[    0.151175] ACPI: PCI: Interrupt link LNKA configured for IRQ 10
+[    0.151252] ACPI: PCI: Interrupt link LNKB configured for IRQ 10
+[    0.151312] ACPI: PCI: Interrupt link LNKC configured for IRQ 11
+[    0.151370] ACPI: PCI: Interrupt link LNKD configured for IRQ 11
+[    0.151403] ACPI: PCI: Interrupt link LNKS configured for IRQ 9
+[    0.151718] iommu: Default domain type: Translated
+[    0.151718] iommu: DMA domain TLB invalidation policy: lazy mode
+[    0.151718] pps_core: LinuxPPS API ver. 1 registered
+[    0.151718] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+[    0.151718] PTP clock support registered
+[    0.151718] EDAC MC: Ver: 3.0.0
+[    0.151718] NetLabel: Initializing
+[    0.151718] NetLabel:  domain hash size = 128
+[    0.151718] NetLabel:  protocols = UNLABELED CIPSOv4 CALIPSO
+[    0.151718] NetLabel:  unlabeled traffic allowed by default
+[    0.151718] PCI: Using ACPI for IRQ routing
+[    0.151718] PCI: pci_cache_line_size set to 64 bytes
+[    0.151718] e820: register RAM buffer resource [mem 0x0009fc00-0x0009ffff]
+[    0.151718] e820: register RAM buffer resource [mem 0xbffe0000-0xbfffffff]
+[    0.151718] hpet0: at MMIO 0xfed00000, IRQs 2, 8, 0
+[    0.151718] hpet0: 3 comparators, 64-bit 100.000000 MHz counter
+[    0.151718] clocksource: Switched to clocksource kvm-clock
+[    0.151718] VFS: Disk quotas dquot_6.6.0
+[    0.151718] VFS: Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+[    0.151718] netfs: FS-Cache loaded
+[    0.151718] pnp: PnP ACPI init
+[    0.151718] pnp 00:02: [dma 2]
+[    0.151718] pnp: PnP ACPI: found 5 devices
+[    0.154405] clocksource: acpi_pm: mask: 0xffffff max_cycles: 0xffffff, max_idle_ns: 2085701024 ns
+[    0.154438] NET: Registered PF_INET protocol family
+[    0.154693] IP idents hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.164849] tcp_listen_portaddr_hash hash table entries: 16384 (order: 6, 262144 bytes, linear)
+[    0.164869] Table-perturb hash table entries: 65536 (order: 6, 262144 bytes, linear)
+[    0.164876] TCP established hash table entries: 262144 (order: 9, 2097152 bytes, linear)
+[    0.165140] TCP bind hash table entries: 65536 (order: 9, 2097152 bytes, linear)
+[    0.165426] TCP: Hash tables configured (established 262144 bind 65536)
+[    0.165539] MPTCP token hash table entries: 32768 (order: 8, 786432 bytes, linear)
+[    0.165568] UDP hash table entries: 16384 (order: 8, 1048576 bytes, linear)
+[    0.165793] UDP-Lite hash table entries: 16384 (order: 8, 1048576 bytes, linear)
+[    0.166052] NET: Registered PF_UNIX/PF_LOCAL protocol family
+[    0.166058] NET: Registered PF_XDP protocol family
+[    0.166069] pci_bus 0000:00: resource 4 [io  0x0000-0x0cf7 window]
+[    0.166072] pci_bus 0000:00: resource 5 [io  0x0d00-0xffff window]
+[    0.166073] pci_bus 0000:00: resource 6 [mem 0x000a0000-0x000bffff window]
+[    0.166073] pci_bus 0000:00: resource 7 [mem 0xc0000000-0xfebfffff window]
+[    0.166074] pci_bus 0000:00: resource 8 [mem 0x380000000000-0x38007fffffff window]
+[    0.166126] pci 0000:00:01.0: PIIX3: Enabling Passive Release
+[    0.166139] pci 0000:00:00.0: Limiting direct PCI/PCI transfers
+[    0.166267] PCI: CLS 0 bytes, default 64
+[    0.166316] PCI-DMA: Using software bounce buffering for IO (SWIOTLB)
+[    0.166317] software IO TLB: mapped [mem 0x00000000bb37a000-0x00000000bf37a000] (64MB)
+[    0.166389] clocksource: tsc: mask: 0xffffffffffffffff max_cycles: 0x6a464ae9873, max_idle_ns: 881590529744 ns
+[    0.166416] Trying to unpack rootfs image as initramfs...
+[    0.171517] Freeing initrd memory: 12696K
+[    0.173556] Initialise system trusted keyrings
+[    0.173561] Key type blacklist registered
+[    0.173648] workingset: timestamp_bits=36 max_order=23 bucket_order=0
+[    0.173864] SGI XFS with ACLs, security attributes, quota, no debug enabled
+[    0.174096] 9p: Installing v9fs 9p2000 file system support
+[    0.174751] integrity: Platform Keyring initialized
+[    0.174798] cryptd: max_cpu_qlen set to 1000
+[    0.179908] Key type asymmetric registered
+[    0.179910] Asymmetric key parser 'x509' registered
+[    0.179926] Block layer SCSI generic (bsg) driver version 0.4 loaded (major 248)
+[    0.179986] io scheduler mq-deadline registered
+[    0.179987] io scheduler kyber registered
+[    0.179993] io scheduler bfq registered
+[    0.188065] ACPI: \_SB_.LNKB: Enabled at IRQ 10
+[    0.196412] ACPI: \_SB_.LNKC: Enabled at IRQ 11
+[    0.204710] ACPI: \_SB_.LNKD: Enabled at IRQ 11
+[    0.237717] ACPI: \_SB_.LNKA: Enabled at IRQ 10
+[    0.255174] Serial: 8250/16550 driver, 4 ports, IRQ sharing disabled
+[    0.255316] 00:03: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A
+[    0.321409] loop: module loaded
+[    0.321736] tun: Universal TUN/TAP device driver, 1.6
+[    0.321818] rtc_cmos 00:04: RTC can wake from S4
+[    0.322327] rtc_cmos 00:04: registered as rtc0
+[    0.322394] rtc_cmos 00:04: setting system clock to 2026-11-26T15:07:00 UTC (1795705620)
+[    0.322437] rtc_cmos 00:04: alarms up to one day, y3k, 242 bytes nvram, hpet irqs
+[    0.322454] intel_pstate: CPU model not supported
+[    0.322493] hid: raw HID events driver (C) Jiri Kosina
+[    0.322927] NET: Registered PF_INET6 protocol family
+[    0.323142] Segment Routing with IPv6
+[    0.323147] In-situ OAM (IOAM) with IPv6
+[    0.323163] NET: Registered PF_PACKET protocol family
+[    0.323171] bridge: filtering via arp/ip/ip6tables is no longer available by default. Update your scripts to load br_netfilter if you need this.
+[    0.323210] 9pnet: Installing 9P2000 support
+[    0.325925] IPI shorthand broadcast: enabled
+[    0.327226] sched_clock: Marking stable (334419997, -8582382)->(340126518, -14288903)
+[    0.328214] registered taskstats version 1
+[    0.328325] Loading compiled-in X.509 certificates
+[    0.328672] Loaded X.509 cert 'Build time autogenerated kernel key: 19518373e813f5b8b0a716c70755f79a6fe68a5e'
+[    0.330250] Demotion targets for Node 0: null
+[    0.330308] Key type .fscrypt registered
+[    0.330308] Key type fscrypt-provisioning registered
+[    0.330327] ima: No TPM chip found, activating TPM-bypass!
+[    0.330333] ima: Allocated hash algorithm: sha256
+[    0.330343] ima: No architecture policies found
+[    0.330666] clk: Disabling unused clocks
+[    0.336352] Freeing unused decrypted memory: 2036K
+[    0.337058] Freeing unused kernel image (initmem) memory: 4020K
+[    0.337083] Write protecting the kernel read-only data: 32768k
+[    0.337789] Freeing unused kernel image (text/rodata gap) memory: 1940K
+[    0.338300] Freeing unused kernel image (rodata/data gap) memory: 1744K
+[    0.338305] Run /init as init process
+[    0.338307]   with arguments:
+[    0.338308]     /init
+[    0.338308]   with environment:
+[    0.338309]     HOME=/
+[    0.338309]     TERM=linux
+[    0.338310]     virtme_hostname=virtme-ng
+[    0.338310]     nr_open=1048576
+[    0.338310]     virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0
+[    0.338311]     virtme_initmount0=workspaces/repository
+[    0.338311]     virtme_initmount1=/var/tmp
+[    0.338312]     virtme_rw_overlay0=/etc
+[    0.338312]     virtme_rw_overlay1=/lib
+[    0.338312]     virtme_rw_overlay2=/home
+[    0.338313]     virtme_rw_overlay3=/opt
+[    0.338313]     virtme_rw_overlay4=/srv
+[    0.338314]     virtme_rw_overlay5=/usr
+[    0.338314]     virtme_rw_overlay6=/var
+[    0.338314]     virtme_rw_overlay7=/tmp
+[    0.338315]     virtme_rw_overlay8=/run
+[    0.338315]     virtme_rw_overlay9=/usr/local
+[    0.338315]     virtme_console=ttyS0
+[    0.338316]     virtme_chdir=workspaces/repository
+[    0.338316]     virtme_root_user=1
+[    0.338630] virtme initramfs: loading fuse.ko...
+[    0.340877] fuse: module verification failed: signature and/or required key missing - tainting kernel
+[    0.346962] fuse: init (API version 7.45)
+[    0.347361] virtme initramfs: loading virtiofs.ko...
+[    0.349009] virtme initramfs: loading virtio_mmio.ko...
+[    0.349849] virtme initramfs: loading serio.ko...
+[    0.350946] virtme initramfs: loading i8042.ko...
+[    0.352094] i8042: PNP: PS/2 Controller [PNP0303:KBD,PNP0f13:MOU] at 0x60,0x64 irq 1,12
+[    0.352760] serio: i8042 KBD port at 0x60,0x64 irq 1
+[    0.352764] serio: i8042 AUX port at 0x60,0x64 irq 12
+[    0.352967] virtme initramfs: loading libps2.ko...
+[    0.354387] virtme initramfs: loading vivaldi-fmap.ko...
+[    0.354893] virtme initramfs: loading atkbd.ko...
+[    0.356187] virtme initramfs: mounting hostfs...
+[    0.356406] input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0
+[    0.356482] virtio-fs: tag <ROOTFS> not found
+[    0.356900] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    0.359016] virtme initramfs: done; switching to real root
+[    0.386681] virtme-ng-init: Setting hostname to virtme-ng...
+[    0.426017] overlay: filesystem on /run/tmp/virtme_rw_overlay9/upper not supported as upperdir
+[    0.426609] overlay: filesystem on /run/tmp/virtme_rw_overlay9/upper not supported as upperdir
+[    0.427362] virtme-ng-init: mount virtme_rw_overlay9 -> /usr/local: EINVAL: Invalid argument
+[    0.431812] virtme-ng-init: running systemd-tmpfiles
+[    0.666797] virtme-ng-init: basic initialization done
+[    0.668549] virtme-ng-init: you have CONFIG_UEVENT_HELPER on; turn it off
+[    0.669285] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    0.669584] 9pnet: Limiting 'msize' to 512000 as this is the maximum supported by transport virtio
+[    0.690593] virtme-ng-init: Starting systemd-udevd version 255.4-1ubuntu8.19
+[    0.690600] virtme-ng-init: triggering udev coldplug
+[    1.529604] virtme-ng-init: waiting for udev to settle
+[    1.542136] input: Power Button as /devices/platform/LNXPWRBN:00/input/input2
+[    1.542572] ACPI: button: Power Button [PWRF]
+[    1.583151] SCSI subsystem initialized
+[    1.584565] piix4_smbus 0000:00:01.3: SMBus Host Controller at 0x700, revision 0
+[    1.584598] i2c i2c-0: Memory type 0x07 not supported yet, not instantiating SPD
+[    1.587474] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input4
+[    1.589320] input: VirtualPS/2 VMware VMMouse as /devices/platform/i8042/serio1/input/input3
+[    1.670862] libata version 3.00 loaded.
+[    1.671263] mousedev: PS/2 mouse device common for all mice
+[    1.732243] scsi host0: ata_piix
+[    1.732438] scsi host1: ata_piix
+[    1.732466] ata1: PATA max MWDMA2 cmd 0x1f0 ctl 0x3f6 bmdma 0xc240 irq 14 lpm-pol 0
+[    1.732468] ata2: PATA max MWDMA2 cmd 0x170 ctl 0x376 bmdma 0xc248 irq 15 lpm-pol 0
+[    1.901886] ata2: found unknown device (class 0)
+[    1.902388] ata2.00: ATAPI: QEMU DVD-ROM, 2.5+, max UDMA/100
+[    1.903459] scsi 1:0:0:0: CD-ROM            QEMU     QEMU DVD-ROM     2.5+ PQ: 0 ANSI: 5
+[    2.025281] scsi 1:0:0:0: Attached scsi generic sg0 type 5
+[    2.152580] sr 1:0:0:0: [sr0] scsi3-mmc drive: 4x/4x cd/rw xa/form2 tray
+[    2.152584] cdrom: Uniform CD-ROM driver Revision: 3.20
+[    2.251787] sr 1:0:0:0: Attached scsi CD-ROM sr0
+[    3.694804] virtme-ng-init: udev is done
+[    3.698046] virtme-ng-init: starting script
+[    4.161005] bpf_x86_native_lab: loading out-of-tree module taints kernel.
+[   18.514156] loop0: detected capacity change from 0 to 134217728
+[   18.573140] EXT4-fs (loop0): mounting with "discard" option, but the device does not support discard
+[   18.573164] EXT4-fs (loop0): mounted filesystem 1d5f85a9-af87-4b6b-b149-f9ea3279b09c r/w with ordered data mode. Quota mode: none.
+[   21.441964] Initializing XFRM netlink socket
+[   94.401557] profile CPU snapshot stress_pid=2337 uptime=93.20
+[   94.401616] sysrq: Show backtrace of all active CPUs
+[   94.405697] NMI backtrace for cpu 3
+[   94.405700] CPU: 3 UID: 0 PID: 1580 Comm: bash Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405704] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405704] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405705] Call Trace:
+[   94.405706]  <TASK>
+[   94.405707]  dump_stack_lvl+0x4f/0x70
+[   94.405713]  nmi_cpu_backtrace+0xbb/0xf0
+[   94.405715]  ? __pfx_nmi_raise_cpu_backtrace+0x10/0x10
+[   94.405719]  nmi_trigger_cpumask_backtrace+0x113/0x130
+[   94.405720]  __handle_sysrq+0xbb/0x170
+[   94.405724]  write_sysrq_trigger+0x55/0x70
+[   94.405725]  proc_reg_write+0x55/0xa0
+[   94.405728]  vfs_write+0xf7/0x420
+[   94.405731]  ? filp_flush+0x75/0x90
+[   94.405734]  ? filp_close+0x19/0x30
+[   94.405735]  ? do_dup2+0xb4/0x140
+[   94.405737]  ksys_write+0x61/0xe0
+[   94.405739]  do_syscall_64+0xa8/0x8c0
+[   94.405742]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[   94.405743] RIP: 0033:0x7f5bd2210804
+[   94.405745] Code: c7 00 16 00 00 00 b8 ff ff ff ff c3 66 2e 0f 1f 84 00 00 00 00 00 f3 0f 1e fa 80 3d 45 f8 0e 00 00 74 13 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 54 c3 0f 1f 00 55 48 89 e5 48 83 ec 20 48 89
+[   94.405746] RSP: 002b:00007ffee636a658 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+[   94.405748] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f5bd2210804
+[   94.405749] RDX: 0000000000000002 RSI: 000055e48eaa0ce0 RDI: 0000000000000001
+[   94.405749] RBP: 00007ffee636a680 R08: 0000000000000073 R09: 0000000000000000
+[   94.405750] R10: 00000000ffffffff R11: 0000000000000202 R12: 0000000000000002
+[   94.405750] R13: 000055e48eaa0ce0 R14: 00007f5bd22f95c0 R15: 00007f5bd22f6ee0
+[   94.405753]  </TASK>
+[   94.405759] Sending NMI from CPU 3 to CPUs 0-2,4-7:
+[   94.405768] NMI backtrace for cpu 4
+[   94.405772] CPU: 4 UID: 0 PID: 2328 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405775] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405775] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405776] RIP: 0033:0x608b63
+[   94.405778] Code: 1f 84 00 00 00 00 00 f3 0f 1e fa 48 ba 6d 9c 2e 3a 42 ce 47 8e 55 48 b8 00 08 fa 82 4b 04 00 00 48 0f af d7 48 89 e5 48 01 c2 <48> b8 08 fa 82 4b 04 00 00 00 48 c1 ca 09 48 39 d0 73 27 66 0f ef
+[   94.405779] RSP: 002b:00007ffc257c5ca0 EFLAGS: 00000202
+[   94.405781] RAX: 0000044b82fa0800 RBX: 0000000000ba6748 RCX: 00000015fb8898b8
+[   94.405782] RDX: 2e210783fa432e58 RSI: 7fffffffe74d9347 RDI: 00000015fb8898b8
+[   94.405783] RBP: 00007ffc257c5ca0 R08: 000bf3308a000000 R09: 00007f65fe487010
+[   94.405783] R10: 0000000000000001 R11: 00007f65fe488000 R12: 00007f65fe0a6b60
+[   94.405784] R13: 0000000000000000 R14: 00000000000000ab R15: 00007f65fe481020
+[   94.405785] FS:  00007f65fe138080 GS:  0000000000000000
+[   94.405786] NMI backtrace for cpu 1
+[   94.405789] CPU: 1 UID: 0 PID: 2334 Comm: perl Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405791] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405792] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405792] RIP: 0010:asm_exc_page_fault+0x0/0x30
+[   94.405795] Code: 74 24 28 ff 74 24 28 ff 74 24 28 ff 74 24 28 e8 e6 06 00 00 48 89 c4 48 89 e7 e8 db fb ff 00 e9 16 08 00 00 66 0f 1f 44 00 00 <0f> 01 ca fc e8 c7 06 00 00 48 89 c4 48 89 e7 48 8b 74 24 78 48 c7
+[   94.405796] RSP: 0000:ffffccbf80873ad0 EFLAGS: 00040046
+[   94.405798] RAX: 0000000000000001 RBX: 0000000000000008 RCX: 0000000000000008
+[   94.405798] RDX: ffffccbf80874000 RSI: 0000000000000318 RDI: ffffccbf80873c28
+[   94.405799] RBP: 0000000000000318 R08: 0000000000000000 R09: ffff895c827764c8
+[   94.405800] R10: ffff895c827764ec R11: ffffccbf80873be8 R12: ffffccbf80873c28
+[   94.405800] R13: ffff895c89eeaa40 R14: ffffccbf81d180f8 R15: ffffccbf80873c68
+[   94.405803] FS:  00007f8fc09bbb80(0000) GS:ffff8963ed9a8000(0000) knlGS:0000000000000000
+[   94.405804] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   94.405805] CR2: 0000000000000318 CR3: 0000000102ac6001 CR4: 0000000000772ef0
+[   94.405805] PKRU: 55555554
+[   94.405806] Call Trace:
+[   94.405806]  <TASK>
+[   94.405807] RIP: 0010:copy_from_user_nofault+0x64/0xa0
+[   94.405810] Code: 4c 8b 2d 97 0f d7 02 41 83 85 ac 24 00 00 01 66 90 31 d2 48 89 de 4c 89 e7 e8 78 96 11 00 0f 01 cb 48 89 d9 4c 89 e7 48 89 ee <f3> a4 0f 1f 00 0f 01 ca 41 83 ad ac 24 00 00 01 48 85 c9 75 0d 5b
+[   94.405810] RSP: 0000:ffffccbf80873b08 EFLAGS: 00050046
+[   94.405812]  ? copy_from_user_nofault+0x58/0xa0
+[   94.405814]  bpf_probe_read_user+0x18/0x50
+[   94.405820]  bpf_prog_69e1bd538f5df53f_perf_unwind_perl+0x37b/0x4758
+[   94.405821]  ? update_sd_lb_stats.constprop.0+0x65/0x270
+[   94.405824]  __perf_event_overflow+0x299/0x3a0
+[   94.405827]  perf_swevent_hrtimer+0xd0/0x130
+[   94.405829]  ? psi_group_change+0x129/0x320
+[   94.405831]  ? update_curr+0x35/0x170
+[   94.405832]  ? place_entity+0x98/0x140
+[   94.405834]  ? reweight_entity+0x27c/0x2f0
+[   94.405836]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[   94.405839]  ? ep_poll_callback+0x261/0x2a0
+[   94.405841]  ? __pfx_perf_swevent_hrtimer+0x10/0x10
+[   94.405842]  __hrtimer_run_queues+0x11c/0x290
+[   94.405846]  hrtimer_interrupt+0xfb/0x240
+[   94.405848]  __sysvec_apic_timer_interrupt+0x51/0x140
+[   94.405851]  sysvec_apic_timer_interrupt+0x34/0x90
+[   94.405852]  asm_sysvec_apic_timer_interrupt+0x16/0x20
+[   94.405853] RIP: 0033:0x55a9a367ff51
+[   94.405854] Code: 00 00 0f 85 41 05 00 00 4c 8b 46 10 41 8b 40 0c a9 00 00 10 00 0f 85 fe 04 00 00 3c 0d 0f 85 d6 05 00 00 44 8b 6b 30 49 8b 00 <48> 83 78 30 00 8b 50 5c 0f 84 21 05 00 00 89 d0 83 e0 60 83 f8 20
+[   94.405854] RSP: 002b:00007ffe2a89ef50 EFLAGS: 00000206
+[   94.405855] RAX: 000055a9aa074010 RBX: 000055a9a9fef2a0 RCX: 0000000000000010
+[   94.405856] RDX: 0000000000008009 RSI: 000055a9aa0af268 RDI: 000055a9a9fef2a0
+[   94.405856] RBP: 00007ffe2a89efc0 R08: 000055a9aa05cb50 R09: 000055a9a9ff4d08
+[   94.405857] R10: 0008000000000001 R11: 0000000000000000 R12: 0000000000000005
+[   94.405857] R13: 0000000000000005 R14: 000055a9a39082d0 R15: 000055a9a9ff4d10
+[   94.405859]  </TASK>
+[   94.405860] NMI backtrace for cpu 6
+[   94.405862] CPU: 6 UID: 0 PID: 2335 Comm: php Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405864] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405865] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405866] RIP: 0010:timerqueue_add+0x0/0xb0
+[   94.405869] Code: a9 bf 02 00 00 00 5b e9 be 1e 32 ff 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 40 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 <55> 53 48 89 f3 48 3b 36 0f 85 96 00 00 00 48 8b 07 48 85 c0 74 55
+[   94.405871] RSP: 0000:ffffccbf807abe50 EFLAGS: 00000002
+[   94.405872] RAX: ffff89639fda0640 RBX: ffff89639fda0640 RCX: 0000000000000000
+[   94.405873] RDX: 0000000000000001 RSI: ffff895c8f25d5f0 RDI: ffff89639fda06a0
+[   94.405873] RBP: 0000000000000001 R08: 00000015fb88b346 R09: 7fffffffffffffff
+[   94.405874] R10: 00000015fb888c36 R11: 0000000000000e33 R12: ffff89639fda0640
+[   94.405875] R13: 0000000000000006 R14: ffff89639fda0680 R15: ffff895c8f25d5f0
+[   94.405878] FS:  00007ff703f8a980(0000) GS:ffff8963edae8000(0000) knlGS:0000000000000000
+[   94.405879] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   94.405880] CR2: 000055e48ea9fb30 CR3: 0000000141045001 CR4: 0000000000772ef0
+[   94.405880] PKRU: 55555554
+[   94.405881] Call Trace:
+[   94.405881]  <TASK>
+[   94.405882]  __hrtimer_run_queues+0x148/0x290
+[   94.405885]  hrtimer_interrupt+0xfb/0x240
+[   94.405887]  __sysvec_apic_timer_interrupt+0x51/0x140
+[   94.405889]  sysvec_apic_timer_interrupt+0x34/0x90
+[   94.405890]  asm_sysvec_apic_timer_interrupt+0x16/0x20
+[   94.405891] RIP: 0033:0x7ff706d9ee50
+[   94.405893] Code: ff 81 3d d3 91 ff ff ff ff ff 7f 48 8d 90 00 f0 ff ff 48 0f 45 c2 48 8b 40 28 48 85 ff 74 03 48 89 07 c3 0f 1f 80 00 00 00 00 <e9> db f9 ff ff 66 66 2e 0f 1f 84 00 00 00 00 00 83 ff 17 77 5e 48
+[   94.405894] RSP: 002b:00007ffef1077978 EFLAGS: 00000206
+[   94.405895] RAX: 00007ff706d9ee50 RBX: 00007ff703c12210 RCX: 0000000000000002
+[   94.405895] RDX: 0000000000000000 RSI: 00007ffef10779a0 RDI: 0000000000000001
+[   94.405896] RBP: 00007ffef1077980 R08: 0000000000000004 R09: 00007ff706d98010
+[   94.405896] R10: 0000000000000001 R11: 00007ff706d99000 R12: 00007ff703c122a0
+[   94.405897] R13: 00007ff703c122a0 R14: 00007ff703c12020 R15: 00007ff703c8c300
+[   94.405898]  </TASK>
+[   94.405899] NMI backtrace for cpu 0
+[   94.405902] CPU: 0 UID: 0 PID: 2307 Comm: otelcol-ebpf-pr Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405904] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405905] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405905] RIP: 0010:iowrite16+0xc/0x60
+[   94.405910] Code: cc cc 66 66 2e 0f 1f 84 00 00 00 00 00 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 48 81 fe ff ff 03 00 76 08 66 89 3e <e9> bf ec 5b 00 48 81 fe 00 00 01 00 76 0b 89 f8 89 f2 66 ef c3 cc
+[   94.405911] RSP: 0000:ffffccbf81c93968 EFLAGS: 00010092
+[   94.405912] RAX: ffffffffafb5ca00 RBX: ffff895c8534d000 RCX: 0000000000000001
+[   94.405913] RDX: ffff895c81f28940 RSI: ffffccbf8005d000 RDI: 0000000000000000
+[   94.405914] RBP: ffff895c829c2038 R08: 0000000000000000 R09: ffff895c85c2d500
+[   94.405914] R10: 0000000000000000 R11: 0000000000000030 R12: ffff895c85c2d500
+[   94.405915] R13: 0000000000000000 R14: 0000000000000002 R15: ffff895c80ce5b40
+[   94.405918] FS:  00007f216dc1d6c0(0000) GS:ffff8963ed968000(0000) knlGS:0000000000000000
+[   94.405919] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   94.405919] CR2: 00007f202a04c00c CR3: 000000011805b001 CR4: 0000000000772ef0
+[   94.405920] PKRU: 55555554
+[   94.405920] Call Trace:
+[   94.405921]  <TASK>
+[   94.405921]  vp_notify+0x12/0x20
+[   94.405924]  virtqueue_kick+0x4f/0x70
+[   94.405926]  p9_virtio_zc_request+0x38c/0x6c0
+[   94.405929]  ? p9pdu_finalize+0x2e/0xa0
+[   94.405931]  p9_client_zc_rpc.constprop.0+0xf6/0x300
+[   94.405933]  ? netfs_prepare_read_iterator+0x136/0x1d0
+[   94.405936]  ? obj_cgroup_charge_account+0x11d/0x300
+[   94.405938]  ? perf_output_end+0xa/0x10
+[   94.405940]  p9_client_read_once+0x14a/0x2c0
+[   94.405941]  ? kmem_cache_alloc_noprof+0x3bf/0x3f0
+[   94.405944]  p9_client_read+0x52/0x70
+[   94.405946]  v9fs_issue_read+0x43/0xd0
+[   94.405949]  netfs_read_to_pagecache+0x1b2/0x510
+[   94.405951]  netfs_read_folio+0xf6/0x230
+[   94.405952]  ? __pfx_netfs_read_folio+0x10/0x10
+[   94.405953]  filemap_read_folio+0x33/0xc0
+[   94.405955]  filemap_fault+0x608/0xc60
+[   94.405957]  __do_fault+0x33/0x180
+[   94.405960]  do_read_fault+0x127/0x210
+[   94.405960]  do_fault+0x12d/0x3a0
+[   94.405961]  __handle_mm_fault+0x49c/0x7a0
+[   94.405963]  ? set_next_entity+0xe3/0x260
+[   94.405965]  handle_mm_fault+0x18e/0x2f0
+[   94.405966]  do_user_addr_fault+0x17c/0x720
+[   94.405969]  exc_page_fault+0x67/0x150
+[   94.405970]  asm_exc_page_fault+0x22/0x30
+[   94.405971] RIP: 0033:0x1037195
+[   94.405972] Code: 01 48 89 c1 48 89 df 48 8d 05 c7 2c 29 00 48 89 d3 0f 1f 40 00 e8 bb 0d 3e ff 84 db 0f 85 c5 01 00 00 48 8b 94 24 68 01 00 00 <8b> 5a 10 85 db 75 0d 48 8b 84 24 c8 00 00 00 e9 c5 04 00 00 48 8b
+[   94.405973] RSP: 002b:00001dcebbf332b8 EFLAGS: 00010246
+[   94.405974] RAX: 000000000233a560 RBX: 0000000000000000 RCX: 0000000000000008
+[   94.405975] RDX: 00007f202a04bffc RSI: 00001dceba6d6410 RDI: 0000000000000018
+[   94.405975] RBP: 00001dcebbf33560 R08: 0000000000000000 R09: 00001dceba6d64d8
+[   94.405976] R10: 0000000000000008 R11: 00007f202a7855af R12: 00007f20299440a0
+[   94.405976] R13: 00000000018ecf40 R14: 00001dceba8b1c20 R15: 0000000000000005
+[   94.405978]  </TASK>
+[   94.405979] NMI backtrace for cpu 7
+[   94.405981] CPU: 7 UID: 0 PID: 2331 Comm: nodejs Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.405984] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.405985] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.405986] RIP: 0033:0x7f8565b0f9c0
+[   94.405988] Code: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc <58> 4d 8b 95 c0 00 00 00 41 52 53 41 52 41 52 4d 8d 55 80 41 52 57
+[   94.405989] RSP: 002b:00007ffe86c6c148 EFLAGS: 00000246
+[   94.405990] RAX: 00002eb10dae3a21 RBX: 0000368189c815b9 RCX: 0000000000000000
+[   94.405991] RDX: 00007f8565916610 RSI: 0000251d440042c1 RDI: 000038ac73481d29
+[   94.405992] RBP: 00007ffe86c6c1d0 R08: 00002eb10dae3a21 R09: 000038ac73481d29
+[   94.405993] R10: 000055a79c50b669 R11: 0000000000000300 R12: 00000000000000c5
+[   94.405993] R13: 000055a79c53fed0 R14: 00000000000000b9 R15: 00000000000000ba
+[   94.405994] FS:  00007f8561eee800 GS:  0000000000000000
+[   94.405995] NMI backtrace for cpu 5
+[   94.405998] CPU: 5 UID: 0 PID: 2327 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.406000] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.406001] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.406001] RIP: 0033:0x7fe6a64cf7ce
+[   94.406003] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[   94.406004] RSP: 002b:00007fff96def628 EFLAGS: 00000202
+[   94.406006] RAX: 000000004134317c RBX: 000000000000486e RCX: 0000000000000005
+[   94.406007] RDX: 0000000000000051 RSI: 0000000000000010 RDI: 00007fe6a64cd000
+[   94.406007] RBP: 00007fff96def650 R08: 0000000000000000 R09: 00007fe6a64c9000
+[   94.406008] R10: 0000000000000001 R11: 00007fe6a64ca000 R12: 0000000000000000
+[   94.406009] R13: 0000000000000000 R14: 00000000000000ab R15: 00007fe6a64c3020
+[   94.406009] FS:  00007fe6a617a080 GS:  0000000000000000
+[   94.408482] NMI backtrace for cpu 2
+[   94.408483] CPU: 2 UID: 0 PID: 2330 Comm: ruby Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[   94.408485] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[   94.408485] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[   94.408486] RIP: 0010:lapic_next_deadline+0x26/0x50
+[   94.408489] Code: 90 90 90 90 0f 1f 44 00 00 0f ae f0 0f ae e8 0f 31 48 c1 e2 20 b9 e0 06 00 00 48 09 c2 48 8d 04 fa 48 89 c2 48 c1 ea 20 0f 30 <66> 90 31 c0 e9 41 c8 d9 00 48 89 c6 31 d2 bf e0 06 00 00 e8 b2 76
+[   94.408490] RSP: 0000:ffffccbf81c3be98 EFLAGS: 00000002
+[   94.408491] RAX: 00000051412f76e2 RBX: 0000000000002069 RCX: 00000000000006e0
+[   94.408491] RDX: 0000000000000051 RSI: ffff89639fc9be00 RDI: 0000000000000eef
+[   94.408492] RBP: 0000000000000000 R08: 0000000000000001 R09: 7fffffffffffffff
+[   94.408492] R10: 00000015fb8729d3 R11: 0000000000002d6f R12: ffff89639fc9be00
+[   94.408493] R13: 00000015fb8750e3 R14: ffff89639fca0640 R15: ffff89639fca0770
+[   94.408496] FS:  00007fcfcd95b740(0000) GS:ffff8963ed9e8000(0000) knlGS:0000000000000000
+[   94.408497] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   94.408497] CR2: 0000000000000000 CR3: 00000002abb99004 CR4: 0000000000772ef0
+[   94.408498] PKRU: 55555554
+[   94.408498] Call Trace:
+[   94.408499]  <TASK>
+[   94.408499]  clockevents_program_event+0x95/0xe0
+[   94.408503]  hrtimer_interrupt+0x124/0x240
+[   94.408505]  __sysvec_apic_timer_interrupt+0x51/0x140
+[   94.408507]  sysvec_apic_timer_interrupt+0x34/0x90
+[   94.408508]  asm_sysvec_apic_timer_interrupt+0x16/0x20
+[   94.408509] RIP: 0033:0x7fcfce0fe7ce
+[   94.408510] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[   94.408510] RSP: 002b:00007ffd4843b608 EFLAGS: 00000202
+[   94.408511] RAX: 00000000412e4f9c RBX: 000000000000486e RCX: 0000000000000002
+[   94.408512] RDX: 0000000000000051 RSI: 0000000000000010 RDI: 00007fcfce0fc000
+[   94.408512] RBP: 00007ffd4843b630 R08: 00007fcfcd8f9f90 R09: 00007fcfce0f8000
+[   94.408513] R10: 0000000000000001 R11: 00007fcfce0f9000 R12: 0000000000000004
+[   94.408513] R13: 00007fcfcd6f9e20 R14: 00000000ffffffff R15: 00007fcfcd7b63e0
+[   94.408514]  </TASK>
+[   96.111434] hrtimer: interrupt took 17473 ns
+[  153.131426] hrtimer: interrupt took 21836 ns
+[  154.329695] profile CPU snapshot stress_pid=2585 uptime=153.14
+[  154.329725] sysrq: Show backtrace of all active CPUs
+[  154.330076] NMI backtrace for cpu 1
+[  154.330079] CPU: 1 UID: 0 PID: 1580 Comm: bash Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330082] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330083] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330088] Call Trace:
+[  154.330089]  <TASK>
+[  154.330089]  dump_stack_lvl+0x4f/0x70
+[  154.330096]  nmi_cpu_backtrace+0xbb/0xf0
+[  154.330098]  ? __pfx_nmi_raise_cpu_backtrace+0x10/0x10
+[  154.330102]  nmi_trigger_cpumask_backtrace+0x113/0x130
+[  154.330103]  __handle_sysrq+0xbb/0x170
+[  154.330107]  write_sysrq_trigger+0x55/0x70
+[  154.330109]  proc_reg_write+0x55/0xa0
+[  154.330112]  vfs_write+0xf7/0x420
+[  154.330115]  ? filp_flush+0x75/0x90
+[  154.330117]  ? filp_close+0x19/0x30
+[  154.330118]  ? do_dup2+0xb4/0x140
+[  154.330121]  ksys_write+0x61/0xe0
+[  154.330122]  do_syscall_64+0xa8/0x8c0
+[  154.330125]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[  154.330126] RIP: 0033:0x7f5bd2210804
+[  154.330128] Code: c7 00 16 00 00 00 b8 ff ff ff ff c3 66 2e 0f 1f 84 00 00 00 00 00 f3 0f 1e fa 80 3d 45 f8 0e 00 00 74 13 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 54 c3 0f 1f 00 55 48 89 e5 48 83 ec 20 48 89
+[  154.330129] RSP: 002b:00007ffee636a658 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+[  154.330131] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f5bd2210804
+[  154.330132] RDX: 0000000000000002 RSI: 000055e48eaa0ce0 RDI: 0000000000000001
+[  154.330132] RBP: 00007ffee636a680 R08: 0000000000000073 R09: 0000000000000000
+[  154.330133] R10: 00000000ffffffff R11: 0000000000000202 R12: 0000000000000002
+[  154.330134] R13: 000055e48eaa0ce0 R14: 00007f5bd22f95c0 R15: 00007f5bd22f6ee0
+[  154.330136]  </TASK>
+[  154.330139] Sending NMI from CPU 1 to CPUs 0,2-7:
+[  154.330153] NMI backtrace for cpu 0
+[  154.330156] CPU: 0 UID: 0 PID: 2580 Comm: nodejs Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330158] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330159] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330160] RIP: 0010:trie_lookup_elem+0x94/0x200
+[  154.330164] Code: ce 41 89 cf 44 0f 46 fe 48 83 fd 07 0f 86 ce 00 00 00 49 8b 5a 18 4d 8b 43 04 44 89 e2 48 89 d8 4c 31 c0 48 0f c8 48 0f bd d0 <44> 89 f0 29 d0 44 39 f8 0f 83 33 01 00 00 4c 39 c3 75 48 89 74 24
+[  154.330165] RSP: 0000:ffffccbf81983a78 EFLAGS: 00000006
+[  154.330167] RAX: 0000000700007f80 RBX: 00000000130a0000 RCX: 000000000000001d
+[  154.330168] RDX: 0000000000000022 RSI: 0000000000000060 RDI: 0000000000000008
+[  154.330168] RBP: 000000000000000c R08: 807f0000140a0000 R09: 0000000000000000
+[  154.330169] R10: ffff895c87dc0e08 R11: ffffccbf81983be8 R12: 00000000ffffffff
+[  154.330169] R13: 0000000000000060 R14: 000000000000003f R15: 000000000000001d
+[  154.330173] FS:  00007f80e9ba5800(0000) GS:ffff8963ed968000(0000) knlGS:0000000000000000
+[  154.330174] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  154.330174] CR2: 00007ffee6368f58 CR3: 000000024b6f5006 CR4: 0000000000772ef0
+[  154.330175] PKRU: 55555558
+[  154.330175] Call Trace:
+[  154.330176]  <TASK>
+[  154.330179]  bpf_prog_1600221a15411be1_perf_unwind_native+0x5080/0x556c
+[  154.330182]  ? bpf_prog_d09a8823a8b5cbd9_perf_unwind_stop+0xaa1/0xe42
+[  154.330183]  __perf_event_overflow+0x299/0x3a0
+[  154.330186]  perf_swevent_hrtimer+0xd0/0x130
+[  154.330188]  ? ttwu_do_activate+0x116/0x1a0
+[  154.330191]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[  154.330194]  ? try_to_wake_up+0x1b6/0x650
+[  154.330197]  ? autoremove_wake_function+0x2e/0x60
+[  154.330200]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[  154.330201]  ? __wake_up+0x40/0x60
+[  154.330202]  ? __pfx_perf_swevent_hrtimer+0x10/0x10
+[  154.330204]  __hrtimer_run_queues+0x11c/0x290
+[  154.330210]  hrtimer_interrupt+0xfb/0x240
+[  154.330212]  __sysvec_apic_timer_interrupt+0x51/0x140
+[  154.330215]  sysvec_apic_timer_interrupt+0x34/0x90
+[  154.330216]  asm_sysvec_apic_timer_interrupt+0x16/0x20
+[  154.330218] RIP: 0033:0x7f80ec8f0a6a
+[  154.330219] Code: ff 66 66 2e 0f 1f 84 00 00 00 00 00 0f 1f 40 00 f3 0f 1e fa 55 bf 01 00 00 00 48 89 e5 48 83 ec 20 64 48 8b 04 25 28 00 00 00 <48> 89 45 f8 31 c0 48 8d 75 e0 e8 47 95 ff ff 89 c2 31 c0 85 d2 75
+[  154.330219] RSP: 002b:00007ffc1dbdd800 EFLAGS: 00000206
+[  154.330220] RAX: fcb8587dcfab1f00 RBX: 000055d77b94ca90 RCX: 0000000000000000
+[  154.330221] RDX: 00007f80ed5cd600 RSI: 00002bb3790442c1 RDI: 0000000000000001
+[  154.330221] RBP: 00007ffc1dbdd820 R08: 00001ecc896e3661 R09: 000037209ec5dda9
+[  154.330221] R10: 0000000000000038 R11: 0000000000000300 R12: 000055d77b7964e0
+[  154.330222] R13: 000055d77b74bed0 R14: 000000000000005f R15: 000055d77b7595a8
+[  154.330223]  </TASK>
+[  154.330224] NMI backtrace for cpu 5
+[  154.330226] CPU: 5 UID: 0 PID: 2584 Comm: php Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330229] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330229] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330230] RIP: 0010:lapic_next_deadline+0x26/0x50
+[  154.330233] Code: 90 90 90 90 0f 1f 44 00 00 0f ae f0 0f ae e8 0f 31 48 c1 e2 20 b9 e0 06 00 00 48 09 c2 48 8d 04 fa 48 89 c2 48 c1 ea 20 0f 30 <66> 90 31 c0 e9 41 c8 d9 00 48 89 c6 31 d2 bf e0 06 00 00 e8 b2 76
+[  154.330234] RSP: 0000:ffffccbf8ff73e98 EFLAGS: 00000007
+[  154.330235] RAX: 00000084b01c56d0 RBX: 0000000000001873 RCX: 00000000000006e0
+[  154.330236] RDX: 0000000000000084 RSI: ffff89639fd5be00 RDI: 0000000000000b44
+[  154.330237] RBP: 0000000000000000 R08: 0000000000000001 R09: 7fffffffffffffff
+[  154.330238] R10: 00000023ef48f99c R11: 0000000000000e6d R12: ffff89639fd5be00
+[  154.330238] R13: 00000023ef4920ac R14: ffff89639fd60640 R15: ffff89639fd60770
+[  154.330241] FS:  00007fe03541d980(0000) GS:ffff8963edaa8000(0000) knlGS:0000000000000000
+[  154.330242] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  154.330243] CR2: 00007f80eda46cb0 CR3: 000000020883c006 CR4: 0000000000772ef0
+[  154.330244] PKRU: 55555554
+[  154.330244] Call Trace:
+[  154.330245]  <TASK>
+[  154.330245]  clockevents_program_event+0x95/0xe0
+[  154.330249]  hrtimer_interrupt+0x124/0x240
+[  154.330252]  __sysvec_apic_timer_interrupt+0x51/0x140
+[  154.330254]  sysvec_apic_timer_interrupt+0x34/0x90
+[  154.330255]  asm_sysvec_apic_timer_interrupt+0x16/0x20
+[  154.330256] RIP: 0033:0x7fe03823180d
+[  154.330257] Code: 05 20 d8 ff ff 49 89 c0 89 d1 f7 d9 49 d3 e8 89 d1 48 d3 e0 85 d2 48 8b 0d 10 d8 ff ff 8b 15 12 d8 ff ff 49 0f 48 c0 48 f7 e2 <48> 0f ac d0 20 8b 17 39 d6 75 a5 48 01 c8 48 0f ba f0 3f c3 48 c7
+[  154.330258] RSP: 002b:00007ffd11c8b518 EFLAGS: 00000a87
+[  154.330259] RAX: fbcaa7c01082ff88 RBX: 00000000000076be RCX: 000000000178470e
+[  154.330259] RDX: 0000000000000023 RSI: 0000000000000010 RDI: 00007fe03822f000
+[  154.330260] RBP: 00007ffd11c8b540 R08: 00000042532ca087 R09: 00007fe03822b000
+[  154.330260] R10: 0000000000000001 R11: 00007fe03822c000 R12: 00007fe0352122a0
+[  154.330261] R13: 00007fe0352122a0 R14: 00007fe035212020 R15: 00007fe03528c300
+[  154.330265]  </TASK>
+[  154.330265] NMI backtrace for cpu 7
+[  154.330268] CPU: 7 UID: 0 PID: 2576 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330270] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330271] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330271] RIP: 0033:0x5d6bba
+[  154.330273] Code: 00 49 63 c3 49 83 ea 08 49 89 df 4c 8d 2c 41 41 0f b6 45 00 45 0f b6 5d 01 49 89 c6 48 8b 04 c5 60 47 78 00 ff e0 f3 0f 1e fa <48> 8b 03 49 63 d3 4c 89 6b 38 49 8d 4d 02 48 8b 40 18 48 8b 54 d0
+[  154.330274] RSP: 002b:00007ffe357d3080 EFLAGS: 00000212
+[  154.330276] RAX: 00000000005d6bb6 RBX: 00007f68d39c0020 RCX: 0000000000000005
+[  154.330276] RDX: 0000000000000002 RSI: 00007ffe357d3058 RDI: 00007f68d33b5e00
+[  154.330277] RBP: 00007ffe357d31f0 R08: 000000000000001e R09: 00007f68d33c8840
+[  154.330278] R10: 00007f68d39c0070 R11: 0000000000000004 R12: 0000000000ba6748
+[  154.330278] R13: 00000000142c13f6 R14: 0000000000000064 R15: 00007f68d39c0020
+[  154.330279] FS:  00007f68d3677080 GS:  0000000000000000
+[  154.330279] NMI backtrace for cpu 2
+[  154.330282] CPU: 2 UID: 0 PID: 2593 Comm: stress-ng-cpu Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330284] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330285] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330286] RIP: 0033:0x563bd35c3037
+[  154.330287] Code: 44 00 00 0f b6 11 48 83 c1 01 89 d7 31 c7 66 d1 e8 83 e7 01 f7 df 66 81 e7 08 84 31 f8 89 d7 40 d0 ef 31 c7 66 d1 e8 83 e7 01 <f7> df 66 81 e7 08 84 31 c7 89 d0 c0 e8 02 31 f8 66 d1 ef 83 e0 01
+[  154.330288] RSP: 002b:00007ffd21615d58 EFLAGS: 00000202
+[  154.330290] RAX: 00000000ffff5892 RBX: 00007ffd21615d60 RCX: 00007ffd21615f05
+[  154.330291] RDX: 000000000000005a RSI: 00007ffd21615f81 RDI: 0000000000000001
+[  154.330291] RBP: 00007ffd21616190 R08: 0000000000000222 R09: 0000563bd3d687e0
+[  154.330292] R10: 0000563bd3f30600 R11: 00000000000000f2 R12: 00007ffd21616160
+[  154.330293] R13: 00007ffd21616160 R14: 000000000000000a R15: 8000000000000000
+[  154.330293] FS:  00007f14e5f07ac0 GS:  0000000000000000
+[  154.330294] NMI backtrace for cpu 6
+[  154.330296] CPU: 6 UID: 0 PID: 2581 Comm: perl Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330299] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330299] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330300] RIP: 0033:0x7fb1d6e8e7ce
+[  154.330301] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  154.330302] RSP: 002b:00007ffd5d4ccb78 EFLAGS: 00000202
+[  154.330304] RAX: 00000000b02ee4e2 RBX: 00000000000076be RCX: 0000000000000006
+[  154.330304] RDX: 0000000000000084 RSI: 0000000000000010 RDI: 00007fb1d6e8c000
+[  154.330305] RBP: 00007ffd5d4ccba0 R08: 00005571ab598c80 R09: 00007fb1d6e88000
+[  154.330306] R10: 0000000000000001 R11: 00007fb1d6e89000 R12: 0000000000000001
+[  154.330306] R13: 00005571ab57cfa8 R14: 0000000000000008 R15: 0000000000000001
+[  154.330307] FS:  00007fb1d6b48b80 GS:  0000000000000000
+[  154.330308] NMI backtrace for cpu 3
+[  154.330310] CPU: 3 UID: 0 PID: 2577 Comm: ruby Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.330313] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.330313] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.330314] RIP: 0033:0x7eff4a68fd88
+[  154.330316] Code: 4d 89 37 41 ff 64 24 18 f3 0f 1e fa 4c 89 fe 48 89 df e8 5b 9b ff ff f3 0f 1e fa 49 8b 4e 08 4c 89 75 90 4d 8d 76 10 4d 89 fd <4d> 89 37 48 8b 41 08 4c 8b 21 48 89 4d a0 48 89 45 a8 4d 85 e4 0f
+[  154.330317] RSP: 002b:00007fffe5001fa0 EFLAGS: 00000202
+[  154.330318] RAX: 00007eff49eff070 RBX: 000055d740f38780 RCX: 000055d7412082d0
+[  154.330319] RDX: 0000000000cbbdc7 RSI: fffffffffffffffa RDI: 000055d7411f8860
+[  154.330320] RBP: 00007fffe5002030 R08: 0000000041c64e6d R09: 7fffffffffffffff
+[  154.330320] R10: 6f285cfea38528fb R11: 0000000000000000 R12: 00007eff49ffef90
+[  154.330321] R13: 00007eff49ffef90 R14: 000055d741207f18 R15: 00007eff49ffef90
+[  154.330322] FS:  00007eff4a060740 GS:  0000000000000000
+[  154.331831] NMI backtrace for cpu 4
+[  154.331835] CPU: 4 UID: 0 PID: 2579 Comm: nodejs Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  154.331837] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  154.331837] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  154.331838] RIP: 0033:0x7f96cc4d37ce
+[  154.331839] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  154.331840] RSP: 002b:00007ffd2fde0268 EFLAGS: 00000202
+[  154.331841] RAX: 00000000b02edfdc RBX: 00000000000076be RCX: 0000000000000004
+[  154.331841] RDX: 0000000000000084 RSI: 0000000000000010 RDI: 00007f96cc4d1000
+[  154.331842] RBP: 00007ffd2fde0290 R08: 0000212693cf2181 R09: 00007f96cc4cd000
+[  154.331842] R10: 0000000000000001 R11: 00007f96cc4ce000 R12: 000055b0270ad4e0
+[  154.331843] R13: 000055b027062ed0 R14: 00000000000000c2 R15: 000055b0270705a8
+[  154.331844] FS:  00007f96c6779800 GS:  0000000000000000
+[  154.331845] INFO: NMI handler (nmi_cpu_backtrace_handler) took too long to run: 1.690 msecs
+[  219.961433] hrtimer: interrupt took 18206 ns
+[  221.219445] profile CPU snapshot stress_pid=2937 uptime=220.05
+[  221.219505] sysrq: Show backtrace of all active CPUs
+[  221.219856] NMI backtrace for cpu 3
+[  221.219858] CPU: 3 UID: 0 PID: 1580 Comm: bash Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.219862] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.219863] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.219864] Call Trace:
+[  221.219865]  <TASK>
+[  221.219865]  dump_stack_lvl+0x4f/0x70
+[  221.219872]  nmi_cpu_backtrace+0xbb/0xf0
+[  221.219874]  ? __pfx_nmi_raise_cpu_backtrace+0x10/0x10
+[  221.219878]  nmi_trigger_cpumask_backtrace+0x113/0x130
+[  221.219880]  __handle_sysrq+0xbb/0x170
+[  221.219883]  write_sysrq_trigger+0x55/0x70
+[  221.219885]  proc_reg_write+0x55/0xa0
+[  221.219888]  vfs_write+0xf7/0x420
+[  221.219891]  ? asm_sysvec_irq_work+0x16/0x20
+[  221.219893]  ksys_write+0x61/0xe0
+[  221.219895]  do_syscall_64+0xa8/0x8c0
+[  221.219897]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[  221.219898] RIP: 0033:0x7f5bd2210804
+[  221.219900] Code: c7 00 16 00 00 00 b8 ff ff ff ff c3 66 2e 0f 1f 84 00 00 00 00 00 f3 0f 1e fa 80 3d 45 f8 0e 00 00 74 13 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 54 c3 0f 1f 00 55 48 89 e5 48 83 ec 20 48 89
+[  221.219901] RSP: 002b:00007ffee636a658 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+[  221.219903] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f5bd2210804
+[  221.219904] RDX: 0000000000000002 RSI: 000055e48eaa0ce0 RDI: 0000000000000001
+[  221.219904] RBP: 00007ffee636a680 R08: 0000000000000073 R09: 0000000000000000
+[  221.219905] R10: 00000000ffffffff R11: 0000000000000202 R12: 0000000000000002
+[  221.219905] R13: 000055e48eaa0ce0 R14: 00007f5bd22f95c0 R15: 00007f5bd22f6ee0
+[  221.219908]  </TASK>
+[  221.219914] Sending NMI from CPU 3 to CPUs 0-2,4-7:
+[  221.219922] NMI backtrace for cpu 2
+[  221.219925] CPU: 2 UID: 0 PID: 2930 Comm: nodejs Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.219927] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.219928] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.219929] RIP: 0010:copy_from_user_nofault+0x6c/0xa0
+[  221.219933] Code: 83 85 ac 24 00 00 01 66 90 31 d2 48 89 de 4c 89 e7 e8 78 96 11 00 0f 01 cb 48 89 d9 4c 89 e7 48 89 ee f3 a4 0f 1f 00 0f 01 ca <41> 83 ad ac 24 00 00 01 48 85 c9 75 0d 5b 31 c0 5d 41 5c 41 5d e9
+[  221.219934] RSP: 0000:ffffccbf80cdbaf8 EFLAGS: 00000046
+[  221.219936] RAX: 0000000000000001 RBX: 0000000000000008 RCX: 0000000000000000
+[  221.219937] RDX: ffffccbf80cdc000 RSI: 0000341612a147b0 RDI: ffffccbf80cdbb48
+[  221.219938] RBP: 0000341612a147a8 R08: 0000000073275f3d R09: ca9b5d4aa71e26f1
+[  221.219938] R10: ffff895ea2cb802c R11: ffffccbf80cdbbb0 R12: ffffccbf80cdbb40
+[  221.219939] R13: ffff895c85082a40 R14: ffffecbf7fc84700 R15: ffffccbf81cf19f0
+[  221.219942] FS:  00007f0c6e702800(0000) GS:ffff8963ed9e8000(0000) knlGS:0000000000000000
+[  221.219943] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  221.219943] CR2: 000030be86f0d740 CR3: 0000000109693004 CR4: 0000000000772ef0
+[  221.219944] PKRU: 55555558
+[  221.219944] Call Trace:
+[  221.219945]  <TASK>
+[  221.219946]  bpf_probe_read_user+0x18/0x50
+[  221.219953]  bpf_prog_acce632fa2867084_perf_unwind_v8+0x79a1/0x872a
+[  221.219955]  ? update_cfs_rq_load_avg+0x29/0x220
+[  221.219957]  ? __perf_event_overflow+0x299/0x3a0
+[  221.219960]  ? perf_swevent_hrtimer+0xd0/0x130
+[  221.219961]  ? __pick_eevdf+0x8e/0x160
+[  221.219962]  ? update_cfs_rq_load_avg+0x29/0x220
+[  221.219963]  ? update_load_avg+0x73/0x220
+[  221.219964]  ? set_next_entity+0xe3/0x260
+[  221.219966]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[  221.219969]  ? ep_poll_callback+0x261/0x2a0
+[  221.219971]  ? psi_task_switch+0x99/0x290
+[  221.219974]  ? __pfx_perf_swevent_hrtimer+0x10/0x10
+[  221.219975]  ? __hrtimer_run_queues+0x11c/0x290
+[  221.219978]  ? hrtimer_interrupt+0xfb/0x240
+[  221.219979]  ? __sysvec_apic_timer_interrupt+0x51/0x140
+[  221.219982]  ? sysvec_apic_timer_interrupt+0x34/0x90
+[  221.219983]  ? asm_sysvec_apic_timer_interrupt+0x16/0x20
+[  221.219986]  </TASK>
+[  221.219986] NMI backtrace for cpu 6
+[  221.219989] CPU: 6 UID: 0 PID: 2928 Comm: ruby Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.219991] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.219992] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.219993] RIP: 0033:0x7ff204f0a7ce
+[  221.219994] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  221.219996] RSP: 002b:00007fff0c43e628 EFLAGS: 00000202
+[  221.219997] RAX: 0000000019a469dc RBX: 000000000000aa94 RCX: 0000000000000006
+[  221.219998] RDX: 00000000000000be RSI: 0000000000000010 RDI: 00007ff204f08000
+[  221.219999] RBP: 00007fff0c43e650 R08: 00007ff204705f90 R09: 00007ff204f04000
+[  221.220000] R10: 0000000000000001 R11: 00007ff204f05000 R12: 0000000000000004
+[  221.220000] R13: 00007ff204509e40 R14: 00000000ffffffff R15: 00007ff2045c6400
+[  221.220001] FS:  00007ff204767740 GS:  0000000000000000
+[  221.220002] NMI backtrace for cpu 1
+[  221.220004] CPU: 1 UID: 0 PID: 2932 Comm: perl Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.220007] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.220007] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.220008] RIP: 0033:0x7f7238ed97ce
+[  221.220010] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  221.220011] RSP: 002b:00007ffccdc50808 EFLAGS: 00000202
+[  221.220013] RAX: 0000000019a4557e RBX: 000000000000aa94 RCX: 0000000000000001
+[  221.220013] RDX: 00000000000000be RSI: 0000000000000010 RDI: 00007f7238ed7000
+[  221.220014] RBP: 00007ffccdc50830 R08: 000055e26b479bf0 R09: 00007f7238ed3000
+[  221.220015] R10: 0000000000000001 R11: 00007f7238ed4000 R12: 0000000000000001
+[  221.220015] R13: 000055e26b45e2b8 R14: 0000000000000008 R15: 0000000000000001
+[  221.220016] FS:  00007f7238b93b80 GS:  0000000000000000
+[  221.220017] NMI backtrace for cpu 4
+[  221.220019] CPU: 4 UID: 0 PID: 2926 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.220022] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.220022] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.220023] RIP: 0033:0x5dbd69
+[  221.220025] Code: 01 48 89 07 75 21 44 89 9d e0 fe ff ff 4c 89 95 f8 fe ff ff e8 b8 a4 f7 ff 44 8b 9d e0 fe ff ff 4c 8b 95 f8 fe ff ff 49 8b 07 <85> c0 78 0d 48 83 e8 01 49 89 07 0f 84 d6 6c 00 00 45 85 f3 b8 80
+[  221.220026] RSP: 002b:00007fff19461030 EFLAGS: 00000202
+[  221.220027] RAX: 0000000000000002 RBX: 00007f817caba020 RCX: 0000000000000001
+[  221.220028] RDX: 0000000000000000 RSI: 00007fff19461008 RDI: 00007f817c62bf70
+[  221.220029] RBP: 00007fff194611a0 R08: 0000000000000009 R09: 00007f817c4c0840
+[  221.220030] R10: 00007f817caba078 R11: 0000000000000002 R12: 0000000000ba6748
+[  221.220030] R13: 00000000064db436 R14: 0000000000000002 R15: 00007f817c62b470
+[  221.220031] FS:  00007f817c771080 GS:  0000000000000000
+[  221.220032] NMI backtrace for cpu 7
+[  221.220034] CPU: 7 UID: 0 PID: 2951 Comm: stress-ng-cpu Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.220037] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.220037] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.220038] RIP: 0033:0x7f7fa9bf9de5
+[  221.220040] Code: 56 e5 66 0f 28 cc f2 0f 59 0d 0f 80 02 00 66 0f ef e4 8b bd 84 fd ff ff f2 0f 5c c1 f2 44 0f 2c d0 f2 41 0f 2a e2 f2 0f 5c c4 <66> 0f 28 c8 85 ff 0f 8e df 03 00 00 41 8d 77 ff b9 18 00 00 00 48
+[  221.220041] RSP: 002b:00007ffdda9e1a80 EFLAGS: 00000202
+[  221.220042] RAX: 00007ffdda9e1c70 RBX: 00007ffdda9e1d70 RCX: 800fffffffffffff
+[  221.220043] RDX: 00001b4bae4a65d3 RSI: 00000000001f3ca7 RDI: 00000000ffffffff
+[  221.220043] RBP: 00007ffdda9e1d50 R08: 0000000000000005 R09: 0000000000000002
+[  221.220044] R10: 0000000000000005 R11: 00007f7fa9c3ac3c R12: 0000000000000001
+[  221.220045] R13: 0000000000000002 R14: 0000000000000003 R15: 0000000000000005
+[  221.220045] FS:  00007f7fa8fb2ac0 GS:  0000000000000000
+[  221.220046] NMI backtrace for cpu 0
+[  221.220048] CPU: 0 UID: 0 PID: 2931 Comm: perl Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.220051] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.220051] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.220052] RIP: 0033:0x7fdb746307e8
+[  221.220054] Code: d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 66 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05 20 d8 ff ff <49> 89 c0 89 d1 f7 d9 49 d3 e8 89 d1 48 d3 e0 85 d2 48 8b 0d 10 d8
+[  221.220055] RSP: 002b:00007ffee116f148 EFLAGS: 00000206
+[  221.220056] RAX: 000000be0fe1d190 RBX: 000000000000aa94 RCX: 0000000000000000
+[  221.220057] RDX: 00000000ffffffff RSI: 0000000000000010 RDI: 00007fdb7462e000
+[  221.220058] RBP: 00007ffee116f170 R08: 00005583e71fec80 R09: 00007fdb7462a000
+[  221.220058] R10: 0000000000000001 R11: 00007fdb7462b000 R12: 0000000000000001
+[  221.220059] R13: 00005583e71e3278 R14: 0000000000000008 R15: 0000000000000001
+[  221.220059] FS:  00007fdb742eab80 GS:  0000000000000000
+[  221.221760] NMI backtrace for cpu 5
+[  221.221762] CPU: 5 UID: 0 PID: 2925 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  221.221763] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  221.221764] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  221.221764] RIP: 0033:0x586d7d
+[  221.221765] Code: 48 8d 43 ff 48 3d ff 01 00 00 0f 87 8d 00 00 00 8d 73 ff c1 ee 04 8d 04 36 49 8b 94 c4 78 0f 00 00 48 8b 7a 10 48 39 fa 74 59 <48> 8b 42 08 83 02 01 48 8b 08 48 89 4a 08 48 85 c9 74 08 5b 41 5c
+[  221.221766] RSP: 002b:00007ffe2755a220 EFLAGS: 00000206
+[  221.221767] RAX: 0000000000000002 RBX: 0000000000000020 RCX: 0000000000000008
+[  221.221767] RDX: 00007f09b7ca0000 RSI: 0000000000000001 RDI: 0000000000b49da0
+[  221.221768] RBP: 00007ffe2755a230 R08: 0000000000000000 R09: 0000000000b370a8
+[  221.221768] R10: 00007f09b8132078 R11: 000000000000000d R12: 0000000000b48e28
+[  221.221769] R13: 00000000001e771e R14: 0000000000000007 R15: 00007f09b7ca3f90
+[  221.221769] FS:  00007f09b7de9080 GS:  0000000000000000
+[  280.721427] hrtimer: interrupt took 18603 ns
+[  282.271915] profile CPU snapshot stress_pid=3153 uptime=281.10
+[  282.271986] sysrq: Show backtrace of all active CPUs
+[  282.272345] NMI backtrace for cpu 4
+[  282.272347] CPU: 4 UID: 0 PID: 1580 Comm: bash Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272350] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272352] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272353] Call Trace:
+[  282.272354]  <TASK>
+[  282.272354]  dump_stack_lvl+0x4f/0x70
+[  282.272361]  nmi_cpu_backtrace+0xbb/0xf0
+[  282.272363]  ? __pfx_nmi_raise_cpu_backtrace+0x10/0x10
+[  282.272367]  nmi_trigger_cpumask_backtrace+0x113/0x130
+[  282.272368]  __handle_sysrq+0xbb/0x170
+[  282.272372]  write_sysrq_trigger+0x55/0x70
+[  282.272373]  proc_reg_write+0x55/0xa0
+[  282.272376]  vfs_write+0xf7/0x420
+[  282.272379]  ? __wake_up_common+0x78/0xa0
+[  282.272382]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[  282.272385]  ? __wake_up+0x40/0x60
+[  282.272388]  ksys_write+0x61/0xe0
+[  282.272390]  do_syscall_64+0xa8/0x8c0
+[  282.272392]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[  282.272393] RIP: 0033:0x7f5bd2210804
+[  282.272395] Code: c7 00 16 00 00 00 b8 ff ff ff ff c3 66 2e 0f 1f 84 00 00 00 00 00 f3 0f 1e fa 80 3d 45 f8 0e 00 00 74 13 b8 01 00 00 00 0f 05 <48> 3d 00 f0 ff ff 77 54 c3 0f 1f 00 55 48 89 e5 48 83 ec 20 48 89
+[  282.272396] RSP: 002b:00007ffee636a658 EFLAGS: 00000202 ORIG_RAX: 0000000000000001
+[  282.272398] RAX: ffffffffffffffda RBX: 0000000000000002 RCX: 00007f5bd2210804
+[  282.272399] RDX: 0000000000000002 RSI: 000055e48eaa0ce0 RDI: 0000000000000001
+[  282.272399] RBP: 00007ffee636a680 R08: 0000000000000073 R09: 0000000000000000
+[  282.272400] R10: 00000000ffffffff R11: 0000000000000202 R12: 0000000000000002
+[  282.272400] R13: 000055e48eaa0ce0 R14: 00007f5bd22f95c0 R15: 00007f5bd22f6ee0
+[  282.272403]  </TASK>
+[  282.272408] Sending NMI from CPU 4 to CPUs 0-3,5-7:
+[  282.272422] NMI backtrace for cpu 5
+[  282.272425] CPU: 5 UID: 0 PID: 3143 Comm: python3 Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272428] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272428] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272429] RIP: 0033:0x567b5b
+[  282.272431] Code: 00 48 89 55 c8 e8 c5 f1 01 00 48 8b 55 c8 48 85 c0 48 89 c3 0f 84 71 02 00 00 49 c1 e7 03 48 c7 40 08 20 bf a3 00 4c 89 78 10 <f6> 05 67 44 4d 00 02 0f 85 b7 c5 ee ff 48 89 c7 48 89 55 c8 e8 9c
+[  282.272432] RSP: 002b:00007ffd02b7f0a0 EFLAGS: 00000202
+[  282.272434] RAX: 00007f302aa06100 RBX: 00007f302aa06100 RCX: 00007f302aa06160
+[  282.272435] RDX: 00007f302ab7ff10 RSI: 0000000000000002 RDI: 0000000000b49db0
+[  282.272435] RBP: 00007ffd02b7f0e0 R08: 0000000000000000 R09: 00007f302ab7ff10
+[  282.272436] R10: 00007f302b00c078 R11: 0000000000000000 R12: 0000000000000001
+[  282.272437] R13: 00007f302aa06130 R14: 0000000000000003 R15: 0000000000000020
+[  282.272437] FS:  00007f302acc3080 GS:  0000000000000000
+[  282.272438] NMI backtrace for cpu 0
+[  282.272440] CPU: 0 UID: 0 PID: 3191 Comm: docker Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272443] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272443] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272444] RIP: 0010:asm_sysvec_reschedule_ipi+0x0/0x20
+[  282.272447] Code: e9 95 05 00 00 0f 1f 44 00 00 0f 01 ca fc 6a ff e8 45 04 00 00 48 89 c4 48 89 e7 e8 ca fe ff 00 e9 75 05 00 00 0f 1f 44 00 00 <0f> 01 ca fc 6a ff e8 25 04 00 00 48 89 c4 48 89 e7 e8 ba 25 00 01
+[  282.272448] RSP: 0000:ffffccbf8185bcf8 EFLAGS: 00000082
+[  282.272450] RAX: 0000000000000001 RBX: ffffed78cc8d6500 RCX: 0000000000000000
+[  282.272450] RDX: ffffed78cc8d64c8 RSI: 0000000000000246 RDI: ffff895c80a02d90
+[  282.272451] RBP: ffff895c80a02d40 R08: 0000000000000048 R09: 000000000000974a
+[  282.272452] R10: ffffffffb22cf000 R11: 0000000000000000 R12: ffff89639fc2b640
+[  282.272452] R13: ffffffffaf5466b0 R14: 000000000000001f R15: ffffed78cc8d6500
+[  282.272455] FS:  00007f5ef255e6c0(0000) GS:ffff8963ed968000(0000) knlGS:0000000000000000
+[  282.272456] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  282.272457] CR2: 0000084e0b394700 CR3: 0000000107c92003 CR4: 0000000000772ef0
+[  282.272457] PKRU: 55555554
+[  282.272458] Call Trace:
+[  282.272458]  <TASK>
+[  282.272459] RIP: 0010:_raw_spin_unlock_irqrestore+0x1b/0x30
+[  282.272462] Code: 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 0f 1f 44 00 00 e8 26 07 00 00 90 f7 c6 00 02 00 00 74 01 fb 65 ff 0d f5 ea 29 02 <74> 05 c3 cc cc cc cc e8 a9 97 1f ff e9 54 23 00 00 0f 1f 40 00 90
+[  282.272463] RSP: 0000:ffffccbf8185bd28 EFLAGS: 00000282
+[  282.272464]  ? _raw_spin_unlock_irqrestore+0xa/0x30
+[  282.272466]  folio_batch_move_lru+0xbd/0x130
+[  282.272469]  __folio_batch_add_and_move+0x4d/0x90
+[  282.272470]  do_anonymous_page+0x3d0/0x5e0
+[  282.272472]  __handle_mm_fault+0x49c/0x7a0
+[  282.272474]  handle_mm_fault+0x18e/0x2f0
+[  282.272475]  do_user_addr_fault+0x17c/0x720
+[  282.272478]  exc_page_fault+0x67/0x150
+[  282.272480]  asm_exc_page_fault+0x22/0x30
+[  282.272481] RIP: 0033:0x55938d2bbff2
+[  282.272482] Code: 0f 6f 59 e0 f3 44 0f 6f 61 f0 c5 fe 6f 26 4c 01 de 48 29 c3 c5 fe 6f 06 c5 fe 6f 4e 20 c5 fe 6f 56 40 c5 fe 6f 5e 60 48 01 c6 <c5> fd 7f 07 c5 fd 7f 4f 20 c5 fd 7f 57 40 c5 fd 7f 5f 60 48 01 c7
+[  282.272482] RSP: 002b:00007f5ef255dbf0 EFLAGS: 00010202
+[  282.272483] RAX: 0000000000000080 RBX: 0000000000003880 RCX: 0000084e0b420000
+[  282.272484] RDX: 0000084e0b3946f8 RSI: 0000084e0b41c780 RDI: 0000084e0b394700
+[  282.272484] RBP: 00007f5ef255dce0 R08: 0000084e0ae321e0 R09: 0000000000020000
+[  282.272485] R10: 0000084e0b3946f8 R11: 0000000000000008 R12: 0000084e0ae92008
+[  282.272485] R13: 0000000000000003 R14: 0000084e0ae330e0 R15: 000055938f178000
+[  282.272487]  </TASK>
+[  282.272487] NMI backtrace for cpu 6
+[  282.272490] CPU: 6 UID: 0 PID: 3152 Comm: php Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272492] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272493] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272493] RIP: 0033:0x7fcbb7e567ce
+[  282.272495] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  282.272496] RSP: 002b:00007ffc06fc2208 EFLAGS: 00000202
+[  282.272498] RAX: 00000000807f7e18 RBX: 000000000000da00 RCX: 0000000000000006
+[  282.272498] RDX: 00000000000000f2 RSI: 0000000000000010 RDI: 00007fcbb7e54000
+[  282.272499] RBP: 00007ffc06fc2230 R08: 0000000000000004 R09: 00007fcbb7e50000
+[  282.272500] R10: 0000000000000001 R11: 00007fcbb7e51000 R12: 00007fcbb4e122a0
+[  282.272500] R13: 00007fcbb4e122a0 R14: 00007fcbb4e12020 R15: 00007fcbb4e8c300
+[  282.272501] FS:  00007fcbb5042980 GS:  0000000000000000
+[  282.272502] NMI backtrace for cpu 3
+[  282.272504] CPU: 3 UID: 0 PID: 3149 Comm: perl Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272507] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272508] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272509] RIP: 0033:0x55d4be9ef4c0
+[  282.272510] Code: c4 11 0f 84 c8 00 00 00 f6 c4 01 0f 84 d9 03 00 00 45 85 ff 0f 85 1e ff ff ff 41 8b 56 0c be 01 00 00 00 31 ff 89 d0 49 8b 16 <41> 89 c0 41 f7 d0 48 8b 52 20 41 81 e0 00 01 00 80 41 b8 01 00 00
+[  282.272511] RSP: 002b:00007ffe41c6f650 EFLAGS: 00000206
+[  282.272513] RAX: 0000000008011101 RBX: 000055d4d14832a0 RCX: 000055d4d14b1ca8
+[  282.272513] RDX: 000055d4d14d8340 RSI: 0000000000000001 RDI: 41b44f610fec8ab4
+[  282.272514] RBP: 00007ffe41c6f690 R08: 0000000000000001 R09: 41b44f610fec8ab4
+[  282.272515] R10: 0000000000000000 R11: 0000000000000000 R12: 000055d4d15436d8
+[  282.272516] R13: 000055d4d1488d10 R14: 000055d4d14d8350 R15: 0000000000000001
+[  282.272516] FS:  00007f8709e27b80 GS:  0000000000000000
+[  282.272517] NMI backtrace for cpu 2
+[  282.272519] CPU: 2 UID: 0 PID: 3151 Comm: php Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272521] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272522] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272522] RIP: 0033:0x7ff9b159e7ce
+[  282.272524] Code: ce 42 cf 41 c6 0c 07 08 41 0b 00 00 8b 15 4a d8 ff ff 48 8d 3d 43 d8 ff ff 89 d6 83 e6 fe f6 05 54 d8 ff ff 01 74 56 0f 01 f9 <66> 90 48 c1 e2 20 48 09 c2 48 89 d0 0f be 15 3b d8 ff ff 48 2b 05
+[  282.272525] RSP: 002b:00007fff721aef38 EFLAGS: 00000202
+[  282.272526] RAX: 00000000807f70c0 RBX: 000000000000da00 RCX: 0000000000000002
+[  282.272527] RDX: 00000000000000f2 RSI: 0000000000000010 RDI: 00007ff9b159c000
+[  282.272527] RBP: 00007fff721aef60 R08: 0000000000000004 R09: 00007ff9b1598000
+[  282.272528] R10: 0000000000000001 R11: 00007ff9b1599000 R12: 00007ff9ae4122a0
+[  282.272529] R13: 00007ff9ae4122a0 R14: 00007ff9ae412020 R15: 00007ff9ae48c300
+[  282.272529] FS:  00007ff9ae78a980 GS:  0000000000000000
+[  282.272530] NMI backtrace for cpu 1
+[  282.272532] CPU: 1 UID: 0 PID: 3193 Comm: docker Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272534] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272535] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272536] RIP: 0033:0x55938d262748
+[  282.272537] Code: 8b 4c 24 70 e8 99 d2 ff ff 48 8b 44 24 40 48 8b 4c 24 38 48 8b 54 24 60 48 8b 5c 24 48 48 8b bc 24 80 00 00 00 4c 8b 44 24 78 <4c> 8b 54 24 70 e9 06 ff ff ff 48 8b 44 24 60 48 8b 8c 24 a0 00 00
+[  282.272538] RSP: 002b:00007f5ef151bce8 EFLAGS: 00000202
+[  282.272539] RAX: 0000084e0b17a750 RBX: 0000084e0b17a750 RCX: 0000000000000000
+[  282.272540] RDX: 0000000000000c00 RSI: 000000000000002c RDI: 000055938f058680
+[  282.272541] RBP: 00007f5ef151bd70 R08: 0000084e0b17a400 R09: 0000000000000020
+[  282.272542] R10: 0000000000000360 R11: 0000084e0b182c54 R12: 00007f5ef151bd68
+[  282.272542] R13: 0000084e0b113f00 R14: 0000084e0af041e0 R15: 0000000000000025
+[  282.272543] FS:  00007f5ef151c6c0 GS:  0000000000000000
+[  282.272543] NMI backtrace for cpu 7
+[  282.272546] CPU: 7 UID: 0 PID: 2851 Comm: otelcol-ebpf-pr Tainted: G           OE       7.0.0-rc2+ #30 PREEMPT(lazy) 
+[  282.272548] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  282.272548] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  282.272549] RIP: 0033:0x4284a0
+[  282.272551] Code: 5c 24 18 eb 9e 48 83 c4 20 5d c3 48 89 44 24 08 48 89 5c 24 10 e8 50 aa 06 00 48 8b 44 24 08 48 8b 5c 24 10 e9 61 ff ff ff cc <49> 3b 66 10 76 25 55 48 89 e5 48 83 ec 18 48 8b 10 48 89 c3 b9 01
+[  282.272551] RSP: 002b:000030be86e9ee18 EFLAGS: 00000212
+[  282.272553] RAX: 0000000001450b80 RBX: 000030be89a471c0 RCX: 000030be8a681530
+[  282.272553] RDX: 000030be8a681530 RSI: 000030be89a471b8 RDI: 0000000000000009
+[  282.272554] RBP: 000030be86e9eea0 R08: 000030be8a888868 R09: 8080808080808080
+[  282.272555] R10: 00000000000000e0 R11: 0000000000000020 R12: 000030be86e9eea0
+[  282.272555] R13: 000030be88c752c0 R14: 000030be871aef00 R15: ffffffffffffffff
+[  282.272556] FS:  00007f817f7fe6c0 GS:  0000000000000000

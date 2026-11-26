@@ -1,0 +1,15 @@
+{
+  "pid": 603782,
+  "source": "c3c019be288b03013ebcda1ad4a0d8b5ac128178",
+  "command": [
+    "prlimit",
+    "--as=42949672960",
+    "--",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/p3-attribution-20261126",
+    "slow-profiles",
+    "OUT=/workspaces/repository/kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z"
+  ],
+  "started": "2026-11-26T14:58:36.043206+00:00"
+}
