@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.after_source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.after_source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_cont
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_cont
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpLabels.taken_step
