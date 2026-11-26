@@ -31,8 +31,7 @@ trace_security_task_prctl (18).
 
 ## Weight on the hot path
 
-A count of call sites gives no weight. The weight comes from a host PMU profile of Tetragon and Tracee
+The count gives the call sites; their weight comes from a host PMU profile of Tetragon and Tracee
 (profile-host.sh, as for OTel in kprog/results/profile-20261123): the share of `memset`, `memset_orig` and
-`__memset` in the native samples. These two apps have no host profile yet. Their profile guest needs 32 GiB, and
-it runs after the arm64 stage-1 compile pool, whose compiles hold that memory now
+`__memset` in the native samples. Their profile comes next. Its guest needs 32 GiB, and it runs after the arm64 stage-1 compile pool, whose compiles hold that memory now
 (COORDINATION 2026-11-26T04:38Z and 05:18Z).
