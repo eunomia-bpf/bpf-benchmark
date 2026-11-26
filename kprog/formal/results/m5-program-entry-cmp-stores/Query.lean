@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.local_binding
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.local_binding
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.single
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.single
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.execute_effect
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.execute_effect
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpStores.execute
