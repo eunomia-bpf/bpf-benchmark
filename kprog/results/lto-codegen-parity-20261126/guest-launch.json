@@ -1,0 +1,13 @@
+{
+  "started_utc": "2026-11-26T22:03:27Z",
+  "pid": 776388,
+  "command": [
+    "nohup",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/lto-codegen-parity-20261126",
+    "guest-check"
+  ],
+  "source_revision": "71ed125968b832c2247bf94568e4b2683f19a5f5",
+  "scope": "Finite existing checked-native regression, sole kernel/base, 4GiB/2vCPU guest on16-17, no app or timing run. STOP installed before child launch to avoid callback races."
+}
