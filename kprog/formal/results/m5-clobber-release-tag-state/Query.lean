@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState.released
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState.released
+#check KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState.caller_released
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState.caller_released
