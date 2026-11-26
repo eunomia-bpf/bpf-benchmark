@@ -131,4 +131,20 @@ read_flags:
 .endm
 table_entry table_private_stack, 0
 table_entry table_external_stack, 1
+.text
+.macro return_lea name, displacement
+entry \name, callee_\name
+    xor %eax,%eax
+end \name
+.type callee_\name,@function
+callee_\name:
+    mov (%rsp),%rax
+    lea \displacement(%rax),%rax
+    mov %rax,(%rsp)
+    ret
+.size callee_\name,.-callee_\name
+.endm
+return_lea return_lea_copy, 0
+return_lea return_lea_forward, 1
+return_lea return_lea_backward, -1
 .section .note.GNU-stack,"",@progbits

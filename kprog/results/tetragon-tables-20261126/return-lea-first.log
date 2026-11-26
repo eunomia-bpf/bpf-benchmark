@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_return_lea.py 
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_return_lea.py", line 28, in <module>
+    subprocess.run([linker, '--input', HERE / 'calls.o', '--symbol', name,
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '[PosixPath('/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link'), '--input', PosixPath('/workspaces/repository/kprog/results/tetragon-tables-20261126/calls.o'), '--symbol', 'return_lea_copy', '--mode', 'proof', '--preserve-entry-abi', '--output', PosixPath('/workspaces/repository/kprog/results/tetragon-tables-20261126/calls/return_lea_copy/test.proof.o')]' returned non-zero exit status 1.
+make: *** [Makefile:49: check-return-lea] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

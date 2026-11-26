@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 spill_liveness.py
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/spill_liveness.py", line 94, in <module>
+    rows.append(dict(revision='fab61404f',path=str(path),stage=stage,**inspect(text)))
+                                                                       ^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/spill_liveness.py", line 44, in inspect
+    raise ValueError('unsupported spill access: ' + line)
+ValueError: unsupported spill access:     STW32 killed $w1, %stack.419, 0
+make: *** [Makefile:44: spill-liveness] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

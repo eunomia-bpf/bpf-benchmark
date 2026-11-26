@@ -91,6 +91,10 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
             return shifted(value)
         if isinstance(value, PointerAlternatives):
             return PointerAlternatives(frozenset(shifted(offset) for offset in value.offsets), value.external)
+        if isinstance(value, frozenset) and displacement:
+            # Return-PC facts describe exact continuations, not a pointer
+            # range. A displaced LEA cannot retain the original RET edge.
+            return None
         return value
 
     def joined(a, b, widen=False):

@@ -1,0 +1,5 @@
+{
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "native-link: entry=return_lea_copy (8 bytes), 2 reachable symbol(s) total\n  - return_lea_copy (vaddr 0xe7, 8 bytes) [entry]\n  - callee_return_lea_copy (vaddr 0xef, 12 bytes)\nnative-link: wrote proof object 24 bytes, 0 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/calls/return_lea_copy/test.proof.o\n"
+}

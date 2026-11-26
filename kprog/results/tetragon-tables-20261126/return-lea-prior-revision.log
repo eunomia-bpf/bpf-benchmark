@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_return_lea.py 06d05f8f0
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/tetragon-tables-20261126/check_return_lea.py", line 52, in <module>
+    raise AssertionError(failures)
+AssertionError: [{'case': 'return_lea_forward', 'known_return': True, 'expected': False, 'return_sites': {'24': [5]}}, {'case': 'return_lea_backward', 'known_return': True, 'expected': False, 'return_sites': {'24': [5]}}]
+make: *** [Makefile:49: check-return-lea] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

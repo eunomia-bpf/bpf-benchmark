@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_return_lea.py 
+3 assembled return-address LEA cases passed
+cc -c calls.S -o calls.o
+python3 check_calls.py 
+18 assembled local/helper-call liveness cases passed
+cc -c hoisted.S -o hoisted.o
+python3 check_hoisted.py 
+8 actual persistent-table cases passed
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

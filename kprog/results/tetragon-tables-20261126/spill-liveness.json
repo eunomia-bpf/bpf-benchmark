@@ -1,0 +1,22 @@
+[
+  {
+    "revision": "fab61404f",
+    "path": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.before.mir",
+    "stage": "before",
+    "blocks": 26337,
+    "spill_objects": 139,
+    "peak_live_spill_objects": 134,
+    "greedy_colors_ignoring_size_classes": 139,
+    "scope": "Static CFG liveness/interference. Colors ignore size classes and escaped/default storage; not an emitted layout or a verifier result."
+  },
+  {
+    "revision": "fab61404f",
+    "path": "kprog/results/tetragon-tables-20261126/request-39/trusted_x86.bpf.packed.mir",
+    "stage": "packed",
+    "blocks": 26337,
+    "spill_objects": 133,
+    "peak_live_spill_objects": 127,
+    "greedy_colors_ignoring_size_classes": 132,
+    "scope": "Static CFG liveness/interference. Colors ignore size classes and escaped/default storage; not an emitted layout or a verifier result."
+  }
+]

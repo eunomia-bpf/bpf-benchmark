@@ -278,3 +278,35 @@ post-bounds policy, and P/runtime image/all LTO pieces remain unchanged.
 This tests the IR stage that the machine-only control left unchanged.
 Archive/raw baseline and both failed input controls are retained. Full
 timing remains frozen; no stock acceptance is claimed.
+
+PERF 2026-11-26T19:31:51Z — Post-bounds O2 outcome and spill audit
+
+postbounds-o2-control completes all four compiler children0 and emits
+1647536-byte ELF. Stock submits88947 instructions but rejects insn1 at
+R10-1304 (processed2, errno13, rc2). This is smaller code than normal39's
+114694 instructions, but still stack-unsafe; the recipe is not adopted.
+The first rejected offset does not measure the total frame. All archived
+intermediates and completed logs remain, including the prior machine-only
+O2 control with byte-identical normal ELF. Production B remainsO1; P flags,
+image and all LTO pieces stay unchanged. Full timing remains frozen.
+
+spill_liveness.py reads normal39 MIR from Git fab61404f into memory. Its
+backward CFG audit models both32-bit halves of each spill, including partial
+stores. After existing dead-frame-address/scalar normalization, pre-packing
+139 spill objects peak134 live; packed133 peak127 live, greedy coloring132
+ignoring size classes and default/escaped storage. These conservative
+static counts do not prove the minimum frame or a production packing fix.
+Failed initial access-parser trials and final audit logs are retained.
+
+PERF 2026-11-26T19:32:47Z — Exact return-PC facts after LEA
+
+An actual assembled saved-return-PC load, LEA by+1/-1, store and RET
+incorrectly retained the original continuation in x86_abi. offset_pointer
+now forgets exact ReturnAddress facts after nonzero displacement, keeping
+zero-offset copies precise. This conservative analysis fix changes no
+native instruction or runtime policy. The three actual assembly/link cases
+pass; prior06d05f8f0 fails both displaced cases. Existing18call-liveness
+and8persistent-table tests also pass. Initial fixture-link and outer-RET
+selection mistakes are recorded in the trial logs; final tests inspect
+only RETs reached under a real local-call context. Full24-source breadth
+replay is running separately; stock frame failures remain open.

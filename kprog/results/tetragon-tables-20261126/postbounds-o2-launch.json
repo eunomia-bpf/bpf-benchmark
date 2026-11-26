@@ -1,0 +1,15 @@
+{
+  "pid": 692161,
+  "started_utc": "2026-11-26T18:48:37Z",
+  "source": "c13e96049609a3ea245ac96920a93b0c6c4ec921",
+  "out": "/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control",
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+    "backend-o2-control",
+    "BACKEND_OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control"
+  ],
+  "resources": "One16GiB-AS worker CPU16/timingSH then sole-kernel2GiB/2vCPU stock CPU18-19/timingSH+imageSH.",
+  "scope": "Fixed post-bounds IR O2 plus machine O2 recipe, original C frontend remainsO1. Common diagnostic only; no production flags/P/image/allLTO change."
+}

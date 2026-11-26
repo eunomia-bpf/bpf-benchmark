@@ -38,3 +38,12 @@ backend-o2-group:
 	python3 backend_control.py $(REQUEST) $(RECORDS)
 backend-o2-control:
 	python3 return_pipeline.py --backend-o2 $(BACKEND_OUT) 39
+
+.PHONY: spill-liveness
+spill-liveness:
+	python3 spill_liveness.py
+
+.PHONY: check-return-lea
+check-return-lea:
+	$(CC) -c calls.S -o calls.o
+	python3 check_return_lea.py $(REVISION)

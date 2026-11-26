@@ -1,0 +1,91 @@
+{
+  "recorded_utc": "2026-11-26T19:31:51Z",
+  "controller": {
+    "started_utc": "2026-11-26T18:48:37Z",
+    "compile_target": "backend-o2-group",
+    "source": "c13e96049609a3ea245ac96920a93b0c6c4ec921",
+    "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+    "scope": "Common B machine-backend O2 control, production policy unchanged. B compilation and sole-kernel detached stock verification only; no native execution or timing.",
+    "cases": [
+      {
+        "request": 39,
+        "started_utc": "2026-11-26T18:48:37Z",
+        "command": [
+          "taskset",
+          "-c",
+          "16",
+          "prlimit",
+          "--as=17179869184",
+          "--",
+          "make",
+          "-C",
+          "/workspaces/repository/kprog/results/tetragon-tables-20261126",
+          "backend-o2-group",
+          "REQUEST=39",
+          "RECORDS=/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/39"
+        ],
+        "compile_returncode": 0,
+        "ended_utc": "2026-11-26T18:49:42Z",
+        "archive_members": [
+          "trusted_x86.bpf.backend-input.ll",
+          "trusted_x86.bpf.before.mir",
+          "trusted_x86.bpf.bounds-input.bc",
+          "trusted_x86.bpf.bounds.bc",
+          "trusted_x86.bpf.i",
+          "trusted_x86.bpf.o",
+          "trusted_x86.bpf.packed.lowering.json",
+          "trusted_x86.bpf.packed.mir"
+        ],
+        "archive_pipeline_status": [
+          0,
+          0,
+          0
+        ],
+        "archive_parts": [
+          {
+            "name": "compiler-evidence.tar.zst.part-aa",
+            "bytes": 9359475
+          }
+        ]
+      }
+    ],
+    "stock_command": [
+      "make",
+      "-f",
+      "kprog/results/cilium-headlen-20261119/Makefile",
+      "archive-stock",
+      "OUT=/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/stock",
+      "INPUTS=/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/stock-index.json",
+      "REPLAY=/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/replay"
+    ],
+    "stock_started_utc": "2026-11-26T18:51:20Z",
+    "stock_returncode": 2,
+    "stock_ended_utc": "2026-11-26T18:51:25Z",
+    "ended_utc": "2026-11-26T18:51:25Z",
+    "controller_status": 1
+  },
+  "compile": {
+    "returncode": 0,
+    "request_id": 39,
+    "object_bytes": 1647536,
+    "ir_level": 2,
+    "backend_level": 2,
+    "scope": "Test one common O2 post-bounds IR and machine backend.\n\nThis control changes no production policy and does not reprocess generated C.\nCanonical case products are replaced in place; their baseline is archived.\n"
+  },
+  "stock": {
+    "source_archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests",
+    "replay": "/workspaces/repository/kprog/results/tetragon-tables-20261126/postbounds-o2-control/replay",
+    "requests": [
+      {
+        "request": 39,
+        "returncode": 2,
+        "stock_loaded": false,
+        "errno": 13,
+        "instructions": 88947
+      }
+    ],
+    "scope": "Sole-kernel detached stock loads of archived B with matching fresh map shapes. No live app binding, native execution or timing result."
+  },
+  "adopted": false,
+  "conclusion": "Post-bounds IR O2 reduces instruction count but stock still rejects stack bounds. No production policy change. First invalid store is not the total frame size."
+}
