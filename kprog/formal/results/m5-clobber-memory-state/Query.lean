@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ClobberMemoryState
+#check KProgFormal.ClightRefinement.Arm64ClobberMemoryState.of_memset
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberMemoryState.of_memset
+#check KProgFormal.ClightRefinement.Arm64ClobberMemoryState.of_memcpy
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberMemoryState.of_memcpy
+#check KProgFormal.ClightRefinement.Arm64ClobberMemoryState.Packet.supplied
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberMemoryState.Packet.supplied
+#check KProgFormal.ClightRefinement.Arm64ClobberMemoryState.Caller.supplied
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberMemoryState.Caller.supplied
