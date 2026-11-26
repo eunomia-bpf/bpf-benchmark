@@ -4,9 +4,9 @@
 ROOT := /workspaces/repository
 HERE := $(ROOT)/kprog/perf/direct-native
 KDIR ?= /workspaces/.agent-state/kprog-ck/build-x86
-OUT ?= /var/tmp/kprog-tmp/direct-native/build
+OUT ?= $(ROOT)/kinsn/module/x86/build
 
 .PHONY: module
 module:
-	install -d $(OUT)/module
-	$(MAKE) -C $(KDIR) M=$(HERE) MO=$(OUT)/module ARCH=x86 modules
+	install -d $(OUT)
+	$(MAKE) -C $(KDIR) M=$(HERE) MO=$(OUT) ARCH=x86 modules

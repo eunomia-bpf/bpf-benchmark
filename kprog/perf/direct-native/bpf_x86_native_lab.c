@@ -33,6 +33,33 @@
 #include <linux/bpf_native.h>
 /* helper_targets: the function the kernel calls for each helper ID of a loaded program. */
 #include "../../stock-path/module/native_lab_helper_query_impl.h"
+#include "../../x86/micro-prog/native_hash.h"
+#include "native_hash_layout.h"
+
+__KPROG_HASH_CODE
+
+/* Return the element; native-link retains value/LRU/per-CPU/map-in-map handling.
+ * Small keys and the larger string keys used by the corpus share the same C.
+ */
+#define KPROG_HTAB_KEY(N) \
+noinline void *kprog_htab_elem_k##N(void *map, const void *key) \
+{ return __kprog_hash_elem(map, key, N, KPROG_HASH_LAYOUT); } \
+EXPORT_SYMBOL_GPL(kprog_htab_elem_k##N);
+#define KPROG_HTAB_KEYS_8(A, B, C, D, E, F, G, H) \
+KPROG_HTAB_KEY(A) KPROG_HTAB_KEY(B) KPROG_HTAB_KEY(C) KPROG_HTAB_KEY(D) \
+KPROG_HTAB_KEY(E) KPROG_HTAB_KEY(F) KPROG_HTAB_KEY(G) KPROG_HTAB_KEY(H)
+KPROG_HTAB_KEYS_8(1, 2, 3, 4, 5, 6, 7, 8)
+KPROG_HTAB_KEYS_8(9, 10, 11, 12, 13, 14, 15, 16)
+KPROG_HTAB_KEYS_8(17, 18, 19, 20, 21, 22, 23, 24)
+KPROG_HTAB_KEYS_8(25, 26, 27, 28, 29, 30, 31, 32)
+KPROG_HTAB_KEYS_8(33, 34, 35, 36, 37, 38, 39, 40)
+KPROG_HTAB_KEYS_8(41, 42, 43, 44, 45, 46, 47, 48)
+KPROG_HTAB_KEYS_8(49, 50, 51, 52, 53, 54, 55, 56)
+KPROG_HTAB_KEYS_8(57, 58, 59, 60, 61, 62, 63, 64)
+KPROG_HTAB_KEY(224)
+KPROG_HTAB_KEY(256)
+#undef KPROG_HTAB_KEYS_8
+#undef KPROG_HTAB_KEY
 
 #define NATIVE_LAB_MAX_BLOBS	2048
 /* Userspace uploads a program as consecutive chunks of at most this size

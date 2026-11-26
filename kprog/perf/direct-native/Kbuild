@@ -5,4 +5,12 @@ bpf_arm64_native_lab-y := bpf_x86_native_lab.o
 else
 obj-m += bpf_x86_native_lab.o
 endif
-ccflags-y += -I$(src)/../../../kinsn/module/include
+ccflags-y += -I$(src)/../../../kinsn/module/include -I$(obj)
+
+# Private hashtab layout of the kernel this module is built for.
+quiet_cmd_hash_layout = BTF     $@
+      cmd_hash_layout = PYTHONPATH=$(src)/../../x86/micro-prog:$(src)/../.. python3 -c 'from inline_array import hash_layout; print("\#define KPROG_HASH_LAYOUT " + ",".join(map(str, hash_layout("$(objtree)/vmlinux").values())))' > $@
+$(obj)/native_hash_layout.h: $(objtree)/vmlinux $(src)/../../x86/micro-prog/inline_array.py FORCE
+	$(call if_changed,hash_layout)
+targets += native_hash_layout.h
+$(obj)/bpf_x86_native_lab.o: $(obj)/native_hash_layout.h $(src)/../../x86/micro-prog/native_hash.h

@@ -446,7 +446,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v44";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
 constexpr const char *kArrayOfMapLookupElemSymbol = "array_of_map_lookup_elem";
 constexpr const char *kHtabLruPercpuMapLookupElemSymbol =
@@ -1242,7 +1242,6 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
     }
     char line[512];
-    size_t found = 0;
     while (std::fgets(line, sizeof(line), f)) {
         char addr_text[32] = {};
         char type = '\0';
@@ -1251,16 +1250,15 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
             continue;
         }
         (void)type;
+        if (starts_with(name, "kprog_htab_elem_k")) {
+            table.emplace(name, std::strtoull(addr_text, nullptr, 16));
+        }
         for (size_t i = 0; i < wanted_count; i++) {
             if (std::strcmp(name, wanted[i]) != 0 || table.count(wanted[i])) {
                 continue;
             }
             uint64_t addr = std::strtoull(addr_text, nullptr, 16);
             table.emplace(wanted[i], addr);
-            found++;
-            break;
-        }
-        if (found == wanted_count) {
             break;
         }
     }
@@ -1289,8 +1287,12 @@ uint64_t helper_kernel_addr(int helper_id)
     return kallsyms_lookup(symbol);
 }
 
-uint64_t htab_lookup_elem_kernel_addr()
+uint64_t htab_lookup_elem_kernel_addr(uint32_t key_size)
 {
+    uint64_t specialized = kallsyms_lookup("kprog_htab_elem_k" + std::to_string(key_size));
+    if (specialized != 0) {
+        return specialized;
+    }
     uint64_t addr = kallsyms_lookup(kHtabLookupElemSymbol);
     if (addr == 0) {
         fail(std::string("native_kernel: ") + kHtabLookupElemSymbol +
@@ -2590,14 +2592,14 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
     }
     if (t == BPF_MAP_TYPE_HASH) {
         uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.target_addr = htab_lookup_elem_kernel_addr(shape.key_size);
         site.kind = CompanionLoad::LookupSite::Kind::Hash;
         site.key_offset = htab_offsets.key + rounded;
         return true;
     }
     if (t == BPF_MAP_TYPE_LRU_HASH) {
         uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.target_addr = htab_lookup_elem_kernel_addr(shape.key_size);
         site.kind = CompanionLoad::LookupSite::Kind::LruHash;
         site.key_offset = htab_offsets.key + rounded;
         site.value_offset = htab_offsets.lru_ref;
@@ -2605,7 +2607,7 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
     }
     if (t == BPF_MAP_TYPE_PERCPU_HASH) {
         uint32_t rounded = (shape.key_size + 7) & ~7u;
-        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.target_addr = htab_lookup_elem_kernel_addr(shape.key_size);
         site.kind = CompanionLoad::LookupSite::Kind::PerCpuHash;
         site.key_offset = htab_offsets.key + rounded;
 #if defined(__x86_64__)
@@ -2624,7 +2626,7 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
     if (t == BPF_MAP_TYPE_HASH_OF_MAPS) {
         uint32_t rounded = (shape.key_size + 7) & ~7u;
         site.kind = CompanionLoad::LookupSite::Kind::HashOfMaps;
-        site.target_addr = htab_lookup_elem_kernel_addr();
+        site.target_addr = htab_lookup_elem_kernel_addr(shape.key_size);
         site.key_offset = htab_offsets.key + rounded;
         return true;
     }

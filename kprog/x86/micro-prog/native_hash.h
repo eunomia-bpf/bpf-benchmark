@@ -1,6 +1,6 @@
-/* kernel/bpf/hashtab.c plain HASH lookup and include/linux/jhash.h (lookup3,
+/* kernel/bpf/hashtab.c hash-family element lookup and include/linux/jhash.h (lookup3,
  * Bob Jenkins, public domain). Layout comes from the one boot kernel's BTF.
- * The byte form equals jhash2 for word-sized keys on this x86 little-endian path. */
+ * The byte form equals jhash2 for word-sized keys on the supported little-endian paths. */
 #ifndef KPROG_NATIVE_HASH_H
 #define KPROG_NATIVE_HASH_H
 #define __KPROG_HASH_CODE \
@@ -53,7 +53,7 @@ __kprog_hash_equal(const unsigned char *a,const unsigned char *b,unsigned size) 
     return 1; \
 } \
 static __attribute__((always_inline)) inline void * \
-__kprog_hash_lookup(void *map,const void *key,unsigned size, \
+__kprog_hash_elem(void *map,const void *key,unsigned size, \
     unsigned buckets,unsigned count,unsigned seed,unsigned stride,unsigned head, \
     unsigned hash_node,unsigned next,unsigned hash_offset,unsigned key_offset) { \
     unsigned hash=__kprog_hash_bytes(key,size,*(const unsigned *)((const unsigned char *)map+seed)); \
@@ -68,10 +68,18 @@ __kprog_hash_lookup(void *map,const void *key,unsigned size, \
             unsigned char *element=node-hash_node; \
             if (*(const unsigned *)(element+hash_offset)==hash && \
                 __kprog_hash_equal(element+key_offset,key,size)) \
-                return element+key_offset+((size+7UL)&~7UL); \
+                return element; \
             node=*(unsigned char *const volatile *)(node+next); \
         } \
     } while (((unsigned long)node>>1)!=index); \
     return (void *)0; \
+} \
+static __attribute__((always_inline)) inline void * \
+__kprog_hash_lookup(void *map,const void *key,unsigned size, \
+    unsigned buckets,unsigned count,unsigned seed,unsigned stride,unsigned head, \
+    unsigned hash_node,unsigned next,unsigned hash_offset,unsigned key_offset) { \
+    unsigned char *element=__kprog_hash_elem(map,key,size,buckets,count,seed,stride,head, \
+                                          hash_node,next,hash_offset,key_offset); \
+    return element ? element+key_offset+((size+7UL)&~7UL) : (void *)0; \
 }
 #endif

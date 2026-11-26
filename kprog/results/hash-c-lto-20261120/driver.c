@@ -50,7 +50,12 @@ void *bpf_map_lookup_elem(void *map,const void *key)
     assert(map==map_c);return map_c;
 }
 static void *actual(void *map,const void *key,unsigned size)
-{ return __kprog_hash_lookup(map,key,size,BUCKETS,COUNT,SEED,STRIDE,HEAD,HASH_NODE,NEXT,HASH_OFFSET,KEY_OFFSET); }
+{
+    unsigned char *element=__kprog_hash_elem(map,key,size,BUCKETS,COUNT,SEED,STRIDE,HEAD,HASH_NODE,NEXT,HASH_OFFSET,KEY_OFFSET);
+    void *value=__kprog_hash_lookup(map,key,size,BUCKETS,COUNT,SEED,STRIDE,HEAD,HASH_NODE,NEXT,HASH_OFFSET,KEY_OFFSET);
+    assert(value==(element ? element+KEY_OFFSET+((size+7)&~7U) : NULL));
+    return value;
+}
 static void shape(unsigned char *key,unsigned size,unsigned seed,unsigned count)
 {
     unsigned char *table=calloc(count,STRIDE);assert(table);
