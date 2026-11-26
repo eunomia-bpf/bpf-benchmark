@@ -1,0 +1,16 @@
+make: Entering directory '/workspaces/repository/kprog/results/lto-codegen-parity-20261126'
+python3 guest_outcome.py /workspaces/repository/kprog/results/lto-codegen-parity-20261126/guest-20261126T220327Z/controller.json
+control 0 [2] [(True, 'checked-sim-c')]
+kernel-stack 0 [2] [(True, 'checked-sim-c')]
+kernel-null 0 [2] [(True, 'checked-sim-c')]
+kernel-user-address 0 [2] [(True, 'checked-sim-c')]
+kernel-fault 1 [] [(True, 'checked-sim-c')]
+kernel-zero-null 0 [2] [(True, 'checked-sim-c')]
+kernel-string-stack 0 [2] [(True, 'checked-sim-c')]
+kernel-string-null 0 [2] [(True, 'checked-sim-c')]
+kernel-string-fault 1 [] [(True, 'checked-sim-c')]
+kernel-zero-stack 0 [2] [(True, 'checked-sim-c')]
+compat-kernel-fault 1 [] [(True, 'checked-sim-c')]
+user-null 0 [2] [(True, 'checked-sim-c')]
+user-zero-null 0 [2] [(True, 'checked-sim-c')]
+make: Leaving directory '/workspaces/repository/kprog/results/lto-codegen-parity-20261126'

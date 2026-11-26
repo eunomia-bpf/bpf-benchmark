@@ -1,0 +1,30 @@
+
+/proc/779195/fd/4:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000000000000 <trusted_entry>:
+       0: 48 c7 c0 ff ff ff ff         	movq	$-0x1, %rax
+       7: 48 85 c0                     	testq	%rax, %rax
+       a: 79 33                        	jns	0x3f <trusted_entry+0x3f>
+       c: 0f b6 08                     	movzbl	(%rax), %ecx
+       f: 84 c9                        	testb	%cl, %cl
+      11: 74 2c                        	je	0x3f <trusted_entry+0x3f>
+      13: 0f b6 48 01                  	movzbl	0x1(%rax), %ecx
+      17: 84 c9                        	testb	%cl, %cl
+      19: 74 24                        	je	0x3f <trusted_entry+0x3f>
+      1b: 0f b6 48 02                  	movzbl	0x2(%rax), %ecx
+      1f: 84 c9                        	testb	%cl, %cl
+      21: 74 1c                        	je	0x3f <trusted_entry+0x3f>
+      23: 0f b6 48 03                  	movzbl	0x3(%rax), %ecx
+      27: 84 c9                        	testb	%cl, %cl
+      29: 74 14                        	je	0x3f <trusted_entry+0x3f>
+      2b: 0f b6 48 04                  	movzbl	0x4(%rax), %ecx
+      2f: 84 c9                        	testb	%cl, %cl
+      31: 74 0c                        	je	0x3f <trusted_entry+0x3f>
+      33: 0f b6 48 05                  	movzbl	0x5(%rax), %ecx
+      37: 84 c9                        	testb	%cl, %cl
+      39: 74 04                        	je	0x3f <trusted_entry+0x3f>
+      3b: 0f b6 40 06                  	movzbl	0x6(%rax), %eax
+      3f: b8 03 00 00 00               	movl	$0x3, %eax
+      44: c3                           	retq

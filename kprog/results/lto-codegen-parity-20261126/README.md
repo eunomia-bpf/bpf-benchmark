@@ -48,3 +48,36 @@ not measure applications or full timing. guest_check.py retains raw files
 under /workspaces, archives/publications on completion, and resumes the
 lane on every result. This is targeted validation of changed native emission;
 it does not close Tetragon's separate oversized-B-frame coverage issue.
+
+2026-11-26T22:12:05Z: finite guest check completed controller1, raw publicationa1d57b754.
+All13B programs passed stock and all13installed as checked-sim-c. All13
+final native command records carry the fixed common option. The existing
+semantic self-check reports10pass/3fail: kernel-fault, kernel-string-fault,
+compat-kernel-fault. No case was skipped or relabelled as passing.
+
+The three initial P objects already have only a constant3 return following
+their plain memory reads (see *-initial-P.dis). The existing fixture expects
+old bpf_probe_read helper EFAULT/zeroing semantics and return2. Current
+native-helpers.h uses plain header loads, whose recovered fault value is0;
+its byte wrapper returns0 and its string loop can observe that0 as a
+terminator. Thus this initial P cannot meet that older oracle regardless
+of the new backend flag. The client combines TEST_RUN syscall/retval errors
+and does not print a failed retval;3 here is a static code finding, not a
+recorded failed TEST_RUN counter. This check remains10pass/3fail, controller1.
+
+History/scope: the old13pass receipt predates78336c8d7 (11-20 08:50Z), which
+restored header loads;3aa496416 retained that performance definition. On
+11-23 the operator rejected changing direct kernel reads to helper calls
+(user-instruction.md lines311-312). This phase1 repair preserves current P;
+no source-helper change or weakened/removed oracle was made to turn these
+results green. The data establish admission and the restored emission flag,
+with an explicit older-helper-contract mismatch, not universal functional
+or application acceptance or an improvement in direct-native timing.
+
+All13successful preprocess commands and26removed piece paths were inspected
+through complete request archives: joined source is retained, piece source
+and expanded pieces are absent. Service archival includes the whole request
+directory. guest-outcome.json/log retain per-case receipts, flags and cleanup;
+full raw evidence remains in the committed5921744-byte part and persistent
+rawdirectory. Current pipeline B-frame coverage and ARM work remain open.
+No job remains active; runtime image and full timing stay unchanged.

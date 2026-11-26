@@ -21,3 +21,7 @@ base-smoke:
 .PHONY: guest-check
 guest-check:
 	python3 guest_check.py
+
+.PHONY: guest-outcome
+guest-outcome:
+	python3 guest_outcome.py $(CURDIR)/guest-20261126T220327Z/controller.json

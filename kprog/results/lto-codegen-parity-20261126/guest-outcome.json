@@ -1,0 +1,1080 @@
+{
+  "recorded_utc": "2026-11-26T22:12:05Z",
+  "controller": "/workspaces/repository/kprog/results/lto-codegen-parity-20261126/guest-20261126T220327Z/controller.json",
+  "cases": [
+    {
+      "name": "control",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 1,
+          "source_prog_id": 3,
+          "native_sha256": "56e71b865c8500ae843aa4f739476fd284a5a949eb8c991b26d19f2e1cafc48d",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:03:33.713189+00:00",
+          "prog_id": 9,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/1.success.tar.gz",
+          "finished": "2026-11-26T22:03:42.578085+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/request-3n2fb7i6/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/request-3n2fb7i6/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/request-3n2fb7i6/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/request-3n2fb7i6/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/control/state/session-lnuecedu/requests/request-3n2fb7i6/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-stack",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 2,
+          "source_prog_id": 12,
+          "native_sha256": "234d13f303b834384703a55d580b24b6dfb577415d1e0afe07ac049a7bba387d",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:03:44.560120+00:00",
+          "prog_id": 18,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/2.success.tar.gz",
+          "finished": "2026-11-26T22:03:51.416880+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/request-1ooqczxe/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/request-1ooqczxe/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/request-1ooqczxe/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/request-1ooqczxe/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-stack/state/session-ftt6yx7j/requests/request-1ooqczxe/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-null",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 3,
+          "source_prog_id": 21,
+          "native_sha256": "eab9839132ddbb091362f0bddc0e7693f0303ec321ddc810afe312fe6fc29673",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:03:53.411747+00:00",
+          "prog_id": 27,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/3.success.tar.gz",
+          "finished": "2026-11-26T22:03:59.719405+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/request-g4dngpti/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/request-g4dngpti/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/request-g4dngpti/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/request-g4dngpti/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-null/state/session-kd4vow_v/requests/request-g4dngpti/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-user-address",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 4,
+          "source_prog_id": 30,
+          "native_sha256": "7b46afff578cd5a4b70487c0d28223d268fa51c446a123ca88b72dbd205bb04a",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:01.645799+00:00",
+          "prog_id": 36,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/4.success.tar.gz",
+          "finished": "2026-11-26T22:04:07.948273+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/request-k8qvguuf/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/request-k8qvguuf/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/request-k8qvguuf/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/request-k8qvguuf/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-user-address/state/session-piscdbif/requests/request-k8qvguuf/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-fault",
+      "returncode": 1,
+      "requests": [
+        {
+          "request_id": 5,
+          "source_prog_id": 39,
+          "native_sha256": "0fa3aa11099656f2c6f25f720827e94e58b9203acfe8c074bca2435c2bf67289",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:09.947028+00:00",
+          "prog_id": 45,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/5.success.tar.gz",
+          "finished": "2026-11-26T22:04:16.457367+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/request-dsqmblw2/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/request-dsqmblw2/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/request-dsqmblw2/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/request-dsqmblw2/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-fault/state/session-78336aia/requests/request-dsqmblw2/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": []
+    },
+    {
+      "name": "kernel-zero-null",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 6,
+          "source_prog_id": 48,
+          "native_sha256": "bfed446bb74524643e00f5d5d17cb8013ac2c4fa17b4a3bf747754a1f1915c7f",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:18.400552+00:00",
+          "prog_id": 54,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/6.success.tar.gz",
+          "finished": "2026-11-26T22:04:24.641520+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/request-hajfrq6_/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/request-hajfrq6_/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/request-hajfrq6_/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/request-hajfrq6_/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-null/state/session-0i4_asou/requests/request-hajfrq6_/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-string-stack",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 7,
+          "source_prog_id": 57,
+          "native_sha256": "b18851ec880088945779ab77863de6e669cb54997e80131a780a5f4fc72e6622",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:26.656830+00:00",
+          "prog_id": 63,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/7.success.tar.gz",
+          "finished": "2026-11-26T22:04:33.446468+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/request-44fqe08z/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/request-44fqe08z/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/request-44fqe08z/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/request-44fqe08z/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-stack/state/session-limckhh6/requests/request-44fqe08z/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-string-null",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 8,
+          "source_prog_id": 66,
+          "native_sha256": "833f5c78c97ad19852728b8a6244f58eeda09cef55fdad5c5a7283e6365b3f41",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:35.443180+00:00",
+          "prog_id": 72,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/8.success.tar.gz",
+          "finished": "2026-11-26T22:04:41.820900+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/request-e2ohejqt/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/request-e2ohejqt/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/request-e2ohejqt/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/request-e2ohejqt/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-null/state/session-wfkr1os7/requests/request-e2ohejqt/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "kernel-string-fault",
+      "returncode": 1,
+      "requests": [
+        {
+          "request_id": 9,
+          "source_prog_id": 75,
+          "native_sha256": "91d0d139596c25347766db0dd10795e02c58126c65274447b6e817e67b46c9b9",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:43.860538+00:00",
+          "prog_id": 81,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/9.success.tar.gz",
+          "finished": "2026-11-26T22:04:50.408411+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/request-btc1opmb/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/request-btc1opmb/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/request-btc1opmb/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/request-btc1opmb/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-string-fault/state/session-3zai1qit/requests/request-btc1opmb/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": []
+    },
+    {
+      "name": "kernel-zero-stack",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 10,
+          "source_prog_id": 84,
+          "native_sha256": "e6176929ef57b3eb113b01476dd705d9290a057c1ff52c164d95e43f75d898ad",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:04:52.411021+00:00",
+          "prog_id": 90,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/10.success.tar.gz",
+          "finished": "2026-11-26T22:04:58.735631+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/request-tn1yrhfc/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/request-tn1yrhfc/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/request-tn1yrhfc/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/request-tn1yrhfc/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/kernel-zero-stack/state/session-xwqhv110/requests/request-tn1yrhfc/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "compat-kernel-fault",
+      "returncode": 1,
+      "requests": [
+        {
+          "request_id": 11,
+          "source_prog_id": 93,
+          "native_sha256": "1db70bd9303997a5008725147cd46a040be5358c7799c06f39582339599efcb1",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:05:00.744905+00:00",
+          "prog_id": 99,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/11.success.tar.gz",
+          "finished": "2026-11-26T22:05:07.272004+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/request-o_l_enh9/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/request-o_l_enh9/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/request-o_l_enh9/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/request-o_l_enh9/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/compat-kernel-fault/state/session-gx5v5avy/requests/request-o_l_enh9/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": []
+    },
+    {
+      "name": "user-null",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 12,
+          "source_prog_id": 102,
+          "native_sha256": "1ec750b948590424ba729b9e0dae1c9ef6911eaa87dd7ef09cfe14609ecefac5",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:05:09.215131+00:00",
+          "prog_id": 108,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/12.success.tar.gz",
+          "finished": "2026-11-26T22:05:16.070117+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/request-pzi6q0dc/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/request-pzi6q0dc/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/request-pzi6q0dc/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/request-pzi6q0dc/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-null/state/session-5_ux3_1q/requests/request-pzi6q0dc/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    },
+    {
+      "name": "user-zero-null",
+      "returncode": 0,
+      "requests": [
+        {
+          "request_id": 13,
+          "source_prog_id": 111,
+          "native_sha256": "5accf2802954803f68883cc1c666a3d5839d1bdd292729d8a44d729fefab345e",
+          "execution_mode": "checked-sim-c",
+          "started": "2026-11-26T22:05:18.136693+00:00",
+          "prog_id": 117,
+          "phase": "load",
+          "status": 0,
+          "execution_path": "checked-sim-c",
+          "b_generated": true,
+          "b_stock_passed": true,
+          "artifact_archive": "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/13.success.tar.gz",
+          "finished": "2026-11-26T22:05:25.058158+00:00"
+        }
+      ],
+      "native_emissions": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-target",
+            "x86_64-linux-gnu",
+            "-O3",
+            "-march=native",
+            "-foptimize-sibling-calls",
+            "-fomit-frame-pointer",
+            "-mno-red-zone",
+            "-mllvm",
+            "-x86-cmov-converter-force-all",
+            "-mllvm",
+            "-force-attribute=noredzone",
+            "-mllvm",
+            "-forceattrs-csv-path=/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/request-1xel3wzk/generated/checked-simulator.attributes.csv",
+            "-mgeneral-regs-only",
+            "-fno-stack-protector",
+            "-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables",
+            "-c",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/request-1xel3wzk/generated/checked-simulator.context.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/request-1xel3wzk/generated/checked-simulator.native.o"
+          ],
+          "returncode": 0,
+          "common_branch_option": true
+        }
+      ],
+      "preprocessing_cleanup": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O1",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-E",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/request-1xel3wzk/generated/trusted_x86.bpf.piece0.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/lto-codegen-parity-20261126/20261126T220327Z/user-zero-null/state/session-7dxrlz59/requests/request-1xel3wzk/generated/trusted_x86.bpf.piece0.i"
+          ],
+          "returncode": 0,
+          "pieces_absent_from_complete_archive": true,
+          "joined_source_retained": true
+        }
+      ],
+      "observed_retvals": [
+        2
+      ]
+    }
+  ],
+  "scope": "All attempted cases retained. Existing oracle expects older helper EFAULT semantics; initial current P in three failures ends with constant3. The client combines syscall/retval errors and does not print failed retval, so3 is a static code finding, not a recorded failed TEST_RUN counter. Stock B admission, checked installation and self-check outcomes are separate. No app or performance conclusion."
+}
