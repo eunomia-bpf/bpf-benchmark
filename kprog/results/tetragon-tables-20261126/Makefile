@@ -98,3 +98,7 @@ u32-flow:
 .PHONY: u32-flow-normal
 u32-flow-normal:
 	taskset -c 16 prlimit --as=8589934592 -- python3 u32_flow.py fab61404f u32-flow-normal
+
+.PHONY: scalar-store-inventory
+scalar-store-inventory:
+	python3 scalar_store_inventory.py

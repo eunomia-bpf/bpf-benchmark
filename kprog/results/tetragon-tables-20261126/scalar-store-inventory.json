@@ -1,0 +1,3782 @@
+{
+  "recorded_utc": "2026-11-26T22:49:30Z",
+  "rows": [
+    {
+      "request": 39,
+      "stack_bytes": 304,
+      "baseline_words": 28,
+      "exclusively_known_scalar_offsets": [],
+      "observed_store_sites": [
+        {
+          "pc": 24,
+          "instruction": "mov    QWORD PTR [rsp+0xc0],rax",
+          "offsets": [
+            -104
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 124,
+          "instruction": "mov    QWORD PTR [rbx+0x60],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 143,
+          "instruction": "mov    QWORD PTR [rbx+0x68],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 163,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 168,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rcx",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 199,
+          "instruction": "mov    QWORD PTR [rsp],r14",
+          "offsets": [
+            -296
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 210,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rcx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 219,
+          "instruction": "mov    QWORD PTR [rsp+0xb0],rax",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 247,
+          "instruction": "mov    QWORD PTR [rbx+0x90],r14",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 267,
+          "instruction": "mov    QWORD PTR [rsp+0xf0],r15",
+          "offsets": [
+            -56
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 275,
+          "instruction": "mov    QWORD PTR [rsp+0xd0],r12",
+          "offsets": [
+            -88
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 442,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 786,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rax",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 798,
+          "instruction": "mov    QWORD PTR [rsp+0x18],rcx",
+          "offsets": [
+            -272
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 803,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rbp",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 827,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rax",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 911,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 980,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rcx",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 989,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rbp",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1076,
+          "instruction": "mov    QWORD PTR [rsp+0x28],r12",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1123,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1605,
+          "instruction": "mov    QWORD PTR [rbx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1624,
+          "instruction": "mov    QWORD PTR [rbx+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1645,
+          "instruction": "mov    QWORD PTR [rbx+0x60],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1812,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rbp",
+          "offsets": [
+            -264
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1930,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1985,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rbp",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2026,
+          "instruction": "mov    QWORD PTR [rsp+0xa8],rbp",
+          "offsets": [
+            -128
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2260,
+          "instruction": "mov    QWORD PTR [rsp],r14",
+          "offsets": [
+            -296
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2333,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -264
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2423,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2542,
+          "instruction": "mov    QWORD PTR [rsp+0xd8],rbp",
+          "offsets": [
+            -80
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2616,
+          "instruction": "mov    QWORD PTR [rsp+0x98],rdx",
+          "offsets": [
+            -144
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2637,
+          "instruction": "mov    QWORD PTR [rsp+0xb8],r14",
+          "offsets": [
+            -112
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2814,
+          "instruction": "mov    QWORD PTR [r13+0xff6],rax",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            7310579611361093664
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 2861,
+          "instruction": "mov    QWORD PTR [rsp+0x50],r13",
+          "offsets": [
+            -216
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2893,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r15",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2926,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2976,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3041,
+          "instruction": "mov    QWORD PTR [rsp+0x58],rax",
+          "offsets": [
+            -208
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3083,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rax",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3130,
+          "instruction": "mov    QWORD PTR [rsp+0x68],rax",
+          "offsets": [
+            -192
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3138,
+          "instruction": "mov    QWORD PTR [rsp+0x30],r15",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3174,
+          "instruction": "mov    QWORD PTR [rsp+0x68],rax",
+          "offsets": [
+            -192
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3183,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rax",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3250,
+          "instruction": "mov    QWORD PTR [rsp+0x90],rax",
+          "offsets": [
+            -152
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3419,
+          "instruction": "mov    QWORD PTR [rsp+0xc8],rax",
+          "offsets": [
+            -96
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3449,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -264
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3539,
+          "instruction": "mov    QWORD PTR [rsp+0x58],rax",
+          "offsets": [
+            -208
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3590,
+          "instruction": "mov    QWORD PTR [rsp+0x80],rax",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3603,
+          "instruction": "mov    QWORD PTR [rsp+0x88],rdx",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3806,
+          "instruction": "mov    QWORD PTR [rdi+r8*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3838,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r12",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3861,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r12",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3888,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r12",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3948,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r12",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3966,
+          "instruction": "mov    QWORD PTR [rsp+0x58],rax",
+          "offsets": [
+            -208
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4154,
+          "instruction": "mov    QWORD PTR [rdi+rsi*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4427,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4436,
+          "instruction": "mov    QWORD PTR [rsp+0x48],r13",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4493,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rdi",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4547,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4848,
+          "instruction": "mov    QWORD PTR [rsp+0x30],r8",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4948,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5111,
+          "instruction": "mov    QWORD PTR [rax+0xc4],r12",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5179,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xa0",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5281,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rdx",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5531,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6323,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rdx",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6410,
+          "instruction": "mov    QWORD PTR [rsp+0x80],r15",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6534,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rax",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6567,
+          "instruction": "mov    QWORD PTR [rsp+0x40],r12",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6671,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xac",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6949,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -264
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7251,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xa0",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7376,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rdx",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7602,
+          "instruction": "mov    QWORD PTR [rax+0xc4],r12",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8244,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8253,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rbp",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8352,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8805,
+          "instruction": "mov    QWORD PTR [rcx+0x9c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8816,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9057,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9100,
+          "instruction": "mov    QWORD PTR [rsp+0x30],r14",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9323,
+          "instruction": "mov    QWORD PTR [rsp+0x98],rax",
+          "offsets": [
+            -144
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9629,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9640,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9888,
+          "instruction": "mov    QWORD PTR [rsp+0x80],rax",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10101,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10155,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10305,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10836,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10889,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10942,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10984,
+          "instruction": "mov    QWORD PTR [rsp+0x40],r12",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11464,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11475,
+          "instruction": "mov    QWORD PTR [rcx+0xb4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11823,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xa0",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11874,
+          "instruction": "mov    QWORD PTR [rdi+rdx*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12167,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12178,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12371,
+          "instruction": "mov    QWORD PTR [rsp+0x80],rax",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12454,
+          "instruction": "mov    QWORD PTR [rcx+0xa0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12466,
+          "instruction": "mov    QWORD PTR [rcx+0xa8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12478,
+          "instruction": "mov    QWORD PTR [rcx+0xb0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12490,
+          "instruction": "mov    QWORD PTR [rcx+0xb8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12502,
+          "instruction": "mov    QWORD PTR [rcx+0xc0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12514,
+          "instruction": "mov    QWORD PTR [rcx+0xc8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12526,
+          "instruction": "mov    QWORD PTR [rcx+0xd0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12538,
+          "instruction": "mov    QWORD PTR [rcx+0xd8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12550,
+          "instruction": "mov    QWORD PTR [rcx+0xe0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12562,
+          "instruction": "mov    QWORD PTR [rcx+0xe8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12574,
+          "instruction": "mov    QWORD PTR [rcx+0xf0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12586,
+          "instruction": "mov    QWORD PTR [rcx+0xf8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12598,
+          "instruction": "mov    QWORD PTR [rcx+0x100],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12673,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r14",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12799,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12876,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13133,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13620,
+          "instruction": "mov    QWORD PTR [rcx+0x9c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13631,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13738,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13749,
+          "instruction": "mov    QWORD PTR [rcx+0xb4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13902,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13948,
+          "instruction": "mov    QWORD PTR [rbp+0x18],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 14958,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r14",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15073,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15191,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15198,
+          "instruction": "add    QWORD PTR [rsp+0x10],0x9e",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15240,
+          "instruction": "add    QWORD PTR [rsp+0x10],0x9e",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15509,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xbe",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15850,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15861,
+          "instruction": "mov    QWORD PTR [rcx+0xb4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15941,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xbe",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16018,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16059,
+          "instruction": "mov    QWORD PTR [rdx+0x18],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16167,
+          "instruction": "mov    QWORD PTR [rcx+0x9c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16178,
+          "instruction": "mov    QWORD PTR [rcx+0xa4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16236,
+          "instruction": "add    QWORD PTR [rsp+0x98],0x18",
+          "offsets": [
+            -144
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16278,
+          "instruction": "mov    QWORD PTR [rcx+0xac],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16289,
+          "instruction": "mov    QWORD PTR [rcx+0xb4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16468,
+          "instruction": "add    QWORD PTR [rsp+0x10],0xbe",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16928,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16940,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16976,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rdx",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17049,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17385,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17397,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17502,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17796,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17808,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17844,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rdx",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17913,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18076,
+          "instruction": "add    QWORD PTR [rsp+0x38],0x60",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18152,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18161,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rax",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18250,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18389,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 18392,
+          "instruction": "mov    QWORD PTR [rdi+0x8],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 18396,
+          "instruction": "mov    QWORD PTR [rdi+0x10],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 18400,
+          "instruction": "mov    QWORD PTR [rdi+0x18],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 18432,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        }
+      ]
+    },
+    {
+      "request": 12,
+      "stack_bytes": 248,
+      "baseline_words": 9,
+      "exclusively_known_scalar_offsets": [],
+      "observed_store_sites": [
+        {
+          "pc": 106,
+          "instruction": "mov    QWORD PTR [rsp+0x8],r12",
+          "offsets": [
+            -80
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 425,
+          "instruction": "mov    QWORD PTR [rsp+0x18],rbx",
+          "offsets": [
+            -64
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 430,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -56
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 487,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rax",
+          "offsets": [
+            -72
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1092,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1101,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rax",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2573,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],r9",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2659,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],r9",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2811,
+          "instruction": "mov    QWORD PTR [rdi+rsi*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2891,
+          "instruction": "mov    QWORD PTR [rdi+rsi*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3425,
+          "instruction": "mov    QWORD PTR [rdi+rdx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3614,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -232,
+            -152,
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4718,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5763,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7357,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8825,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8828,
+          "instruction": "mov    QWORD PTR [rdi+0x8],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8832,
+          "instruction": "mov    QWORD PTR [rdi+0x10],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8836,
+          "instruction": "mov    QWORD PTR [rdi+0x18],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8868,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        }
+      ]
+    },
+    {
+      "request": 38,
+      "stack_bytes": 248,
+      "baseline_words": 9,
+      "exclusively_known_scalar_offsets": [],
+      "observed_store_sites": [
+        {
+          "pc": 141,
+          "instruction": "mov    QWORD PTR [rsp+0x10],r13",
+          "offsets": [
+            -72
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 336,
+          "instruction": "mov    QWORD PTR [rsp+0x18],rbx",
+          "offsets": [
+            -64
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 341,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -56
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 398,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rax",
+          "offsets": [
+            -80
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1004,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rax",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1013,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rax",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2488,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],r9",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2574,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],r9",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2726,
+          "instruction": "mov    QWORD PTR [rdi+rsi*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2806,
+          "instruction": "mov    QWORD PTR [rdi+rsi*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3340,
+          "instruction": "mov    QWORD PTR [rdi+rdx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3529,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -232,
+            -152,
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4671,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5746,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7366,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rcx",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8864,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8867,
+          "instruction": "mov    QWORD PTR [rdi+0x8],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8871,
+          "instruction": "mov    QWORD PTR [rdi+0x10],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8875,
+          "instruction": "mov    QWORD PTR [rdi+0x18],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 8907,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        }
+      ]
+    },
+    {
+      "request": 9,
+      "stack_bytes": 480,
+      "baseline_words": 25,
+      "exclusively_known_scalar_offsets": [],
+      "observed_store_sites": [
+        {
+          "pc": 166,
+          "instruction": "mov    QWORD PTR [rsp+0xb0],r12",
+          "offsets": [
+            -120
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 194,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rdx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 218,
+          "instruction": "mov    QWORD PTR [rsp+0x18],rbp",
+          "offsets": [
+            -272
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 223,
+          "instruction": "mov    QWORD PTR [rsp+0x20],rsi",
+          "offsets": [
+            -264
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 228,
+          "instruction": "mov    QWORD PTR [rsp+0x48],rbx",
+          "offsets": [
+            -224
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 424,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 471,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 533,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 557,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 625,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 649,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 717,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 741,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 809,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 833,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 901,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 925,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 998,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1022,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1095,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1119,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1192,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1216,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1282,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1302,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rdx",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1368,
+          "instruction": "mov    QWORD PTR [rsp+0x38],rax",
+          "offsets": [
+            -240
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1586,
+          "instruction": "mov    QWORD PTR [rax+rsi*8+0x5e78],rdi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1788,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rcx",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1793,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r15",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1814,
+          "instruction": "mov    QWORD PTR [rsp+0x10],rax",
+          "offsets": [
+            -280
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1837,
+          "instruction": "mov    QWORD PTR [rsp+0xb8],rdi",
+          "offsets": [
+            -112
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1853,
+          "instruction": "mov    QWORD PTR [rsp+0x28],r15",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1886,
+          "instruction": "mov    QWORD PTR [rsp+0xb8],rdi",
+          "offsets": [
+            -112
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1894,
+          "instruction": "mov    QWORD PTR [rsp+0x28],r15",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 1942,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2056,
+          "instruction": "mov    QWORD PTR [rdx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2111,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r15",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2156,
+          "instruction": "mov    QWORD PTR [rsp+0xf0],r15",
+          "offsets": [
+            -56
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2366,
+          "instruction": "mov    QWORD PTR [rsp+0x50],rax",
+          "offsets": [
+            -216
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2384,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2513,
+          "instruction": "mov    QWORD PTR [rsp+0xd0],r12",
+          "offsets": [
+            -88
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2597,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rdx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2615,
+          "instruction": "mov    QWORD PTR [rsp+0xc0],rbx",
+          "offsets": [
+            -104
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2791,
+          "instruction": "mov    QWORD PTR [r13+0xff6],rax",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            7310579611361093664
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 2843,
+          "instruction": "mov    QWORD PTR [rsp+0x80],r13",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2887,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],rbp",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2919,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rbp",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2935,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 2985,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rax",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3050,
+          "instruction": "mov    QWORD PTR [rsp+0x88],rax",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3097,
+          "instruction": "mov    QWORD PTR [rsp+0x90],rax",
+          "offsets": [
+            -152
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3156,
+          "instruction": "mov    QWORD PTR [rsp+0x98],rax",
+          "offsets": [
+            -144
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3202,
+          "instruction": "mov    QWORD PTR [rsp+0x98],rax",
+          "offsets": [
+            -144
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3214,
+          "instruction": "mov    QWORD PTR [rsp+0x90],rax",
+          "offsets": [
+            -152
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3291,
+          "instruction": "mov    QWORD PTR [rsp+0xc8],rax",
+          "offsets": [
+            -96
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3454,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3481,
+          "instruction": "mov    QWORD PTR [rsp+0x50],rax",
+          "offsets": [
+            -216
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3554,
+          "instruction": "mov    QWORD PTR [rsp+0x88],rax",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3607,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rax",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3616,
+          "instruction": "mov    QWORD PTR [rsp+0x68],rdx",
+          "offsets": [
+            -192
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3812,
+          "instruction": "mov    QWORD PTR [rdi+r8*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3844,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r15",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3870,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r15",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3900,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r15",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3963,
+          "instruction": "mov    QWORD PTR [rsp+0xa0],r15",
+          "offsets": [
+            -136
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 3981,
+          "instruction": "mov    QWORD PTR [rsp+0x88],rax",
+          "offsets": [
+            -160
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4182,
+          "instruction": "mov    QWORD PTR [rdi+r8*1],rdx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4629,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4800,
+          "instruction": "mov    QWORD PTR [rax+0x28],r15",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4961,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rdx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 4985,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rdx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5213,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 5984,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rdx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6288,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r15",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 6688,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7022,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rdx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7158,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rcx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7168,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7185,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rdx",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7190,
+          "instruction": "mov    QWORD PTR [rsp+0x68],rax",
+          "offsets": [
+            -192
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7252,
+          "instruction": "mov    QWORD PTR [rsp+0x54],rax",
+          "offsets": [
+            -212
+          ],
+          "all_constant_scalar": true,
+          "constants": [
+            8589934662
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 7393,
+          "instruction": "mov    QWORD PTR [rax+0x28],r15",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 7948,
+          "instruction": "mov    QWORD PTR [rdx+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8408,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8415,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8666,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 8890,
+          "instruction": "mov    QWORD PTR [rsp+0x28],rax",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9167,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9175,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9420,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rax",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9558,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9582,
+          "instruction": "add    QWORD PTR [rsp+0x8],0x88",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 9619,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10116,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10168,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10220,
+          "instruction": "mov    QWORD PTR [rdi],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10269,
+          "instruction": "mov    QWORD PTR [rsp+0x70],r15",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10460,
+          "instruction": "add    QWORD PTR [rsp+0x8],0x4c",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10742,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10750,
+          "instruction": "mov    QWORD PTR [rcx+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 10923,
+          "instruction": "add    QWORD PTR [rsp+0x8],0xc",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11141,
+          "instruction": "mov    QWORD PTR [rdi+rdx*1],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11412,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11420,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11670,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rax",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11881,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rcx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11891,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11896,
+          "instruction": "mov    QWORD PTR [rsp+0x80],r12",
+          "offsets": [
+            -168
+          ],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11904,
+          "instruction": "mov    QWORD PTR [rsp+0x60],rdx",
+          "offsets": [
+            -200
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11909,
+          "instruction": "mov    QWORD PTR [rsp+0x68],rax",
+          "offsets": [
+            -192
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 11971,
+          "instruction": "mov    QWORD PTR [rsp+0x54],rax",
+          "offsets": [
+            -212
+          ],
+          "all_constant_scalar": true,
+          "constants": [
+            8589934679
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 12030,
+          "instruction": "mov    QWORD PTR [rcx+0x4],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12038,
+          "instruction": "mov    QWORD PTR [rcx+0xc],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12046,
+          "instruction": "mov    QWORD PTR [rcx+0x14],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12054,
+          "instruction": "mov    QWORD PTR [rcx+0x1c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12062,
+          "instruction": "mov    QWORD PTR [rcx+0x24],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12070,
+          "instruction": "mov    QWORD PTR [rcx+0x2c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12078,
+          "instruction": "mov    QWORD PTR [rcx+0x34],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12086,
+          "instruction": "mov    QWORD PTR [rcx+0x3c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12094,
+          "instruction": "mov    QWORD PTR [rcx+0x44],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12102,
+          "instruction": "mov    QWORD PTR [rcx+0x4c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12110,
+          "instruction": "mov    QWORD PTR [rcx+0x54],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12118,
+          "instruction": "mov    QWORD PTR [rcx+0x5c],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12126,
+          "instruction": "mov    QWORD PTR [rcx+0x64],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12209,
+          "instruction": "mov    QWORD PTR [rsp+0x50],rbx",
+          "offsets": [
+            -216
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12434,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12511,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 12776,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13305,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13312,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13416,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13424,
+          "instruction": "mov    QWORD PTR [rcx+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13559,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13596,
+          "instruction": "mov    QWORD PTR [r13+0x18],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13929,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rcx",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 13938,
+          "instruction": "mov    QWORD PTR [rsp+0x78],r15",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 14016,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 14534,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 14560,
+          "instruction": "mov    QWORD PTR [rsp+0xc8],rax",
+          "offsets": [
+            -96
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 14608,
+          "instruction": "mov    QWORD PTR [rsp+0x40],rax",
+          "offsets": [
+            -232
+          ],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 14860,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15195,
+          "instruction": "mov    QWORD PTR [rsp+0x50],rax",
+          "offsets": [
+            -216
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15463,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 15578,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16049,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16057,
+          "instruction": "mov    QWORD PTR [rcx+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16194,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16231,
+          "instruction": "mov    QWORD PTR [r13+0x18],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16445,
+          "instruction": "mov    QWORD PTR [rcx],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16452,
+          "instruction": "mov    QWORD PTR [rcx+0x8],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16504,
+          "instruction": "add    QWORD PTR [rsp+0x28],0x18",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16540,
+          "instruction": "mov    QWORD PTR [rcx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 16548,
+          "instruction": "mov    QWORD PTR [rcx+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17267,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rax",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17298,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17310,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rcx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17315,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17433,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17649,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rax",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17684,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17696,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rcx",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17701,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17782,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 17991,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rax",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18015,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18027,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rcx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18032,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18113,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18285,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rax",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18309,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18321,
+          "instruction": "mov    QWORD PTR [rsp+0x8],rcx",
+          "offsets": [
+            -288
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18326,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18403,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18587,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rax",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18611,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18623,
+          "instruction": "mov    QWORD PTR [rsp+0x30],rcx",
+          "offsets": [
+            -248
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18628,
+          "instruction": "mov    QWORD PTR [rsp+0x78],rcx",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18705,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18845,
+          "instruction": "add    QWORD PTR [rsp+0x28],0x60",
+          "offsets": [
+            -256
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18921,
+          "instruction": "mov    QWORD PTR [rsp+0x70],rax",
+          "offsets": [
+            -184
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 18930,
+          "instruction": "mov    QWORD PTR [rsp+0x78],r12",
+          "offsets": [
+            -176
+          ],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19001,
+          "instruction": "mov    QWORD PTR [rdi+rax*1],rsi",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19345,
+          "instruction": "mov    QWORD PTR [r13+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19360,
+          "instruction": "mov    QWORD PTR [rbp+0x0],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19369,
+          "instruction": "mov    QWORD PTR [r13+0x18],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19381,
+          "instruction": "mov    QWORD PTR [rbx+0x10],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 19385,
+          "instruction": "mov    QWORD PTR [rbx+0x18],rcx",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 20037,
+          "instruction": "lock inc QWORD PTR [rax]",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 20142,
+          "instruction": "mov    QWORD PTR [rdi+rcx*1],rax",
+          "offsets": [],
+          "all_constant_scalar": false,
+          "constants": [],
+          "has_unknown_constant": true
+        },
+        {
+          "pc": 20391,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20394,
+          "instruction": "mov    QWORD PTR [rdi+0x8],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20398,
+          "instruction": "mov    QWORD PTR [rdi+0x10],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20402,
+          "instruction": "mov    QWORD PTR [rdi+0x18],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20434,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20512,
+          "instruction": "mov    QWORD PTR [rdi],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20515,
+          "instruction": "mov    QWORD PTR [rdi+0x8],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20519,
+          "instruction": "mov    QWORD PTR [rdi+0x10],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        },
+        {
+          "pc": 20523,
+          "instruction": "mov    QWORD PTR [rdi+0x18],r8",
+          "offsets": [],
+          "all_constant_scalar": true,
+          "constants": [
+            0
+          ],
+          "has_unknown_constant": false
+        }
+      ]
+    }
+  ],
+  "scope": "Observer of existing full-source ABI pass. Candidate offsets only, not a soundness proof, adopted optimization, frame reduction or stock/app acceptance."
+}
