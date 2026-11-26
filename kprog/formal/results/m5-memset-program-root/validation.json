@@ -1,0 +1,76 @@
+{
+  "confirmed_utc": "2026-11-26T10:03:44.644610+00:00",
+  "full_lake_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "env",
+      "LEAN_IMPORT_WORKERS=1",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 53.65607500076294,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "build_jobs": 1147,
+  "public_query": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-program-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 9.362257957458496,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 970,
+  "query_union": {
+    "retained_source": "kprog/formal/results/m5-x86-producer-sub-all-flags-root/Query.lean",
+    "retained_count": 949,
+    "added": [
+      "Arm64MemsetReturn.locals_source",
+      "Arm64MemsetReturn.continuation_source",
+      "Arm64MemsetReturn.free",
+      "Arm64MemsetReturn.exit",
+      "Arm64MemsetFreeState.local_load",
+      "Arm64MemsetFreeState.storage",
+      "Arm64MemsetFreeState.header",
+      "Arm64MemsetFreeState.tail",
+      "Arm64MemsetFreeState.gpr",
+      "Arm64MemsetFreeState.flag",
+      "Arm64MemsetFreeState.resources",
+      "Arm64MemsetFreeState.ready",
+      "Arm64MemsetFreeState.complete",
+      "Arm64MemsetComplete.original",
+      "Arm64MemsetProgramCaller.source",
+      "Arm64MemsetProgramCaller.next_source",
+      "Arm64MemsetProgramCaller.call_source",
+      "Arm64MemsetProgramCaller.binding",
+      "Arm64MemsetProgramCaller.ready",
+      "Arm64MemsetProgramCaller.returned",
+      "Arm64MemsetProgramCaller.original"
+    ],
+    "query_count": 970
+  },
+  "fixture_native_prefix": 14,
+  "current_resource_native_prefix": 3,
+  "complete_isa_families": 0,
+  "formal_full_lock": "exclusive",
+  "whole_make_check_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
