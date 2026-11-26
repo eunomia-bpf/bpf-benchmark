@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.no_copy
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.no_copy
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.to_statement
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.to_statement
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.statement_execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.statement_execute
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.inputs
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.inputs
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.storage_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.storage_after
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.resources_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.resources_after
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.view_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.view_after
+#check KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.gpr_after
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagTransferStore.gpr_after
