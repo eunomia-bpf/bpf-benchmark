@@ -1,0 +1,3 @@
+All six original producer flag objects have actual current writable byte rights derived through initialization, PUSH stores/freeing and SUB allocation. Those rights construct exact byte stores/readback, other-block load frames and complete old-caller frame without whole-map equality or assumed store success. Instruction expressions and source transitions are handled at their real sites.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.X86ProducerSubFlagStorage
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.writable
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.writable
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write_current
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write_current
+#check KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write

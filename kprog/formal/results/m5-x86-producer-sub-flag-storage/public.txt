@@ -1,0 +1,68 @@
+KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.writable {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (i : Fin 6) :
+  (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.validAccess CC.Chunk.Mint8unsigned
+      (ready.scalars ⟨↑i, ⋯⟩).block 0 CC.Permission.Writable =
+    true
+'KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.writable' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write_current {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (memory : CC.Mem)
+  (access : memory.access = (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.access)
+  (i : Fin 6) (value : Bool) :
+  ∃ after,
+    CC.Mem.store CC.Chunk.Mint8unsigned memory (ready.scalars ⟨↑i, ⋯⟩).block 0
+          (CC.Val.Vint (if value = true then 1 else 0)) =
+        some after ∧
+      CC.Mem.load CC.Chunk.Mint8unsigned after (ready.scalars ⟨↑i, ⋯⟩).block 0 =
+          some (CC.Val.Vint (if value = true then 1 else 0)) ∧
+        (∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+            block ≠ (ready.scalars ⟨↑i, ⋯⟩).block →
+              CC.Mem.load chunk after block offset = CC.Mem.load chunk memory block offset) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock memory after ∧
+            after.access = memory.access ∧ after.nextblock = memory.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write_current' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write {before : CC.Mem} {ctxBlock : CC.Block}
+  {ctxOffset : CC.Integers.Ptrofs} {outer : CC.Cont}
+  {ready : KProgFormal.ClightRefinement.X86ProducerEntryReady.Result before ctxBlock ctxOffset outer}
+  {rsp : KProgFormal.ClightRefinement.X86ProducerPushRspPrefix.Result ready}
+  {metadata : KProgFormal.ClightRefinement.X86ProducerPushMetadataPrefix.Result rsp}
+  {cache : KProgFormal.ClightRefinement.X86ProducerPushCachePrefix.Result metadata}
+  (complete : KProgFormal.ClightRefinement.X86ProducerPushComplete.Result cache) (i : Fin 6) (value : Bool) :
+  ∃ after,
+    CC.Mem.store CC.Chunk.Mint8unsigned (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd
+          (ready.scalars ⟨↑i, ⋯⟩).block 0 (CC.Val.Vint (if value = true then 1 else 0)) =
+        some after ∧
+      CC.Mem.load CC.Chunk.Mint8unsigned after (ready.scalars ⟨↑i, ⋯⟩).block 0 =
+          some (CC.Val.Vint (if value = true then 1 else 0)) ∧
+        (∀ (chunk : CC.Chunk) (block : CC.Block) (offset : CC.Z),
+            block ≠ (ready.scalars ⟨↑i, ⋯⟩).block →
+              CC.Mem.load chunk after block offset =
+                CC.Mem.load chunk (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd block
+                  offset) ∧
+          KProgFormal.ClightRefinement.FrameBelow before.nextblock
+              (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd after ∧
+            after.access = (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.access ∧
+              after.nextblock =
+                (KProgFormal.ClightRefinement.X86ProducerSubBody.allocation complete.after).snd.nextblock
+'KProgFormal.ClightRefinement.X86ProducerSubFlagStorage.write' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
