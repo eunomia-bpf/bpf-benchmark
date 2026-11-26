@@ -1,0 +1,63 @@
+{
+  "recorded_utc": "2026-11-26T19:34:31Z",
+  "scope": "Static direct R10 memory operands in executable sections only; does not include indirect stack addresses or establish verifier acceptance/total frame.",
+  "cases": [
+    {
+      "stage": "normal-o1",
+      "archive": "kprog/results/tetragon-tables-20261126/compiler-evidence.tar.zst",
+      "object_bytes": 1939680,
+      "sections": [
+        {
+          "name": ".text",
+          "instructions": 40,
+          "direct_fp_memory_references": 0,
+          "minimum_offset": null
+        },
+        {
+          "name": "kprobe/trusted",
+          "instructions": 114654,
+          "direct_fp_memory_references": 40488,
+          "minimum_offset": -1376
+        }
+      ]
+    },
+    {
+      "stage": "machine-o2",
+      "archive": "kprog/results/tetragon-tables-20261126/backend-o2-ir-stage/39/compiler-evidence.tar.zst.part-aa",
+      "object_bytes": 1939680,
+      "sections": [
+        {
+          "name": ".text",
+          "instructions": 40,
+          "direct_fp_memory_references": 0,
+          "minimum_offset": null
+        },
+        {
+          "name": "kprobe/trusted",
+          "instructions": 114654,
+          "direct_fp_memory_references": 40488,
+          "minimum_offset": -1376
+        }
+      ]
+    },
+    {
+      "stage": "postbounds-o2",
+      "archive": "kprog/results/tetragon-tables-20261126/postbounds-o2-control/39/compiler-evidence.tar.zst.part-aa",
+      "object_bytes": 1647536,
+      "sections": [
+        {
+          "name": ".text",
+          "instructions": 40,
+          "direct_fp_memory_references": 0,
+          "minimum_offset": null
+        },
+        {
+          "name": "kprobe/trusted",
+          "instructions": 88907,
+          "direct_fp_memory_references": 37351,
+          "minimum_offset": -2056
+        }
+      ]
+    }
+  ]
+}

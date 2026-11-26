@@ -310,3 +310,24 @@ and8persistent-table tests also pass. Initial fixture-link and outer-RET
 selection mistakes are recorded in the trial logs; final tests inspect
 only RETs reached under a real local-call context. Full24-source breadth
 replay is running separately; stock frame failures remain open.
+
+PERF 2026-11-26T19:35:41Z — Breadth and uninterrupted-backend control
+
+The full24captured requests again generate B C successfully; all24source
+texts are byte-for-byte unchanged after the return-PC fact fix.
+return-lea-breadth.json/log retains the actual replay. Static archived ELF
+R10memory operand inventory backend-stack-operands.json finds normal39
+minimum directFPoffset-1376, machine-onlyO2 also-1376, post-boundsO2-2056.
+These are direct memory operands only, not total frame measurements; the
+normal stock first rejection-528 never implied only16bytes excess.
+
+The next result-only unsplit-control uses preserved normal bounds.bc and
+the same production O1 flags, emits B in one uninterrupted Clang invocation
+without MIR serialization/packing, then attempts the same sole-kernel stock
+load. It tests that compiler boundary rather than another optimization
+level. It is one fixed recipe, no production per-program selection or
+runtime setting. Existing MIR/backend-input.ll are archived untouched and
+are not outputs of this control. Prior generated artifacts remain in their
+committed archives; the canonical B object is replaced in place. Dry Make
+commands are retained in unsplit-dry-run.log. Production B/P flags, image,
+all LTO components and frozen full timing stay unchanged.

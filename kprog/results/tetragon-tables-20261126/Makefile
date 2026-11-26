@@ -47,3 +47,10 @@ spill-liveness:
 check-return-lea:
 	$(CC) -c calls.S -o calls.o
 	python3 check_return_lea.py $(REVISION)
+
+.PHONY: unsplit-group unsplit-control
+UNSPLIT_OUT ?= $(CURDIR)/unsplit-control
+unsplit-group:
+	python3 unsplit_control.py $(REQUEST) $(RECORDS)
+unsplit-control:
+	python3 return_pipeline.py --unsplit $(UNSPLIT_OUT) 39

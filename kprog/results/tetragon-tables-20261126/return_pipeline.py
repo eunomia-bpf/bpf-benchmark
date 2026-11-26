@@ -11,12 +11,14 @@ from datetime import datetime, timezone
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 arguments = sys.argv[1:]
-BACKEND_CONTROL = arguments[:1] == ['--backend-o2']
-if BACKEND_CONTROL:
+CONTROLS = {'--backend-o2': ('backend-o2-group', 'Common post-bounds IR/machine O2 control'),
+            '--unsplit': ('unsplit-group', 'Common uninterrupted O1 backend control')}
+control = CONTROLS.get(arguments[0]) if arguments else None
+if control:
     arguments = arguments[1:]
 OUT = Path(arguments[0]) if arguments else HERE / 'return-pipeline'
 REQUESTS = tuple(map(int, arguments[1:])) if len(arguments) > 1 else (12, 38)
-COMPILE_TARGET = 'backend-o2-group' if BACKEND_CONTROL else 'compile-group'
+COMPILE_TARGET = control[0] if control else 'compile-group'
 LOCKS = Path('/workspaces/.agent-state/kprog-lanes/locks')
 ARCHIVES = Path('/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests')
 
@@ -70,7 +72,7 @@ status = 1
 record = dict(started_utc=now(), compile_target=COMPILE_TARGET,
               source=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
               kernel_source=subprocess.check_output(['git', '-C', 'vendor/linux-framework', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
-              scope=('Common B machine-backend O2 control, production policy unchanged. ' if BACKEND_CONTROL else '') +
+              scope=(control[1] + ', production policy unchanged. ' if control else '') +
                     'B compilation and sole-kernel detached stock verification only; no native execution or timing.', cases=[])
 try:
     with (LOCKS / 'timing').open('a') as timing:
