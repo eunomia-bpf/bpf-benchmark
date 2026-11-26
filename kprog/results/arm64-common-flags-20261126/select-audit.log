@@ -1,0 +1,53 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 select_audit.py
+{
+  "controls": [
+    {
+      "name": "default",
+      "select_family_instructions": 12
+    },
+    {
+      "name": "without-early-ifcvt",
+      "select_family_instructions": 12
+    }
+  ],
+  "by_app": {
+    "bcc": {
+      "objects": 8,
+      "ir_selects": 0,
+      "native_instructions": 2203,
+      "native_selects": 12
+    },
+    "cilium": {
+      "objects": 8,
+      "ir_selects": 39,
+      "native_instructions": 57995,
+      "native_selects": 502
+    },
+    "katran": {
+      "objects": 4,
+      "ir_selects": 0,
+      "native_instructions": 2248,
+      "native_selects": 19
+    },
+    "otelcol-ebpf-profiler": {
+      "objects": 1,
+      "ir_selects": 14,
+      "native_instructions": 89733,
+      "native_selects": 546
+    },
+    "tetragon": {
+      "objects": 88,
+      "ir_selects": 344,
+      "native_instructions": 1372052,
+      "native_selects": 13847
+    },
+    "tracee": {
+      "objects": 3,
+      "ir_selects": 3,
+      "native_instructions": 394210,
+      "native_selects": 293
+    }
+  }
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

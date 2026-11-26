@@ -23,3 +23,7 @@ abi-checked-before:
 	python3 abi_checked.py before
 abi-checked-after:
 	python3 abi_checked.py after
+
+.PHONY: select-audit
+select-audit:
+	python3 select_audit.py
