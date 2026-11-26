@@ -396,3 +396,31 @@ MIR input reader before commands, retry finalemitter1, machineO2 emits the
 identical normalELF then stockR10-528, postIR2 stockR10-1304, uninterrupted
 O1 stockR10-808. No preprocessing command/newpiece cleanup occurred in any
 of these controls; original9cleanup is already committed and rechecked.
+
+PERF 2026-11-26T20:11:51Z — Full current-stage acceptance result
+
+Finite controller715897 completed0 at20:03:34Z; final publication2450cf92c.
+All286explicit current pairs link. Complete C rendering accepts285before
+pre06d parentd229ed691 and285current source0be40eef0; those285 C texts are
+byte-for-byte identical. Zero newly refused, zero missing pairs and zero
+unexpected generation errors. Per-app pairs/generated-before/current:
+BCC26/26/26,Cilium61/61/61,Katran3/3/3,OTel24/24/24,
+Tetragon76/75/75,Tracee96/96/96. Thus every request accepted by the pre06d
+generator in this entire current explicit catalog remains accepted; the
+four persistent-base proof conditions introduce no refusal on that set.
+This is not a claim about stock B verification or live app safety.
+
+One pre-existing refusal is unchanged: case188, Tetragon
+bpf_multi_usdt_v61.native.o:try_preload_arg (.text helper),
+`ABI CFG target 0x40f2 is not an instruction`. This is not a06dregression;
+it is a separate phase1 generator issue to inspect next. Every one of286
+per-case archives has been opened, its case.json matched against the journal
+and its before/current source bytes compared directly when generated.
+The native input archive tar/zstd/split statuses are all0.
+
+The scope remains286current explicit pairs plus49unresolved runtime groups,
+not the historical P3aggregate289. That older receipt has no matching
+manifest snapshot, so three old pair identities are unknown. The49groups
+are retained in catalog.json, not resolved or skipped at app runtime by
+this audit. No source/policy/flag/image change or new preprocessing/removal
+occurred. Full timing stays frozen and all LTO pieces remain together.

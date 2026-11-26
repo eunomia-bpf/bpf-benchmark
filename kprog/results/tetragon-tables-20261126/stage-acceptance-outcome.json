@@ -1,0 +1,90 @@
+{
+  "recorded_utc": "2026-11-26T20:11:51Z",
+  "baseline": "d229ed6917225765f71fc7c15e405659fb22d7e6",
+  "source": "0be40eef0fb959e5f8a8e4e365ff7568aa0769b7",
+  "started_utc": "2026-11-26T19:54:29Z",
+  "ended_utc": "2026-11-26T20:03:34Z",
+  "controller_status": 0,
+  "explicit_pairs": 286,
+  "linked": 286,
+  "before_generated": 285,
+  "current_generated": 285,
+  "source_identical": 285,
+  "newly_refused": [],
+  "missing_pairs": [],
+  "unexpected_generation_errors": [],
+  "per_app": [
+    {
+      "app": "bcc",
+      "pairs": 26,
+      "linked": 26,
+      "before_generated": 26,
+      "current_generated": 26,
+      "identical_source": 26
+    },
+    {
+      "app": "cilium",
+      "pairs": 61,
+      "linked": 61,
+      "before_generated": 61,
+      "current_generated": 61,
+      "identical_source": 61
+    },
+    {
+      "app": "katran",
+      "pairs": 3,
+      "linked": 3,
+      "before_generated": 3,
+      "current_generated": 3,
+      "identical_source": 3
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "pairs": 24,
+      "linked": 24,
+      "before_generated": 24,
+      "current_generated": 24,
+      "identical_source": 24
+    },
+    {
+      "app": "tetragon",
+      "pairs": 76,
+      "linked": 76,
+      "before_generated": 75,
+      "current_generated": 75,
+      "identical_source": 75
+    },
+    {
+      "app": "tracee",
+      "pairs": 96,
+      "linked": 96,
+      "before_generated": 96,
+      "current_generated": 96,
+      "identical_source": 96
+    }
+  ],
+  "unchanged_refusals": [
+    {
+      "case": 188,
+      "app": "tetragon",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/bpf_multi_usdt_v61.native.o",
+      "symbol": "try_preload_arg",
+      "before": {
+        "status": "refused",
+        "error_type": "ValueError",
+        "error": "ABI CFG target 0x40f2 is not an instruction",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/tetragon-tables-20261126/stage_acceptance.py\", line 74, in generate\n    text = generator.render_program(name, insns, functions, exit_addr=end, rodata16=rodata, **options)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"06d05f8f0^:kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1879, in render_program\n  File \"06d05f8f0^:kprog/x86/micro-prog/x86_abi.py\", line 656, in check_definedness\n  File \"06d05f8f0^:kprog/x86/micro-prog/x86_abi.py\", line 109, in push\nValueError: ABI CFG target 0x40f2 is not an instruction\n"
+      },
+      "current": {
+        "status": "refused",
+        "error_type": "ValueError",
+        "error": "ABI CFG target 0x40f2 is not an instruction",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/tetragon-tables-20261126/stage_acceptance.py\", line 74, in generate\n    text = generator.render_program(name, insns, functions, exit_addr=end, rodata16=rodata, **options)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py\", line 1879, in render_program\n    stack_bytes = check_definedness(all_insns, targets, exit_addr,\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 666, in check_definedness\n    push(child, target, State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants)))\n  File \"/workspaces/repository/kprog/x86/micro-prog/x86_abi.py\", line 115, in push\n    raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')\nValueError: ABI CFG target 0x40f2 is not an instruction\n"
+      }
+    }
+  ],
+  "runtime_resolved_groups": 49,
+  "scope": "Existing full-stage proof/kernel link with stand-in plan; full C rendering with identical ELF-derived section/context and map/value externs on both versions. No B compilation, stock verification, live binding or native execution.",
+  "historical_289_scope": "P3 aggregate289 has no matching retained manifest snapshot; current explicit pairs are compared in full, not relabeled289.",
+  "archive_audit": "stage-acceptance-archive-audit.json"
+}
