@@ -1,0 +1,3995 @@
+{
+  "recorded_utc": "2026-11-26T23:09:19Z",
+  "old_target": "/workspaces/repository/kprog/arm64/build/app-native-link",
+  "canonical_target": "/workspaces/repository/kprog/x86/native_lab/native_link/target",
+  "archived": [
+    {
+      "member": ".rustc_info.json",
+      "bytes": 2203,
+      "mtime_ns": 1793974685061162188
+    },
+    {
+      "member": "CACHEDIR.TAG",
+      "bytes": 177,
+      "mtime_ns": 1793972931966330714
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/CACHEDIR.TAG",
+      "bytes": 177,
+      "mtime_ns": 1793974660457630025
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.cargo-artifact-lock",
+      "bytes": 0,
+      "mtime_ns": 1793974660457630025
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.cargo-build-lock",
+      "bytes": 0,
+      "mtime_ns": 1793974660457630025
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.cargo-lock",
+      "bytes": 0,
+      "mtime_ns": 1793974660457630025
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstream-553de5b0e7943b33/dep-lib-anstream",
+      "bytes": 14,
+      "mtime_ns": 1793974660667634566
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstream-553de5b0e7943b33/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660667634566
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstream-553de5b0e7943b33/lib-anstream",
+      "bytes": 16,
+      "mtime_ns": 1793974661119644340
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstream-553de5b0e7943b33/lib-anstream.json",
+      "bytes": 849,
+      "mtime_ns": 1793974661119644340
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-b0f9c447fe10d60e/dep-lib-anstyle",
+      "bytes": 14,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-b0f9c447fe10d60e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-b0f9c447fe10d60e/lib-anstyle",
+      "bytes": 16,
+      "mtime_ns": 1793974660710635495
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-b0f9c447fe10d60e/lib-anstyle.json",
+      "bytes": 433,
+      "mtime_ns": 1793974660710635495
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-parse-8d5dd669a9f6aead/dep-lib-anstyle_parse",
+      "bytes": 14,
+      "mtime_ns": 1793974660541833011
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-parse-8d5dd669a9f6aead/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660541833011
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-parse-8d5dd669a9f6aead/lib-anstyle_parse",
+      "bytes": 16,
+      "mtime_ns": 1793974660704282526
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-parse-8d5dd669a9f6aead/lib-anstyle_parse.json",
+      "bytes": 519,
+      "mtime_ns": 1793974660704282526
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-query-5f6588979c45d338/dep-lib-anstyle_query",
+      "bytes": 14,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-query-5f6588979c45d338/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-query-5f6588979c45d338/lib-anstyle_query",
+      "bytes": 16,
+      "mtime_ns": 1793974660553632100
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anstyle-query-5f6588979c45d338/lib-anstyle_query.json",
+      "bytes": 407,
+      "mtime_ns": 1793974660553632100
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-26a99d22f9f7ac2b/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660975641226
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-26a99d22f9f7ac2b/run-build-script-build-script-build.json",
+      "bytes": 419,
+      "mtime_ns": 1793974660975641226
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-6e79a5f4dc577a04/dep-lib-anyhow",
+      "bytes": 14,
+      "mtime_ns": 1793974661134644664
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-6e79a5f4dc577a04/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661134644664
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-6e79a5f4dc577a04/lib-anyhow",
+      "bytes": 16,
+      "mtime_ns": 1793974661509652774
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/anyhow-6e79a5f4dc577a04/lib-anyhow.json",
+      "bytes": 515,
+      "mtime_ns": 1793974661509652774
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/cfg-if-9d20f159ffcd1b02/dep-lib-cfg_if",
+      "bytes": 14,
+      "mtime_ns": 1793974660704635366
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/cfg-if-9d20f159ffcd1b02/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660704635366
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/cfg-if-9d20f159ffcd1b02/lib-cfg_if",
+      "bytes": 16,
+      "mtime_ns": 1793974660745636253
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/cfg-if-9d20f159ffcd1b02/lib-cfg_if.json",
+      "bytes": 422,
+      "mtime_ns": 1793974660745636253
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap-7a5e5bac0a27bc88/dep-lib-clap",
+      "bytes": 14,
+      "mtime_ns": 1793974662931495454
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap-7a5e5bac0a27bc88/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974662931495454
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap-7a5e5bac0a27bc88/lib-clap",
+      "bytes": 16,
+      "mtime_ns": 1793974662953960142
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap-7a5e5bac0a27bc88/lib-clap.json",
+      "bytes": 927,
+      "mtime_ns": 1793974662953960142
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_builder-1507e6b2e781c5c1/dep-lib-clap_builder",
+      "bytes": 14,
+      "mtime_ns": 1793974660976641248
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_builder-1507e6b2e781c5c1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660976641248
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_builder-1507e6b2e781c5c1/lib-clap_builder",
+      "bytes": 16,
+      "mtime_ns": 1793974666765766445
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_builder-1507e6b2e781c5c1/lib-clap_builder.json",
+      "bytes": 963,
+      "mtime_ns": 1793974666765766445
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_lex-0e01e4c19ef9960d/dep-lib-clap_lex",
+      "bytes": 14,
+      "mtime_ns": 1793974660555632143
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_lex-0e01e4c19ef9960d/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660555632143
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_lex-0e01e4c19ef9960d/lib-clap_lex",
+      "bytes": 16,
+      "mtime_ns": 1793974660815637766
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/clap_lex-0e01e4c19ef9960d/lib-clap_lex.json",
+      "bytes": 395,
+      "mtime_ns": 1793974660815637766
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/colorchoice-1dc3a9c657c177db/dep-lib-colorchoice",
+      "bytes": 14,
+      "mtime_ns": 1793974660476630435
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/colorchoice-1dc3a9c657c177db/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660476630435
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/colorchoice-1dc3a9c657c177db/lib-colorchoice",
+      "bytes": 16,
+      "mtime_ns": 1793974660554632121
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/colorchoice-1dc3a9c657c177db/lib-colorchoice.json",
+      "bytes": 402,
+      "mtime_ns": 1793974660554632121
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-acea0ee7ec3fb790/dep-lib-crc32fast",
+      "bytes": 14,
+      "mtime_ns": 1793974660745636253
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-acea0ee7ec3fb790/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660745636253
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-acea0ee7ec3fb790/lib-crc32fast",
+      "bytes": 16,
+      "mtime_ns": 1793974660907639756
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-acea0ee7ec3fb790/lib-crc32fast.json",
+      "bytes": 563,
+      "mtime_ns": 1793974660907639756
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-f5d45ff6b750cde2/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660490630738
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/crc32fast-f5d45ff6b750cde2/run-build-script-build-script-build.json",
+      "bytes": 255,
+      "mtime_ns": 1793974660490630738
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/equivalent-1137c0cf9c5b6195/dep-lib-equivalent",
+      "bytes": 14,
+      "mtime_ns": 1793974660554632121
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/equivalent-1137c0cf9c5b6195/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660554632121
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/equivalent-1137c0cf9c5b6195/lib-equivalent",
+      "bytes": 16,
+      "mtime_ns": 1793974660604633203
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/equivalent-1137c0cf9c5b6195/lib-equivalent.json",
+      "bytes": 398,
+      "mtime_ns": 1793974660604633203
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/foldhash-8677aa8addd7cfa4/dep-lib-foldhash",
+      "bytes": 14,
+      "mtime_ns": 1793974660495630846
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/foldhash-8677aa8addd7cfa4/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660495630846
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/foldhash-8677aa8addd7cfa4/lib-foldhash",
+      "bytes": 16,
+      "mtime_ns": 1793974660667634566
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/foldhash-8677aa8addd7cfa4/lib-foldhash.json",
+      "bytes": 415,
+      "mtime_ns": 1793974660667634566
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-20018db0e07ce0f1/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793974660543631884
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-20018db0e07ce0f1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660543631884
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-20018db0e07ce0f1/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793974661355649444
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-20018db0e07ce0f1/lib-hashbrown.json",
+      "bytes": 598,
+      "mtime_ns": 1793974661355649444
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-583b7813bc61d259/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793974660710635495
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-583b7813bc61d259/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660710635495
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-583b7813bc61d259/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793974661372649812
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/hashbrown-583b7813bc61d259/lib-hashbrown.json",
+      "bytes": 676,
+      "mtime_ns": 1793974661372649812
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/iced-x86-dc2cca99c30afe65/dep-lib-iced_x86",
+      "bytes": 14,
+      "mtime_ns": 1793974661175645551
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/iced-x86-dc2cca99c30afe65/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661175645551
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/iced-x86-dc2cca99c30afe65/lib-iced_x86",
+      "bytes": 16,
+      "mtime_ns": 1793974670056837624
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/iced-x86-dc2cca99c30afe65/lib-iced_x86.json",
+      "bytes": 947,
+      "mtime_ns": 1793974670056837624
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/indexmap-cae78440e5a08a14/dep-lib-indexmap",
+      "bytes": 14,
+      "mtime_ns": 1793974661313687034
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/indexmap-cae78440e5a08a14/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661313687034
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/indexmap-cae78440e5a08a14/lib-indexmap",
+      "bytes": 16,
+      "mtime_ns": 1793974661961662549
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/indexmap-cae78440e5a08a14/lib-indexmap.json",
+      "bytes": 632,
+      "mtime_ns": 1793974661962662571
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/is_terminal_polyfill-a40234635818defc/dep-lib-is_terminal_polyfill",
+      "bytes": 14,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/is_terminal_polyfill-a40234635818defc/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/is_terminal_polyfill-a40234635818defc/lib-is_terminal_polyfill",
+      "bytes": 16,
+      "mtime_ns": 1793974660541833011
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/is_terminal_polyfill-a40234635818defc/lib-is_terminal_polyfill.json",
+      "bytes": 442,
+      "mtime_ns": 1793974660541833011
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/itoa-3c9c955f00d8e3c1/dep-lib-itoa",
+      "bytes": 14,
+      "mtime_ns": 1793974661118644318
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/itoa-3c9c955f00d8e3c1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661118644318
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/itoa-3c9c955f00d8e3c1/lib-itoa",
+      "bytes": 16,
+      "mtime_ns": 1793974661265647498
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/itoa-3c9c955f00d8e3c1/lib-itoa.json",
+      "bytes": 400,
+      "mtime_ns": 1793974661265647498
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/lazy_static-f906d2deec2c06ce/dep-lib-lazy_static",
+      "bytes": 14,
+      "mtime_ns": 1793974661121644384
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/lazy_static-f906d2deec2c06ce/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661121644384
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/lazy_static-f906d2deec2c06ce/lib-lazy_static",
+      "bytes": 16,
+      "mtime_ns": 1793974661174645530
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/lazy_static-f906d2deec2c06ce/lib-lazy_static.json",
+      "bytes": 426,
+      "mtime_ns": 1793974661174645530
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/memchr-0db23c49f2f04ca8/dep-lib-memchr",
+      "bytes": 14,
+      "mtime_ns": 1793974660606633246
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/memchr-0db23c49f2f04ca8/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660606633246
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/memchr-0db23c49f2f04ca8/lib-memchr",
+      "bytes": 16,
+      "mtime_ns": 1793974661108644102
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/memchr-0db23c49f2f04ca8/lib-memchr.json",
+      "bytes": 509,
+      "mtime_ns": 1793974661109644124
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-40f52e836c3328eb/bin-native-link",
+      "bytes": 16,
+      "mtime_ns": 1794182174648710404
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-40f52e836c3328eb/bin-native-link.json",
+      "bytes": 750,
+      "mtime_ns": 1794182174648710404
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-40f52e836c3328eb/dep-bin-native-link",
+      "bytes": 47,
+      "mtime_ns": 1794182155468289715
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-40f52e836c3328eb/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794182155468289715
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-b38cd3fa557e404c/bin-native-link-arm64-rodata-extents",
+      "bytes": 16,
+      "mtime_ns": 1794089718656195776
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-b38cd3fa557e404c/bin-native-link-arm64-rodata-extents.json",
+      "bytes": 772,
+      "mtime_ns": 1794089718656195776
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-b38cd3fa557e404c/dep-bin-native-link-arm64-rodata-extents",
+      "bytes": 47,
+      "mtime_ns": 1794089700889806935
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/native-link-b38cd3fa557e404c/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794089700889806935
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-2e50fa5935e56e82/dep-lib-object",
+      "bytes": 14,
+      "mtime_ns": 1793974661941267451
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-2e50fa5935e56e82/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661941267451
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-2e50fa5935e56e82/lib-object",
+      "bytes": 16,
+      "mtime_ns": 1793974666316756734
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-2e50fa5935e56e82/lib-object.json",
+      "bytes": 1196,
+      "mtime_ns": 1793974666316756734
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-aa2ee818f1ef885e/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660838638264
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/object-aa2ee818f1ef885e/run-build-script-build-script-build.json",
+      "bytes": 256,
+      "mtime_ns": 1793974660838638264
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-213b168e11ddb9fc/dep-lib-serde",
+      "bytes": 97,
+      "mtime_ns": 1793974662324777161
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-213b168e11ddb9fc/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974662324777161
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-213b168e11ddb9fc/lib-serde",
+      "bytes": 16,
+      "mtime_ns": 1793974662799680672
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-213b168e11ddb9fc/lib-serde.json",
+      "bytes": 717,
+      "mtime_ns": 1793974662799680672
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-b41b2029ca7a162c/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660855638631
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde-b41b2029ca7a162c/run-build-script-build-script-build.json",
+      "bytes": 354,
+      "mtime_ns": 1793974660855638631
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-09b7a84bdc408e12/dep-lib-serde_core",
+      "bytes": 102,
+      "mtime_ns": 1793974660496630868
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-09b7a84bdc408e12/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660496630868
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-09b7a84bdc408e12/lib-serde_core",
+      "bytes": 16,
+      "mtime_ns": 1793974662382671654
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-09b7a84bdc408e12/lib-serde_core.json",
+      "bytes": 553,
+      "mtime_ns": 1793974662382671654
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-a9af0570d11bae77/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660494630825
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_core-a9af0570d11bae77/run-build-script-build-script-build.json",
+      "bytes": 358,
+      "mtime_ns": 1793974660494630825
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-76ba514bad6429c6/dep-lib-serde_json",
+      "bytes": 14,
+      "mtime_ns": 1793974662324777161
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-76ba514bad6429c6/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974662324777161
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-76ba514bad6429c6/lib-serde_json",
+      "bytes": 16,
+      "mtime_ns": 1793974663691699963
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-76ba514bad6429c6/lib-serde_json.json",
+      "bytes": 863,
+      "mtime_ns": 1793974663691699963
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-e2f75c828544a2de/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974661117644297
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/serde_json-e2f75c828544a2de/run-build-script-build-script-build.json",
+      "bytes": 358,
+      "mtime_ns": 1793974661117644297
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/strsim-0bdfd57758e76787/dep-lib-strsim",
+      "bytes": 14,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/strsim-0bdfd57758e76787/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/strsim-0bdfd57758e76787/lib-strsim",
+      "bytes": 16,
+      "mtime_ns": 1793974661179645638
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/strsim-0bdfd57758e76787/lib-strsim.json",
+      "bytes": 392,
+      "mtime_ns": 1793974661179645638
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/utf8parse-583c46be68dcc8a4/dep-lib-utf8parse",
+      "bytes": 14,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/utf8parse-583c46be68dcc8a4/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660474630392
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/utf8parse-583c46be68dcc8a4/lib-utf8parse",
+      "bytes": 16,
+      "mtime_ns": 1793974660542631863
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/utf8parse-583c46be68dcc8a4/lib-utf8parse.json",
+      "bytes": 432,
+      "mtime_ns": 1793974660542631863
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-5f9387c2c65edb1c/dep-lib-zmij",
+      "bytes": 14,
+      "mtime_ns": 1793974660856638653
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-5f9387c2c65edb1c/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660856638653
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-5f9387c2c65edb1c/lib-zmij",
+      "bytes": 16,
+      "mtime_ns": 1793974661134644664
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-5f9387c2c65edb1c/lib-zmij.json",
+      "bytes": 470,
+      "mtime_ns": 1793974661134644664
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-f390600b2122dfa5/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/.fingerprint/zmij-f390600b2122dfa5/run-build-script-build-script-build.json",
+      "bytes": 353,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/anyhow-26a99d22f9f7ac2b/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660908639777
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/anyhow-26a99d22f9f7ac2b/output",
+      "bytes": 336,
+      "mtime_ns": 1793974660908639777
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/anyhow-26a99d22f9f7ac2b/root-output",
+      "bytes": 124,
+      "mtime_ns": 1793974660975641226
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/anyhow-26a99d22f9f7ac2b/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660975641226
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/crc32fast-f5d45ff6b750cde2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660479630500
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/crc32fast-f5d45ff6b750cde2/output",
+      "bytes": 99,
+      "mtime_ns": 1793974660479630500
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/crc32fast-f5d45ff6b750cde2/root-output",
+      "bytes": 127,
+      "mtime_ns": 1793974660489630717
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/crc32fast-f5d45ff6b750cde2/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660489630717
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/object-aa2ee818f1ef885e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660817637810
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/object-aa2ee818f1ef885e/output",
+      "bytes": 65,
+      "mtime_ns": 1793974660817637810
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/object-aa2ee818f1ef885e/root-output",
+      "bytes": 124,
+      "mtime_ns": 1793974660838638264
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/object-aa2ee818f1ef885e/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660838638264
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde-b41b2029ca7a162c/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660840638307
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde-b41b2029ca7a162c/out/private.rs",
+      "bytes": 142,
+      "mtime_ns": 1793974660845638415
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde-b41b2029ca7a162c/output",
+      "bytes": 582,
+      "mtime_ns": 1793974660840638307
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde-b41b2029ca7a162c/root-output",
+      "bytes": 123,
+      "mtime_ns": 1793974660855638631
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde-b41b2029ca7a162c/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660855638631
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_core-a9af0570d11bae77/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660475630413
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_core-a9af0570d11bae77/out/private.rs",
+      "bytes": 90,
+      "mtime_ns": 1793974660478630479
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_core-a9af0570d11bae77/output",
+      "bytes": 484,
+      "mtime_ns": 1793974660475630413
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_core-a9af0570d11bae77/root-output",
+      "bytes": 128,
+      "mtime_ns": 1793974660494630825
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_core-a9af0570d11bae77/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660494630825
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_json-e2f75c828544a2de/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974661111945504
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_json-e2f75c828544a2de/output",
+      "bytes": 132,
+      "mtime_ns": 1793974661111945504
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_json-e2f75c828544a2de/root-output",
+      "bytes": 128,
+      "mtime_ns": 1793974661117644297
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/serde_json-e2f75c828544a2de/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974661117644297
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/zmij-f390600b2122dfa5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793974660477630456
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/zmij-f390600b2122dfa5/output",
+      "bytes": 126,
+      "mtime_ns": 1793974660477630456
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/zmij-f390600b2122dfa5/root-output",
+      "bytes": 122,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/build/zmij-f390600b2122dfa5/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793974660493630803
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/anstream-553de5b0e7943b33.d",
+      "bytes": 4129,
+      "mtime_ns": 1793974660716635625
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/anstyle-b0f9c447fe10d60e.d",
+      "bytes": 2578,
+      "mtime_ns": 1793974660515631279
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/anstyle_parse-8d5dd669a9f6aead.d",
+      "bytes": 2415,
+      "mtime_ns": 1793974660564632338
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/anstyle_query-5f6588979c45d338.d",
+      "bytes": 1176,
+      "mtime_ns": 1793974660512631213
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/anyhow-6e79a5f4dc577a04.d",
+      "bytes": 4412,
+      "mtime_ns": 1793974661176645572
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/cfg_if-9d20f159ffcd1b02.d",
+      "bytes": 734,
+      "mtime_ns": 1793974660729635907
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/clap-7a5e5bac0a27bc88.d",
+      "bytes": 1506,
+      "mtime_ns": 1793974662945683829
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/clap_builder-1507e6b2e781c5c1.d",
+      "bytes": 23017,
+      "mtime_ns": 1793974661209646287
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/clap_lex-0e01e4c19ef9960d.d",
+      "bytes": 1105,
+      "mtime_ns": 1793974660589632879
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/colorchoice-1dc3a9c657c177db.d",
+      "bytes": 769,
+      "mtime_ns": 1793974660510631171
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/crc32fast-acea0ee7ec3fb790.d",
+      "bytes": 2716,
+      "mtime_ns": 1793974660794637312
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/equivalent-1137c0cf9c5b6195.d",
+      "bytes": 762,
+      "mtime_ns": 1793974660580632684
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/foldhash-8677aa8addd7cfa4.d",
+      "bytes": 1843,
+      "mtime_ns": 1793974660515413998
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/hashbrown-20018db0e07ce0f1.d",
+      "bytes": 6618,
+      "mtime_ns": 1793974660617633484
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/hashbrown-583b7813bc61d259.d",
+      "bytes": 6273,
+      "mtime_ns": 1793974660829638069
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/iced_x86-dc2cca99c30afe65.d",
+      "bytes": 52329,
+      "mtime_ns": 1793974661785658743
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/indexmap-cae78440e5a08a14.d",
+      "bytes": 6876,
+      "mtime_ns": 1793974661368649725
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/is_terminal_polyfill-a40234635818defc.d",
+      "bytes": 836,
+      "mtime_ns": 1793974660513631235
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/itoa-3c9c955f00d8e3c1.d",
+      "bytes": 1089,
+      "mtime_ns": 1793974661137644730
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/lazy_static-f906d2deec2c06ce.d",
+      "bytes": 1170,
+      "mtime_ns": 1793974661144644881
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/memchr-0db23c49f2f04ca8.d",
+      "bytes": 9901,
+      "mtime_ns": 1793974660697177285
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/native_link-40f52e836c3328eb.d",
+      "bytes": 365,
+      "mtime_ns": 1794182155559291710
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/native_link_arm64_rodata_extents-b38cd3fa557e404c.d",
+      "bytes": 407,
+      "mtime_ns": 1794089701087811269
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/object-2e50fa5935e56e82.d",
+      "bytes": 29699,
+      "mtime_ns": 1793974662163666918
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/serde-213b168e11ddb9fc.d",
+      "bytes": 2951,
+      "mtime_ns": 1793974662399672022
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/serde_core-09b7a84bdc408e12.d",
+      "bytes": 8316,
+      "mtime_ns": 1793974660669634608
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/serde_json-76ba514bad6429c6.d",
+      "bytes": 6593,
+      "mtime_ns": 1793974662405672151
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/strsim-0bdfd57758e76787.d",
+      "bytes": 738,
+      "mtime_ns": 1793974660522631430
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/utf8parse-583c46be68dcc8a4.d",
+      "bytes": 1124,
+      "mtime_ns": 1793974660511893225
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/deps/zmij-5f9387c2c65edb1c.d",
+      "bytes": 1081,
+      "mtime_ns": 1793974660893639453
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/native-link",
+      "bytes": 2759336,
+      "mtime_ns": 1794182174630710009,
+      "machine": "EM_AARCH64"
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/native-link-arm64-rodata-extents.d",
+      "bytes": 280,
+      "mtime_ns": 1794089718675196192
+    },
+    {
+      "member": "aarch64-unknown-linux-gnu/release/native-link.d",
+      "bytes": 239,
+      "mtime_ns": 1794157217750613068
+    },
+    {
+      "member": "debug/.cargo-artifact-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972931966330714
+    },
+    {
+      "member": "debug/.cargo-build-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972931966330714
+    },
+    {
+      "member": "debug/.cargo-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972931966330714
+    },
+    {
+      "member": "debug/.fingerprint/anstream-a98462d01da6aca2/dep-lib-anstream",
+      "bytes": 14,
+      "mtime_ns": 1793972932122334122
+    },
+    {
+      "member": "debug/.fingerprint/anstream-a98462d01da6aca2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932122334122
+    },
+    {
+      "member": "debug/.fingerprint/anstream-a98462d01da6aca2/lib-anstream",
+      "bytes": 16,
+      "mtime_ns": 1793972932366339453
+    },
+    {
+      "member": "debug/.fingerprint/anstream-a98462d01da6aca2/lib-anstream.json",
+      "bytes": 804,
+      "mtime_ns": 1793972932366339453
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-4c019e4345862a26/dep-lib-anstyle",
+      "bytes": 14,
+      "mtime_ns": 1793972931972330845
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-4c019e4345862a26/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931972330845
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-4c019e4345862a26/lib-anstyle",
+      "bytes": 16,
+      "mtime_ns": 1793972932115333970
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-4c019e4345862a26/lib-anstyle.json",
+      "bytes": 386,
+      "mtime_ns": 1793972932115333970
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-parse-96e2f6759137828f/dep-lib-anstyle_parse",
+      "bytes": 14,
+      "mtime_ns": 1793972932022382523
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-parse-96e2f6759137828f/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932022382523
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-parse-96e2f6759137828f/lib-anstyle_parse",
+      "bytes": 16,
+      "mtime_ns": 1793972932141343571
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-parse-96e2f6759137828f/lib-anstyle_parse.json",
+      "bytes": 472,
+      "mtime_ns": 1793972932141343571
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-query-59650c27b1628560/dep-lib-anstyle_query",
+      "bytes": 14,
+      "mtime_ns": 1793972931973330867
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-query-59650c27b1628560/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931973330867
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-query-59650c27b1628560/lib-anstyle_query",
+      "bytes": 16,
+      "mtime_ns": 1793972932021331916
+    },
+    {
+      "member": "debug/.fingerprint/anstyle-query-59650c27b1628560/lib-anstyle_query.json",
+      "bytes": 360,
+      "mtime_ns": 1793972932021331916
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-4184027e6f7c6c22/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932515342708
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-4184027e6f7c6c22/build-script-build-script-build.json",
+      "bytes": 419,
+      "mtime_ns": 1793972932515342708
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-4184027e6f7c6c22/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972932346339016
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-4184027e6f7c6c22/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932346339016
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-aceecda2e2a9cd98/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-aceecda2e2a9cd98/run-build-script-build-script-build.json",
+      "bytes": 389,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-cc3ed87143e67a4d/dep-lib-anyhow",
+      "bytes": 14,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-cc3ed87143e67a4d/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-cc3ed87143e67a4d/lib-anyhow",
+      "bytes": 16,
+      "mtime_ns": 1793972933218358068
+    },
+    {
+      "member": "debug/.fingerprint/anyhow-cc3ed87143e67a4d/lib-anyhow.json",
+      "bytes": 469,
+      "mtime_ns": 1793972933218358068
+    },
+    {
+      "member": "debug/.fingerprint/cfg-if-e202c1210b381f60/dep-lib-cfg_if",
+      "bytes": 14,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/.fingerprint/cfg-if-e202c1210b381f60/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/.fingerprint/cfg-if-e202c1210b381f60/lib-cfg_if",
+      "bytes": 16,
+      "mtime_ns": 1793972932160334953
+    },
+    {
+      "member": "debug/.fingerprint/cfg-if-e202c1210b381f60/lib-cfg_if.json",
+      "bytes": 377,
+      "mtime_ns": 1793972932160334953
+    },
+    {
+      "member": "debug/.fingerprint/clap-d23ac14bce308fee/dep-lib-clap",
+      "bytes": 14,
+      "mtime_ns": 1793972936233423940
+    },
+    {
+      "member": "debug/.fingerprint/clap-d23ac14bce308fee/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972936233423940
+    },
+    {
+      "member": "debug/.fingerprint/clap-d23ac14bce308fee/lib-clap",
+      "bytes": 16,
+      "mtime_ns": 1793972936254424399
+    },
+    {
+      "member": "debug/.fingerprint/clap-d23ac14bce308fee/lib-clap.json",
+      "bytes": 882,
+      "mtime_ns": 1793972936254424399
+    },
+    {
+      "member": "debug/.fingerprint/clap_builder-e4774f99e68a0e43/dep-lib-clap_builder",
+      "bytes": 14,
+      "mtime_ns": 1793972932497342315
+    },
+    {
+      "member": "debug/.fingerprint/clap_builder-e4774f99e68a0e43/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932497342315
+    },
+    {
+      "member": "debug/.fingerprint/clap_builder-e4774f99e68a0e43/lib-clap_builder",
+      "bytes": 16,
+      "mtime_ns": 1793972935041397897
+    },
+    {
+      "member": "debug/.fingerprint/clap_builder-e4774f99e68a0e43/lib-clap_builder.json",
+      "bytes": 919,
+      "mtime_ns": 1793972935041397897
+    },
+    {
+      "member": "debug/.fingerprint/clap_derive-f6ad7365b36baa98/dep-lib-clap_derive",
+      "bytes": 14,
+      "mtime_ns": 1793972935210401589
+    },
+    {
+      "member": "debug/.fingerprint/clap_derive-f6ad7365b36baa98/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972935210401589
+    },
+    {
+      "member": "debug/.fingerprint/clap_derive-f6ad7365b36baa98/lib-clap_derive",
+      "bytes": 16,
+      "mtime_ns": 1793972936232423918
+    },
+    {
+      "member": "debug/.fingerprint/clap_derive-f6ad7365b36baa98/lib-clap_derive.json",
+      "bytes": 693,
+      "mtime_ns": 1793972936232423918
+    },
+    {
+      "member": "debug/.fingerprint/clap_lex-4d4a7a08730306b2/dep-lib-clap_lex",
+      "bytes": 14,
+      "mtime_ns": 1793972932358339279
+    },
+    {
+      "member": "debug/.fingerprint/clap_lex-4d4a7a08730306b2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932358339279
+    },
+    {
+      "member": "debug/.fingerprint/clap_lex-4d4a7a08730306b2/lib-clap_lex",
+      "bytes": 16,
+      "mtime_ns": 1793972932502342425
+    },
+    {
+      "member": "debug/.fingerprint/clap_lex-4d4a7a08730306b2/lib-clap_lex.json",
+      "bytes": 349,
+      "mtime_ns": 1793972932502342425
+    },
+    {
+      "member": "debug/.fingerprint/colorchoice-ae9bb2491751696b/dep-lib-colorchoice",
+      "bytes": 14,
+      "mtime_ns": 1793972932067050789
+    },
+    {
+      "member": "debug/.fingerprint/colorchoice-ae9bb2491751696b/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932067050789
+    },
+    {
+      "member": "debug/.fingerprint/colorchoice-ae9bb2491751696b/lib-colorchoice",
+      "bytes": 16,
+      "mtime_ns": 1793972932121334101
+    },
+    {
+      "member": "debug/.fingerprint/colorchoice-ae9bb2491751696b/lib-colorchoice.json",
+      "bytes": 355,
+      "mtime_ns": 1793972932121334101
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-30e241fd443c6f79/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932172335215
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-30e241fd443c6f79/build-script-build-script-build.json",
+      "bytes": 409,
+      "mtime_ns": 1793972932172335215
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-30e241fd443c6f79/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972932023331960
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-30e241fd443c6f79/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932023331960
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-4749094d1e7d56b9/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932189335586
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-4749094d1e7d56b9/run-build-script-build-script-build.json",
+      "bytes": 255,
+      "mtime_ns": 1793972932189335586
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-7d3619bc3276ffb1/dep-lib-crc32fast",
+      "bytes": 14,
+      "mtime_ns": 1793972932503342447
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-7d3619bc3276ffb1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932503342447
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-7d3619bc3276ffb1/lib-crc32fast",
+      "bytes": 16,
+      "mtime_ns": 1793972932642345483
+    },
+    {
+      "member": "debug/.fingerprint/crc32fast-7d3619bc3276ffb1/lib-crc32fast.json",
+      "bytes": 518,
+      "mtime_ns": 1793972932642345483
+    },
+    {
+      "member": "debug/.fingerprint/equivalent-bc5578463be669e6/dep-lib-equivalent",
+      "bytes": 14,
+      "mtime_ns": 1793972932256337050
+    },
+    {
+      "member": "debug/.fingerprint/equivalent-bc5578463be669e6/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932256337050
+    },
+    {
+      "member": "debug/.fingerprint/equivalent-bc5578463be669e6/lib-equivalent",
+      "bytes": 16,
+      "mtime_ns": 1793972932281337597
+    },
+    {
+      "member": "debug/.fingerprint/equivalent-bc5578463be669e6/lib-equivalent.json",
+      "bytes": 353,
+      "mtime_ns": 1793972932281337597
+    },
+    {
+      "member": "debug/.fingerprint/foldhash-b5d13c0e92a91d0a/dep-lib-foldhash",
+      "bytes": 14,
+      "mtime_ns": 1793972932141343571
+    },
+    {
+      "member": "debug/.fingerprint/foldhash-b5d13c0e92a91d0a/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932141343571
+    },
+    {
+      "member": "debug/.fingerprint/foldhash-b5d13c0e92a91d0a/lib-foldhash",
+      "bytes": 16,
+      "mtime_ns": 1793972932247336853
+    },
+    {
+      "member": "debug/.fingerprint/foldhash-b5d13c0e92a91d0a/lib-foldhash.json",
+      "bytes": 370,
+      "mtime_ns": 1793972932247336853
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-8559ad8073936cd5/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793972932353339169
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-8559ad8073936cd5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932353339169
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-8559ad8073936cd5/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793972932902351164
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-8559ad8073936cd5/lib-hashbrown.json",
+      "bytes": 552,
+      "mtime_ns": 1793972932902351164
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-e55c5ebaa8d231b8/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793972932418340589
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-e55c5ebaa8d231b8/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932418340589
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-e55c5ebaa8d231b8/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793972933005353414
+    },
+    {
+      "member": "debug/.fingerprint/hashbrown-e55c5ebaa8d231b8/lib-hashbrown.json",
+      "bytes": 631,
+      "mtime_ns": 1793972933005353414
+    },
+    {
+      "member": "debug/.fingerprint/heck-a876ea2d961da7dc/dep-lib-heck",
+      "bytes": 14,
+      "mtime_ns": 1793972932137334450
+    },
+    {
+      "member": "debug/.fingerprint/heck-a876ea2d961da7dc/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932137334450
+    },
+    {
+      "member": "debug/.fingerprint/heck-a876ea2d961da7dc/lib-heck",
+      "bytes": 16,
+      "mtime_ns": 1793972932256337050
+    },
+    {
+      "member": "debug/.fingerprint/heck-a876ea2d961da7dc/lib-heck.json",
+      "bytes": 342,
+      "mtime_ns": 1793972932256337050
+    },
+    {
+      "member": "debug/.fingerprint/iced-x86-0c301411c6021da4/dep-lib-iced_x86",
+      "bytes": 14,
+      "mtime_ns": 1793972932845349918
+    },
+    {
+      "member": "debug/.fingerprint/iced-x86-0c301411c6021da4/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932845349918
+    },
+    {
+      "member": "debug/.fingerprint/iced-x86-0c301411c6021da4/lib-iced_x86",
+      "bytes": 16,
+      "mtime_ns": 1793972939337491761
+    },
+    {
+      "member": "debug/.fingerprint/iced-x86-0c301411c6021da4/lib-iced_x86.json",
+      "bytes": 902,
+      "mtime_ns": 1793972939338491783
+    },
+    {
+      "member": "debug/.fingerprint/indexmap-e8ccfe7e5c6824ab/dep-lib-indexmap",
+      "bytes": 14,
+      "mtime_ns": 1793972932903351185
+    },
+    {
+      "member": "debug/.fingerprint/indexmap-e8ccfe7e5c6824ab/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932903351185
+    },
+    {
+      "member": "debug/.fingerprint/indexmap-e8ccfe7e5c6824ab/lib-indexmap",
+      "bytes": 16,
+      "mtime_ns": 1793972933412362306
+    },
+    {
+      "member": "debug/.fingerprint/indexmap-e8ccfe7e5c6824ab/lib-indexmap.json",
+      "bytes": 588,
+      "mtime_ns": 1793972933412362306
+    },
+    {
+      "member": "debug/.fingerprint/is_terminal_polyfill-407d487cc0c45818/dep-lib-is_terminal_polyfill",
+      "bytes": 14,
+      "mtime_ns": 1793972932027332047
+    },
+    {
+      "member": "debug/.fingerprint/is_terminal_polyfill-407d487cc0c45818/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932027332047
+    },
+    {
+      "member": "debug/.fingerprint/is_terminal_polyfill-407d487cc0c45818/lib-is_terminal_polyfill",
+      "bytes": 16,
+      "mtime_ns": 1793972932063332834
+    },
+    {
+      "member": "debug/.fingerprint/is_terminal_polyfill-407d487cc0c45818/lib-is_terminal_polyfill.json",
+      "bytes": 395,
+      "mtime_ns": 1793972932063332834
+    },
+    {
+      "member": "debug/.fingerprint/itoa-763a2aea54fe86e2/dep-lib-itoa",
+      "bytes": 14,
+      "mtime_ns": 1793972932643345505
+    },
+    {
+      "member": "debug/.fingerprint/itoa-763a2aea54fe86e2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932643345505
+    },
+    {
+      "member": "debug/.fingerprint/itoa-763a2aea54fe86e2/lib-itoa",
+      "bytes": 16,
+      "mtime_ns": 1793972932788348673
+    },
+    {
+      "member": "debug/.fingerprint/itoa-763a2aea54fe86e2/lib-itoa.json",
+      "bytes": 355,
+      "mtime_ns": 1793972932788348673
+    },
+    {
+      "member": "debug/.fingerprint/lazy_static-98bd77cf47001da3/dep-lib-lazy_static",
+      "bytes": 14,
+      "mtime_ns": 1793972932791348738
+    },
+    {
+      "member": "debug/.fingerprint/lazy_static-98bd77cf47001da3/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932791348738
+    },
+    {
+      "member": "debug/.fingerprint/lazy_static-98bd77cf47001da3/lib-lazy_static",
+      "bytes": 16,
+      "mtime_ns": 1793972932844349896
+    },
+    {
+      "member": "debug/.fingerprint/lazy_static-98bd77cf47001da3/lib-lazy_static.json",
+      "bytes": 381,
+      "mtime_ns": 1793972932844349896
+    },
+    {
+      "member": "debug/.fingerprint/memchr-a9fb9931fea60094/dep-lib-memchr",
+      "bytes": 14,
+      "mtime_ns": 1793972932282337618
+    },
+    {
+      "member": "debug/.fingerprint/memchr-a9fb9931fea60094/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932282337618
+    },
+    {
+      "member": "debug/.fingerprint/memchr-a9fb9931fea60094/lib-memchr",
+      "bytes": 16,
+      "mtime_ns": 1793972932971352671
+    },
+    {
+      "member": "debug/.fingerprint/memchr-a9fb9931fea60094/lib-memchr.json",
+      "bytes": 464,
+      "mtime_ns": 1793972932971352671
+    },
+    {
+      "member": "debug/.fingerprint/native-link-47f135697fa1259b/dep-test-bin-native-link",
+      "bytes": 47,
+      "mtime_ns": 1794058887386540676
+    },
+    {
+      "member": "debug/.fingerprint/native-link-47f135697fa1259b/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794058887386540676
+    },
+    {
+      "member": "debug/.fingerprint/native-link-47f135697fa1259b/test-bin-native-link",
+      "bytes": 16,
+      "mtime_ns": 1794058890756614616
+    },
+    {
+      "member": "debug/.fingerprint/native-link-47f135697fa1259b/test-bin-native-link.json",
+      "bytes": 705,
+      "mtime_ns": 1794058890756614616
+    },
+    {
+      "member": "debug/.fingerprint/object-2e5e4b00bab0c543/dep-lib-object",
+      "bytes": 14,
+      "mtime_ns": 1793972933393627374
+    },
+    {
+      "member": "debug/.fingerprint/object-2e5e4b00bab0c543/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972933393627374
+    },
+    {
+      "member": "debug/.fingerprint/object-2e5e4b00bab0c543/lib-object",
+      "bytes": 16,
+      "mtime_ns": 1793972936637432768
+    },
+    {
+      "member": "debug/.fingerprint/object-2e5e4b00bab0c543/lib-object.json",
+      "bytes": 1153,
+      "mtime_ns": 1793972936638432789
+    },
+    {
+      "member": "debug/.fingerprint/object-5cbcf6d9b8b894c9/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932382339803
+    },
+    {
+      "member": "debug/.fingerprint/object-5cbcf6d9b8b894c9/run-build-script-build-script-build.json",
+      "bytes": 257,
+      "mtime_ns": 1793972932382339803
+    },
+    {
+      "member": "debug/.fingerprint/object-fdb64a2dc0e8906a/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932355339213
+    },
+    {
+      "member": "debug/.fingerprint/object-fdb64a2dc0e8906a/build-script-build-script-build.json",
+      "bytes": 866,
+      "mtime_ns": 1793972932355339213
+    },
+    {
+      "member": "debug/.fingerprint/object-fdb64a2dc0e8906a/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972932190335608
+    },
+    {
+      "member": "debug/.fingerprint/object-fdb64a2dc0e8906a/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932190335608
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-5bc0003d8393bf3f/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-5bc0003d8393bf3f/run-build-script-build-script-build.json",
+      "bytes": 485,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-c92d60a79cf39563/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932199335805
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-c92d60a79cf39563/build-script-build-script-build.json",
+      "bytes": 458,
+      "mtime_ns": 1793972932199335805
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-c92d60a79cf39563/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972931971330824
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-c92d60a79cf39563/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931971330824
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-f8d4f05defdf86b4/dep-lib-proc_macro2",
+      "bytes": 14,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-f8d4f05defdf86b4/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-f8d4f05defdf86b4/lib-proc_macro2",
+      "bytes": 16,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/proc-macro2-f8d4f05defdf86b4/lib-proc_macro2.json",
+      "bytes": 572,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/quote-a0079a1655b520b0/dep-lib-quote",
+      "bytes": 14,
+      "mtime_ns": 1793972932759348039
+    },
+    {
+      "member": "debug/.fingerprint/quote-a0079a1655b520b0/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932759348039
+    },
+    {
+      "member": "debug/.fingerprint/quote-a0079a1655b520b0/lib-quote",
+      "bytes": 16,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/quote-a0079a1655b520b0/lib-quote.json",
+      "bytes": 528,
+      "mtime_ns": 1793972932990353086
+    },
+    {
+      "member": "debug/.fingerprint/quote-bf0bcd823bfa0821/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932126334210
+    },
+    {
+      "member": "debug/.fingerprint/quote-bf0bcd823bfa0821/build-script-build-script-build.json",
+      "bytes": 417,
+      "mtime_ns": 1793972932126334210
+    },
+    {
+      "member": "debug/.fingerprint/quote-bf0bcd823bfa0821/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972931972330845
+    },
+    {
+      "member": "debug/.fingerprint/quote-bf0bcd823bfa0821/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931972330845
+    },
+    {
+      "member": "debug/.fingerprint/quote-f505ce0ff956f0ef/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/.fingerprint/quote-f505ce0ff956f0ef/run-build-script-build-script-build.json",
+      "bytes": 326,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/.fingerprint/serde-3cf2c95ec3720cf7/dep-lib-serde",
+      "bytes": 69,
+      "mtime_ns": 1793972936869437836
+    },
+    {
+      "member": "debug/.fingerprint/serde-3cf2c95ec3720cf7/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972936869437836
+    },
+    {
+      "member": "debug/.fingerprint/serde-3cf2c95ec3720cf7/lib-serde",
+      "bytes": 16,
+      "mtime_ns": 1793972937234445810
+    },
+    {
+      "member": "debug/.fingerprint/serde-3cf2c95ec3720cf7/lib-serde.json",
+      "bytes": 672,
+      "mtime_ns": 1793972937234445810
+    },
+    {
+      "member": "debug/.fingerprint/serde-67f18227888b9c12/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932417340567
+    },
+    {
+      "member": "debug/.fingerprint/serde-67f18227888b9c12/run-build-script-build-script-build.json",
+      "bytes": 325,
+      "mtime_ns": 1793972932417340567
+    },
+    {
+      "member": "debug/.fingerprint/serde-cced0500590e0659/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932346339016
+    },
+    {
+      "member": "debug/.fingerprint/serde-cced0500590e0659/build-script-build-script-build.json",
+      "bytes": 497,
+      "mtime_ns": 1793972932346339016
+    },
+    {
+      "member": "debug/.fingerprint/serde-cced0500590e0659/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972932160334953
+    },
+    {
+      "member": "debug/.fingerprint/serde-cced0500590e0659/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932160334953
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-0eadb61125a8ba05/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-0eadb61125a8ba05/run-build-script-build-script-build.json",
+      "bytes": 330,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-44163a980fc6139d/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932145334625
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-44163a980fc6139d/build-script-build-script-build.json",
+      "bytes": 454,
+      "mtime_ns": 1793972932145334625
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-44163a980fc6139d/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-44163a980fc6139d/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-b83a1580ee63b725/dep-lib-serde_core",
+      "bytes": 74,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-b83a1580ee63b725/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-b83a1580ee63b725/lib-serde_core",
+      "bytes": 16,
+      "mtime_ns": 1793972933929373601
+    },
+    {
+      "member": "debug/.fingerprint/serde_core-b83a1580ee63b725/lib-serde_core.json",
+      "bytes": 507,
+      "mtime_ns": 1793972933929373601
+    },
+    {
+      "member": "debug/.fingerprint/serde_derive-3b0127fc58576ca6/dep-lib-serde_derive",
+      "bytes": 14,
+      "mtime_ns": 1793972935209401567
+    },
+    {
+      "member": "debug/.fingerprint/serde_derive-3b0127fc58576ca6/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972935209401567
+    },
+    {
+      "member": "debug/.fingerprint/serde_derive-3b0127fc58576ca6/lib-serde_derive",
+      "bytes": 16,
+      "mtime_ns": 1793972936869437836
+    },
+    {
+      "member": "debug/.fingerprint/serde_derive-3b0127fc58576ca6/lib-serde_derive.json",
+      "bytes": 580,
+      "mtime_ns": 1793972936869437836
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-5049759476d2e118/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932353339169
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-5049759476d2e118/build-script-build-script-build.json",
+      "bytes": 536,
+      "mtime_ns": 1793972932353339169
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-5049759476d2e118/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972932248336875
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-5049759476d2e118/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932248336875
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-c912ce1fd6bfd45f/dep-lib-serde_json",
+      "bytes": 14,
+      "mtime_ns": 1793972933842371700
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-c912ce1fd6bfd45f/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972933842371700
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-c912ce1fd6bfd45f/lib-serde_json",
+      "bytes": 16,
+      "mtime_ns": 1793972934833393352
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-c912ce1fd6bfd45f/lib-serde_json.json",
+      "bytes": 819,
+      "mtime_ns": 1793972934833393352
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-d0babc3a4540505f/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932390339978
+    },
+    {
+      "member": "debug/.fingerprint/serde_json-d0babc3a4540505f/run-build-script-build-script-build.json",
+      "bytes": 329,
+      "mtime_ns": 1793972932391339999
+    },
+    {
+      "member": "debug/.fingerprint/strsim-5791654f07c0d1f9/dep-lib-strsim",
+      "bytes": 14,
+      "mtime_ns": 1793972932115333970
+    },
+    {
+      "member": "debug/.fingerprint/strsim-5791654f07c0d1f9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932115333970
+    },
+    {
+      "member": "debug/.fingerprint/strsim-5791654f07c0d1f9/lib-strsim",
+      "bytes": 16,
+      "mtime_ns": 1793972932497342315
+    },
+    {
+      "member": "debug/.fingerprint/strsim-5791654f07c0d1f9/lib-strsim.json",
+      "bytes": 347,
+      "mtime_ns": 1793972932497342315
+    },
+    {
+      "member": "debug/.fingerprint/syn-06b74572728ed17d/dep-lib-syn",
+      "bytes": 14,
+      "mtime_ns": 1793972932971352671
+    },
+    {
+      "member": "debug/.fingerprint/syn-06b74572728ed17d/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932971352671
+    },
+    {
+      "member": "debug/.fingerprint/syn-06b74572728ed17d/lib-syn",
+      "bytes": 16,
+      "mtime_ns": 1793972935208401545
+    },
+    {
+      "member": "debug/.fingerprint/syn-06b74572728ed17d/lib-syn.json",
+      "bytes": 773,
+      "mtime_ns": 1793972935208401545
+    },
+    {
+      "member": "debug/.fingerprint/unicode-ident-16671597901020c5/dep-lib-unicode_ident",
+      "bytes": 14,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/unicode-ident-16671597901020c5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/unicode-ident-16671597901020c5/lib-unicode_ident",
+      "bytes": 16,
+      "mtime_ns": 1793972932023331960
+    },
+    {
+      "member": "debug/.fingerprint/unicode-ident-16671597901020c5/lib-unicode_ident.json",
+      "bytes": 358,
+      "mtime_ns": 1793972932023331960
+    },
+    {
+      "member": "debug/.fingerprint/utf8parse-6cef86e2756f710e/dep-lib-utf8parse",
+      "bytes": 14,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/utf8parse-6cef86e2756f710e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931974330889
+    },
+    {
+      "member": "debug/.fingerprint/utf8parse-6cef86e2756f710e/lib-utf8parse",
+      "bytes": 16,
+      "mtime_ns": 1793972932027332047
+    },
+    {
+      "member": "debug/.fingerprint/utf8parse-6cef86e2756f710e/lib-utf8parse.json",
+      "bytes": 387,
+      "mtime_ns": 1793972932027332047
+    },
+    {
+      "member": "debug/.fingerprint/zmij-41010ab236080980/dep-lib-zmij",
+      "bytes": 14,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/.fingerprint/zmij-41010ab236080980/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/.fingerprint/zmij-41010ab236080980/lib-zmij",
+      "bytes": 16,
+      "mtime_ns": 1793972932757347996
+    },
+    {
+      "member": "debug/.fingerprint/zmij-41010ab236080980/lib-zmij.json",
+      "bytes": 424,
+      "mtime_ns": 1793972932757347996
+    },
+    {
+      "member": "debug/.fingerprint/zmij-5842d56de1a6bbda/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932128334254
+    },
+    {
+      "member": "debug/.fingerprint/zmij-5842d56de1a6bbda/build-script-build-script-build.json",
+      "bytes": 375,
+      "mtime_ns": 1793972932128334254
+    },
+    {
+      "member": "debug/.fingerprint/zmij-5842d56de1a6bbda/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972931973330867
+    },
+    {
+      "member": "debug/.fingerprint/zmij-5842d56de1a6bbda/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972931973330867
+    },
+    {
+      "member": "debug/.fingerprint/zmij-8d333075d3db21da/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972932136814312
+    },
+    {
+      "member": "debug/.fingerprint/zmij-8d333075d3db21da/run-build-script-build-script-build.json",
+      "bytes": 325,
+      "mtime_ns": 1793972932136814312
+    },
+    {
+      "member": "debug/build/anyhow-4184027e6f7c6c22/build_script_build-4184027e6f7c6c22.d",
+      "bytes": 526,
+      "mtime_ns": 1793972932368339497
+    },
+    {
+      "member": "debug/build/anyhow-aceecda2e2a9cd98/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932516342730
+    },
+    {
+      "member": "debug/build/anyhow-aceecda2e2a9cd98/output",
+      "bytes": 336,
+      "mtime_ns": 1793972932516342730
+    },
+    {
+      "member": "debug/build/anyhow-aceecda2e2a9cd98/root-output",
+      "bytes": 96,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/build/anyhow-aceecda2e2a9cd98/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932565343801
+    },
+    {
+      "member": "debug/build/crc32fast-30e241fd443c6f79/build_script_build-30e241fd443c6f79.d",
+      "bytes": 535,
+      "mtime_ns": 1793972932047659836
+    },
+    {
+      "member": "debug/build/crc32fast-4749094d1e7d56b9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932172335215
+    },
+    {
+      "member": "debug/build/crc32fast-4749094d1e7d56b9/output",
+      "bytes": 99,
+      "mtime_ns": 1793972932172335215
+    },
+    {
+      "member": "debug/build/crc32fast-4749094d1e7d56b9/root-output",
+      "bytes": 99,
+      "mtime_ns": 1793972932189335586
+    },
+    {
+      "member": "debug/build/crc32fast-4749094d1e7d56b9/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932189335586
+    },
+    {
+      "member": "debug/build/object-5cbcf6d9b8b894c9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932367339475
+    },
+    {
+      "member": "debug/build/object-5cbcf6d9b8b894c9/output",
+      "bytes": 65,
+      "mtime_ns": 1793972932367339475
+    },
+    {
+      "member": "debug/build/object-5cbcf6d9b8b894c9/root-output",
+      "bytes": 96,
+      "mtime_ns": 1793972932382339803
+    },
+    {
+      "member": "debug/build/object-5cbcf6d9b8b894c9/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932382339803
+    },
+    {
+      "member": "debug/build/object-fdb64a2dc0e8906a/build_script_build-fdb64a2dc0e8906a.d",
+      "bytes": 523,
+      "mtime_ns": 1793972932217336198
+    },
+    {
+      "member": "debug/build/proc-macro2-5bc0003d8393bf3f/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932200335827
+    },
+    {
+      "member": "debug/build/proc-macro2-5bc0003d8393bf3f/output",
+      "bytes": 1061,
+      "mtime_ns": 1793972932200335827
+    },
+    {
+      "member": "debug/build/proc-macro2-5bc0003d8393bf3f/root-output",
+      "bytes": 101,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/build/proc-macro2-5bc0003d8393bf3f/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932280573415
+    },
+    {
+      "member": "debug/build/proc-macro2-c92d60a79cf39563/build_script_build-c92d60a79cf39563.d",
+      "bytes": 551,
+      "mtime_ns": 1793972932009331654
+    },
+    {
+      "member": "debug/build/quote-bf0bcd823bfa0821/build_script_build-bf0bcd823bfa0821.d",
+      "bytes": 518,
+      "mtime_ns": 1793972932011850239
+    },
+    {
+      "member": "debug/build/quote-f505ce0ff956f0ef/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932126334210
+    },
+    {
+      "member": "debug/build/quote-f505ce0ff956f0ef/output",
+      "bytes": 83,
+      "mtime_ns": 1793972932126334210
+    },
+    {
+      "member": "debug/build/quote-f505ce0ff956f0ef/root-output",
+      "bytes": 95,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/build/quote-f505ce0ff956f0ef/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932138334472
+    },
+    {
+      "member": "debug/build/serde-67f18227888b9c12/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932392340021
+    },
+    {
+      "member": "debug/build/serde-67f18227888b9c12/out/private.rs",
+      "bytes": 142,
+      "mtime_ns": 1793972932397340131
+    },
+    {
+      "member": "debug/build/serde-67f18227888b9c12/output",
+      "bytes": 582,
+      "mtime_ns": 1793972932392340021
+    },
+    {
+      "member": "debug/build/serde-67f18227888b9c12/root-output",
+      "bytes": 95,
+      "mtime_ns": 1793972932417340567
+    },
+    {
+      "member": "debug/build/serde-67f18227888b9c12/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932417340567
+    },
+    {
+      "member": "debug/build/serde-cced0500590e0659/build_script_build-cced0500590e0659.d",
+      "bytes": 521,
+      "mtime_ns": 1793972932188335565
+    },
+    {
+      "member": "debug/build/serde_core-0eadb61125a8ba05/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932146334647
+    },
+    {
+      "member": "debug/build/serde_core-0eadb61125a8ba05/out/private.rs",
+      "bytes": 90,
+      "mtime_ns": 1793972932148104834
+    },
+    {
+      "member": "debug/build/serde_core-0eadb61125a8ba05/output",
+      "bytes": 484,
+      "mtime_ns": 1793972932146334647
+    },
+    {
+      "member": "debug/build/serde_core-0eadb61125a8ba05/root-output",
+      "bytes": 100,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/build/serde_core-0eadb61125a8ba05/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932154334822
+    },
+    {
+      "member": "debug/build/serde_core-44163a980fc6139d/build_script_build-44163a980fc6139d.d",
+      "bytes": 546,
+      "mtime_ns": 1793972932002331501
+    },
+    {
+      "member": "debug/build/serde_json-5049759476d2e118/build_script_build-5049759476d2e118.d",
+      "bytes": 546,
+      "mtime_ns": 1793972932272337400
+    },
+    {
+      "member": "debug/build/serde_json-d0babc3a4540505f/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932383339825
+    },
+    {
+      "member": "debug/build/serde_json-d0babc3a4540505f/output",
+      "bytes": 132,
+      "mtime_ns": 1793972932383339825
+    },
+    {
+      "member": "debug/build/serde_json-d0babc3a4540505f/root-output",
+      "bytes": 100,
+      "mtime_ns": 1793972932390339978
+    },
+    {
+      "member": "debug/build/serde_json-d0babc3a4540505f/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932390339978
+    },
+    {
+      "member": "debug/build/zmij-5842d56de1a6bbda/build_script_build-5842d56de1a6bbda.d",
+      "bytes": 513,
+      "mtime_ns": 1793972932001331479
+    },
+    {
+      "member": "debug/build/zmij-8d333075d3db21da/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972932128334254
+    },
+    {
+      "member": "debug/build/zmij-8d333075d3db21da/output",
+      "bytes": 126,
+      "mtime_ns": 1793972932128334254
+    },
+    {
+      "member": "debug/build/zmij-8d333075d3db21da/root-output",
+      "bytes": 94,
+      "mtime_ns": 1793972932136814312
+    },
+    {
+      "member": "debug/build/zmij-8d333075d3db21da/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972932136814312
+    },
+    {
+      "member": "debug/deps/anstream-a98462d01da6aca2.d",
+      "bytes": 4045,
+      "mtime_ns": 1793972932158334909
+    },
+    {
+      "member": "debug/deps/anstyle-4c019e4345862a26.d",
+      "bytes": 2494,
+      "mtime_ns": 1793972932010331676
+    },
+    {
+      "member": "debug/deps/anstyle_parse-96e2f6759137828f.d",
+      "bytes": 2331,
+      "mtime_ns": 1793972932049332528
+    },
+    {
+      "member": "debug/deps/anstyle_query-59650c27b1628560.d",
+      "bytes": 1092,
+      "mtime_ns": 1793972932002331501
+    },
+    {
+      "member": "debug/deps/anyhow-cc3ed87143e67a4d.d",
+      "bytes": 4328,
+      "mtime_ns": 1793972933026353873
+    },
+    {
+      "member": "debug/deps/cfg_if-e202c1210b381f60.d",
+      "bytes": 650,
+      "mtime_ns": 1793972932156334866
+    },
+    {
+      "member": "debug/deps/clap-d23ac14bce308fee.d",
+      "bytes": 1422,
+      "mtime_ns": 1793972936247424246
+    },
+    {
+      "member": "debug/deps/clap_builder-e4774f99e68a0e43.d",
+      "bytes": 23378,
+      "mtime_ns": 1793972932643345505
+    },
+    {
+      "member": "debug/deps/clap_derive-f6ad7365b36baa98.d",
+      "bytes": 5305,
+      "mtime_ns": 1793972935354404735
+    },
+    {
+      "member": "debug/deps/clap_lex-4d4a7a08730306b2.d",
+      "bytes": 1021,
+      "mtime_ns": 1793972932384339847
+    },
+    {
+      "member": "debug/deps/colorchoice-ae9bb2491751696b.d",
+      "bytes": 685,
+      "mtime_ns": 1793972932087333358
+    },
+    {
+      "member": "debug/deps/crc32fast-7d3619bc3276ffb1.d",
+      "bytes": 2640,
+      "mtime_ns": 1793972932542343298
+    },
+    {
+      "member": "debug/deps/equivalent-bc5578463be669e6.d",
+      "bytes": 678,
+      "mtime_ns": 1793972932269337334
+    },
+    {
+      "member": "debug/deps/foldhash-b5d13c0e92a91d0a.d",
+      "bytes": 1759,
+      "mtime_ns": 1793972932163335018
+    },
+    {
+      "member": "debug/deps/hashbrown-8559ad8073936cd5.d",
+      "bytes": 6534,
+      "mtime_ns": 1793972932455341398
+    },
+    {
+      "member": "debug/deps/hashbrown-e55c5ebaa8d231b8.d",
+      "bytes": 6189,
+      "mtime_ns": 1793972932533343102
+    },
+    {
+      "member": "debug/deps/heck-a876ea2d961da7dc.d",
+      "bytes": 3532,
+      "mtime_ns": 1793972932153334800
+    },
+    {
+      "member": "debug/deps/iced_x86-0c301411c6021da4.d",
+      "bytes": 52245,
+      "mtime_ns": 1793972933600366413
+    },
+    {
+      "member": "debug/deps/indexmap-e8ccfe7e5c6824ab.d",
+      "bytes": 6792,
+      "mtime_ns": 1793972932995353195
+    },
+    {
+      "member": "debug/deps/is_terminal_polyfill-407d487cc0c45818.d",
+      "bytes": 752,
+      "mtime_ns": 1793972932042332375
+    },
+    {
+      "member": "debug/deps/itoa-763a2aea54fe86e2.d",
+      "bytes": 1005,
+      "mtime_ns": 1793972932676346226
+    },
+    {
+      "member": "debug/deps/lazy_static-98bd77cf47001da3.d",
+      "bytes": 1086,
+      "mtime_ns": 1793972932822349416
+    },
+    {
+      "member": "debug/deps/memchr-a9fb9931fea60094.d",
+      "bytes": 11088,
+      "mtime_ns": 1793972932365339431
+    },
+    {
+      "member": "debug/deps/native_link-47f135697fa1259b.d",
+      "bytes": 309,
+      "mtime_ns": 1794058887667546842
+    },
+    {
+      "member": "debug/deps/object-2e5e4b00bab0c543.d",
+      "bytes": 29615,
+      "mtime_ns": 1793972933633367134
+    },
+    {
+      "member": "debug/deps/proc_macro2-f8d4f05defdf86b4.d",
+      "bytes": 4767,
+      "mtime_ns": 1793972932333338733
+    },
+    {
+      "member": "debug/deps/quote-a0079a1655b520b0.d",
+      "bytes": 2853,
+      "mtime_ns": 1793972932792348760
+    },
+    {
+      "member": "debug/deps/serde-3cf2c95ec3720cf7.d",
+      "bytes": 2727,
+      "mtime_ns": 1793972936912438776
+    },
+    {
+      "member": "debug/deps/serde_core-b83a1580ee63b725.d",
+      "bytes": 8092,
+      "mtime_ns": 1793972932342338929
+    },
+    {
+      "member": "debug/deps/serde_derive-3b0127fc58576ca6.d",
+      "bytes": 8933,
+      "mtime_ns": 1793972935451406854
+    },
+    {
+      "member": "debug/deps/serde_json-c912ce1fd6bfd45f.d",
+      "bytes": 6509,
+      "mtime_ns": 1793972933956374191
+    },
+    {
+      "member": "debug/deps/strsim-5791654f07c0d1f9.d",
+      "bytes": 654,
+      "mtime_ns": 1793972932145334625
+    },
+    {
+      "member": "debug/deps/syn-06b74572728ed17d.d",
+      "bytes": 17167,
+      "mtime_ns": 1793972933181357259
+    },
+    {
+      "member": "debug/deps/unicode_ident-16671597901020c5.d",
+      "bytes": 1096,
+      "mtime_ns": 1793972931996331370
+    },
+    {
+      "member": "debug/deps/utf8parse-6cef86e2756f710e.d",
+      "bytes": 1040,
+      "mtime_ns": 1793972931996331370
+    },
+    {
+      "member": "debug/deps/zmij-41010ab236080980.d",
+      "bytes": 1374,
+      "mtime_ns": 1793972932604344653
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxhk87tz1-0ieijep-64f3aesozj9wfw9qa46szaufr/dep-graph.bin",
+      "bytes": 26673615,
+      "mtime_ns": 1794029041002849453
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxhk87tz1-0ieijep-64f3aesozj9wfw9qa46szaufr/query-cache.bin",
+      "bytes": 12424303,
+      "mtime_ns": 1794029041002849453
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxhk87tz1-0ieijep-64f3aesozj9wfw9qa46szaufr/work-products.bin",
+      "bytes": 16011,
+      "mtime_ns": 1794029041020849844
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxhk87tz1-0ieijep.lock",
+      "bytes": 0,
+      "mtime_ns": 1794029037073764203
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxv9wchl1-1qvfsio-dqhgcga56ugh3meo9q6g0c0ut/dep-graph.bin",
+      "bytes": 26729175,
+      "mtime_ns": 1794058890547610030
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxv9wchl1-1qvfsio-dqhgcga56ugh3meo9q6g0c0ut/query-cache.bin",
+      "bytes": 12510696,
+      "mtime_ns": 1794058890547610030
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxv9wchl1-1qvfsio-dqhgcga56ugh3meo9q6g0c0ut/work-products.bin",
+      "bytes": 16011,
+      "mtime_ns": 1794058890564610404
+    },
+    {
+      "member": "debug/incremental/native_link-0a5uqbwlwha1p/s-hnxv9wchl1-1qvfsio.lock",
+      "bytes": 0,
+      "mtime_ns": 1794058887426541554
+    },
+    {
+      "member": "release/.cargo-artifact-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972942722565725
+    },
+    {
+      "member": "release/.cargo-build-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972942722565725
+    },
+    {
+      "member": "release/.cargo-lock",
+      "bytes": 0,
+      "mtime_ns": 1793972942722565725
+    },
+    {
+      "member": "release/.fingerprint/anstream-66acff63e9091b8e/dep-lib-anstream",
+      "bytes": 14,
+      "mtime_ns": 1793972942899569593
+    },
+    {
+      "member": "release/.fingerprint/anstream-66acff63e9091b8e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942899569593
+    },
+    {
+      "member": "release/.fingerprint/anstream-66acff63e9091b8e/lib-anstream",
+      "bytes": 16,
+      "mtime_ns": 1793972943259212313
+    },
+    {
+      "member": "release/.fingerprint/anstream-66acff63e9091b8e/lib-anstream.json",
+      "bytes": 808,
+      "mtime_ns": 1793972943259212313
+    },
+    {
+      "member": "release/.fingerprint/anstyle-436eacb473563c34/dep-lib-anstyle",
+      "bytes": 14,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/anstyle-436eacb473563c34/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/anstyle-436eacb473563c34/lib-anstyle",
+      "bytes": 16,
+      "mtime_ns": 1793972942899569593
+    },
+    {
+      "member": "release/.fingerprint/anstyle-436eacb473563c34/lib-anstyle.json",
+      "bytes": 389,
+      "mtime_ns": 1793972942899569593
+    },
+    {
+      "member": "release/.fingerprint/anstyle-parse-fd9a27416c686219/dep-lib-anstyle_parse",
+      "bytes": 14,
+      "mtime_ns": 1793972942778566949
+    },
+    {
+      "member": "release/.fingerprint/anstyle-parse-fd9a27416c686219/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942778566949
+    },
+    {
+      "member": "release/.fingerprint/anstyle-parse-fd9a27416c686219/lib-anstyle_parse",
+      "bytes": 16,
+      "mtime_ns": 1793972942922570095
+    },
+    {
+      "member": "release/.fingerprint/anstyle-parse-fd9a27416c686219/lib-anstyle_parse.json",
+      "bytes": 476,
+      "mtime_ns": 1793972942922570095
+    },
+    {
+      "member": "release/.fingerprint/anstyle-query-027ccb6f71877770/dep-lib-anstyle_query",
+      "bytes": 14,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/anstyle-query-027ccb6f71877770/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/anstyle-query-027ccb6f71877770/lib-anstyle_query",
+      "bytes": 16,
+      "mtime_ns": 1793972942815567758
+    },
+    {
+      "member": "release/.fingerprint/anstyle-query-027ccb6f71877770/lib-anstyle_query.json",
+      "bytes": 363,
+      "mtime_ns": 1793972942815567758
+    },
+    {
+      "member": "release/.fingerprint/anyhow-6259131690f23133/dep-lib-anyhow",
+      "bytes": 14,
+      "mtime_ns": 1793972943918591860
+    },
+    {
+      "member": "release/.fingerprint/anyhow-6259131690f23133/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943918591860
+    },
+    {
+      "member": "release/.fingerprint/anyhow-6259131690f23133/lib-anyhow",
+      "bytes": 16,
+      "mtime_ns": 1793972944380601956
+    },
+    {
+      "member": "release/.fingerprint/anyhow-6259131690f23133/lib-anyhow.json",
+      "bytes": 470,
+      "mtime_ns": 1793972944380601956
+    },
+    {
+      "member": "release/.fingerprint/anyhow-86cedd889023f716/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943757588342
+    },
+    {
+      "member": "release/.fingerprint/anyhow-86cedd889023f716/run-build-script-build-script-build.json",
+      "bytes": 393,
+      "mtime_ns": 1793972943757588342
+    },
+    {
+      "member": "release/.fingerprint/anyhow-d3f22f29a7980643/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943097573919
+    },
+    {
+      "member": "release/.fingerprint/anyhow-d3f22f29a7980643/build-script-build-script-build.json",
+      "bytes": 422,
+      "mtime_ns": 1793972943097573919
+    },
+    {
+      "member": "release/.fingerprint/anyhow-d3f22f29a7980643/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942906569746
+    },
+    {
+      "member": "release/.fingerprint/anyhow-d3f22f29a7980643/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942906569746
+    },
+    {
+      "member": "release/.fingerprint/cfg-if-8061b46528201150/dep-lib-cfg_if",
+      "bytes": 14,
+      "mtime_ns": 1793972943259577459
+    },
+    {
+      "member": "release/.fingerprint/cfg-if-8061b46528201150/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943259577459
+    },
+    {
+      "member": "release/.fingerprint/cfg-if-8061b46528201150/lib-cfg_if",
+      "bytes": 16,
+      "mtime_ns": 1793972943304578443
+    },
+    {
+      "member": "release/.fingerprint/cfg-if-8061b46528201150/lib-cfg_if.json",
+      "bytes": 378,
+      "mtime_ns": 1793972943304578443
+    },
+    {
+      "member": "release/.fingerprint/clap-8a22628b5d1602a9/dep-lib-clap",
+      "bytes": 14,
+      "mtime_ns": 1793972947132662093
+    },
+    {
+      "member": "release/.fingerprint/clap-8a22628b5d1602a9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972947132662093
+    },
+    {
+      "member": "release/.fingerprint/clap-8a22628b5d1602a9/lib-clap",
+      "bytes": 16,
+      "mtime_ns": 1793972947154662574
+    },
+    {
+      "member": "release/.fingerprint/clap-8a22628b5d1602a9/lib-clap.json",
+      "bytes": 884,
+      "mtime_ns": 1793972947154662574
+    },
+    {
+      "member": "release/.fingerprint/clap_builder-c9896e2dc196b791/dep-lib-clap_builder",
+      "bytes": 14,
+      "mtime_ns": 1793972943530583382
+    },
+    {
+      "member": "release/.fingerprint/clap_builder-c9896e2dc196b791/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943530583382
+    },
+    {
+      "member": "release/.fingerprint/clap_builder-c9896e2dc196b791/lib-clap_builder",
+      "bytes": 16,
+      "mtime_ns": 1793972949671717580
+    },
+    {
+      "member": "release/.fingerprint/clap_builder-c9896e2dc196b791/lib-clap_builder.json",
+      "bytes": 918,
+      "mtime_ns": 1793972949671717580
+    },
+    {
+      "member": "release/.fingerprint/clap_derive-26178628eddf3182/dep-lib-clap_derive",
+      "bytes": 14,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/clap_derive-26178628eddf3182/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/clap_derive-26178628eddf3182/lib-clap_derive",
+      "bytes": 16,
+      "mtime_ns": 1793972947132662093
+    },
+    {
+      "member": "release/.fingerprint/clap_derive-26178628eddf3182/lib-clap_derive.json",
+      "bytes": 697,
+      "mtime_ns": 1793972947132662093
+    },
+    {
+      "member": "release/.fingerprint/clap_lex-b63dbb7fd48bfb88/dep-lib-clap_lex",
+      "bytes": 14,
+      "mtime_ns": 1793972943305578465
+    },
+    {
+      "member": "release/.fingerprint/clap_lex-b63dbb7fd48bfb88/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943305578465
+    },
+    {
+      "member": "release/.fingerprint/clap_lex-b63dbb7fd48bfb88/lib-clap_lex",
+      "bytes": 16,
+      "mtime_ns": 1793972943621585370
+    },
+    {
+      "member": "release/.fingerprint/clap_lex-b63dbb7fd48bfb88/lib-clap_lex.json",
+      "bytes": 351,
+      "mtime_ns": 1793972943621585370
+    },
+    {
+      "member": "release/.fingerprint/colorchoice-fc5914e7da56009a/dep-lib-colorchoice",
+      "bytes": 14,
+      "mtime_ns": 1793972942817567801
+    },
+    {
+      "member": "release/.fingerprint/colorchoice-fc5914e7da56009a/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942817567801
+    },
+    {
+      "member": "release/.fingerprint/colorchoice-fc5914e7da56009a/lib-colorchoice",
+      "bytes": 16,
+      "mtime_ns": 1793972942873416000
+    },
+    {
+      "member": "release/.fingerprint/colorchoice-fc5914e7da56009a/lib-colorchoice.json",
+      "bytes": 358,
+      "mtime_ns": 1793972942873416000
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-902a9be12e8617f1/dep-lib-crc32fast",
+      "bytes": 14,
+      "mtime_ns": 1793972943344579318
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-902a9be12e8617f1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943344579318
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-902a9be12e8617f1/lib-crc32fast",
+      "bytes": 16,
+      "mtime_ns": 1793972943528583338
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-902a9be12e8617f1/lib-crc32fast.json",
+      "bytes": 520,
+      "mtime_ns": 1793972943528583338
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-aa29198d1e0243fb/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-aa29198d1e0243fb/run-build-script-build-script-build.json",
+      "bytes": 255,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-e0e3e849141f1ed6/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942919570030
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-e0e3e849141f1ed6/build-script-build-script-build.json",
+      "bytes": 412,
+      "mtime_ns": 1793972942919570030
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-e0e3e849141f1ed6/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942729565878
+    },
+    {
+      "member": "release/.fingerprint/crc32fast-e0e3e849141f1ed6/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942729565878
+    },
+    {
+      "member": "release/.fingerprint/equivalent-40820df89af17da5/dep-lib-equivalent",
+      "bytes": 14,
+      "mtime_ns": 1793972943088573723
+    },
+    {
+      "member": "release/.fingerprint/equivalent-40820df89af17da5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943088573723
+    },
+    {
+      "member": "release/.fingerprint/equivalent-40820df89af17da5/lib-equivalent",
+      "bytes": 16,
+      "mtime_ns": 1793972943134574728
+    },
+    {
+      "member": "release/.fingerprint/equivalent-40820df89af17da5/lib-equivalent.json",
+      "bytes": 354,
+      "mtime_ns": 1793972943134574728
+    },
+    {
+      "member": "release/.fingerprint/foldhash-459bb4209a360319/dep-lib-foldhash",
+      "bytes": 14,
+      "mtime_ns": 1793972943074573417
+    },
+    {
+      "member": "release/.fingerprint/foldhash-459bb4209a360319/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943074573417
+    },
+    {
+      "member": "release/.fingerprint/foldhash-459bb4209a360319/lib-foldhash",
+      "bytes": 16,
+      "mtime_ns": 1793972943219576585
+    },
+    {
+      "member": "release/.fingerprint/foldhash-459bb4209a360319/lib-foldhash.json",
+      "bytes": 371,
+      "mtime_ns": 1793972943219576585
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-09ac8c383d149dcf/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793972943564584124
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-09ac8c383d149dcf/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943564584124
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-09ac8c383d149dcf/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793972944217598393
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-09ac8c383d149dcf/lib-hashbrown.json",
+      "bytes": 632,
+      "mtime_ns": 1793972944217598393
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-90ee4dacbb31c0a8/dep-lib-hashbrown",
+      "bytes": 14,
+      "mtime_ns": 1793972942873569025
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-90ee4dacbb31c0a8/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942873569025
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-90ee4dacbb31c0a8/lib-hashbrown",
+      "bytes": 16,
+      "mtime_ns": 1793972943540583600
+    },
+    {
+      "member": "release/.fingerprint/hashbrown-90ee4dacbb31c0a8/lib-hashbrown.json",
+      "bytes": 554,
+      "mtime_ns": 1793972943540583600
+    },
+    {
+      "member": "release/.fingerprint/heck-cdde0c5c32ed7511/dep-lib-heck",
+      "bytes": 14,
+      "mtime_ns": 1793972943221576629
+    },
+    {
+      "member": "release/.fingerprint/heck-cdde0c5c32ed7511/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943221576629
+    },
+    {
+      "member": "release/.fingerprint/heck-cdde0c5c32ed7511/lib-heck",
+      "bytes": 16,
+      "mtime_ns": 1793972943447581568
+    },
+    {
+      "member": "release/.fingerprint/heck-cdde0c5c32ed7511/lib-heck.json",
+      "bytes": 345,
+      "mtime_ns": 1793972943447581568
+    },
+    {
+      "member": "release/.fingerprint/iced-x86-33847630a97a3902/dep-lib-iced_x86",
+      "bytes": 14,
+      "mtime_ns": 1793972943918591860
+    },
+    {
+      "member": "release/.fingerprint/iced-x86-33847630a97a3902/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943918591860
+    },
+    {
+      "member": "release/.fingerprint/iced-x86-33847630a97a3902/lib-iced_x86",
+      "bytes": 16,
+      "mtime_ns": 1793972953539802114
+    },
+    {
+      "member": "release/.fingerprint/iced-x86-33847630a97a3902/lib-iced_x86.json",
+      "bytes": 902,
+      "mtime_ns": 1793972953539802114
+    },
+    {
+      "member": "release/.fingerprint/indexmap-d6c076169ae6e8c2/dep-lib-indexmap",
+      "bytes": 14,
+      "mtime_ns": 1793972943541583622
+    },
+    {
+      "member": "release/.fingerprint/indexmap-d6c076169ae6e8c2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943541583622
+    },
+    {
+      "member": "release/.fingerprint/indexmap-d6c076169ae6e8c2/lib-indexmap",
+      "bytes": 16,
+      "mtime_ns": 1793972944353601365
+    },
+    {
+      "member": "release/.fingerprint/indexmap-d6c076169ae6e8c2/lib-indexmap.json",
+      "bytes": 589,
+      "mtime_ns": 1793972944353601365
+    },
+    {
+      "member": "release/.fingerprint/is_terminal_polyfill-90f7e62e834751e1/dep-lib-is_terminal_polyfill",
+      "bytes": 14,
+      "mtime_ns": 1793972942816567779
+    },
+    {
+      "member": "release/.fingerprint/is_terminal_polyfill-90f7e62e834751e1/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942816567779
+    },
+    {
+      "member": "release/.fingerprint/is_terminal_polyfill-90f7e62e834751e1/lib-is_terminal_polyfill",
+      "bytes": 16,
+      "mtime_ns": 1793972942848568478
+    },
+    {
+      "member": "release/.fingerprint/is_terminal_polyfill-90f7e62e834751e1/lib-is_terminal_polyfill.json",
+      "bytes": 398,
+      "mtime_ns": 1793972942848568478
+    },
+    {
+      "member": "release/.fingerprint/itoa-f24b7fde3becc223/dep-lib-itoa",
+      "bytes": 14,
+      "mtime_ns": 1793972943817589652
+    },
+    {
+      "member": "release/.fingerprint/itoa-f24b7fde3becc223/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943817589652
+    },
+    {
+      "member": "release/.fingerprint/itoa-f24b7fde3becc223/lib-itoa",
+      "bytes": 16,
+      "mtime_ns": 1793972943993593499
+    },
+    {
+      "member": "release/.fingerprint/itoa-f24b7fde3becc223/lib-itoa.json",
+      "bytes": 356,
+      "mtime_ns": 1793972943993593499
+    },
+    {
+      "member": "release/.fingerprint/lazy_static-ae4a585fbc22f7d2/dep-lib-lazy_static",
+      "bytes": 14,
+      "mtime_ns": 1793972943759588385
+    },
+    {
+      "member": "release/.fingerprint/lazy_static-ae4a585fbc22f7d2/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943759588385
+    },
+    {
+      "member": "release/.fingerprint/lazy_static-ae4a585fbc22f7d2/lib-lazy_static",
+      "bytes": 16,
+      "mtime_ns": 1793972943816589630
+    },
+    {
+      "member": "release/.fingerprint/lazy_static-ae4a585fbc22f7d2/lib-lazy_static.json",
+      "bytes": 382,
+      "mtime_ns": 1793972943816589630
+    },
+    {
+      "member": "release/.fingerprint/memchr-4c15dfbab87337d5/dep-lib-memchr",
+      "bytes": 14,
+      "mtime_ns": 1793972943097573919
+    },
+    {
+      "member": "release/.fingerprint/memchr-4c15dfbab87337d5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943097573919
+    },
+    {
+      "member": "release/.fingerprint/memchr-4c15dfbab87337d5/lib-memchr",
+      "bytes": 16,
+      "mtime_ns": 1793972943917591838
+    },
+    {
+      "member": "release/.fingerprint/memchr-4c15dfbab87337d5/lib-memchr.json",
+      "bytes": 465,
+      "mtime_ns": 1793972943917591838
+    },
+    {
+      "member": "release/.fingerprint/native-link-62ccb5c6f5eda54e/dep-test-bin-native-link",
+      "bytes": 47,
+      "mtime_ns": 1794088737645941163
+    },
+    {
+      "member": "release/.fingerprint/native-link-62ccb5c6f5eda54e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794088737645941163
+    },
+    {
+      "member": "release/.fingerprint/native-link-62ccb5c6f5eda54e/test-bin-native-link",
+      "bytes": 16,
+      "mtime_ns": 1794088754515299875
+    },
+    {
+      "member": "release/.fingerprint/native-link-62ccb5c6f5eda54e/test-bin-native-link.json",
+      "bytes": 711,
+      "mtime_ns": 1794088754515299875
+    },
+    {
+      "member": "release/.fingerprint/native-link-89e6cdf9b2bb753e/bin-native-link",
+      "bytes": 16,
+      "mtime_ns": 1794058905939947708
+    },
+    {
+      "member": "release/.fingerprint/native-link-89e6cdf9b2bb753e/bin-native-link.json",
+      "bytes": 706,
+      "mtime_ns": 1794058905939947708
+    },
+    {
+      "member": "release/.fingerprint/native-link-89e6cdf9b2bb753e/dep-bin-native-link",
+      "bytes": 47,
+      "mtime_ns": 1794058890832616284
+    },
+    {
+      "member": "release/.fingerprint/native-link-89e6cdf9b2bb753e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794058890832616284
+    },
+    {
+      "member": "release/.fingerprint/native-link-8af13e2b28f2c096/dep-test-bin-native-link-arm64-rodata-extents",
+      "bytes": 47,
+      "mtime_ns": 1794089683893435013
+    },
+    {
+      "member": "release/.fingerprint/native-link-8af13e2b28f2c096/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1794089683893435013
+    },
+    {
+      "member": "release/.fingerprint/native-link-8af13e2b28f2c096/test-bin-native-link-arm64-rodata-extents",
+      "bytes": 16,
+      "mtime_ns": 1794089700808805162
+    },
+    {
+      "member": "release/.fingerprint/native-link-8af13e2b28f2c096/test-bin-native-link-arm64-rodata-extents.json",
+      "bytes": 733,
+      "mtime_ns": 1794089700808805162
+    },
+    {
+      "member": "release/.fingerprint/object-810b2d415a6d4233/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943343617938
+    },
+    {
+      "member": "release/.fingerprint/object-810b2d415a6d4233/run-build-script-build-script-build.json",
+      "bytes": 256,
+      "mtime_ns": 1793972943343617938
+    },
+    {
+      "member": "release/.fingerprint/object-c5df0082991af2b9/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943317578727
+    },
+    {
+      "member": "release/.fingerprint/object-c5df0082991af2b9/build-script-build-script-build.json",
+      "bytes": 869,
+      "mtime_ns": 1793972943317578727
+    },
+    {
+      "member": "release/.fingerprint/object-c5df0082991af2b9/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972943135574750
+    },
+    {
+      "member": "release/.fingerprint/object-c5df0082991af2b9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943135574750
+    },
+    {
+      "member": "release/.fingerprint/object-dfea7fe4bae12012/dep-lib-object",
+      "bytes": 14,
+      "mtime_ns": 1793972944326600775
+    },
+    {
+      "member": "release/.fingerprint/object-dfea7fe4bae12012/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972944326600775
+    },
+    {
+      "member": "release/.fingerprint/object-dfea7fe4bae12012/lib-object",
+      "bytes": 16,
+      "mtime_ns": 1793972949247708313
+    },
+    {
+      "member": "release/.fingerprint/object-dfea7fe4bae12012/lib-object.json",
+      "bytes": 1151,
+      "mtime_ns": 1793972949248708335
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-04cd1d6962d0f973/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942955038804
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-04cd1d6962d0f973/build-script-build-script-build.json",
+      "bytes": 461,
+      "mtime_ns": 1793972942955038804
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-04cd1d6962d0f973/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942727565835
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-04cd1d6962d0f973/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942727565835
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-2a0678669d77037e/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943043572739
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-2a0678669d77037e/run-build-script-build-script-build.json",
+      "bytes": 488,
+      "mtime_ns": 1793972943043572739
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-3214e68ac3446618/dep-lib-proc_macro2",
+      "bytes": 14,
+      "mtime_ns": 1793972943043572739
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-3214e68ac3446618/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943043572739
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-3214e68ac3446618/lib-proc_macro2",
+      "bytes": 16,
+      "mtime_ns": 1793972943563584102
+    },
+    {
+      "member": "release/.fingerprint/proc-macro2-3214e68ac3446618/lib-proc_macro2.json",
+      "bytes": 574,
+      "mtime_ns": 1793972943563584102
+    },
+    {
+      "member": "release/.fingerprint/quote-5ac12fc42410e4d3/dep-lib-quote",
+      "bytes": 14,
+      "mtime_ns": 1793972943448581590
+    },
+    {
+      "member": "release/.fingerprint/quote-5ac12fc42410e4d3/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943448581590
+    },
+    {
+      "member": "release/.fingerprint/quote-5ac12fc42410e4d3/lib-quote",
+      "bytes": 16,
+      "mtime_ns": 1793972943680586659
+    },
+    {
+      "member": "release/.fingerprint/quote-5ac12fc42410e4d3/lib-quote.json",
+      "bytes": 531,
+      "mtime_ns": 1793972943680586659
+    },
+    {
+      "member": "release/.fingerprint/quote-9a53da4438e1353e/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942903569681
+    },
+    {
+      "member": "release/.fingerprint/quote-9a53da4438e1353e/run-build-script-build-script-build.json",
+      "bytes": 327,
+      "mtime_ns": 1793972942903569681
+    },
+    {
+      "member": "release/.fingerprint/quote-e2982919d7d78c24/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942883569243
+    },
+    {
+      "member": "release/.fingerprint/quote-e2982919d7d78c24/build-script-build-script-build.json",
+      "bytes": 420,
+      "mtime_ns": 1793972942883569243
+    },
+    {
+      "member": "release/.fingerprint/quote-e2982919d7d78c24/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942728565857
+    },
+    {
+      "member": "release/.fingerprint/quote-e2982919d7d78c24/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942728565857
+    },
+    {
+      "member": "release/.fingerprint/serde-272f5916e9509490/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943088573723
+    },
+    {
+      "member": "release/.fingerprint/serde-272f5916e9509490/build-script-build-script-build.json",
+      "bytes": 500,
+      "mtime_ns": 1793972943088573723
+    },
+    {
+      "member": "release/.fingerprint/serde-272f5916e9509490/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942923570117
+    },
+    {
+      "member": "release/.fingerprint/serde-272f5916e9509490/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942923570117
+    },
+    {
+      "member": "release/.fingerprint/serde-b44c066aa104cf8e/dep-lib-serde",
+      "bytes": 71,
+      "mtime_ns": 1793972947866678134
+    },
+    {
+      "member": "release/.fingerprint/serde-b44c066aa104cf8e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972947866678134
+    },
+    {
+      "member": "release/.fingerprint/serde-b44c066aa104cf8e/lib-serde",
+      "bytes": 16,
+      "mtime_ns": 1793972948340688492
+    },
+    {
+      "member": "release/.fingerprint/serde-b44c066aa104cf8e/lib-serde.json",
+      "bytes": 674,
+      "mtime_ns": 1793972948340688492
+    },
+    {
+      "member": "release/.fingerprint/serde-d3e32e378f2231d5/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943698587052
+    },
+    {
+      "member": "release/.fingerprint/serde-d3e32e378f2231d5/run-build-script-build-script-build.json",
+      "bytes": 328,
+      "mtime_ns": 1793972943698587052
+    },
+    {
+      "member": "release/.fingerprint/serde_core-12e01b0532498b47/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942899569593
+    },
+    {
+      "member": "release/.fingerprint/serde_core-12e01b0532498b47/build-script-build-script-build.json",
+      "bytes": 457,
+      "mtime_ns": 1793972942900569615
+    },
+    {
+      "member": "release/.fingerprint/serde_core-12e01b0532498b47/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/serde_core-12e01b0532498b47/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942731565923
+    },
+    {
+      "member": "release/.fingerprint/serde_core-76c56e6fd88c64d0/dep-lib-serde_core",
+      "bytes": 76,
+      "mtime_ns": 1793972942926570183
+    },
+    {
+      "member": "release/.fingerprint/serde_core-76c56e6fd88c64d0/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942926570183
+    },
+    {
+      "member": "release/.fingerprint/serde_core-76c56e6fd88c64d0/lib-serde_core",
+      "bytes": 16,
+      "mtime_ns": 1793972945045616487
+    },
+    {
+      "member": "release/.fingerprint/serde_core-76c56e6fd88c64d0/lib-serde_core.json",
+      "bytes": 508,
+      "mtime_ns": 1793972945045616487
+    },
+    {
+      "member": "release/.fingerprint/serde_core-bfb0e8e3c36430ae/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972942925570161
+    },
+    {
+      "member": "release/.fingerprint/serde_core-bfb0e8e3c36430ae/run-build-script-build-script-build.json",
+      "bytes": 332,
+      "mtime_ns": 1793972942925570161
+    },
+    {
+      "member": "release/.fingerprint/serde_derive-eefbce42b0d977b7/dep-lib-serde_derive",
+      "bytes": 14,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/serde_derive-eefbce42b0d977b7/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/serde_derive-eefbce42b0d977b7/lib-serde_derive",
+      "bytes": 16,
+      "mtime_ns": 1793972947866678134
+    },
+    {
+      "member": "release/.fingerprint/serde_derive-eefbce42b0d977b7/lib-serde_derive.json",
+      "bytes": 583,
+      "mtime_ns": 1793972947866678134
+    },
+    {
+      "member": "release/.fingerprint/serde_json-0525261e0b795374/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943074573417
+    },
+    {
+      "member": "release/.fingerprint/serde_json-0525261e0b795374/build-script-build-script-build.json",
+      "bytes": 539,
+      "mtime_ns": 1793972943074573417
+    },
+    {
+      "member": "release/.fingerprint/serde_json-0525261e0b795374/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/.fingerprint/serde_json-0525261e0b795374/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/.fingerprint/serde_json-882f830287fb82f4/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943705587205
+    },
+    {
+      "member": "release/.fingerprint/serde_json-882f830287fb82f4/run-build-script-build-script-build.json",
+      "bytes": 332,
+      "mtime_ns": 1793972943705587205
+    },
+    {
+      "member": "release/.fingerprint/serde_json-eb87065a04f21940/dep-lib-serde_json",
+      "bytes": 14,
+      "mtime_ns": 1793972944956614542
+    },
+    {
+      "member": "release/.fingerprint/serde_json-eb87065a04f21940/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972944956614542
+    },
+    {
+      "member": "release/.fingerprint/serde_json-eb87065a04f21940/lib-serde_json",
+      "bytes": 16,
+      "mtime_ns": 1793972946536649069
+    },
+    {
+      "member": "release/.fingerprint/serde_json-eb87065a04f21940/lib-serde_json.json",
+      "bytes": 822,
+      "mtime_ns": 1793972946536649069
+    },
+    {
+      "member": "release/.fingerprint/strsim-3d027f1b9d5c58ad/dep-lib-strsim",
+      "bytes": 14,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/.fingerprint/strsim-3d027f1b9d5c58ad/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/.fingerprint/strsim-3d027f1b9d5c58ad/lib-strsim",
+      "bytes": 16,
+      "mtime_ns": 1793972943680586659
+    },
+    {
+      "member": "release/.fingerprint/strsim-3d027f1b9d5c58ad/lib-strsim.json",
+      "bytes": 348,
+      "mtime_ns": 1793972943680586659
+    },
+    {
+      "member": "release/.fingerprint/syn-747ab78e9ab6df9c/dep-lib-syn",
+      "bytes": 14,
+      "mtime_ns": 1793972943622585392
+    },
+    {
+      "member": "release/.fingerprint/syn-747ab78e9ab6df9c/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943622585392
+    },
+    {
+      "member": "release/.fingerprint/syn-747ab78e9ab6df9c/lib-syn",
+      "bytes": 16,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/syn-747ab78e9ab6df9c/lib-syn.json",
+      "bytes": 775,
+      "mtime_ns": 1793972946024637881
+    },
+    {
+      "member": "release/.fingerprint/unicode-ident-4384f3d109d2f58b/dep-lib-unicode_ident",
+      "bytes": 14,
+      "mtime_ns": 1793972942730565900
+    },
+    {
+      "member": "release/.fingerprint/unicode-ident-4384f3d109d2f58b/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942730565900
+    },
+    {
+      "member": "release/.fingerprint/unicode-ident-4384f3d109d2f58b/lib-unicode_ident",
+      "bytes": 16,
+      "mtime_ns": 1793972942816567779
+    },
+    {
+      "member": "release/.fingerprint/unicode-ident-4384f3d109d2f58b/lib-unicode_ident.json",
+      "bytes": 361,
+      "mtime_ns": 1793972942816567779
+    },
+    {
+      "member": "release/.fingerprint/utf8parse-6603349c31b65f21/dep-lib-utf8parse",
+      "bytes": 14,
+      "mtime_ns": 1793972942727565835
+    },
+    {
+      "member": "release/.fingerprint/utf8parse-6603349c31b65f21/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942727565835
+    },
+    {
+      "member": "release/.fingerprint/utf8parse-6603349c31b65f21/lib-utf8parse",
+      "bytes": 16,
+      "mtime_ns": 1793972942777566927
+    },
+    {
+      "member": "release/.fingerprint/utf8parse-6603349c31b65f21/lib-utf8parse.json",
+      "bytes": 388,
+      "mtime_ns": 1793972942777566927
+    },
+    {
+      "member": "release/.fingerprint/zmij-3885d2a87ad21a16/run-build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/.fingerprint/zmij-3885d2a87ad21a16/run-build-script-build-script-build.json",
+      "bytes": 327,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/.fingerprint/zmij-4133846e91a906a9/dep-lib-zmij",
+      "bytes": 14,
+      "mtime_ns": 1793972943709587293
+    },
+    {
+      "member": "release/.fingerprint/zmij-4133846e91a906a9/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943709587293
+    },
+    {
+      "member": "release/.fingerprint/zmij-4133846e91a906a9/lib-zmij",
+      "bytes": 16,
+      "mtime_ns": 1793972943915591794
+    },
+    {
+      "member": "release/.fingerprint/zmij-4133846e91a906a9/lib-zmij.json",
+      "bytes": 425,
+      "mtime_ns": 1793972943915591794
+    },
+    {
+      "member": "release/.fingerprint/zmij-9032d2de79ee564b/build-script-build-script-build",
+      "bytes": 16,
+      "mtime_ns": 1793972943010572018
+    },
+    {
+      "member": "release/.fingerprint/zmij-9032d2de79ee564b/build-script-build-script-build.json",
+      "bytes": 378,
+      "mtime_ns": 1793972943010572018
+    },
+    {
+      "member": "release/.fingerprint/zmij-9032d2de79ee564b/dep-build-script-build-script-build",
+      "bytes": 14,
+      "mtime_ns": 1793972942850568522
+    },
+    {
+      "member": "release/.fingerprint/zmij-9032d2de79ee564b/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942850568522
+    },
+    {
+      "member": "release/build/anyhow-86cedd889023f716/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943681586681
+    },
+    {
+      "member": "release/build/anyhow-86cedd889023f716/output",
+      "bytes": 336,
+      "mtime_ns": 1793972943681586681
+    },
+    {
+      "member": "release/build/anyhow-86cedd889023f716/root-output",
+      "bytes": 98,
+      "mtime_ns": 1793972943757588342
+    },
+    {
+      "member": "release/build/anyhow-86cedd889023f716/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943757588342
+    },
+    {
+      "member": "release/build/anyhow-d3f22f29a7980643/build_script_build-d3f22f29a7980643.d",
+      "bytes": 530,
+      "mtime_ns": 1793972942932570314
+    },
+    {
+      "member": "release/build/crc32fast-aa29198d1e0243fb/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942921570073
+    },
+    {
+      "member": "release/build/crc32fast-aa29198d1e0243fb/output",
+      "bytes": 99,
+      "mtime_ns": 1793972942921570073
+    },
+    {
+      "member": "release/build/crc32fast-aa29198d1e0243fb/root-output",
+      "bytes": 101,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/build/crc32fast-aa29198d1e0243fb/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/build/crc32fast-e0e3e849141f1ed6/build_script_build-e0e3e849141f1ed6.d",
+      "bytes": 539,
+      "mtime_ns": 1793972942762566599
+    },
+    {
+      "member": "release/build/object-810b2d415a6d4233/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943318578749
+    },
+    {
+      "member": "release/build/object-810b2d415a6d4233/output",
+      "bytes": 65,
+      "mtime_ns": 1793972943318578749
+    },
+    {
+      "member": "release/build/object-810b2d415a6d4233/root-output",
+      "bytes": 98,
+      "mtime_ns": 1793972943343617938
+    },
+    {
+      "member": "release/build/object-810b2d415a6d4233/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943343617938
+    },
+    {
+      "member": "release/build/object-c5df0082991af2b9/build_script_build-c5df0082991af2b9.d",
+      "bytes": 527,
+      "mtime_ns": 1793972943160575296
+    },
+    {
+      "member": "release/build/proc-macro2-04cd1d6962d0f973/build_script_build-04cd1d6962d0f973.d",
+      "bytes": 555,
+      "mtime_ns": 1793972942752566381
+    },
+    {
+      "member": "release/build/proc-macro2-2a0678669d77037e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942956570838
+    },
+    {
+      "member": "release/build/proc-macro2-2a0678669d77037e/output",
+      "bytes": 1061,
+      "mtime_ns": 1793972942956570838
+    },
+    {
+      "member": "release/build/proc-macro2-2a0678669d77037e/root-output",
+      "bytes": 103,
+      "mtime_ns": 1793972943043254973
+    },
+    {
+      "member": "release/build/proc-macro2-2a0678669d77037e/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943043254973
+    },
+    {
+      "member": "release/build/quote-9a53da4438e1353e/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942885569287
+    },
+    {
+      "member": "release/build/quote-9a53da4438e1353e/output",
+      "bytes": 83,
+      "mtime_ns": 1793972942885569287
+    },
+    {
+      "member": "release/build/quote-9a53da4438e1353e/root-output",
+      "bytes": 97,
+      "mtime_ns": 1793972942903109862
+    },
+    {
+      "member": "release/build/quote-9a53da4438e1353e/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972942903109862
+    },
+    {
+      "member": "release/build/quote-e2982919d7d78c24/build_script_build-e2982919d7d78c24.d",
+      "bytes": 522,
+      "mtime_ns": 1793972942757566490
+    },
+    {
+      "member": "release/build/serde-272f5916e9509490/build_script_build-272f5916e9509490.d",
+      "bytes": 525,
+      "mtime_ns": 1793972942940570489
+    },
+    {
+      "member": "release/build/serde-d3e32e378f2231d5/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943683586725
+    },
+    {
+      "member": "release/build/serde-d3e32e378f2231d5/out/private.rs",
+      "bytes": 142,
+      "mtime_ns": 1793972943684586747
+    },
+    {
+      "member": "release/build/serde-d3e32e378f2231d5/output",
+      "bytes": 582,
+      "mtime_ns": 1793972943683586725
+    },
+    {
+      "member": "release/build/serde-d3e32e378f2231d5/root-output",
+      "bytes": 97,
+      "mtime_ns": 1793972943698587052
+    },
+    {
+      "member": "release/build/serde-d3e32e378f2231d5/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943698587052
+    },
+    {
+      "member": "release/build/serde_core-12e01b0532498b47/build_script_build-12e01b0532498b47.d",
+      "bytes": 550,
+      "mtime_ns": 1793972942760566556
+    },
+    {
+      "member": "release/build/serde_core-bfb0e8e3c36430ae/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972942903109862
+    },
+    {
+      "member": "release/build/serde_core-bfb0e8e3c36430ae/out/private.rs",
+      "bytes": 90,
+      "mtime_ns": 1793972942907569768
+    },
+    {
+      "member": "release/build/serde_core-bfb0e8e3c36430ae/output",
+      "bytes": 484,
+      "mtime_ns": 1793972942903109862
+    },
+    {
+      "member": "release/build/serde_core-bfb0e8e3c36430ae/root-output",
+      "bytes": 102,
+      "mtime_ns": 1793972942925570161
+    },
+    {
+      "member": "release/build/serde_core-bfb0e8e3c36430ae/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972942925570161
+    },
+    {
+      "member": "release/build/serde_json-0525261e0b795374/build_script_build-0525261e0b795374.d",
+      "bytes": 550,
+      "mtime_ns": 1793972942978571319
+    },
+    {
+      "member": "release/build/serde_json-882f830287fb82f4/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943699587074
+    },
+    {
+      "member": "release/build/serde_json-882f830287fb82f4/output",
+      "bytes": 132,
+      "mtime_ns": 1793972943699587074
+    },
+    {
+      "member": "release/build/serde_json-882f830287fb82f4/root-output",
+      "bytes": 102,
+      "mtime_ns": 1793972943705587205
+    },
+    {
+      "member": "release/build/serde_json-882f830287fb82f4/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943705587205
+    },
+    {
+      "member": "release/build/zmij-3885d2a87ad21a16/invoked.timestamp",
+      "bytes": 48,
+      "mtime_ns": 1793972943012572062
+    },
+    {
+      "member": "release/build/zmij-3885d2a87ad21a16/output",
+      "bytes": 126,
+      "mtime_ns": 1793972943012572062
+    },
+    {
+      "member": "release/build/zmij-3885d2a87ad21a16/root-output",
+      "bytes": 96,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/build/zmij-3885d2a87ad21a16/stderr",
+      "bytes": 0,
+      "mtime_ns": 1793972943037572609
+    },
+    {
+      "member": "release/build/zmij-9032d2de79ee564b/build_script_build-9032d2de79ee564b.d",
+      "bytes": 517,
+      "mtime_ns": 1793972942874569047
+    },
+    {
+      "member": "release/deps/anstream-66acff63e9091b8e.d",
+      "bytes": 4051,
+      "mtime_ns": 1793972942951570729
+    },
+    {
+      "member": "release/deps/anstyle-436eacb473563c34.d",
+      "bytes": 2500,
+      "mtime_ns": 1793972942758566512
+    },
+    {
+      "member": "release/deps/anstyle_parse-fd9a27416c686219.d",
+      "bytes": 2337,
+      "mtime_ns": 1793972942815119510
+    },
+    {
+      "member": "release/deps/anstyle_query-027ccb6f71877770.d",
+      "bytes": 1098,
+      "mtime_ns": 1793972942767021077
+    },
+    {
+      "member": "release/deps/anyhow-6259131690f23133.d",
+      "bytes": 4334,
+      "mtime_ns": 1793972943982593258
+    },
+    {
+      "member": "release/deps/cfg_if-8061b46528201150.d",
+      "bytes": 656,
+      "mtime_ns": 1793972943288578093
+    },
+    {
+      "member": "release/deps/clap-8a22628b5d1602a9.d",
+      "bytes": 1428,
+      "mtime_ns": 1793972947147662421
+    },
+    {
+      "member": "release/deps/clap_builder-c9896e2dc196b791.d",
+      "bytes": 22939,
+      "mtime_ns": 1793972943658586178
+    },
+    {
+      "member": "release/deps/clap_derive-26178628eddf3182.d",
+      "bytes": 5309,
+      "mtime_ns": 1793972946179641268
+    },
+    {
+      "member": "release/deps/clap_lex-b63dbb7fd48bfb88.d",
+      "bytes": 1027,
+      "mtime_ns": 1793972943342579273
+    },
+    {
+      "member": "release/deps/colorchoice-fc5914e7da56009a.d",
+      "bytes": 691,
+      "mtime_ns": 1793972942844568391
+    },
+    {
+      "member": "release/deps/crc32fast-902a9be12e8617f1.d",
+      "bytes": 2646,
+      "mtime_ns": 1793972943388580278
+    },
+    {
+      "member": "release/deps/equivalent-40820df89af17da5.d",
+      "bytes": 684,
+      "mtime_ns": 1793972943110574203
+    },
+    {
+      "member": "release/deps/foldhash-459bb4209a360319.d",
+      "bytes": 1765,
+      "mtime_ns": 1793972943101574007
+    },
+    {
+      "member": "release/deps/hashbrown-09ac8c383d149dcf.d",
+      "bytes": 6195,
+      "mtime_ns": 1793972943667586375
+    },
+    {
+      "member": "release/deps/hashbrown-90ee4dacbb31c0a8.d",
+      "bytes": 6540,
+      "mtime_ns": 1793972942943570555
+    },
+    {
+      "member": "release/deps/heck-cdde0c5c32ed7511.d",
+      "bytes": 3538,
+      "mtime_ns": 1793972943254577350
+    },
+    {
+      "member": "release/deps/iced_x86-33847630a97a3902.d",
+      "bytes": 52251,
+      "mtime_ns": 1793972944648607812
+    },
+    {
+      "member": "release/deps/indexmap-d6c076169ae6e8c2.d",
+      "bytes": 6798,
+      "mtime_ns": 1793972943621585370
+    },
+    {
+      "member": "release/deps/is_terminal_polyfill-90f7e62e834751e1.d",
+      "bytes": 758,
+      "mtime_ns": 1793972942835174102
+    },
+    {
+      "member": "release/deps/itoa-f24b7fde3becc223.d",
+      "bytes": 1011,
+      "mtime_ns": 1793972943852590418
+    },
+    {
+      "member": "release/deps/lazy_static-ae4a585fbc22f7d2.d",
+      "bytes": 1092,
+      "mtime_ns": 1793972943790589063
+    },
+    {
+      "member": "release/deps/memchr-4c15dfbab87337d5.d",
+      "bytes": 11094,
+      "mtime_ns": 1793972943158575253
+    },
+    {
+      "member": "release/deps/native_link-62ccb5c6f5eda54e.d",
+      "bytes": 313,
+      "mtime_ns": 1794088737755943501
+    },
+    {
+      "member": "release/deps/native_link-89e6cdf9b2bb753e.d",
+      "bytes": 313,
+      "mtime_ns": 1794058890991619773
+    },
+    {
+      "member": "release/deps/native_link_arm64_rodata_extents-8af13e2b28f2c096.d",
+      "bytes": 355,
+      "mtime_ns": 1794089684010437573
+    },
+    {
+      "member": "release/deps/object-dfea7fe4bae12012.d",
+      "bytes": 29621,
+      "mtime_ns": 1793972944599606741
+    },
+    {
+      "member": "release/deps/proc_macro2-3214e68ac3446618.d",
+      "bytes": 4773,
+      "mtime_ns": 1793972943093573832
+    },
+    {
+      "member": "release/deps/quote-5ac12fc42410e4d3.d",
+      "bytes": 2859,
+      "mtime_ns": 1793972943497582660
+    },
+    {
+      "member": "release/deps/serde-b44c066aa104cf8e.d",
+      "bytes": 2743,
+      "mtime_ns": 1793972947914679183
+    },
+    {
+      "member": "release/deps/serde_core-76c56e6fd88c64d0.d",
+      "bytes": 8108,
+      "mtime_ns": 1793972943105574094
+    },
+    {
+      "member": "release/deps/serde_derive-eefbce42b0d977b7.d",
+      "bytes": 8937,
+      "mtime_ns": 1793972946277643409
+    },
+    {
+      "member": "release/deps/serde_json-eb87065a04f21940.d",
+      "bytes": 6515,
+      "mtime_ns": 1793972945062616858
+    },
+    {
+      "member": "release/deps/strsim-3d027f1b9d5c58ad.d",
+      "bytes": 660,
+      "mtime_ns": 1793972943076573461
+    },
+    {
+      "member": "release/deps/syn-747ab78e9ab6df9c.d",
+      "bytes": 17173,
+      "mtime_ns": 1793972943947592494
+    },
+    {
+      "member": "release/deps/unicode_ident-4384f3d109d2f58b.d",
+      "bytes": 1102,
+      "mtime_ns": 1793972942762566599
+    },
+    {
+      "member": "release/deps/utf8parse-6603349c31b65f21.d",
+      "bytes": 1046,
+      "mtime_ns": 1793972942753566403
+    },
+    {
+      "member": "release/deps/zmij-4133846e91a906a9.d",
+      "bytes": 1380,
+      "mtime_ns": 1793972943748588145
+    },
+    {
+      "member": "release/native-link",
+      "bytes": 2779248,
+      "mtime_ns": 1794058905915947182,
+      "machine": "EM_X86_64"
+    },
+    {
+      "member": "release/native-link.d",
+      "bytes": 213,
+      "mtime_ns": 1794058905941947752
+    }
+  ],
+  "rebuildable_files": 656,
+  "rebuildable_bytes": 610840962,
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--help"
+      ],
+      "machine": "EM_X86_64",
+      "returncode": 0,
+      "stdout": "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab.\n\nUsage: native-link [OPTIONS] --input <INPUT> --symbol <SYMBOL> --output <OUTPUT>\n\nOptions:\n      --input <INPUT>\n          Input ELF object/shared library (e.g. *.native.so from micro/programs)\n      --symbol <SYMBOL>\n          Symbol name of the entry function to extract\n      --output <OUTPUT>\n          Output path for the raw native blob bytes\n      --output-relocs <OUTPUT_RELOCS>\n          Output path for the side-band relocations table consumed by the kernel module at splat time. Omit if the input has no external helper or map references\n      --output-map-patches <OUTPUT_MAP_PATCHES>\n          Output path for map literal patch sites. Each line is NAME<TAB>OFFSET, where OFFSET points at an 8-byte literal-pool slot that the runner must fill with the current kernel map pointer\n      --output-abi <OUTPUT_ABI>\n          Output path for native_lab ABI sideband metadata consumed by the runner\n      --link-plan <LINK_PLAN>\n          Versioned structured link plan containing helper/map/callsite facts. This is the stable loader/native-link boundary for kernel mode\n      --show\n          Print a human-readable disassembly of the rewritten blob to stderr\n      --preserve-entry-abi\n          Keep the compiler's entry-function saves in the verifier's proof input\n      --mode <MODE>\n          Link mode. `proof` applies canonical ABI/link edits but leaves verifier-after helper/map lowering symbolic and emits a relocatable proof object for the eBPF simulator generator [default: kernel] [possible values: kernel, proof]\n  -h, --help\n          Print help\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+        "--help"
+      ],
+      "machine": "EM_AARCH64",
+      "returncode": 0,
+      "stdout": "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab.\n\nUsage: native-link [OPTIONS] --input <INPUT> --symbol <SYMBOL> --output <OUTPUT>\n\nOptions:\n      --input <INPUT>\n          Input ELF object/shared library (e.g. *.native.so from micro/programs)\n      --symbol <SYMBOL>\n          Symbol name of the entry function to extract\n      --output <OUTPUT>\n          Output path for the raw native blob bytes\n      --output-relocs <OUTPUT_RELOCS>\n          Output path for the side-band relocations table consumed by the kernel module at splat time. Omit if the input has no external helper or map references\n      --output-map-patches <OUTPUT_MAP_PATCHES>\n          Output path for map literal patch sites. Each line is NAME<TAB>OFFSET, where OFFSET points at an 8-byte literal-pool slot that the runner must fill with the current kernel map pointer\n      --output-abi <OUTPUT_ABI>\n          Output path for native_lab ABI sideband metadata consumed by the runner\n      --link-plan <LINK_PLAN>\n          Versioned structured link plan containing helper/map/callsite facts. This is the stable loader/native-link boundary for kernel mode\n      --show\n          Print a human-readable disassembly of the rewritten blob to stderr\n      --preserve-entry-abi\n          Keep the compiler's entry-function saves in the verifier's proof input\n      --mode <MODE>\n          Link mode. `proof` applies canonical ABI/link edits but leaves verifier-after helper/map lowering symbolic and emits a relocatable proof object for the eBPF simulator generator [default: kernel] [possible values: kernel, proof]\n  -h, --help\n          Print help\n",
+      "stderr": ""
+    }
+  ],
+  "archive_bytes": 37903429,
+  "archive_members_compared": 791,
+  "alias_target": "/workspaces/repository/kprog/x86/native_lab/native_link/target",
+  "scope": "Obsolete duplicate build cache removed after complete recipe/log/metadata and both old binary archive comparison. Host/ARM executable help only; no image/base/kernel, stock/app or timing change."
+}

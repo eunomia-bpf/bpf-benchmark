@@ -33,7 +33,7 @@ parser.add_argument('--root', type=Path,
 parser.add_argument('--compiler', type=Path, default=Path('/tmp/cc_compile-sim-ir'))
 parser.add_argument('--context-compiler', type=Path, default=Path('/tmp/cc_context-lower'))
 parser.add_argument('--native-link', type=Path,
-                    default=ROOT / 'kprog/arm64/build/app-native-link/release/native-link')
+                    default=ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link')
 parser.add_argument('--jobs', type=int, default=12)
 args = parser.parse_args()
 

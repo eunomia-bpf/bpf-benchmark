@@ -58,3 +58,15 @@ lr-before:
 	python3 lr_check.py before
 lr-after:
 	python3 lr_check.py after
+
+.PHONY: native-link-arm-build
+native-link-arm-build:
+	CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc cargo build --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release --target aarch64-unknown-linux-gnu -j 1
+
+.PHONY: consolidate-linker
+consolidate-linker:
+	python3 consolidate_linker.py
+
+.PHONY: linker-parity
+linker-parity:
+	python3 linker_parity.py

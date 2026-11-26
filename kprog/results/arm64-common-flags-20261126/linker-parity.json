@@ -1,0 +1,172 @@
+{
+  "recorded_utc": "2026-11-26T23:10:08Z",
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o",
+        "--symbol",
+        "lr_after_blr",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_blr (28 bytes), 1 reachable symbol(s) total\n  - lr_after_blr (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 2 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o",
+        "--symbol",
+        "lr_after_blr",
+        "--mode",
+        "kernel",
+        "--link-plan",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_blr (28 bytes), 1 reachable symbol(s) total\n  - lr_after_blr (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote 44 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin (0 relocs)\n"
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o",
+        "--symbol",
+        "lr_after_blr",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_blr (28 bytes), 1 reachable symbol(s) total\n  - lr_after_blr (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 2 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o\n"
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o",
+        "--symbol",
+        "lr_after_blr",
+        "--mode",
+        "kernel",
+        "--link-plan",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_blr (28 bytes), 1 reachable symbol(s) total\n  - lr_after_blr (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote 44 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin (0 relocs)\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o",
+        "--symbol",
+        "lr_after_bl",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_bl (28 bytes), 1 reachable symbol(s) total\n  - lr_after_bl (vaddr 0x1c, 28 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/arm64/build/app-native-link/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o",
+        "--symbol",
+        "lr_after_bl",
+        "--mode",
+        "kernel",
+        "--link-plan",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_bl (28 bytes), 1 reachable symbol(s) total\n  - lr_after_bl (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote 44 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin (0 relocs)\n"
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o",
+        "--symbol",
+        "lr_after_bl",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_bl (28 bytes), 1 reachable symbol(s) total\n  - lr_after_bl (vaddr 0x1c, 28 bytes) [entry]\nnative-link: wrote proof object 36 bytes, 3 reloc(s) -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o\n"
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/arm64/build/app-native-link/aarch64-unknown-linux-gnu/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.proof.o",
+        "--symbol",
+        "lr_after_bl",
+        "--mode",
+        "kernel",
+        "--link-plan",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=lr_after_bl (28 bytes), 1 reachable symbol(s) total\n  - lr_after_bl (vaddr 0x0, 28 bytes) [entry]\nnative-link: wrote 44 bytes -> /var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin (0 relocs)\n"
+    }
+  ],
+  "rows": [
+    {
+      "entry": "lr_after_blr",
+      "bytes": 44,
+      "host_arm_equal": true,
+      "load_from_lr_retained": true
+    },
+    {
+      "entry": "lr_after_bl",
+      "bytes": 44,
+      "host_arm_equal": true,
+      "load_from_lr_retained": true
+    }
+  ],
+  "scope": "Host and ARM native-link actual proof/kernel-mode rewrite parity on two LR cases through canonical alias; no stock/kernel/app execution or timing result."
+}

@@ -1,0 +1,17 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 linker_parity.py
+[
+  {
+    "entry": "lr_after_blr",
+    "bytes": 44,
+    "host_arm_equal": true,
+    "load_from_lr_retained": true
+  },
+  {
+    "entry": "lr_after_bl",
+    "bytes": 44,
+    "host_arm_equal": true,
+    "load_from_lr_retained": true
+  }
+]
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
