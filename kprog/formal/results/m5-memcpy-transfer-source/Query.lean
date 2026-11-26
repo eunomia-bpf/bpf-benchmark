@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTransferSource
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.shared_clobbers
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.shared_clobbers
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.enter
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.enter
+#check KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.leave
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTransferSource.leave
