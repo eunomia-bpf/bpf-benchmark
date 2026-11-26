@@ -1,0 +1,49 @@
+{
+  "confirmed_utc": "2026-11-26T05:58:56.324306+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport"
+    ],
+    "exit": 0,
+    "seconds": 4.153818607330322,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 315,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-tag-byte-transport/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6198570728302002,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "retained_actual_zero_tag_bytes": 24,
+    "actual_store_equations": 2,
+    "zero_word_offset": 8
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetTagByteTransport.lean",
+      "size_bytes": 3237,
+      "mtime_ns": 1795672360251607566
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

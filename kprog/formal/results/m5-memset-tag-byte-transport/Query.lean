@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport
+
+#check KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport.word_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport.word_store
+#check KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport.both_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetTagByteTransport.both_stores

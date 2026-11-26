@@ -1,0 +1,7 @@
+# Both actual memset stores retain all24 zero tag bytes
+
+The actual Mint64 zero-word store at tag offset8 preserves all24 real zero byte observations. Outside bytes follow imported disjoint-load/store semantics; the eight written bytes follow the actual imported zero-word encoding and setN_inside, with current readable permission transported by store_access. The following actual stack-byte store retains this invariant by real tag/stack separation. Both stores remain actual source equations, even where their tag effect is idempotent. These derived observations supply the next sequential iteration without adding a post-store tag premise. Actual SP=-32 follows its separately proved12-transition guard/exit route, and current iteration Resources follow their actual header/access frame. Next compose all16 genuine source iterations and loop counters, same original entry/current resources, transfer/clobber/free/caller and remaining M5 before M6. Fixture14, original full-call prefix353 and complete ISA families0 retain their scopes. Imported memory/encoding and ISA models remain as they are, with original proof caps and no new axiom.
+
+Focused build 315 and 2 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
