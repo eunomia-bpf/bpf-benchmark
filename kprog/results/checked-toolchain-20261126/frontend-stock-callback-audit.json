@@ -1,0 +1,90 @@
+{
+  "recorded_utc": "2026-11-26T23:48:21Z",
+  "controller_status": 1,
+  "published_result_equal": true,
+  "cases": [
+    {
+      "phase": "before",
+      "result": {
+        "request": 0,
+        "returncode": 2,
+        "stock_loaded": false,
+        "errno": 22,
+        "instructions": 100
+      },
+      "command_receipt": {
+        "command": [
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/probe-inputs/archive-stock",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/0/replay.bpf.o",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/generation.metadata.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/kernel.facts.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/0/verifier.log"
+        ],
+        "returncode": 2,
+        "stdout": "{\"stock_loaded\":false,\"errno\":22,\"instructions\":100}\n",
+        "stderr": ""
+      },
+      "verifier_log": "0: R1=ctx() R10=fp0\n0: (b7) r0 = 2\nBPF_MOV uses reserved fields\nprocessed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "replay_matches_producer": true,
+      "controller_result_equal": true,
+      "outcome_result_equal": true,
+      "receipt_result_equal": true
+    },
+    {
+      "phase": "after",
+      "result": {
+        "request": 1,
+        "returncode": 0,
+        "stock_loaded": true,
+        "errno": 0,
+        "instructions": 102
+      },
+      "command_receipt": {
+        "command": [
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/probe-inputs/archive-stock",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/1/replay.bpf.o",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/generation.metadata.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/kernel.facts.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/1/verifier.log"
+        ],
+        "returncode": 0,
+        "stdout": "{\"stock_loaded\":true,\"errno\":0,\"instructions\":102}\n",
+        "stderr": ""
+      },
+      "verifier_log": "processed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "replay_matches_producer": true,
+      "controller_result_equal": true,
+      "outcome_result_equal": true,
+      "receipt_result_equal": true
+    },
+    {
+      "phase": "broker",
+      "result": {
+        "request": 2,
+        "returncode": 0,
+        "stock_loaded": true,
+        "errno": 0,
+        "instructions": 102
+      },
+      "command_receipt": {
+        "command": [
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/probe-inputs/archive-stock",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/replay/2/replay.bpf.o",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/generation.metadata.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/kernel.facts.json",
+          "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend-stock-20261126T233912Z/2/verifier.log"
+        ],
+        "returncode": 0,
+        "stdout": "{\"stock_loaded\":true,\"errno\":0,\"instructions\":102}\n",
+        "stderr": ""
+      },
+      "verifier_log": "processed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+      "replay_matches_producer": true,
+      "controller_result_equal": true,
+      "outcome_result_equal": true,
+      "receipt_result_equal": true
+    }
+  ],
+  "prior_outcome_commit": "b2dd8f217",
+  "scope": "Duplicate finite-check callback audit only. No compile/guest/timing rerun or source change; current direct/broker accepted, retained old baseline rejected."
+}
