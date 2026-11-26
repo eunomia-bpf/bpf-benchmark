@@ -23,7 +23,7 @@ private theorem writer_not_local : Arm64Program._kprog_arm64_program_write ∉ C
 /-- The actual fifth MUL caller's nine arguments, generic frame, source body,
 real frame release and return. All register observations and warm cache survive
 at the original caller frontier; no final-readback premise is assumed. -/
-theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
+theorem execute_rights {initial before : CC.Mem} {entry : HeaderLocal initial}
     (storage : Storage initial before entry)
     (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
     (header : (j : Fin 12) → HeaderSourceLocal initial j)
@@ -56,7 +56,9 @@ theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
       Arm64CacheLocalFrame.Kept initial before after 4 ∧
       (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
       Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
-      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat ∧
+      (∀ block, block.toNat < (Arm64Producer.allocation initial).2.nextblock.toNat →
+        CC.PMap.get block after.access = CC.PMap.get block before.access) := by
   have allocationFrame := Arm64Nop.entry_frame world before
   let carried := storage.frame allocationFrame
   have allocationKept := Arm64CacheLocalFrame.of_frame before.nextblock 4 bound allocationFrame
@@ -136,9 +138,57 @@ theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
     Eq.mpr (congrArg (fun frontier : CC.Block => (Arm64Producer.allocation initial).2.nextblock.toNat ≤ frontier.toNat)
       finalNext) (Nat.le_trans bound (FrameBelow.allocVariables (Arm64MovImmediate.allocated_bound world before)
         before.nextblock (Nat.le_refl _)).1)
+  have permissionFrame : ∀ block, block.toNat < (Arm64Producer.allocation initial).2.nextblock.toNat →
+      CC.PMap.get block after.access = CC.PMap.get block before.access := by
+    intro block ownedBlock
+    have oldBlock := Nat.lt_of_lt_of_le ownedBlock bound
+    exact (freeFrame block oldBlock).2.trans
+      ((congrArg (CC.PMap.get block) result.access).trans (allocationFrame block oldBlock).2)
   exact ⟨written, after, finalStorage, word, tag, (enter.trans body).trans leave, finalRegisters,
     (allocationCaller.trans result.caller).trans freeCaller, freed, freeFrame, contents, next, released,
-    kept, kept.pointers header pointers, kept.warm before.nextblock header bound pointers false origins.stack warm, finalBound⟩
+    kept, kept.pointers header pointers, kept.warm before.nextblock header bound pointers false origins.stack warm, finalBound,permissionFrame⟩
+
+/-- Project the existing interface from the SAME actual execution and rights. -/
+theorem execute {initial before : CC.Mem} {entry : HeaderLocal initial}
+    (storage : Storage initial before entry)
+    (bound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (header : (j : Fin 12) → HeaderSourceLocal initial j)
+    (pointers : ∀ j, CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0))
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (native : Reference.AArch64.State)
+    (represented : Arm64Registers.Represents addresses origins (fun r => r.val)
+      before.nextblock before (.Vptr entry.block 0) native)
+    (warm : Arm64RegisterReads.WarmEntryCache false before.nextblock before (.Vptr entry.block 0) origins.stack)
+    (lhs rhs : BitVec 64)
+    (lhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 1) 0 = some (.Vlong lhs))
+    (lhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 1) 0 = some (.Vint 0))
+    (rhsWord : CC.Mem.load .Mint64 before ((storage.tables false).cellBlock 3) 0 = some (.Vlong rhs))
+    (rhsTag : CC.Mem.load .Mint8unsigned before ((storage.tables true).cellBlock 3) 0 = some (.Vint 0))
+    (k : CC.Cont) (valid : CC.isCallCont k = true) :
+    ∃ written after, ∃ finalStorage : Storage initial after entry,
+      CC.Mem.load .Mint64 after ((finalStorage.tables false).cellBlock 4) 0 = some (.Vlong (lhs * rhs)) ∧
+      CC.Mem.load .Mint8unsigned after ((finalStorage.tables true).cellBlock 4) 0 = some (.Vint 0) ∧
+      InternalRun world 437 (.Callstate (.Internal Arm64Nop.handler) (arguments entry.block) k before)
+        (.Returnstate .Vundef k after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val) before.nextblock after (.Vptr entry.block 0)
+        (Arm64RegisterWrite.nativeUpdate native 4 (lhs * rhs) false) ∧
+      FrameBelow initial.nextblock before after ∧
+      CC.Mem.freeList written (CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1) = some after ∧
+      FrameBelow before.nextblock written after ∧
+      after.contents = written.contents ∧ after.nextblock = written.nextblock ∧
+      (∀ row ∈ CC.blocksOfEnv world.genv_cenv (Arm64Nop.allocation world before).1,
+        ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) ∧
+      Arm64CacheLocalFrame.Kept initial before after 4 ∧
+      (∀ j, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) = some (.Vptr (header j).block 0)) ∧
+      Arm64RegisterReads.WarmEntryCache false before.nextblock after (.Vptr entry.block 0) origins.stack ∧
+      (Arm64Producer.allocation initial).2.nextblock.toNat ≤ after.nextblock.toNat := by
+  obtain ⟨written, after, finalStorage, word, tag, run, registers, frame, freed, freeFrame,
+      contents, next, released, kept, finalPointers, finalWarm, finalBound,_permissions⟩ :=
+    execute_rights storage bound header pointers addresses origins native represented warm lhs rhs
+      lhsWord lhsTag rhsWord rhsTag k valid
+  exact ⟨written,after,finalStorage,word,tag,run,registers,frame,freed,freeFrame,contents,next,released,
+    kept,finalPointers,finalWarm,finalBound⟩
 
 /-- Every relational execution is a silent prefix of the same real freed-frame
 return. All stuck endpoints coincide, and no infinite execution exists. -/
