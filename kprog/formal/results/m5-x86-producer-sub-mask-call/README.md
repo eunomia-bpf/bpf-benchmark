@@ -1,0 +1,3 @@
+SAME original provider/PUSH/SUB trace includes genuine flag-width cast/save, exact mask call, all14 original width-mask helper steps and caller return. Actual qword mask result is all-ones and current heap/source continuations/temporaries/provider ABIs remain. No mask/read/result/source-run premise. Revalidated surviving exact Draft after container recreation; original caps unchanged. Actual mask assignment/operand masks/sign/flag stores remain later source work.
+
+Focused canonical build and public type/axiom queries passed at original200000 heartbeats/512 depth/j1/32GiB, inside shared timing on CPUs12–15. All actual source branches and existing external semantics remain explicit.

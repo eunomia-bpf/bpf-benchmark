@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerSubMaskCall
+#check KProgFormal.ClightRefinement.X86ProducerSubMaskCall.invoke
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubMaskCall.invoke
+#check KProgFormal.ClightRefinement.X86ProducerSubMaskCall.from_width
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubMaskCall.from_width
+#check KProgFormal.ClightRefinement.X86ProducerSubMaskCall.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubMaskCall.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubMaskCall.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubMaskCall.from_call
