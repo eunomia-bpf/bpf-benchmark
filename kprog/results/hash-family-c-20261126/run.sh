@@ -23,8 +23,8 @@ if [ "$old_image" != "$(cat "$out/image-after.txt")" ]; then
         *$'\n'"$old_image"$'\n'*) docker image rm "$old_image" > "$out/image-cleanup.log" 2>&1 ;;
         *) printf 'Previous image already absent: %s\n' "$old_image" > "$out/image-cleanup.log" ;;
     esac
-    printf '\n- %s PERF P3: superseded x86 runtime image %s is absent after replacement by %s; raw cleanup outcome retained in kprog/results/hash-family-c-20261126.\n' \
-        "$(date -u +%FT%TZ)" "$old_image" "$(cat "$out/image-after.txt")" >> kprog/docs/cleanup-log.md
+    printf '\n- %s PERF P3: superseded x86 runtime image %s is absent after replacement by %s; raw cleanup outcome retained in %s/image-cleanup.log.\n' \
+        "$(date -u +%FT%TZ)" "$old_image" "$(cat "$out/image-after.txt")" "$out" >> kprog/docs/cleanup-log.md
 fi
 ) 8>"$locks/timing" 9>"$locks/image"
 bash kprog/results/hash-family-c-20261126/check.sh "$out"

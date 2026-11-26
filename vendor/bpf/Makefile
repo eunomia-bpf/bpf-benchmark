@@ -50,7 +50,8 @@ OTEL_NATIVE_IR := $(OTEL_NATIVE_IR_DIR)/otelcol-ebpf-profiler.llvmbc
 TETRAGON_NATIVE_STAGE_OUT := $(NATIVE_STAGE_ROOT)/tetragon
 TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
-NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
+# Use branches for selects after source loops have been unrolled, too.
+NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x26)
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
@@ -498,5 +499,8 @@ $(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnat
 		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
 
+
+# All P objects use the common flags above, including after a flag-only change.
+$(KATRAN_NATIVE_OBJS) $(BCC_NATIVE_OBJS) $(CILIUM_NATIVE_OBJS) $(OTEL_NATIVE_UNIT_OBJS) $(TRACEE_NATIVE_OBJS): Makefile
 
 native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon $(PERF_CONTEXT_LTO)

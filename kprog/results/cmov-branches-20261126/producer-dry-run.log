@@ -1,0 +1,7 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o" "otel/support/ebpf/native_stack_trace.ebpf.c"
+make: Leaving directory '/workspaces/repository/vendor/bpf'

@@ -1,0 +1,96 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o" "otel/support/ebpf/custom_trace.ebpf.c"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o" "otel/support/ebpf/dotnet_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o" "otel/support/ebpf/go_labels.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o" "otel/support/ebpf/hotspot_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o" "otel/support/ebpf/interpreter_dispatcher.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o" "otel/support/ebpf/native_stack_trace.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o" "otel/support/ebpf/off_cpu.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o" "otel/support/ebpf/perl_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o" "otel/support/ebpf/php_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o" "otel/support/ebpf/python_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o" "otel/support/ebpf/ruby_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o" "otel/support/ebpf/sched_monitor.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o" "otel/support/ebpf/system_config.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o" "otel/support/ebpf/uprobe.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -O3 -g -fPIC -c -DMICRO_NATIVE -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all  -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables -fno-optimize-sibling-calls -Xclang -fembed-bitcode=all -Wno-unknown-attributes -mllvm -switch-to-lookup=false \
+	-Wno-unused-function -Wno-unused-variable \
+	-I"/workspaces/repository/vendor/bpf/otel/support/ebpf" \
+	-o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o" "otel/support/ebpf/v8_tracer.ebpf.c"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/"
+"clang-18"  -r -o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o" /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir"
+rm -f "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir"/*.bc
+for o in /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o; do \
+	"llvm-objcopy-18" --dump-section .llvmbc="/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir/$(basename $o .native.o).bc" "$o"; \
+done
+"/workspaces/.agent-state/kprog-ck/verified-compiler/link-embedded-ir" /workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir/*.bc -o "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir/otelcol-ebpf-profiler.llvmbc"
+"llvm-objcopy-18" --remove-section .llvmbc --remove-section .llvmcmd "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o"
+"llvm-objcopy-18" --add-section .llvmbc="/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ir/otelcol-ebpf-profiler.llvmbc" "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o"
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler"
+install -m 0644 "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o" "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o"
+python3 "/workspaces/repository/vendor/bpf/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "llvm-nm-18" \
+	--output "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/manifest.json" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/otelcol-ebpf-profiler.native.o"
+true
+python3 "/workspaces/repository/vendor/bpf/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "llvm-nm-18" \
+	--output "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/manifest.json" \
+	--object "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o"
+make: Leaving directory '/workspaces/repository/vendor/bpf'
