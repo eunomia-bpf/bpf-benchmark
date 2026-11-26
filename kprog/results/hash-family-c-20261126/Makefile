@@ -15,3 +15,16 @@ module-arm64:
 loaders:
 	$(MAKE) -C $(ROOT)/runner/build-llvmbpf native_loader_shared -j2
 	$(MAKE) -C $(ROOT)/runner/build-arm64-llvmbpf native_loader_shared -j2
+
+TEST_BUILD := /var/tmp/kprog-tmp/perf/hash-family
+TEST_FLAGS := -std=c++20 -O1 -ffunction-sections -fdata-sections \
+	-I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 \
+	-I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
+	-I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi
+.PHONY: loader-selection
+loader-selection:
+	install -d $(TEST_BUILD)
+	$(CXX) $(TEST_FLAGS) $(HERE)/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o $(TEST_BUILD)/direct
+	$(TEST_BUILD)/direct
+	$(CXX) $(TEST_FLAGS) -DTRUSTED $(HERE)/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o $(TEST_BUILD)/trusted
+	$(TEST_BUILD)/trusted
