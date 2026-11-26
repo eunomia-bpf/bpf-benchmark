@@ -1,0 +1,19 @@
+{
+  "command": [
+    "env",
+    "LEAN_NUM_THREADS=1",
+    "LEAN_IMPORT_WORKERS=1",
+    "make",
+    "check"
+  ],
+  "exit": 0,
+  "seconds": 867.4799912449962,
+  "cpus": "12-15",
+  "shared_timing": true,
+  "memory_limit": 34359738368,
+  "maxHeartbeats": 200000,
+  "maxRecDepth": 512,
+  "starting_commit": "73d36489ac6e79dbadc8fd35ee6a69803b725d73",
+  "ending_commit": "c66e612014ed0c22b52793b6bcf142aeadf31c2d",
+  "raw_directory": "/workspaces/kprog-raw/V/sub-rest-flags-20261126T064522Z"
+}
