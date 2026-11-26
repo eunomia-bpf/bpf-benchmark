@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ClobberRegisterState
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterState.written
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterState.written
+#check KProgFormal.ClightRefinement.Arm64ClobberRegisterState.caller_written
+#print axioms KProgFormal.ClightRefinement.Arm64ClobberRegisterState.caller_written
