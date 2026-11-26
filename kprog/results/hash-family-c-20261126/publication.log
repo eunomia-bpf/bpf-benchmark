@@ -1,0 +1,17 @@
+[master 3b7bf174a] Record hash-family six-app guest check outcomes
+ 13 files changed, 3043 insertions(+)
+ create mode 100644 kprog/results/hash-family-c-20261126/callback.pid
+ create mode 100644 kprog/results/hash-family-c-20261126/collect.log
+ create mode 100644 kprog/results/hash-family-c-20261126/controller.log
+ create mode 100644 kprog/results/hash-family-c-20261126/finish-controller.log
+ create mode 100644 kprog/results/hash-family-c-20261126/guest-summary.json
+ create mode 100644 kprog/results/hash-family-c-20261126/image-before.txt
+ create mode 100644 kprog/results/hash-family-c-20261126/image-first-before.txt
+ create mode 100644 kprog/results/hash-family-c-20261126/image-first-source.txt
+ create mode 100644 kprog/results/hash-family-c-20261126/image-source.txt
+ create mode 100644 kprog/results/hash-family-c-20261126/image.log
+ create mode 100644 kprog/results/hash-family-c-20261126/publication-status.txt
+ create mode 100644 kprog/results/hash-family-c-20261126/publication.log
+ create mode 100644 kprog/results/hash-family-c-20261126/raw-paths.txt
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   190ebc14e..3b7bf174a  master -> master

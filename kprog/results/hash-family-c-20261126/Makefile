@@ -34,5 +34,6 @@ loader-selection:
 	$(CXX) $(TEST_FLAGS) -DTRUSTED $(HERE)/loader_selection.cpp $(TEST_LIBS) -o $(TEST_BUILD)/trusted
 	$(TEST_BUILD)/trusted
 .PHONY: collect
+OUT ?= $(HERE)
 collect:
-	python3 $(HERE)/collect.py
+	python3 $(HERE)/collect.py $(OUT)

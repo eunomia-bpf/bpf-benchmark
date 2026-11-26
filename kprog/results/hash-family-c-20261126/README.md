@@ -68,3 +68,19 @@ collects each app's status, native replacements and native-load failures,
 commits the raw app/counter/shim records under the git lock, and wakes the
 stopped perf lane to review the outcome and complete its todo record. It also
 wakes the lane on failure. The full timing target is never invoked.
+
+## First callback outcome, 2026-11-26T06:50Z
+
+Publication 3b7bf174a contains an incomplete attempt: `controller_completed`
+is false and `checks` is empty. The callback's status 0 describes collection
+and publication, not the build or functional check. The image build log ends
+in native Tetragon compilation without a compiler error or Make completion.
+The foreground controller disappeared when its owning turn ended; the
+detached callback survived. No guest started, no replacement image was
+published, and no image cleanup occurred. The original x86 image remains
+17aaf1ff3dda. This is a job-lifetime failure, not an application test result.
+
+The retry launches both controller and callback with `setsid nohup`, retains
+outputs in a fresh attempt directory, and records the controller's own exit
+status separately. The frozen image and functional-check Make targets remain
+unchanged. All first-attempt records are retained.

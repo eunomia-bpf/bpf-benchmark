@@ -2,9 +2,10 @@
 import json
 from pathlib import Path
 import re
+import sys
 
 root = Path('/workspaces/repository')
-here = Path(__file__).resolve().parent
+here = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent
 check = here / 'guest/check.log'
 rows, raw = [], []
 for line in check.read_text().splitlines() if check.exists() else []:
@@ -31,6 +32,8 @@ for line in check.read_text().splitlines() if check.exists() else []:
         raw += [str(p.relative_to(root)) for p in paths if p.exists()]
     rows.append(row)
 summary = dict(controller_completed=(here / 'completed.txt').exists(),
+               controller_exit_status=int((here / 'controller-exit.txt').read_text())
+                   if (here / 'controller-exit.txt').exists() else None,
                scope='Default six-app functional check; no timing claim.', checks=rows)
 (here / 'guest-summary.json').write_text(json.dumps(summary, indent=2) + '\n')
 (here / 'raw-paths.txt').write_text('\n'.join(raw) + ('\n' if raw else ''))

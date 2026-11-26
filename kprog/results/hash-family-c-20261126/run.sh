@@ -1,7 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 cd /workspaces/repository
-out=$PWD/kprog/results/hash-family-c-20261126
+out=${1:-$PWD/kprog/results/hash-family-c-20261126}
+install -d "$out"
+trap 'printf "%s\n" "$?" > "$out/controller-exit.txt"' EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+trap 'exit 129' HUP
 locks=/workspaces/.agent-state/kprog-lanes/locks
 git rev-parse HEAD > "$out/image-source.txt"
 old_image=$(docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current)
