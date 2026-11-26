@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpExit
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpExit.xor_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpExit.xor_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpExit.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpExit.execute
