@@ -1,0 +1,11 @@
+[
+  "prlimit",
+  "--as=42949672960",
+  "--",
+  "make",
+  "-C",
+  "/workspaces/repository/kprog/results/p3-attribution-20261126",
+  "profile",
+  "APP=tetragon/observer",
+  "OUT=/workspaces/repository/kprog/results/p3-attribution-20261126/collection-20261126T104107Z/tetragon-profile"
+]
