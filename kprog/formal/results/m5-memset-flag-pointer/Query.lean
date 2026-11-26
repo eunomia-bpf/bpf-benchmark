@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetFlagPointer
+open KProgFormal.ClightRefinement
+#check Arm64MemsetFlagPointer.transport
+#print axioms Arm64MemsetFlagPointer.transport
+#check Arm64MemsetFlagPointer.execute
+#print axioms Arm64MemsetFlagPointer.execute
