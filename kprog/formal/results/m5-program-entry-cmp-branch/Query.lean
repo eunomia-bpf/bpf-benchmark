@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.source
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.source
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.call_step
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.current_read
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.current_read
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryCmpBranch.execute
