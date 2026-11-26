@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyStoreMask
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.byte_mask
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.byte_mask
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.observations
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreMask.observations
