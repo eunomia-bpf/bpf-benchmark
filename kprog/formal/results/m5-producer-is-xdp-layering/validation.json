@@ -1,0 +1,49 @@
+{
+  "confirmed_utc": "2026-11-26T17:42:19.940813+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ProducerIsXdpGprInputs"
+    ],
+    "exit": 0,
+    "seconds": 11.267755508422852,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 197,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-producer-is-xdp-layering/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5352087020874023,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "actual_setup_steps": 9,
+    "actual_setup_assignments": 3,
+    "is_xdp": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerIsXdpSetup.lean",
+      "size_bytes": 5565,
+      "mtime_ns": 1795714849111493172
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
