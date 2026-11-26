@@ -54,3 +54,24 @@ Retired instructions (EVENT=cpu_core/instructions/, one sample per 20000, run ot
 it takes more cycle samples: its instructions take more cycles each (stalls), it executes no extra code.
 A run sampling last-level cache misses (EVENT=cpu_core/cache-misses/, one per 2000) is queued after the
 x86 timing of 30e401e37.
+
+## Last-level cache misses (2026-11-26, run otel-host-cachemiss-20261125)
+
+EVENT=cpu_core/cache-misses/ PERIOD=2000 on the image from 823e92e49's chain (b418fb960 linker), 1,777,861 samples.
+`HOST_RT_MINUS_UPTIME` is the host's realtime minus the host's uptime (the sample clock), here 1795603241.007;
+windows eBPF 120-185 s, native 225-285 s (guest uptime), native snapshot from 219.71 s. Cache-miss samples per second:
+
+| Symbol | eBPF | native |
+|---|---|---|
+| all BPF programs | 73 | 129 |
+| unwinder body (eBPF perf_unwind_native; native tag acce632f…, split across custom__generic / perf_unwind_nat names) | 58 | 83 |
+| irq_work_queue | 25 | 507 |
+| _raw_spin_trylock | 0 | 496 |
+| trie_lookup_elem | 45 | 38 |
+| copy_from_user_nofault | 23 | 25 |
+
+The native phase misses the cache more in the program bodies, and it adds about 500 samples per second each in
+irq_work_queue and _raw_spin_trylock, which the eBPF phase has almost none of. The guest log of this run carries no
+kernel messages (quiet loglevel), so the caller of irq_work_queue is open; a call-graph run (-g) on the same event
+names it. The native code takes more cycles per instruction (the earlier cycle and instruction runs); these two
+kernel symbols are the largest difference in this run.
