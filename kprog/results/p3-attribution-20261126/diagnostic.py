@@ -11,7 +11,7 @@ command = ['flock', '-x', '/workspaces/.agent-state/kprog-lanes/locks/timing',
            'flock', '-s', '/workspaces/.agent-state/kprog-lanes/locks/image',
            'prlimit', '--as=85899345920', '--', 'make', '-C', 'kprog/perf/one-image',
            'check', 'ORDER=' + app, 'LOGS=' + str(out / 'guest')]
-(out / 'command.json').write_text(json.dumps(command, indent=2) + '\n')
+(out / 'check-command.json').write_text(json.dumps(command, indent=2) + '\n')
 with (out / 'controller.log').open('w') as log:
     result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
 (out / 'controller-exit.txt').write_text(str(result.returncode) + '\n')
