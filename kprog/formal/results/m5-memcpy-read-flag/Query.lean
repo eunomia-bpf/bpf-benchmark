@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadFlag
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadFlag.initialized
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadFlag.initialized
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadFlag.of_header
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadFlag.of_header
