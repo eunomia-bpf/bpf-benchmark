@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.link
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.link
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.lr
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.lr
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.gpr_other
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.gpr_other
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.memory
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.memory
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.packet
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkWritten.packet
