@@ -24,10 +24,12 @@ TEST_FLAGS := -std=c++20 -O1 -ffunction-sections -fdata-sections \
 	-I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 \
 	-I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
 	-I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi
+TEST_LIBS := -Wl,--gc-sections -L$(ROOT)/runner/build-llvmbpf/native_loader \
+	-Wl,-rpath,$(ROOT)/runner/build-llvmbpf/native_loader -lnative_loader -lbpf -lelf -lz
 .PHONY: loader-selection
 loader-selection:
 	install -d $(TEST_BUILD)
-	$(CXX) $(TEST_FLAGS) $(HERE)/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o $(TEST_BUILD)/direct
+	$(CXX) $(TEST_FLAGS) $(HERE)/loader_selection.cpp $(TEST_LIBS) -o $(TEST_BUILD)/direct
 	$(TEST_BUILD)/direct
-	$(CXX) $(TEST_FLAGS) -DTRUSTED $(HERE)/loader_selection.cpp -Wl,--gc-sections -lbpf -lelf -lz -o $(TEST_BUILD)/trusted
+	$(CXX) $(TEST_FLAGS) -DTRUSTED $(HERE)/loader_selection.cpp $(TEST_LIBS) -o $(TEST_BUILD)/trusted
 	$(TEST_BUILD)/trusted

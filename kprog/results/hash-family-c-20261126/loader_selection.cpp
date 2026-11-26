@@ -2,9 +2,6 @@
 // or changing the hash-family postprocessing when that entry is absent/zero.
 #ifdef TRUSTED
 #include "../../libnativeloader/src/native_loader_trusted.cpp"
-namespace native_loader::internal {
-[[noreturn]] void fail(const std::string &message) { throw std::runtime_error(message); }
-}
 namespace loader = native_loader::trusted;
 #else
 #include "../../libnativeloader/src/native_loader.cpp"
