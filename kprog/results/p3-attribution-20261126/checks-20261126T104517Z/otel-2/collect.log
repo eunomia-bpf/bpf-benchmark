@@ -1,0 +1,24 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
+python3 /workspaces/repository/kprog/results/hash-family-c-20261126/collect.py /workspaces/repository/kprog/results/p3-attribution-20261126/checks-20261126T104517Z/otel-2
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Frozen functional check; no full timing claim.",
+  "checks": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_112553_192230",
+      "apps": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 14,
+      "native_load_failures": 0
+    }
+  ]
+}
+make[1]: Leaving directory '/workspaces/repository/kprog/results/hash-family-c-20261126'
