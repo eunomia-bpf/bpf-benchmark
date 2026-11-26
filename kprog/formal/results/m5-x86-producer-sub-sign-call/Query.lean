@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.X86ProducerSubSignCall
+#check KProgFormal.ClightRefinement.X86ProducerSubSignCall.invoke
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignCall.invoke
+#check KProgFormal.ClightRefinement.X86ProducerSubSignCall.from_masks
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignCall.from_masks
+#check KProgFormal.ClightRefinement.X86ProducerSubSignCall.execute
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignCall.execute
+#check KProgFormal.ClightRefinement.X86ProducerSubSignCall.from_call
+#print axioms KProgFormal.ClightRefinement.X86ProducerSubSignCall.from_call
