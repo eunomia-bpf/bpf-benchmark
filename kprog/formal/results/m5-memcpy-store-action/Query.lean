@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyStoreAction
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreAction.kept
