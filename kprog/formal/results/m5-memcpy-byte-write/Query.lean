@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyByteWrite
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.builtin
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.builtin
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.write
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteWrite.write
