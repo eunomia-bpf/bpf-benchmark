@@ -45,7 +45,7 @@
    - 重测：trie 那一轮在 OTel stats 关之后停（STOP），inner-20261123/chain.sh 用 30e401e37 重建 x86 镜像、检查，再对 OTel、Cilium、Tetragon、Tracee、Katran 完整计时；arm64 镜像和检查由 trie-direct-20261123/arm64-chain.sh 进行，之后在 Spark 上补测受影响的应用。
    - 只修设计之内的必要问题，修好后只补测受影响的应用。
    - [x] 直接原生和 verifier 的内联一一对应（运营者 11-25：“我们之前说的一些不符合设计的都改掉了吗”）：ARRAY_OF_MAPS 查找（c0c202bff）、get_current_task(_btf)（b418fb960）；Cilium 三个对象恢复 agent 的编译开关（6cdde0600）。镜像 b418fb960 的 10 秒检查六个应用 rc 0（每次调用诊断值 OTel 0.940x、BCC 1.018x、Cilium 1.164x、Tetragon 1.880x、Tracee 1.943x、Katran 1.040x；kprog/results/array-of-maps-inline-20261125）。
-   - perf（协调者 2026-11-26T06:3xZ 交给它）：hash 族查找改调按 key 大小特化的 C 例程，例程写在头文件里（运营者 11-22“helper 例程用 C 写在头文件里”；方案 /workspaces/kprog-raw/coordinator/sa-20261124/inline-more/README.md 的 P3，可信模块保持原样）。BCC、Katran、Cilium 的热路径以 hash 查找为主（运营者 11-25：“还有啥可能性能差的? 所有性能都优化和测试过了吗?”）。
+   - perf（协调者 2026-11-26T06:25Z 交给它）：hash 族查找改调按 key 大小特化的 C 例程，例程写在头文件里（运营者 11-22“helper 例程用 C 写在头文件里”；方案 /workspaces/kprog-raw/coordinator/sa-20261124/inline-more/README.md 的 P3，可信模块保持原样）。BCC、Katran、Cilium 的热路径以 hash 查找为主（运营者 11-25：“还有啥可能性能差的? 所有性能都优化和测试过了吗?”）。
    - 协调者：OTel 每次调用 0.940x（10 秒检查），用宿主 PMU 采样找原生一侧多出来的时间。
    - 协调者：编译器生成的 memset，eBPF 一侧按字节展开，原生调内核 memset（Tetragon 5905 处、Tracee 818 处，/workspaces/kprog-raw/coordinator/sa-20261124/inline-more/static-helper-sites-all-apps.txt）；大小分布在 kprog/results/memset-calls-20261126（c2c354c45）；Tetragon、Tracee 的宿主采样给出它们在热路径上的分量之后，再定编译参数（所有应用一组）。
    - [x] 协调者：arm64 get_current_task(_btf) 按 arm64 JIT 内联（mrs x0, sp_el0），arm64 镜像重建后跑 arm64 功能检查（chain-arm64.sh）：24bbf8b89 的镜像六个应用 rc 0（kprog/results/array-of-maps-inline-20261125，3b5e3ea1d）；arm64 验证覆盖第一阶段 208/327，第二阶段（来宾里交 verifier）待做。
