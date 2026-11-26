@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64ClobberCoreComplete
+open KProgFormal.ClightRefinement
+#check Arm64ClobberCoreComplete.entered
+#print axioms Arm64ClobberCoreComplete.entered
+#check Arm64ClobberCoreComplete.execute
+#print axioms Arm64ClobberCoreComplete.execute
