@@ -29,7 +29,8 @@ for obj in sorted(Path('vendor/build/native-bpf/x86/stage').glob('*/*.native.o')
     with obj.open('rb') as source:
         elf = ELFFile(source)
         names = {s.name for s in elf.get_section_by_name('.symtab').iter_symbols()
-                 if isinstance(s['st_shndx'], int) and elf.get_section(s['st_shndx']).name == '.maps'}
+                 if s['st_info']['type'] == 'STT_OBJECT' and isinstance(s['st_shndx'], int)
+                 and elf.get_section(s['st_shndx']).name == '.maps'}
         remaining = set(names)
         for cu in elf.get_dwarf_info().iter_CUs():
             for die in cu.get_top_DIE().iter_children():
