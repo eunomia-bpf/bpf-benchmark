@@ -81,18 +81,32 @@ Two checks run on `otel/0004` rule out two alternatives:
 - **Not the bound the harness sets.** That object aborted with no `prlimit` at all, with
   about 100 GB free.
 
-**Most of the class is contention, not shape.** The three-worker pool ran without a
-`prlimit`, and a solo re-test of `tracee/0072` — 552 KB of source, 2,877 labels, which
-the pool recorded as an OOM — compiles clean in 299 s with `rc=0` when nothing else
-runs. So the recorded OOM set of 23 is an upper bound: a row marked OOM means the
-compile aborted under three-way contention, and only a solo re-test says whether the
-object itself reaches the OOM. Size and inlined-body count do not separate the two
-even then: `otel/0018` passes at 2.19 MB with 3,333 labels, `otel/0008`/`otel/0019`
-pass at 4,319 labels, while `otel/0004` fails at 6,345 with 1,142,983 allocas in one
-function; the passing objects reach 815,954 allocas at `-O0`, so the alloca count on
-its own is not the predictor either. What separates the objects that survive solo is
-still open; the honest reading of the sweep is the count of objects that reach
-`checked-simulator.native.o`, plus the OOM list as "aborted under contention".
+**Part of the class is contention; the largest objects are real.** The three-worker
+pool ran without a `prlimit`, so an OOM row records an abort under three-way
+contention. Re-run one at a time:
+
+|object|B source|labels|recorded|solo|
+|---|---|---|---|---|
+|`tracee/0072`|552 KB|2,877|OOM|`rc=0`, 299 s|
+|`tracee/0065`|—|3,483|OOM|`rc=0`, 282 s|
+|`tracee/0073`|—|3,595|OOM|`rc=0`, 283 s|
+|`tracee/0032`|—|3,917|OOM|`rc=0`, 510 s|
+|`otel/0004`|3.36 MB|6,345|OOM|kernel OOM kill at **114 GB** virtual / **109 GiB** anon-RSS, `rc=137`, 1062 s|
+|`otel/0018`|2.19 MB|3,333|pass|`rc=0`, 629 s|
+
+So four of the 23 recorded OOM rows compile clean when nothing else runs, and the
+largest one is a real wall: `otel/0004` reaches 109 GiB anon-RSS with no `prlimit`
+and no cgroup cap in place, which the host's 125 GB cannot hold once anything else
+runs. The recorded OOM set is therefore an upper bound, read as "aborted under
+contention"; the objects that survive solo are the ones whose compile fits.
+
+Size and inlined-body count do not separate the two by themselves: `otel/0018` passes
+at 2.19 MB with 3,333 labels and `otel/0008`/`otel/0019` pass at 4,319, while
+`otel/0004` fails at 6,345. The alloca count on its own is not the predictor either —
+`otel/0008` carries 815,954 allocas at `-O0` and passes, `tracee/0072` carries
+412,686 and also passes solo. What the genuinely-failing objects share is the
+1,142,983 allocas of `otel/0004`'s single function; a solo run of each remaining OOM
+object is what settles which rows move.
 
 ## The one native ABI failure
 
