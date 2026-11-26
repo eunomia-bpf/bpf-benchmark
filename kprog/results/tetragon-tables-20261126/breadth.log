@@ -1,0 +1,21 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_calls.py 
+9 assembled local/helper-call liveness cases passed
+python3 reproduce.py 12 16 23 33 38 39 41 49 58 62 64 71 75 80 9
+12 refused relative table computation has live register or flag results
+16 refused relative table computation has live register or flag results
+23 refused relative table computation has live register or flag results
+33 refused relative table computation has live register or flag results
+38 refused relative table computation has live register or flag results
+39 lowered 
+41 refused relative table computation has live register or flag results
+49 refused relative table computation has live register or flag results
+58 refused relative table computation has live register or flag results
+62 lowered 
+64 refused relative table computation has live register or flag results
+71 refused relative table computation has live register or flag results
+75 refused relative table computation has live register or flag results
+80 refused relative table computation has live register or flag results
+9 refused unresolved finite indirect target at 0x3580: jmp    rax
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

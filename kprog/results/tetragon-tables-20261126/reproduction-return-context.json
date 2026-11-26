@@ -1,0 +1,74 @@
+[
+  {
+    "request_id": 12,
+    "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/12.success.tar.gz",
+    "historical_error": "relative table computation has live register or flag results",
+    "status": "refused",
+    "error": "relative table computation has live register or flag results",
+    "input_instructions": 2526,
+    "liveness_witnesses": [
+      {
+        "line": 144,
+        "instruction": "ret",
+        "address": 1504,
+        "scratch": [
+          "X86_RAX",
+          "X86_RDX"
+        ],
+        "private_masks": [
+          18446744073709551615,
+          18446744073709551615,
+          0
+        ],
+        "flags_read": 0,
+        "register_reads": {
+          "X86_RSP": 18446744073709551615
+        }
+      }
+    ],
+    "indirect_jump_context": []
+  },
+  {
+    "request_id": 9,
+    "archive": "/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests/9.success.tar.gz",
+    "historical_error": "unresolved finite indirect target at 0x3580: jmp    rax",
+    "status": "refused",
+    "error": "unresolved finite indirect target at 0x3580: jmp    rax",
+    "input_instructions": 4917,
+    "liveness_witnesses": [],
+    "indirect_jump_context": [
+      {
+        "address": 13675,
+        "instruction": "movzx  eax,BYTE PTR [r12+0x5]"
+      },
+      {
+        "address": 13681,
+        "instruction": "lea    ecx,[rax-0x2b]"
+      },
+      {
+        "address": 13684,
+        "instruction": "cmp    ecx,0x11"
+      },
+      {
+        "address": 13687,
+        "instruction": "ja     3590 <generic_kprobe_process_event+0x3590>"
+      },
+      {
+        "address": 13689,
+        "instruction": "movsxd rax,DWORD PTR [r15+rcx*4]"
+      },
+      {
+        "address": 13693,
+        "instruction": "add    rax,r15"
+      },
+      {
+        "address": 13696,
+        "instruction": "jmp    rax"
+      },
+      {
+        "address": 13698,
+        "instruction": "mov    WORD PTR [r12+0x2],0x8"
+      }
+    ]
+  }
+]

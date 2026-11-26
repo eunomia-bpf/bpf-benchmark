@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+cc -c calls.S -o calls.o
+python3 check_calls.py
+7 assembled local/helper-call liveness cases passed
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

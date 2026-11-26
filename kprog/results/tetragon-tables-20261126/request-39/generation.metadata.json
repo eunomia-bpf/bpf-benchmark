@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "prog_type": 2,
+  "section": "kprobe/trusted",
+  "maps": [
+    {
+      "name": "tg_ipv6_ext_heap",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 8,
+      "map_type": 6
+    },
+    {
+      "name": "execve_map",
+      "value_offset": null,
+      "max_entries": 32768,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 896,
+      "map_type": 1
+    },
+    {
+      "name": "socktrack_map",
+      "value_offset": null,
+      "max_entries": 32000,
+      "map_flags": 0,
+      "key_size": 8,
+      "value_size": 16,
+      "map_type": 9
+    },
+    {
+      "name": "fdinstall_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 4104,
+      "map_type": 9
+    },
+    {
+      "name": "retprobe_map",
+      "value_offset": null,
+      "max_entries": 1024,
+      "map_flags": 0,
+      "key_size": 16,
+      "value_size": 24,
+      "map_type": 1
+    },
+    {
+      "name": "retkprobe_calls",
+      "value_offset": null,
+      "max_entries": 13,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4,
+      "map_type": 3
+    },
+    {
+      "name": "buffer_heap_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 4352,
+      "map_type": 6
+    },
+    {
+      "name": "config_map",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 736,
+      "map_type": 2
+    },
+    {
+      "name": "process_call_heap",
+      "value_offset": null,
+      "max_entries": 1,
+      "map_flags": 0,
+      "key_size": 4,
+      "value_size": 25632,
+      "map_type": 6
+    }
+  ],
+  "kernel_kfunc_context": false
+}

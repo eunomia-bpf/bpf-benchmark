@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'
+python3 reproduce.py
+12 refused relative table computation has live register or flag results
+9 refused unresolved finite indirect target at 0x3580: jmp    rax
+make: Leaving directory '/workspaces/repository/kprog/results/tetragon-tables-20261126'

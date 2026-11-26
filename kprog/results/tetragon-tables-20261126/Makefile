@@ -1,3 +1,6 @@
-.PHONY: reproduce
+.PHONY: reproduce check-calls
 reproduce:
-	python3 reproduce.py
+	python3 reproduce.py $(REQUESTS)
+check-calls:
+	$(CC) -c calls.S -o calls.o
+	python3 check_calls.py $(REVISION)

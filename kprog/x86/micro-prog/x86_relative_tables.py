@@ -88,15 +88,16 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
     arguments = ('X86_RDI', 'X86_RSI', 'X86_RDX', 'X86_RCX', 'X86_R8', 'X86_R9')
     if initial is None:
         initial = (full,) * len(scratch) + (flags,)
-    pending = deque((target, initial) for target in starts)
+    pending = deque((target, initial, True) for target in starts)
     visited = {}
     while pending:
-        addr, live = pending.popleft()
-        old = visited.get(addr)
+        addr, live, observes_return = pending.popleft()
+        key = (addr, observes_return)
+        old = visited.get(key)
         merged = live if old is None else tuple(a | b for a, b in zip(old, live))
         if old == merged:
             continue
-        visited[addr] = merged
+        visited[key] = merged
         live = merged
         if addr == exit_addr:
             if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
@@ -107,7 +108,14 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
             raise ValueError('table liveness lacks image-bound instruction effects')
         reads, writes = dict(insn.effects.reads), dict(insn.effects.writes)
         flags_read, flags_written = insn.effects.flags_read, insn.effects.flags_written
+        local_target = None
         if insn.mnemonic == 'call':
+            target = insn.reloc_target
+            if target is None and insn.reloc_symbol is None and decode.has_direct_branch_target(insn.operands[0]):
+                target = decode.branch_target(insn.operands[0])
+            if target in by_addr:
+                local_target = target
+        if insn.mnemonic == 'call' and local_target is None:
             prototype = helper_prototypes().get(insn.reloc_symbol)
             prototypes = [prototype] if prototype is not None else []
             if not prototypes:
@@ -132,7 +140,7 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
         live = tuple(mask & ~writes.get(reg, 0) for reg, mask in zip(scratch, live[:-1])) + (
             live[-1] & ~flags_written,)
         if insn.mnemonic == 'ret':
-            if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
+            if observes_return and any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:-1])):
                 return False
             continue
         if not any(live):
@@ -152,7 +160,11 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
         for child in children:
             if child != exit_addr and child not in by_addr:
                 raise ValueError('table liveness has an unknown CFG successor')
-            pending.append((child, live))
+            pending.append((child, live, observes_return))
+        if local_target is not None:
+            # Check the actual callee and keep old masks in the continuation,
+            # crediting no callee kills. Only the caller observes its return.
+            pending.append((local_target, live, False))
     return True
 
 

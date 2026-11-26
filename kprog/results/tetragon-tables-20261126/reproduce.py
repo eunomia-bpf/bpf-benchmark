@@ -12,7 +12,7 @@ from x86_relative_tables import lower_relative_tables
 
 ARCHIVES = Path('/workspaces/kprog-raw/verified/omp-five-20261120/tetragon/state/session-6f0mwwi2/requests')
 results = []
-for ident in (12, 9):
+for ident in tuple(map(int, sys.argv[1:])) if len(sys.argv) > 1 else (12, 9):
     out = HERE / ('request-' + str(ident))
     out.mkdir(exist_ok=True)
     archive = ARCHIVES / (str(ident) + '.success.tar.gz')
@@ -36,17 +36,19 @@ for ident in (12, 9):
             witnesses.append(dict(line=frame.f_lineno, instruction=insn.raw if insn else None,
                 address=insn.addr if insn else None, scratch=list(state['scratch']),
                 private_masks=list(state['live']), flags_read=state.get('flags_read'),
-                register_reads=state.get('reads')))
+                register_reads=state.get('reads'), observes_return=state.get('observes_return'),
+                relocation=insn.reloc_symbol if insn else None,
+                local_target=insn.reloc_target if insn else None))
         return trace
 
-    sys.settrace(trace)
+    sys.setprofile(trace)
     try:
         lowered = lower_relative_tables(all_insns, rodata, worker.gen, exit_addr, starts)
         row.update(status='lowered', input_instructions=len(all_insns), output_instructions=len(lowered))
     except ValueError as error:
         row.update(status='refused', error=str(error), input_instructions=len(all_insns))
     finally:
-        sys.settrace(None)
+        sys.setprofile(None)
     row['liveness_witnesses'] = witnesses
     row['indirect_jump_context'] = [dict(address=insn.addr, instruction=insn.raw)
         for index, insn in enumerate(all_insns) if insn.addr == 0x3580
