@@ -20,3 +20,9 @@ consolidate:
 	flock /workspaces/.agent-state/kprog-lanes/locks/image python3 consolidate.py
 arm-regressions:
 	$(MAKE) -C ../arm64-common-flags-20261126 abi-checked-after helpers-mixed
+
+.PHONY: frontend-before frontend-after
+frontend-before:
+	python3 frontend_check.py before
+frontend-after:
+	python3 frontend_check.py after

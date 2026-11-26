@@ -1,0 +1,58 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-O3",
+      "-mtune=neoverse-n1",
+      "-mgeneral-regs-only",
+      "-mno-outline-atomics",
+      "-ffixed-x26",
+      "-fPIC",
+      "-fno-stack-protector",
+      "-c",
+      "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/input.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llvm-objdump-18",
+      "-d",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/trusted_arm64.bpf.o:\tfile format elf64-bpf\n\nDisassembly of section kprobe/trusted:\n\n0000000000000000 <trusted_arm64_arm64_sim_xdp>:\n       0:\tb7 90 06 00 02 00 00 00\t<unknown>\n       1:\tb7 90 06 00 02 00 00 00\t<unknown>\n       2:\tb7 90 06 00 02 00 00 00\t<unknown>\n       3:\tb7 90 06 00 02 00 00 00\t<unknown>\n       4:\tb7 90 06 00 02 00 00 00\t<unknown>\n       5:\tb7 90 06 00 02 00 00 00\t<unknown>\n       6:\tb7 90 06 00 02 00 00 00\t<unknown>\n       7:\tb7 90 06 00 02 00 00 00\t<unknown>\n       8:\tb7 90 06 00 02 00 00 00\t<unknown>\n       9:\tb7 90 06 00 02 00 00 00\t<unknown>\n      10:\tb7 90 06 00 02 00 00 00\t<unknown>\n      11:\tb7 90 06 00 02 00 00 00\t<unknown>\n      12:\tb7 90 06 00 02 00 00 00\t<unknown>\n      13:\tb7 90 06 00 02 00 00 00\t<unknown>\n      14:\tb7 90 06 00 02 00 00 00\t<unknown>\n      15:\tb7 90 06 00 02 00 00 00\t<unknown>\n      16:\tb7 90 06 00 02 00 00 00\t<unknown>\n      17:\tb7 90 06 00 02 00 00 00\t<unknown>\n      18:\tb7 90 06 00 02 00 00 00\t<unknown>\n      19:\tb7 90 06 00 02 00 00 00\t<unknown>\n      20:\tb7 90 06 00 02 00 00 00\t<unknown>\n      21:\tb7 90 06 00 02 00 00 00\t<unknown>\n      22:\tb7 90 06 00 02 00 00 00\t<unknown>\n      23:\tb7 90 06 00 02 00 00 00\t<unknown>\n      24:\tb7 90 06 00 02 00 00 00\t<unknown>\n      25:\tb7 90 06 00 02 00 00 00\t<unknown>\n      26:\tb7 90 06 00 02 00 00 00\t<unknown>\n      27:\tb7 90 06 00 02 00 00 00\t<unknown>\n      28:\tb7 90 06 00 02 00 00 00\t<unknown>\n      29:\tb7 90 06 00 02 00 00 00\t<unknown>\n      30:\tb7 90 06 00 02 00 00 00\t<unknown>\n      31:\tb7 90 06 00 02 00 00 00\t<unknown>\n      32:\tb7 90 06 00 02 00 00 00\t<unknown>\n      33:\tb7 90 06 00 02 00 00 00\t<unknown>\n      34:\tb7 90 06 00 02 00 00 00\t<unknown>\n      35:\tb7 90 06 00 02 00 00 00\t<unknown>\n      36:\tb7 90 06 00 02 00 00 00\t<unknown>\n      37:\tb7 90 06 00 02 00 00 00\t<unknown>\n      38:\tb7 90 06 00 02 00 00 00\t<unknown>\n      39:\tb7 90 06 00 02 00 00 00\t<unknown>\n      40:\tb7 90 06 00 02 00 00 00\t<unknown>\n      41:\tb7 90 06 00 02 00 00 00\t<unknown>\n      42:\tb7 90 06 00 02 00 00 00\t<unknown>\n      43:\tb7 90 06 00 02 00 00 00\t<unknown>\n      44:\tb7 90 06 00 02 00 00 00\t<unknown>\n      45:\tb7 90 06 00 02 00 00 00\t<unknown>\n      46:\tb7 90 06 00 02 00 00 00\t<unknown>\n      47:\tb7 90 06 00 02 00 00 00\t<unknown>\n      48:\tb7 90 06 00 02 00 00 00\t<unknown>\n      49:\tb7 90 06 00 02 00 00 00\t<unknown>\n      50:\tb7 90 06 00 02 00 00 00\t<unknown>\n      51:\tb7 90 06 00 02 00 00 00\t<unknown>\n      52:\tb7 90 06 00 02 00 00 00\t<unknown>\n      53:\tb7 90 06 00 02 00 00 00\t<unknown>\n      54:\tb7 90 06 00 02 00 00 00\t<unknown>\n      55:\tb7 90 06 00 02 00 00 00\t<unknown>\n      56:\tb7 90 06 00 02 00 00 00\t<unknown>\n      57:\tb7 90 06 00 02 00 00 00\t<unknown>\n      58:\tb7 90 06 00 02 00 00 00\t<unknown>\n      59:\tb7 90 06 00 02 00 00 00\t<unknown>\n      60:\tb7 90 06 00 02 00 00 00\t<unknown>\n      61:\tb7 90 06 00 02 00 00 00\t<unknown>\n      62:\tb7 90 06 00 02 00 00 00\t<unknown>\n      63:\tb7 90 06 00 02 00 00 00\t<unknown>\n      64:\tb7 90 06 00 02 00 00 00\t<unknown>\n      65:\tb7 90 06 00 02 00 00 00\t<unknown>\n      66:\tb7 90 06 00 02 00 00 00\t<unknown>\n      67:\tb7 90 06 00 02 00 00 00\t<unknown>\n      68:\tb7 90 06 00 02 00 00 00\t<unknown>\n      69:\tb7 90 06 00 02 00 00 00\t<unknown>\n      70:\tb7 90 06 00 02 00 00 00\t<unknown>\n      71:\tb7 90 06 00 02 00 00 00\t<unknown>\n      72:\tb7 90 06 00 02 00 00 00\t<unknown>\n      73:\tb7 90 06 00 02 00 00 00\t<unknown>\n      74:\tb7 90 06 00 02 00 00 00\t<unknown>\n      75:\tb7 90 06 00 02 00 00 00\t<unknown>\n      76:\tb7 90 06 00 02 00 00 00\t<unknown>\n      77:\tb7 90 06 00 02 00 00 00\t<unknown>\n      78:\tb7 90 06 00 02 00 00 00\t<unknown>\n      79:\tb7 90 06 00 02 00 00 00\t<unknown>\n      80:\tb7 90 06 00 02 00 00 00\t<unknown>\n      81:\tb7 90 06 00 02 00 00 00\t<unknown>\n      82:\tb7 90 06 00 02 00 00 00\t<unknown>\n      83:\tb7 90 06 00 02 00 00 00\t<unknown>\n      84:\tb7 90 06 00 02 00 00 00\t<unknown>\n      85:\tb7 90 06 00 02 00 00 00\t<unknown>\n      86:\tb7 90 06 00 02 00 00 00\t<unknown>\n      87:\tb7 90 06 00 02 00 00 00\t<unknown>\n      88:\tb7 90 06 00 02 00 00 00\t<unknown>\n      89:\tb7 90 06 00 02 00 00 00\t<unknown>\n      90:\tb7 90 06 00 02 00 00 00\t<unknown>\n      91:\tb7 90 06 00 02 00 00 00\t<unknown>\n      92:\tb7 90 06 00 02 00 00 00\t<unknown>\n      93:\tb7 90 06 00 02 00 00 00\t<unknown>\n      94:\tb7 90 06 00 02 00 00 00\t<unknown>\n      95:\tb7 90 06 00 02 00 00 00\t<unknown>\n      96:\tb7 90 06 00 02 00 00 00\t<unknown>\n      97:\tb7 90 06 00 02 00 00 00\t<unknown>\n      98:\tb4 00 00 00 07 00 00 00\tw0 = 0x7\n      99:\t95 00 00 00 00 00 00 00\texit\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "aarch64-linux-gnu-gcc",
+      "-O2",
+      "-static",
+      "-ffixed-x26",
+      "/workspaces/repository/kprog/results/checked-toolchain-20261126/frontend_driver.c",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/generated/checked-simulator.native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/execute"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "qemu-aarch64-static",
+      "-cpu",
+      "cortex-a57",
+      "/var/tmp/kprog-tmp/perf/checked-toolchain/frontend/execute"
+    ],
+    "returncode": 0,
+    "stdout": "native_return=99\n",
+    "stderr": ""
+  }
+]
