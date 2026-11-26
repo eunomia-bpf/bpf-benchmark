@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix.writable
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix.writable
+#check KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix.execute
