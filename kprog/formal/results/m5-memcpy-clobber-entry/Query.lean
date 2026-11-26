@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyClobberEntry
+#check KProgFormal.ClightRefinement.Arm64MemcpyClobberEntry.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyClobberEntry.call_step
+#check KProgFormal.ClightRefinement.Arm64MemcpyClobberEntry.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyClobberEntry.execute
