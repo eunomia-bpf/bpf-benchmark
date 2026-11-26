@@ -1,0 +1,20 @@
+{
+  "started_at": "2026-11-26T07:15:25.201421+00:00",
+  "revision": "2a35bf339",
+  "controller_pid": 380701,
+  "callback_pid": 380702,
+  "detachment": "setsid nohup for both processes",
+  "controller_command": [
+    "bash",
+    "kprog/results/hash-family-c-20261126/check.sh",
+    "/workspaces/repository/kprog/results/hash-family-c-20261126/check-20261126T071525Z"
+  ],
+  "callback_command": [
+    "bash",
+    "kprog/results/hash-family-c-20261126/finish.sh",
+    "380701",
+    "/workspaces/repository/kprog/results/hash-family-c-20261126/check-20261126T071525Z"
+  ],
+  "image": "fb53150e89ea",
+  "scope": "Frozen six-app functional check on existing image; no rebuild or full timing"
+}
