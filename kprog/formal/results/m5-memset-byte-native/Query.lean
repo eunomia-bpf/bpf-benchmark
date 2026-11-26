@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetByteNative
+
+#check KProgFormal.ClightRefinement.Arm64MemsetByteNative.decoded_word
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteNative.decoded_word
+#check KProgFormal.ClightRefinement.Arm64MemsetByteNative.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteNative.reference_step
