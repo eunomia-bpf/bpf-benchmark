@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTagLoop
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.kept
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.current
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagLoop.current
