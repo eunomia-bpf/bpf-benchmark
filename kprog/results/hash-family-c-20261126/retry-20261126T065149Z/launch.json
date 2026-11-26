@@ -1,0 +1,18 @@
+{
+  "started_at": "2026-11-26T06:51:49.367037+00:00",
+  "revision": "9b1b153fe",
+  "controller_pid": 338429,
+  "callback_pid": 338430,
+  "detachment": "setsid nohup for both processes",
+  "controller_command": [
+    "bash",
+    "kprog/results/hash-family-c-20261126/run.sh",
+    "/workspaces/repository/kprog/results/hash-family-c-20261126/retry-20261126T065149Z"
+  ],
+  "callback_command": [
+    "bash",
+    "kprog/results/hash-family-c-20261126/finish.sh",
+    "338429",
+    "/workspaces/repository/kprog/results/hash-family-c-20261126/retry-20261126T065149Z"
+  ]
+}
