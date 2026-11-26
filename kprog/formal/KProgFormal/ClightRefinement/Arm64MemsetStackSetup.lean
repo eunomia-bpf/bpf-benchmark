@@ -609,6 +609,15 @@ private theorem address_setup (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : C
   rw [tagEnd_source]
   exact .step trivial (CC.doStep_sound _ _ _ _ rfl) (.refl _)
 
+/-- The actual per-byte address setup retains both enclosing loop inputs
+and sets the real byte offset to the current counter. -/
+theorem temps_loop (le : CC.TempEnv) (i : BitVec 64) :
+    (temps le i).get Arm64Program.___a64_lib_i = le.get Arm64Program.___a64_lib_i ∧
+    (temps le i).get Arm64Program.___a64_lib_len = le.get Arm64Program.___a64_lib_len ∧
+    (temps le i).get Arm64Program.___a64_mwr_off = some (.Vlong i) := by
+  refine ⟨?_,?_,?_⟩ <;> simp +decide only [temps,offsetTemps,resultTemps,hasTemps,
+    prepostTemps,copiedTemps,metadataTemps,CC.PTree.gso,CC.PTree.gss]
+
 /-- All original offset metadata, both loops, current iteration offset and
 R0 selection reach the actual tag-reader source without memory effects. -/
 theorem to_tag (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (i : BitVec 64)
