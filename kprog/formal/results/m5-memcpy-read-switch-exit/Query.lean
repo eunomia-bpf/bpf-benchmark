@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.enter_read
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.enter_read
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.outer_exit
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.outer_exit
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.switch_exit
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.switch_exit
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadSwitchExit.kept
