@@ -1,0 +1,6 @@
+arg#0 reference type('UNKNOWN ') size cannot be determined: -22
+0: R1=ctx() R10=fp0
+0: (b7) r0 = 0                        ; R0=0
+1: (7b) *(u64 *)(r10 -976) = r0
+invalid write to stack R10 off=-976 size=8
+processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

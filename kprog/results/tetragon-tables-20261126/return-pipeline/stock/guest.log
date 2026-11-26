@@ -1,0 +1,6 @@
+make: *** [kprog/results/cilium-headlen-20261119/Makefile:53: archive-guest] Error 1
+itory/kprog/results/tetragon-tables-20261126/return-pipeline/stock-index.json /workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/replay /workspaces/repository/kprog/results/tetragon-tables-20261126/return-pipeline/stock
+{"request": 12, "returncode": 2, "stock_loaded": false, "errno": 13, "instructions": 412628}
+{"request": 38, "returncode": 2, "stock_loaded": false, "errno": 13, "instructions": 406458}
+make[1]: *** [kprog/results/cilium-headlen-20261119/Makefile:45: archive-stock] Error 2
+make[1]: Leaving directory '/workspaces/repository'

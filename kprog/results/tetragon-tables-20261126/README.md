@@ -156,3 +156,27 @@ commands, statuses and publication log live in return-pipeline. This source
 change affects only rejecting unknown RSP facts; the14 accepted sources
 have integer RET offsets. Compilation/stock results remain pending here.
 All raw data is retained, and full timing remains frozen.
+
+PERF 2026-11-26T17:03:10Z — Completed return-group pipeline
+
+Controller642075 completed1 at16:57:53Z. Both normal B compilations succeed,
+seven child commands0 each: request12 ELF6594560bytes, request38
+ELF6508304bytes. Complete compiler evidence is archived per case; commands,
+statuses, source revision ae0a2546d and kernel83e0fabe355d are retained.
+Actual stock guest16:57:47–16:57:53Z submits412628 instructions for12 and
+406458 for38. Both returnrc2/errno13 and stock_loaded=false. Request12
+fails insn1 at R10-976;38 fails insn1 at R10-968; each processes2insns.
+The initial arg#0 UNKNOWN/-22 message is also retained. Together with the
+previous39/62 representative rejection at R10-528, every distinct generated
+source group has now reached and failed stock verification on B stack
+pressure. Equal-source peers were not separately loaded; no checked-native
+or app acceptance is claimed. These are real failures to fix within the
+existing pipeline, not a reason to alter the kernel stack limit or exclude
+programs. Full timing remains frozen.
+
+All four successful preprocessing commands and their eight normal piece
+removals were inspected again: all pieces remain absent, joined .i and
+compiler evidence remain. The own cleanup-log line was committed in
+7949ec26a; no additional removal occurred. return-pipeline-outcome.json
+records the actual outcomes and this reinspection. Raw compiler evidence
+publications are e1797f3c5/1fd28da00, stock publication99841361e.
