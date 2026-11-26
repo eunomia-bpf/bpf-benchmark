@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTagFrame
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagFrame.word_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagFrame.word_store
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagFrame.current
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagFrame.current
