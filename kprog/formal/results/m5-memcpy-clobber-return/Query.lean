@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyClobberReturn
+
+open KProgFormal.ClightRefinement
+#check Arm64MemcpyClobberReturn.restore
+#print axioms Arm64MemcpyClobberReturn.restore
+#check Arm64MemcpyClobberReturn.original
+#print axioms Arm64MemcpyClobberReturn.original
