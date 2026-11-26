@@ -1,0 +1,7 @@
+# The same complete original source prefix reaches memcpy with derived inputs
+
+One original program memset statement now derives its entire actual procedure, eight-local free and caller return, both following pointer calls and four stores, then the original fifteenth-MOV dispatcher, R2 length stores, actual local free and return to the real memcpy statement. Both current bounds derive from the preceding actual MOV results and actual allocation growth. The final same packet reads R0=-16/tag4,R1=-32/tag4,R2=16/tag0, retains16 original data values,24 stack tags, remaining GPR words,4 flags and64 vector halves, and current Resources/Storage/permissions/SP/ABI. The initial caller frame and exact new frontier derive from the same chained effects; the original provider trace is unchanged by both pointer calls and length MOV. The source execution is derived from its original current-rights/provider/cache domain without an extra execution-witness premise. Native instruction prefix counts retain their earlier scopes. Next is the actual memcpy entry, length/tag reads,16 memory copies, tag transfer and shared clobber/free/caller.
+
+Focused build 371 and 1 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
