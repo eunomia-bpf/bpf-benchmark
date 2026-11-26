@@ -1,0 +1,4 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAddCallRights
+
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryAddCallRights.corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryAddCallRights.corresponds
