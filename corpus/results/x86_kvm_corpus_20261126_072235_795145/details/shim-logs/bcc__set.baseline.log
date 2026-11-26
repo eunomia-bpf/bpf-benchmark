@@ -1,0 +1,632 @@
+[94.697149 pid=1815 tid=1815] shim_init pid=1815 exe=/usr/local/bin/capable
+[94.697730 pid=1821 tid=1821] shim_init pid=1821 exe=/usr/local/bin/vfsstat
+[94.697697 pid=1818 tid=1818] shim_init pid=1818 exe=/usr/local/bin/biosnoop
+[94.697802 pid=1824 tid=1824] shim_init pid=1824 exe=/usr/local/bin/opensnoop
+[94.697794 pid=1827 tid=1827] shim_init pid=1827 exe=/usr/local/bin/syscount
+[94.698057 pid=1830 tid=1830] shim_init pid=1830 exe=/usr/local/bin/tcpconnect
+[94.698155 pid=1833 tid=1833] shim_init pid=1833 exe=/usr/local/bin/tcplife
+[94.698559 pid=1837 tid=1837] shim_init pid=1837 exe=/usr/local/bin/runqlat
+[94.796535 pid=1818 tid=1818] kinsnprober exit=0 target=/tmp/target.json
+[94.796616 pid=1815 tid=1815] kinsnprober exit=0 target=/tmp/target.json
+[94.796775 pid=1824 tid=1824] kinsnprober exit=0 target=/tmp/target.json
+[94.796738 pid=1833 tid=1833] kinsnprober exit=0 target=/tmp/target.json
+[94.797119 pid=1821 tid=1821] kinsnprober exit=0 target=/tmp/target.json
+[94.797104 pid=1833 tid=1833] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.797000 pid=1818 tid=1818] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.797078 pid=1827 tid=1827] kinsnprober exit=0 target=/tmp/target.json
+[94.796926 pid=1837 tid=1837] kinsnprober exit=0 target=/tmp/target.json
+[94.797369 pid=1818 tid=1818]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=4
+[94.797422 pid=1833 tid=1833]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=5
+[94.798188 pid=1861 tid=1861] shim_init pid=1861 exe=/usr/bin/dash
+[94.798417 pid=1824 tid=1824] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.798461 pid=1815 tid=1815] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.798486 pid=1818 tid=1818] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.798609 pid=1833 tid=1833] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.798564 pid=1830 tid=1830] kinsnprober exit=0 target=/tmp/target.json
+[94.798802 pid=1815 tid=1815]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=9
+[94.798758 pid=1818 tid=1818]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=8
+[94.798725 pid=1824 tid=1824]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=6
+[94.798753 pid=1833 tid=1833]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=7
+[94.798945 pid=1815 tid=1815] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.798919 pid=1830 tid=1830] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.799092 pid=1830 tid=1830]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=11
+[94.799074 pid=1815 tid=1815]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=10
+[94.799210 pid=1830 tid=1830] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.799325 pid=1830 tid=1830]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=12
+[94.799761 pid=1824 tid=1824] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.799926 pid=1824 tid=1824]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=13
+[94.805578 pid=1818 tid=1848] socket: listening on /var/run/bpfrejit/shim-1818.sock
+[94.805634 pid=1824 tid=1852] socket: listening on /var/run/bpfrejit/shim-1824.sock
+[94.806046 pid=1821 tid=1821] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.806277 pid=1815 tid=1854] socket: listening on /var/run/bpfrejit/shim-1815.sock
+[94.806241 pid=1821 tid=1859] socket: listening on /var/run/bpfrejit/shim-1821.sock
+[94.806651 pid=1821 tid=1821]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=14
+[94.806646 pid=1833 tid=1851] socket: listening on /var/run/bpfrejit/shim-1833.sock
+[94.806729 pid=1837 tid=1837] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.806793 pid=1821 tid=1821] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.806791 pid=1818 tid=1818] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=14977 attach_prog_fd=14977
+[94.806764 pid=1815 tid=1815] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=4490 attach_prog_fd=4490
+[94.806903 pid=1821 tid=1821]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=16
+[94.806878 pid=1837 tid=1837]   PROG_LOAD -> fd=5 errno=0 kernel_prog_id=15
+[94.806869 pid=1827 tid=1858] socket: listening on /var/run/bpfrejit/shim-1827.sock
+[94.806948 pid=1818 tid=1818]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=18
+[94.806923 pid=1815 tid=1815]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=17
+[94.806918 pid=1830 tid=1865] socket: listening on /var/run/bpfrejit/shim-1830.sock
+[94.807000 pid=1837 tid=1860] socket: listening on /var/run/bpfrejit/shim-1837.sock
+[94.807126 pid=1818 tid=1818] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.807165 pid=1837 tid=1837] BPF_PROG_LOAD type=26 (tracing) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=23 attach_btf_id=74175 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.807156 pid=1815 tid=1815] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.807302 pid=1827 tid=1827] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.807276 pid=1818 tid=1818]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=3
+[94.807271 pid=1837 tid=1837]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=19
+[94.807253 pid=1815 tid=1815]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=2
+[94.807421 pid=1815 tid=1815] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=start
+[94.807412 pid=1837 tid=1837] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.807471 pid=1827 tid=1827]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=20
+[94.807450 pid=1830 tid=1830] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=34427 attach_prog_fd=34427
+[94.807449 pid=1818 tid=1818] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[94.807619 pid=1827 tid=1827] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.807611 pid=1837 tid=1837]   PROG_LOAD -> fd=6 errno=0 kernel_prog_id=21
+[94.807640 pid=1830 tid=1830]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=22
+[94.807778 pid=1827 tid=1827]   PROG_LOAD -> fd=4 errno=0 kernel_prog_id=23
+[94.807763 pid=1830 tid=1830] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.807753 pid=1815 tid=1815]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=4
+[94.807789 pid=1818 tid=1818]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=5
+[94.807854 pid=1818 tid=1818] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=infobyreq
+[94.807869 pid=1815 tid=1815] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[94.807910 pid=1830 tid=1830]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=6
+[94.807958 pid=1815 tid=1815]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=7
+[94.808114 pid=1830 tid=1830] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=sockets
+[94.808092 pid=1818 tid=1818]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=8
+[94.808089 pid=1815 tid=1815] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[94.808158 pid=1818 tid=1818] BPF_MAP_CREATE type=1 key_size=8 value_size=24 max_entries=10240 name=start
+[94.808165 pid=1815 tid=1815]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=9
+[94.808222 pid=1815 tid=1815] BPF_MAP_CREATE type=7 key_size=4 value_size=1016 max_entries=1024 name=stackmap
+[94.808516 pid=1815 tid=1815]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=11
+[94.808505 pid=1818 tid=1818]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=10
+[94.808583 pid=1830 tid=1830]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=12
+[94.809439 pid=1830 tid=1830] BPF_MAP_CREATE type=1 key_size=12 value_size=8 max_entries=8192 name=ipv4_count
+[94.809415 pid=1818 tid=1818] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[94.809402 pid=1815 tid=1815] BPF_MAP_CREATE type=1 key_size=16 value_size=44 max_entries=10240 name=info
+[94.809542 pid=1818 tid=1818]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=13
+[94.809638 pid=1818 tid=1818] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.809695 pid=1818 tid=1818]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=14
+[94.809735 pid=1815 tid=1815]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=15
+[94.809834 pid=1818 tid=1818] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.809872 pid=1830 tid=1830]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=16
+[94.809912 pid=1815 tid=1815] BPF_MAP_CREATE type=1 key_size=16 value_size=8 max_entries=10240 name=seen
+[94.809962 pid=1818 tid=1818]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=24
+[94.810056 pid=1830 tid=1830] BPF_MAP_CREATE type=1 key_size=36 value_size=8 max_entries=8192 name=ipv6_count
+[94.810051 pid=1818 tid=1818] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=biosnoop.rodata
+[94.810100 pid=1824 tid=1824] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=3505 attach_prog_fd=3505
+[94.810257 pid=1815 tid=1815]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=17
+[94.810374 pid=1818 tid=1818]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=19
+[94.810362 pid=1815 tid=1815] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.810345 pid=1830 tid=1830]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=18
+[94.810431 pid=1818 tid=1818] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=biosnoo.kconfig
+[94.810425 pid=1815 tid=1815]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=20
+[94.810462 pid=1830 tid=1830] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[94.810523 pid=1818 tid=1818]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=21
+[94.810547 pid=1815 tid=1815] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f24bde511ad423d2 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.810541 pid=1830 tid=1830]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=22
+[94.810691 pid=1815 tid=1815]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=25
+[94.810763 pid=1815 tid=1815] BPF_MAP_CREATE type=2 key_size=4 value_size=16 max_entries=1 name=capable_.rodata
+[94.810849 pid=1815 tid=1815]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=23
+[94.810945 pid=1815 tid=1815] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=capable.kconfig
+[94.811001 pid=1815 tid=1815]   MAP_CREATE -> fd=14 errno=0 kernel_map_id=24
+[94.811039 pid=1830 tid=1830] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.811093 pid=1830 tid=1830]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=25
+[94.811178 pid=1830 tid=1830] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=be83cd95099a1830 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.811330 pid=1830 tid=1830]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=26
+[94.811409 pid=1830 tid=1830] BPF_MAP_CREATE type=2 key_size=4 value_size=280 max_entries=1 name=tcpconne.rodata
+[94.811489 pid=1830 tid=1830]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=26
+[94.811542 pid=1830 tid=1830] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=1 name=tcpconne.bss
+[94.811652 pid=1830 tid=1830]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=27
+[94.812962 pid=1824 tid=1824]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=27
+[94.812400 pid=1815 tid=1815] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=38 hash=870f49dfc7705d8c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.813785 pid=1824 tid=1824] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.813860 pid=1824 tid=1824]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=28
+[94.813936 pid=1824 tid=1824] BPF_MAP_CREATE type=1 key_size=4 value_size=16 max_entries=10240 name=start
+[94.814093 pid=1833 tid=1833] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=42956 attach_prog_fd=42956
+[94.814302 pid=1824 tid=1824]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=29
+[94.814369 pid=1833 tid=1833]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=28
+[94.814473 pid=1824 tid=1824] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[94.814508 pid=1833 tid=1833] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.814538 pid=1824 tid=1824]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=30
+[94.814585 pid=1833 tid=1833]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=31
+[94.814597 pid=1824 tid=1824] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.814664 pid=1824 tid=1824]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=32
+[94.814702 pid=1833 tid=1833] BPF_MAP_CREATE type=1 key_size=8 value_size=8 max_entries=10240 name=birth
+[94.814790 pid=1824 tid=1824] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=918b4f57cc8f3b1e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.814932 pid=1824 tid=1824]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=29
+[94.815011 pid=1824 tid=1824] BPF_MAP_CREATE type=2 key_size=4 value_size=13 max_entries=1 name=opensnoo.rodata
+[94.815174 pid=1824 tid=1824]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=34
+[94.815076 pid=1833 tid=1833]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=33
+[94.815342 pid=1827 tid=1827] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=30954 attach_prog_fd=30954
+[94.815289 pid=1833 tid=1833] BPF_MAP_CREATE type=1 key_size=8 value_size=20 max_entries=10240 name=idents
+[94.815479 pid=1827 tid=1827]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=30
+[94.815766 pid=1833 tid=1833]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=35
+[94.815829 pid=1821 tid=1821] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=1813 attach_prog_fd=1813
+[94.815994 pid=1837 tid=1837] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=18 attach_btf_obj_fd=33140 attach_prog_fd=33140
+[94.815985 pid=1821 tid=1821]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=31
+[94.815974 pid=1833 tid=1833] BPF_MAP_CREATE type=4 key_size=4 value_size=4 max_entries=8 name=events
+[94.816059 pid=1821 tid=1821] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.816008 pid=1827 tid=1827] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.816067 pid=1833 tid=1833]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=36
+[94.816084 pid=1837 tid=1837]   PROG_LOAD -> fd=7 errno=0 kernel_prog_id=32
+[94.816142 pid=1833 tid=1833] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.816137 pid=1837 tid=1837] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=1 name=libbpf_mmap
+[94.816109 pid=1821 tid=1821]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=37
+[94.816161 pid=1827 tid=1827]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=38
+[94.816205 pid=1833 tid=1833]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=40
+[94.816201 pid=1837 tid=1837]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=39
+[94.816199 pid=1821 tid=1821] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.816194 pid=1830 tid=1830] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816257 pid=1837 tid=1837] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[94.816256 pid=1821 tid=1821]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=41
+[94.816226 pid=1827 tid=1827] BPF_MAP_CREATE type=8 key_size=4 value_size=4 max_entries=1 name=cgroup_map
+[94.816308 pid=1827 tid=1827]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=42
+[94.816294 pid=1833 tid=1833] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816341 pid=1837 tid=1837]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=43
+[94.816340 pid=1821 tid=1821] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=06ffeef05d7e610c license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816362 pid=1827 tid=1827] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=8192 name=start
+[94.816356 pid=1815 tid=1815]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=33
+[94.816393 pid=1837 tid=1837] BPF_MAP_CREATE type=1 key_size=4 value_size=8 max_entries=10240 name=start
+[94.816430 pid=1818 tid=1818] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816449 pid=1821 tid=1821]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=35
+[94.816428 pid=1815 tid=1815] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.816410 pid=1830 tid=1830]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=34
+[94.816514 pid=1821 tid=1821] BPF_MAP_CREATE type=2 key_size=4 value_size=40 max_entries=1 name=vfsstat_.bss
+[94.816499 pid=1833 tid=1833]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=36
+[94.816498 pid=1827 tid=1827]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=44
+[94.816559 pid=1815 tid=1815]   MAP_CREATE -> fd=16 errno=0 kernel_map_id=45
+[94.816556 pid=1818 tid=1818]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=37
+[94.816542 pid=1830 tid=1830] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect insn_cnt=32 hash=9b37d763eeafa7fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816585 pid=1833 tid=1833] BPF_MAP_CREATE type=2 key_size=4 value_size=4106 max_entries=1 name=tcplife_.rodata
+[94.816581 pid=1821 tid=1821]   MAP_CREATE -> fd=7 errno=0 kernel_map_id=46
+[94.816575 pid=1827 tid=1827] BPF_MAP_CREATE type=1 key_size=4 value_size=32 max_entries=8192 name=data
+[94.816654 pid=1833 tid=1833]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=47
+[94.816615 pid=1815 tid=1815] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816715 pid=1830 tid=1830]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=38
+[94.816741 pid=1837 tid=1837]   MAP_CREATE -> fd=8 errno=0 kernel_map_id=48
+[94.816789 pid=1818 tid=1818] BPF_PROG_LOAD type=2 (kprobe) name=blk_account_io_ insn_cnt=31 hash=e873fdad705e3f0f license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.816890 pid=1837 tid=1837] BPF_MAP_CREATE type=1 key_size=4 value_size=120 max_entries=10240 name=hists
+[94.816872 pid=1815 tid=1815]   PROG_LOAD -> fd=17 errno=0 kernel_prog_id=39
+[94.816866 pid=1830 tid=1830] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.816912 pid=1827 tid=1827]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=49
+[94.816987 pid=1818 tid=1818]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=40
+[94.816970 pid=1827 tid=1827] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.816956 pid=1830 tid=1830]   MAP_CREATE -> fd=14 errno=0 kernel_map_id=50
+[94.817138 pid=1827 tid=1827]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=51
+[94.817046 pid=1815 tid=1815] BPF_PROG_LOAD type=2 (kprobe) name=kprobe__cap_cap insn_cnt=142 hash=e09b549328e1631b license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817150 pid=1818 tid=1818] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.817252 pid=1830 tid=1830] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817225 pid=1827 tid=1827] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817345 pid=1818 tid=1818]   MAP_CREATE -> fd=14 errno=0 kernel_map_id=52
+[94.817337 pid=1830 tid=1830]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=43
+[94.817321 pid=1815 tid=1815]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=41
+[94.817392 pid=1837 tid=1837]   MAP_CREATE -> fd=9 errno=0 kernel_map_id=53
+[94.817375 pid=1827 tid=1827]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=42
+[94.817439 pid=1837 tid=1837] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_global
+[94.817436 pid=1827 tid=1827] BPF_MAP_CREATE type=2 key_size=4 value_size=48 max_entries=1 name=syscount.rodata
+[94.817423 pid=1818 tid=1818] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817491 pid=1821 tid=1821] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_read insn_cnt=6 hash=ca9822ef332acdf2 license=GPL expected_attach=24 attach_btf_id=123744 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817532 pid=1818 tid=1818]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=44
+[94.817519 pid=1827 tid=1827]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=55
+[94.817517 pid=1837 tid=1837]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=54
+[94.817612 pid=1821 tid=1821]   PROG_LOAD -> fd=8 errno=0 kernel_prog_id=45
+[94.817607 pid=1837 tid=1837] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=5 hash=f2f24c65389bee75 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817719 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817763 pid=1818 tid=1818] BPF_PROG_LOAD type=26 (tracing) name=block_rq_insert insn_cnt=165 hash=7a3cc784f2afd7b0 license=GPL expected_attach=23 attach_btf_id=73507 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817823 pid=1824 tid=1824]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=47
+[94.817798 pid=1837 tid=1837]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=46
+[94.817894 pid=1837 tid=1837] BPF_MAP_CREATE type=2 key_size=4 value_size=12 max_entries=1 name=runqlat_.rodata
+[94.817916 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=d1065e8f646a994e license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.817948 pid=1837 tid=1837]   MAP_CREATE -> fd=10 errno=0 kernel_map_id=56
+[94.818044 pid=1824 tid=1824]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=48
+[94.818020 pid=1837 tid=1837] BPF_MAP_CREATE type=2 key_size=4 value_size=120 max_entries=1 name=runqlat_.bss
+[94.818103 pid=1824 tid=1824] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.818103 pid=1837 tid=1837]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=57
+[94.818168 pid=1824 tid=1824]   MAP_CREATE -> fd=11 errno=0 kernel_map_id=58
+[94.818249 pid=1824 tid=1824] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.818316 pid=1824 tid=1824]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=49
+[94.818401 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=46 hash=67e42c98e01a90ee license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.818440 pid=1821 tid=1821] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_writ insn_cnt=6 hash=d0c2d468d90e10ba license=GPL expected_attach=24 attach_btf_id=123764 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.818513 pid=1824 tid=1824]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=50
+[94.818536 pid=1821 tid=1821]   PROG_LOAD -> fd=9 errno=0 kernel_prog_id=51
+[94.818585 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.818726 pid=1824 tid=1824]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=52
+[94.818792 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name=tracepoint__sys insn_cnt=102 hash=3ee7b67cec664f61 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.818913 pid=1824 tid=1824]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=53
+[94.819029 pid=1821 tid=1821] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_fsyn insn_cnt=6 hash=cc6d44cf3357ea62 license=GPL expected_attach=24 attach_btf_id=123710 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.819140 pid=1821 tid=1821]   PROG_LOAD -> fd=10 errno=0 kernel_prog_id=54
+[94.819230 pid=1830 tid=1830] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v4_connect_ insn_cnt=167 hash=9928e6ae2f001c9a license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.819204 pid=1818 tid=1818]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=55
+[94.819322 pid=1833 tid=1833] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.819601 pid=1818 tid=1818] BPF_PROG_LOAD type=26 (tracing) name=block_rq_issue insn_cnt=117 hash=bcc1df550d6af5d3 license=GPL expected_attach=23 attach_btf_id=73508 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.819653 pid=1821 tid=1821] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_open insn_cnt=6 hash=c826085eb7cf6f2a license=GPL expected_attach=24 attach_btf_id=123734 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.819979 pid=1824 tid=1824] perf_event_open type=2 config=728 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=14 errno=0
+[94.820074 pid=1821 tid=1821]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=57
+[94.820061 pid=1824 tid=1824] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820055 pid=1833 tid=1833]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=56
+[94.820125 pid=1827 tid=1827] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820118 pid=1830 tid=1830]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=58
+[94.820221 pid=1818 tid=1818]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=59
+[94.820214 pid=1827 tid=1827]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=61
+[94.820188 pid=1824 tid=1824]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=60
+[94.820186 pid=1833 tid=1833] BPF_PROG_LOAD type=5 (tracepoint) name=inet_sock_set_s insn_cnt=309 hash=8e43f6c8f4b557f0 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820305 pid=1830 tid=1830] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect insn_cnt=32 hash=9b37d763eeafa7fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820296 pid=1827 tid=1827] BPF_PROG_LOAD type=5 (tracepoint) name=sys_enter insn_cnt=31 hash=a88ae21d0f87b8fa license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820283 pid=1824 tid=1824] BPF_LINK_CREATE prog_fd=15 target_fd=4294967295 attach_type=41 flags=0
+[94.820504 pid=1824 tid=1824]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.820487 pid=1830 tid=1830]   PROG_LOAD -> fd=15 errno=0 kernel_prog_id=63
+[94.820481 pid=1827 tid=1827]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=62
+[94.820547 pid=1827 tid=1827] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.820573 pid=1824 tid=1824] BPF_LINK_CREATE prog_fd=10 target_fd=14 attach_type=41 flags=0
+[94.820592 pid=1827 tid=1827]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=59
+[94.820606 pid=1821 tid=1821] BPF_PROG_LOAD type=26 (tracing) name=fentry_vfs_crea insn_cnt=6 hash=8656aae1a3bb4f12 license=GPL expected_attach=24 attach_btf_id=123695 prog_btf_fd=5 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820631 pid=1827 tid=1827] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820629 pid=1830 tid=1830] BPF_PROG_LOAD type=2 (kprobe) name=tcp_v6_connect_ insn_cnt=170 hash=597c5385273447d9 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820652 pid=1824 tid=1824] BPF_TASK_FD_QUERY target_fd=14 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=48 probe_offset=0 probe_addr=0 symbol=sys_enter_open
+[94.820846 pid=1824 tid=1824]   LINK_CREATE -> fd=15 errno=0 kernel_link_id=1
+[94.820814 pid=1830 tid=1830]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=67
+[94.820738 pid=1833 tid=1833]   PROG_LOAD -> fd=11 errno=0 kernel_prog_id=66
+[94.820707 pid=1821 tid=1821]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=64
+[94.820691 pid=1827 tid=1827]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=65
+[94.820669 pid=1818 tid=1818] BPF_PROG_LOAD type=26 (tracing) name=block_rq_comple insn_cnt=114 hash=5979a2ca13e1d758 license=GPL expected_attach=23 attach_btf_id=73505 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820936 pid=1827 tid=1827] BPF_PROG_LOAD type=5 (tracepoint) name=sys_exit insn_cnt=116 hash=b73a9e8ecdbe64c4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=4 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.820908 pid=1833 tid=1833] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.820995 pid=1833 tid=1833]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=60
+[94.821041 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=14
+[94.821024 pid=1818 tid=1818]   PROG_LOAD -> fd=16 errno=0 kernel_prog_id=68
+[94.821054 pid=1833 tid=1833] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.821136 pid=1827 tid=1827]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=69
+[94.821133 pid=1821 tid=1821] BPF_LINK_CREATE prog_fd=8 target_fd=0 attach_type=24 flags=0
+[94.821117 pid=1833 tid=1833]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=70
+[94.821256 pid=1824 tid=1824] perf_event_open type=2 config=726 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=16 errno=0
+[94.821347 pid=1824 tid=1824] BPF_LINK_CREATE prog_fd=11 target_fd=16 attach_type=41 flags=0
+[94.821405 pid=1824 tid=1824] BPF_TASK_FD_QUERY target_fd=16 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=50 probe_offset=0 probe_addr=0 symbol=sys_enter_openat
+[94.821482 pid=1824 tid=1824]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=3
+[94.821536 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=16
+[94.823617 pid=1837 tid=1837] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=6 hash=7e4864ff1af3e9d4 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.838140 pid=1837 tid=1837]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=71
+[94.839135 pid=1837 tid=1837] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup insn_cnt=32 hash=664da210f6a9400d license=GPL expected_attach=23 attach_btf_id=74175 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.847194 pid=1833 tid=1833] perf_event_open type=2 config=2207 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=12 errno=0
+[94.847391 pid=1833 tid=1833] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.854726 pid=1837 tid=1837]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=72
+[94.854664 pid=1821 tid=1821]   LINK_CREATE -> fd=13 errno=0 kernel_link_id=2
+[94.854661 pid=1833 tid=1833]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=73
+[94.854931 pid=1837 tid=1837] BPF_MAP_CREATE type=2 key_size=4 value_size=32 max_entries=1 name=libbpf_det_bind
+[94.854923 pid=1833 tid=1833] BPF_LINK_CREATE prog_fd=13 target_fd=4294967295 attach_type=41 flags=0
+[94.854939 pid=1821 tid=1821] BPF_LINK_CREATE prog_fd=9 target_fd=0 attach_type=24 flags=0
+[94.855067 pid=1833 tid=1833]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.855070 pid=1837 tid=1837]   MAP_CREATE -> fd=13 errno=0 kernel_map_id=61
+[94.855187 pid=1833 tid=1833] BPF_LINK_CREATE prog_fd=11 target_fd=12 attach_type=41 flags=0
+[94.855184 pid=1837 tid=1837] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.855283 pid=1833 tid=1833] BPF_TASK_FD_QUERY target_fd=12 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=66 probe_offset=0 probe_addr=0 symbol=inet_sock_set_state
+[94.855345 pid=1833 tid=1833]   LINK_CREATE -> fd=13 errno=0 kernel_link_id=5
+[94.855397 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=12
+[94.855528 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=15 errno=0
+[94.855664 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=15
+[94.855712 pid=1837 tid=1837]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=74
+[94.855763 pid=1830 tid=1830] perf_event_open type=8 config=0 config1=94418930158288 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=17 errno=0
+[94.856604 pid=1830 tid=1830] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.856604 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=16 errno=0
+[94.856763 pid=1830 tid=1830]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=75
+[94.856747 pid=1824 tid=1824] perf_event_open type=2 config=727 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=18 errno=0
+[94.856744 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=16
+[94.856930 pid=1824 tid=1824] BPF_LINK_CREATE prog_fd=12 target_fd=18 attach_type=41 flags=0
+[94.856914 pid=1837 tid=1837] BPF_PROG_LOAD type=26 (tracing) name=sched_wakeup_ne insn_cnt=32 hash=664da210f6a9400d license=GPL expected_attach=23 attach_btf_id=74176 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.856902 pid=1830 tid=1830] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[94.856874 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=17 errno=0
+[94.856973 pid=1827 tid=1827] perf_event_open type=2 config=371 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=13 errno=0
+[94.857046 pid=1824 tid=1824] BPF_TASK_FD_QUERY target_fd=18 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=52 probe_offset=0 probe_addr=0 symbol=sys_exit_open
+[94.857043 pid=1830 tid=1830]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.857040 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=17
+[94.857116 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=18 errno=0
+[94.857106 pid=1824 tid=1824]   LINK_CREATE -> fd=19 errno=0 kernel_link_id=6
+[94.857081 pid=1827 tid=1827] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.857145 pid=1830 tid=1830] BPF_LINK_CREATE prog_fd=13 target_fd=17 attach_type=41 flags=0
+[94.857191 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=18
+[94.857185 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=18
+[94.857278 pid=1830 tid=1830] BPF_TASK_FD_QUERY target_fd=17 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=38 probe_offset=0 probe_addr=18446744072382347136 symbol=tcp_v4_connect
+[94.857261 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=19 errno=0
+[94.857324 pid=1824 tid=1824] perf_event_open type=2 config=725 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=20 errno=0
+[94.857348 pid=1830 tid=1830]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=7
+[94.857336 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=19
+[94.857398 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=17
+[94.857395 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=20 errno=0
+[94.857388 pid=1824 tid=1824] BPF_LINK_CREATE prog_fd=13 target_fd=20 attach_type=41 flags=0
+[94.857475 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=20
+[94.857470 pid=1824 tid=1824] BPF_TASK_FD_QUERY target_fd=20 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=53 probe_offset=0 probe_addr=0 symbol=sys_exit_openat
+[94.857543 pid=1824 tid=1824]   LINK_CREATE -> fd=21 errno=0 kernel_link_id=8
+[94.857580 pid=1821 tid=1821]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=4
+[94.857572 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=21 errno=0
+[94.857606 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=20
+[94.857590 pid=1827 tid=1827]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=77
+[94.857635 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=21
+[94.857627 pid=1837 tid=1837]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=76
+[94.857627 pid=1821 tid=1821] BPF_LINK_CREATE prog_fd=10 target_fd=0 attach_type=24 flags=0
+[94.857653 pid=1827 tid=1827] BPF_LINK_CREATE prog_fd=14 target_fd=4294967295 attach_type=41 flags=0
+[94.857682 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=23 errno=0
+[94.857683 pid=1833 tid=1833] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=22 errno=0
+[94.857813 pid=1827 tid=1827]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.857807 pid=1833 tid=1833] PERF_EVENT_IOC_ENABLE event_fd=22
+[94.857842 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=23
+[94.858226 pid=1837 tid=1837] BPF_PROG_LOAD type=26 (tracing) name=sched_switch insn_cnt=257 hash=b10d44abfbb937d0 license=GPL expected_attach=23 attach_btf_id=74169 prog_btf_fd=6 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.858283 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=24 errno=0
+[94.858273 pid=1827 tid=1827] BPF_LINK_CREATE prog_fd=12 target_fd=13 attach_type=41 flags=0
+[94.858351 pid=1827 tid=1827] BPF_TASK_FD_QUERY target_fd=13 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=69 probe_offset=0 probe_addr=0 symbol=sys_exit
+[94.858460 pid=1827 tid=1827]   LINK_CREATE -> fd=14 errno=0 kernel_link_id=10
+[94.858436 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=24
+[94.858516 pid=1827 tid=1827] PERF_EVENT_IOC_ENABLE event_fd=13
+[94.858557 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=25 errno=0
+[94.858581 pid=1830 tid=1830] perf_event_open type=8 config=1 config1=94418930224368 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v4_connect kprobe_addr=0 -> fd=19 errno=0
+[94.858653 pid=1830 tid=1830] BPF_LINK_CREATE prog_fd=14 target_fd=19 attach_type=41 flags=0
+[94.858738 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=25
+[94.858732 pid=1830 tid=1830] BPF_TASK_FD_QUERY target_fd=19 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=58 probe_offset=0 probe_addr=18446744072382347136 symbol=tcp_v4_connect
+[94.858783 pid=1830 tid=1830]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=11
+[94.858799 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=26 errno=0
+[94.858825 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=19
+[94.858884 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=26
+[94.858973 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=27 errno=0
+[94.859011 pid=1827 tid=1827] perf_event_open type=2 config=372 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=15 errno=0
+[94.859099 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=27
+[94.859128 pid=1827 tid=1827] BPF_LINK_CREATE prog_fd=11 target_fd=15 attach_type=41 flags=0
+[94.859216 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=28 errno=0
+[94.859196 pid=1827 tid=1827] BPF_TASK_FD_QUERY target_fd=15 attach_type=41 -> ret=0 errno=0 fd_type=1 prog_id=62 probe_offset=0 probe_addr=0 symbol=sys_enter
+[94.859316 pid=1827 tid=1827]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=12
+[94.859306 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=28
+[94.859342 pid=1821 tid=1821]   LINK_CREATE -> fd=15 errno=0 kernel_link_id=9
+[94.859374 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=29 errno=0
+[94.859394 pid=1837 tid=1837]   PROG_LOAD -> fd=14 errno=0 kernel_prog_id=78
+[94.859388 pid=1827 tid=1827] PERF_EVENT_IOC_ENABLE event_fd=15
+[94.859471 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=29
+[94.859468 pid=1821 tid=1821] BPF_LINK_CREATE prog_fd=11 target_fd=0 attach_type=24 flags=0
+[94.859544 pid=1824 tid=1824] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=30 errno=0
+[94.859667 pid=1824 tid=1824] PERF_EVENT_IOC_ENABLE event_fd=30
+[94.859759 pid=1837 tid=1837] BPF_LINK_CREATE prog_fd=12 target_fd=0 attach_type=23 flags=0
+[94.860086 pid=1837 tid=1837]   LINK_CREATE -> fd=15 errno=0 kernel_link_id=14
+[94.860213 pid=1837 tid=1837] BPF_LINK_CREATE prog_fd=13 target_fd=0 attach_type=23 flags=0
+[94.860402 pid=1837 tid=1837]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=15
+[94.860511 pid=1837 tid=1837] BPF_LINK_CREATE prog_fd=14 target_fd=0 attach_type=23 flags=0
+[94.860992 pid=1821 tid=1821]   LINK_CREATE -> fd=16 errno=0 kernel_link_id=13
+[94.861137 pid=1837 tid=1837]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=16
+[94.861160 pid=1821 tid=1821] BPF_LINK_CREATE prog_fd=12 target_fd=0 attach_type=24 flags=0
+[94.861603 pid=1830 tid=1830] perf_event_open type=8 config=0 config1=94418930224992 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=21 errno=0
+[94.861724 pid=1830 tid=1830] BPF_LINK_CREATE prog_fd=15 target_fd=21 attach_type=41 flags=0
+[94.861780 pid=1830 tid=1830] BPF_TASK_FD_QUERY target_fd=21 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=63 probe_offset=0 probe_addr=18446744072383144224 symbol=tcp_v6_connect
+[94.861850 pid=1830 tid=1830]   LINK_CREATE -> fd=22 errno=0 kernel_link_id=18
+[94.861907 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=21
+[94.863185 pid=1830 tid=1830] perf_event_open type=8 config=1 config1=94418930225616 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=tcp_v6_connect kprobe_addr=0 -> fd=23 errno=0
+[94.863182 pid=1821 tid=1821]   LINK_CREATE -> fd=17 errno=0 kernel_link_id=17
+[94.863405 pid=1830 tid=1830] BPF_LINK_CREATE prog_fd=16 target_fd=23 attach_type=41 flags=0
+[94.863521 pid=1830 tid=1830] BPF_TASK_FD_QUERY target_fd=23 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=67 probe_offset=0 probe_addr=18446744072383144224 symbol=tcp_v6_connect
+[94.863588 pid=1830 tid=1830]   LINK_CREATE -> fd=24 errno=0 kernel_link_id=19
+[94.863697 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=23
+[94.863820 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=26 errno=0
+[94.864015 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=26
+[94.864139 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=27 errno=0
+[94.864260 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=27
+[94.864359 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=28 errno=0
+[94.864673 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=28
+[94.864785 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=29 errno=0
+[94.864913 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=29
+[94.865008 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=30 errno=0
+[94.865120 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=30
+[94.865220 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=31 errno=0
+[94.865347 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=31
+[94.865450 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=32 errno=0
+[94.865575 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=32
+[94.865677 pid=1830 tid=1830] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=33 errno=0
+[94.865838 pid=1830 tid=1830] PERF_EVENT_IOC_ENABLE event_fd=33
+[94.898787 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[94.913717 pid=1815 tid=1815] perf_event_open type=8 config=0 config1=93868101790288 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=17 errno=0
+[94.914537 pid=1815 tid=1815] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.915003 pid=1815 tid=1815]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=79
+[94.915105 pid=1815 tid=1815] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[94.915366 pid=1815 tid=1815]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.915730 pid=1815 tid=1815] BPF_LINK_CREATE prog_fd=15 target_fd=17 attach_type=41 flags=0
+[94.916123 pid=1815 tid=1815] BPF_TASK_FD_QUERY target_fd=17 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=33 probe_offset=0 probe_addr=18446744072376953536 symbol=cap_capable
+[94.916448 pid=1815 tid=1815]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=20
+[94.916885 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=17
+[94.918403 pid=1818 tid=1818] perf_event_open type=8 config=0 config1=94822878602304 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=blk_account_io_merge_bio kprobe_addr=0 -> fd=17 errno=0
+[94.918568 pid=1818 tid=1818] BPF_PROG_LOAD type=5 (tracepoint) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[94.918808 pid=1815 tid=1815] perf_event_open type=8 config=1 config1=93868101787440 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 kprobe_func=cap_capable kprobe_addr=0 -> fd=19 errno=0
+[94.918864 pid=1818 tid=1818]   PROG_LOAD -> fd=18 errno=0 kernel_prog_id=80
+[94.918916 pid=1815 tid=1815] BPF_LINK_CREATE prog_fd=16 target_fd=19 attach_type=41 flags=0
+[94.918963 pid=1818 tid=1818] BPF_LINK_CREATE prog_fd=18 target_fd=4294967295 attach_type=41 flags=0
+[94.919031 pid=1815 tid=1815] BPF_TASK_FD_QUERY target_fd=19 attach_type=41 -> ret=0 errno=0 fd_type=3 prog_id=41 probe_offset=0 probe_addr=18446744072376953536 symbol=cap_capable
+[94.919071 pid=1818 tid=1818]   LINK_CREATE -> fd=-1 errno=9 kernel_link_id=0
+[94.919113 pid=1815 tid=1815]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=21
+[94.919144 pid=1818 tid=1818] BPF_LINK_CREATE prog_fd=13 target_fd=17 attach_type=41 flags=0
+[94.919189 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=19
+[94.919231 pid=1818 tid=1818] BPF_TASK_FD_QUERY target_fd=17 attach_type=41 -> ret=0 errno=0 fd_type=2 prog_id=40 probe_offset=0 probe_addr=18446744072377511248 symbol=blk_account_io_merge_bio
+[94.919317 pid=1818 tid=1818]   LINK_CREATE -> fd=18 errno=0 kernel_link_id=22
+[94.919309 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=22 errno=0
+[94.919412 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=17
+[94.919439 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=22
+[94.919474 pid=1818 tid=1818] BPF_LINK_CREATE prog_fd=15 target_fd=0 attach_type=23 flags=0
+[94.919534 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=23 errno=0
+[94.919634 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=23
+[94.919719 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=24 errno=0
+[94.919769 pid=1818 tid=1818]   LINK_CREATE -> fd=19 errno=0 kernel_link_id=23
+[94.919866 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=24
+[94.919855 pid=1818 tid=1818] BPF_LINK_CREATE prog_fd=16 target_fd=0 attach_type=23 flags=0
+[94.919971 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=25 errno=0
+[94.920037 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=25
+[94.920119 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=26 errno=0
+[94.920230 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=26
+[94.920218 pid=1818 tid=1818]   LINK_CREATE -> fd=20 errno=0 kernel_link_id=24
+[94.920320 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=27 errno=0
+[94.920352 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=0 group_fd=-1 flags=8 -> fd=22 errno=0
+[94.920466 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=22
+[94.920459 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=27
+[94.920559 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=1 group_fd=-1 flags=8 -> fd=23 errno=0
+[94.920552 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=28 errno=0
+[94.920648 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=23
+[94.920647 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=28
+[94.920764 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=2 group_fd=-1 flags=8 -> fd=24 errno=0
+[94.920761 pid=1815 tid=1815] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=29 errno=0
+[94.920868 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=24
+[94.920868 pid=1815 tid=1815] PERF_EVENT_IOC_ENABLE event_fd=29
+[94.921022 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=3 group_fd=-1 flags=8 -> fd=25 errno=0
+[94.921142 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=25
+[94.921249 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=4 group_fd=-1 flags=8 -> fd=26 errno=0
+[94.921362 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=26
+[94.921459 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=5 group_fd=-1 flags=8 -> fd=27 errno=0
+[94.921566 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=27
+[94.921681 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=6 group_fd=-1 flags=8 -> fd=28 errno=0
+[94.921793 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=28
+[94.921902 pid=1818 tid=1818] perf_event_open type=1 config=10 config1=0 config2=0 pid=-1 cpu=7 group_fd=-1 flags=8 -> fd=29 errno=0
+[94.922016 pid=1818 tid=1818] PERF_EVENT_IOC_ENABLE event_fd=29
+[95.099898 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[95.301583 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[95.503106 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[95.704227 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[95.905181 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[96.106715 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[96.308011 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[96.509485 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[96.711313 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[96.912841 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[97.114709 pid=1815 tid=1854] socket: cmd=list_progs len=22
+[97.115634 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[97.316840 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[97.518835 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[97.720684 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[97.923283 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[98.124898 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[98.326935 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[98.528369 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[98.730147 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[98.932013 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[99.133454 pid=1818 tid=1848] socket: cmd=list_progs len=22
+[99.134674 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[99.335830 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[99.537430 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[99.738994 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[99.941399 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[100.142952 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[100.344667 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[100.546192 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[100.748256 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[100.950426 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[101.152902 pid=1821 tid=1859] socket: cmd=list_progs len=22
+[101.154598 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[101.355679 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[101.556515 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[101.758104 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[101.959739 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[102.161348 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[102.363232 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[102.564619 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[102.765797 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[102.966797 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[103.168407 pid=1824 tid=1852] socket: cmd=list_progs len=22
+[103.169590 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[103.371456 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[103.572782 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[103.773888 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[103.975221 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[104.177181 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[104.378404 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[104.579553 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[104.780775 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[104.982495 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[105.184035 pid=1827 tid=1858] socket: cmd=list_progs len=22
+[105.184730 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[105.385502 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[105.586910 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[105.788097 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[105.989741 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[106.191416 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[106.392462 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[106.593539 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[106.794578 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[106.996391 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[107.197860 pid=1830 tid=1865] socket: cmd=list_progs len=22
+[107.199101 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[107.400018 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[107.601318 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[107.802268 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[108.003584 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[108.205165 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[108.406956 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[108.609198 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[108.811033 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[109.012447 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[109.214257 pid=1833 tid=1851] socket: cmd=list_progs len=22
+[109.215910 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[109.417963 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[109.620254 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[109.822112 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[110.023872 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[110.225367 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[110.426735 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[110.627725 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[110.829587 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[111.031462 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[111.232677 pid=1837 tid=1860] socket: cmd=list_progs len=22
+[121.298992 pid=1815 tid=1854] socket: cmd=measure_start len=25
+[121.299596 pid=1818 tid=1848] socket: cmd=measure_start len=25
+[121.300194 pid=1821 tid=1859] socket: cmd=measure_start len=25
+[121.300669 pid=1824 tid=1852] socket: cmd=measure_start len=25
+[121.301151 pid=1827 tid=1858] socket: cmd=measure_start len=25
+[121.301576 pid=1830 tid=1865] socket: cmd=measure_start len=25
+[121.302028 pid=1833 tid=1851] socket: cmd=measure_start len=25
+[121.302478 pid=1837 tid=1860] socket: cmd=measure_start len=25
+[131.370185 pid=1815 tid=1854] socket: cmd=measure_finish len=26
+[131.370657 pid=1818 tid=1848] socket: cmd=measure_finish len=26
+[131.371090 pid=1821 tid=1859] socket: cmd=measure_finish len=26
+[131.371534 pid=1824 tid=1852] socket: cmd=measure_finish len=26
+[131.371942 pid=1827 tid=1858] socket: cmd=measure_finish len=26
+[131.372371 pid=1830 tid=1865] socket: cmd=measure_finish len=26
+[131.372715 pid=1833 tid=1851] socket: cmd=measure_finish len=26
+[131.373029 pid=1837 tid=1860] socket: cmd=measure_finish len=26
+[131.373306 pid=1815 tid=1815] PERF_EVENT_IOC_DISABLE event_fd=17
+[131.720350 pid=1815 tid=1815] PERF_EVENT_IOC_DISABLE event_fd=19
+[131.941864 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=22
+[131.942530 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=23
+[131.942967 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=24
+[131.943929 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=25
+[131.944213 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=26
+[131.944357 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=27
+[131.944500 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=28
+[131.944615 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=29
+[131.944755 pid=1818 tid=1818] PERF_EVENT_IOC_DISABLE event_fd=17
+[132.163169 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=23
+[132.163356 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=24
+[132.163478 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=25
+[132.163602 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=26
+[132.163711 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=27
+[132.163822 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=28
+[132.163928 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=29
+[132.164047 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=30
+[132.164228 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=14
+[132.341495 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=16
+[132.900234 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=18
+[133.060709 pid=1824 tid=1824] PERF_EVENT_IOC_DISABLE event_fd=20
+[133.581137 pid=1827 tid=1827] PERF_EVENT_IOC_DISABLE event_fd=15
+[133.880440 pid=1827 tid=1827] PERF_EVENT_IOC_DISABLE event_fd=13
+[134.247306 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=26
+[134.248035 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=27
+[134.248755 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=28
+[134.249209 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=29
+[134.250143 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=30
+[134.250528 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=31
+[134.250659 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=32
+[134.250763 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=33
+[134.250870 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=17
+[134.480259 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=19
+[134.650785 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=21
+[134.830483 pid=1830 tid=1830] PERF_EVENT_IOC_DISABLE event_fd=23
+[135.013058 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=15
+[135.013635 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=16
+[135.013900 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=17
+[135.014123 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=18
+[135.014232 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=19
+[135.014359 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=20
+[135.014493 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=21
+[135.014672 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=22
+[135.014808 pid=1833 tid=1833] PERF_EVENT_IOC_DISABLE event_fd=12

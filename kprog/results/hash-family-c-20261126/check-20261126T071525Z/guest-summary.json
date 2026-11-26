@@ -1,0 +1,91 @@
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Default six-app functional check; no timing claim.",
+  "checks": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_072004_258004",
+      "apps": [
+        {
+          "app": "otelcol-ebpf-profiler/profiling",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 14,
+      "native_load_failures": 0
+    },
+    {
+      "app": "bcc/set",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_072235_795145",
+      "apps": [
+        {
+          "app": "bcc/set",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 25,
+      "native_load_failures": 0
+    },
+    {
+      "app": "cilium/agent",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_072536_648665",
+      "apps": [
+        {
+          "app": "cilium/agent",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 135,
+      "native_load_failures": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_072843_366158",
+      "apps": [
+        {
+          "app": "tetragon/observer",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 288,
+      "native_load_failures": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_073319_240233",
+      "apps": [
+        {
+          "app": "tracee/monitor",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 169,
+      "native_load_failures": 0
+    },
+    {
+      "app": "katran",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_073722_681565",
+      "apps": [
+        {
+          "app": "katran",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 1,
+      "native_load_failures": 0
+    }
+  ]
+}

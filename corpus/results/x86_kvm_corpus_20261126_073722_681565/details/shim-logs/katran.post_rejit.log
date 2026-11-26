@@ -1,0 +1,73 @@
+[141.632295 pid=2755 tid=2755] shim_init pid=2755 exe=/artifacts/user/repo-artifacts/x86_64/katran/bin/katran_server_grpc
+[141.632710 pid=2755 tid=2759] socket: listening on /var/run/bpfrejit/shim-2755.sock
+[141.633610 pid=2755 tid=2755] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=39f82ae52884c235 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.633782 pid=2755 tid=2755] native-loader skipped feature probe program name= insn_cnt=2
+[141.633882 pid=2755 tid=2755]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=10
+[141.633986 pid=2755 tid=2755] BPF_PROG_LOAD type=1 (socket_filter) name=libbpf_nametest insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.634092 pid=2755 tid=2755] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2
+[141.634179 pid=2755 tid=2755]   PROG_LOAD -> fd=12 errno=0 kernel_prog_id=11
+[141.634273 pid=2755 tid=2755] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1024 name=katran_lru0
+[141.634382 pid=2755 tid=2755]   MAP_CREATE -> fd=12 errno=0 kernel_map_id=21
+[141.634606 pid=2755 tid=2755] BPF_PROG_LOAD type=1 (socket_filter) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.634727 pid=2755 tid=2755] native-loader skipped feature probe program name= insn_cnt=2
+[141.634829 pid=2755 tid=2755]   PROG_LOAD -> fd=13 errno=0 kernel_prog_id=12
+[141.634958 pid=2755 tid=2755] BPF_PROG_LOAD type=2 (kprobe) name=det_arg_ctx insn_cnt=4 hash=3ae725ddb7d69e19 license=GPL expected_attach=0 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.635082 pid=2755 tid=2755] native-loader skipped feature probe program name=det_arg_ctx insn_cnt=4
+[141.635169 pid=2755 tid=2755]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=13
+[141.635305 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=1024 name=stats
+[141.635586 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=22
+[141.635678 pid=2755 tid=2755] BPF_MAP_CREATE type=2 key_size=4 value_size=8 max_entries=16 name=ctl_array
+[141.635765 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=23
+[141.635855 pid=2755 tid=2755] BPF_MAP_CREATE type=1 key_size=20 value_size=8 max_entries=512 name=vip_map
+[141.635955 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=24
+[141.636043 pid=2755 tid=2755] BPF_MAP_CREATE type=9 key_size=40 value_size=16 max_entries=1000 name=fallback_cache
+[141.636149 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=25
+[141.636242 pid=2755 tid=2755] BPF_MAP_CREATE type=12 key_size=4 value_size=4 max_entries=128 name=lru_mapping
+[141.636351 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=26
+[141.636439 pid=2755 tid=2755] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=33554944 name=ch_rings
+[141.661606 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=27
+[141.662205 pid=2755 tid=2755] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=4096 name=reals
+[141.662810 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=28
+[141.663198 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=4096 name=reals_stats
+[141.664353 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=29
+[141.664850 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=4 max_entries=4096 name=lru_miss_stats
+[141.665766 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=30
+[141.666109 pid=2755 tid=2755] BPF_MAP_CREATE type=2 key_size=4 value_size=20 max_entries=1 name=vip_miss_stats
+[141.666230 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=31
+[141.666682 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=104 max_entries=1 name=quic_stats_map
+[141.667031 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=32
+[141.667134 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=40 max_entries=1 name=stable_rt_stats
+[141.667239 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=33
+[141.667342 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=decap_vip_stats
+[141.667572 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=34
+[141.667686 pid=2755 tid=2755] BPF_MAP_CREATE type=2 key_size=4 value_size=4 max_entries=16777214 name=server_id_map
+[141.680787 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=35
+[141.681293 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=32 max_entries=1 name=tpr_stats_map
+[141.681701 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=36
+[141.682468 pid=2755 tid=2755] BPF_MAP_CREATE type=6 key_size=4 value_size=16 max_entries=512 name=server_id_stats
+[141.682925 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=37
+[141.683147 pid=2755 tid=2755] BPF_MAP_CREATE type=1 key_size=4 value_size=1 max_entries=4096 name=vip_to_down_rea
+[141.683277 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=38
+[141.683712 pid=2755 tid=2755] BPF_MAP_CREATE type=13 key_size=20 value_size=4 max_entries=512 name=vip_to_down_rea
+[141.684921 pid=2755 tid=2755]   MAP_CREATE -> fd=19 errno=0 kernel_map_id=39
+[141.685082 pid=2755 tid=2755] BPF_PROG_LOAD type=9 (cgroup_sock) name= insn_cnt=2 hash=58255400910d7827 license=GPL expected_attach=2 attach_btf_id=0 prog_btf_fd=0 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.685241 pid=2755 tid=2755] native-loader skipped feature probe program name= insn_cnt=2
+[141.685355 pid=2755 tid=2755]   PROG_LOAD -> fd=19 errno=0 kernel_prog_id=14
+[141.685567 pid=2755 tid=2755] BPF_PROG_LOAD type=6 (xdp) name=balancer_ingres insn_cnt=2542 hash=0325eddd38cf33c9 license=GPL expected_attach=37 attach_btf_id=0 prog_btf_fd=13 attach_btf_obj_fd=0 attach_prog_fd=0
+[141.823553 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[141.882514 pid=2755 tid=2755] native-loader jit-info original fd=19 id=15 type=6 name=balancer_ingres tag=90e1a12c30a4bce5 jited_len=13641 xlated_len=23840 nr_jited_ksyms=3 ksym0=0xffffffffc0401760 ksym1=0xffffffffc04049f8
+[141.882786 pid=2755 tid=2755] native-loader jit-info native fd=50 id=16 type=6 name=balancer_ingres tag=59f4a931744dcdc6 jited_len=9795 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0405d4c ksym1=0x0
+[141.882908 pid=2755 tid=2755] native-loader replaced prog=balancer_ingres original_fd=19 native_fd=50 manifest=/opt/bpf-benchmark/native-bpf/x86_64/katran/manifest.json source=/tmp/bpfrejit_2755_0325eddd38cf33c9.bpf
+[141.883110 pid=2755 tid=2755]   PROG_LOAD -> fd=50 errno=0 kernel_prog_id=16
+[142.083918 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[142.285143 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[142.486847 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[142.687753 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[142.889258 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[143.090210 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[143.291763 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[143.493221 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[143.694629 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[143.895795 pid=2755 tid=2759] socket: cmd=list_progs len=22
+[156.767493 pid=2755 tid=2759] socket: cmd=measure_start len=25
+[167.586152 pid=2755 tid=2759] socket: cmd=measure_finish len=26
