@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadObserve
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.after_width
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.after_width
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadObserve.kept
