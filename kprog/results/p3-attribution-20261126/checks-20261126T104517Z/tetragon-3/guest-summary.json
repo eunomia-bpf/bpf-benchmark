@@ -1,0 +1,21 @@
+{
+  "controller_completed": true,
+  "controller_exit_status": 0,
+  "scope": "Frozen functional check; no full timing claim.",
+  "checks": [
+    {
+      "app": "tetragon/observer",
+      "returncode": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261126_111433_299444",
+      "apps": [
+        {
+          "app": "tetragon/observer",
+          "status": "ok",
+          "error": ""
+        }
+      ],
+      "native_replacements": 288,
+      "native_load_failures": 0
+    }
+  ]
+}
