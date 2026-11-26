@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.input_kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.input_kept
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.source_zero
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadContextFlow.source_zero
