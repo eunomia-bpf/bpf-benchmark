@@ -41,27 +41,32 @@ Raw captures: `/workspaces/kprog-raw/omp/arm64-coverage-20261125/`.
 
 ## Results
 
-| app | manifest objects | deduped | B generated + aarch64 proof | resume collision | LLVM OOM | native ABI |
-|---|---|---|---|---|---|---|
-| bcc | 29 | 3 | 26 | 0 | 0 | 0 |
-| cilium | 89 | 10 | 79 | 0 | 0 | 0 |
-| katran | 3 | 0 | 3 | 0 | 0 | 0 |
-| otel | 26 | 2 | 14 | 0 | 10 | 0 |
-| tetragon | 93 | 17 | 73 | 0 | 2 | 1 |
-| tracee | 113 | 17 | 46 | 45 | 5 | 0 |
+| app | manifest objects | deduped | B generated + aarch64 proof | LLVM OOM | native ABI |
+|---|---|---|---|---|---|
+| bcc | 29 | 3 | 26 | 0 | 0 |
+| cilium | 89 | 10 | 79 | 0 | 0 |
+| katran | 3 | 0 | 3 | 0 | 0 |
+| otel | 26 | 2 | 14 | 10 | 0 |
+| tetragon | 93 | 17 | 73 | 2 | 1 |
+| tracee | 113 | 17 | 85 | 11 | 0 |
+| **total** | **353** | **49** | **280** | **23** | **1** |
 
 `B generated + aarch64 proof` counts objects whose
 `generated*/checked-simulator.native.o` exists, i.e. B was compiled and lowered to a
-linked aarch64 proof object. The failure columns are disjoint and exhaust every object
-not counted as a proof: a resume collision (`[Errno 17] File exists`) from a re-run
-inside an unfinished job, an `LLVM ERROR: out of memory` raised by `SROAPass` on a B
-whose single function holds over a million allocas, and one unmodelled native ABI
-external call. No object is left unexplained.
+linked aarch64 proof object. The columns are disjoint and exhaust every object not
+counted as a proof: 280 + 49 + 23 + 1 = 353. The 253 objects with a single manifest
+symbol are all covered. The 49 `deduped` entries have no single entry symbol, so they
+are resolved at the guest pass rather than here.
+
+`LLVM ERROR: out of memory` is raised inside `SROAPass`'s `PromoteMemToReg`; the one
+object measured in detail, `otel/0004`, holds 1,142,983 allocas in its single
+function. The 23 rows are an upper bound, because the first sweep ran three compiles
+at once; the section below re-runs them one at a time.
 
 ## The `LLVM ERROR: out of memory` class
 
-Seventeen objects raise the same failure, and it is a property of the generated B, not
-of a flag, a memory bound or the resume. `otel/0004` (`kprobe_unwind_dotnet`) is the
+The recorded rows raise the same message; the largest one is a real wall and several
+of the smaller ones are contention. `otel/0004` (`kprobe_unwind_dotnet`) is the
 measured case: `commands.jsonl` records `LLVM ERROR: out of memory / Allocation failed`
 from `clang -w -g -O2 ... -c trusted_arm64.bpf.c`, and the stack is
 `llvm::PromoteMemToReg` <- `llvm::SROAPass::run` inside the module optimizer.
