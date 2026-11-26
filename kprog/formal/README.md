@@ -32,7 +32,7 @@ theorem per ISA. That complete argument is still in progress; the
 
 The library proves actual C helper/handler executions, typed memory effects,
 allocation/freeing, caller frames and native register/scalar/cache views.
-[Public type and axiom queries](results/m5-x86-producer-sub-cf-root/README.md)
+[Public type and axiom queries](results/m5-x86-producer-sub-zf-root/README.md)
 expose every theorem's precise premises and retain prior interfaces.
 
 The complete NOP handler and its actual generic dispatcher case refine the
@@ -55,13 +55,15 @@ For the next original SUB RSP,32, the same source prefix includes actual
 allocation, both operand helpers/saves, arithmetic/result save, unconditional
 old-CF header/byte read, intermediate temporary, cast/save, real flag-arm
 selection, width/mask/sign helper calls and returns, operand masking and the
-first real CF store. The saved number equals canonical
+actual CF and ZF stores. The saved number equals canonical
 PUSH/SUB RSP under the initial register relation and native PUSH access domain.
 Current scalar/header observations and per-object permissions derive actual
 allocation/store/free frames; normalized temporary maps equal the original.
-Concrete 48 83 ec 20 decoding is separate. The actual CF comparison/cast/store
-is derived from current allocation rights; its byte equals external SUB borrow
-on the physical operands and preserves the caller and other blocks. Remaining
+Concrete 48 83 ec 20 decoding is separate. The actual CF/ZF comparisons,
+casts and stores derive from current allocation rights. Their bytes encode
+external SUB borrow and zero predicates on the physical operands. Proved
+block separation preserves CF through the ZF write, with caller and
+other-block frames retained. Remaining
 flag stores, RSP writeback/release/free/return and complete SUB refinement remain
 unfinished.
 
