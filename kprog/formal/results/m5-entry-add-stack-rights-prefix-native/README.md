@@ -1,0 +1,7 @@
+# Same original three-call native prefix constructs current stack resources
+
+The same original98-provider setup, both actual MOV calls and original third ADD-from-SP caller now retain current HeaderView, ALL actual Freeable/cache Resources and producer-owned access frame on the reached heap together with all3 fetched imported native steps. Each actual allocation/writer/free equation and genuine header/Kept frame supplies this transport. All preceding source/native/GPR/PC/events/fault/raw/tag/cache/store/free/caller/frontier/ABI/24tag contracts remain in the stronger interface, and all old interfaces keep their types. The Ready packet remains at the SAME initial setup memory; its current-resource counterpart is derived rather than chosen separately. Actual provider outcome/CacheFrame ABI stays explicit. Next carry current rights through remaining original callers and complete actual sequential memset/provider/tag/transfer/clobber/free/caller before one related root. The established instruction/native fixture14, original memset prefix353 and complete ISA families0 retain their scopes; current-resource/native prefix advances2 to3.
+
+Focused build 337 and 1 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
