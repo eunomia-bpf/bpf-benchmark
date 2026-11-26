@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.kept
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyReadAbiContext.kept
