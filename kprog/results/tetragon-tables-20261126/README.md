@@ -71,3 +71,14 @@ duplicate compile of identical input, without a per-program production
 policy. The finite job records its own result and wakes the lane on either
 outcome. No compiler, base or image rebuild, new LTO setting or native flag
 change is involved. Actual stock/app acceptance remains open.
+
+Compilation completed with returncode0: all8 recorded subprocesses succeeded,
+including the three preprocessing pieces and the installed packet-bounds,
+spill and final backend stages. The B ELF is1,939,680 bytes, including debug
+information. compile-status.json/compile-commands.jsonl/compile.log retain
+the actual outcomes. compiler-evidence.tar.zst (9,133,233 bytes) publishes
+the joined input, both bitcode stages, both MIR stages, spill record and
+final ELF; uncompressed artifacts stay locally. The normal preprocessing
+cleanup is recorded in cleanup-log.md. The first launch failed before Make
+because an optional /usr/bin/time wrapper was unavailable; its log and
+launch metadata remain separate from this successful compilation.
