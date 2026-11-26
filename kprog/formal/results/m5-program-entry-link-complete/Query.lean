@@ -1,0 +1,19 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.packet
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.packet
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.link
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.link
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.lr_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.lr_readback
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.caller
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.Result.caller
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.result_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.result_readback
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.ctx_preserved
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.ctx_preserved
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.execute
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.execute
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.from_cmp
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.from_cmp
+#check KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.from_memcpy
+#print axioms KProgFormal.ClightRefinement.Arm64ProgramEntryLinkComplete.from_memcpy
