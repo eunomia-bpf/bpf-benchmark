@@ -36,3 +36,68 @@
  create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/publication.log
 To https://github.com/eunomia-bpf/bpf-benchmark.git
    1e24a9059..e4e8cf7ce  master -> master
+[master fd39e9840] Record staged generation acceptance for cilium
+ 65 files changed, 18634 insertions(+), 4 deletions(-)
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-026.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-027.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-028.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-029.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-030.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-031.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-032.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-033.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-034.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-035.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-036.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-037.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-038.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-039.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-040.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-041.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-042.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-043.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-044.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-045.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-046.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-047.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-048.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-049.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-050.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-051.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-052.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-053.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-054.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-055.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-056.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-057.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-058.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-059.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-060.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-061.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-062.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-063.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-064.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-065.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-066.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-067.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-068.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-069.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-070.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-071.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-072.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-073.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-074.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-075.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-076.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-077.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-078.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-079.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-080.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-081.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-082.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-083.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-084.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-085.tar.gz
+ create mode 100644 kprog/results/tetragon-tables-20261126/stage-acceptance/case-086.tar.gz
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   b54f90487..fd39e9840  master -> master

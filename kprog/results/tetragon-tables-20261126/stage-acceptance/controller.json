@@ -20940,6 +20940,333 @@
       },
       "source_unchanged": true,
       "ended_utc": "2026-11-26T19:57:14Z"
+    },
+    {
+      "number": 87,
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+      "symbol": "balancer_ingress",
+      "link_returncode": 0,
+      "started_utc": "2026-11-26T19:59:06Z",
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+            "--symbol",
+            "balancer_ingress",
+            "--mode",
+            "proof",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=balancer_ingress (8021 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 8021 bytes) [entry]\n  - jhash (vaddr 0x60, 223 bytes)\n  - jhash_2words (vaddr 0x0, 88 bytes) [entry]\nnative-link: wrote proof object 8326 bytes, 149 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o",
+            "--symbol",
+            "balancer_ingress",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/plan.json",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b",
+            "--output-relocs",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r",
+            "--output-abi",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=balancer_ingress (8015 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 8015 bytes) [entry]\n  - jhash (vaddr 0x1f4f, 223 bytes)\n  - jhash_2words (vaddr 0x202e, 88 bytes)\nnative-link: wrote 8516 bytes -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b (84 relocs)\nnative-link: wrote 84 relocs -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r\nnative-link: wrote ABI metadata, 303 load site(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/balancer.native.o",
+            "--symbol",
+            "balancer_ingress",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=balancer_ingress (8021 bytes), 3 reachable symbol(s) total\n  - balancer_ingress (vaddr 0x0, 8021 bytes) [entry]\n  - jhash (vaddr 0x60, 223 bytes)\n  - jhash_2words (vaddr 0x0, 88 bytes) [entry]\nnative-link: wrote proof object 8340 bytes, 149 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        }
+      ],
+      "generation_metadata": {
+        "kind": "xdp",
+        "program_section": "xdp",
+        "trusted_map_bindings": [
+          {
+            "native_symbol": "stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "vip_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "lru_mapping",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "fallback_cache",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "quic_stats_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "server_id_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "vip_to_down_reals_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "reals",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "ctl_array",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "reals_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "ch_rings",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "vip_miss_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "lru_miss_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "server_id_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "stable_rt_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "decap_vip_stats",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "tpr_stats_map",
+            "value_offset": null
+          }
+        ]
+      },
+      "before": {
+        "status": "generated",
+        "source_bytes": 277137
+      },
+      "current": {
+        "status": "generated",
+        "source_bytes": 277137
+      },
+      "source_unchanged": true,
+      "ended_utc": "2026-11-26T19:59:06Z"
+    },
+    {
+      "number": 88,
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+      "symbol": "healthcheck_encap",
+      "link_returncode": 0,
+      "started_utc": "2026-11-26T19:59:06Z",
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+            "--symbol",
+            "healthcheck_encap",
+            "--mode",
+            "proof",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=healthcheck_encap (352 bytes), 1 reachable symbol(s) total\n  - healthcheck_encap (vaddr 0x0, 352 bytes) [entry]\nnative-link: wrote proof object 340 bytes, 10 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o",
+            "--symbol",
+            "healthcheck_encap",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/plan.json",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b",
+            "--output-relocs",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r",
+            "--output-abi",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=healthcheck_encap (340 bytes), 1 reachable symbol(s) total\n  - healthcheck_encap (vaddr 0x0, 340 bytes) [entry]\nnative-link: wrote 352 bytes -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b (6 relocs)\nnative-link: wrote 6 relocs -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r\nnative-link: wrote ABI metadata, 6 load site(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/healthchecking_ipip.native.o",
+            "--symbol",
+            "healthcheck_encap",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=healthcheck_encap (352 bytes), 1 reachable symbol(s) total\n  - healthcheck_encap (vaddr 0x0, 352 bytes) [entry]\nnative-link: wrote proof object 359 bytes, 10 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        }
+      ],
+      "generation_metadata": {
+        "kind": "tc",
+        "program_section": "tc",
+        "trusted_map_bindings": [
+          {
+            "native_symbol": "hc_stats_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "hc_reals_map",
+            "value_offset": null
+          },
+          {
+            "native_symbol": "hc_ctrl_map",
+            "value_offset": null
+          }
+        ]
+      },
+      "before": {
+        "status": "generated",
+        "source_bytes": 13624
+      },
+      "current": {
+        "status": "generated",
+        "source_bytes": 13624
+      },
+      "source_unchanged": true,
+      "ended_utc": "2026-11-26T19:59:07Z"
+    },
+    {
+      "number": 89,
+      "app": "katran",
+      "object": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+      "symbol": "xdp_root",
+      "link_returncode": 0,
+      "started_utc": "2026-11-26T19:59:07Z",
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+            "--symbol",
+            "xdp_root",
+            "--mode",
+            "proof",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=xdp_root (69 bytes), 1 reachable symbol(s) total\n  - xdp_root (vaddr 0x0, 69 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 4 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o",
+            "--symbol",
+            "xdp_root",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/plan.json",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b",
+            "--output-relocs",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r",
+            "--output-abi",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=xdp_root (67 bytes), 1 reachable symbol(s) total\n  - xdp_root (vaddr 0x0, 67 bytes) [entry]\nnative-link: wrote 272 bytes -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/b (0 relocs)\nnative-link: wrote 0 relocs -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/r\nnative-link: wrote ABI metadata, 21 load site(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/a\n"
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/xdp_root.native.o",
+            "--symbol",
+            "xdp_root",
+            "--mode",
+            "proof",
+            "--preserve-entry-abi",
+            "--output",
+            "/workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: entry=xdp_root (69 bytes), 1 reachable symbol(s) total\n  - xdp_root (vaddr 0x0, 69 bytes) [entry]\nnative-link: wrote proof object 73 bytes, 4 reloc(s) -> /workspaces/repository/kprog/results/tetragon-tables-20261126/stage-acceptance/offline-link-udij5egu/p.proof.o\n"
+        }
+      ],
+      "generation_metadata": {
+        "kind": "xdp",
+        "program_section": "xdp",
+        "trusted_map_bindings": [
+          {
+            "native_symbol": "root_array",
+            "value_offset": null
+          }
+        ]
+      },
+      "before": {
+        "status": "generated",
+        "source_bytes": 3573
+      },
+      "current": {
+        "status": "generated",
+        "source_bytes": 3573
+      },
+      "source_unchanged": true,
+      "ended_utc": "2026-11-26T19:59:07Z"
     }
   ],
   "input_archive_status": [
