@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters
+
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.first_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.first_source
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.register_indices
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.register_indices
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.register_nonzero
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.register_nonzero
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.next_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.next_source
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.key_names
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.key_names
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.ready
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.ready
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.returned
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.returned
+#check KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.returned_entry
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetClobberRegisters.returned_entry
