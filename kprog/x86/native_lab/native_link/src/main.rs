@@ -1977,6 +1977,7 @@ fn arm64_call_clobber_map_regs(reg_map_names: &mut [Option<String>; 32]) {
     for slot in reg_map_names.iter_mut().take(19) {
         *slot = None;
     }
+    reg_map_names[30] = None; // BL/BLR overwrite LR with the return PC.
 }
 
 /// The word indices a direct branch of the function lands on, and whether an indirect
@@ -2831,6 +2832,19 @@ fn disasm_arm64_words(blob: &[u8]) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn arm64_call_clears_lr_and_preserves_callee_map_facts() {
+        let mut maps = std::array::from_fn(|i| Some(format!("map{i}")));
+        super::arm64_call_clobber_map_regs(&mut maps);
+        for (i, value) in maps.iter().enumerate() {
+            if i <= 18 || i == 30 {
+                assert_eq!(value, &None);
+            } else {
+                assert_eq!(value.as_deref(), Some(format!("map{i}").as_str()));
+            }
+        }
+    }
+
     #[test]
     fn tbz_tbnz_decode_and_retarget() {
         use super::*;

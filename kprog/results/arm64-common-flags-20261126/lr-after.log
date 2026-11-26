@@ -1,0 +1,20 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 lr_check.py after
+{
+  "recorded_utc": "2026-11-26T23:03:40Z",
+  "phase": "after",
+  "rows": [
+    {
+      "entry": "lr_after_blr",
+      "load_from_lr_retained": true,
+      "blob_bytes": 44
+    },
+    {
+      "entry": "lr_after_bl",
+      "load_from_lr_retained": true,
+      "blob_bytes": 44
+    }
+  ],
+  "scope": "Actual assembled/native-link kernel-mode frozen-map rewrite regression; no kernel execution, stock, app or timing claim."
+}
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

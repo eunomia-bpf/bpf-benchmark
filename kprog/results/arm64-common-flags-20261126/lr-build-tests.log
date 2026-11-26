@@ -1,0 +1,66 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+cargo build --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release -j 1
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: function `indirect_sites` is never used
+   --> src/x86_readonly_relocs.rs:209:15
+    |
+209 | pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    |               ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+
+warning: fields `target_offset` and `table_offset` are never read
+   --> src/x86_readonly_relocs.rs:335:43
+    |
+335 |     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    |     ------------ fields in this variant   ^^^^^^^^^^^^^       ^^^^^^^^^^^^
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+warning: `native-link` (bin "native-link") generated 4 warnings
+    Finished `release` profile [optimized] target(s) in 23.80s
+cargo test --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release -j 1
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+warning: `native-link` (bin "native-link" test) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 18.96s
+     Running unittests src/main.rs (/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 10 tests
+test tests::arm64_call_clears_lr_and_preserves_callee_map_facts ... ok
+test tests::arm64_entry_abi_strip_allows_multiple_epilogues ... ok
+test tests::tbz_tbnz_decode_and_retarget ... ok
+test x86::effects::tests::effect_masks_preserve_partial_and_conditional_writes_and_flag_dependencies ... ok
+test x86::readonly_relocs::tests::relative_tables_use_rewritten_target_offsets_and_preserve_slot_bias ... ok
+test x86::readonly_relocs::tests::table_shape_does_not_authorize_unbound_code_or_another_jump_register ... ok
+test x86::tests::helper_call_reloc_slot_encodes_only_call_rel32 ... ok
+test x86::tests::proof_entry_abi_preserves_native_saves_only_when_requested ... ok
+test x86::tests::tail_call_frame_keeps_imm8_stack_adjust ... ok
+test x86::tests::tail_cleanup_keeps_stack_restore_before_return_value ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

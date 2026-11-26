@@ -52,3 +52,9 @@ helpers-execution:
 helpers-mixed:
 	python3 helpers_checked.py mixed
 	python3 helpers_execution.py mixed
+
+.PHONY: lr-before lr-after
+lr-before:
+	python3 lr_check.py before
+lr-after:
+	python3 lr_check.py after

@@ -1,0 +1,33 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "--target=aarch64-linux-gnu",
+      "-c",
+      "/workspaces/repository/kprog/results/arm64-common-flags-20261126/lr_fixture.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o",
+      "--symbol",
+      "lr_after_blr",
+      "--mode",
+      "kernel",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Error: --mode kernel requires a .proof.o produced by --mode proof\n"
+  }
+]

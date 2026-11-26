@@ -1,0 +1,12 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+python3 lr_check.py before
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/arm64-common-flags-20261126/lr_check.py", line 28, in <module>
+    run([ROOT/'kprog/x86/native_lab/native_link/target/release/native-link','--input',obj,
+  File "/workspaces/repository/kprog/results/arm64-common-flags-20261126/lr_check.py", line 16, in run
+    r.check_returncode()
+  File "/usr/lib/python3.12/subprocess.py", line 502, in check_returncode
+    raise CalledProcessError(self.returncode, self.args, self.stdout,
+subprocess.CalledProcessError: Command '['/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '--input', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.o', '--symbol', 'lr_after_blr', '--mode', 'kernel', '--link-plan', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr-plan.json', '--output', '/var/tmp/kprog-tmp/perf/arm64-codegen-abi/lr.bin']' returned non-zero exit status 1.
+make: *** [Makefile:58: lr-before] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

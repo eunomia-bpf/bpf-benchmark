@@ -1,0 +1,17 @@
+{
+  "recorded_utc": "2026-11-26T23:02:29Z",
+  "phase": "before",
+  "rows": [
+    {
+      "entry": "lr_after_blr",
+      "load_from_lr_retained": false,
+      "blob_bytes": 52
+    },
+    {
+      "entry": "lr_after_bl",
+      "load_from_lr_retained": false,
+      "blob_bytes": 60
+    }
+  ],
+  "scope": "Actual assembled/native-link kernel-mode frozen-map rewrite regression; no kernel execution, stock, app or timing claim."
+}
