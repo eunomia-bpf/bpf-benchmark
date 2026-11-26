@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyTagSetup
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.source
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.prepared
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.prepared
+#check KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyTagSetup.execute
