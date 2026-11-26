@@ -74,21 +74,25 @@ unoptimized IR is 258 MB of bitcode, 1.68 GB of text, **1,142,983 allocas**
 ...), and 6,345 inlined bodies in one function multiply them past what SROA's
 promotion maps can hold.
 
-Two independent checks rule out the alternatives, both run on the same object:
+Two checks run on `otel/0004` rule out two alternatives:
 
 - **Not the optimization level.** `-O1` and `-O2` both abort in `PromoteMemToReg`;
   `-O1` (1011 s) and `-O2` fail identically.
-- **Not a memory bound.** With no `prlimit` at all and about 100 GB free, the bare
-  `clang -emit-llvm` still raises `LLVM ERROR: out of memory`. The three-worker
-  stage-1 pool ran without a `prlimit` wrapper, so contention was not the trigger
-  either.
+- **Not the bound the harness sets.** That object aborted with no `prlimit` at all, with
+  about 100 GB free.
 
-Size separates the classes cleanly: every object with a B under 1.5 MB either passes or
-carries a resume collision, while 17 of the 18 objects with a B over 1.5 MB raise the
-OOM (the eighteenth, `tracee/0012`, was still compiling). The largest passing B is
-2.19 MB (`otel/0018`) and the smallest OOM is 1.89 MB (`tracee/0014`), so the boundary
-is a per-object property of the function's alloca count rather than the byte size
-alone.
+**Most of the class is contention, not shape.** The three-worker pool ran without a
+`prlimit`, and a solo re-test of `tracee/0072` — 552 KB of source, 2,877 labels, which
+the pool recorded as an OOM — compiles clean in 299 s with `rc=0` when nothing else
+runs. So the recorded OOM set of 23 is an upper bound: a row marked OOM means the
+compile aborted under three-way contention, and only a solo re-test says whether the
+object itself reaches the OOM. Size and inlined-body count do not separate the two
+even then: `otel/0018` passes at 2.19 MB with 3,333 labels, `otel/0008`/`otel/0019`
+pass at 4,319 labels, while `otel/0004` fails at 6,345 with 1,142,983 allocas in one
+function; the passing objects reach 815,954 allocas at `-O0`, so the alloca count on
+its own is not the predictor either. What separates the objects that survive solo is
+still open; the honest reading of the sweep is the count of objects that reach
+`checked-simulator.native.o`, plus the OOM list as "aborted under contention".
 
 ## The one native ABI failure
 
@@ -96,3 +100,17 @@ alone.
 `unresolved native ABI external call bpf_copy_from_user_str at 0x8ec: bl 0
 <bpf_copy_from_user_str>`. The arm64 native linker has no simulator model for that
 helper, so this is a coverage gap in the arm64 helper set, not a B defect.
+
+## Coordinator note, 2026-11-26T07:21Z: address-space caps on this pool
+
+The pool's three workers and their compiles carried an address-space cap (prlimit --as) the whole time:
+- 48 GiB from 2026-11-25 18:19Z (coordinator, after the 14:26Z node OOM);
+- from 2026-11-26 04:36-04:38Z: 40 GiB on tracee/0010, and 16 GiB on tracee/0012 and 0014;
+- from 05:18Z: 16 GiB on the three worker processes (pids 85989, 85990, 85991), which every later compile of
+  the pool inherited (COORDINATION 2026-11-26T04:38Z and 05:18Z).
+
+These objects recorded "out of memory" under the 16 GiB cap (commands.jsonl written 05:13Z-06:55Z): tracee/0012,
+0014, 0032, 0037, 0055, 0065, 0072, 0073 and 0101. Their OOM marks that cap, and each gets one run on its own at
+48 GiB. otel/0004 ran with no cap at 06:53Z, reached 114,302,232 kB anon RSS, and the node's global OOM killer
+ended it at 07:10:39Z (dmesg: longhorn invoked oom-killer, killed process 16088 clang). That is the shape failure
+measured above. From 07:19Z omp's own process (pid 20115) also carries the 48 GiB cap, so its solo runs inherit it.
