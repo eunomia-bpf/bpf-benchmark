@@ -34,7 +34,7 @@ for line in check.read_text().splitlines() if check.exists() else []:
 summary = dict(controller_completed=(here / 'completed.txt').exists(),
                controller_exit_status=int((here / 'controller-exit.txt').read_text())
                    if (here / 'controller-exit.txt').exists() else None,
-               scope='Default six-app functional check; no timing claim.', checks=rows)
+               scope='Frozen functional check; no full timing claim.', checks=rows)
 (here / 'guest-summary.json').write_text(json.dumps(summary, indent=2) + '\n')
 (here / 'raw-paths.txt').write_text('\n'.join(raw) + ('\n' if raw else ''))
 print(json.dumps(summary, indent=2))
