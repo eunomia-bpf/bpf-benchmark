@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Arm64ClobberMemoryState
+import KProgFormal.ClightRefinement.Arm64ClobberCoreState
 
 set_option Elab.async false
 set_option linter.unusedSimpArgs false
@@ -7,7 +7,8 @@ namespace KProgFormal.ClightRefinement.Arm64ClobberReleaseState
 
 open Arm64Producer Arm64ProducerRegisterStorage
 open Arm64ProgramEntryAllocation (world)
-open Arm64ClobberMemoryState (Packet Caller)
+open Arm64ClobberMemoryState (Packet)
+open Arm64ClobberCoreState (Saved)
 
 private theorem local_load {initial before after : CC.Mem} {entry : HeaderLocal initial}
     (view : Arm64MemsetHeaderView.View initial before entry) (i : Fin 64) (value : BitVec 64)
@@ -73,21 +74,17 @@ def released {initial seed before after : CC.Mem} {entry : HeaderLocal initial}
 
 /-- The actual store also retains memcpy's saved caller, all eight local
 Freeable ranges and the same initialized flag through genuine separation. -/
-def caller_released {initial seed calleeBefore before after : CC.Mem} {entry : HeaderLocal initial}
+def caller_released {initial seed before after : CC.Mem} {entry : HeaderLocal initial} {env : CC.Env}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
-    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8} {outerLe : CC.TempEnv}
-    (prior : Caller base abi byte calleeBefore rawR0 n cell flagValue before outerLe)
+    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    (prior : Saved env base abi byte rawR0 n cell flagValue before)
     (i : Fin 64) (value : BitVec 64)
     (stored : CC.Mem.store .Mint8unsigned before prior.memory.view.stack.block (i.val : Int)
       (.Vint ((value.setWidth 8).setWidth 32)) = some after) :
-    Caller base abi byte calleeBefore rawR0 n cell flagValue after outerLe where
+    Saved env base abi byte rawR0 n cell flagValue after where
   memory := released prior.memory i value stored
   callee := fun id result binding => (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
     (fun offset => by simp only [CC.Mem.perm,CC.Mem.store_access stored])).trans (prior.callee id result binding)
-  entryRead := prior.entryRead
-  length := prior.length
-  counter := prior.counter
-  sourceTag := prior.sourceTag
   flag := ⟨(local_load prior.memory.view i value stored _ _ _ entry.binding (by decide +kernel) CC.Mptr 696).trans prior.flag.header,
     (local_load prior.memory.view i value stored _ _ _ cell.binding (by decide +kernel) .Mint8unsigned 0).trans prior.flag.byte⟩
 

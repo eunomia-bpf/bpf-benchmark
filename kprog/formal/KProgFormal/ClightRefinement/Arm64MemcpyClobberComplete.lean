@@ -33,7 +33,7 @@ theorem original {initial seed calleeBefore m : CC.Mem} {entry : HeaderLocal ini
   obtain ⟨written,helperLe,selectedGprs,selectedFlags,values,trace,packet,run,frame,_access,next⟩ :=
     Arm64MemcpyClobberReturn.original current flag byteInputs registerInputs flagInputs vectorInputs
       (Arm64MemcpySource.continuation k)
-  obtain ⟨after,freed,leave⟩ := Arm64MemcpyReturn.exit packet.flagsPacket.registers.ready k hk
+  obtain ⟨after,freed,leave⟩ := Arm64MemcpyReturn.exit packet.flagsPacket.registers.ready outerLe k hk
   let retained := Arm64ClobberResult.retained calleeBefore.nextblock bound freed.caller
     (Arm64ClobberResult.of_complete packet)
   have allocated := (FrameBelow.allocVariables (CC.doAllocVariables_sound _ _ _ _ _ _

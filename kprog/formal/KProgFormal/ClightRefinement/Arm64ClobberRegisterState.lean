@@ -7,7 +7,8 @@ namespace KProgFormal.ClightRefinement.Arm64ClobberRegisterState
 
 open Arm64Producer Arm64ProducerRegisterStorage
 open Arm64ProgramEntryAllocation (world)
-open Arm64ClobberMemoryState (Packet Caller)
+open Arm64ClobberMemoryState (Packet)
+open Arm64ClobberCoreState (Saved)
 open Arm64MemsetClobberRegisters (declaration)
 
 /-- The two real original GPR stores retain shared current memory with
@@ -54,20 +55,16 @@ def written {initial seed before after : CC.Mem} {entry : HeaderLocal initial}
 /-- The same actual two-store effect keeps all eight saved memcpy-local
 Freeable ranges and transports its initialized flag by the original
 header/tail frame, while the advancing helper records selected outputs. -/
-def caller_written {initial seed calleeBefore before after : CC.Mem} {entry : HeaderLocal initial}
+def caller_written {initial seed before after : CC.Mem} {entry : HeaderLocal initial} {env : CC.Env}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
-    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8} {outerLe : CC.TempEnv}
-    (prior : Caller base abi byte calleeBefore rawR0 n cell flagValue before outerLe)
+    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    (prior : Saved env base abi byte rawR0 n cell flagValue before)
     {i : Fin 18} {value : BitVec 64}
     (effect : Arm64MemsetClobberRegisterStores.Effect prior.memory.storage i value after) :
-    Caller base abi byte calleeBefore rawR0 n cell flagValue after outerLe where
+    Saved env base abi byte rawR0 n cell flagValue after where
   memory := written prior.memory effect
   callee := fun id result binding => (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
     (fun offset => by simp only [CC.Mem.perm,effect.access])).trans (prior.callee id result binding)
-  entryRead := prior.entryRead
-  length := prior.length
-  counter := prior.counter
-  sourceTag := prior.sourceTag
   flag := prior.flag.tail_frame
     ⟨Arm64MemsetClobberRegisterState.header effect,Arm64MemsetClobberRegisterState.tail effect⟩
 

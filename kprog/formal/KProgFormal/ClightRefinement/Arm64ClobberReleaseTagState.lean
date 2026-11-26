@@ -7,7 +7,8 @@ namespace KProgFormal.ClightRefinement.Arm64ClobberReleaseTagState
 
 open Arm64Producer Arm64ProducerRegisterStorage
 open Arm64ProgramEntryAllocation (world)
-open Arm64ClobberMemoryState (Packet Caller)
+open Arm64ClobberMemoryState (Packet)
+open Arm64ClobberCoreState (Saved)
 
 private theorem local_load {initial before after : CC.Mem} {entry : HeaderLocal initial}
     (view : Arm64MemsetHeaderView.View initial before entry)
@@ -58,19 +59,15 @@ def released {initial seed before after : CC.Mem} {entry : HeaderLocal initial}
 
 /-- Actual tag-store access and allocation separation preserve the same
 eight memcpy locals and the initialized flag in the saved caller packet. -/
-def caller_released {initial seed calleeBefore before after : CC.Mem} {entry : HeaderLocal initial}
+def caller_released {initial seed before after : CC.Mem} {entry : HeaderLocal initial} {env : CC.Env}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
-    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8} {outerLe : CC.TempEnv}
-    (prior : Caller base abi byte calleeBefore rawR0 n cell flagValue before outerLe)
+    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    (prior : Saved env base abi byte rawR0 n cell flagValue before)
     (stored : CC.Mem.store .Mint64 before prior.memory.view.tags.block 0 (.Vlong 0) = some after) :
-    Caller base abi byte calleeBefore rawR0 n cell flagValue after outerLe where
+    Saved env base abi byte rawR0 n cell flagValue after where
   memory := released prior.memory stored
   callee := fun id result binding => (CC.Mem.rangePerm_congr (m1 := after) (m2 := before)
     (fun offset => by simp only [CC.Mem.perm,CC.Mem.store_access stored])).trans (prior.callee id result binding)
-  entryRead := prior.entryRead
-  length := prior.length
-  counter := prior.counter
-  sourceTag := prior.sourceTag
   flag := ⟨(local_load prior.memory.view stored _ _ _ entry.binding (by decide +kernel) CC.Mptr 696).trans prior.flag.header,
     (local_load prior.memory.view stored _ _ _ cell.binding (by decide +kernel) .Mint8unsigned 0).trans prior.flag.byte⟩
 

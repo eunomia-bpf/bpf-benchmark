@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyCompleteProgram
+open KProgFormal.ClightRefinement
+#check Arm64ClobberReleaseComplete.execute
+#print axioms Arm64ClobberReleaseComplete.execute
+#check Arm64ClobberReleaseTagComplete.original
+#print axioms Arm64ClobberReleaseTagComplete.original
+#check Arm64ClobberRegisterComplete.execute
+#print axioms Arm64ClobberRegisterComplete.execute
+#check Arm64ClobberFlagsComplete.execute
+#print axioms Arm64ClobberFlagsComplete.execute
+#check Arm64ClobberVectorsComplete.execute
+#print axioms Arm64ClobberVectorsComplete.execute
+#check Arm64MemcpyReturn.exit
+#print axioms Arm64MemcpyReturn.exit
+#check Arm64MemcpyCompleteProgram.execute
+#print axioms Arm64MemcpyCompleteProgram.execute

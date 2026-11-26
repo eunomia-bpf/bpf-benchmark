@@ -15,7 +15,7 @@ structure Invariant {initial seed : CC.Mem} {entry : HeaderLocal initial}
     (base : Arm64MemsetHeaderView.View initial seed entry) (abi : TailLocal initial 6)
     (byte : BitVec 8) (calleeBefore : CC.Mem) (rawR0 : BitVec 64) (copiedN : Nat)
     (cell : TailLocal initial 5) (flagValue : BitVec 8) (outerLe : CC.TempEnv) (n : Nat) (m : CC.Mem) (le : CC.TempEnv) where
-  ready : Arm64ClobberMemoryState.Caller base abi byte calleeBefore rawR0 copiedN cell flagValue m outerLe
+  ready : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue m
   parameter : le.get Arm64Program._entry = some (.Vptr entry.block 0)
   counter : le.get Arm64Program.___a64_release_i = some (.Vint (BitVec.ofNat 32 n))
   old : le.get Arm64Program.___a64_release_old = some (.Vlong (-96#64))
@@ -147,7 +147,7 @@ variable {initial seed before : CC.Mem} {entry : HeaderLocal initial}
     {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
     {outerLe : CC.TempEnv}
 
-private def start (current : Arm64ClobberMemoryState.Caller base abi byte calleeBefore rawR0 copiedN cell flagValue before outerLe) :
+private def start (current : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue before) :
     Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe 0 before
       (Arm64MemsetClobberEntry.temps entry.block current.memory.storage.sp.block) := by
   have obs := Arm64MemsetClobberEntry.inputs entry.block current.memory.storage.sp.block
@@ -161,7 +161,7 @@ private theorem continuation_source (k : CC.Cont) : Arm64MemsetClobberEntry.cont
 provider/store effects, ordered external traces, final guard and next tag
 statement, with the actual R0 and same caller/flag packet throughout. -/
 theorem execute
-    (current : Arm64ClobberMemoryState.Caller base abi byte calleeBefore rawR0 copiedN cell flagValue before outerLe)
+    (current : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue before)
     (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont) :
     ∃ after nextLe trace,
       ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe 160 after nextLe,

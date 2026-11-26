@@ -30,7 +30,7 @@ theorem execute {initial seed calleeBefore before : CC.Mem} {entry : HeaderLocal
           (Arm64MemsetReleaseTagLoop.restCont (Arm64MemcpyClobberEntry.callCont calleeBefore outerLe k))
           CC.emptyEnv nextLe after) ∧
       FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock := by
-  let packet := Arm64ClobberMemoryState.of_memcpy current flag
+  let packet := Arm64ClobberCoreState.of_memcpy (Arm64ClobberMemoryState.of_memcpy current flag)
   have opened := Arm64MemcpyClobberEntry.execute current k
   obtain ⟨after,nextLe,trace,next,scans,frame,access,frontier⟩ :=
     Arm64ClobberReleaseTagComplete.original packet inputs (Arm64MemcpyClobberEntry.callCont calleeBefore outerLe k)

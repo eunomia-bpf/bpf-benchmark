@@ -22,8 +22,8 @@ structure FreeResult (before current after : CC.Mem) : Prop where
 including through providers whose cache cells changed on their supplied heap. -/
 theorem free {initial seed before current : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
-    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8} {outerLe : CC.TempEnv}
-    (prior : Arm64ClobberMemoryState.Caller base abi byte before rawR0 n cell flagValue current outerLe) :
+    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    (prior : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation before).1 base abi byte rawR0 n cell flagValue current) :
     ∃ after, FreeResult before current after := by
   obtain ⟨after,freed,frame,contents,next,released⟩ := deallocate_live_locals (Arm64MemcpySource.allocated before) prior.callee
   exact ⟨after,freed,frame,contents,next,released⟩
@@ -32,9 +32,9 @@ theorem free {initial seed before current : CC.Mem} {entry : HeaderLocal initial
 PTree-enumerated eight-local freeList to its original Returnstate. -/
 theorem exit {initial seed before current : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
-    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8} {outerLe : CC.TempEnv}
-    (prior : Arm64ClobberMemoryState.Caller base abi byte before rawR0 n cell flagValue current outerLe)
-    (k : CC.Cont) (hk : CC.isCallCont k = true) :
+    {rawR0 : BitVec 64} {n : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    (prior : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation before).1 base abi byte rawR0 n cell flagValue current)
+    (outerLe : CC.TempEnv) (k : CC.Cont) (hk : CC.isCallCont k = true) :
     ∃ after, FreeResult before current after ∧ InternalRun world 3
       (.State handler .Sskip (Arm64MemcpySource.continuation k) (Arm64MemcpySource.allocation before).1 outerLe current)
       (.Returnstate .Vundef k after) := by

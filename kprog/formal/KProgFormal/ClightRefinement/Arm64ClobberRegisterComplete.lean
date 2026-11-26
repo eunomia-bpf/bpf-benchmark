@@ -31,7 +31,7 @@ structure Invariant {initial seed : CC.Mem} {entry : HeaderLocal initial}
     (byte : BitVec 8) (calleeBefore : CC.Mem) (rawR0 : BitVec 64) (copiedN : Nat)
     (cell : TailLocal initial 5) (flagValue : BitVec 8) (outerLe : CC.TempEnv) (n : Nat) (values : Fin 18 → BitVec 64)
     (m : CC.Mem) (le : CC.TempEnv) where
-  ready : Arm64ClobberMemoryState.Caller base abi byte calleeBefore rawR0 copiedN cell flagValue m outerLe
+  ready : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue m
   parameter : le.get Arm64Program._entry = some (.Vptr entry.block 0)
   written : ∀ j : Fin 18, j.val < n →
     Arm64EntryMemory.gpr m.nextblock m (.Vptr entry.block 0) (declaration j).reg.val =

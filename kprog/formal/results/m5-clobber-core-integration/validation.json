@@ -1,0 +1,100 @@
+{
+  "confirmed_utc": "2026-11-26T17:24:57.893447+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyCompleteProgram"
+    ],
+    "exit": 0,
+    "seconds": 30.151820421218872,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 468,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-clobber-core-integration/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.671903133392334,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 7,
+  "source_steps": {
+    "updated_source_modules": 11,
+    "helper_providers": 150,
+    "helper_stores": 176,
+    "memcpy_locals_freed": 8
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberFlagState.lean",
+      "size_bytes": 3507,
+      "mtime_ns": 1795713789706775963
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberRegisterComplete.lean",
+      "size_bytes": 13199,
+      "mtime_ns": 1795713789707195738
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberRegisterState.lean",
+      "size_bytes": 3874,
+      "mtime_ns": 1795713789706687861
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberReleaseComplete.lean",
+      "size_bytes": 14356,
+      "mtime_ns": 1795713789706995431
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberReleaseState.lean",
+      "size_bytes": 5072,
+      "mtime_ns": 1795713789706393197
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberReleaseTagComplete.lean",
+      "size_bytes": 15648,
+      "mtime_ns": 1795713789707105740
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberReleaseTagState.lean",
+      "size_bytes": 4467,
+      "mtime_ns": 1795713789706581674
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberVectorState.lean",
+      "size_bytes": 3543,
+      "mtime_ns": 1795713789706862466
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyClobberComplete.lean",
+      "size_bytes": 3465,
+      "mtime_ns": 1795713789707421587
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyClobberRelease.lean",
+      "size_bytes": 2456,
+      "mtime_ns": 1795713789707265465
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyReturn.lean",
+      "size_bytes": 2916,
+      "mtime_ns": 1795713789707345947
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

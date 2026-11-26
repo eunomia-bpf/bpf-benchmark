@@ -181,7 +181,7 @@ theorem original {initial seed before : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
     {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
     {outerLe : CC.TempEnv}
-    (current : Arm64ClobberMemoryState.Caller base abi byte calleeBefore rawR0 copiedN cell flagValue before outerLe)
+    (current : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue before)
     (inputs : Arm64ClobberReleaseComplete.Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe)
     (called : CC.Cont) :
     ∃ after nextLe trace,
