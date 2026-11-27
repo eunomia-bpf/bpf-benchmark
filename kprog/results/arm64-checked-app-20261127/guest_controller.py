@@ -13,7 +13,7 @@ token=subprocess.check_output(['date','-u','+%Y%m%dT%H%M%SZ'],text=True).strip()
 OUT=HERE/('guest-'+token);OUT.mkdir()
 RAW=Path('/workspaces/kprog-raw/perf/arm64-checked-app-20261127')/token;RAW.mkdir(parents=True)
 record=dict(started_utc=now(),pid=os.getpid(),raw=str(RAW),revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
- scope='Existing upstream BCC vfsstat startup, original image native manifest, real ARM kernel/stock verifier/checked-native install/attachment/application output. Cortex-A57 fourCPUs/eightGiB matches current ARM entry; functional startup only, no corpus workload or timing.')
+ scope='Existing upstream BCC opensnoop startup, original image native manifest, real ARM kernel/stock verifier/checked-native install/attachment/application output. Cortex-A57 fourCPUs/eightGiB matches current ARM entry; functional startup only, no corpus workload or timing.')
 def save():(OUT/'controller.json').write_text(json.dumps(record,indent=2)+'\n')
 status=1;broker=None
 try:

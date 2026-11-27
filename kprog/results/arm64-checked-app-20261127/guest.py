@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 ROOT=Path('/workspaces/repository');BASE=Path('/workspaces/.agent-state/kprog-ck')
-out=Path(sys.argv[1]);case=out/'bcc-vfsstat';case.mkdir()
+out=Path(sys.argv[1]);case=out/'bcc-opensnoop';case.mkdir()
 (case/'captures').mkdir();Path('/run/bpfrejit-checked-app').mkdir()
 loader=ROOT/'runner/build-arm64-llvmbpf/native_loader/trusted-native-loader'
 command=['python3',str(ROOT/'kprog/trusted_service.py'),'--arch','2',
@@ -23,9 +23,9 @@ command=['python3',str(ROOT/'kprog/trusted_service.py'),'--arch','2',
  'BPFREJIT_SHIM_NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json',
  'BPFREJIT_NATIVE_LOADER_SO='+str(loader.with_name('libnative_loader.so')),
  'BPFREJIT_NATIVE_LINK_BINARY='+str(ROOT/'kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link'),
- '/usr/local/bin/vfsstat','1','10']
+ '/usr/local/bin/opensnoop','-d','10']
 r=subprocess.run(command,text=True,capture_output=True)
 (case/'stdout').write_text(r.stdout);(case/'stderr').write_text(r.stderr)
-row=dict(app='bcc-vfsstat',command=command,returncode=r.returncode)
+row=dict(app='bcc-opensnoop',command=command,returncode=r.returncode)
 (out/'cases.json').write_text(json.dumps([row],indent=2)+'\n');print(json.dumps(row),flush=True)
 raise SystemExit(r.returncode)
