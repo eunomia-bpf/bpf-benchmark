@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T11:35:31Z",
+  "pid": 993452,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-loadtime-20261127",
+    "const-selectors"
+  ],
+  "revision": "0d21f65e4d7e26b69faa0a8206ea4553a87608e2",
+  "compiler_cpu": 18,
+  "compiler_address_space_bytes": 51539607552,
+  "scope": "Archived Cilium request10 constant register-selector source control; same architecture flags, timed frontend stages and original artifact comparisons. Tetragon retains original code; at most two compiles."
+}
