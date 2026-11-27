@@ -1,0 +1,55 @@
+{
+  "confirmed_utc": "2026-11-27T02:06:13.041247+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpySource"
+    ],
+    "exit": 0,
+    "seconds": 2.210130214691162,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 464,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-source/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5955102443695068,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "actual_source_phase": "original caller entry and sixteen real copies to afterCopy",
+    "native": "same original TwoLoads and one actual TwoStores witness",
+    "source_indices": "64..79",
+    "destination_indices": "80..95",
+    "physical_bias": 96,
+    "native_write_permission": "derived from actual source resources",
+    "source_bytes": "actual source loads and original physical representation",
+    "final_observation": "same actual Mint8unsigned result for all16 bytes",
+    "scope": "existing initialized constant-byte fixture, no universal family recount"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpySource.lean",
+      "size_bytes": 6840,
+      "mtime_ns": 1795745104349969819
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

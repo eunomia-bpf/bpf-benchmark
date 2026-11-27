@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpySource
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpySource.source_address
+#print axioms Arm64KernelMemcpySource.source_address
+#check Arm64KernelMemcpySource.destination_address
+#print axioms Arm64KernelMemcpySource.destination_address
+#check Arm64KernelMemcpySource.execute
+#print axioms Arm64KernelMemcpySource.execute
