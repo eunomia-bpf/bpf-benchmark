@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.flag_word
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.flag_word
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.iterations
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.execute
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.observed
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderFlags.observed
