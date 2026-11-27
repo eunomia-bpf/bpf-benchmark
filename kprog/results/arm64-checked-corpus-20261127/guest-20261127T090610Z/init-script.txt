@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+if ! mountpoint -q /dev; then mount -t devtmpfs devtmpfs /dev; fi
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+mount -t tmpfs tmpfs /var/tmp
+mount -t debugfs debugfs /sys/kernel/debug
+mount -t bpf bpffs /sys/fs/bpf
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any workspace /workspaces
+install -d /run/host-python
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any hostpython /run/host-python
+install -d /run/checked-python
+ln -s /run/host-python/elftools /run/checked-python/elftools
+ulimit -l unlimited
+export HOME=/root
+export PATH=/usr/lib/llvm-18/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHONPATH=/workspaces/repository:/run/checked-python
+export CLANG=/workspaces/repository/kprog/stock-path/bin/clang
+export KPROG_ARM64_SYSROOT=/workspaces/repository/.cache/qemu-arm64-root
+export KPROG_TRUSTED_COMPILE_STATE=/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/broker
+export BPFREJIT_INSIDE_RUNTIME_CONTAINER=1
+export TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm
+export RUN_TOKEN=07745d59 RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool
+export RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon ETCD_UNSUPPORTED_ARCH=arm64
+status=0
+cd /workspaces/repository
+python3 kprog/results/arm64-checked-corpus-20261127/guest.py /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z cilium/agent || status=$?
+printf '%s\n' "$status" > /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/guest-status
+sync
+echo o > /proc/sysrq-trigger
+while :; do sleep 60; done
