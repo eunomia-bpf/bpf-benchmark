@@ -28,3 +28,6 @@ smoke:
 # Host compiler jobs stay capped; the guest retains the ARM entry's 4vCPU/8GiB.
 guest:
 	python3 guest_controller.py
+.PHONY: broker-lookup
+broker-lookup:
+	prlimit --as=17179869184 taskset -c 16 python3 broker_lookup.py

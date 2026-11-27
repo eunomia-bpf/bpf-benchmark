@@ -1,0 +1,47 @@
+{
+  "utc": "2026-11-27T00:21:17Z",
+  "command": [
+    "llvm-nm-18",
+    "-u",
+    "-j",
+    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/host-name-lookup.native.bc"
+  ],
+  "before": {
+    "exception": "FileNotFoundError(2, 'No such file or directory')"
+  },
+  "after": {
+    "returncode": 0,
+    "stdout": "kprog_unspecified_input\n",
+    "stderr": "",
+    "command": [
+      "/usr/lib/llvm-18/bin/llvm-nm",
+      "-u",
+      "-j",
+      "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/host-name-lookup.native.bc"
+    ],
+    "executable_sha256": "3f85dd567c2806f2c031e317871e7145f858072fc9595aba4dc33d2e3a671402",
+    "wall_seconds": 0.013252031989395618,
+    "max_rss_kib": 49456,
+    "user_seconds": 0.00494,
+    "system_seconds": 0.0069169999999999995
+  },
+  "absolute": {
+    "returncode": 0,
+    "stdout": "kprog_unspecified_input\n",
+    "stderr": "",
+    "command": [
+      "/usr/lib/llvm-18/bin/llvm-nm",
+      "-u",
+      "-j",
+      "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/host-name-lookup.native.bc"
+    ],
+    "executable_sha256": "3f85dd567c2806f2c031e317871e7145f858072fc9595aba4dc33d2e3a671402",
+    "wall_seconds": 0.011568813992198557,
+    "max_rss_kib": 49184,
+    "user_seconds": 0.006056,
+    "system_seconds": 0.005046
+  },
+  "missing": {
+    "exception": "FileNotFoundError(2, 'No such file or directory')"
+  }
+}

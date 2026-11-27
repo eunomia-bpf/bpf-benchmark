@@ -1,0 +1,4 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'
+prlimit --as=17179869184 taskset -c 16 python3 broker_lookup.py
+Old name lookup fails; current name/absolute real LLVM invocation agree; missing tool still fails
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'

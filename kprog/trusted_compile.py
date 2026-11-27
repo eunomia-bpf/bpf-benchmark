@@ -69,7 +69,7 @@ def execute(job: dict, scope: Path, clang: str, arm64_sysroot: Path | None = Non
 def execute_command(job: dict, scope: Path, tool_roots: tuple[Path, ...] = ()) -> dict:
     """Run a tool already built for the host, from the run scope or a tool root."""
     command = [str(x) for x in job['command']]
-    resolved = Path(command[0]).resolve(strict=True)
+    resolved = Path(shutil.which(command[0]) or command[0]).resolve(strict=True)
     start = time.monotonic()
     with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
         child = subprocess.Popen([str(resolved), *command[1:]], stdout=stdout, stderr=stderr)
