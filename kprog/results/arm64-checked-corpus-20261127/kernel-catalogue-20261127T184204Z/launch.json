@@ -1,0 +1,21 @@
+{
+  "pid": 1101973,
+  "started_utc": "2026-11-27T18:42:04Z",
+  "source_revision": "3e2ce5586b9de8276e74b1c454d12ef115e93091",
+  "source_sha256": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+  "scope": "Build existing ARM checked loader in place; 48GiBAS/atmost2compilerjobs/CPU16,18. Build completion does not establish live kernel symbol/native binding or workload acceptance.",
+  "command": [
+    "prlimit",
+    "--as=51539607552",
+    "taskset",
+    "-c",
+    "16,18",
+    "cmake",
+    "--build",
+    "/workspaces/repository/runner/build-arm64-llvmbpf",
+    "--target",
+    "trusted-native-loader",
+    "--",
+    "-j2"
+  ]
+}

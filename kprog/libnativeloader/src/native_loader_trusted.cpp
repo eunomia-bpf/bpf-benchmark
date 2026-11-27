@@ -617,11 +617,9 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     for (const char *symbol : kKernelDataSymbols) {
         wanted.insert(symbol);
     }
-#if defined(__x86_64__)
     for (const char *symbol : native_lto::kernel_symbols) {
         wanted.insert(symbol);
     }
-#endif
 
     std::ifstream input("/proc/kallsyms");
     if (!input) {
