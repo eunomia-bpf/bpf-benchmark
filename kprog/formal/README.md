@@ -88,10 +88,18 @@ each real LDP's checked read states and exact events: either two ordered
 arbitrary underlying bytes. Both LDPs compose on the same reached state and
 profile, repeating the source interval and retaining the complete frame.
 The continuation consumes the original prefix witness and its reached-state
-equality; final PC=origin+44 derives the first STP fetch. The next work binds
-the loaded word values, real repeated stores and landing-pad/alternative
-feature domains, then joins the complete helper/environment to the original
-source entry and whole-program observer.
+equality; final PC=origin+44 derives the first STP fetch. Imported bit-level
+memory semantics identify both loaded register pairs with the original two
+source words in either pair mode, including wrapping addresses. The same
+loaded-state witness then feeds both real STPs from one original 16-byte
+writable range. The first write derives the second initialized profile,
+rights, address, code and error state. Both genuine write-event lists repeat
+the same original source words; all registers and environment fields remain,
+and final PC=origin+52 derives the actual RET fetch. Concrete imported output
+memory states remain attached to these same execution witnesses. Next comes
+final memory readback and source-byte correspondence, actual RET/LR and
+landing-pad/alternative feature domains, then the complete helper/environment
+and original source entry with its whole-program observer.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

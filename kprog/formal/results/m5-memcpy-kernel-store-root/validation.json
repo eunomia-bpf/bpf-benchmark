@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T01:50:23.587368+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 8.241613864898682,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1393,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-store-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.7220587730407715,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22386,
+      "sha256": "f8c5438c8aa8c72e594c7aed9d6c0146458ae7f2e543dd4c99f8da46bd1d0cac"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 10048,
+      "sha256": "f67d9c5f4678dc06700d42f0021c80681a3fd2b83907897d5e9d22d1aaa42752"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports both true LDP register pairs and the real repeated STPs on the same actual kernel memcpy state. Imported bit-level memory reads identify each64bit half of a native16byte read with the corresponding read8 under wrapping64. Both actual LDPs and both pair modes load original physical source words into X6/X7 and X12/X13; the second LDP preserves the first pair. TwoLoads reached-state views derive by reflexivity from its existing steps. The imported checked-write body supplies actual memory, initialized ranges, ordered write events and full native frames. Both captured STP instructions implement two ordered write8 operations or one high++low write16. One original16byte writable-range premise derives all actual write results and initialized profiles. The first STP derives the second address minus16, profile, rights, no-error, code/PC and fetch; both stores retain actual stored/final witnesses and concrete imported memory-state views. complete_from_loads consumes the SAME TwoLoads witness and reached-state equality, derives current facts and original loaded words, and returns one store witness whose two real event lists repeat those words. Final PC=origin+52 derives actual RET fetch, with every register/environment preserved. Final physical memory readback/source16byte correspondence, actual RET/LR, BTI/live alternatives and remaining helper/source/global/universal domains/recount continue before M6.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
