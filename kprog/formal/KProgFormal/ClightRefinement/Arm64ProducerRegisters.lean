@@ -136,14 +136,16 @@ def GprLayout (world : CC.CGenv) : Prop :=
   CC.unionFieldOffset world.genv_cenv Arm64Entry._x gprComposite.co_members = .OK (0, .Full)
 
 /-- Execute a returned input in the actual caller using the shared stores. -/
-theorem declaration_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
-    (gpr : GprLayout world) (d : RegisterDeclaration) (m supplied : CC.Mem)
-    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (writes : DeclarationStores d m supplied value)
-    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
-    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+theorem declaration_return_body_stored (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (supplied middle after : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (wordBlock tagBlock : CC.Block)
+    (storedWord : CC.Mem.storev .Mint64 supplied (.Vptr wordBlock (0#64)) (.Vlong value) = some middle)
+    (storedTag : CC.Mem.storev .Mint8unsigned middle (.Vptr tagBlock (0#64)) (.Vint (0#32)) = some after)
+    (wordBinding : e.get d.word = some (wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (tagBlock, CC.tuchar)) :
     steps world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
       (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) =
-      some (CC.E0, .State f d.rest k e (d.temps le value) writes.after) ∧
+      some (CC.E0, .State f d.rest k e (d.temps le value) after) ∧
     InternalPath world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
       (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) := by
   simp [steps, InternalPath, InternalState, RegisterDeclaration.temps,
@@ -154,7 +156,21 @@ theorem declaration_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
     CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr,
     CC.Integers.MI.zero, CC.Integers.MI.add, CC.tuchar, CC.tuint, CC.tulong, CC.E0, CC.Eapp,
-    wordBinding, tagBinding, writes.storeWord, writes.storeTag]
+    wordBinding, tagBinding, storedWord, storedTag]
+
+/-- Preserve the mature full API by the same single execution proof. -/
+theorem declaration_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (m supplied : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (writes : DeclarationStores d m supplied value)
+    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+    steps world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
+      (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) =
+      some (CC.E0, .State f d.rest k e (d.temps le value) writes.after) ∧
+    InternalPath world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
+      (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) := by
+  exact declaration_return_body_stored world f e gpr d supplied writes.middle writes.after le k value
+    writes.wordBlock writes.tagBlock writes.storeWord writes.storeTag wordBinding tagBinding
 
 private theorem declaration_return_exec (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m supplied : CC.Mem)
@@ -210,15 +226,17 @@ theorem register_input_returns_bound (world : CC.CGenv)
       (star_trans call (internalRun_of_steps suffix.2 suffix.1).sound)
 
 /-- The zero branch uses the same store witness and named GPR layout. -/
-theorem declaration_zero_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
-    (gpr : GprLayout world) (d : RegisterDeclaration) (m before : CC.Mem)
+theorem declaration_zero_body_stored (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (before middle after : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (same : CC.Integers.Int.eq d.index (30#32) = true)
-    (writes : DeclarationStores d m before (0#64))
-    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
-    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+    (wordBlock tagBlock : CC.Block)
+    (storedWord : CC.Mem.storev .Mint64 before (.Vptr wordBlock (0#64)) (.Vlong (0#64)) = some middle)
+    (storedTag : CC.Mem.storev .Mint8unsigned middle (.Vptr tagBlock (0#64)) (.Vint (0#32)) = some after)
+    (wordBinding : e.get d.word = some (wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (tagBlock, CC.tuchar)) :
     steps world 10 (.State f d.body k e le before) =
       some (CC.E0, .State f d.rest k e
-        (le.set d.resultTemp (.Vlong (0#64))) writes.after) ∧
+        (le.set d.resultTemp (.Vlong (0#64))) after) ∧
     InternalPath world 10 (.State f d.body k e le before) := by
   have indexSame : d.index = (30#32) := by
     simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_iff_eq] using same
@@ -234,7 +252,21 @@ theorem declaration_zero_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
     CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add,
     CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.E0, CC.Eapp,
-    wordBinding, tagBinding, writes.storeWord, writes.storeTag]
+    wordBinding, tagBinding, storedWord, storedTag]
+
+/-- Preserve the original literal-zero API by the same single execution proof. -/
+theorem declaration_zero_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (m before : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (same : CC.Integers.Int.eq d.index (30#32) = true)
+    (writes : DeclarationStores d m before (0#64))
+    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+    steps world 10 (.State f d.body k e le before) =
+      some (CC.E0, .State f d.rest k e
+        (le.set d.resultTemp (.Vlong (0#64))) writes.after) ∧
+    InternalPath world 10 (.State f d.body k e le before) := by
+  exact declaration_zero_body_stored world f e gpr d before writes.middle writes.after le k same
+    writes.wordBlock writes.tagBlock writes.storeWord writes.storeTag wordBinding tagBinding
 
 private theorem declaration_zero_exec (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m before : CC.Mem)

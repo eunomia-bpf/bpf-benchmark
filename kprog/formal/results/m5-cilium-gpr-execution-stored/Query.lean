@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64ProducerRegisters
+#check KProgFormal.ClightRefinement.Arm64Producer.declaration_return_body_stored
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.declaration_return_body_stored
+#check KProgFormal.ClightRefinement.Arm64Producer.declaration_zero_body_stored
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.declaration_zero_body_stored
+#check KProgFormal.ClightRefinement.Arm64Producer.declaration_return_body
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.declaration_return_body
+#check KProgFormal.ClightRefinement.Arm64Producer.declaration_zero_body
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.declaration_zero_body

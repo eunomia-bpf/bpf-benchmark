@@ -1,0 +1,79 @@
+{
+  "scope": "same mature9step returned-input/10step literal-zero execution bodies accept actual environment/localbindings/two real store witnesses;old APIs singledelegate/full-type compatible;no actualcaller store construction claimed",
+  "source_sha256": "3993ce53840474959951a27a1c5ba8bfe0c6100d597df3b76f3a3aaad6d0cd7a",
+  "source_before_sha256": "07bcf4c22870c46be03bc8c99af7347fe21ea957175c746bee0ab231dbfa4886",
+  "receipts": {
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64ProducerRegisters"
+      ],
+      "exit": 0,
+      "seconds": 14.600168704986572,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "compat1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-gpr-execution-stored/Compatibility.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.096113681793213,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-gpr-execution-stored/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.837855100631714,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 6162.7306888103485,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 149,
+  "full_jobs": 1494,
+  "public_queries": 4,
+  "complete_old_type_examples": 2,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
