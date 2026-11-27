@@ -1,0 +1,23 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.row_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.row_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.after_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.after_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.declared
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.declared
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.names_distinct
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.names_distinct
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.local_storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.local_storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.abi_separate
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.abi_separate
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.writable
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.writable
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.store_row
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.store_row
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.entry
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerDefaults.entry
