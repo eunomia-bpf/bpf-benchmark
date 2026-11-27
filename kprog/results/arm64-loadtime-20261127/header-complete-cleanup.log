@@ -1,0 +1,23 @@
+{
+  "receipt": "kprog/results/arm64-loadtime-20261127/raw-dedup-20261127T155353Z.json",
+  "removed_allocated_bytes": 773894144,
+  "free_before_bytes": 16463433728,
+  "free_after_bytes": 17237692416,
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z",
+      "status": "removed",
+      "reason": null
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T141857Z",
+      "status": "removed",
+      "reason": null
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/header-source-20261127T151253Z",
+      "status": "removed",
+      "reason": null
+    }
+  ]
+}
