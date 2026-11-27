@@ -25,3 +25,7 @@ inline-mod:
 .PHONY: corpus
 corpus:
 	prlimit --as=51539607552 taskset -c 18 python3 corpus.py
+
+.PHONY: cross-app
+cross-app:
+	prlimit --as=51539607552 taskset -c 18 python3 cross_app.py
