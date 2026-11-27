@@ -1,0 +1,56 @@
+{
+  "confirmed_utc": "2026-11-27T00:43:32.465805+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyCode"
+    ],
+    "exit": 0,
+    "seconds": 1.5227696895599365,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 76,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-arm64-kernel-memcpy-code/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.9197371006011963,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "linked_generic_bytes": 556,
+    "captured_generic_words": 14,
+    "all_symbol_bytes_object_equal_vmlinux": true,
+    "real_runtime_symbols": [
+      "memcpy",
+      "__memcpy",
+      "__pi_memcpy"
+    ],
+    "actual_16byte_path": "two LDP and two STP, first/tail repeated",
+    "live_alternatives": "separate feature binding"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCode.lean",
+      "size_bytes": 2446,
+      "mtime_ns": 1795740053258564754
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

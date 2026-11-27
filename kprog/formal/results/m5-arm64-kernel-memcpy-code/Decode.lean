@@ -1,0 +1,10 @@
+import KProgFormal.Reference.AArch64
+#eval repr (decode_raw_inst 0xd503245f#32)
+#eval repr (decode_raw_inst 0x8b020024#32)
+#eval repr (decode_raw_inst 0x8b020005#32)
+#eval repr (decode_raw_inst 0xf102005f#32)
+#eval repr (decode_raw_inst 0x54000788#32)
+#eval repr (decode_raw_inst 0xa9401c26#32)
+#eval repr (decode_raw_inst 0xa97f348c#32)
+#eval repr (decode_raw_inst 0xa9001c06#32)
+#eval repr (decode_raw_inst 0xa93f34ac#32)
