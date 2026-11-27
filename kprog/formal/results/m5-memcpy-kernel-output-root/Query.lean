@@ -1,0 +1,13 @@
+import KProgFormal
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairMemory.mode_memory_eq
+#print axioms Arm64KernelMemcpyPairMemory.mode_memory_eq
+#check Arm64KernelMemcpyPairProfile.repeated_profile_eq
+#print axioms Arm64KernelMemcpyPairProfile.repeated_profile_eq
+#check Arm64KernelMemcpyOutput.complete_from_loads
+#print axioms Arm64KernelMemcpyOutput.complete_from_loads
+#check Arm64KernelMemcpySource.execute
+#print axioms Arm64KernelMemcpySource.execute
+#check Arm64KernelMemcpyReturn.execute
+#print axioms Arm64KernelMemcpyReturn.execute

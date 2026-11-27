@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T02:09:22.685091+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 8.392091512680054,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1405,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-output-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.276468276977539,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22446,
+      "sha256": "ef531e323322bca496d5702ff2864746d48a3ff0b302fc43b503927520baf295"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 10668,
+      "sha256": "9618670c26ae4cc3092b2a62e6b2daeba57897513ad19b62c40e42a54f185ad6"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports true wrapping STP physical memory/readback/frame and exact initialized-profile correspondence, one original C caller/copy execution related to the same native two-store witness, and actual captured RET. Completed imported MemoryProofs supplies real read/write round trips; split and single STP modes yield the same entire physical memory and full profile, with all16 destination bytes initialized and all outside bytes/initialization retained. Same TwoLoads and stored/final witnesses give original source16byte and per-byte output equality without replay or assumed successful writes. Source resources derive writable16, actual source loads derive initialized bytes, and the same original C copy execution reaches afterCopy with all16 Mint8unsigned observations equal to the same final native memory, preserving its invariant/flag/caller/frontier and native profile/frame. Captured RET derives its fetch/error from that store witness, targets original X30 and preserves complete output memory/profile/history/registers/environment. Public dependency inspection led to a forward correction replacing three initial local native bv_decide dependencies with kernel arithmetic; final code has no new local native axiom. Existing mature MemoryProofs native dependencies and source CC externalFunctionsSem/inlineAssemblySem are named in public logs. The current original source correspondence covers its initialized constant-byte fixture copy phase; the same source tag transfer/clobber/free/caller and native caller/BTI/live-alternative/global/universal domains/recount continue before M6.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

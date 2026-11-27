@@ -96,10 +96,18 @@ writable range. The first write derives the second initialized profile,
 rights, address, code and error state. Both genuine write-event lists repeat
 the same original source words; all registers and environment fields remain,
 and final PC=origin+52 derives the actual RET fetch. Concrete imported output
-memory states remain attached to these same execution witnesses. Next comes
-final memory readback and source-byte correspondence, actual RET/LR and
-landing-pad/alternative feature domains, then the complete helper/environment
-and original source entry with its whole-program observer.
+memory states remain attached to these same execution witnesses. Both actual
+STP modes now have identical physical memory and initialized profiles, with
+exact 16-byte readback and outside-byte frames under wrapping addresses.
+One original C caller/copy execution reaches its actual afterCopy statement;
+its resources derive native write rights, and every final mapped native byte
+has the same Mint8unsigned observation as that same source heap. The captured
+RET then consumes the original LR and retains all copied bytes, initialized
+profile, registers and environment. Public queries record the mature imported
+MemoryProofs computation dependencies; kprog's local range proofs use kernel
+arithmetic. Next comes the same source witness's tag transfer, clobbers,
+free/caller return and native caller/landing-pad/alternative feature binding,
+then the complete helper/environment and whole-program observer.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
