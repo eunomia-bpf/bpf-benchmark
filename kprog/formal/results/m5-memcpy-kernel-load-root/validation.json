@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T01:26:22.009477+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 9.266624450683594,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1388,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-load-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.305964708328247,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22323,
+      "sha256": "9d46ead4d6b4e5fad498b66e2d7d58bbb02948676277a0917f10e0a19f2d1d6a"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 9429,
+      "sha256": "07baf662940ee16d8a9829389175e64c6b2fd5904d28d7bb6babc4df620580cd"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports the real eight-step kernel memcpy prefix and both actual repeated LDPs on the same reached machine. SmallPrefix consumes one original Code/count16/error/PC and derives all eight actual steps, complete frame and first-LDP fetch at origin+36. Actual checked native reads retain arbitrary byte contents, computed initialization and complete physical frames. The two real LDP instructions support both split ordered8byte and single16byte modes. One original16byte readable-range premise derives all native read outcomes, intermediate states/errors and exact Reference events under wrapping64. TwoLoads stores actual loaded/final witnesses constrained by both true steps; the first frame derives the second signed-minus16 base, current profile/code/error/PC and fetch. Repeated Reference event lists coincide, with complete memory/profile/program/monitor/atomic/thread/extra and other-register frame. Final PC=origin+44 derives the real first-STP fetch. The continuation consumes the SAME original eight-step prefix witness plus the equality identifying its reached state and invokes this two-load proof once from original profile/permission inputs. Actual loaded word observations, two repeated STPs, RET/LR, BTI/platform alternatives and complete helper/source/global/universal domains/recount continue before M6.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

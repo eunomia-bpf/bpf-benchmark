@@ -81,11 +81,17 @@ instructions, including the repeated tail accesses. Kernel-checked decoder
 certificates bind its first fourteen words. The two actual source/destination
 end additions execute on arbitrary physical addresses and count, retaining
 the complete frame; their input PC is generic origin+4 after BTI. For count16,
-each of the three real comparisons and branches produces its actual NZCV and
-falls through, retaining GPRs, memory and history. The next work composes
-these reached native states under one code certificate, binds the real pair
-accesses and landing-pad/alternative feature domains, and joins the complete
-helper/environment to the original source entry and whole-program observer.
+all eight actual prefix steps compose under one Code certificate and derive
+the first LDP fetch at origin+36. The original 16-byte readable range supplies
+each real LDP's checked read states and exact events: either two ordered
+8-byte reads or one 16-byte read, with actual initialization Booleans and
+arbitrary underlying bytes. Both LDPs compose on the same reached state and
+profile, repeating the source interval and retaining the complete frame.
+The continuation consumes the original prefix witness and its reached-state
+equality; final PC=origin+44 derives the first STP fetch. The next work binds
+the loaded word values, real repeated stores and landing-pad/alternative
+feature domains, then joins the complete helper/environment to the original
+source entry and whole-program observer.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
