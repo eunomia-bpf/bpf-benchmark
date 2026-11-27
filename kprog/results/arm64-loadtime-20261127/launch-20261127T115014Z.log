@@ -1,2 +1,3 @@
 make: Entering directory '/workspaces/repository/kprog/results/arm64-loadtime-20261127'
 prlimit --as=51539607552 taskset -c 18 python3 profile.py inline-mod
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-loadtime-20261127'

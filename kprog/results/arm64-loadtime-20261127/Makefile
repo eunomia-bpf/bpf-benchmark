@@ -21,3 +21,7 @@ const-controls:
 .PHONY: inline-mod
 inline-mod:
 	prlimit --as=51539607552 taskset -c 18 python3 profile.py inline-mod
+
+.PHONY: corpus
+corpus:
+	prlimit --as=51539607552 taskset -c 18 python3 corpus.py

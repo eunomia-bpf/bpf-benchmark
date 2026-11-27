@@ -19,7 +19,8 @@ def now():
     return subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip()
 token = subprocess.check_output(['date', '-u', '+%Y%m%dT%H%M%SZ'], text=True).strip()
 mode = sys.argv[1] if len(sys.argv) > 1 else 'profile'
-OUT = HERE/(mode+'-'+token)
+request_number = int(sys.argv[2]) if len(sys.argv) > 2 else None
+OUT = HERE/(mode+('-request'+str(request_number) if request_number is not None else '')+'-'+token)
 OUT.mkdir()
 RAW = Path('/workspaces/kprog-raw/perf/arm64-loadtime-20261127')/token
 RAW.mkdir(parents=True)
@@ -44,7 +45,9 @@ try:
     save()
     source_run = ROOT/'kprog/results/arm64-checked-corpus-20261127'
     attribution = json.loads((source_run/'loadtime-attribution.json').read_text())
-    specimen = max(attribution['per_request'], key=lambda row: row['host_frontend_wall_seconds'])
+    specimen = (next(row for row in attribution['per_request'] if row['request'] == request_number)
+                if request_number is not None else
+                max(attribution['per_request'], key=lambda row: row['host_frontend_wall_seconds']))
     record['mode'] = mode
     record['specimen'] = specimen
     raw_source = Path('/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z')
@@ -175,6 +178,7 @@ static __always_inline __u64 kprog_arm64_profile_mod(__u8 mod, __u64 value, __u8
     record['restored_source'] = str(source)
     record['canonical_outputs_before'] = [str(p) for p in [frontend, frontend.with_name('trusted_arm64.bpf.o')] if p.exists()]
     # The retained original request archive owns the prior canonical products.
+    save()
     trace = RAW/'frontend-trace.json'
     with Path('/workspaces/.agent-state/kprog-lanes/locks/timing').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_SH)
