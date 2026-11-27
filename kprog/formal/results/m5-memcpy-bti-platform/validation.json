@@ -1,0 +1,101 @@
+{
+  "confirmed_utc": "2026-11-27T04:31:59.448157+00:00",
+  "checks": {
+    "memcpy-bti-mature-stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "external/LNSym/Arm/Insts/BR/Hints.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.492243766784668,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-bti-mature2": {
+      "command": [
+        "lake",
+        "build",
+        "+Arm.Insts.BR.Hints"
+      ],
+      "exit": 0,
+      "seconds": 1.539311408996582,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-bti-tests-stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "external/LNSym/Tests/HintTest.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.4949519634246826,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-bti-tests3": {
+      "command": [
+        "lake",
+        "build",
+        "lnsym/+Tests.HintTest"
+      ],
+      "exit": 0,
+      "seconds": 1.541471242904663,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-bti-platform1": {
+      "command": [
+        "python3",
+        "results/m5-memcpy-bti-platform/inspect_platform.py",
+        "--output",
+        "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z/memcpy-bti-platform.json"
+      ],
+      "exit": 0,
+      "seconds": 0.19533824920654297,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-bti-platform-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-memcpy-bti-platform/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7073390483856201,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "fork_revision": "d8cb51933327ca3dbe05fc7c816d9a700a29b8f7",
+  "old_interface_complete_type_checks": 1,
+  "public_queries": 2,
+  "model_domain": "FEAT_BTI absent; existing plain branch projection",
+  "live_binding": "captured actual CPU invocation,configuration/binary identity and primary model inference; actual code/feature evidence retains explicit input domain"
+}
