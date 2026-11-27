@@ -133,3 +133,22 @@ These objects recorded "out of memory" under the 16 GiB cap (commands.jsonl writ
 48 GiB. otel/0004 ran with no cap at 06:53Z, reached 114,302,232 kB anon RSS, and the node's global OOM killer
 ended it at 07:10:39Z (dmesg: longhorn invoked oom-killer, killed process 16088 clang). That is the shape failure
 measured above. From 07:19Z omp's own process (pid 20115) also carries the 48 GiB cap, so its solo runs inherit it.
+
+## Coordinator note, 2026-11-27T21:10Z: the 48 GiB rerun of the OOM list (operator 2026-11-27 21:06Z: "还有没有你搞的配置问题")
+
+The coordinator's 16 GiB cap of 2026-11-26 04:36Z-05:18Z marked nine tracee objects "out of memory". The one-at-a-time
+rerun of the whole 22-row OOM list (/tmp/run_uncapped.sh, started 2026-11-26 19:35Z, under the 48 GiB cap from 20:2xZ)
+finished 2026-11-27 08:37Z; its results are recorded here for the first time: oom-rerun-48g-20261127.tsv (object, B C
+source bytes, clang exit, seconds), the script beside it, raw logs and SHA256SUMS in /workspaces/kprog-raw/coordinator/arm64-oom-rerun-48g-20261127.
+
+- Compile at 48 GiB (exit 0): otel/0005, tracee/0010, 0012, 0032, 0065, 0072, 0073, 0101 (8).
+- "LLVM ERROR: out of memory" at 48 GiB: otel/0006, 0010, 0013, 0014, 0015, 0016, 0017, 0021, tetragon/0052, 0075,
+  tracee/0014, 0037, 0055 (13); otel/0004 killed (exit 137).
+- Of the nine objects the 16 GiB cap stopped, six compile at 48 GiB (tracee/0012, 0032, 0065, 0072, 0073, 0101) and
+  three stay at the 48 GiB limit (tracee/0014, 0037, 0055).
+
+These B C files come from the producer before ffb1d6077; with the const decoder locals now in the header sources
+(d8f43a799, c99b62d15), all 13 OTel stage-2 inputs compile with at most 23.7 GB (e494b016f). The 14 objects still at
+the limit get regenerated with the current headers and checked by the stock verifier when the arm64 verified-path work
+resumes after performance (todo section 0, coordinator 2026-11-27T21:10Z). A clean compile is a compile result; the checked count of
+stage 1 (280/304) moves only with the stock verifier's outcome.
