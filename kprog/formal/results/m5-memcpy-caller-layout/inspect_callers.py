@@ -1,6 +1,6 @@
 """Read-only inventory of retained real inputs; never create a replacement P."""
 from pathlib import Path
-import hashlib,io,json,tarfile
+import gzip,hashlib,io,json,tarfile
 from elftools.elf.elffile import ELFFile
 from elftools.elf.relocation import RelocationSection
 
@@ -57,5 +57,5 @@ memcpy=[x for x in requests if x['source_memcpy_lines'] or any(c['symbol']=='mem
 record={'archives':rows,'successful_requests':len(requests),'memcpy_requests':memcpy,
  'scope':'Exactly five named retained archives and their successful requests. All input ELF executable-section CALL26 relocations and original generated source are inspected. Missing artifact manifests are recorded explicitly; native/source bytes still come from the hashed request archive. Failures,other captures,loaded/patched text and future requests are outside this inventory. No new native input or simulator source is generated. No absence claim for the entire corpus.'}
 assert not memcpy,'Real memcpy candidate found; inspect and retain it before choosing the next caller.'
-Path(__file__).with_name('callers.json').write_text(json.dumps(record,indent=2)+'\n')
+Path(__file__).with_name('callers.json.gz').write_bytes(gzip.compress((json.dumps(record,indent=2)+'\n').encode(),mtime=0))
 print(json.dumps({'archives':len(rows),'successful_requests':len(requests),'memcpy_requests':len(memcpy)},indent=2))

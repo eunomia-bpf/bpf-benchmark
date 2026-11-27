@@ -5,3 +5,5 @@ Original producer allocation and actual pointer slots rule out a same-heap conti
 Focused build 173 and 5 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
 
 Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+The complete inventory is retained as callers.json.gz (351220 bytes;17396212 uncompressed). A fresh inspection reproduces the identical uncompressed JSON and deterministic gzip bytes;the original JSON is retained in raw evidence and Git history. Compression changes no query,input or result.

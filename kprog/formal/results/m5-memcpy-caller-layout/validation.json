@@ -89,17 +89,23 @@
       "results/m5-memcpy-caller-layout/inspect_callers.py"
     ],
     "exit": 0,
-    "seconds": 10.37557864189148,
+    "seconds": 7.068410158157349,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
     "address_space_bytes": 34359738368,
     "timing_lock": "shared"
   },
-  "artifact_sha256": "f6881edbdbeab159a88307033d11a77aaa40bb2888a11ded4fa5208a68b23181",
+  "artifact_sha256": "f6412da0982b42ac116c47f383dcd08a14d71d93088fbd7282b0cde463082e04",
   "owned_source_sha256": {
     "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyCallerLayout.lean": "b1837d3ca4c9a85778ea9fb67ea565451cb2d1a9c762f927a3f8f767ff2c9438",
     "kprog/formal/KProgFormal.lean": "125e82891d3acfb14d8d38370044e3f40885b545f839c78e367bd417b6750e78",
     "kprog/formal/README.md": "9183bdd6ef70ec5f74a959bfc5b7bf7141d6ba10643176d255d68b8c0a50ea01"
-  }
+  },
+  "artifact_format": "gzip-json",
+  "artifact_json_sha256": "f6881edbdbeab159a88307033d11a77aaa40bb2888a11ded4fa5208a68b23181",
+  "artifact_original_bytes": 17396212,
+  "artifact_packed_bytes": 351220,
+  "artifact_reproduced_byteequal": true,
+  "inspector_sha256": "9e0625cc12360165445820959eab52b7f615438ea558936349c36fc253ee39f1"
 }
