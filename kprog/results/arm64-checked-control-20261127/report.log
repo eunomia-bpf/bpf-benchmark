@@ -1,0 +1,16 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'
+python3 report.py
+guest-20261127T001548Z controller 1
+guest-20261127T001642Z controller 1
+  xdp client 1 []
+  tc client 1 []
+guest-20261127T001831Z controller 0
+  xdp client 0 [('direct-native', False, False, 0)]
+  tc client 0 [('direct-native', False, False, 0)]
+guest-20261127T001949Z controller 1
+  xdp client 1 [(None, None, None, -5)]
+  tc client 1 [(None, None, None, -5)]
+guest-20261127T002212Z controller 0
+  xdp client 0 [('checked-sim-c', True, True, 0)]
+  tc client 0 [('checked-sim-c', True, True, 0)]
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'

@@ -1,0 +1,9 @@
+[master 271686611] Record actual ARM checked-native control guest
+ 5 files changed, 194 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   17ed1d633..271686611  master -> master

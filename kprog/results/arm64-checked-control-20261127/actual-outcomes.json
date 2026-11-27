@@ -1,0 +1,588 @@
+{
+  "utc": "2026-11-27T00:24:21Z",
+  "scope": "Tiny XDP/TC controls only; client0 alone does not establish checked installation; no application/timing claim.",
+  "runs": [
+    {
+      "directory": "guest-20261127T001548Z",
+      "revision": "0fc1f9099db5ebf8a7221b5f72bebabef2ce4c91",
+      "controller_status": 1,
+      "ended_utc": "2026-11-27T00:16:21Z",
+      "cases": [],
+      "controller_exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/arm64-checked-control-20261127/guest_controller.py\", line 75, in <module>\n    status=int((RAW/'guest-status').read_text())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1029, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001548Z/guest-status'\n"
+    },
+    {
+      "directory": "guest-20261127T001642Z",
+      "revision": "ed46f1e8fdea960c9ed1a243774b9be58cb50eec",
+      "controller_status": 1,
+      "ended_utc": "2026-11-27T00:17:20Z",
+      "cases": [
+        {
+          "kind": "xdp",
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 19, in <module>\n    from trusted_generation import declarations, u32, elf_symbol\n  File \"/workspaces/repository/kprog/trusted_generation.py\", line 9, in <module>\n    from elftools.elf.elffile import ELFFile\nModuleNotFoundError: No module named 'elftools'\n",
+          "client_returncode": 1
+        },
+        {
+          "kind": "tc",
+          "stdout": "",
+          "stderr": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 19, in <module>\n    from trusted_generation import declarations, u32, elf_symbol\n  File \"/workspaces/repository/kprog/trusted_generation.py\", line 9, in <module>\n    from elftools.elf.elffile import ELFFile\nModuleNotFoundError: No module named 'elftools'\n",
+          "client_returncode": 1
+        }
+      ]
+    },
+    {
+      "directory": "guest-20261127T001831Z",
+      "revision": "6024c719109f07660ed1eed4df778dd71d6a6aff",
+      "controller_status": 0,
+      "ended_utc": "2026-11-27T00:18:59Z",
+      "cases": [
+        {
+          "kind": "xdp",
+          "stdout": "{\"ok\":true,\"original_prog_id\":6,\"native_prog_id\":9,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/service.tar.gz\"}\n",
+          "stderr": "",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:11.671360+00:00",
+              "prog_id": 9,
+              "phase": "load-direct",
+              "status": 0,
+              "execution_path": "direct-native",
+              "b_generated": false,
+              "b_stock_passed": false,
+              "simulator_failure": {
+                "stage": "generation",
+                "error": "Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 257, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 86, in specialize\n    run([sys.executable, ROOT / \"kprog/trusted_compile.py\", \"exec\",\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 65, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.\n"
+              },
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/1.success.tar.gz",
+              "finished": "1970-01-01T00:00:15.877236+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/1.success.tar.gz",
+              "load-direct.stdout": "{\"request_id\":1,\"prog_id\":9,\"phase\":\"load-direct\",\"status\":0}\n"
+            }
+          ]
+        },
+        {
+          "kind": "tc",
+          "stdout": "{\"ok\":true,\"original_prog_id\":12,\"native_prog_id\":15,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/service.tar.gz\"}\n",
+          "stderr": "",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 12,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:22.598729+00:00",
+              "prog_id": 15,
+              "phase": "load-direct",
+              "status": 0,
+              "execution_path": "direct-native",
+              "b_generated": false,
+              "b_stock_passed": false,
+              "simulator_failure": {
+                "stage": "generation",
+                "error": "Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 257, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 86, in specialize\n    run([sys.executable, ROOT / \"kprog/trusted_compile.py\", \"exec\",\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 65, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.\n"
+              },
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/2.success.tar.gz",
+              "finished": "1970-01-01T00:00:26.547607+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/2.success.tar.gz",
+              "load-direct.stdout": "{\"request_id\":2,\"prog_id\":15,\"phase\":\"load-direct\",\"status\":0}\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "directory": "guest-20261127T001949Z",
+      "revision": "3599f1bfa25299f133e677d54658e4a093f2e0de",
+      "controller_status": 1,
+      "ended_utc": "2026-11-27T00:20:35Z",
+      "cases": [
+        {
+          "kind": "xdp",
+          "stdout": "{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/service.tar.gz\"}\n",
+          "stderr": "trusted service control: trusted specializer refused native program: Input/output error\n",
+          "client_returncode": 1,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:14.526763+00:00",
+              "status": -5,
+              "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+              "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+              "failure_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/1.failure.tar.gz",
+              "finished": "1970-01-01T00:00:24.185264+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/1.failure.tar.gz",
+              "checked-simulator-verification.json": {
+                "request_id": 1,
+                "prog_id": 9,
+                "phase": "verify",
+                "status": 0
+              },
+              "error.json": {
+                "request_id": 1,
+                "source_prog_id": 6,
+                "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+                "execution_mode": "checked-sim-c",
+                "started": "1970-01-01T00:00:14.526763+00:00",
+                "status": -5,
+                "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n"
+              },
+              "native_commands": [
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc",
+                    "--helper-list",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.helpers.txt",
+                    "--stack-arena",
+                    "union.anon",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "-u",
+                    "-j",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc"
+                  ],
+                  "returncode": 1,
+                  "stdout": "",
+                  "stderr": ""
+                }
+              ],
+              "verify.stderr": "verification time 30590 usec\nstack depth 0\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+            }
+          ]
+        },
+        {
+          "kind": "tc",
+          "stdout": "{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/service.tar.gz\"}\n",
+          "stderr": "trusted service control: trusted specializer refused native program: Input/output error\n",
+          "client_returncode": 1,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 12,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:33.673754+00:00",
+              "status": -5,
+              "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+              "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+              "failure_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/2.failure.tar.gz",
+              "finished": "1970-01-01T00:00:44.030997+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/2.failure.tar.gz",
+              "checked-simulator-verification.json": {
+                "request_id": 2,
+                "prog_id": 15,
+                "phase": "verify",
+                "status": 0
+              },
+              "error.json": {
+                "request_id": 2,
+                "source_prog_id": 12,
+                "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+                "execution_mode": "checked-sim-c",
+                "started": "1970-01-01T00:00:33.673754+00:00",
+                "status": -5,
+                "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n"
+              },
+              "native_commands": [
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc",
+                    "--helper-list",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.helpers.txt",
+                    "--stack-arena",
+                    "union.anon",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "-u",
+                    "-j",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc"
+                  ],
+                  "returncode": 1,
+                  "stdout": "",
+                  "stderr": ""
+                }
+              ],
+              "verify.stderr": "verification time 29739 usec\nstack depth 0\nprocessed 102 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "directory": "guest-20261127T002212Z",
+      "revision": "acea7bf303bd8ed5f7d634ebdfdc784b7c1503bc",
+      "controller_status": 0,
+      "ended_utc": "2026-11-27T00:23:10Z",
+      "cases": [
+        {
+          "kind": "xdp",
+          "stdout": "{\"ok\":true,\"original_prog_id\":6,\"native_prog_id\":12,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/service.tar.gz\"}\n",
+          "stderr": "",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:13.406386+00:00",
+              "prog_id": 12,
+              "phase": "load",
+              "status": 0,
+              "execution_path": "checked-sim-c",
+              "b_generated": true,
+              "b_stock_passed": true,
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/1.success.tar.gz",
+              "finished": "1970-01-01T00:00:31.470003+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/1.success.tar.gz",
+              "checked-simulator-verification.json": {
+                "request_id": 1,
+                "prog_id": 9,
+                "phase": "verify",
+                "status": 0
+              },
+              "native_commands": [
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.native.bc",
+                    "--helper-list",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.helpers.txt",
+                    "--stack-arena",
+                    "union.anon",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "-u",
+                    "-j",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.native.bc"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.native.bc",
+                    "--public-layout",
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/public-layout.json",
+                    "--physical-layout",
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/physical-layout.json",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.context.bc",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "--defined-only",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.context.bc"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/repository/kprog/stock-path/bin/clang",
+                    "-target",
+                    "aarch64-unknown-linux-gnu",
+                    "-O3",
+                    "-mtune=neoverse-n1",
+                    "-mno-outline-atomics",
+                    "-ffixed-x26",
+                    "-foptimize-sibling-calls",
+                    "-fomit-frame-pointer",
+                    "-mgeneral-regs-only",
+                    "-fno-stack-protector",
+                    "-fno-asynchronous-unwind-tables",
+                    "-fno-unwind-tables",
+                    "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+                    "-mllvm",
+                    "-forceattrs-csv-path=/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.attributes.csv",
+                    "-c",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.context.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.native.o"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+                    "--input",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.native.o",
+                    "--symbol",
+                    "trusted_arm64_arm64_sim_xdp",
+                    "--mode",
+                    "proof",
+                    "--preserve-entry-abi",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/request-fy4el_bd/generated/checked-simulator.proof.o"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                }
+              ],
+              "load.stderr": "",
+              "load.stdout": "{\"request_id\":1,\"prog_id\":12,\"phase\":\"load\",\"status\":0}\n",
+              "verify.stderr": "verification time 30308 usec\nstack depth 0\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+            }
+          ]
+        },
+        {
+          "kind": "tc",
+          "stdout": "{\"ok\":true,\"original_prog_id\":15,\"native_prog_id\":21,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/service.tar.gz\"}\n",
+          "stderr": "",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 15,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:39.419440+00:00",
+              "prog_id": 21,
+              "phase": "load",
+              "status": 0,
+              "execution_path": "checked-sim-c",
+              "b_generated": true,
+              "b_stock_passed": true,
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/2.success.tar.gz",
+              "finished": "1970-01-01T00:00:56.228056+00:00"
+            }
+          ],
+          "request_receipts": [
+            {
+              "archive": "service/requests/2.success.tar.gz",
+              "checked-simulator-verification.json": {
+                "request_id": 2,
+                "prog_id": 18,
+                "phase": "verify",
+                "status": 0
+              },
+              "native_commands": [
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.native.bc",
+                    "--helper-list",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.helpers.txt",
+                    "--stack-arena",
+                    "union.anon",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "-u",
+                    "-j",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.native.bc"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/context-lower",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.native.bc",
+                    "--public-layout",
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/public-layout.json",
+                    "--physical-layout",
+                    "/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/physical-layout.json",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.context.bc",
+                    "--arch",
+                    "aarch64-unknown-linux-gnu",
+                    "--data-layout",
+                    "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "llvm-nm-18",
+                    "--defined-only",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.context.bc"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/repository/kprog/stock-path/bin/clang",
+                    "-target",
+                    "aarch64-unknown-linux-gnu",
+                    "-O3",
+                    "-mtune=neoverse-n1",
+                    "-mno-outline-atomics",
+                    "-ffixed-x26",
+                    "-foptimize-sibling-calls",
+                    "-fomit-frame-pointer",
+                    "-mgeneral-regs-only",
+                    "-fno-stack-protector",
+                    "-fno-asynchronous-unwind-tables",
+                    "-fno-unwind-tables",
+                    "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+                    "-mllvm",
+                    "-forceattrs-csv-path=/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.attributes.csv",
+                    "-c",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.context.bc",
+                    "-o",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.native.o"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                },
+                {
+                  "command": [
+                    "/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+                    "--input",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.native.o",
+                    "--symbol",
+                    "trusted_arm64_arm64_sim_xdp",
+                    "--mode",
+                    "proof",
+                    "--preserve-entry-abi",
+                    "--output",
+                    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/request-vmynqcni/generated/checked-simulator.proof.o"
+                  ],
+                  "returncode": 0,
+                  "stdout": "",
+                  "stderr": ""
+                }
+              ],
+              "load.stderr": "",
+              "load.stdout": "{\"request_id\":2,\"prog_id\":21,\"phase\":\"load\",\"status\":0}\n",
+              "verify.stderr": "verification time 29811 usec\nstack depth 0\nprocessed 102 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

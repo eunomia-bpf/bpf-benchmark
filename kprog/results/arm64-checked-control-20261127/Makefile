@@ -31,3 +31,6 @@ guest:
 .PHONY: broker-lookup
 broker-lookup:
 	prlimit --as=17179869184 taskset -c 16 python3 broker_lookup.py
+.PHONY: report
+report:
+	python3 report.py
