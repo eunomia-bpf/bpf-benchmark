@@ -1,0 +1,12 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpySource.execute_framed
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpySource.execute_framed
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.finish_copied
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.finish_copied
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.complete
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedEntry.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedEntry.execute
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.complete

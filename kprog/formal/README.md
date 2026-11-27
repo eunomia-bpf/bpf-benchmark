@@ -125,13 +125,25 @@ readers for all 32 vectors, R1 through R18 with tag0, the complete NZCV tuple,
 source R0=-16/tag4 and borrowed SP=-32. Its original stack-origin and physical
 SP=-32+stackOrigin contracts bind both R0 and SP through the existing
 provenance map. All reads use the exported C layout and real retained loads.
-From the actual completed-release boundary, the same provider/store/helper
-return and eight frees now retain the original R19–R30 values, tags and
-provenance. Together with the same native field frames and the initial
-source/native binding, they derive the complete existing 31-GPR/SP/SIMD/NZCV
-relation. The original copy/tag/release prefix binding to this boundary,
-native caller/landing-pad/alternative features, global provider evidence and
-whole-program observer continue on these same witnesses.
+The same original program memcpy caller now retains its full initial
+source/native binding through the actual eight-local entry, all sixteen
+reader/tag/byte-store iterations, original tag transfers and release scans,
+the same providers/stores, helper return, eight frees and saved caller
+restoration. Real frames preserve R19–R30 values, tags and provenance;
+the actual final packet derives the complete existing 31-GPR/SP/SIMD/NZCV
+relation from that original caller binding. Fifteen complete original API
+types retain kernel compatibility. One shared copy continuation consumes the
+same actual source and native store witnesses. Actual generic Code, post-BTI
+PC, count16, error and physical input derive all thirteen native steps;
+source-derived read/write permissions and byte observations then yield both
+the complete final register relation and all sixteen final source/native
+destination-byte observations on that single execution. The actual exported alias branch now decodes and executes mature B, reaching
+the distinct generic symbol while preserving LR and the complete physical
+frame and fetching generic BTI on the same program. Initial full binding,
+targeted provider/cache inputs and the generic count16 post-BTI domain stay
+explicit. Actual exported-symbol entry, native BL/caller/landing-pad/live
+alternatives, global provider/code evidence and whole-program observer
+continue on these same witnesses.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
