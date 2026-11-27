@@ -172,8 +172,11 @@ transitions from that original entry, with the real saved caller and casts.
 The same execution now enters that writer's actual three-local allocator,
 initializes both of its 31-pointer tables and writes its real stack descriptor:
 590 source transitions preserve all four tables and the caller's raw frame.
-The ordinary reg30 stores, eager coordinate read and actual inner/outer
-free-lists and return still follow.
+The actual ordinary reg30 branch now reads the coordinate, writes the raw
+address and tag9, and frees all three writer locals. Its saved caller then
+breaks the original loop, frees both LINK locals and returns the same address:
+638 actual source transitions, derived from original read/write resources.
+Native BL/code-coordinate and global source/native binding still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

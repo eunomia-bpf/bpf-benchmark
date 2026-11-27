@@ -1,0 +1,93 @@
+{
+  "confirmed_utc": "2026-11-27T11:28:50.134529+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary"
+    ],
+    "exit": 0,
+    "seconds": 197.788756608963,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 151,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-ordinary/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.917459487915039,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 10,
+  "source_steps": {
+    "same_original_LINK_to_initialized_writer": 590,
+    "real_reg30_branch": 42,
+    "same_original_LINK_to_written": 632,
+    "actual_writer_three_local_free_return": 1,
+    "same_original_LINK_to_writer_return": 633,
+    "real_saved_callee_return_loop_break_LR_return_and_outer_free": 5,
+    "whole_actual_LINK": 638,
+    "native_BL_and_code_binding": "remaining"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkOrdinary.lean",
+      "size_bytes": 43555,
+      "mtime_ns": 1795778421283663227
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 3.891392469406128,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1437,
+  "direct_final_stage": 10,
+  "direct_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-ordinary/Proof.lean"
+    ],
+    "exit": 0,
+    "seconds": 225.91138243675232,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkOrdinary.lean": "69d98c22585c75230cf7ec9519085ea36d0b8821223314e841331e5191167968",
+    "kprog/formal/KProgFormal.lean": "b4d6032a29ee4b3fbf1bbc9ae442f7d7599c246b4f9954014046128b8b29076f",
+    "kprog/formal/README.md": "44f1da1b3c8a30c1efe6928e7d684c947d24069dbae135e1741822638660c550"
+  }
+}

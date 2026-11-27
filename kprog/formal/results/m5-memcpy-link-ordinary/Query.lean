@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.layouts
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.layouts
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.execute_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.execute_stores
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.access
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.access
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.next
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.next
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.release_inner
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.release_inner
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.return_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.return_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.return_to_caller
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.return_to_caller
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.complete
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.Written.complete
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.link
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkOrdinary.link
