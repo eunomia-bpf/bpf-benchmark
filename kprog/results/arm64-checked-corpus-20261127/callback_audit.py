@@ -11,8 +11,10 @@ destination = folder if len(sys.argv) > 1 else here
 controller = json.loads((folder / 'controller.json').read_text())
 raw = Path(controller['raw'])
 parts = sorted(folder.glob('evidence.tar.zst.part-*'))
-assert len(parts) == 1, parts
-process = subprocess.Popen(['zstd', '-dc', str(parts[0])], stdout=subprocess.PIPE)
+assert parts, folder
+source = subprocess.Popen(['cat', *map(str, parts)], stdout=subprocess.PIPE)
+process = subprocess.Popen(['zstd', '-dc'], stdin=source.stdout, stdout=subprocess.PIPE)
+source.stdout.close()
 compared = []
 with tarfile.open(fileobj=process.stdout, mode='r|') as archive:
     for member in archive:
@@ -22,6 +24,7 @@ with tarfile.open(fileobj=process.stdout, mode='r|') as archive:
             compared.append(dict(member=member.name, bytes=member.size))
 process.stdout.close()
 assert process.wait() == 0
+assert source.wait() == 0
 prefix = controller['cases'][0]['app'].split('/')[0]
 report = json.loads((destination / (prefix + '-outcome.json')).read_text())
 result = dict(utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),

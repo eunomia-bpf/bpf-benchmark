@@ -1,0 +1,86 @@
+request	symbol	prog_type	native_id	source_prog_id	post_prog_id	post_uses_original	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	event_exit_disassociate_ctty	2	250	245	250	False	True	False	direct-native	0	None	None	R3 invalid mem access 'scalar'
+2	event_exit_acct_process	2	256	251	256	False	True	False	direct-native	0	21	856832	R3 invalid mem access 'scalar'
+3	event_wake_up_new_task	2	262	257	262	False	True	False	direct-native	0	21	1380624	R2 invalid mem access 'scalar'
+4	execve_rate	5	268	263	268	False	True	False	direct-native	0	0	0	infinite loop detected at insn 1826
+5	execve_send	5	274	269	274	False	True	False	direct-native	0	0	0	R0 invalid mem access 'scalar'
+6	event_execve	5	280	275	280	False	True	False	direct-native	0	8	1314928	
+7	tg_kp_bprm_committing_creds	2	286	281	286	False	True	False	direct-native	0	8	131056	R2 invalid mem access 'scalar'
+8	execve_map_update	1	292	287	292	False	True	False	direct-native	0	0	0	383: (55) if r3 != 0x0 goto pc+4 infinite loop detected at insn 388
+9	generic_kprobe_filter_arg	2	300	295	300	False	True	False	direct-native	0	0	0	
+10	generic_kprobe_actions	2	306	301	306	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+11	generic_kprobe_output	2	312	307	312	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+12	generic_kprobe_setup_event	2	319	313	319	False	True	True	checked-sim-c	0	0	0	
+13	generic_kprobe_process_event	2	325	320	325	False	True	False	direct-native	0	0	0	
+14	generic_kprobe_event	2	331	326	331	False	True	False	direct-native	0	7	4850528	R6 invalid mem access 'scalar'
+15	generic_kprobe_process_filter	2	337	332	337	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+16	generic_kprobe_filter_arg	2	343	338	343	False	True	False	direct-native	0	0	0	
+17	generic_kprobe_process_event	2	349	344	349	False	True	False	direct-native	0	0	0	
+18	generic_kprobe_actions	2	355	350	355	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+19	generic_kprobe_setup_event	2	362	356	362	False	True	True	checked-sim-c	0	0	0	
+20	generic_kprobe_process_filter	2	368	363	368	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+21	generic_kprobe_output	2	374	369	374	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+22	generic_kprobe_event	2	380	375	380	False	True	False	direct-native	0	0	0	R6 invalid mem access 'scalar'
+23	generic_kprobe_filter_arg	2	386	381	386	False	True	False	direct-native	0	0	0	
+24	generic_kprobe_output	2	392	387	392	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+25	generic_kprobe_process_event	2	398	393	398	False	True	False	direct-native	0	0	0	
+26	generic_kprobe_event	2	404	399	404	False	True	False	direct-native	0	3	196960	R6 invalid mem access 'scalar'
+27	generic_kprobe_actions	2	410	405	410	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+28	generic_kprobe_setup_event	2	417	411	417	False	True	True	checked-sim-c	0	0	0	
+29	generic_kprobe_process_filter	2	423	418	423	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+30	generic_kprobe_actions	2	429	424	429	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+31	generic_kprobe_process_filter	2	435	430	435	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+32	generic_kprobe_output	2	441	436	441	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+33	generic_kprobe_setup_event	2	448	442	448	False	True	True	checked-sim-c	0	0	0	
+34	generic_kprobe_process_event	2	454	449	454	False	True	False	direct-native	0	0	0	
+35	generic_kprobe_event	2	460	455	460	False	True	False	direct-native	0	7579	214796496	R6 invalid mem access 'scalar'
+36	generic_kprobe_filter_arg	2	466	461	466	False	True	False	direct-native	0	0	0	
+37	generic_retkprobe_filter_arg	2	472	467	472	False	True	False	direct-native	0	0	0	
+38	generic_retkprobe_event	2	478	473	478	False	True	False	direct-native	0	7579	35795600	
+39	generic_retkprobe_actions	2	484	479	484	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+40	generic_retkprobe_output	2	490	485	490	False	True	False	direct-native	0	0	0	infinite loop detected at insn 551
+41	generic_kprobe_output	2	496	491	496	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+42	generic_kprobe_process_event	2	502	497	502	False	True	False	direct-native	0	0	0	
+43	generic_kprobe_filter_arg	2	508	503	508	False	True	False	direct-native	0	0	0	
+44	generic_kprobe_event	2	514	509	514	False	True	False	direct-native	0	7581	194019744	R6 invalid mem access 'scalar'
+45	generic_kprobe_setup_event	2	521	515	521	False	True	True	checked-sim-c	0	0	0	
+46	generic_kprobe_actions	2	527	522	527	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+47	generic_kprobe_process_filter	2	533	528	533	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+48	generic_kprobe_process_event	2	539	534	539	False	True	False	direct-native	0	0	0	
+49	generic_kprobe_process_filter	2	545	540	545	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+50	generic_kprobe_actions	2	551	546	551	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+51	generic_kprobe_output	2	557	552	557	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+52	generic_kprobe_filter_arg	2	563	558	563	False	True	False	direct-native	0	0	0	
+53	generic_kprobe_event	2	569	564	569	False	True	False	direct-native	0	0	0	R6 invalid mem access 'scalar'
+54	generic_kprobe_setup_event	2	576	570	576	False	True	True	checked-sim-c	0	0	0	
+55	generic_kprobe_process_filter	2	582	577	582	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+56	generic_kprobe_actions	2	588	583	588	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+57	generic_kprobe_event	2	594	589	594	False	True	False	direct-native	0	7579	306884176	R6 invalid mem access 'scalar'
+58	generic_kprobe_process_event	2	600	595	600	False	True	False	direct-native	0	0	0	
+59	generic_kprobe_filter_arg	2	606	601	606	False	True	False	direct-native	0	0	0	
+60	generic_kprobe_setup_event	2	613	607	613	False	True	True	checked-sim-c	0	0	0	
+61	generic_kprobe_output	2	619	614	619	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+62	generic_retkprobe_event	2	625	620	625	False	True	False	direct-native	0	7579	32119744	
+63	generic_retkprobe_actions	2	631	626	631	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+64	generic_retkprobe_filter_arg	2	637	632	637	False	True	False	direct-native	0	0	0	
+65	generic_retkprobe_output	2	643	638	643	False	True	False	direct-native	0	0	0	infinite loop detected at insn 551
+66	generic_kprobe_output	2	649	644	649	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+67	generic_kprobe_actions	2	655	650	655	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+68	generic_kprobe_process_filter	2	661	656	661	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+69	generic_kprobe_filter_arg	2	667	662	667	False	True	False	direct-native	0	0	0	
+70	generic_kprobe_event	2	673	668	673	False	True	False	direct-native	0	7581	313215616	R6 invalid mem access 'scalar'
+71	generic_kprobe_setup_event	2	680	674	680	False	True	True	checked-sim-c	0	0	0	
+72	generic_kprobe_process_event	2	686	681	686	False	True	False	direct-native	0	0	0	
+73	generic_kprobe_event	2	692	687	692	False	True	False	direct-native	0	17928	1179843376	R6 invalid mem access 'scalar'
+74	generic_kprobe_actions	2	698	693	698	False	True	False	direct-native	0	0	0	R0 invalid mem access 'map_value_or_null'
+75	generic_kprobe_output	2	704	699	704	False	True	False	direct-native	0	0	0	R3 invalid mem access 'scalar'
+76	generic_kprobe_filter_arg	2	710	705	710	False	True	False	direct-native	0	0	0	
+77	generic_kprobe_process_filter	2	716	711	716	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+78	generic_kprobe_process_event	2	722	717	722	False	True	False	direct-native	0	0	0	
+79	generic_kprobe_setup_event	2	729	723	729	False	True	True	checked-sim-c	0	0	0	
+80	generic_kprobe_event	2	735	730	735	False	True	False	direct-native	0	0	0	R6 invalid mem access 'scalar'
+81	generic_kprobe_process_filter	2	741	736	741	False	True	False	direct-native	0	0	0	R2 invalid mem access 'scalar'
+82	generic_kprobe_filter_arg	2	747	742	747	False	True	False	direct-native	0	0	0	
+83	generic_kprobe_actions	2	753	748	753	False	True	False	direct-native	0	None	None	R0 invalid mem access 'map_value_or_null'
+84	generic_kprobe_output	2	759	754	759	False	True	False	direct-native	0	None	None	R3 invalid mem access 'scalar'
+85	generic_kprobe_setup_event	2	766	760	766	False	True	True	checked-sim-c	0	None	None	
