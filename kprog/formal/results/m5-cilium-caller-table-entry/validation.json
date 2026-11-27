@@ -1,0 +1,104 @@
+{
+  "scope": "SAMEactualFunctionEntry/context/CB/defaults/all31GPR then186pointer-table steps;all62slotreadbacks andtwo genuine Initializedslot30 resources;SAMEfinalheap/tempEnv/trace preserves31GPR/2ABIptr/5CB/9defaults;actual afterTables BEFOREvector/providerprefix/LINK;native/global/universal stillopen",
+  "source_sha256": "beeed1f5e2119b8a972cbf4f233f0225fbcf47e8e5f77a6dbbba7fd29e277791",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-table-entry/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 3.3493845462799072,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerTableEntry"
+      ],
+      "exit": 0,
+      "seconds": 3.529088020324707,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.8125908374786377,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-table-entry/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.447827100753784,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 205,
+  "full_jobs": 1499,
+  "root_queries": [
+    "observers_outside",
+    "bound_frame",
+    "named_frame",
+    "initialized_frame",
+    "entry"
+  ],
+  "actual_initializer_frame_commit": "e9561dec0f05785c1c65370bb70d0da00ea2d52a",
+  "table_assignments": 62,
+  "table_internal_steps": 186,
+  "gpr_initializers": 31,
+  "gpr_provider_calls": 30,
+  "context_calls": 2,
+  "default_assignments": 9,
+  "cb_zero_words": 5,
+  "table_slot_readbacks": 62,
+  "genuine_initialized_slot30_resources": 2,
+  "same_execution_composition": true,
+  "caller_memory_access_frontier_preserved": true,
+  "external_outcomes": "sameexplicit actualCompCert context/GPR call traces/heaps;availability/access/local/callerframes stayexplicit;no newinitializedobserverpremise",
+  "entry_endpoint": "Arm64CiliumCallerInitializers.afterTables",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
