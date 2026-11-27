@@ -1,0 +1,47 @@
+{
+  "controller_status": 0,
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z",
+  "files": {
+    "source.proof.o": {
+      "bytes": 796224,
+      "sha256": "c331cdd10ed88a73360a82ef4dc5d9fb5f53748b29dc949dab15c06b655f451d"
+    },
+    "identity.log": {
+      "bytes": 290,
+      "sha256": "96aa4562620cdc8ff2da0ae76e5af2bf9514e6f5cb85408a6c4b5e678a823661"
+    },
+    "frozen-facts.o": {
+      "bytes": 118200,
+      "sha256": "9999fab8cb20b12cc19c576d27d45d93994bb34d1003526703775e500aaaee5f"
+    },
+    "immutable.json": {
+      "bytes": 287,
+      "sha256": "88176e869675480135b8ba072eb8d95f607d19a54ae71d1bd0aca5e12021295d"
+    },
+    "frozen-facts.log": {
+      "bytes": 35,
+      "sha256": "2f204e089f4a0c66e9a5af29e6463f753344f7b6cac3095990032271fd1a6ac4"
+    },
+    "no-facts.o": {
+      "bytes": 156712,
+      "sha256": "4374035e838be21fe519b3eef4654ccb1fb5a7f97511b3be2acb965623cbe2db"
+    },
+    "input.native.o": {
+      "bytes": 2704920,
+      "sha256": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8"
+    },
+    "no-facts.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "verified_files": 8,
+  "parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/evidence.tar.gz",
+      "bytes": 861646,
+      "sha256": "d4437892eff4759c0c1d861b676f2811d59f94f1d2659649a4230f87fca97dc9"
+    }
+  ],
+  "ended_utc": "2026-11-27T19:37:18Z"
+}

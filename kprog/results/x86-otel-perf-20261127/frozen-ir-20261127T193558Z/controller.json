@@ -1,0 +1,109 @@
+{
+  "pid": 1119122,
+  "started_utc": "2026-11-27T19:35:58Z",
+  "controller_status": 0,
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z",
+  "scope": "Offline same-P same-compiler no-facts/frozen-facts experiment. No installed-native or performance claim; no production, image, kernel or benchmark changes.",
+  "profile": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/profile-20261127T192332Z",
+  "captured_proof": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T192332Z/linkcache/native_kernel_link_cache/fd110add9b43bd6b.proof.o",
+  "captured_proof_sha256": "c331cdd10ed88a73360a82ef4dc5d9fb5f53748b29dc949dab15c06b655f451d",
+  "input_sha256": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8",
+  "compiler_sha256": "d9905543cc045e75c64772a28c8181901be670390cdce60bd2579dba1df9bde5",
+  "linker_sha256": "5813c237d9138ed238adfe41615fff0ee1615a7e417a85da7c3a85afd53e344f",
+  "kernel_btf_sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de",
+  "facts": {
+    "filter_error_frames": "00",
+    "filter_idle_frames": "00",
+    "inverse_pac_mask": "0000000000000000",
+    "off_cpu_threshold": "00000000",
+    "stack_ptregs_offset": "00000000",
+    "task_stack_offset": "00000000",
+    "tpbase_offset": "0000000000000000",
+    "with_debug_output": "00000000"
+  },
+  "commands": [
+    {
+      "label": "identity",
+      "argv": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/input.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--mode",
+        "proof",
+        "--output",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/source.proof.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "no-facts",
+      "argv": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/input.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "0",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/no-facts.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "frozen-facts",
+      "argv": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/input.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "0",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/frozen-facts.o",
+        "--immutable-globals",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/immutable.json"
+      ],
+      "returncode": 0
+    }
+  ],
+  "source_proof_sha256": "c331cdd10ed88a73360a82ef4dc5d9fb5f53748b29dc949dab15c06b655f451d",
+  "same_captured_P": true,
+  "outputs": {
+    "no-facts": {
+      "bytes": 156712,
+      "sha256": "4374035e838be21fe519b3eef4654ccb1fb5a7f97511b3be2acb965623cbe2db",
+      "debug_symbol_remaining": true,
+      "frozen_flag_remaining": false,
+      "undefined_symbols": [
+        "                 U bpf_map_lookup_elem",
+        "                 U bpf_probe_read_user",
+        "                 U bpf_tail_call",
+        "                 U bpf_trace_printk"
+      ],
+      "llvm_size": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n  29668\t   1404\t      0\t  31072\t   7960\t/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/no-facts.o\n",
+      "debug_call_relocations": 106
+    },
+    "frozen-facts": {
+      "bytes": 118200,
+      "sha256": "9999fab8cb20b12cc19c576d27d45d93994bb34d1003526703775e500aaaee5f",
+      "debug_symbol_remaining": false,
+      "frozen_flag_remaining": false,
+      "undefined_symbols": [
+        "                 U bpf_map_lookup_elem",
+        "                 U bpf_probe_read_user",
+        "                 U bpf_tail_call"
+      ],
+      "llvm_size": "   text\t   data\t    bss\t    dec\t    hex\tfilename\n  13090\t   1404\t      0\t  14494\t   389e\t/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/frozen-facts.o\n",
+      "debug_call_relocations": 0
+    }
+  },
+  "ended_utc": "2026-11-27T19:36:00Z"
+}

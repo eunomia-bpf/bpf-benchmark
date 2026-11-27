@@ -1,0 +1,3438 @@
+
+/workspaces/kprog-raw/perf/x86-otel-perf-20261127/frozen-ir-20261127T193558Z/frozen-facts.o:	file format elf64-x86-64
+
+Disassembly of section perf_event/unwind_native:
+
+0000000000000000 <perf_unwind_native>:
+       0:      	pushq	%rbp
+       1:      	pushq	%r15
+       3:      	pushq	%r14
+       5:      	pushq	%r13
+       7:      	pushq	%r12
+       9:      	pushq	%rbx
+       a:      	subq	$0x118, %rsp            # imm = 0x118
+      11:      	movq	%rdi, %r13
+      14:      	movl	$0x0, 0x80(%rsp)
+      1f:      	movq	(%rip), %rdi            # 0x26 <perf_unwind_native+0x26>
+		0000000000000022:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+      26:      	leaq	0x80(%rsp), %rsi
+      2e:      	callq	0x33 <perf_unwind_native+0x33>
+		000000000000002f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      33:      	testq	%rax, %rax
+      36:      	je	0x2e2b <perf_unwind_native+0x2e2b>
+      3c:      	movq	%rax, %r12
+      3f:      	movq	%rax, %rbp
+      42:      	movl	$0x5, 0x80(%rsp)
+      4d:      	movq	(%rip), %rdi            # 0x54 <perf_unwind_native+0x54>
+		0000000000000050:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+      54:      	leaq	0x80(%rsp), %rsi
+      5c:      	callq	0x61 <perf_unwind_native+0x61>
+		000000000000005d:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      61:      	testq	%rax, %rax
+      64:      	je	0x69 <perf_unwind_native+0x69>
+      66:      	incq	(%rax)
+      69:      	movl	0x2c0(%rbp), %eax
+      6f:      	cmpq	$0x7f, %rax
+      73:      	jb	0xaa <perf_unwind_native+0xaa>
+      75:      	movl	$0x2, 0x80(%rsp)
+      80:      	movq	(%rip), %rdi            # 0x87 <perf_unwind_native+0x87>
+		0000000000000083:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+      87:      	leaq	0x80(%rsp), %rsi
+      8f:      	callq	0x94 <perf_unwind_native+0x94>
+		0000000000000090:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      94:      	testq	%rax, %rax
+      97:      	je	0x9c <perf_unwind_native+0x9c>
+      99:      	incq	(%rax)
+      9c:      	movl	$0x2, %r14d
+      a2:      	xorl	%r12d, %r12d
+      a5:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
+      aa:      	movzbl	0xf30(%rbp), %ecx
+      b1:      	movq	0xf10(%rbp), %rdx
+      b8:      	movq	0xf18(%rbp), %rsi
+      bf:      	leal	0x1(%rax), %edi
+      c2:      	movl	%edi, 0x2c0(%rbp)
+      c8:      	leaq	(%rax,%rax,2), %rax
+      cc:      	movq	%rdx, 0x2d0(%rbp,%rax,8)
+      d4:      	movq	%rsi, 0x2d8(%rbp,%rax,8)
+      dc:      	movb	$0x3, 0x2e0(%rbp,%rax,8)
+      e4:      	movb	%cl, 0x2e1(%rbp,%rax,8)
+      eb:      	movl	$0x0, 0x2e2(%rbp,%rax,8)
+      f6:      	movw	$0x0, 0x2e6(%rbp,%rax,8)
+     100:      	movl	$0x0, 0x28(%rsp)
+     108:      	movq	0xf10(%rbp), %rax
+     10f:      	movq	%rax, 0x78(%rsp)
+     114:      	movq	%rax, 0x30(%rsp)
+     119:      	movq	$-0x10000, %rax         # imm = 0xFFFF0000
+     120:      	andq	0xf18(%rbp), %rax
+     127:      	movq	%rax, 0x38(%rsp)
+     12c:      	movq	(%rip), %rdi            # 0x133 <perf_unwind_native+0x133>
+		000000000000012f:  R_X86_64_REX_GOTPCRELX	stack_delta_page_to_info-0x4
+     133:      	leaq	0x30(%rsp), %rsi
+     138:      	callq	0x13d <perf_unwind_native+0x13d>
+		0000000000000139:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     13d:      	movl	$0xfa0, %edx            # imm = 0xFA0
+     142:      	movl	$0x8, %ecx
+     147:      	testq	%rax, %rax
+     14a:      	je	0x1bb2 <perf_unwind_native+0x1bb2>
+     150:      	movq	%rax, %r14
+     153:      	movzwl	0x6(%rax), %eax
+     157:      	cmpl	$0xf, %eax
+     15a:      	movq	%r13, 0x10(%rsp)
+     15f:      	jg	0x18d <perf_unwind_native+0x18d>
+     161:      	cmpl	$0xb, %eax
+     164:      	jg	0x1b5 <perf_unwind_native+0x1b5>
+     166:      	cmpl	$0x9, %eax
+     169:      	jg	0x1fb <perf_unwind_native+0x1fb>
+     16f:      	cmpl	$0x8, %eax
+     172:      	je	0x25a <perf_unwind_native+0x25a>
+     178:      	cmpl	$0x9, %eax
+     17b:      	jne	0x356 <perf_unwind_native+0x356>
+     181:      	movq	(%rip), %rdi            # 0x188 <perf_unwind_native+0x188>
+		0000000000000184:  R_X86_64_REX_GOTPCRELX	exe_id_to_9_stack_deltas-0x4
+     188:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     18d:      	cmpl	$0x13, %eax
+     190:      	jg	0x1d8 <perf_unwind_native+0x1d8>
+     192:      	cmpl	$0x11, %eax
+     195:      	jg	0x215 <perf_unwind_native+0x215>
+     197:      	cmpl	$0x10, %eax
+     19a:      	je	0x263 <perf_unwind_native+0x263>
+     1a0:      	cmpl	$0x11, %eax
+     1a3:      	jne	0x356 <perf_unwind_native+0x356>
+     1a9:      	movq	(%rip), %rdi            # 0x1b0 <perf_unwind_native+0x1b0>
+		00000000000001ac:  R_X86_64_REX_GOTPCRELX	exe_id_to_17_stack_deltas-0x4
+     1b0:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     1b5:      	cmpl	$0xd, %eax
+     1b8:      	jg	0x22c <perf_unwind_native+0x22c>
+     1ba:      	cmpl	$0xc, %eax
+     1bd:      	je	0x26c <perf_unwind_native+0x26c>
+     1c3:      	cmpl	$0xd, %eax
+     1c6:      	jne	0x356 <perf_unwind_native+0x356>
+     1cc:      	movq	(%rip), %rdi            # 0x1d3 <perf_unwind_native+0x1d3>
+		00000000000001cf:  R_X86_64_REX_GOTPCRELX	exe_id_to_13_stack_deltas-0x4
+     1d3:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     1d8:      	cmpl	$0x15, %eax
+     1db:      	jg	0x243 <perf_unwind_native+0x243>
+     1dd:      	cmpl	$0x14, %eax
+     1e0:      	je	0x275 <perf_unwind_native+0x275>
+     1e6:      	cmpl	$0x15, %eax
+     1e9:      	jne	0x356 <perf_unwind_native+0x356>
+     1ef:      	movq	(%rip), %rdi            # 0x1f6 <perf_unwind_native+0x1f6>
+		00000000000001f2:  R_X86_64_REX_GOTPCRELX	exe_id_to_21_stack_deltas-0x4
+     1f6:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     1fb:      	cmpl	$0xa, %eax
+     1fe:      	je	0x27e <perf_unwind_native+0x27e>
+     200:      	cmpl	$0xb, %eax
+     203:      	jne	0x356 <perf_unwind_native+0x356>
+     209:      	movq	(%rip), %rdi            # 0x210 <perf_unwind_native+0x210>
+		000000000000020c:  R_X86_64_REX_GOTPCRELX	exe_id_to_11_stack_deltas-0x4
+     210:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     215:      	cmpl	$0x12, %eax
+     218:      	je	0x287 <perf_unwind_native+0x287>
+     21a:      	cmpl	$0x13, %eax
+     21d:      	jne	0x356 <perf_unwind_native+0x356>
+     223:      	movq	(%rip), %rdi            # 0x22a <perf_unwind_native+0x22a>
+		0000000000000226:  R_X86_64_REX_GOTPCRELX	exe_id_to_19_stack_deltas-0x4
+     22a:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     22c:      	cmpl	$0xe, %eax
+     22f:      	je	0x290 <perf_unwind_native+0x290>
+     231:      	cmpl	$0xf, %eax
+     234:      	jne	0x356 <perf_unwind_native+0x356>
+     23a:      	movq	(%rip), %rdi            # 0x241 <perf_unwind_native+0x241>
+		000000000000023d:  R_X86_64_REX_GOTPCRELX	exe_id_to_15_stack_deltas-0x4
+     241:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     243:      	cmpl	$0x16, %eax
+     246:      	je	0x299 <perf_unwind_native+0x299>
+     248:      	cmpl	$0x17, %eax
+     24b:      	jne	0x356 <perf_unwind_native+0x356>
+     251:      	movq	(%rip), %rdi            # 0x258 <perf_unwind_native+0x258>
+		0000000000000254:  R_X86_64_REX_GOTPCRELX	exe_id_to_23_stack_deltas-0x4
+     258:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     25a:      	movq	(%rip), %rdi            # 0x261 <perf_unwind_native+0x261>
+		000000000000025d:  R_X86_64_REX_GOTPCRELX	exe_id_to_8_stack_deltas-0x4
+     261:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     263:      	movq	(%rip), %rdi            # 0x26a <perf_unwind_native+0x26a>
+		0000000000000266:  R_X86_64_REX_GOTPCRELX	exe_id_to_16_stack_deltas-0x4
+     26a:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     26c:      	movq	(%rip), %rdi            # 0x273 <perf_unwind_native+0x273>
+		000000000000026f:  R_X86_64_REX_GOTPCRELX	exe_id_to_12_stack_deltas-0x4
+     273:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     275:      	movq	(%rip), %rdi            # 0x27c <perf_unwind_native+0x27c>
+		0000000000000278:  R_X86_64_REX_GOTPCRELX	exe_id_to_20_stack_deltas-0x4
+     27c:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     27e:      	movq	(%rip), %rdi            # 0x285 <perf_unwind_native+0x285>
+		0000000000000281:  R_X86_64_REX_GOTPCRELX	exe_id_to_10_stack_deltas-0x4
+     285:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     287:      	movq	(%rip), %rdi            # 0x28e <perf_unwind_native+0x28e>
+		000000000000028a:  R_X86_64_REX_GOTPCRELX	exe_id_to_18_stack_deltas-0x4
+     28e:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     290:      	movq	(%rip), %rdi            # 0x297 <perf_unwind_native+0x297>
+		0000000000000293:  R_X86_64_REX_GOTPCRELX	exe_id_to_14_stack_deltas-0x4
+     297:      	jmp	0x2a0 <perf_unwind_native+0x2a0>
+     299:      	movq	(%rip), %rdi            # 0x2a0 <perf_unwind_native+0x2a0>
+		000000000000029c:  R_X86_64_REX_GOTPCRELX	exe_id_to_22_stack_deltas-0x4
+     2a0:      	leaq	0x78(%rsp), %rsi
+     2a5:      	callq	0x2aa <perf_unwind_native+0x2aa>
+		00000000000002a6:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     2aa:      	testq	%rax, %rax
+     2ad:      	je	0x1ba3 <perf_unwind_native+0x1ba3>
+     2b3:      	movq	%rax, %r15
+     2b6:      	movl	(%r14), %ebx
+     2b9:      	movl	%ebx, 0x2c(%rsp)
+     2bd:      	movq	0xf18(%rbp), %rax
+     2c4:      	movq	%rax, 0x20(%rsp)
+     2c9:      	movzwl	0x4(%r14), %r13d
+     2ce:      	testl	%r13d, %r13d
+     2d1:      	je	0x6f5 <perf_unwind_native+0x6f5>
+     2d7:      	addl	%ebx, %r13d
+     2da:      	leal	(%rbx,%r13), %eax
+     2de:      	shrl	%eax
+     2e0:      	movl	%eax, 0xc(%rsp)
+     2e4:      	leaq	0xc(%rsp), %rsi
+     2e9:      	movq	%r15, %rdi
+     2ec:      	callq	0x2f1 <perf_unwind_native+0x2f1>
+		00000000000002ed:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     2f1:      	testq	%rax, %rax
+     2f4:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     2fa:      	movl	0xc(%rsp), %ecx
+     2fe:      	movq	0x20(%rsp), %rdx
+     303:      	cmpw	%dx, (%rax)
+     306:      	ja	0x316 <perf_unwind_native+0x316>
+     308:      	incl	%ecx
+     30a:      	movl	%ecx, %ebx
+     30c:      	cmpl	%r13d, %ebx
+     30f:      	jb	0x322 <perf_unwind_native+0x322>
+     311:      	jmp	0x6e9 <perf_unwind_native+0x6e9>
+     316:      	movl	%ecx, %r13d
+     319:      	cmpl	%r13d, %ebx
+     31c:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     322:      	leal	(%rbx,%r13), %eax
+     326:      	shrl	%eax
+     328:      	movl	%eax, 0xc(%rsp)
+     32c:      	leaq	0xc(%rsp), %rsi
+     331:      	movq	%r15, %rdi
+     334:      	callq	0x339 <perf_unwind_native+0x339>
+		0000000000000335:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     339:      	testq	%rax, %rax
+     33c:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     342:      	movl	0xc(%rsp), %ecx
+     346:      	movq	0x20(%rsp), %rdx
+     34b:      	cmpw	%dx, (%rax)
+     34e:      	ja	0x365 <perf_unwind_native+0x365>
+     350:      	incl	%ecx
+     352:      	movl	%ecx, %ebx
+     354:      	jmp	0x368 <perf_unwind_native+0x368>
+     356:      	movl	$0x33, %ecx
+     35b:      	movl	$0xfa1, %edx            # imm = 0xFA1
+     360:      	jmp	0x1bb2 <perf_unwind_native+0x1bb2>
+     365:      	movl	%ecx, %r13d
+     368:      	cmpl	%r13d, %ebx
+     36b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     371:      	leal	(%rbx,%r13), %eax
+     375:      	shrl	%eax
+     377:      	movl	%eax, 0xc(%rsp)
+     37b:      	leaq	0xc(%rsp), %rsi
+     380:      	movq	%r15, %rdi
+     383:      	callq	0x388 <perf_unwind_native+0x388>
+		0000000000000384:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     388:      	testq	%rax, %rax
+     38b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     391:      	movl	0xc(%rsp), %ecx
+     395:      	movq	0x20(%rsp), %rdx
+     39a:      	cmpw	%dx, (%rax)
+     39d:      	ja	0x3a5 <perf_unwind_native+0x3a5>
+     39f:      	incl	%ecx
+     3a1:      	movl	%ecx, %ebx
+     3a3:      	jmp	0x3a8 <perf_unwind_native+0x3a8>
+     3a5:      	movl	%ecx, %r13d
+     3a8:      	cmpl	%r13d, %ebx
+     3ab:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     3b1:      	leal	(%rbx,%r13), %eax
+     3b5:      	shrl	%eax
+     3b7:      	movl	%eax, 0xc(%rsp)
+     3bb:      	leaq	0xc(%rsp), %rsi
+     3c0:      	movq	%r15, %rdi
+     3c3:      	callq	0x3c8 <perf_unwind_native+0x3c8>
+		00000000000003c4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     3c8:      	testq	%rax, %rax
+     3cb:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     3d1:      	movl	0xc(%rsp), %ecx
+     3d5:      	movq	0x20(%rsp), %rdx
+     3da:      	cmpw	%dx, (%rax)
+     3dd:      	ja	0x3e5 <perf_unwind_native+0x3e5>
+     3df:      	incl	%ecx
+     3e1:      	movl	%ecx, %ebx
+     3e3:      	jmp	0x3e8 <perf_unwind_native+0x3e8>
+     3e5:      	movl	%ecx, %r13d
+     3e8:      	cmpl	%r13d, %ebx
+     3eb:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     3f1:      	leal	(%rbx,%r13), %eax
+     3f5:      	shrl	%eax
+     3f7:      	movl	%eax, 0xc(%rsp)
+     3fb:      	leaq	0xc(%rsp), %rsi
+     400:      	movq	%r15, %rdi
+     403:      	callq	0x408 <perf_unwind_native+0x408>
+		0000000000000404:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     408:      	testq	%rax, %rax
+     40b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     411:      	movl	0xc(%rsp), %ecx
+     415:      	movq	0x20(%rsp), %rdx
+     41a:      	cmpw	%dx, (%rax)
+     41d:      	ja	0x425 <perf_unwind_native+0x425>
+     41f:      	incl	%ecx
+     421:      	movl	%ecx, %ebx
+     423:      	jmp	0x428 <perf_unwind_native+0x428>
+     425:      	movl	%ecx, %r13d
+     428:      	cmpl	%r13d, %ebx
+     42b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     431:      	leal	(%rbx,%r13), %eax
+     435:      	shrl	%eax
+     437:      	movl	%eax, 0xc(%rsp)
+     43b:      	leaq	0xc(%rsp), %rsi
+     440:      	movq	%r15, %rdi
+     443:      	callq	0x448 <perf_unwind_native+0x448>
+		0000000000000444:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     448:      	testq	%rax, %rax
+     44b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     451:      	movl	0xc(%rsp), %ecx
+     455:      	movq	0x20(%rsp), %rdx
+     45a:      	cmpw	%dx, (%rax)
+     45d:      	ja	0x465 <perf_unwind_native+0x465>
+     45f:      	incl	%ecx
+     461:      	movl	%ecx, %ebx
+     463:      	jmp	0x468 <perf_unwind_native+0x468>
+     465:      	movl	%ecx, %r13d
+     468:      	cmpl	%r13d, %ebx
+     46b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     471:      	leal	(%rbx,%r13), %eax
+     475:      	shrl	%eax
+     477:      	movl	%eax, 0xc(%rsp)
+     47b:      	leaq	0xc(%rsp), %rsi
+     480:      	movq	%r15, %rdi
+     483:      	callq	0x488 <perf_unwind_native+0x488>
+		0000000000000484:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     488:      	testq	%rax, %rax
+     48b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     491:      	movl	0xc(%rsp), %ecx
+     495:      	movq	0x20(%rsp), %rdx
+     49a:      	cmpw	%dx, (%rax)
+     49d:      	ja	0x4a5 <perf_unwind_native+0x4a5>
+     49f:      	incl	%ecx
+     4a1:      	movl	%ecx, %ebx
+     4a3:      	jmp	0x4a8 <perf_unwind_native+0x4a8>
+     4a5:      	movl	%ecx, %r13d
+     4a8:      	cmpl	%r13d, %ebx
+     4ab:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     4b1:      	leal	(%rbx,%r13), %eax
+     4b5:      	shrl	%eax
+     4b7:      	movl	%eax, 0xc(%rsp)
+     4bb:      	leaq	0xc(%rsp), %rsi
+     4c0:      	movq	%r15, %rdi
+     4c3:      	callq	0x4c8 <perf_unwind_native+0x4c8>
+		00000000000004c4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     4c8:      	testq	%rax, %rax
+     4cb:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     4d1:      	movl	0xc(%rsp), %ecx
+     4d5:      	movq	0x20(%rsp), %rdx
+     4da:      	cmpw	%dx, (%rax)
+     4dd:      	ja	0x4e5 <perf_unwind_native+0x4e5>
+     4df:      	incl	%ecx
+     4e1:      	movl	%ecx, %ebx
+     4e3:      	jmp	0x4e8 <perf_unwind_native+0x4e8>
+     4e5:      	movl	%ecx, %r13d
+     4e8:      	cmpl	%r13d, %ebx
+     4eb:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     4f1:      	leal	(%rbx,%r13), %eax
+     4f5:      	shrl	%eax
+     4f7:      	movl	%eax, 0xc(%rsp)
+     4fb:      	leaq	0xc(%rsp), %rsi
+     500:      	movq	%r15, %rdi
+     503:      	callq	0x508 <perf_unwind_native+0x508>
+		0000000000000504:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     508:      	testq	%rax, %rax
+     50b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     511:      	movl	0xc(%rsp), %ecx
+     515:      	movq	0x20(%rsp), %rdx
+     51a:      	cmpw	%dx, (%rax)
+     51d:      	ja	0x525 <perf_unwind_native+0x525>
+     51f:      	incl	%ecx
+     521:      	movl	%ecx, %ebx
+     523:      	jmp	0x528 <perf_unwind_native+0x528>
+     525:      	movl	%ecx, %r13d
+     528:      	cmpl	%r13d, %ebx
+     52b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     531:      	leal	(%rbx,%r13), %eax
+     535:      	shrl	%eax
+     537:      	movl	%eax, 0xc(%rsp)
+     53b:      	leaq	0xc(%rsp), %rsi
+     540:      	movq	%r15, %rdi
+     543:      	callq	0x548 <perf_unwind_native+0x548>
+		0000000000000544:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     548:      	testq	%rax, %rax
+     54b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     551:      	movl	0xc(%rsp), %ecx
+     555:      	movq	0x20(%rsp), %rdx
+     55a:      	cmpw	%dx, (%rax)
+     55d:      	ja	0x565 <perf_unwind_native+0x565>
+     55f:      	incl	%ecx
+     561:      	movl	%ecx, %ebx
+     563:      	jmp	0x568 <perf_unwind_native+0x568>
+     565:      	movl	%ecx, %r13d
+     568:      	cmpl	%r13d, %ebx
+     56b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     571:      	leal	(%rbx,%r13), %eax
+     575:      	shrl	%eax
+     577:      	movl	%eax, 0xc(%rsp)
+     57b:      	leaq	0xc(%rsp), %rsi
+     580:      	movq	%r15, %rdi
+     583:      	callq	0x588 <perf_unwind_native+0x588>
+		0000000000000584:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     588:      	testq	%rax, %rax
+     58b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     591:      	movl	0xc(%rsp), %ecx
+     595:      	movq	0x20(%rsp), %rdx
+     59a:      	cmpw	%dx, (%rax)
+     59d:      	ja	0x5a5 <perf_unwind_native+0x5a5>
+     59f:      	incl	%ecx
+     5a1:      	movl	%ecx, %ebx
+     5a3:      	jmp	0x5a8 <perf_unwind_native+0x5a8>
+     5a5:      	movl	%ecx, %r13d
+     5a8:      	cmpl	%r13d, %ebx
+     5ab:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     5b1:      	leal	(%rbx,%r13), %eax
+     5b5:      	shrl	%eax
+     5b7:      	movl	%eax, 0xc(%rsp)
+     5bb:      	leaq	0xc(%rsp), %rsi
+     5c0:      	movq	%r15, %rdi
+     5c3:      	callq	0x5c8 <perf_unwind_native+0x5c8>
+		00000000000005c4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     5c8:      	testq	%rax, %rax
+     5cb:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     5d1:      	movl	0xc(%rsp), %ecx
+     5d5:      	movq	0x20(%rsp), %rdx
+     5da:      	cmpw	%dx, (%rax)
+     5dd:      	ja	0x5e5 <perf_unwind_native+0x5e5>
+     5df:      	incl	%ecx
+     5e1:      	movl	%ecx, %ebx
+     5e3:      	jmp	0x5e8 <perf_unwind_native+0x5e8>
+     5e5:      	movl	%ecx, %r13d
+     5e8:      	cmpl	%r13d, %ebx
+     5eb:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     5f1:      	leal	(%rbx,%r13), %eax
+     5f5:      	shrl	%eax
+     5f7:      	movl	%eax, 0xc(%rsp)
+     5fb:      	leaq	0xc(%rsp), %rsi
+     600:      	movq	%r15, %rdi
+     603:      	callq	0x608 <perf_unwind_native+0x608>
+		0000000000000604:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     608:      	testq	%rax, %rax
+     60b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     611:      	movl	0xc(%rsp), %ecx
+     615:      	movq	0x20(%rsp), %rdx
+     61a:      	cmpw	%dx, (%rax)
+     61d:      	ja	0x625 <perf_unwind_native+0x625>
+     61f:      	incl	%ecx
+     621:      	movl	%ecx, %ebx
+     623:      	jmp	0x628 <perf_unwind_native+0x628>
+     625:      	movl	%ecx, %r13d
+     628:      	cmpl	%r13d, %ebx
+     62b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     631:      	leal	(%rbx,%r13), %eax
+     635:      	shrl	%eax
+     637:      	movl	%eax, 0xc(%rsp)
+     63b:      	leaq	0xc(%rsp), %rsi
+     640:      	movq	%r15, %rdi
+     643:      	callq	0x648 <perf_unwind_native+0x648>
+		0000000000000644:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     648:      	testq	%rax, %rax
+     64b:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     651:      	movl	0xc(%rsp), %ecx
+     655:      	movq	0x20(%rsp), %rdx
+     65a:      	cmpw	%dx, (%rax)
+     65d:      	ja	0x665 <perf_unwind_native+0x665>
+     65f:      	incl	%ecx
+     661:      	movl	%ecx, %ebx
+     663:      	jmp	0x668 <perf_unwind_native+0x668>
+     665:      	movl	%ecx, %r13d
+     668:      	cmpl	%r13d, %ebx
+     66b:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     66d:      	leal	(%rbx,%r13), %eax
+     671:      	shrl	%eax
+     673:      	movl	%eax, 0xc(%rsp)
+     677:      	leaq	0xc(%rsp), %rsi
+     67c:      	movq	%r15, %rdi
+     67f:      	callq	0x684 <perf_unwind_native+0x684>
+		0000000000000680:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     684:      	testq	%rax, %rax
+     687:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     68d:      	movl	0xc(%rsp), %ecx
+     691:      	movq	0x20(%rsp), %rdx
+     696:      	cmpw	%dx, (%rax)
+     699:      	ja	0x6a1 <perf_unwind_native+0x6a1>
+     69b:      	incl	%ecx
+     69d:      	movl	%ecx, %ebx
+     69f:      	jmp	0x6a4 <perf_unwind_native+0x6a4>
+     6a1:      	movl	%ecx, %r13d
+     6a4:      	cmpl	%r13d, %ebx
+     6a7:      	jae	0x6e9 <perf_unwind_native+0x6e9>
+     6a9:      	leal	(%rbx,%r13), %eax
+     6ad:      	shrl	%eax
+     6af:      	movl	%eax, 0xc(%rsp)
+     6b3:      	leaq	0xc(%rsp), %rsi
+     6b8:      	movq	%r15, %rdi
+     6bb:      	callq	0x6c0 <perf_unwind_native+0x6c0>
+		00000000000006bc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     6c0:      	testq	%rax, %rax
+     6c3:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     6c9:      	movl	0xc(%rsp), %ecx
+     6cd:      	movq	0x20(%rsp), %rdx
+     6d2:      	cmpw	%dx, (%rax)
+     6d5:      	ja	0x6dd <perf_unwind_native+0x6dd>
+     6d7:      	incl	%ecx
+     6d9:      	movl	%ecx, %ebx
+     6db:      	jmp	0x6e0 <perf_unwind_native+0x6e0>
+     6dd:      	movl	%ecx, %r13d
+     6e0:      	cmpl	%r13d, %ebx
+     6e3:      	jb	0x2d77 <perf_unwind_native+0x2d77>
+     6e9:      	movl	%r13d, %ebx
+     6ec:      	testl	%r13d, %r13d
+     6ef:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     6f5:      	decl	%ebx
+     6f7:      	movl	%ebx, 0x2c(%rsp)
+     6fb:      	leaq	0x2c(%rsp), %rsi
+     700:      	movq	%r15, %rdi
+     703:      	callq	0x708 <perf_unwind_native+0x708>
+		0000000000000704:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     708:      	movl	$0xfa4, %edx            # imm = 0xFA4
+     70d:      	movl	$0xa, %esi
+     712:      	testq	%rax, %rax
+     715:      	je	0x2d81 <perf_unwind_native+0x2d81>
+     71b:      	movzwl	0x20(%rsp), %r13d
+     721:      	movzwl	(%rax), %ecx
+     724:      	subl	%ecx, %r13d
+     727:      	movl	0x2c(%rsp), %ecx
+     72b:      	cmpl	(%r14), %ecx
+     72e:      	jae	0x737 <perf_unwind_native+0x737>
+     730:      	addl	$0x10000, %r13d         # imm = 0x10000
+     737:      	movq	%r12, %rcx
+     73a:      	movzwl	0x2(%rax), %edx
+     73e:      	movl	%edx, 0x28(%rsp)
+     742:      	cmpl	$0x8000, %edx           # imm = 0x8000
+     748:      	je	0x208f <perf_unwind_native+0x208f>
+     74e:      	cmpl	$0x8001, %edx           # imm = 0x8001
+     754:      	jne	0x77e <perf_unwind_native+0x77e>
+     756:      	movl	$0x7, 0xc(%rsp)
+     75e:      	movq	(%rip), %rdi            # 0x765 <perf_unwind_native+0x765>
+		0000000000000761:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     765:      	leaq	0xc(%rsp), %rsi
+     76a:      	callq	0x76f <perf_unwind_native+0x76f>
+		000000000000076b:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     76f:      	testq	%rax, %rax
+     772:      	je	0x777 <perf_unwind_native+0x777>
+     774:      	incq	(%rax)
+     777:      	movl	0x28(%rsp), %edx
+     77b:      	movq	%r12, %rcx
+     77e:      	leaq	0xed0(%rcx), %rbx
+     785:      	leaq	0xee0(%rcx), %r15
+     78c:      	leaq	0xed8(%rcx), %r14
+     793:      	leaq	0xee8(%rcx), %r12
+     79a:      	leaq	0xef0(%rcx), %rsi
+     7a1:      	leaq	0xef8(%rcx), %rdi
+     7a8:      	addq	$0xf08, %rcx            # imm = 0xF08
+     7af:      	testw	%dx, %dx
+     7b2:      	js	0x819 <perf_unwind_native+0x819>
+     7b4:      	movq	%rdi, 0x70(%rsp)
+     7b9:      	movq	%rsi, 0x68(%rsp)
+     7be:      	movq	%rcx, 0x20(%rsp)
+     7c3:      	movq	(%rip), %rdi            # 0x7ca <perf_unwind_native+0x7ca>
+		00000000000007c6:  R_X86_64_REX_GOTPCRELX	unwind_info_array-0x4
+     7ca:      	leaq	0x28(%rsp), %rsi
+     7cf:      	callq	0x7d4 <perf_unwind_native+0x7d4>
+		00000000000007d0:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     7d4:      	testq	%rax, %rax
+     7d7:      	je	0x2e42 <perf_unwind_native+0x2e42>
+     7dd:      	movq	%rbx, 0x60(%rsp)
+     7e2:      	movl	0x4(%rax), %ebx
+     7e5:      	movzbl	0x2(%rax), %edx
+     7e9:      	testl	%edx, %edx
+     7eb:      	je	0x8eb <perf_unwind_native+0x8eb>
+     7f1:      	movl	%edx, %ecx
+     7f3:      	andl	$0x7f, %ecx
+     7f6:      	cmpl	%ecx, %r13d
+     7f9:      	movq	0x20(%rsp), %rcx
+     7fe:      	jl	0x8f0 <perf_unwind_native+0x8f0>
+     804:      	xorl	%esi, %esi
+     806:      	testb	%dl, %dl
+     808:      	setns	%sil
+     80c:      	shll	$0x4, %esi
+     80f:      	addl	%esi, %ebx
+     811:      	addl	$-0x8, %ebx
+     814:      	jmp	0x8f0 <perf_unwind_native+0x8f0>
+     819:      	andl	$0xffff7fff, %edx       # imm = 0xFFFF7FFF
+     81f:      	movl	$0x1, %eax
+     824:      	cmpl	$0x2, %edx
+     827:      	movq	0x10(%rsp), %r13
+     82c:      	jg	0x876 <perf_unwind_native+0x876>
+     82e:      	cmpl	$0x1, %edx
+     831:      	je	0x2eb7 <perf_unwind_native+0x2eb7>
+     837:      	cmpl	$0x2, %edx
+     83a:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+     840:      	movq	%rdi, 0x70(%rsp)
+     845:      	movq	%rsi, 0x68(%rsp)
+     84a:      	movq	%r12, 0x50(%rsp)
+     84f:      	movq	%rcx, 0x20(%rsp)
+     854:      	movq	%r14, 0x40(%rsp)
+     859:      	movq	(%r14), %rax
+     85c:      	movl	(%rbx), %ecx
+     85e:      	andl	$0xf, %ecx
+     861:      	xorl	%edx, %edx
+     863:      	cmpl	$0xb, %ecx
+     866:      	setae	%dl
+     869:      	leaq	(%rax,%rdx,8), %r12
+     86d:      	addq	$0x8, %r12
+     871:      	jmp	0xb7f <perf_unwind_native+0xb7f>
+     876:      	cmpl	$0x3, %edx
+     879:      	je	0x9aa <perf_unwind_native+0x9aa>
+     87f:      	cmpl	$0x4, %edx
+     882:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+     888:      	movq	%rdi, 0x70(%rsp)
+     88d:      	movq	%rsi, 0x68(%rsp)
+     892:      	movq	%rcx, 0x20(%rsp)
+     897:      	movq	(%r15), %rdx
+     89a:      	leaq	0x30(%rsp), %rdi
+     89f:      	movl	$0x10, %esi
+     8a4:      	callq	0x8a9 <perf_unwind_native+0x8a9>
+		00000000000008a5:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     8a9:      	testq	%rax, %rax
+     8ac:      	jne	0xb9b <perf_unwind_native+0xb9b>
+     8b2:      	movq	%r12, 0x50(%rsp)
+     8b7:      	movq	%r14, 0x40(%rsp)
+     8bc:      	movq	0xee0(%rbp), %rax
+     8c3:      	addq	$0x10, %rax
+     8c7:      	movq	%rax, 0xed8(%rbp)
+     8ce:      	movq	0x30(%rsp), %rax
+     8d3:      	movq	%rax, 0xee0(%rbp)
+     8da:      	movq	0x38(%rsp), %rax
+     8df:      	movq	%rax, 0xed0(%rbp)
+     8e6:      	jmp	0xbcd <perf_unwind_native+0xbcd>
+     8eb:      	movq	0x20(%rsp), %rcx
+     8f0:      	movq	0x10(%rsp), %r13
+     8f5:      	movq	%r12, 0x50(%rsp)
+     8fa:      	movq	%r14, 0x40(%rsp)
+     8ff:      	movzbl	(%rax), %edx
+     902:      	movl	%ebx, %esi
+     904:      	testb	%dl, %dl
+     906:      	jns	0x90d <perf_unwind_native+0x90d>
+     908:      	movl	%ebx, %esi
+     90a:      	andl	$-0x8, %esi
+     90d:      	movl	%edx, %edi
+     90f:      	andl	$0x7f, %edi
+     912:      	xorl	%r12d, %r12d
+     915:      	cmpl	$0x2, %edi
+     918:      	jg	0x92e <perf_unwind_native+0x92e>
+     91a:      	cmpl	$0x1, %edi
+     91d:      	je	0x973 <perf_unwind_native+0x973>
+     91f:      	movq	0x40(%rsp), %r8
+     924:      	cmpl	$0x2, %edi
+     927:      	je	0x970 <perf_unwind_native+0x970>
+     929:      	jmp	0xa9e <perf_unwind_native+0xa9e>
+     92e:      	movq	%r15, %r8
+     931:      	cmpl	$0x3, %edi
+     934:      	je	0x970 <perf_unwind_native+0x970>
+     936:      	cmpl	$0x5, %edi
+     939:      	jne	0xa9e <perf_unwind_native+0xa9e>
+     93f:      	movl	%ebx, %edx
+     941:      	andl	$0xf, %edx
+     944:      	xorl	%r12d, %r12d
+     947:      	cmpl	$0xa, %edx
+     94a:      	jg	0xa69 <perf_unwind_native+0xa69>
+     950:      	movq	0x50(%rsp), %rsi
+     955:      	testl	%edx, %edx
+     957:      	je	0xa7b <perf_unwind_native+0xa7b>
+     95d:      	movq	0x68(%rsp), %rsi
+     962:      	cmpl	$0x9, %edx
+     965:      	je	0xa7b <perf_unwind_native+0xa7b>
+     96b:      	jmp	0xa9e <perf_unwind_native+0xa9e>
+     970:      	movq	(%r8), %r12
+     973:      	movq	%r12, %rdi
+     976:      	movslq	%esi, %r12
+     979:      	addq	%rdi, %r12
+     97c:      	testb	%dl, %dl
+     97e:      	jns	0xa9e <perf_unwind_native+0xa9e>
+     984:      	movq	%rax, %r14
+     987:      	leaq	0x30(%rsp), %rdi
+     98c:      	movl	$0x8, %esi
+     991:      	movq	%r12, %rdx
+     994:      	callq	0x999 <perf_unwind_native+0x999>
+		0000000000000995:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     999:      	testq	%rax, %rax
+     99c:      	je	0xa88 <perf_unwind_native+0xa88>
+     9a2:      	xorl	%r12d, %r12d
+     9a5:      	jmp	0xa96 <perf_unwind_native+0xa96>
+     9aa:      	movq	%rdi, 0x70(%rsp)
+     9af:      	movq	%rsi, 0x68(%rsp)
+     9b4:      	movq	%r12, 0x50(%rsp)
+     9b9:      	movq	%rcx, 0x20(%rsp)
+     9be:      	movq	%r14, 0x40(%rsp)
+     9c3:      	movq	(%r14), %rdx
+     9c6:      	addq	$0x28, %rdx
+     9ca:      	leaq	0x80(%rsp), %rdi
+     9d2:      	movl	$0x90, %esi
+     9d7:      	callq	0x9dc <perf_unwind_native+0x9dc>
+		00000000000009d8:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     9dc:      	testq	%rax, %rax
+     9df:      	jne	0xb9b <perf_unwind_native+0xb9b>
+     9e5:      	movq	0xe8(%rsp), %rax
+     9ed:      	movq	%rax, 0xee8(%rbp)
+     9f4:      	movq	0x88(%rsp), %rax
+     9fc:      	movq	%rax, 0xef0(%rbp)
+     a03:      	movq	0x98(%rsp), %rax
+     a0b:      	movq	%rax, 0xef8(%rbp)
+     a12:      	movq	0xa8(%rsp), %rax
+     a1a:      	movq	%rax, 0xf00(%rbp)
+     a21:      	movq	0xb8(%rsp), %rax
+     a29:      	movq	%rax, 0xf08(%rbp)
+     a30:      	movq	0xd0(%rsp), %rax
+     a38:      	movq	%rax, 0xee0(%rbp)
+     a3f:      	movq	0xf8(%rsp), %rax
+     a47:      	movq	%rax, 0xed8(%rbp)
+     a4e:      	movq	0x100(%rsp), %rax
+     a56:      	movq	%rax, 0xed0(%rbp)
+     a5d:      	movb	$0x0, 0xf30(%rbp)
+     a64:      	jmp	0xbd4 <perf_unwind_native+0xbd4>
+     a69:      	movq	0x70(%rsp), %rsi
+     a6e:      	cmpl	$0xb, %edx
+     a71:      	je	0xa7b <perf_unwind_native+0xa7b>
+     a73:      	cmpl	$0xf, %edx
+     a76:      	jne	0xa9e <perf_unwind_native+0xa9e>
+     a78:      	movq	%rcx, %rsi
+     a7b:      	sarl	%ebx
+     a7d:      	andl	$-0x8, %ebx
+     a80:      	movslq	%ebx, %r12
+     a83:      	addq	(%rsi), %r12
+     a86:      	jmp	0xa9e <perf_unwind_native+0xa9e>
+     a88:      	shll	$0x3, %ebx
+     a8b:      	andl	$0x38, %ebx
+     a8e:      	addq	0x30(%rsp), %rbx
+     a93:      	movq	%rbx, %r12
+     a96:      	movq	0x20(%rsp), %rcx
+     a9b:      	movq	%r14, %rax
+     a9e:      	movzbl	0x1(%rax), %esi
+     aa2:      	movl	0x8(%rax), %ebx
+     aa5:      	movl	%ebx, %edx
+     aa7:      	testb	%sil, %sil
+     aaa:      	jns	0xab1 <perf_unwind_native+0xab1>
+     aac:      	movl	%ebx, %edx
+     aae:      	andl	$-0x8, %edx
+     ab1:      	movl	%esi, %edi
+     ab3:      	andl	$0x7f, %edi
+     ab6:      	cmpl	$0x2, %edi
+     ab9:      	jg	0xacf <perf_unwind_native+0xacf>
+     abb:      	movq	%r12, %rcx
+     abe:      	cmpl	$0x1, %edi
+     ac1:      	je	0xafe <perf_unwind_native+0xafe>
+     ac3:      	movq	0x40(%rsp), %r8
+     ac8:      	cmpl	$0x2, %edi
+     acb:      	je	0xafb <perf_unwind_native+0xafb>
+     acd:      	jmp	0xb26 <perf_unwind_native+0xb26>
+     acf:      	movq	%r15, %r8
+     ad2:      	cmpl	$0x3, %edi
+     ad5:      	je	0xafb <perf_unwind_native+0xafb>
+     ad7:      	cmpl	$0x5, %edi
+     ada:      	jne	0xb26 <perf_unwind_native+0xb26>
+     adc:      	movl	%ebx, %edx
+     ade:      	andl	$0xf, %edx
+     ae1:      	cmpl	$0xa, %edx
+     ae4:      	jg	0xb2d <perf_unwind_native+0xb2d>
+     ae6:      	movq	0x50(%rsp), %rsi
+     aeb:      	testl	%edx, %edx
+     aed:      	je	0xb3f <perf_unwind_native+0xb3f>
+     aef:      	movq	0x68(%rsp), %rsi
+     af4:      	cmpl	$0x9, %edx
+     af7:      	je	0xb3f <perf_unwind_native+0xb3f>
+     af9:      	jmp	0xb26 <perf_unwind_native+0xb26>
+     afb:      	movq	(%r8), %rcx
+     afe:      	movslq	%edx, %rdx
+     b01:      	addq	%rcx, %rdx
+     b04:      	testb	%sil, %sil
+     b07:      	jns	0xb5a <perf_unwind_native+0xb5a>
+     b09:      	leaq	0x30(%rsp), %rdi
+     b0e:      	movl	$0x8, %esi
+     b13:      	movq	%rax, %r14
+     b16:      	callq	0xb1b <perf_unwind_native+0xb1b>
+		0000000000000b17:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     b1b:      	movq	%rax, %rcx
+     b1e:      	movq	%r14, %rax
+     b21:      	testq	%rcx, %rcx
+     b24:      	je	0xb4c <perf_unwind_native+0xb4c>
+     b26:      	movq	0x60(%rsp), %rbx
+     b2b:      	jmp	0xb73 <perf_unwind_native+0xb73>
+     b2d:      	movq	0x70(%rsp), %rsi
+     b32:      	cmpl	$0xb, %edx
+     b35:      	je	0xb3f <perf_unwind_native+0xb3f>
+     b37:      	cmpl	$0xf, %edx
+     b3a:      	jne	0xb26 <perf_unwind_native+0xb26>
+     b3c:      	movq	%rcx, %rsi
+     b3f:      	sarl	%ebx
+     b41:      	andl	$-0x8, %ebx
+     b44:      	movslq	%ebx, %rdx
+     b47:      	addq	(%rsi), %rdx
+     b4a:      	jmp	0xb5a <perf_unwind_native+0xb5a>
+     b4c:      	shll	$0x3, %ebx
+     b4f:      	andl	$0x38, %ebx
+     b52:      	addq	0x30(%rsp), %rbx
+     b57:      	movq	%rbx, %rdx
+     b5a:      	testq	%rdx, %rdx
+     b5d:      	movq	0x60(%rsp), %rbx
+     b62:      	je	0xb73 <perf_unwind_native+0xb73>
+     b64:      	movq	%r15, %rdi
+     b67:      	movl	$0x8, %esi
+     b6c:      	callq	0xb71 <perf_unwind_native+0xb71>
+		0000000000000b6d:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     b71:      	jmp	0xb7f <perf_unwind_native+0xb7f>
+     b73:      	cmpb	$0x3, (%rax)
+     b76:      	jne	0xb7f <perf_unwind_native+0xb7f>
+     b78:      	movq	$0x0, (%r15)
+     b7f:      	testq	%r12, %r12
+     b82:      	je	0xb9b <perf_unwind_native+0xb9b>
+     b84:      	leaq	-0x8(%r12), %rdx
+     b89:      	movq	%rbx, %rdi
+     b8c:      	movl	$0x8, %esi
+     b91:      	callq	0xb96 <perf_unwind_native+0xb96>
+		0000000000000b92:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+     b96:      	testq	%rax, %rax
+     b99:      	je	0xbc6 <perf_unwind_native+0xbc6>
+     b9b:      	movl	$0xe, 0x30(%rsp)
+     ba3:      	movq	(%rip), %rdi            # 0xbaa <perf_unwind_native+0xbaa>
+		0000000000000ba6:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     baa:      	leaq	0x30(%rsp), %rsi
+     baf:      	callq	0xbb4 <perf_unwind_native+0xbb4>
+		0000000000000bb0:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     bb4:      	testq	%rax, %rax
+     bb7:      	je	0xbbc <perf_unwind_native+0xbbc>
+     bb9:      	incq	(%rax)
+     bbc:      	movl	$0xfa7, %eax            # imm = 0xFA7
+     bc1:      	jmp	0x2d8e <perf_unwind_native+0x2d8e>
+     bc6:      	movq	%r12, 0xed8(%rbp)
+     bcd:      	movb	$0x1, 0xf30(%rbp)
+     bd4:      	movl	$0x6, 0x30(%rsp)
+     bdc:      	movq	(%rip), %rdi            # 0xbe3 <perf_unwind_native+0xbe3>
+		0000000000000bdf:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     be3:      	leaq	0x30(%rsp), %rsi
+     be8:      	callq	0xbed <perf_unwind_native+0xbed>
+		0000000000000be9:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     bed:      	testq	%rax, %rax
+     bf0:      	je	0xbf5 <perf_unwind_native+0xbf5>
+     bf2:      	incq	(%rax)
+     bf5:      	movq	%rbx, 0x60(%rsp)
+     bfa:      	movq	(%rbx), %rbx
+     bfd:      	testq	%rbx, %rbx
+     c00:      	je	0x32f2 <perf_unwind_native+0x32f2>
+     c06:      	movq	%rbx, %rax
+     c09:      	shrq	$0x38, %rax
+     c0d:      	je	0xc27 <perf_unwind_native+0xc27>
+     c0f:      	movl	$0xb, 0xf28(%rbp)
+     c19:      	movl	$0xfab, %r14d           # imm = 0xFAB
+     c1f:      	xorl	%r12d, %r12d
+     c22:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
+     c27:      	cmpq	$0xfff, %rbx            # imm = 0xFFF
+     c2e:      	ja	0xc48 <perf_unwind_native+0xc48>
+     c30:      	movl	$0x31, 0xf28(%rbp)
+     c3a:      	movl	$0xfae, %r14d           # imm = 0xFAE
+     c40:      	xorl	%r12d, %r12d
+     c43:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
+     c48:      	movl	(%rbp), %eax
+     c4b:      	movl	$0x60, 0x80(%rsp)
+     c56:      	movbel	%eax, 0x84(%rsp)
+     c5f:      	movbeq	%rbx, 0x88(%rsp)
+     c69:      	movq	(%rip), %rdi            # 0xc70 <perf_unwind_native+0xc70>
+		0000000000000c6c:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+     c70:      	leaq	0x80(%rsp), %rsi
+     c78:      	callq	0xc7d <perf_unwind_native+0xc7d>
+		0000000000000c79:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     c7d:      	testq	%rax, %rax
+     c80:      	je	0x330a <perf_unwind_native+0x330a>
+     c86:      	movabsq	$0xffffffffffffff, %rdx # imm = 0xFFFFFFFFFFFFFF
+     c90:      	movq	0x8(%rax), %r12
+     c94:      	movq	%r12, %rcx
+     c97:      	andq	%rdx, %rcx
+     c9a:      	movq	%rcx, 0xf20(%rbp)
+     ca1:      	shrq	$0x38, %r12
+     ca5:      	movq	(%rax), %rax
+     ca8:      	movq	%rax, 0xf10(%rbp)
+     caf:      	subq	%rcx, %rbx
+     cb2:      	movq	%rbx, 0xf18(%rbp)
+     cb9:      	cmpq	$0x1, %r12
+     cbd:      	jne	0xd34 <perf_unwind_native+0xd34>
+     cbf:      	movq	%rax, 0x80(%rsp)
+     cc7:      	movq	(%rip), %rdi            # 0xcce <perf_unwind_native+0xcce>
+		0000000000000cca:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+     cce:      	leaq	0x80(%rsp), %rsi
+     cd6:      	callq	0xcdb <perf_unwind_native+0xcdb>
+		0000000000000cd7:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     cdb:      	movl	$0x1, %r12d
+     ce1:      	testq	%rax, %rax
+     ce4:      	je	0xd34 <perf_unwind_native+0xd34>
+     ce6:      	cmpq	%rbx, (%rax)
+     ce9:      	ja	0xcf1 <perf_unwind_native+0xcf1>
+     ceb:      	cmpq	%rbx, 0x8(%rax)
+     cef:      	jae	0xcfd <perf_unwind_native+0xcfd>
+     cf1:      	cmpq	%rbx, 0x10(%rax)
+     cf5:      	ja	0xd34 <perf_unwind_native+0xd34>
+     cf7:      	cmpq	%rbx, 0x18(%rax)
+     cfb:      	jb	0xd34 <perf_unwind_native+0xd34>
+     cfd:      	movl	0x1380(%rbp), %ecx
+     d03:      	movq	%rax, %rbx
+     d06:      	movl	0x20(%rax), %eax
+     d09:      	btl	%eax, %ecx
+     d0c:      	jb	0xd34 <perf_unwind_native+0xd34>
+     d0e:      	movl	$0x0, 0x30(%rsp)
+     d16:      	movq	(%rip), %rdi            # 0xd1d <perf_unwind_native+0xd1d>
+		0000000000000d19:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     d1d:      	leaq	0x30(%rsp), %rsi
+     d22:      	callq	0xd27 <perf_unwind_native+0xd27>
+		0000000000000d23:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     d27:      	testq	%rax, %rax
+     d2a:      	je	0xd2f <perf_unwind_native+0xd2f>
+     d2c:      	incq	(%rax)
+     d2f:      	movzwl	0x20(%rbx), %r12d
+     d34:      	xorl	%r14d, %r14d
+     d37:      	cmpl	$0x1, %r12d
+     d3b:      	jne	0x2d94 <perf_unwind_native+0x2d94>
+     d41:      	movl	$0x5, 0x80(%rsp)
+     d4c:      	movq	(%rip), %rdi            # 0xd53 <perf_unwind_native+0xd53>
+		0000000000000d4f:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     d53:      	leaq	0x80(%rsp), %rsi
+     d5b:      	callq	0xd60 <perf_unwind_native+0xd60>
+		0000000000000d5c:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     d60:      	testq	%rax, %rax
+     d63:      	je	0xd68 <perf_unwind_native+0xd68>
+     d65:      	incq	(%rax)
+     d68:      	movl	0x2c0(%rbp), %eax
+     d6e:      	cmpq	$0x7e, %rax
+     d72:      	ja	0x75 <perf_unwind_native+0x75>
+     d78:      	movq	%r15, 0x58(%rsp)
+     d7d:      	movzbl	0xf30(%rbp), %ecx
+     d84:      	movq	0xf10(%rbp), %rdx
+     d8b:      	movq	0xf18(%rbp), %rsi
+     d92:      	leal	0x1(%rax), %edi
+     d95:      	movl	%edi, 0x2c0(%rbp)
+     d9b:      	leaq	(%rax,%rax,2), %rax
+     d9f:      	movq	%rdx, 0x2d0(%rbp,%rax,8)
+     da7:      	movq	%rsi, 0x2d8(%rbp,%rax,8)
+     daf:      	movb	$0x3, 0x2e0(%rbp,%rax,8)
+     db7:      	movb	%cl, 0x2e1(%rbp,%rax,8)
+     dbe:      	movl	$0x0, 0x2e2(%rbp,%rax,8)
+     dc9:      	movw	$0x0, 0x2e6(%rbp,%rax,8)
+     dd3:      	movl	$0x0, 0x28(%rsp)
+     ddb:      	movq	0xf10(%rbp), %rax
+     de2:      	movq	%rax, 0x78(%rsp)
+     de7:      	movq	%rax, 0x30(%rsp)
+     dec:      	movq	$-0x10000, %rax         # imm = 0xFFFF0000
+     df3:      	andq	0xf18(%rbp), %rax
+     dfa:      	movq	%rax, 0x38(%rsp)
+     dff:      	movq	(%rip), %rdi            # 0xe06 <perf_unwind_native+0xe06>
+		0000000000000e02:  R_X86_64_REX_GOTPCRELX	stack_delta_page_to_info-0x4
+     e06:      	leaq	0x30(%rsp), %rsi
+     e0b:      	callq	0xe10 <perf_unwind_native+0xe10>
+		0000000000000e0c:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     e10:      	testq	%rax, %rax
+     e13:      	je	0x1a1e <perf_unwind_native+0x1a1e>
+     e19:      	movq	%rax, %r12
+     e1c:      	movzwl	0x6(%rax), %eax
+     e20:      	cmpl	$0xf, %eax
+     e23:      	jg	0xe51 <perf_unwind_native+0xe51>
+     e25:      	cmpl	$0xb, %eax
+     e28:      	jg	0xe79 <perf_unwind_native+0xe79>
+     e2a:      	cmpl	$0x9, %eax
+     e2d:      	jg	0xebf <perf_unwind_native+0xebf>
+     e33:      	cmpl	$0x8, %eax
+     e36:      	je	0xf1e <perf_unwind_native+0xf1e>
+     e3c:      	cmpl	$0x9, %eax
+     e3f:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     e45:      	movq	(%rip), %rdi            # 0xe4c <perf_unwind_native+0xe4c>
+		0000000000000e48:  R_X86_64_REX_GOTPCRELX	exe_id_to_9_stack_deltas-0x4
+     e4c:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     e51:      	cmpl	$0x13, %eax
+     e54:      	jg	0xe9c <perf_unwind_native+0xe9c>
+     e56:      	cmpl	$0x11, %eax
+     e59:      	jg	0xed9 <perf_unwind_native+0xed9>
+     e5b:      	cmpl	$0x10, %eax
+     e5e:      	je	0xf27 <perf_unwind_native+0xf27>
+     e64:      	cmpl	$0x11, %eax
+     e67:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     e6d:      	movq	(%rip), %rdi            # 0xe74 <perf_unwind_native+0xe74>
+		0000000000000e70:  R_X86_64_REX_GOTPCRELX	exe_id_to_17_stack_deltas-0x4
+     e74:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     e79:      	cmpl	$0xd, %eax
+     e7c:      	jg	0xef0 <perf_unwind_native+0xef0>
+     e7e:      	cmpl	$0xc, %eax
+     e81:      	je	0xf30 <perf_unwind_native+0xf30>
+     e87:      	cmpl	$0xd, %eax
+     e8a:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     e90:      	movq	(%rip), %rdi            # 0xe97 <perf_unwind_native+0xe97>
+		0000000000000e93:  R_X86_64_REX_GOTPCRELX	exe_id_to_13_stack_deltas-0x4
+     e97:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     e9c:      	cmpl	$0x15, %eax
+     e9f:      	jg	0xf07 <perf_unwind_native+0xf07>
+     ea1:      	cmpl	$0x14, %eax
+     ea4:      	je	0xf39 <perf_unwind_native+0xf39>
+     eaa:      	cmpl	$0x15, %eax
+     ead:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     eb3:      	movq	(%rip), %rdi            # 0xeba <perf_unwind_native+0xeba>
+		0000000000000eb6:  R_X86_64_REX_GOTPCRELX	exe_id_to_21_stack_deltas-0x4
+     eba:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     ebf:      	cmpl	$0xa, %eax
+     ec2:      	je	0xf42 <perf_unwind_native+0xf42>
+     ec4:      	cmpl	$0xb, %eax
+     ec7:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     ecd:      	movq	(%rip), %rdi            # 0xed4 <perf_unwind_native+0xed4>
+		0000000000000ed0:  R_X86_64_REX_GOTPCRELX	exe_id_to_11_stack_deltas-0x4
+     ed4:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     ed9:      	cmpl	$0x12, %eax
+     edc:      	je	0xf4b <perf_unwind_native+0xf4b>
+     ede:      	cmpl	$0x13, %eax
+     ee1:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     ee7:      	movq	(%rip), %rdi            # 0xeee <perf_unwind_native+0xeee>
+		0000000000000eea:  R_X86_64_REX_GOTPCRELX	exe_id_to_19_stack_deltas-0x4
+     eee:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     ef0:      	cmpl	$0xe, %eax
+     ef3:      	je	0xf54 <perf_unwind_native+0xf54>
+     ef5:      	cmpl	$0xf, %eax
+     ef8:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     efe:      	movq	(%rip), %rdi            # 0xf05 <perf_unwind_native+0xf05>
+		0000000000000f01:  R_X86_64_REX_GOTPCRELX	exe_id_to_15_stack_deltas-0x4
+     f05:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f07:      	cmpl	$0x16, %eax
+     f0a:      	je	0xf5d <perf_unwind_native+0xf5d>
+     f0c:      	cmpl	$0x17, %eax
+     f0f:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+     f15:      	movq	(%rip), %rdi            # 0xf1c <perf_unwind_native+0xf1c>
+		0000000000000f18:  R_X86_64_REX_GOTPCRELX	exe_id_to_23_stack_deltas-0x4
+     f1c:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f1e:      	movq	(%rip), %rdi            # 0xf25 <perf_unwind_native+0xf25>
+		0000000000000f21:  R_X86_64_REX_GOTPCRELX	exe_id_to_8_stack_deltas-0x4
+     f25:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f27:      	movq	(%rip), %rdi            # 0xf2e <perf_unwind_native+0xf2e>
+		0000000000000f2a:  R_X86_64_REX_GOTPCRELX	exe_id_to_16_stack_deltas-0x4
+     f2e:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f30:      	movq	(%rip), %rdi            # 0xf37 <perf_unwind_native+0xf37>
+		0000000000000f33:  R_X86_64_REX_GOTPCRELX	exe_id_to_12_stack_deltas-0x4
+     f37:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f39:      	movq	(%rip), %rdi            # 0xf40 <perf_unwind_native+0xf40>
+		0000000000000f3c:  R_X86_64_REX_GOTPCRELX	exe_id_to_20_stack_deltas-0x4
+     f40:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f42:      	movq	(%rip), %rdi            # 0xf49 <perf_unwind_native+0xf49>
+		0000000000000f45:  R_X86_64_REX_GOTPCRELX	exe_id_to_10_stack_deltas-0x4
+     f49:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f4b:      	movq	(%rip), %rdi            # 0xf52 <perf_unwind_native+0xf52>
+		0000000000000f4e:  R_X86_64_REX_GOTPCRELX	exe_id_to_18_stack_deltas-0x4
+     f52:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f54:      	movq	(%rip), %rdi            # 0xf5b <perf_unwind_native+0xf5b>
+		0000000000000f57:  R_X86_64_REX_GOTPCRELX	exe_id_to_14_stack_deltas-0x4
+     f5b:      	jmp	0xf64 <perf_unwind_native+0xf64>
+     f5d:      	movq	(%rip), %rdi            # 0xf64 <perf_unwind_native+0xf64>
+		0000000000000f60:  R_X86_64_REX_GOTPCRELX	exe_id_to_22_stack_deltas-0x4
+     f64:      	leaq	0x78(%rsp), %rsi
+     f69:      	callq	0xf6e <perf_unwind_native+0xf6e>
+		0000000000000f6a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     f6e:      	testq	%rax, %rax
+     f71:      	je	0x1ba3 <perf_unwind_native+0x1ba3>
+     f77:      	movq	%rax, %r15
+     f7a:      	movl	(%r12), %ebx
+     f7e:      	movl	%ebx, 0x2c(%rsp)
+     f82:      	movq	0xf18(%rbp), %rax
+     f89:      	movq	%rax, 0x18(%rsp)
+     f8e:      	movzwl	0x4(%r12), %r13d
+     f94:      	testl	%r13d, %r13d
+     f97:      	je	0x13a4 <perf_unwind_native+0x13a4>
+     f9d:      	addl	%ebx, %r13d
+     fa0:      	leal	(%rbx,%r13), %eax
+     fa4:      	shrl	%eax
+     fa6:      	movl	%eax, 0xc(%rsp)
+     faa:      	leaq	0xc(%rsp), %rsi
+     faf:      	movq	%r15, %rdi
+     fb2:      	callq	0xfb7 <perf_unwind_native+0xfb7>
+		0000000000000fb3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     fb7:      	testq	%rax, %rax
+     fba:      	je	0x2d77 <perf_unwind_native+0x2d77>
+     fc0:      	movl	0xc(%rsp), %ecx
+     fc4:      	movq	0x18(%rsp), %rdx
+     fc9:      	cmpw	%dx, (%rax)
+     fcc:      	ja	0xfd4 <perf_unwind_native+0xfd4>
+     fce:      	incl	%ecx
+     fd0:      	movl	%ecx, %ebx
+     fd2:      	jmp	0xfd7 <perf_unwind_native+0xfd7>
+     fd4:      	movl	%ecx, %r13d
+     fd7:      	cmpl	%r13d, %ebx
+     fda:      	jae	0x1398 <perf_unwind_native+0x1398>
+     fe0:      	leal	(%rbx,%r13), %eax
+     fe4:      	shrl	%eax
+     fe6:      	movl	%eax, 0xc(%rsp)
+     fea:      	leaq	0xc(%rsp), %rsi
+     fef:      	movq	%r15, %rdi
+     ff2:      	callq	0xff7 <perf_unwind_native+0xff7>
+		0000000000000ff3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     ff7:      	testq	%rax, %rax
+     ffa:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1000:      	movl	0xc(%rsp), %ecx
+    1004:      	movq	0x18(%rsp), %rdx
+    1009:      	cmpw	%dx, (%rax)
+    100c:      	ja	0x1014 <perf_unwind_native+0x1014>
+    100e:      	incl	%ecx
+    1010:      	movl	%ecx, %ebx
+    1012:      	jmp	0x1017 <perf_unwind_native+0x1017>
+    1014:      	movl	%ecx, %r13d
+    1017:      	cmpl	%r13d, %ebx
+    101a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1020:      	leal	(%rbx,%r13), %eax
+    1024:      	shrl	%eax
+    1026:      	movl	%eax, 0xc(%rsp)
+    102a:      	leaq	0xc(%rsp), %rsi
+    102f:      	movq	%r15, %rdi
+    1032:      	callq	0x1037 <perf_unwind_native+0x1037>
+		0000000000001033:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1037:      	testq	%rax, %rax
+    103a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1040:      	movl	0xc(%rsp), %ecx
+    1044:      	movq	0x18(%rsp), %rdx
+    1049:      	cmpw	%dx, (%rax)
+    104c:      	ja	0x1054 <perf_unwind_native+0x1054>
+    104e:      	incl	%ecx
+    1050:      	movl	%ecx, %ebx
+    1052:      	jmp	0x1057 <perf_unwind_native+0x1057>
+    1054:      	movl	%ecx, %r13d
+    1057:      	cmpl	%r13d, %ebx
+    105a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1060:      	leal	(%rbx,%r13), %eax
+    1064:      	shrl	%eax
+    1066:      	movl	%eax, 0xc(%rsp)
+    106a:      	leaq	0xc(%rsp), %rsi
+    106f:      	movq	%r15, %rdi
+    1072:      	callq	0x1077 <perf_unwind_native+0x1077>
+		0000000000001073:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1077:      	testq	%rax, %rax
+    107a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1080:      	movl	0xc(%rsp), %ecx
+    1084:      	movq	0x18(%rsp), %rdx
+    1089:      	cmpw	%dx, (%rax)
+    108c:      	ja	0x1094 <perf_unwind_native+0x1094>
+    108e:      	incl	%ecx
+    1090:      	movl	%ecx, %ebx
+    1092:      	jmp	0x1097 <perf_unwind_native+0x1097>
+    1094:      	movl	%ecx, %r13d
+    1097:      	cmpl	%r13d, %ebx
+    109a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    10a0:      	leal	(%rbx,%r13), %eax
+    10a4:      	shrl	%eax
+    10a6:      	movl	%eax, 0xc(%rsp)
+    10aa:      	leaq	0xc(%rsp), %rsi
+    10af:      	movq	%r15, %rdi
+    10b2:      	callq	0x10b7 <perf_unwind_native+0x10b7>
+		00000000000010b3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    10b7:      	testq	%rax, %rax
+    10ba:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    10c0:      	movl	0xc(%rsp), %ecx
+    10c4:      	movq	0x18(%rsp), %rdx
+    10c9:      	cmpw	%dx, (%rax)
+    10cc:      	ja	0x10d4 <perf_unwind_native+0x10d4>
+    10ce:      	incl	%ecx
+    10d0:      	movl	%ecx, %ebx
+    10d2:      	jmp	0x10d7 <perf_unwind_native+0x10d7>
+    10d4:      	movl	%ecx, %r13d
+    10d7:      	cmpl	%r13d, %ebx
+    10da:      	jae	0x1398 <perf_unwind_native+0x1398>
+    10e0:      	leal	(%rbx,%r13), %eax
+    10e4:      	shrl	%eax
+    10e6:      	movl	%eax, 0xc(%rsp)
+    10ea:      	leaq	0xc(%rsp), %rsi
+    10ef:      	movq	%r15, %rdi
+    10f2:      	callq	0x10f7 <perf_unwind_native+0x10f7>
+		00000000000010f3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    10f7:      	testq	%rax, %rax
+    10fa:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1100:      	movl	0xc(%rsp), %ecx
+    1104:      	movq	0x18(%rsp), %rdx
+    1109:      	cmpw	%dx, (%rax)
+    110c:      	ja	0x1114 <perf_unwind_native+0x1114>
+    110e:      	incl	%ecx
+    1110:      	movl	%ecx, %ebx
+    1112:      	jmp	0x1117 <perf_unwind_native+0x1117>
+    1114:      	movl	%ecx, %r13d
+    1117:      	cmpl	%r13d, %ebx
+    111a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1120:      	leal	(%rbx,%r13), %eax
+    1124:      	shrl	%eax
+    1126:      	movl	%eax, 0xc(%rsp)
+    112a:      	leaq	0xc(%rsp), %rsi
+    112f:      	movq	%r15, %rdi
+    1132:      	callq	0x1137 <perf_unwind_native+0x1137>
+		0000000000001133:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1137:      	testq	%rax, %rax
+    113a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1140:      	movl	0xc(%rsp), %ecx
+    1144:      	movq	0x18(%rsp), %rdx
+    1149:      	cmpw	%dx, (%rax)
+    114c:      	ja	0x1154 <perf_unwind_native+0x1154>
+    114e:      	incl	%ecx
+    1150:      	movl	%ecx, %ebx
+    1152:      	jmp	0x1157 <perf_unwind_native+0x1157>
+    1154:      	movl	%ecx, %r13d
+    1157:      	cmpl	%r13d, %ebx
+    115a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1160:      	leal	(%rbx,%r13), %eax
+    1164:      	shrl	%eax
+    1166:      	movl	%eax, 0xc(%rsp)
+    116a:      	leaq	0xc(%rsp), %rsi
+    116f:      	movq	%r15, %rdi
+    1172:      	callq	0x1177 <perf_unwind_native+0x1177>
+		0000000000001173:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1177:      	testq	%rax, %rax
+    117a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1180:      	movl	0xc(%rsp), %ecx
+    1184:      	movq	0x18(%rsp), %rdx
+    1189:      	cmpw	%dx, (%rax)
+    118c:      	ja	0x1194 <perf_unwind_native+0x1194>
+    118e:      	incl	%ecx
+    1190:      	movl	%ecx, %ebx
+    1192:      	jmp	0x1197 <perf_unwind_native+0x1197>
+    1194:      	movl	%ecx, %r13d
+    1197:      	cmpl	%r13d, %ebx
+    119a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    11a0:      	leal	(%rbx,%r13), %eax
+    11a4:      	shrl	%eax
+    11a6:      	movl	%eax, 0xc(%rsp)
+    11aa:      	leaq	0xc(%rsp), %rsi
+    11af:      	movq	%r15, %rdi
+    11b2:      	callq	0x11b7 <perf_unwind_native+0x11b7>
+		00000000000011b3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    11b7:      	testq	%rax, %rax
+    11ba:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    11c0:      	movl	0xc(%rsp), %ecx
+    11c4:      	movq	0x18(%rsp), %rdx
+    11c9:      	cmpw	%dx, (%rax)
+    11cc:      	ja	0x11d4 <perf_unwind_native+0x11d4>
+    11ce:      	incl	%ecx
+    11d0:      	movl	%ecx, %ebx
+    11d2:      	jmp	0x11d7 <perf_unwind_native+0x11d7>
+    11d4:      	movl	%ecx, %r13d
+    11d7:      	cmpl	%r13d, %ebx
+    11da:      	jae	0x1398 <perf_unwind_native+0x1398>
+    11e0:      	leal	(%rbx,%r13), %eax
+    11e4:      	shrl	%eax
+    11e6:      	movl	%eax, 0xc(%rsp)
+    11ea:      	leaq	0xc(%rsp), %rsi
+    11ef:      	movq	%r15, %rdi
+    11f2:      	callq	0x11f7 <perf_unwind_native+0x11f7>
+		00000000000011f3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    11f7:      	testq	%rax, %rax
+    11fa:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1200:      	movl	0xc(%rsp), %ecx
+    1204:      	movq	0x18(%rsp), %rdx
+    1209:      	cmpw	%dx, (%rax)
+    120c:      	ja	0x1214 <perf_unwind_native+0x1214>
+    120e:      	incl	%ecx
+    1210:      	movl	%ecx, %ebx
+    1212:      	jmp	0x1217 <perf_unwind_native+0x1217>
+    1214:      	movl	%ecx, %r13d
+    1217:      	cmpl	%r13d, %ebx
+    121a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1220:      	leal	(%rbx,%r13), %eax
+    1224:      	shrl	%eax
+    1226:      	movl	%eax, 0xc(%rsp)
+    122a:      	leaq	0xc(%rsp), %rsi
+    122f:      	movq	%r15, %rdi
+    1232:      	callq	0x1237 <perf_unwind_native+0x1237>
+		0000000000001233:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1237:      	testq	%rax, %rax
+    123a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1240:      	movl	0xc(%rsp), %ecx
+    1244:      	movq	0x18(%rsp), %rdx
+    1249:      	cmpw	%dx, (%rax)
+    124c:      	ja	0x1254 <perf_unwind_native+0x1254>
+    124e:      	incl	%ecx
+    1250:      	movl	%ecx, %ebx
+    1252:      	jmp	0x1257 <perf_unwind_native+0x1257>
+    1254:      	movl	%ecx, %r13d
+    1257:      	cmpl	%r13d, %ebx
+    125a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1260:      	leal	(%rbx,%r13), %eax
+    1264:      	shrl	%eax
+    1266:      	movl	%eax, 0xc(%rsp)
+    126a:      	leaq	0xc(%rsp), %rsi
+    126f:      	movq	%r15, %rdi
+    1272:      	callq	0x1277 <perf_unwind_native+0x1277>
+		0000000000001273:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1277:      	testq	%rax, %rax
+    127a:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1280:      	movl	0xc(%rsp), %ecx
+    1284:      	movq	0x18(%rsp), %rdx
+    1289:      	cmpw	%dx, (%rax)
+    128c:      	ja	0x1294 <perf_unwind_native+0x1294>
+    128e:      	incl	%ecx
+    1290:      	movl	%ecx, %ebx
+    1292:      	jmp	0x1297 <perf_unwind_native+0x1297>
+    1294:      	movl	%ecx, %r13d
+    1297:      	cmpl	%r13d, %ebx
+    129a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    12a0:      	leal	(%rbx,%r13), %eax
+    12a4:      	shrl	%eax
+    12a6:      	movl	%eax, 0xc(%rsp)
+    12aa:      	leaq	0xc(%rsp), %rsi
+    12af:      	movq	%r15, %rdi
+    12b2:      	callq	0x12b7 <perf_unwind_native+0x12b7>
+		00000000000012b3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    12b7:      	testq	%rax, %rax
+    12ba:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    12c0:      	movl	0xc(%rsp), %ecx
+    12c4:      	movq	0x18(%rsp), %rdx
+    12c9:      	cmpw	%dx, (%rax)
+    12cc:      	ja	0x12d4 <perf_unwind_native+0x12d4>
+    12ce:      	incl	%ecx
+    12d0:      	movl	%ecx, %ebx
+    12d2:      	jmp	0x12d7 <perf_unwind_native+0x12d7>
+    12d4:      	movl	%ecx, %r13d
+    12d7:      	cmpl	%r13d, %ebx
+    12da:      	jae	0x1398 <perf_unwind_native+0x1398>
+    12e0:      	leal	(%rbx,%r13), %eax
+    12e4:      	shrl	%eax
+    12e6:      	movl	%eax, 0xc(%rsp)
+    12ea:      	leaq	0xc(%rsp), %rsi
+    12ef:      	movq	%r15, %rdi
+    12f2:      	callq	0x12f7 <perf_unwind_native+0x12f7>
+		00000000000012f3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    12f7:      	testq	%rax, %rax
+    12fa:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1300:      	movl	0xc(%rsp), %ecx
+    1304:      	movq	0x18(%rsp), %rdx
+    1309:      	cmpw	%dx, (%rax)
+    130c:      	ja	0x1314 <perf_unwind_native+0x1314>
+    130e:      	incl	%ecx
+    1310:      	movl	%ecx, %ebx
+    1312:      	jmp	0x1317 <perf_unwind_native+0x1317>
+    1314:      	movl	%ecx, %r13d
+    1317:      	cmpl	%r13d, %ebx
+    131a:      	jae	0x1398 <perf_unwind_native+0x1398>
+    131c:      	leal	(%rbx,%r13), %eax
+    1320:      	shrl	%eax
+    1322:      	movl	%eax, 0xc(%rsp)
+    1326:      	leaq	0xc(%rsp), %rsi
+    132b:      	movq	%r15, %rdi
+    132e:      	callq	0x1333 <perf_unwind_native+0x1333>
+		000000000000132f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1333:      	testq	%rax, %rax
+    1336:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    133c:      	movl	0xc(%rsp), %ecx
+    1340:      	movq	0x18(%rsp), %rdx
+    1345:      	cmpw	%dx, (%rax)
+    1348:      	ja	0x1350 <perf_unwind_native+0x1350>
+    134a:      	incl	%ecx
+    134c:      	movl	%ecx, %ebx
+    134e:      	jmp	0x1353 <perf_unwind_native+0x1353>
+    1350:      	movl	%ecx, %r13d
+    1353:      	cmpl	%r13d, %ebx
+    1356:      	jae	0x1398 <perf_unwind_native+0x1398>
+    1358:      	leal	(%rbx,%r13), %eax
+    135c:      	shrl	%eax
+    135e:      	movl	%eax, 0xc(%rsp)
+    1362:      	leaq	0xc(%rsp), %rsi
+    1367:      	movq	%r15, %rdi
+    136a:      	callq	0x136f <perf_unwind_native+0x136f>
+		000000000000136b:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    136f:      	testq	%rax, %rax
+    1372:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1378:      	movl	0xc(%rsp), %ecx
+    137c:      	movq	0x18(%rsp), %rdx
+    1381:      	cmpw	%dx, (%rax)
+    1384:      	ja	0x138c <perf_unwind_native+0x138c>
+    1386:      	incl	%ecx
+    1388:      	movl	%ecx, %ebx
+    138a:      	jmp	0x138f <perf_unwind_native+0x138f>
+    138c:      	movl	%ecx, %r13d
+    138f:      	cmpl	%r13d, %ebx
+    1392:      	jb	0x2d77 <perf_unwind_native+0x2d77>
+    1398:      	movl	%r13d, %ebx
+    139b:      	testl	%r13d, %r13d
+    139e:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    13a4:      	decl	%ebx
+    13a6:      	movl	%ebx, 0x2c(%rsp)
+    13aa:      	leaq	0x2c(%rsp), %rsi
+    13af:      	movq	%r15, %rdi
+    13b2:      	callq	0x13b7 <perf_unwind_native+0x13b7>
+		00000000000013b3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    13b7:      	testq	%rax, %rax
+    13ba:      	je	0x209e <perf_unwind_native+0x209e>
+    13c0:      	movzwl	0x18(%rsp), %r13d
+    13c6:      	movzwl	(%rax), %ecx
+    13c9:      	subl	%ecx, %r13d
+    13cc:      	movl	0x2c(%rsp), %ecx
+    13d0:      	cmpl	(%r12), %ecx
+    13d4:      	jae	0x13dd <perf_unwind_native+0x13dd>
+    13d6:      	addl	$0x10000, %r13d         # imm = 0x10000
+    13dd:      	movzwl	0x2(%rax), %ecx
+    13e1:      	movl	%ecx, 0x28(%rsp)
+    13e5:      	cmpl	$0x8000, %ecx           # imm = 0x8000
+    13eb:      	je	0x208f <perf_unwind_native+0x208f>
+    13f1:      	cmpl	$0x8001, %ecx           # imm = 0x8001
+    13f7:      	jne	0x141e <perf_unwind_native+0x141e>
+    13f9:      	movl	$0x7, 0xc(%rsp)
+    1401:      	movq	(%rip), %rdi            # 0x1408 <perf_unwind_native+0x1408>
+		0000000000001404:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    1408:      	leaq	0xc(%rsp), %rsi
+    140d:      	callq	0x1412 <perf_unwind_native+0x1412>
+		000000000000140e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1412:      	testq	%rax, %rax
+    1415:      	je	0x141a <perf_unwind_native+0x141a>
+    1417:      	incq	(%rax)
+    141a:      	movl	0x28(%rsp), %ecx
+    141e:      	testw	%cx, %cx
+    1421:      	js	0x14a0 <perf_unwind_native+0x14a0>
+    1423:      	movq	(%rip), %rdi            # 0x142a <perf_unwind_native+0x142a>
+		0000000000001426:  R_X86_64_REX_GOTPCRELX	unwind_info_array-0x4
+    142a:      	leaq	0x28(%rsp), %rsi
+    142f:      	callq	0x1434 <perf_unwind_native+0x1434>
+		0000000000001430:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1434:      	testq	%rax, %rax
+    1437:      	je	0x2e42 <perf_unwind_native+0x2e42>
+    143d:      	movq	%rax, %r15
+    1440:      	movl	0x4(%rax), %ebx
+    1443:      	movzbl	0x2(%rax), %eax
+    1447:      	testl	%eax, %eax
+    1449:      	je	0x1464 <perf_unwind_native+0x1464>
+    144b:      	movl	%eax, %ecx
+    144d:      	andl	$0x7f, %ecx
+    1450:      	cmpl	%ecx, %r13d
+    1453:      	jl	0x1464 <perf_unwind_native+0x1464>
+    1455:      	xorl	%ecx, %ecx
+    1457:      	testb	%al, %al
+    1459:      	setns	%cl
+    145c:      	shll	$0x4, %ecx
+    145f:      	addl	%ecx, %ebx
+    1461:      	addl	$-0x8, %ebx
+    1464:      	movzbl	(%r15), %eax
+    1468:      	movl	%ebx, %ecx
+    146a:      	testb	%al, %al
+    146c:      	jns	0x1473 <perf_unwind_native+0x1473>
+    146e:      	movl	%ebx, %ecx
+    1470:      	andl	$-0x8, %ecx
+    1473:      	movl	%eax, %edx
+    1475:      	andl	$0x7f, %edx
+    1478:      	xorl	%r12d, %r12d
+    147b:      	cmpl	$0x2, %edx
+    147e:      	jg	0x1554 <perf_unwind_native+0x1554>
+    1484:      	cmpl	$0x1, %edx
+    1487:      	je	0x164f <perf_unwind_native+0x164f>
+    148d:      	movq	0x40(%rsp), %rsi
+    1492:      	cmpl	$0x2, %edx
+    1495:      	je	0x164c <perf_unwind_native+0x164c>
+    149b:      	jmp	0x16a7 <perf_unwind_native+0x16a7>
+    14a0:      	andl	$0xffff7fff, %ecx       # imm = 0xFFFF7FFF
+    14a6:      	movl	$0x1, %eax
+    14ab:      	cmpl	$0x2, %ecx
+    14ae:      	jg	0x14ee <perf_unwind_native+0x14ee>
+    14b0:      	cmpl	$0x1, %ecx
+    14b3:      	movq	0x10(%rsp), %r13
+    14b8:      	movq	0x60(%rsp), %rdx
+    14bd:      	movq	0x40(%rsp), %rsi
+    14c2:      	je	0x2eb7 <perf_unwind_native+0x2eb7>
+    14c8:      	cmpl	$0x2, %ecx
+    14cb:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    14d1:      	movq	(%rsi), %rax
+    14d4:      	movl	(%rdx), %ecx
+    14d6:      	andl	$0xf, %ecx
+    14d9:      	xorl	%edx, %edx
+    14db:      	cmpl	$0xb, %ecx
+    14de:      	setae	%dl
+    14e1:      	leaq	(%rax,%rdx,8), %r12
+    14e5:      	addq	$0x8, %r12
+    14e9:      	jmp	0x1786 <perf_unwind_native+0x1786>
+    14ee:      	cmpl	$0x3, %ecx
+    14f1:      	je	0x1597 <perf_unwind_native+0x1597>
+    14f7:      	cmpl	$0x4, %ecx
+    14fa:      	movq	0x10(%rsp), %r13
+    14ff:      	movq	0x58(%rsp), %rcx
+    1504:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    150a:      	movq	(%rcx), %rdx
+    150d:      	leaq	0x30(%rsp), %rdi
+    1512:      	movl	$0x10, %esi
+    1517:      	callq	0x151c <perf_unwind_native+0x151c>
+		0000000000001518:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    151c:      	testq	%rax, %rax
+    151f:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    1525:      	movq	0xee0(%rbp), %rax
+    152c:      	addq	$0x10, %rax
+    1530:      	movq	%rax, 0xed8(%rbp)
+    1537:      	movq	0x30(%rsp), %rax
+    153c:      	movq	%rax, 0xee0(%rbp)
+    1543:      	movq	0x38(%rsp), %rax
+    1548:      	movq	%rax, 0xed0(%rbp)
+    154f:      	jmp	0x17b8 <perf_unwind_native+0x17b8>
+    1554:      	cmpl	$0x3, %edx
+    1557:      	je	0x1647 <perf_unwind_native+0x1647>
+    155d:      	cmpl	$0x5, %edx
+    1560:      	jne	0x16a7 <perf_unwind_native+0x16a7>
+    1566:      	movl	%ebx, %eax
+    1568:      	andl	$0xf, %eax
+    156b:      	xorl	%r12d, %r12d
+    156e:      	cmpl	$0xa, %eax
+    1571:      	jg	0x1678 <perf_unwind_native+0x1678>
+    1577:      	movq	0x50(%rsp), %rcx
+    157c:      	testl	%eax, %eax
+    157e:      	je	0x168c <perf_unwind_native+0x168c>
+    1584:      	cmpl	$0x9, %eax
+    1587:      	jne	0x16a7 <perf_unwind_native+0x16a7>
+    158d:      	movq	0x68(%rsp), %rcx
+    1592:      	jmp	0x168c <perf_unwind_native+0x168c>
+    1597:      	movq	0x40(%rsp), %rax
+    159c:      	movq	(%rax), %rdx
+    159f:      	addq	$0x28, %rdx
+    15a3:      	leaq	0x80(%rsp), %rdi
+    15ab:      	movl	$0x90, %esi
+    15b0:      	callq	0x15b5 <perf_unwind_native+0x15b5>
+		00000000000015b1:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    15b5:      	testq	%rax, %rax
+    15b8:      	movq	0x10(%rsp), %r13
+    15bd:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    15c3:      	movq	0xe8(%rsp), %rax
+    15cb:      	movq	%rax, 0xee8(%rbp)
+    15d2:      	movq	0x88(%rsp), %rax
+    15da:      	movq	%rax, 0xef0(%rbp)
+    15e1:      	movq	0x98(%rsp), %rax
+    15e9:      	movq	%rax, 0xef8(%rbp)
+    15f0:      	movq	0xa8(%rsp), %rax
+    15f8:      	movq	%rax, 0xf00(%rbp)
+    15ff:      	movq	0xb8(%rsp), %rax
+    1607:      	movq	%rax, 0xf08(%rbp)
+    160e:      	movq	0xd0(%rsp), %rax
+    1616:      	movq	%rax, 0xee0(%rbp)
+    161d:      	movq	0xf8(%rsp), %rax
+    1625:      	movq	%rax, 0xed8(%rbp)
+    162c:      	movq	0x100(%rsp), %rax
+    1634:      	movq	%rax, 0xed0(%rbp)
+    163b:      	movb	$0x0, 0xf30(%rbp)
+    1642:      	jmp	0x17bf <perf_unwind_native+0x17bf>
+    1647:      	movq	0x58(%rsp), %rsi
+    164c:      	movq	(%rsi), %r12
+    164f:      	movq	%r12, %rdx
+    1652:      	movslq	%ecx, %r12
+    1655:      	addq	%rdx, %r12
+    1658:      	testb	%al, %al
+    165a:      	jns	0x16a7 <perf_unwind_native+0x16a7>
+    165c:      	leaq	0x30(%rsp), %rdi
+    1661:      	movl	$0x8, %esi
+    1666:      	movq	%r12, %rdx
+    1669:      	callq	0x166e <perf_unwind_native+0x166e>
+		000000000000166a:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    166e:      	testq	%rax, %rax
+    1671:      	je	0x1699 <perf_unwind_native+0x1699>
+    1673:      	xorl	%r12d, %r12d
+    1676:      	jmp	0x16a7 <perf_unwind_native+0x16a7>
+    1678:      	movq	0x70(%rsp), %rcx
+    167d:      	cmpl	$0xb, %eax
+    1680:      	je	0x168c <perf_unwind_native+0x168c>
+    1682:      	movq	0x20(%rsp), %rcx
+    1687:      	cmpl	$0xf, %eax
+    168a:      	jne	0x16a7 <perf_unwind_native+0x16a7>
+    168c:      	sarl	%ebx
+    168e:      	andl	$-0x8, %ebx
+    1691:      	movslq	%ebx, %r12
+    1694:      	addq	(%rcx), %r12
+    1697:      	jmp	0x16a7 <perf_unwind_native+0x16a7>
+    1699:      	shll	$0x3, %ebx
+    169c:      	andl	$0x38, %ebx
+    169f:      	addq	0x30(%rsp), %rbx
+    16a4:      	movq	%rbx, %r12
+    16a7:      	movzbl	0x1(%r15), %eax
+    16ac:      	movl	0x8(%r15), %ebx
+    16b0:      	movl	%ebx, %ecx
+    16b2:      	testb	%al, %al
+    16b4:      	jns	0x16bb <perf_unwind_native+0x16bb>
+    16b6:      	movl	%ebx, %ecx
+    16b8:      	andl	$-0x8, %ecx
+    16bb:      	movl	%eax, %edx
+    16bd:      	andl	$0x7f, %edx
+    16c0:      	cmpl	$0x2, %edx
+    16c3:      	jg	0x16dc <perf_unwind_native+0x16dc>
+    16c5:      	movq	%r12, %rsi
+    16c8:      	cmpl	$0x1, %edx
+    16cb:      	je	0x1711 <perf_unwind_native+0x1711>
+    16cd:      	movq	0x40(%rsp), %rsi
+    16d2:      	cmpl	$0x2, %edx
+    16d5:      	je	0x170e <perf_unwind_native+0x170e>
+    16d7:      	jmp	0x1774 <perf_unwind_native+0x1774>
+    16dc:      	cmpl	$0x3, %edx
+    16df:      	je	0x1709 <perf_unwind_native+0x1709>
+    16e1:      	cmpl	$0x5, %edx
+    16e4:      	jne	0x1774 <perf_unwind_native+0x1774>
+    16ea:      	movl	%ebx, %eax
+    16ec:      	andl	$0xf, %eax
+    16ef:      	cmpl	$0xa, %eax
+    16f2:      	jg	0x173f <perf_unwind_native+0x173f>
+    16f4:      	movq	0x50(%rsp), %rcx
+    16f9:      	testl	%eax, %eax
+    16fb:      	je	0x1753 <perf_unwind_native+0x1753>
+    16fd:      	cmpl	$0x9, %eax
+    1700:      	jne	0x1774 <perf_unwind_native+0x1774>
+    1702:      	movq	0x68(%rsp), %rcx
+    1707:      	jmp	0x1753 <perf_unwind_native+0x1753>
+    1709:      	movq	0x58(%rsp), %rsi
+    170e:      	movq	(%rsi), %rsi
+    1711:      	movslq	%ecx, %rdx
+    1714:      	addq	%rsi, %rdx
+    1717:      	testb	%al, %al
+    1719:      	jns	0x175e <perf_unwind_native+0x175e>
+    171b:      	leaq	0x30(%rsp), %rdi
+    1720:      	movl	$0x8, %esi
+    1725:      	callq	0x172a <perf_unwind_native+0x172a>
+		0000000000001726:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    172a:      	testq	%rax, %rax
+    172d:      	jne	0x1774 <perf_unwind_native+0x1774>
+    172f:      	shll	$0x3, %ebx
+    1732:      	andl	$0x38, %ebx
+    1735:      	addq	0x30(%rsp), %rbx
+    173a:      	movq	%rbx, %rdx
+    173d:      	jmp	0x175e <perf_unwind_native+0x175e>
+    173f:      	movq	0x70(%rsp), %rcx
+    1744:      	cmpl	$0xb, %eax
+    1747:      	je	0x1753 <perf_unwind_native+0x1753>
+    1749:      	movq	0x20(%rsp), %rcx
+    174e:      	cmpl	$0xf, %eax
+    1751:      	jne	0x1774 <perf_unwind_native+0x1774>
+    1753:      	sarl	%ebx
+    1755:      	andl	$-0x8, %ebx
+    1758:      	movslq	%ebx, %rdx
+    175b:      	addq	(%rcx), %rdx
+    175e:      	testq	%rdx, %rdx
+    1761:      	je	0x1774 <perf_unwind_native+0x1774>
+    1763:      	movq	0x58(%rsp), %rdi
+    1768:      	movl	$0x8, %esi
+    176d:      	callq	0x1772 <perf_unwind_native+0x1772>
+		000000000000176e:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    1772:      	jmp	0x1786 <perf_unwind_native+0x1786>
+    1774:      	cmpb	$0x3, (%r15)
+    1778:      	jne	0x1786 <perf_unwind_native+0x1786>
+    177a:      	movq	0x58(%rsp), %rax
+    177f:      	movq	$0x0, (%rax)
+    1786:      	testq	%r12, %r12
+    1789:      	movq	0x10(%rsp), %r13
+    178e:      	movq	0x60(%rsp), %rdi
+    1793:      	je	0xb9b <perf_unwind_native+0xb9b>
+    1799:      	leaq	-0x8(%r12), %rdx
+    179e:      	movl	$0x8, %esi
+    17a3:      	callq	0x17a8 <perf_unwind_native+0x17a8>
+		00000000000017a4:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    17a8:      	testq	%rax, %rax
+    17ab:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    17b1:      	movq	%r12, 0xed8(%rbp)
+    17b8:      	movb	$0x1, 0xf30(%rbp)
+    17bf:      	movl	$0x6, 0x30(%rsp)
+    17c7:      	movq	(%rip), %rdi            # 0x17ce <perf_unwind_native+0x17ce>
+		00000000000017ca:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    17ce:      	leaq	0x30(%rsp), %rsi
+    17d3:      	callq	0x17d8 <perf_unwind_native+0x17d8>
+		00000000000017d4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    17d8:      	testq	%rax, %rax
+    17db:      	je	0x17e0 <perf_unwind_native+0x17e0>
+    17dd:      	incq	(%rax)
+    17e0:      	movq	0x60(%rsp), %rax
+    17e5:      	movq	(%rax), %rbx
+    17e8:      	testq	%rbx, %rbx
+    17eb:      	movq	0x10(%rsp), %r13
+    17f0:      	je	0x32f2 <perf_unwind_native+0x32f2>
+    17f6:      	movabsq	$0xffffffffffffff, %rax # imm = 0xFFFFFFFFFFFFFF
+    1800:      	cmpq	%rax, %rbx
+    1803:      	ja	0xc0f <perf_unwind_native+0xc0f>
+    1809:      	cmpq	$0x1000, %rbx           # imm = 0x1000
+    1810:      	jb	0xc30 <perf_unwind_native+0xc30>
+    1816:      	movl	(%rbp), %eax
+    1819:      	movl	$0x60, 0x80(%rsp)
+    1824:      	movbel	%eax, 0x84(%rsp)
+    182d:      	movbeq	%rbx, 0x88(%rsp)
+    1837:      	movq	(%rip), %rdi            # 0x183e <perf_unwind_native+0x183e>
+		000000000000183a:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+    183e:      	leaq	0x80(%rsp), %rsi
+    1846:      	callq	0x184b <perf_unwind_native+0x184b>
+		0000000000001847:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    184b:      	testq	%rax, %rax
+    184e:      	je	0x330a <perf_unwind_native+0x330a>
+    1854:      	movq	0x8(%rax), %r12
+    1858:      	movq	%r12, %rcx
+    185b:      	movabsq	$0xffffffffffffff, %rdx # imm = 0xFFFFFFFFFFFFFF
+    1865:      	andq	%rdx, %rcx
+    1868:      	movq	%rcx, 0xf20(%rbp)
+    186f:      	shrq	$0x38, %r12
+    1873:      	movq	(%rax), %rax
+    1876:      	movq	%rax, 0xf10(%rbp)
+    187d:      	subq	%rcx, %rbx
+    1880:      	movq	%rbx, 0xf18(%rbp)
+    1887:      	cmpq	$0x1, %r12
+    188b:      	jne	0x1903 <perf_unwind_native+0x1903>
+    188d:      	movq	%rax, 0x80(%rsp)
+    1895:      	movq	(%rip), %rdi            # 0x189c <perf_unwind_native+0x189c>
+		0000000000001898:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+    189c:      	leaq	0x80(%rsp), %rsi
+    18a4:      	callq	0x18a9 <perf_unwind_native+0x18a9>
+		00000000000018a5:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    18a9:      	movl	$0x1, %r12d
+    18af:      	testq	%rax, %rax
+    18b2:      	je	0x1903 <perf_unwind_native+0x1903>
+    18b4:      	movq	%rax, %r15
+    18b7:      	cmpq	%rbx, (%rax)
+    18ba:      	ja	0x18c2 <perf_unwind_native+0x18c2>
+    18bc:      	cmpq	%rbx, 0x8(%r15)
+    18c0:      	jae	0x18ce <perf_unwind_native+0x18ce>
+    18c2:      	cmpq	%rbx, 0x10(%r15)
+    18c6:      	ja	0x1903 <perf_unwind_native+0x1903>
+    18c8:      	cmpq	%rbx, 0x18(%r15)
+    18cc:      	jb	0x1903 <perf_unwind_native+0x1903>
+    18ce:      	movl	0x1380(%rbp), %eax
+    18d4:      	movl	0x20(%r15), %ecx
+    18d8:      	btl	%ecx, %eax
+    18db:      	jb	0x1903 <perf_unwind_native+0x1903>
+    18dd:      	movl	$0x0, 0x30(%rsp)
+    18e5:      	movq	(%rip), %rdi            # 0x18ec <perf_unwind_native+0x18ec>
+		00000000000018e8:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    18ec:      	leaq	0x30(%rsp), %rsi
+    18f1:      	callq	0x18f6 <perf_unwind_native+0x18f6>
+		00000000000018f2:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    18f6:      	testq	%rax, %rax
+    18f9:      	je	0x18fe <perf_unwind_native+0x18fe>
+    18fb:      	incq	(%rax)
+    18fe:      	movzwl	0x20(%r15), %r12d
+    1903:      	cmpl	$0x1, %r12d
+    1907:      	jne	0x32e8 <perf_unwind_native+0x32e8>
+    190d:      	movl	$0x5, 0x80(%rsp)
+    1918:      	movq	(%rip), %rdi            # 0x191f <perf_unwind_native+0x191f>
+		000000000000191b:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    191f:      	leaq	0x80(%rsp), %rsi
+    1927:      	callq	0x192c <perf_unwind_native+0x192c>
+		0000000000001928:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    192c:      	testq	%rax, %rax
+    192f:      	je	0x1934 <perf_unwind_native+0x1934>
+    1931:      	incq	(%rax)
+    1934:      	movl	0x2c0(%rbp), %eax
+    193a:      	cmpq	$0x7e, %rax
+    193e:      	movq	0x10(%rsp), %r13
+    1943:      	ja	0x75 <perf_unwind_native+0x75>
+    1949:      	movzbl	0xf30(%rbp), %ecx
+    1950:      	movq	0xf10(%rbp), %rdx
+    1957:      	movq	0xf18(%rbp), %rsi
+    195e:      	leal	0x1(%rax), %edi
+    1961:      	movl	%edi, 0x2c0(%rbp)
+    1967:      	leaq	(%rax,%rax,2), %rax
+    196b:      	movq	%rdx, 0x2d0(%rbp,%rax,8)
+    1973:      	movq	%rsi, 0x2d8(%rbp,%rax,8)
+    197b:      	movb	$0x3, 0x2e0(%rbp,%rax,8)
+    1983:      	movb	%cl, 0x2e1(%rbp,%rax,8)
+    198a:      	movl	$0x0, 0x2e2(%rbp,%rax,8)
+    1995:      	movw	$0x0, 0x2e6(%rbp,%rax,8)
+    199f:      	movl	$0x0, 0x28(%rsp)
+    19a7:      	movq	0xf10(%rbp), %rax
+    19ae:      	movq	%rax, 0x78(%rsp)
+    19b3:      	movq	%rax, 0x30(%rsp)
+    19b8:      	movq	$-0x10000, %rax         # imm = 0xFFFF0000
+    19bf:      	andq	0xf18(%rbp), %rax
+    19c6:      	movq	%rax, 0x38(%rsp)
+    19cb:      	movq	(%rip), %rdi            # 0x19d2 <perf_unwind_native+0x19d2>
+		00000000000019ce:  R_X86_64_REX_GOTPCRELX	stack_delta_page_to_info-0x4
+    19d2:      	leaq	0x30(%rsp), %rsi
+    19d7:      	callq	0x19dc <perf_unwind_native+0x19dc>
+		00000000000019d8:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    19dc:      	testq	%rax, %rax
+    19df:      	je	0x1a19 <perf_unwind_native+0x1a19>
+    19e1:      	movq	%rax, %r12
+    19e4:      	movzwl	0x6(%rax), %eax
+    19e8:      	cmpl	$0xf, %eax
+    19eb:      	jg	0x1a2d <perf_unwind_native+0x1a2d>
+    19ed:      	cmpl	$0xb, %eax
+    19f0:      	jg	0x1a55 <perf_unwind_native+0x1a55>
+    19f2:      	cmpl	$0x9, %eax
+    19f5:      	jg	0x1a93 <perf_unwind_native+0x1a93>
+    19fb:      	cmpl	$0x8, %eax
+    19fe:      	je	0x1af1 <perf_unwind_native+0x1af1>
+    1a04:      	cmpl	$0x9, %eax
+    1a07:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1a0d:      	movq	(%rip), %rdi            # 0x1a14 <perf_unwind_native+0x1a14>
+		0000000000001a10:  R_X86_64_REX_GOTPCRELX	exe_id_to_9_stack_deltas-0x4
+    1a14:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1a19:      	movq	0x10(%rsp), %r13
+    1a1e:      	movl	$0x8, %ecx
+    1a23:      	movl	$0xfa0, %edx            # imm = 0xFA0
+    1a28:      	jmp	0x1bb2 <perf_unwind_native+0x1bb2>
+    1a2d:      	cmpl	$0x13, %eax
+    1a30:      	jg	0x1a74 <perf_unwind_native+0x1a74>
+    1a32:      	cmpl	$0x11, %eax
+    1a35:      	jg	0x1aa9 <perf_unwind_native+0x1aa9>
+    1a37:      	cmpl	$0x10, %eax
+    1a3a:      	je	0x1afa <perf_unwind_native+0x1afa>
+    1a40:      	cmpl	$0x11, %eax
+    1a43:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1a49:      	movq	(%rip), %rdi            # 0x1a50 <perf_unwind_native+0x1a50>
+		0000000000001a4c:  R_X86_64_REX_GOTPCRELX	exe_id_to_17_stack_deltas-0x4
+    1a50:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1a55:      	cmpl	$0xd, %eax
+    1a58:      	jg	0x1abc <perf_unwind_native+0x1abc>
+    1a5a:      	cmpl	$0xc, %eax
+    1a5d:      	je	0x1b03 <perf_unwind_native+0x1b03>
+    1a63:      	cmpl	$0xd, %eax
+    1a66:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1a68:      	movq	(%rip), %rdi            # 0x1a6f <perf_unwind_native+0x1a6f>
+		0000000000001a6b:  R_X86_64_REX_GOTPCRELX	exe_id_to_13_stack_deltas-0x4
+    1a6f:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1a74:      	cmpl	$0x15, %eax
+    1a77:      	jg	0x1acf <perf_unwind_native+0x1acf>
+    1a79:      	cmpl	$0x14, %eax
+    1a7c:      	je	0x1b0c <perf_unwind_native+0x1b0c>
+    1a82:      	cmpl	$0x15, %eax
+    1a85:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1a87:      	movq	(%rip), %rdi            # 0x1a8e <perf_unwind_native+0x1a8e>
+		0000000000001a8a:  R_X86_64_REX_GOTPCRELX	exe_id_to_21_stack_deltas-0x4
+    1a8e:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1a93:      	cmpl	$0xa, %eax
+    1a96:      	je	0x1b15 <perf_unwind_native+0x1b15>
+    1a98:      	cmpl	$0xb, %eax
+    1a9b:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1a9d:      	movq	(%rip), %rdi            # 0x1aa4 <perf_unwind_native+0x1aa4>
+		0000000000001aa0:  R_X86_64_REX_GOTPCRELX	exe_id_to_11_stack_deltas-0x4
+    1aa4:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1aa9:      	cmpl	$0x12, %eax
+    1aac:      	je	0x1b1e <perf_unwind_native+0x1b1e>
+    1aae:      	cmpl	$0x13, %eax
+    1ab1:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1ab3:      	movq	(%rip), %rdi            # 0x1aba <perf_unwind_native+0x1aba>
+		0000000000001ab6:  R_X86_64_REX_GOTPCRELX	exe_id_to_19_stack_deltas-0x4
+    1aba:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1abc:      	cmpl	$0xe, %eax
+    1abf:      	je	0x1b27 <perf_unwind_native+0x1b27>
+    1ac1:      	cmpl	$0xf, %eax
+    1ac4:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1ac6:      	movq	(%rip), %rdi            # 0x1acd <perf_unwind_native+0x1acd>
+		0000000000001ac9:  R_X86_64_REX_GOTPCRELX	exe_id_to_15_stack_deltas-0x4
+    1acd:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1acf:      	cmpl	$0x16, %eax
+    1ad2:      	je	0x1b30 <perf_unwind_native+0x1b30>
+    1ad4:      	cmpl	$0x17, %eax
+    1ad7:      	jne	0x1ae2 <perf_unwind_native+0x1ae2>
+    1ad9:      	movq	(%rip), %rdi            # 0x1ae0 <perf_unwind_native+0x1ae0>
+		0000000000001adc:  R_X86_64_REX_GOTPCRELX	exe_id_to_23_stack_deltas-0x4
+    1ae0:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1ae2:      	movl	$0x33, %ecx
+    1ae7:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    1aec:      	jmp	0x1bad <perf_unwind_native+0x1bad>
+    1af1:      	movq	(%rip), %rdi            # 0x1af8 <perf_unwind_native+0x1af8>
+		0000000000001af4:  R_X86_64_REX_GOTPCRELX	exe_id_to_8_stack_deltas-0x4
+    1af8:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1afa:      	movq	(%rip), %rdi            # 0x1b01 <perf_unwind_native+0x1b01>
+		0000000000001afd:  R_X86_64_REX_GOTPCRELX	exe_id_to_16_stack_deltas-0x4
+    1b01:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b03:      	movq	(%rip), %rdi            # 0x1b0a <perf_unwind_native+0x1b0a>
+		0000000000001b06:  R_X86_64_REX_GOTPCRELX	exe_id_to_12_stack_deltas-0x4
+    1b0a:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b0c:      	movq	(%rip), %rdi            # 0x1b13 <perf_unwind_native+0x1b13>
+		0000000000001b0f:  R_X86_64_REX_GOTPCRELX	exe_id_to_20_stack_deltas-0x4
+    1b13:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b15:      	movq	(%rip), %rdi            # 0x1b1c <perf_unwind_native+0x1b1c>
+		0000000000001b18:  R_X86_64_REX_GOTPCRELX	exe_id_to_10_stack_deltas-0x4
+    1b1c:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b1e:      	movq	(%rip), %rdi            # 0x1b25 <perf_unwind_native+0x1b25>
+		0000000000001b21:  R_X86_64_REX_GOTPCRELX	exe_id_to_18_stack_deltas-0x4
+    1b25:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b27:      	movq	(%rip), %rdi            # 0x1b2e <perf_unwind_native+0x1b2e>
+		0000000000001b2a:  R_X86_64_REX_GOTPCRELX	exe_id_to_14_stack_deltas-0x4
+    1b2e:      	jmp	0x1b37 <perf_unwind_native+0x1b37>
+    1b30:      	movq	(%rip), %rdi            # 0x1b37 <perf_unwind_native+0x1b37>
+		0000000000001b33:  R_X86_64_REX_GOTPCRELX	exe_id_to_22_stack_deltas-0x4
+    1b37:      	leaq	0x78(%rsp), %rsi
+    1b3c:      	callq	0x1b41 <perf_unwind_native+0x1b41>
+		0000000000001b3d:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1b41:      	testq	%rax, %rax
+    1b44:      	je	0x1ba3 <perf_unwind_native+0x1ba3>
+    1b46:      	movq	%rax, %r15
+    1b49:      	movl	(%r12), %ebx
+    1b4d:      	movl	%ebx, 0x2c(%rsp)
+    1b51:      	movq	0xf18(%rbp), %rax
+    1b58:      	movq	%rax, 0x18(%rsp)
+    1b5d:      	movzwl	0x4(%r12), %r13d
+    1b63:      	testl	%r13d, %r13d
+    1b66:      	je	0x1f8f <perf_unwind_native+0x1f8f>
+    1b6c:      	addl	%ebx, %r13d
+    1b6f:      	leal	(%rbx,%r13), %eax
+    1b73:      	shrl	%eax
+    1b75:      	movl	%eax, 0xc(%rsp)
+    1b79:      	leaq	0xc(%rsp), %rsi
+    1b7e:      	movq	%r15, %rdi
+    1b81:      	callq	0x1b86 <perf_unwind_native+0x1b86>
+		0000000000001b82:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1b86:      	testq	%rax, %rax
+    1b89:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1b8f:      	movl	0xc(%rsp), %ecx
+    1b93:      	movq	0x18(%rsp), %rdx
+    1b98:      	cmpw	%dx, (%rax)
+    1b9b:      	ja	0x1bbf <perf_unwind_native+0x1bbf>
+    1b9d:      	incl	%ecx
+    1b9f:      	movl	%ecx, %ebx
+    1ba1:      	jmp	0x1bc2 <perf_unwind_native+0x1bc2>
+    1ba3:      	movl	$0x32, %ecx
+    1ba8:      	movl	$0xfa2, %edx            # imm = 0xFA2
+    1bad:      	movq	0x10(%rsp), %r13
+    1bb2:      	movl	%ecx, 0xf28(%rbp)
+    1bb8:      	movl	%edx, %eax
+    1bba:      	jmp	0x2d8e <perf_unwind_native+0x2d8e>
+    1bbf:      	movl	%ecx, %r13d
+    1bc2:      	cmpl	%r13d, %ebx
+    1bc5:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1bcb:      	leal	(%rbx,%r13), %eax
+    1bcf:      	shrl	%eax
+    1bd1:      	movl	%eax, 0xc(%rsp)
+    1bd5:      	leaq	0xc(%rsp), %rsi
+    1bda:      	movq	%r15, %rdi
+    1bdd:      	callq	0x1be2 <perf_unwind_native+0x1be2>
+		0000000000001bde:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1be2:      	testq	%rax, %rax
+    1be5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1beb:      	movl	0xc(%rsp), %ecx
+    1bef:      	movq	0x18(%rsp), %rdx
+    1bf4:      	cmpw	%dx, (%rax)
+    1bf7:      	ja	0x1bff <perf_unwind_native+0x1bff>
+    1bf9:      	incl	%ecx
+    1bfb:      	movl	%ecx, %ebx
+    1bfd:      	jmp	0x1c02 <perf_unwind_native+0x1c02>
+    1bff:      	movl	%ecx, %r13d
+    1c02:      	cmpl	%r13d, %ebx
+    1c05:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1c0b:      	leal	(%rbx,%r13), %eax
+    1c0f:      	shrl	%eax
+    1c11:      	movl	%eax, 0xc(%rsp)
+    1c15:      	leaq	0xc(%rsp), %rsi
+    1c1a:      	movq	%r15, %rdi
+    1c1d:      	callq	0x1c22 <perf_unwind_native+0x1c22>
+		0000000000001c1e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1c22:      	testq	%rax, %rax
+    1c25:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1c2b:      	movl	0xc(%rsp), %ecx
+    1c2f:      	movq	0x18(%rsp), %rdx
+    1c34:      	cmpw	%dx, (%rax)
+    1c37:      	ja	0x1c3f <perf_unwind_native+0x1c3f>
+    1c39:      	incl	%ecx
+    1c3b:      	movl	%ecx, %ebx
+    1c3d:      	jmp	0x1c42 <perf_unwind_native+0x1c42>
+    1c3f:      	movl	%ecx, %r13d
+    1c42:      	cmpl	%r13d, %ebx
+    1c45:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1c4b:      	leal	(%rbx,%r13), %eax
+    1c4f:      	shrl	%eax
+    1c51:      	movl	%eax, 0xc(%rsp)
+    1c55:      	leaq	0xc(%rsp), %rsi
+    1c5a:      	movq	%r15, %rdi
+    1c5d:      	callq	0x1c62 <perf_unwind_native+0x1c62>
+		0000000000001c5e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1c62:      	testq	%rax, %rax
+    1c65:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1c6b:      	movl	0xc(%rsp), %ecx
+    1c6f:      	movq	0x18(%rsp), %rdx
+    1c74:      	cmpw	%dx, (%rax)
+    1c77:      	ja	0x1c7f <perf_unwind_native+0x1c7f>
+    1c79:      	incl	%ecx
+    1c7b:      	movl	%ecx, %ebx
+    1c7d:      	jmp	0x1c82 <perf_unwind_native+0x1c82>
+    1c7f:      	movl	%ecx, %r13d
+    1c82:      	cmpl	%r13d, %ebx
+    1c85:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1c8b:      	leal	(%rbx,%r13), %eax
+    1c8f:      	shrl	%eax
+    1c91:      	movl	%eax, 0xc(%rsp)
+    1c95:      	leaq	0xc(%rsp), %rsi
+    1c9a:      	movq	%r15, %rdi
+    1c9d:      	callq	0x1ca2 <perf_unwind_native+0x1ca2>
+		0000000000001c9e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1ca2:      	testq	%rax, %rax
+    1ca5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1cab:      	movl	0xc(%rsp), %ecx
+    1caf:      	movq	0x18(%rsp), %rdx
+    1cb4:      	cmpw	%dx, (%rax)
+    1cb7:      	ja	0x1cbf <perf_unwind_native+0x1cbf>
+    1cb9:      	incl	%ecx
+    1cbb:      	movl	%ecx, %ebx
+    1cbd:      	jmp	0x1cc2 <perf_unwind_native+0x1cc2>
+    1cbf:      	movl	%ecx, %r13d
+    1cc2:      	cmpl	%r13d, %ebx
+    1cc5:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1ccb:      	leal	(%rbx,%r13), %eax
+    1ccf:      	shrl	%eax
+    1cd1:      	movl	%eax, 0xc(%rsp)
+    1cd5:      	leaq	0xc(%rsp), %rsi
+    1cda:      	movq	%r15, %rdi
+    1cdd:      	callq	0x1ce2 <perf_unwind_native+0x1ce2>
+		0000000000001cde:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1ce2:      	testq	%rax, %rax
+    1ce5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1ceb:      	movl	0xc(%rsp), %ecx
+    1cef:      	movq	0x18(%rsp), %rdx
+    1cf4:      	cmpw	%dx, (%rax)
+    1cf7:      	ja	0x1cff <perf_unwind_native+0x1cff>
+    1cf9:      	incl	%ecx
+    1cfb:      	movl	%ecx, %ebx
+    1cfd:      	jmp	0x1d02 <perf_unwind_native+0x1d02>
+    1cff:      	movl	%ecx, %r13d
+    1d02:      	cmpl	%r13d, %ebx
+    1d05:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1d0b:      	leal	(%rbx,%r13), %eax
+    1d0f:      	shrl	%eax
+    1d11:      	movl	%eax, 0xc(%rsp)
+    1d15:      	leaq	0xc(%rsp), %rsi
+    1d1a:      	movq	%r15, %rdi
+    1d1d:      	callq	0x1d22 <perf_unwind_native+0x1d22>
+		0000000000001d1e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1d22:      	testq	%rax, %rax
+    1d25:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1d2b:      	movl	0xc(%rsp), %ecx
+    1d2f:      	movq	0x18(%rsp), %rdx
+    1d34:      	cmpw	%dx, (%rax)
+    1d37:      	ja	0x1d3f <perf_unwind_native+0x1d3f>
+    1d39:      	incl	%ecx
+    1d3b:      	movl	%ecx, %ebx
+    1d3d:      	jmp	0x1d42 <perf_unwind_native+0x1d42>
+    1d3f:      	movl	%ecx, %r13d
+    1d42:      	cmpl	%r13d, %ebx
+    1d45:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1d4b:      	leal	(%rbx,%r13), %eax
+    1d4f:      	shrl	%eax
+    1d51:      	movl	%eax, 0xc(%rsp)
+    1d55:      	leaq	0xc(%rsp), %rsi
+    1d5a:      	movq	%r15, %rdi
+    1d5d:      	callq	0x1d62 <perf_unwind_native+0x1d62>
+		0000000000001d5e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1d62:      	testq	%rax, %rax
+    1d65:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1d6b:      	movl	0xc(%rsp), %ecx
+    1d6f:      	movq	0x18(%rsp), %rdx
+    1d74:      	cmpw	%dx, (%rax)
+    1d77:      	ja	0x1d7f <perf_unwind_native+0x1d7f>
+    1d79:      	incl	%ecx
+    1d7b:      	movl	%ecx, %ebx
+    1d7d:      	jmp	0x1d82 <perf_unwind_native+0x1d82>
+    1d7f:      	movl	%ecx, %r13d
+    1d82:      	cmpl	%r13d, %ebx
+    1d85:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1d8b:      	leal	(%rbx,%r13), %eax
+    1d8f:      	shrl	%eax
+    1d91:      	movl	%eax, 0xc(%rsp)
+    1d95:      	leaq	0xc(%rsp), %rsi
+    1d9a:      	movq	%r15, %rdi
+    1d9d:      	callq	0x1da2 <perf_unwind_native+0x1da2>
+		0000000000001d9e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1da2:      	testq	%rax, %rax
+    1da5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1dab:      	movl	0xc(%rsp), %ecx
+    1daf:      	movq	0x18(%rsp), %rdx
+    1db4:      	cmpw	%dx, (%rax)
+    1db7:      	ja	0x1dbf <perf_unwind_native+0x1dbf>
+    1db9:      	incl	%ecx
+    1dbb:      	movl	%ecx, %ebx
+    1dbd:      	jmp	0x1dc2 <perf_unwind_native+0x1dc2>
+    1dbf:      	movl	%ecx, %r13d
+    1dc2:      	cmpl	%r13d, %ebx
+    1dc5:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1dcb:      	leal	(%rbx,%r13), %eax
+    1dcf:      	shrl	%eax
+    1dd1:      	movl	%eax, 0xc(%rsp)
+    1dd5:      	leaq	0xc(%rsp), %rsi
+    1dda:      	movq	%r15, %rdi
+    1ddd:      	callq	0x1de2 <perf_unwind_native+0x1de2>
+		0000000000001dde:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1de2:      	testq	%rax, %rax
+    1de5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1deb:      	movl	0xc(%rsp), %ecx
+    1def:      	movq	0x18(%rsp), %rdx
+    1df4:      	cmpw	%dx, (%rax)
+    1df7:      	ja	0x1dff <perf_unwind_native+0x1dff>
+    1df9:      	incl	%ecx
+    1dfb:      	movl	%ecx, %ebx
+    1dfd:      	jmp	0x1e02 <perf_unwind_native+0x1e02>
+    1dff:      	movl	%ecx, %r13d
+    1e02:      	cmpl	%r13d, %ebx
+    1e05:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1e0b:      	leal	(%rbx,%r13), %eax
+    1e0f:      	shrl	%eax
+    1e11:      	movl	%eax, 0xc(%rsp)
+    1e15:      	leaq	0xc(%rsp), %rsi
+    1e1a:      	movq	%r15, %rdi
+    1e1d:      	callq	0x1e22 <perf_unwind_native+0x1e22>
+		0000000000001e1e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1e22:      	testq	%rax, %rax
+    1e25:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1e2b:      	movl	0xc(%rsp), %ecx
+    1e2f:      	movq	0x18(%rsp), %rdx
+    1e34:      	cmpw	%dx, (%rax)
+    1e37:      	ja	0x1e3f <perf_unwind_native+0x1e3f>
+    1e39:      	incl	%ecx
+    1e3b:      	movl	%ecx, %ebx
+    1e3d:      	jmp	0x1e42 <perf_unwind_native+0x1e42>
+    1e3f:      	movl	%ecx, %r13d
+    1e42:      	cmpl	%r13d, %ebx
+    1e45:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1e4b:      	leal	(%rbx,%r13), %eax
+    1e4f:      	shrl	%eax
+    1e51:      	movl	%eax, 0xc(%rsp)
+    1e55:      	leaq	0xc(%rsp), %rsi
+    1e5a:      	movq	%r15, %rdi
+    1e5d:      	callq	0x1e62 <perf_unwind_native+0x1e62>
+		0000000000001e5e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1e62:      	testq	%rax, %rax
+    1e65:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1e6b:      	movl	0xc(%rsp), %ecx
+    1e6f:      	movq	0x18(%rsp), %rdx
+    1e74:      	cmpw	%dx, (%rax)
+    1e77:      	ja	0x1e7f <perf_unwind_native+0x1e7f>
+    1e79:      	incl	%ecx
+    1e7b:      	movl	%ecx, %ebx
+    1e7d:      	jmp	0x1e82 <perf_unwind_native+0x1e82>
+    1e7f:      	movl	%ecx, %r13d
+    1e82:      	cmpl	%r13d, %ebx
+    1e85:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1e8b:      	leal	(%rbx,%r13), %eax
+    1e8f:      	shrl	%eax
+    1e91:      	movl	%eax, 0xc(%rsp)
+    1e95:      	leaq	0xc(%rsp), %rsi
+    1e9a:      	movq	%r15, %rdi
+    1e9d:      	callq	0x1ea2 <perf_unwind_native+0x1ea2>
+		0000000000001e9e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1ea2:      	testq	%rax, %rax
+    1ea5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1eab:      	movl	0xc(%rsp), %ecx
+    1eaf:      	movq	0x18(%rsp), %rdx
+    1eb4:      	cmpw	%dx, (%rax)
+    1eb7:      	ja	0x1ebf <perf_unwind_native+0x1ebf>
+    1eb9:      	incl	%ecx
+    1ebb:      	movl	%ecx, %ebx
+    1ebd:      	jmp	0x1ec2 <perf_unwind_native+0x1ec2>
+    1ebf:      	movl	%ecx, %r13d
+    1ec2:      	cmpl	%r13d, %ebx
+    1ec5:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1ecb:      	leal	(%rbx,%r13), %eax
+    1ecf:      	shrl	%eax
+    1ed1:      	movl	%eax, 0xc(%rsp)
+    1ed5:      	leaq	0xc(%rsp), %rsi
+    1eda:      	movq	%r15, %rdi
+    1edd:      	callq	0x1ee2 <perf_unwind_native+0x1ee2>
+		0000000000001ede:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1ee2:      	testq	%rax, %rax
+    1ee5:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1eeb:      	movl	0xc(%rsp), %ecx
+    1eef:      	movq	0x18(%rsp), %rdx
+    1ef4:      	cmpw	%dx, (%rax)
+    1ef7:      	ja	0x1eff <perf_unwind_native+0x1eff>
+    1ef9:      	incl	%ecx
+    1efb:      	movl	%ecx, %ebx
+    1efd:      	jmp	0x1f02 <perf_unwind_native+0x1f02>
+    1eff:      	movl	%ecx, %r13d
+    1f02:      	cmpl	%r13d, %ebx
+    1f05:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1f07:      	leal	(%rbx,%r13), %eax
+    1f0b:      	shrl	%eax
+    1f0d:      	movl	%eax, 0xc(%rsp)
+    1f11:      	leaq	0xc(%rsp), %rsi
+    1f16:      	movq	%r15, %rdi
+    1f19:      	callq	0x1f1e <perf_unwind_native+0x1f1e>
+		0000000000001f1a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1f1e:      	testq	%rax, %rax
+    1f21:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1f27:      	movl	0xc(%rsp), %ecx
+    1f2b:      	movq	0x18(%rsp), %rdx
+    1f30:      	cmpw	%dx, (%rax)
+    1f33:      	ja	0x1f3b <perf_unwind_native+0x1f3b>
+    1f35:      	incl	%ecx
+    1f37:      	movl	%ecx, %ebx
+    1f39:      	jmp	0x1f3e <perf_unwind_native+0x1f3e>
+    1f3b:      	movl	%ecx, %r13d
+    1f3e:      	cmpl	%r13d, %ebx
+    1f41:      	jae	0x1f83 <perf_unwind_native+0x1f83>
+    1f43:      	leal	(%rbx,%r13), %eax
+    1f47:      	shrl	%eax
+    1f49:      	movl	%eax, 0xc(%rsp)
+    1f4d:      	leaq	0xc(%rsp), %rsi
+    1f52:      	movq	%r15, %rdi
+    1f55:      	callq	0x1f5a <perf_unwind_native+0x1f5a>
+		0000000000001f56:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1f5a:      	testq	%rax, %rax
+    1f5d:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1f63:      	movl	0xc(%rsp), %ecx
+    1f67:      	movq	0x18(%rsp), %rdx
+    1f6c:      	cmpw	%dx, (%rax)
+    1f6f:      	ja	0x1f77 <perf_unwind_native+0x1f77>
+    1f71:      	incl	%ecx
+    1f73:      	movl	%ecx, %ebx
+    1f75:      	jmp	0x1f7a <perf_unwind_native+0x1f7a>
+    1f77:      	movl	%ecx, %r13d
+    1f7a:      	cmpl	%r13d, %ebx
+    1f7d:      	jb	0x2d77 <perf_unwind_native+0x2d77>
+    1f83:      	movl	%r13d, %ebx
+    1f86:      	testl	%r13d, %r13d
+    1f89:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    1f8f:      	decl	%ebx
+    1f91:      	movl	%ebx, 0x2c(%rsp)
+    1f95:      	leaq	0x2c(%rsp), %rsi
+    1f9a:      	movq	%r15, %rdi
+    1f9d:      	callq	0x1fa2 <perf_unwind_native+0x1fa2>
+		0000000000001f9e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1fa2:      	testq	%rax, %rax
+    1fa5:      	je	0x209e <perf_unwind_native+0x209e>
+    1fab:      	movzwl	0x18(%rsp), %r13d
+    1fb1:      	movzwl	(%rax), %ecx
+    1fb4:      	subl	%ecx, %r13d
+    1fb7:      	movl	0x2c(%rsp), %ecx
+    1fbb:      	cmpl	(%r12), %ecx
+    1fbf:      	jae	0x1fc8 <perf_unwind_native+0x1fc8>
+    1fc1:      	addl	$0x10000, %r13d         # imm = 0x10000
+    1fc8:      	movzwl	0x2(%rax), %ecx
+    1fcc:      	movl	%ecx, 0x28(%rsp)
+    1fd0:      	cmpl	$0x8000, %ecx           # imm = 0x8000
+    1fd6:      	je	0x208f <perf_unwind_native+0x208f>
+    1fdc:      	cmpl	$0x8001, %ecx           # imm = 0x8001
+    1fe2:      	jne	0x2009 <perf_unwind_native+0x2009>
+    1fe4:      	movl	$0x7, 0xc(%rsp)
+    1fec:      	movq	(%rip), %rdi            # 0x1ff3 <perf_unwind_native+0x1ff3>
+		0000000000001fef:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    1ff3:      	leaq	0xc(%rsp), %rsi
+    1ff8:      	callq	0x1ffd <perf_unwind_native+0x1ffd>
+		0000000000001ff9:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    1ffd:      	testq	%rax, %rax
+    2000:      	je	0x2005 <perf_unwind_native+0x2005>
+    2002:      	incq	(%rax)
+    2005:      	movl	0x28(%rsp), %ecx
+    2009:      	testw	%cx, %cx
+    200c:      	js	0x20ad <perf_unwind_native+0x20ad>
+    2012:      	movq	(%rip), %rdi            # 0x2019 <perf_unwind_native+0x2019>
+		0000000000002015:  R_X86_64_REX_GOTPCRELX	unwind_info_array-0x4
+    2019:      	leaq	0x28(%rsp), %rsi
+    201e:      	callq	0x2023 <perf_unwind_native+0x2023>
+		000000000000201f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2023:      	testq	%rax, %rax
+    2026:      	je	0x2e42 <perf_unwind_native+0x2e42>
+    202c:      	movq	%rax, %r15
+    202f:      	movl	0x4(%rax), %ebx
+    2032:      	movzbl	0x2(%rax), %eax
+    2036:      	testl	%eax, %eax
+    2038:      	je	0x2053 <perf_unwind_native+0x2053>
+    203a:      	movl	%eax, %ecx
+    203c:      	andl	$0x7f, %ecx
+    203f:      	cmpl	%ecx, %r13d
+    2042:      	jl	0x2053 <perf_unwind_native+0x2053>
+    2044:      	xorl	%ecx, %ecx
+    2046:      	testb	%al, %al
+    2048:      	setns	%cl
+    204b:      	shll	$0x4, %ecx
+    204e:      	addl	%ecx, %ebx
+    2050:      	addl	$-0x8, %ebx
+    2053:      	movzbl	(%r15), %eax
+    2057:      	movl	%ebx, %ecx
+    2059:      	testb	%al, %al
+    205b:      	jns	0x2062 <perf_unwind_native+0x2062>
+    205d:      	movl	%ebx, %ecx
+    205f:      	andl	$-0x8, %ecx
+    2062:      	movl	%eax, %edx
+    2064:      	andl	$0x7f, %edx
+    2067:      	xorl	%r12d, %r12d
+    206a:      	cmpl	$0x2, %edx
+    206d:      	jg	0x2161 <perf_unwind_native+0x2161>
+    2073:      	cmpl	$0x1, %edx
+    2076:      	je	0x225c <perf_unwind_native+0x225c>
+    207c:      	movq	0x40(%rsp), %rsi
+    2081:      	cmpl	$0x2, %edx
+    2084:      	je	0x2259 <perf_unwind_native+0x2259>
+    208a:      	jmp	0x22b4 <perf_unwind_native+0x22b4>
+    208f:      	movl	$0xd, %esi
+    2094:      	movl	$0xfa5, %edx            # imm = 0xFA5
+    2099:      	jmp	0x2d81 <perf_unwind_native+0x2d81>
+    209e:      	movl	$0xfa4, %edx            # imm = 0xFA4
+    20a3:      	movl	$0xa, %esi
+    20a8:      	jmp	0x2d81 <perf_unwind_native+0x2d81>
+    20ad:      	andl	$0xffff7fff, %ecx       # imm = 0xFFFF7FFF
+    20b3:      	movl	$0x1, %eax
+    20b8:      	cmpl	$0x2, %ecx
+    20bb:      	jg	0x20fb <perf_unwind_native+0x20fb>
+    20bd:      	cmpl	$0x1, %ecx
+    20c0:      	movq	0x10(%rsp), %r13
+    20c5:      	movq	0x60(%rsp), %rdx
+    20ca:      	movq	0x40(%rsp), %rsi
+    20cf:      	je	0x2eb7 <perf_unwind_native+0x2eb7>
+    20d5:      	cmpl	$0x2, %ecx
+    20d8:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    20de:      	movq	(%rsi), %rax
+    20e1:      	movl	(%rdx), %ecx
+    20e3:      	andl	$0xf, %ecx
+    20e6:      	xorl	%edx, %edx
+    20e8:      	cmpl	$0xb, %ecx
+    20eb:      	setae	%dl
+    20ee:      	leaq	(%rax,%rdx,8), %r12
+    20f2:      	addq	$0x8, %r12
+    20f6:      	jmp	0x2393 <perf_unwind_native+0x2393>
+    20fb:      	cmpl	$0x3, %ecx
+    20fe:      	je	0x21a4 <perf_unwind_native+0x21a4>
+    2104:      	cmpl	$0x4, %ecx
+    2107:      	movq	0x10(%rsp), %r13
+    210c:      	movq	0x58(%rsp), %rcx
+    2111:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    2117:      	movq	(%rcx), %rdx
+    211a:      	leaq	0x30(%rsp), %rdi
+    211f:      	movl	$0x10, %esi
+    2124:      	callq	0x2129 <perf_unwind_native+0x2129>
+		0000000000002125:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    2129:      	testq	%rax, %rax
+    212c:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    2132:      	movq	0xee0(%rbp), %rax
+    2139:      	addq	$0x10, %rax
+    213d:      	movq	%rax, 0xed8(%rbp)
+    2144:      	movq	0x30(%rsp), %rax
+    2149:      	movq	%rax, 0xee0(%rbp)
+    2150:      	movq	0x38(%rsp), %rax
+    2155:      	movq	%rax, 0xed0(%rbp)
+    215c:      	jmp	0x23c5 <perf_unwind_native+0x23c5>
+    2161:      	cmpl	$0x3, %edx
+    2164:      	je	0x2254 <perf_unwind_native+0x2254>
+    216a:      	cmpl	$0x5, %edx
+    216d:      	jne	0x22b4 <perf_unwind_native+0x22b4>
+    2173:      	movl	%ebx, %eax
+    2175:      	andl	$0xf, %eax
+    2178:      	xorl	%r12d, %r12d
+    217b:      	cmpl	$0xa, %eax
+    217e:      	jg	0x2285 <perf_unwind_native+0x2285>
+    2184:      	movq	0x50(%rsp), %rcx
+    2189:      	testl	%eax, %eax
+    218b:      	je	0x2299 <perf_unwind_native+0x2299>
+    2191:      	cmpl	$0x9, %eax
+    2194:      	jne	0x22b4 <perf_unwind_native+0x22b4>
+    219a:      	movq	0x68(%rsp), %rcx
+    219f:      	jmp	0x2299 <perf_unwind_native+0x2299>
+    21a4:      	movq	0x40(%rsp), %rax
+    21a9:      	movq	(%rax), %rdx
+    21ac:      	addq	$0x28, %rdx
+    21b0:      	leaq	0x80(%rsp), %rdi
+    21b8:      	movl	$0x90, %esi
+    21bd:      	callq	0x21c2 <perf_unwind_native+0x21c2>
+		00000000000021be:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    21c2:      	testq	%rax, %rax
+    21c5:      	movq	0x10(%rsp), %r13
+    21ca:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    21d0:      	movq	0xe8(%rsp), %rax
+    21d8:      	movq	%rax, 0xee8(%rbp)
+    21df:      	movq	0x88(%rsp), %rax
+    21e7:      	movq	%rax, 0xef0(%rbp)
+    21ee:      	movq	0x98(%rsp), %rax
+    21f6:      	movq	%rax, 0xef8(%rbp)
+    21fd:      	movq	0xa8(%rsp), %rax
+    2205:      	movq	%rax, 0xf00(%rbp)
+    220c:      	movq	0xb8(%rsp), %rax
+    2214:      	movq	%rax, 0xf08(%rbp)
+    221b:      	movq	0xd0(%rsp), %rax
+    2223:      	movq	%rax, 0xee0(%rbp)
+    222a:      	movq	0xf8(%rsp), %rax
+    2232:      	movq	%rax, 0xed8(%rbp)
+    2239:      	movq	0x100(%rsp), %rax
+    2241:      	movq	%rax, 0xed0(%rbp)
+    2248:      	movb	$0x0, 0xf30(%rbp)
+    224f:      	jmp	0x23cc <perf_unwind_native+0x23cc>
+    2254:      	movq	0x58(%rsp), %rsi
+    2259:      	movq	(%rsi), %r12
+    225c:      	movq	%r12, %rdx
+    225f:      	movslq	%ecx, %r12
+    2262:      	addq	%rdx, %r12
+    2265:      	testb	%al, %al
+    2267:      	jns	0x22b4 <perf_unwind_native+0x22b4>
+    2269:      	leaq	0x30(%rsp), %rdi
+    226e:      	movl	$0x8, %esi
+    2273:      	movq	%r12, %rdx
+    2276:      	callq	0x227b <perf_unwind_native+0x227b>
+		0000000000002277:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    227b:      	testq	%rax, %rax
+    227e:      	je	0x22a6 <perf_unwind_native+0x22a6>
+    2280:      	xorl	%r12d, %r12d
+    2283:      	jmp	0x22b4 <perf_unwind_native+0x22b4>
+    2285:      	movq	0x70(%rsp), %rcx
+    228a:      	cmpl	$0xb, %eax
+    228d:      	je	0x2299 <perf_unwind_native+0x2299>
+    228f:      	movq	0x20(%rsp), %rcx
+    2294:      	cmpl	$0xf, %eax
+    2297:      	jne	0x22b4 <perf_unwind_native+0x22b4>
+    2299:      	sarl	%ebx
+    229b:      	andl	$-0x8, %ebx
+    229e:      	movslq	%ebx, %r12
+    22a1:      	addq	(%rcx), %r12
+    22a4:      	jmp	0x22b4 <perf_unwind_native+0x22b4>
+    22a6:      	shll	$0x3, %ebx
+    22a9:      	andl	$0x38, %ebx
+    22ac:      	addq	0x30(%rsp), %rbx
+    22b1:      	movq	%rbx, %r12
+    22b4:      	movzbl	0x1(%r15), %eax
+    22b9:      	movl	0x8(%r15), %ebx
+    22bd:      	movl	%ebx, %ecx
+    22bf:      	testb	%al, %al
+    22c1:      	jns	0x22c8 <perf_unwind_native+0x22c8>
+    22c3:      	movl	%ebx, %ecx
+    22c5:      	andl	$-0x8, %ecx
+    22c8:      	movl	%eax, %edx
+    22ca:      	andl	$0x7f, %edx
+    22cd:      	cmpl	$0x2, %edx
+    22d0:      	jg	0x22e9 <perf_unwind_native+0x22e9>
+    22d2:      	movq	%r12, %rsi
+    22d5:      	cmpl	$0x1, %edx
+    22d8:      	je	0x231e <perf_unwind_native+0x231e>
+    22da:      	movq	0x40(%rsp), %rsi
+    22df:      	cmpl	$0x2, %edx
+    22e2:      	je	0x231b <perf_unwind_native+0x231b>
+    22e4:      	jmp	0x2381 <perf_unwind_native+0x2381>
+    22e9:      	cmpl	$0x3, %edx
+    22ec:      	je	0x2316 <perf_unwind_native+0x2316>
+    22ee:      	cmpl	$0x5, %edx
+    22f1:      	jne	0x2381 <perf_unwind_native+0x2381>
+    22f7:      	movl	%ebx, %eax
+    22f9:      	andl	$0xf, %eax
+    22fc:      	cmpl	$0xa, %eax
+    22ff:      	jg	0x234c <perf_unwind_native+0x234c>
+    2301:      	movq	0x50(%rsp), %rcx
+    2306:      	testl	%eax, %eax
+    2308:      	je	0x2360 <perf_unwind_native+0x2360>
+    230a:      	cmpl	$0x9, %eax
+    230d:      	jne	0x2381 <perf_unwind_native+0x2381>
+    230f:      	movq	0x68(%rsp), %rcx
+    2314:      	jmp	0x2360 <perf_unwind_native+0x2360>
+    2316:      	movq	0x58(%rsp), %rsi
+    231b:      	movq	(%rsi), %rsi
+    231e:      	movslq	%ecx, %rdx
+    2321:      	addq	%rsi, %rdx
+    2324:      	testb	%al, %al
+    2326:      	jns	0x236b <perf_unwind_native+0x236b>
+    2328:      	leaq	0x30(%rsp), %rdi
+    232d:      	movl	$0x8, %esi
+    2332:      	callq	0x2337 <perf_unwind_native+0x2337>
+		0000000000002333:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    2337:      	testq	%rax, %rax
+    233a:      	jne	0x2381 <perf_unwind_native+0x2381>
+    233c:      	shll	$0x3, %ebx
+    233f:      	andl	$0x38, %ebx
+    2342:      	addq	0x30(%rsp), %rbx
+    2347:      	movq	%rbx, %rdx
+    234a:      	jmp	0x236b <perf_unwind_native+0x236b>
+    234c:      	movq	0x70(%rsp), %rcx
+    2351:      	cmpl	$0xb, %eax
+    2354:      	je	0x2360 <perf_unwind_native+0x2360>
+    2356:      	movq	0x20(%rsp), %rcx
+    235b:      	cmpl	$0xf, %eax
+    235e:      	jne	0x2381 <perf_unwind_native+0x2381>
+    2360:      	sarl	%ebx
+    2362:      	andl	$-0x8, %ebx
+    2365:      	movslq	%ebx, %rdx
+    2368:      	addq	(%rcx), %rdx
+    236b:      	testq	%rdx, %rdx
+    236e:      	je	0x2381 <perf_unwind_native+0x2381>
+    2370:      	movq	0x58(%rsp), %rdi
+    2375:      	movl	$0x8, %esi
+    237a:      	callq	0x237f <perf_unwind_native+0x237f>
+		000000000000237b:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    237f:      	jmp	0x2393 <perf_unwind_native+0x2393>
+    2381:      	cmpb	$0x3, (%r15)
+    2385:      	jne	0x2393 <perf_unwind_native+0x2393>
+    2387:      	movq	0x58(%rsp), %rax
+    238c:      	movq	$0x0, (%rax)
+    2393:      	testq	%r12, %r12
+    2396:      	movq	0x10(%rsp), %r13
+    239b:      	movq	0x60(%rsp), %rdi
+    23a0:      	je	0xb9b <perf_unwind_native+0xb9b>
+    23a6:      	leaq	-0x8(%r12), %rdx
+    23ab:      	movl	$0x8, %esi
+    23b0:      	callq	0x23b5 <perf_unwind_native+0x23b5>
+		00000000000023b1:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    23b5:      	testq	%rax, %rax
+    23b8:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    23be:      	movq	%r12, 0xed8(%rbp)
+    23c5:      	movb	$0x1, 0xf30(%rbp)
+    23cc:      	movl	$0x6, 0x30(%rsp)
+    23d4:      	movq	(%rip), %rdi            # 0x23db <perf_unwind_native+0x23db>
+		00000000000023d7:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    23db:      	leaq	0x30(%rsp), %rsi
+    23e0:      	callq	0x23e5 <perf_unwind_native+0x23e5>
+		00000000000023e1:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    23e5:      	testq	%rax, %rax
+    23e8:      	je	0x23ed <perf_unwind_native+0x23ed>
+    23ea:      	incq	(%rax)
+    23ed:      	movq	0x60(%rsp), %rax
+    23f2:      	movq	(%rax), %rbx
+    23f5:      	testq	%rbx, %rbx
+    23f8:      	movq	0x10(%rsp), %r13
+    23fd:      	je	0x32f2 <perf_unwind_native+0x32f2>
+    2403:      	movabsq	$0xffffffffffffff, %rax # imm = 0xFFFFFFFFFFFFFF
+    240d:      	cmpq	%rax, %rbx
+    2410:      	ja	0xc0f <perf_unwind_native+0xc0f>
+    2416:      	cmpq	$0x1000, %rbx           # imm = 0x1000
+    241d:      	jb	0xc30 <perf_unwind_native+0xc30>
+    2423:      	movl	(%rbp), %eax
+    2426:      	movl	$0x60, 0x80(%rsp)
+    2431:      	movbel	%eax, 0x84(%rsp)
+    243a:      	movbeq	%rbx, 0x88(%rsp)
+    2444:      	movq	(%rip), %rdi            # 0x244b <perf_unwind_native+0x244b>
+		0000000000002447:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+    244b:      	leaq	0x80(%rsp), %rsi
+    2453:      	callq	0x2458 <perf_unwind_native+0x2458>
+		0000000000002454:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2458:      	testq	%rax, %rax
+    245b:      	je	0x330a <perf_unwind_native+0x330a>
+    2461:      	movq	0x8(%rax), %r12
+    2465:      	movq	%r12, %rcx
+    2468:      	movabsq	$0xffffffffffffff, %rdx # imm = 0xFFFFFFFFFFFFFF
+    2472:      	andq	%rdx, %rcx
+    2475:      	movq	%rcx, 0xf20(%rbp)
+    247c:      	shrq	$0x38, %r12
+    2480:      	movq	(%rax), %rax
+    2483:      	movq	%rax, 0xf10(%rbp)
+    248a:      	subq	%rcx, %rbx
+    248d:      	movq	%rbx, 0xf18(%rbp)
+    2494:      	cmpq	$0x1, %r12
+    2498:      	jne	0x2510 <perf_unwind_native+0x2510>
+    249a:      	movq	%rax, 0x80(%rsp)
+    24a2:      	movq	(%rip), %rdi            # 0x24a9 <perf_unwind_native+0x24a9>
+		00000000000024a5:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+    24a9:      	leaq	0x80(%rsp), %rsi
+    24b1:      	callq	0x24b6 <perf_unwind_native+0x24b6>
+		00000000000024b2:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    24b6:      	movl	$0x1, %r12d
+    24bc:      	testq	%rax, %rax
+    24bf:      	je	0x2510 <perf_unwind_native+0x2510>
+    24c1:      	movq	%rax, %r15
+    24c4:      	cmpq	%rbx, (%rax)
+    24c7:      	ja	0x24cf <perf_unwind_native+0x24cf>
+    24c9:      	cmpq	%rbx, 0x8(%r15)
+    24cd:      	jae	0x24db <perf_unwind_native+0x24db>
+    24cf:      	cmpq	%rbx, 0x10(%r15)
+    24d3:      	ja	0x2510 <perf_unwind_native+0x2510>
+    24d5:      	cmpq	%rbx, 0x18(%r15)
+    24d9:      	jb	0x2510 <perf_unwind_native+0x2510>
+    24db:      	movl	0x1380(%rbp), %eax
+    24e1:      	movl	0x20(%r15), %ecx
+    24e5:      	btl	%ecx, %eax
+    24e8:      	jb	0x2510 <perf_unwind_native+0x2510>
+    24ea:      	movl	$0x0, 0x30(%rsp)
+    24f2:      	movq	(%rip), %rdi            # 0x24f9 <perf_unwind_native+0x24f9>
+		00000000000024f5:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    24f9:      	leaq	0x30(%rsp), %rsi
+    24fe:      	callq	0x2503 <perf_unwind_native+0x2503>
+		00000000000024ff:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2503:      	testq	%rax, %rax
+    2506:      	je	0x250b <perf_unwind_native+0x250b>
+    2508:      	incq	(%rax)
+    250b:      	movzwl	0x20(%r15), %r12d
+    2510:      	cmpl	$0x1, %r12d
+    2514:      	jne	0x32e8 <perf_unwind_native+0x32e8>
+    251a:      	movl	$0x5, 0x80(%rsp)
+    2525:      	movq	(%rip), %rdi            # 0x252c <perf_unwind_native+0x252c>
+		0000000000002528:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    252c:      	leaq	0x80(%rsp), %rsi
+    2534:      	callq	0x2539 <perf_unwind_native+0x2539>
+		0000000000002535:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2539:      	testq	%rax, %rax
+    253c:      	je	0x2541 <perf_unwind_native+0x2541>
+    253e:      	incq	(%rax)
+    2541:      	movl	0x2c0(%rbp), %eax
+    2547:      	cmpq	$0x7e, %rax
+    254b:      	movq	0x10(%rsp), %r13
+    2550:      	ja	0x75 <perf_unwind_native+0x75>
+    2556:      	movzbl	0xf30(%rbp), %ecx
+    255d:      	movq	0xf10(%rbp), %rdx
+    2564:      	movq	0xf18(%rbp), %rsi
+    256b:      	leal	0x1(%rax), %edi
+    256e:      	movl	%edi, 0x2c0(%rbp)
+    2574:      	leaq	(%rax,%rax,2), %rax
+    2578:      	movq	%rdx, 0x2d0(%rbp,%rax,8)
+    2580:      	movq	%rsi, 0x2d8(%rbp,%rax,8)
+    2588:      	movb	$0x3, 0x2e0(%rbp,%rax,8)
+    2590:      	movb	%cl, 0x2e1(%rbp,%rax,8)
+    2597:      	movl	$0x0, 0x2e2(%rbp,%rax,8)
+    25a2:      	movw	$0x0, 0x2e6(%rbp,%rax,8)
+    25ac:      	movl	$0x0, 0x28(%rsp)
+    25b4:      	movq	0xf10(%rbp), %rax
+    25bb:      	movq	%rax, 0x78(%rsp)
+    25c0:      	movq	%rax, 0x30(%rsp)
+    25c5:      	movq	$-0x10000, %rax         # imm = 0xFFFF0000
+    25cc:      	andq	0xf18(%rbp), %rax
+    25d3:      	movq	%rax, 0x38(%rsp)
+    25d8:      	movq	(%rip), %rdi            # 0x25df <perf_unwind_native+0x25df>
+		00000000000025db:  R_X86_64_REX_GOTPCRELX	stack_delta_page_to_info-0x4
+    25df:      	leaq	0x30(%rsp), %rsi
+    25e4:      	callq	0x25e9 <perf_unwind_native+0x25e9>
+		00000000000025e5:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    25e9:      	testq	%rax, %rax
+    25ec:      	movl	$0x8, %ecx
+    25f1:      	movl	$0xfa0, %edx            # imm = 0xFA0
+    25f6:      	je	0x1bb2 <perf_unwind_native+0x1bb2>
+    25fc:      	movq	%rax, %r12
+    25ff:      	movzwl	0x6(%rax), %eax
+    2603:      	cmpl	$0xf, %eax
+    2606:      	jg	0x2643 <perf_unwind_native+0x2643>
+    2608:      	cmpl	$0xb, %eax
+    260b:      	jg	0x267e <perf_unwind_native+0x267e>
+    260d:      	cmpl	$0x9, %eax
+    2610:      	jg	0x26ea <perf_unwind_native+0x26ea>
+    2616:      	cmpl	$0x8, %eax
+    2619:      	je	0x2790 <perf_unwind_native+0x2790>
+    261f:      	movl	$0x33, %ecx
+    2624:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    2629:      	cmpl	$0x9, %eax
+    262c:      	movq	0x10(%rsp), %r13
+    2631:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    2637:      	movq	(%rip), %rdi            # 0x263e <perf_unwind_native+0x263e>
+		000000000000263a:  R_X86_64_REX_GOTPCRELX	exe_id_to_9_stack_deltas-0x4
+    263e:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    2643:      	cmpl	$0x13, %eax
+    2646:      	jg	0x26b4 <perf_unwind_native+0x26b4>
+    2648:      	cmpl	$0x11, %eax
+    264b:      	jg	0x2717 <perf_unwind_native+0x2717>
+    2651:      	cmpl	$0x10, %eax
+    2654:      	je	0x2799 <perf_unwind_native+0x2799>
+    265a:      	movl	$0x33, %ecx
+    265f:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    2664:      	cmpl	$0x11, %eax
+    2667:      	movq	0x10(%rsp), %r13
+    266c:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    2672:      	movq	(%rip), %rdi            # 0x2679 <perf_unwind_native+0x2679>
+		0000000000002675:  R_X86_64_REX_GOTPCRELX	exe_id_to_17_stack_deltas-0x4
+    2679:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    267e:      	cmpl	$0xd, %eax
+    2681:      	jg	0x2744 <perf_unwind_native+0x2744>
+    2687:      	cmpl	$0xc, %eax
+    268a:      	je	0x27a2 <perf_unwind_native+0x27a2>
+    2690:      	movl	$0x33, %ecx
+    2695:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    269a:      	cmpl	$0xd, %eax
+    269d:      	movq	0x10(%rsp), %r13
+    26a2:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    26a8:      	movq	(%rip), %rdi            # 0x26af <perf_unwind_native+0x26af>
+		00000000000026ab:  R_X86_64_REX_GOTPCRELX	exe_id_to_13_stack_deltas-0x4
+    26af:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    26b4:      	cmpl	$0x15, %eax
+    26b7:      	jg	0x276a <perf_unwind_native+0x276a>
+    26bd:      	cmpl	$0x14, %eax
+    26c0:      	je	0x27ab <perf_unwind_native+0x27ab>
+    26c6:      	movl	$0x33, %ecx
+    26cb:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    26d0:      	cmpl	$0x15, %eax
+    26d3:      	movq	0x10(%rsp), %r13
+    26d8:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    26de:      	movq	(%rip), %rdi            # 0x26e5 <perf_unwind_native+0x26e5>
+		00000000000026e1:  R_X86_64_REX_GOTPCRELX	exe_id_to_21_stack_deltas-0x4
+    26e5:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    26ea:      	cmpl	$0xa, %eax
+    26ed:      	je	0x27b4 <perf_unwind_native+0x27b4>
+    26f3:      	movl	$0x33, %ecx
+    26f8:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    26fd:      	cmpl	$0xb, %eax
+    2700:      	movq	0x10(%rsp), %r13
+    2705:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    270b:      	movq	(%rip), %rdi            # 0x2712 <perf_unwind_native+0x2712>
+		000000000000270e:  R_X86_64_REX_GOTPCRELX	exe_id_to_11_stack_deltas-0x4
+    2712:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    2717:      	cmpl	$0x12, %eax
+    271a:      	je	0x27bd <perf_unwind_native+0x27bd>
+    2720:      	movl	$0x33, %ecx
+    2725:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    272a:      	cmpl	$0x13, %eax
+    272d:      	movq	0x10(%rsp), %r13
+    2732:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    2738:      	movq	(%rip), %rdi            # 0x273f <perf_unwind_native+0x273f>
+		000000000000273b:  R_X86_64_REX_GOTPCRELX	exe_id_to_19_stack_deltas-0x4
+    273f:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    2744:      	cmpl	$0xe, %eax
+    2747:      	je	0x27c6 <perf_unwind_native+0x27c6>
+    2749:      	movl	$0x33, %ecx
+    274e:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    2753:      	cmpl	$0xf, %eax
+    2756:      	movq	0x10(%rsp), %r13
+    275b:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    2761:      	movq	(%rip), %rdi            # 0x2768 <perf_unwind_native+0x2768>
+		0000000000002764:  R_X86_64_REX_GOTPCRELX	exe_id_to_15_stack_deltas-0x4
+    2768:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    276a:      	cmpl	$0x16, %eax
+    276d:      	je	0x27cf <perf_unwind_native+0x27cf>
+    276f:      	movl	$0x33, %ecx
+    2774:      	movl	$0xfa1, %edx            # imm = 0xFA1
+    2779:      	cmpl	$0x17, %eax
+    277c:      	movq	0x10(%rsp), %r13
+    2781:      	jne	0x1bb2 <perf_unwind_native+0x1bb2>
+    2787:      	movq	(%rip), %rdi            # 0x278e <perf_unwind_native+0x278e>
+		000000000000278a:  R_X86_64_REX_GOTPCRELX	exe_id_to_23_stack_deltas-0x4
+    278e:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    2790:      	movq	(%rip), %rdi            # 0x2797 <perf_unwind_native+0x2797>
+		0000000000002793:  R_X86_64_REX_GOTPCRELX	exe_id_to_8_stack_deltas-0x4
+    2797:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    2799:      	movq	(%rip), %rdi            # 0x27a0 <perf_unwind_native+0x27a0>
+		000000000000279c:  R_X86_64_REX_GOTPCRELX	exe_id_to_16_stack_deltas-0x4
+    27a0:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27a2:      	movq	(%rip), %rdi            # 0x27a9 <perf_unwind_native+0x27a9>
+		00000000000027a5:  R_X86_64_REX_GOTPCRELX	exe_id_to_12_stack_deltas-0x4
+    27a9:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27ab:      	movq	(%rip), %rdi            # 0x27b2 <perf_unwind_native+0x27b2>
+		00000000000027ae:  R_X86_64_REX_GOTPCRELX	exe_id_to_20_stack_deltas-0x4
+    27b2:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27b4:      	movq	(%rip), %rdi            # 0x27bb <perf_unwind_native+0x27bb>
+		00000000000027b7:  R_X86_64_REX_GOTPCRELX	exe_id_to_10_stack_deltas-0x4
+    27bb:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27bd:      	movq	(%rip), %rdi            # 0x27c4 <perf_unwind_native+0x27c4>
+		00000000000027c0:  R_X86_64_REX_GOTPCRELX	exe_id_to_18_stack_deltas-0x4
+    27c4:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27c6:      	movq	(%rip), %rdi            # 0x27cd <perf_unwind_native+0x27cd>
+		00000000000027c9:  R_X86_64_REX_GOTPCRELX	exe_id_to_14_stack_deltas-0x4
+    27cd:      	jmp	0x27d6 <perf_unwind_native+0x27d6>
+    27cf:      	movq	(%rip), %rdi            # 0x27d6 <perf_unwind_native+0x27d6>
+		00000000000027d2:  R_X86_64_REX_GOTPCRELX	exe_id_to_22_stack_deltas-0x4
+    27d6:      	leaq	0x78(%rsp), %rsi
+    27db:      	callq	0x27e0 <perf_unwind_native+0x27e0>
+		00000000000027dc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    27e0:      	movl	$0x32, %ecx
+    27e5:      	movl	$0xfa2, %edx            # imm = 0xFA2
+    27ea:      	movq	%rax, 0x18(%rsp)
+    27ef:      	testq	%rax, %rax
+    27f2:      	movq	0x10(%rsp), %r13
+    27f7:      	je	0x1bb2 <perf_unwind_native+0x1bb2>
+    27fd:      	movl	(%r12), %ebx
+    2801:      	movl	%ebx, 0x2c(%rsp)
+    2805:      	movq	0xf18(%rbp), %rax
+    280c:      	movq	%rax, 0x48(%rsp)
+    2811:      	movzwl	0x4(%r12), %r13d
+    2817:      	testl	%r13d, %r13d
+    281a:      	je	0x2c4b <perf_unwind_native+0x2c4b>
+    2820:      	addl	%ebx, %r13d
+    2823:      	leal	(%rbx,%r13), %eax
+    2827:      	shrl	%eax
+    2829:      	movl	%eax, 0xc(%rsp)
+    282d:      	leaq	0xc(%rsp), %rsi
+    2832:      	movq	0x18(%rsp), %rdi
+    2837:      	callq	0x283c <perf_unwind_native+0x283c>
+		0000000000002838:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    283c:      	testq	%rax, %rax
+    283f:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2845:      	movl	0xc(%rsp), %ecx
+    2849:      	movq	0x48(%rsp), %rdx
+    284e:      	cmpw	%dx, (%rax)
+    2851:      	ja	0x2859 <perf_unwind_native+0x2859>
+    2853:      	incl	%ecx
+    2855:      	movl	%ecx, %ebx
+    2857:      	jmp	0x285c <perf_unwind_native+0x285c>
+    2859:      	movl	%ecx, %r13d
+    285c:      	cmpl	%r13d, %ebx
+    285f:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2865:      	leal	(%rbx,%r13), %eax
+    2869:      	shrl	%eax
+    286b:      	movl	%eax, 0xc(%rsp)
+    286f:      	leaq	0xc(%rsp), %rsi
+    2874:      	movq	0x18(%rsp), %rdi
+    2879:      	callq	0x287e <perf_unwind_native+0x287e>
+		000000000000287a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    287e:      	testq	%rax, %rax
+    2881:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2887:      	movl	0xc(%rsp), %ecx
+    288b:      	movq	0x48(%rsp), %rdx
+    2890:      	cmpw	%dx, (%rax)
+    2893:      	ja	0x289b <perf_unwind_native+0x289b>
+    2895:      	incl	%ecx
+    2897:      	movl	%ecx, %ebx
+    2899:      	jmp	0x289e <perf_unwind_native+0x289e>
+    289b:      	movl	%ecx, %r13d
+    289e:      	cmpl	%r13d, %ebx
+    28a1:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    28a7:      	leal	(%rbx,%r13), %eax
+    28ab:      	shrl	%eax
+    28ad:      	movl	%eax, 0xc(%rsp)
+    28b1:      	leaq	0xc(%rsp), %rsi
+    28b6:      	movq	0x18(%rsp), %rdi
+    28bb:      	callq	0x28c0 <perf_unwind_native+0x28c0>
+		00000000000028bc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    28c0:      	testq	%rax, %rax
+    28c3:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    28c9:      	movl	0xc(%rsp), %ecx
+    28cd:      	movq	0x48(%rsp), %rdx
+    28d2:      	cmpw	%dx, (%rax)
+    28d5:      	ja	0x28dd <perf_unwind_native+0x28dd>
+    28d7:      	incl	%ecx
+    28d9:      	movl	%ecx, %ebx
+    28db:      	jmp	0x28e0 <perf_unwind_native+0x28e0>
+    28dd:      	movl	%ecx, %r13d
+    28e0:      	cmpl	%r13d, %ebx
+    28e3:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    28e9:      	leal	(%rbx,%r13), %eax
+    28ed:      	shrl	%eax
+    28ef:      	movl	%eax, 0xc(%rsp)
+    28f3:      	leaq	0xc(%rsp), %rsi
+    28f8:      	movq	0x18(%rsp), %rdi
+    28fd:      	callq	0x2902 <perf_unwind_native+0x2902>
+		00000000000028fe:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2902:      	testq	%rax, %rax
+    2905:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    290b:      	movl	0xc(%rsp), %ecx
+    290f:      	movq	0x48(%rsp), %rdx
+    2914:      	cmpw	%dx, (%rax)
+    2917:      	ja	0x291f <perf_unwind_native+0x291f>
+    2919:      	incl	%ecx
+    291b:      	movl	%ecx, %ebx
+    291d:      	jmp	0x2922 <perf_unwind_native+0x2922>
+    291f:      	movl	%ecx, %r13d
+    2922:      	cmpl	%r13d, %ebx
+    2925:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    292b:      	leal	(%rbx,%r13), %eax
+    292f:      	shrl	%eax
+    2931:      	movl	%eax, 0xc(%rsp)
+    2935:      	leaq	0xc(%rsp), %rsi
+    293a:      	movq	0x18(%rsp), %rdi
+    293f:      	callq	0x2944 <perf_unwind_native+0x2944>
+		0000000000002940:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2944:      	testq	%rax, %rax
+    2947:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    294d:      	movl	0xc(%rsp), %ecx
+    2951:      	movq	0x48(%rsp), %rdx
+    2956:      	cmpw	%dx, (%rax)
+    2959:      	ja	0x2961 <perf_unwind_native+0x2961>
+    295b:      	incl	%ecx
+    295d:      	movl	%ecx, %ebx
+    295f:      	jmp	0x2964 <perf_unwind_native+0x2964>
+    2961:      	movl	%ecx, %r13d
+    2964:      	cmpl	%r13d, %ebx
+    2967:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    296d:      	leal	(%rbx,%r13), %eax
+    2971:      	shrl	%eax
+    2973:      	movl	%eax, 0xc(%rsp)
+    2977:      	leaq	0xc(%rsp), %rsi
+    297c:      	movq	0x18(%rsp), %rdi
+    2981:      	callq	0x2986 <perf_unwind_native+0x2986>
+		0000000000002982:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2986:      	testq	%rax, %rax
+    2989:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    298f:      	movl	0xc(%rsp), %ecx
+    2993:      	movq	0x48(%rsp), %rdx
+    2998:      	cmpw	%dx, (%rax)
+    299b:      	ja	0x29a3 <perf_unwind_native+0x29a3>
+    299d:      	incl	%ecx
+    299f:      	movl	%ecx, %ebx
+    29a1:      	jmp	0x29a6 <perf_unwind_native+0x29a6>
+    29a3:      	movl	%ecx, %r13d
+    29a6:      	cmpl	%r13d, %ebx
+    29a9:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    29af:      	leal	(%rbx,%r13), %eax
+    29b3:      	shrl	%eax
+    29b5:      	movl	%eax, 0xc(%rsp)
+    29b9:      	leaq	0xc(%rsp), %rsi
+    29be:      	movq	0x18(%rsp), %rdi
+    29c3:      	callq	0x29c8 <perf_unwind_native+0x29c8>
+		00000000000029c4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    29c8:      	testq	%rax, %rax
+    29cb:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    29d1:      	movl	0xc(%rsp), %ecx
+    29d5:      	movq	0x48(%rsp), %rdx
+    29da:      	cmpw	%dx, (%rax)
+    29dd:      	ja	0x29e5 <perf_unwind_native+0x29e5>
+    29df:      	incl	%ecx
+    29e1:      	movl	%ecx, %ebx
+    29e3:      	jmp	0x29e8 <perf_unwind_native+0x29e8>
+    29e5:      	movl	%ecx, %r13d
+    29e8:      	cmpl	%r13d, %ebx
+    29eb:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    29f1:      	leal	(%rbx,%r13), %eax
+    29f5:      	shrl	%eax
+    29f7:      	movl	%eax, 0xc(%rsp)
+    29fb:      	leaq	0xc(%rsp), %rsi
+    2a00:      	movq	0x18(%rsp), %rdi
+    2a05:      	callq	0x2a0a <perf_unwind_native+0x2a0a>
+		0000000000002a06:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2a0a:      	testq	%rax, %rax
+    2a0d:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2a13:      	movl	0xc(%rsp), %ecx
+    2a17:      	movq	0x48(%rsp), %rdx
+    2a1c:      	cmpw	%dx, (%rax)
+    2a1f:      	ja	0x2a27 <perf_unwind_native+0x2a27>
+    2a21:      	incl	%ecx
+    2a23:      	movl	%ecx, %ebx
+    2a25:      	jmp	0x2a2a <perf_unwind_native+0x2a2a>
+    2a27:      	movl	%ecx, %r13d
+    2a2a:      	cmpl	%r13d, %ebx
+    2a2d:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2a33:      	leal	(%rbx,%r13), %eax
+    2a37:      	shrl	%eax
+    2a39:      	movl	%eax, 0xc(%rsp)
+    2a3d:      	leaq	0xc(%rsp), %rsi
+    2a42:      	movq	0x18(%rsp), %rdi
+    2a47:      	callq	0x2a4c <perf_unwind_native+0x2a4c>
+		0000000000002a48:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2a4c:      	testq	%rax, %rax
+    2a4f:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2a55:      	movl	0xc(%rsp), %ecx
+    2a59:      	movq	0x48(%rsp), %rdx
+    2a5e:      	cmpw	%dx, (%rax)
+    2a61:      	ja	0x2a69 <perf_unwind_native+0x2a69>
+    2a63:      	incl	%ecx
+    2a65:      	movl	%ecx, %ebx
+    2a67:      	jmp	0x2a6c <perf_unwind_native+0x2a6c>
+    2a69:      	movl	%ecx, %r13d
+    2a6c:      	cmpl	%r13d, %ebx
+    2a6f:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2a75:      	leal	(%rbx,%r13), %eax
+    2a79:      	shrl	%eax
+    2a7b:      	movl	%eax, 0xc(%rsp)
+    2a7f:      	leaq	0xc(%rsp), %rsi
+    2a84:      	movq	0x18(%rsp), %rdi
+    2a89:      	callq	0x2a8e <perf_unwind_native+0x2a8e>
+		0000000000002a8a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2a8e:      	testq	%rax, %rax
+    2a91:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2a97:      	movl	0xc(%rsp), %ecx
+    2a9b:      	movq	0x48(%rsp), %rdx
+    2aa0:      	cmpw	%dx, (%rax)
+    2aa3:      	ja	0x2aab <perf_unwind_native+0x2aab>
+    2aa5:      	incl	%ecx
+    2aa7:      	movl	%ecx, %ebx
+    2aa9:      	jmp	0x2aae <perf_unwind_native+0x2aae>
+    2aab:      	movl	%ecx, %r13d
+    2aae:      	cmpl	%r13d, %ebx
+    2ab1:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2ab7:      	leal	(%rbx,%r13), %eax
+    2abb:      	shrl	%eax
+    2abd:      	movl	%eax, 0xc(%rsp)
+    2ac1:      	leaq	0xc(%rsp), %rsi
+    2ac6:      	movq	0x18(%rsp), %rdi
+    2acb:      	callq	0x2ad0 <perf_unwind_native+0x2ad0>
+		0000000000002acc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2ad0:      	testq	%rax, %rax
+    2ad3:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2ad9:      	movl	0xc(%rsp), %ecx
+    2add:      	movq	0x48(%rsp), %rdx
+    2ae2:      	cmpw	%dx, (%rax)
+    2ae5:      	ja	0x2aed <perf_unwind_native+0x2aed>
+    2ae7:      	incl	%ecx
+    2ae9:      	movl	%ecx, %ebx
+    2aeb:      	jmp	0x2af0 <perf_unwind_native+0x2af0>
+    2aed:      	movl	%ecx, %r13d
+    2af0:      	cmpl	%r13d, %ebx
+    2af3:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2af9:      	leal	(%rbx,%r13), %eax
+    2afd:      	shrl	%eax
+    2aff:      	movl	%eax, 0xc(%rsp)
+    2b03:      	leaq	0xc(%rsp), %rsi
+    2b08:      	movq	0x18(%rsp), %rdi
+    2b0d:      	callq	0x2b12 <perf_unwind_native+0x2b12>
+		0000000000002b0e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2b12:      	testq	%rax, %rax
+    2b15:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2b1b:      	movl	0xc(%rsp), %ecx
+    2b1f:      	movq	0x48(%rsp), %rdx
+    2b24:      	cmpw	%dx, (%rax)
+    2b27:      	ja	0x2b2f <perf_unwind_native+0x2b2f>
+    2b29:      	incl	%ecx
+    2b2b:      	movl	%ecx, %ebx
+    2b2d:      	jmp	0x2b32 <perf_unwind_native+0x2b32>
+    2b2f:      	movl	%ecx, %r13d
+    2b32:      	cmpl	%r13d, %ebx
+    2b35:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2b3b:      	leal	(%rbx,%r13), %eax
+    2b3f:      	shrl	%eax
+    2b41:      	movl	%eax, 0xc(%rsp)
+    2b45:      	leaq	0xc(%rsp), %rsi
+    2b4a:      	movq	0x18(%rsp), %rdi
+    2b4f:      	callq	0x2b54 <perf_unwind_native+0x2b54>
+		0000000000002b50:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2b54:      	testq	%rax, %rax
+    2b57:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2b5d:      	movl	0xc(%rsp), %ecx
+    2b61:      	movq	0x48(%rsp), %rdx
+    2b66:      	cmpw	%dx, (%rax)
+    2b69:      	ja	0x2b71 <perf_unwind_native+0x2b71>
+    2b6b:      	incl	%ecx
+    2b6d:      	movl	%ecx, %ebx
+    2b6f:      	jmp	0x2b74 <perf_unwind_native+0x2b74>
+    2b71:      	movl	%ecx, %r13d
+    2b74:      	cmpl	%r13d, %ebx
+    2b77:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2b7d:      	leal	(%rbx,%r13), %eax
+    2b81:      	shrl	%eax
+    2b83:      	movl	%eax, 0xc(%rsp)
+    2b87:      	leaq	0xc(%rsp), %rsi
+    2b8c:      	movq	0x18(%rsp), %rdi
+    2b91:      	callq	0x2b96 <perf_unwind_native+0x2b96>
+		0000000000002b92:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2b96:      	testq	%rax, %rax
+    2b99:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2b9f:      	movl	0xc(%rsp), %ecx
+    2ba3:      	movq	0x48(%rsp), %rdx
+    2ba8:      	cmpw	%dx, (%rax)
+    2bab:      	ja	0x2bb3 <perf_unwind_native+0x2bb3>
+    2bad:      	incl	%ecx
+    2baf:      	movl	%ecx, %ebx
+    2bb1:      	jmp	0x2bb6 <perf_unwind_native+0x2bb6>
+    2bb3:      	movl	%ecx, %r13d
+    2bb6:      	cmpl	%r13d, %ebx
+    2bb9:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2bbf:      	leal	(%rbx,%r13), %eax
+    2bc3:      	shrl	%eax
+    2bc5:      	movl	%eax, 0xc(%rsp)
+    2bc9:      	leaq	0xc(%rsp), %rsi
+    2bce:      	movq	0x18(%rsp), %rdi
+    2bd3:      	callq	0x2bd8 <perf_unwind_native+0x2bd8>
+		0000000000002bd4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2bd8:      	testq	%rax, %rax
+    2bdb:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2be1:      	movl	0xc(%rsp), %ecx
+    2be5:      	movq	0x48(%rsp), %rdx
+    2bea:      	cmpw	%dx, (%rax)
+    2bed:      	ja	0x2bf5 <perf_unwind_native+0x2bf5>
+    2bef:      	incl	%ecx
+    2bf1:      	movl	%ecx, %ebx
+    2bf3:      	jmp	0x2bf8 <perf_unwind_native+0x2bf8>
+    2bf5:      	movl	%ecx, %r13d
+    2bf8:      	cmpl	%r13d, %ebx
+    2bfb:      	jae	0x2c3f <perf_unwind_native+0x2c3f>
+    2bfd:      	leal	(%rbx,%r13), %eax
+    2c01:      	shrl	%eax
+    2c03:      	movl	%eax, 0xc(%rsp)
+    2c07:      	leaq	0xc(%rsp), %rsi
+    2c0c:      	movq	0x18(%rsp), %rdi
+    2c11:      	callq	0x2c16 <perf_unwind_native+0x2c16>
+		0000000000002c12:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2c16:      	testq	%rax, %rax
+    2c19:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2c1f:      	movl	0xc(%rsp), %ecx
+    2c23:      	movq	0x48(%rsp), %rdx
+    2c28:      	cmpw	%dx, (%rax)
+    2c2b:      	ja	0x2c33 <perf_unwind_native+0x2c33>
+    2c2d:      	incl	%ecx
+    2c2f:      	movl	%ecx, %ebx
+    2c31:      	jmp	0x2c36 <perf_unwind_native+0x2c36>
+    2c33:      	movl	%ecx, %r13d
+    2c36:      	cmpl	%r13d, %ebx
+    2c39:      	jb	0x2d77 <perf_unwind_native+0x2d77>
+    2c3f:      	movl	%r13d, %ebx
+    2c42:      	testl	%r13d, %r13d
+    2c45:      	je	0x2d77 <perf_unwind_native+0x2d77>
+    2c4b:      	decl	%ebx
+    2c4d:      	movl	%ebx, 0x2c(%rsp)
+    2c51:      	leaq	0x2c(%rsp), %rsi
+    2c56:      	movq	0x18(%rsp), %rdi
+    2c5b:      	callq	0x2c60 <perf_unwind_native+0x2c60>
+		0000000000002c5c:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2c60:      	testq	%rax, %rax
+    2c63:      	movl	$0xfa4, %edx            # imm = 0xFA4
+    2c68:      	movl	$0xa, %esi
+    2c6d:      	je	0x2d81 <perf_unwind_native+0x2d81>
+    2c73:      	movzwl	0x48(%rsp), %r13d
+    2c79:      	movzwl	(%rax), %ecx
+    2c7c:      	subl	%ecx, %r13d
+    2c7f:      	movl	0x2c(%rsp), %ecx
+    2c83:      	cmpl	(%r12), %ecx
+    2c87:      	jae	0x2c90 <perf_unwind_native+0x2c90>
+    2c89:      	addl	$0x10000, %r13d         # imm = 0x10000
+    2c90:      	movzwl	0x2(%rax), %ecx
+    2c94:      	movl	%ecx, 0x28(%rsp)
+    2c98:      	movl	$0xd, %esi
+    2c9d:      	movl	$0xfa5, %edx            # imm = 0xFA5
+    2ca2:      	cmpl	$0x8000, %ecx           # imm = 0x8000
+    2ca8:      	je	0x2d81 <perf_unwind_native+0x2d81>
+    2cae:      	cmpl	$0x8001, %ecx           # imm = 0x8001
+    2cb4:      	jne	0x2cdb <perf_unwind_native+0x2cdb>
+    2cb6:      	movl	$0x7, 0xc(%rsp)
+    2cbe:      	movq	(%rip), %rdi            # 0x2cc5 <perf_unwind_native+0x2cc5>
+		0000000000002cc1:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    2cc5:      	leaq	0xc(%rsp), %rsi
+    2cca:      	callq	0x2ccf <perf_unwind_native+0x2ccf>
+		0000000000002ccb:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2ccf:      	testq	%rax, %rax
+    2cd2:      	je	0x2cd7 <perf_unwind_native+0x2cd7>
+    2cd4:      	incq	(%rax)
+    2cd7:      	movl	0x28(%rsp), %ecx
+    2cdb:      	testw	%cx, %cx
+    2cde:      	js	0x2e6d <perf_unwind_native+0x2e6d>
+    2ce4:      	movq	(%rip), %rdi            # 0x2ceb <perf_unwind_native+0x2ceb>
+		0000000000002ce7:  R_X86_64_REX_GOTPCRELX	unwind_info_array-0x4
+    2ceb:      	leaq	0x28(%rsp), %rsi
+    2cf0:      	callq	0x2cf5 <perf_unwind_native+0x2cf5>
+		0000000000002cf1:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2cf5:      	movq	%rax, %r15
+    2cf8:      	testq	%rax, %rax
+    2cfb:      	movq	0x40(%rsp), %rax
+    2d00:      	movq	0x50(%rsp), %rcx
+    2d05:      	je	0x2e42 <perf_unwind_native+0x2e42>
+    2d0b:      	movq	%rcx, 0x50(%rsp)
+    2d10:      	movq	%rax, 0x40(%rsp)
+    2d15:      	movl	0x4(%r15), %ebx
+    2d19:      	movzbl	0x2(%r15), %eax
+    2d1e:      	testl	%eax, %eax
+    2d20:      	je	0x2d3b <perf_unwind_native+0x2d3b>
+    2d22:      	movl	%eax, %ecx
+    2d24:      	andl	$0x7f, %ecx
+    2d27:      	cmpl	%ecx, %r13d
+    2d2a:      	jl	0x2d3b <perf_unwind_native+0x2d3b>
+    2d2c:      	xorl	%ecx, %ecx
+    2d2e:      	testb	%al, %al
+    2d30:      	setns	%cl
+    2d33:      	shll	$0x4, %ecx
+    2d36:      	addl	%ecx, %ebx
+    2d38:      	addl	$-0x8, %ebx
+    2d3b:      	movzbl	(%r15), %eax
+    2d3f:      	movl	%ebx, %ecx
+    2d41:      	testb	%al, %al
+    2d43:      	jns	0x2d4a <perf_unwind_native+0x2d4a>
+    2d45:      	movl	%ebx, %ecx
+    2d47:      	andl	$-0x8, %ecx
+    2d4a:      	movl	%eax, %edx
+    2d4c:      	andl	$0x7f, %edx
+    2d4f:      	xorl	%r12d, %r12d
+    2d52:      	cmpl	$0x2, %edx
+    2d55:      	jg	0x2f24 <perf_unwind_native+0x2f24>
+    2d5b:      	cmpl	$0x1, %edx
+    2d5e:      	je	0x301f <perf_unwind_native+0x301f>
+    2d64:      	movq	0x40(%rsp), %rsi
+    2d69:      	cmpl	$0x2, %edx
+    2d6c:      	je	0x301c <perf_unwind_native+0x301c>
+    2d72:      	jmp	0x3077 <perf_unwind_native+0x3077>
+    2d77:      	movl	$0xfa3, %edx            # imm = 0xFA3
+    2d7c:      	movl	$0x9, %esi
+    2d81:      	movl	%esi, 0xf28(%rbp)
+    2d87:      	movl	%edx, %eax
+    2d89:      	movq	0x10(%rsp), %r13
+    2d8e:      	xorl	%r12d, %r12d
+    2d91:      	movl	%eax, %r14d
+    2d94:      	movl	%r14d, 0xf2c(%rbp)
+    2d9b:      	movl	$0x0, 0x80(%rsp)
+    2da6:      	movq	(%rip), %rdi            # 0x2dad <perf_unwind_native+0x2dad>
+		0000000000002da9:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+    2dad:      	leaq	0x80(%rsp), %rsi
+    2db5:      	callq	0x2dba <perf_unwind_native+0x2dba>
+		0000000000002db6:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2dba:      	testq	%rax, %rax
+    2dbd:      	je	0x2e16 <perf_unwind_native+0x2e16>
+    2dbf:      	movzbl	0x1384(%rax), %ecx
+    2dc6:      	cmpb	$0x1d, %cl
+    2dc9:      	jb	0x2e0c <perf_unwind_native+0x2e0c>
+    2dcb:      	movq	%rax, %rbx
+    2dce:      	movl	$0x5, 0xf2c(%rax)
+    2dd8:      	movl	$0x44, 0x80(%rsp)
+    2de3:      	movq	(%rip), %rdi            # 0x2dea <perf_unwind_native+0x2dea>
+		0000000000002de6:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    2dea:      	leaq	0x80(%rsp), %rsi
+    2df2:      	callq	0x2df7 <perf_unwind_native+0x2df7>
+		0000000000002df3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2df7:      	testq	%rax, %rax
+    2dfa:      	je	0x2dff <perf_unwind_native+0x2dff>
+    2dfc:      	incq	(%rax)
+    2dff:      	movq	%rbx, %rax
+    2e02:      	movzbl	0x1384(%rbx), %ecx
+    2e09:      	xorl	%r12d, %r12d
+    2e0c:      	incb	%cl
+    2e0e:      	movb	%cl, 0x1384(%rax)
+    2e14:      	jmp	0x2e19 <perf_unwind_native+0x2e19>
+    2e16:      	xorl	%r12d, %r12d
+    2e19:      	movq	(%rip), %rsi            # 0x2e20 <perf_unwind_native+0x2e20>
+		0000000000002e1c:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+    2e20:      	movq	%r13, %rdi
+    2e23:      	movl	%r12d, %edx
+    2e26:      	callq	0x2e2b <perf_unwind_native+0x2e2b>
+		0000000000002e27:  R_X86_64_PLT32	bpf_tail_call-0x4
+    2e2b:      	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+    2e30:      	addq	$0x118, %rsp            # imm = 0x118
+    2e37:      	popq	%rbx
+    2e38:      	popq	%r12
+    2e3a:      	popq	%r13
+    2e3c:      	popq	%r14
+    2e3e:      	popq	%r15
+    2e40:      	popq	%rbp
+    2e41:      	retq
+    2e42:      	movl	$0x55, 0x30(%rsp)
+    2e4a:      	movq	(%rip), %rdi            # 0x2e51 <perf_unwind_native+0x2e51>
+		0000000000002e4d:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    2e51:      	leaq	0x30(%rsp), %rsi
+    2e56:      	callq	0x2e5b <perf_unwind_native+0x2e5b>
+		0000000000002e57:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    2e5b:      	testq	%rax, %rax
+    2e5e:      	je	0x2e63 <perf_unwind_native+0x2e63>
+    2e60:      	incq	(%rax)
+    2e63:      	movl	$0xfaf, %eax            # imm = 0xFAF
+    2e68:      	jmp	0x2d89 <perf_unwind_native+0x2d89>
+    2e6d:      	andl	$0xffff7fff, %ecx       # imm = 0xFFFF7FFF
+    2e73:      	movl	$0x1, %eax
+    2e78:      	cmpl	$0x2, %ecx
+    2e7b:      	jg	0x2ebe <perf_unwind_native+0x2ebe>
+    2e7d:      	cmpl	$0x1, %ecx
+    2e80:      	movq	0x10(%rsp), %r13
+    2e85:      	movq	0x60(%rsp), %rdx
+    2e8a:      	movq	0x40(%rsp), %rsi
+    2e8f:      	je	0x2eb7 <perf_unwind_native+0x2eb7>
+    2e91:      	cmpl	$0x2, %ecx
+    2e94:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    2e9a:      	movq	(%rsi), %rax
+    2e9d:      	movl	(%rdx), %ecx
+    2e9f:      	andl	$0xf, %ecx
+    2ea2:      	xorl	%edx, %edx
+    2ea4:      	cmpl	$0xb, %ecx
+    2ea7:      	setae	%dl
+    2eaa:      	leaq	(%rax,%rdx,8), %r12
+    2eae:      	addq	$0x8, %r12
+    2eb2:      	jmp	0x316e <perf_unwind_native+0x316e>
+    2eb7:      	xorl	%eax, %eax
+    2eb9:      	jmp	0x2d8e <perf_unwind_native+0x2d8e>
+    2ebe:      	cmpl	$0x3, %ecx
+    2ec1:      	je	0x2f67 <perf_unwind_native+0x2f67>
+    2ec7:      	cmpl	$0x4, %ecx
+    2eca:      	movq	0x10(%rsp), %r13
+    2ecf:      	movq	0x58(%rsp), %r15
+    2ed4:      	jne	0x2d8e <perf_unwind_native+0x2d8e>
+    2eda:      	movq	(%r15), %rdx
+    2edd:      	leaq	0x30(%rsp), %rdi
+    2ee2:      	movl	$0x10, %esi
+    2ee7:      	callq	0x2eec <perf_unwind_native+0x2eec>
+		0000000000002ee8:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    2eec:      	testq	%rax, %rax
+    2eef:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    2ef5:      	movq	0xee0(%rbp), %rax
+    2efc:      	addq	$0x10, %rax
+    2f00:      	movq	%rax, 0xed8(%rbp)
+    2f07:      	movq	0x30(%rsp), %rax
+    2f0c:      	movq	%rax, 0xee0(%rbp)
+    2f13:      	movq	0x38(%rsp), %rax
+    2f18:      	movq	%rax, 0xed0(%rbp)
+    2f1f:      	jmp	0x31a0 <perf_unwind_native+0x31a0>
+    2f24:      	cmpl	$0x3, %edx
+    2f27:      	je	0x3017 <perf_unwind_native+0x3017>
+    2f2d:      	cmpl	$0x5, %edx
+    2f30:      	jne	0x3077 <perf_unwind_native+0x3077>
+    2f36:      	movl	%ebx, %eax
+    2f38:      	andl	$0xf, %eax
+    2f3b:      	xorl	%r12d, %r12d
+    2f3e:      	cmpl	$0xa, %eax
+    2f41:      	jg	0x3048 <perf_unwind_native+0x3048>
+    2f47:      	movq	0x50(%rsp), %rcx
+    2f4c:      	testl	%eax, %eax
+    2f4e:      	je	0x305c <perf_unwind_native+0x305c>
+    2f54:      	cmpl	$0x9, %eax
+    2f57:      	jne	0x3077 <perf_unwind_native+0x3077>
+    2f5d:      	movq	0x68(%rsp), %rcx
+    2f62:      	jmp	0x305c <perf_unwind_native+0x305c>
+    2f67:      	movq	0x40(%rsp), %rax
+    2f6c:      	movq	(%rax), %rdx
+    2f6f:      	addq	$0x28, %rdx
+    2f73:      	leaq	0x80(%rsp), %rdi
+    2f7b:      	movl	$0x90, %esi
+    2f80:      	callq	0x2f85 <perf_unwind_native+0x2f85>
+		0000000000002f81:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    2f85:      	testq	%rax, %rax
+    2f88:      	movq	0x10(%rsp), %r13
+    2f8d:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    2f93:      	movq	0xe8(%rsp), %rax
+    2f9b:      	movq	%rax, 0xee8(%rbp)
+    2fa2:      	movq	0x88(%rsp), %rax
+    2faa:      	movq	%rax, 0xef0(%rbp)
+    2fb1:      	movq	0x98(%rsp), %rax
+    2fb9:      	movq	%rax, 0xef8(%rbp)
+    2fc0:      	movq	0xa8(%rsp), %rax
+    2fc8:      	movq	%rax, 0xf00(%rbp)
+    2fcf:      	movq	0xb8(%rsp), %rax
+    2fd7:      	movq	%rax, 0xf08(%rbp)
+    2fde:      	movq	0xd0(%rsp), %rax
+    2fe6:      	movq	%rax, 0xee0(%rbp)
+    2fed:      	movq	0xf8(%rsp), %rax
+    2ff5:      	movq	%rax, 0xed8(%rbp)
+    2ffc:      	movq	0x100(%rsp), %rax
+    3004:      	movq	%rax, 0xed0(%rbp)
+    300b:      	movb	$0x0, 0xf30(%rbp)
+    3012:      	jmp	0x31a7 <perf_unwind_native+0x31a7>
+    3017:      	movq	0x58(%rsp), %rsi
+    301c:      	movq	(%rsi), %r12
+    301f:      	movq	%r12, %rdx
+    3022:      	movslq	%ecx, %r12
+    3025:      	addq	%rdx, %r12
+    3028:      	testb	%al, %al
+    302a:      	jns	0x3077 <perf_unwind_native+0x3077>
+    302c:      	leaq	0x30(%rsp), %rdi
+    3031:      	movl	$0x8, %esi
+    3036:      	movq	%r12, %rdx
+    3039:      	callq	0x303e <perf_unwind_native+0x303e>
+		000000000000303a:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    303e:      	testq	%rax, %rax
+    3041:      	je	0x3069 <perf_unwind_native+0x3069>
+    3043:      	xorl	%r12d, %r12d
+    3046:      	jmp	0x3077 <perf_unwind_native+0x3077>
+    3048:      	movq	0x70(%rsp), %rcx
+    304d:      	cmpl	$0xb, %eax
+    3050:      	je	0x305c <perf_unwind_native+0x305c>
+    3052:      	movq	0x20(%rsp), %rcx
+    3057:      	cmpl	$0xf, %eax
+    305a:      	jne	0x3077 <perf_unwind_native+0x3077>
+    305c:      	sarl	%ebx
+    305e:      	andl	$-0x8, %ebx
+    3061:      	movslq	%ebx, %r12
+    3064:      	addq	(%rcx), %r12
+    3067:      	jmp	0x3077 <perf_unwind_native+0x3077>
+    3069:      	shll	$0x3, %ebx
+    306c:      	andl	$0x38, %ebx
+    306f:      	addq	0x30(%rsp), %rbx
+    3074:      	movq	%rbx, %r12
+    3077:      	movzbl	0x1(%r15), %eax
+    307c:      	movl	0x8(%r15), %ebx
+    3080:      	movl	%ebx, %ecx
+    3082:      	testb	%al, %al
+    3084:      	jns	0x308b <perf_unwind_native+0x308b>
+    3086:      	movl	%ebx, %ecx
+    3088:      	andl	$-0x8, %ecx
+    308b:      	movl	%eax, %edx
+    308d:      	andl	$0x7f, %edx
+    3090:      	cmpl	$0x2, %edx
+    3093:      	jg	0x30a7 <perf_unwind_native+0x30a7>
+    3095:      	movq	%r12, %rsi
+    3098:      	cmpl	$0x1, %edx
+    309b:      	je	0x30ea <perf_unwind_native+0x30ea>
+    309d:      	cmpl	$0x2, %edx
+    30a0:      	je	0x30e2 <perf_unwind_native+0x30e2>
+    30a2:      	jmp	0x315c <perf_unwind_native+0x315c>
+    30a7:      	cmpl	$0x3, %edx
+    30aa:      	je	0x30d8 <perf_unwind_native+0x30d8>
+    30ac:      	cmpl	$0x5, %edx
+    30af:      	jne	0x315c <perf_unwind_native+0x315c>
+    30b5:      	movl	%ebx, %eax
+    30b7:      	andl	$0xf, %eax
+    30ba:      	cmpl	$0xa, %eax
+    30bd:      	jg	0x3118 <perf_unwind_native+0x3118>
+    30bf:      	testl	%eax, %eax
+    30c1:      	je	0x3136 <perf_unwind_native+0x3136>
+    30c3:      	cmpl	$0x9, %eax
+    30c6:      	jne	0x315c <perf_unwind_native+0x315c>
+    30cc:      	movq	0x68(%rsp), %rax
+    30d1:      	movq	%rax, 0x50(%rsp)
+    30d6:      	jmp	0x3136 <perf_unwind_native+0x3136>
+    30d8:      	movq	0x58(%rsp), %rdx
+    30dd:      	movq	%rdx, 0x40(%rsp)
+    30e2:      	movq	0x40(%rsp), %rdx
+    30e7:      	movq	(%rdx), %rsi
+    30ea:      	movslq	%ecx, %rdx
+    30ed:      	addq	%rsi, %rdx
+    30f0:      	testb	%al, %al
+    30f2:      	jns	0x3146 <perf_unwind_native+0x3146>
+    30f4:      	leaq	0x30(%rsp), %rdi
+    30f9:      	movl	$0x8, %esi
+    30fe:      	callq	0x3103 <perf_unwind_native+0x3103>
+		00000000000030ff:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    3103:      	testq	%rax, %rax
+    3106:      	jne	0x315c <perf_unwind_native+0x315c>
+    3108:      	shll	$0x3, %ebx
+    310b:      	andl	$0x38, %ebx
+    310e:      	addq	0x30(%rsp), %rbx
+    3113:      	movq	%rbx, %rdx
+    3116:      	jmp	0x3146 <perf_unwind_native+0x3146>
+    3118:      	movq	0x70(%rsp), %rcx
+    311d:      	movq	%rcx, 0x50(%rsp)
+    3122:      	cmpl	$0xb, %eax
+    3125:      	je	0x3136 <perf_unwind_native+0x3136>
+    3127:      	movq	0x20(%rsp), %rcx
+    312c:      	movq	%rcx, 0x50(%rsp)
+    3131:      	cmpl	$0xf, %eax
+    3134:      	jne	0x315c <perf_unwind_native+0x315c>
+    3136:      	sarl	%ebx
+    3138:      	andl	$-0x8, %ebx
+    313b:      	movslq	%ebx, %rdx
+    313e:      	movq	0x50(%rsp), %rax
+    3143:      	addq	(%rax), %rdx
+    3146:      	testq	%rdx, %rdx
+    3149:      	je	0x315c <perf_unwind_native+0x315c>
+    314b:      	movq	0x58(%rsp), %rdi
+    3150:      	movl	$0x8, %esi
+    3155:      	callq	0x315a <perf_unwind_native+0x315a>
+		0000000000003156:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    315a:      	jmp	0x316e <perf_unwind_native+0x316e>
+    315c:      	cmpb	$0x3, (%r15)
+    3160:      	jne	0x316e <perf_unwind_native+0x316e>
+    3162:      	movq	0x58(%rsp), %rax
+    3167:      	movq	$0x0, (%rax)
+    316e:      	testq	%r12, %r12
+    3171:      	movq	0x10(%rsp), %r13
+    3176:      	movq	0x60(%rsp), %rdi
+    317b:      	je	0xb9b <perf_unwind_native+0xb9b>
+    3181:      	leaq	-0x8(%r12), %rdx
+    3186:      	movl	$0x8, %esi
+    318b:      	callq	0x3190 <perf_unwind_native+0x3190>
+		000000000000318c:  R_X86_64_PLT32	bpf_probe_read_user-0x4
+    3190:      	testq	%rax, %rax
+    3193:      	jne	0xb9b <perf_unwind_native+0xb9b>
+    3199:      	movq	%r12, 0xed8(%rbp)
+    31a0:      	movb	$0x1, 0xf30(%rbp)
+    31a7:      	movl	$0x6, 0x30(%rsp)
+    31af:      	movq	(%rip), %rdi            # 0x31b6 <perf_unwind_native+0x31b6>
+		00000000000031b2:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    31b6:      	leaq	0x30(%rsp), %rsi
+    31bb:      	callq	0x31c0 <perf_unwind_native+0x31c0>
+		00000000000031bc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    31c0:      	testq	%rax, %rax
+    31c3:      	je	0x31c8 <perf_unwind_native+0x31c8>
+    31c5:      	incq	(%rax)
+    31c8:      	movq	0x60(%rsp), %rax
+    31cd:      	movq	(%rax), %rbx
+    31d0:      	testq	%rbx, %rbx
+    31d3:      	movq	0x10(%rsp), %r13
+    31d8:      	je	0x32f2 <perf_unwind_native+0x32f2>
+    31de:      	movabsq	$0xffffffffffffff, %rax # imm = 0xFFFFFFFFFFFFFF
+    31e8:      	cmpq	%rax, %rbx
+    31eb:      	ja	0xc0f <perf_unwind_native+0xc0f>
+    31f1:      	cmpq	$0x1000, %rbx           # imm = 0x1000
+    31f8:      	jb	0xc30 <perf_unwind_native+0xc30>
+    31fe:      	movl	(%rbp), %eax
+    3201:      	movl	$0x60, 0x80(%rsp)
+    320c:      	movbel	%eax, 0x84(%rsp)
+    3215:      	movbeq	%rbx, 0x88(%rsp)
+    321f:      	movq	(%rip), %rdi            # 0x3226 <perf_unwind_native+0x3226>
+		0000000000003222:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+    3226:      	leaq	0x80(%rsp), %rsi
+    322e:      	callq	0x3233 <perf_unwind_native+0x3233>
+		000000000000322f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    3233:      	testq	%rax, %rax
+    3236:      	je	0x330a <perf_unwind_native+0x330a>
+    323c:      	movq	0x8(%rax), %r12
+    3240:      	movabsq	$0xffffffffffffff, %rcx # imm = 0xFFFFFFFFFFFFFF
+    324a:      	andq	%r12, %rcx
+    324d:      	movq	%rcx, 0xf20(%rbp)
+    3254:      	shrq	$0x38, %r12
+    3258:      	movq	(%rax), %rax
+    325b:      	movq	%rax, 0xf10(%rbp)
+    3262:      	subq	%rcx, %rbx
+    3265:      	movq	%rbx, 0xf18(%rbp)
+    326c:      	cmpq	$0x1, %r12
+    3270:      	jne	0x32e8 <perf_unwind_native+0x32e8>
+    3272:      	movq	%rax, 0x80(%rsp)
+    327a:      	movq	(%rip), %rdi            # 0x3281 <perf_unwind_native+0x3281>
+		000000000000327d:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+    3281:      	leaq	0x80(%rsp), %rsi
+    3289:      	callq	0x328e <perf_unwind_native+0x328e>
+		000000000000328a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    328e:      	movl	$0x1, %r12d
+    3294:      	testq	%rax, %rax
+    3297:      	je	0x32e8 <perf_unwind_native+0x32e8>
+    3299:      	movq	%rax, %r15
+    329c:      	cmpq	%rbx, (%rax)
+    329f:      	ja	0x32a7 <perf_unwind_native+0x32a7>
+    32a1:      	cmpq	%rbx, 0x8(%r15)
+    32a5:      	jae	0x32b3 <perf_unwind_native+0x32b3>
+    32a7:      	cmpq	%rbx, 0x10(%r15)
+    32ab:      	ja	0x32e8 <perf_unwind_native+0x32e8>
+    32ad:      	cmpq	%rbx, 0x18(%r15)
+    32b1:      	jb	0x32e8 <perf_unwind_native+0x32e8>
+    32b3:      	movl	0x1380(%rbp), %eax
+    32b9:      	movl	0x20(%r15), %ecx
+    32bd:      	btl	%ecx, %eax
+    32c0:      	jb	0x32e8 <perf_unwind_native+0x32e8>
+    32c2:      	movl	$0x0, 0x30(%rsp)
+    32ca:      	movq	(%rip), %rdi            # 0x32d1 <perf_unwind_native+0x32d1>
+		00000000000032cd:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+    32d1:      	leaq	0x30(%rsp), %rsi
+    32d6:      	callq	0x32db <perf_unwind_native+0x32db>
+		00000000000032d7:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+    32db:      	testq	%rax, %rax
+    32de:      	je	0x32e3 <perf_unwind_native+0x32e3>
+    32e0:      	incq	(%rax)
+    32e3:      	movzwl	0x20(%r15), %r12d
+    32e8:      	movq	0x10(%rsp), %r13
+    32ed:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
+    32f2:      	movl	$0x1, 0xf28(%rbp)
+    32fc:      	movl	$0xfad, %r14d           # imm = 0xFAD
+    3302:      	xorl	%r12d, %r12d
+    3305:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
+    330a:      	movl	$0xc, 0xf28(%rbp)
+    3314:      	movl	$0xfac, %r14d           # imm = 0xFAC
+    331a:      	xorl	%r12d, %r12d
+    331d:      	jmp	0x2d94 <perf_unwind_native+0x2d94>
