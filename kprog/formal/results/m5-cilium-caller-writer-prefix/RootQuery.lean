@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.rest_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.rest_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.begin_allocated
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix.begin_allocated

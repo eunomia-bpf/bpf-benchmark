@@ -273,3 +273,11 @@ steps to LR=88,same-store readback/caller and other-local frames. The default
 root includes this proof;Lake1482 jobs and3 root queries pass. Actual site
 reachability,remaining inline writer,and whole source/native obligations
 remain. See results/m5-cilium-caller-link.
+
+The original inline writer continues the same caller-site invocation through
+eagerSP/reg30/LR-read/three pointer casts/tag9 setup:20 actual source steps
+on the same LR-store memory. Temporary maps,LR/SP readback,caller frame and
+loop continuations remain exact;raw CODE9 bits88 stay unre-based. The default
+root includes this proof;Lake1484 jobs and3 root queries pass. Initial prefix
+reachability,initializedSP,guards/table word/tag writes and native binding
+remain explicit obligations. See results/m5-cilium-caller-writer-prefix.

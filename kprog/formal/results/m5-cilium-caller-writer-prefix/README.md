@@ -19,3 +19,5 @@ M5 remains active;M6 pending. Validation.json and compressed direct/focused/
 3public logs use original CPU17/j1/nice0/32GiB/SH timing/heartbeat200000/
 recursion512. Default root integration remains this batch's next step;
 V owns makecheck. Existing CompCert semantic parameters remain explicit.
+
+The default root now imports the same accepted caller twenty-step original writer setup. Full Lake1484 jobs and3 root type/axiom queries pass at original caps. This verifies integration,not additional source entry reachability/guards/stores/native/universal coverage.
