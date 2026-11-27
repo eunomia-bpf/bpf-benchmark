@@ -161,10 +161,13 @@ The actual source-unit link also exposes the original LINK entry and renamed
 ten-argument writer through their real symbol lookups. Its ABI theorem checks
 the complete parameter types, signed bias, volatile-byte pointer, returns and
 three writer locals. The complete LINK call will use this linked program.
-Its actual two-argument LINK entry now derives the two local array allocations,
-caller frame and first real header-read/table-store execution. All 62 original
-table rows and temporary names are bound to that source. Complete table
-initialization, the ten-argument writer call and freeing still follow.
+Its actual two-argument LINK entry now executes both complete 31-row
+pointer-table initializations: 373 true entry/body transitions retain both
+typed pointer tables, every actual temporary update and the original caller
+frame and access map. Original header reads and allocated ownership derive
+each current read and store permission. The previous complete first-row API
+delegates to that same generic row proof. LR setup, the ten-argument writer
+call and both actual free-lists still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

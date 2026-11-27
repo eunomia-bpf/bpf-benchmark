@@ -1,0 +1,9 @@
+# Execute both original LINK pointer-table initializations
+
+The original exported LINK FunctionEntry2 and actual two-array allocation feed both complete31-row initializations on the same actual heap witnesses. Each real header load comes from the original caller header read and preceding old-block frame; each successful store is derived from actual allocated ownership and the unchanged access map. True C array operand types,index narrowing and strides8/1 retain arbitrary original pointer blocks and wrapping offsets. One generic row executes6 real transitions. The actual finite row lists compose once for372 body transitions,then the original function entry yields373 actual transitions from original Callstate to the genuine afterTables statement. Both final31-slot pointer tables,all actual temporary updates,original addressing/address parameters,typed loads from every other block,raw caller bytes/Cur-Max permissions and exact access/nextblock are derived on those same states. The previous complete first_store public type is kernel compatible through the same generic proof; its duplicated body is removed. Actual LR assignment,seven remaining header reads,the genuine ten-argument writer/stores/inner and outer freeLists/return and native BL/code-coordinate binding remain. No source export,runtime,oracle,canonical provenance or benchmark change.
+
+Focused build 148 and 9 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+Root-integrated default Lake build also passes (1434 jobs),with exclusive formal-full-check. The complete original first_store public type passes a kernel compatibility proof in Query.lean.
