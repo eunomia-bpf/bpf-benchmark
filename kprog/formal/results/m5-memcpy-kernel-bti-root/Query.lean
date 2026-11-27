@@ -1,0 +1,12 @@
+import KProgFormal
+
+#check BR.exec_hints_bti
+#print axioms BR.exec_hints_bti
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.generic
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.generic
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryControl.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryControl.execute
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryControl.registers
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryControl.registers
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyAliasEntry.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyAliasEntry.execute

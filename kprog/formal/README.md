@@ -137,13 +137,30 @@ same actual source and native store witnesses. Actual generic Code, post-BTI
 PC, count16, error and physical input derive all thirteen native steps;
 source-derived read/write permissions and byte observations then yield both
 the complete final register relation and all sixteen final source/native
-destination-byte observations on that single execution. The actual exported alias branch now decodes and executes mature B, reaching
+destination-byte observations on that single execution. The actual exported
+alias branch now decodes and executes mature B, reaching
 the distinct generic symbol while preserving LR and the complete physical
-frame and fetching generic BTI on the same program. Initial full binding,
-targeted provider/cache inputs and the generic count16 post-BTI domain stay
-explicit. Actual exported-symbol entry, native BL/caller/landing-pad/live
-alternatives, global provider/code evidence and whole-program observer
-continue on these same witnesses.
+frame and fetching generic BTI on the same program. The mature Hints body now
+executes the four BTI landing encodings in its feature-absent plain projection.
+Actual alias BTI, branch to the distinct generic symbol and generic BTI derive
+their successive fetches and error states on that same Code. Those three
+steps preserve the full input relation and feed the same thirteen native
+prefix/load/store/RET steps and original C call. Both final sixteen-byte
+observations and the complete register relation follow from these shared
+witnesses. The captured Cortex-A57/QEMU invocation supplies configuration and
+source evidence; live feature-register and patched-text bindings continue
+alongside the actual generic-branch Code contract. Initial full binding,
+targeted provider/cache inputs and the initialized count16 domain stay
+explicit. The real emitter already writes LINK(next_addr) before a relocated
+memcpy/memset BL's LIBC call. The next caller proof follows that actual LINK
+source and native PC+4, then global provider/code evidence and the original
+whole-program observer. [The platform receipt](results/m5-memcpy-bti-platform/README.md)
+records the architectural source and projection; [the next route](results/m5-memcpy-kernel-bti-root/next-route.md)
+names the actual C link and pointer-writer bodies.
+The actual source-unit link also exposes the original LINK entry and renamed
+ten-argument writer through their real symbol lookups. Its ABI theorem checks
+the complete parameter types, signed bias, volatile-byte pointer, returns and
+three writer locals. The complete LINK call will use this linked program.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

@@ -1,0 +1,68 @@
+{
+  "confirmed_utc": "2026-11-27T09:29:41.316831+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 1535.15092086792,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1433,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-bti-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 4.559540033340454,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "actual_source_unit_link_kernel_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-bti-root/LinkSources.lean"
+    ],
+    "exit": 0,
+    "seconds": 51.340163230895996,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22956,
+      "sha256": "cd4abe210799941bb2be0ae57b62edb6f20219b9d1b3eee529b5e1e44f9ee01e"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 14695,
+      "sha256": "ab2bb71b4be548092d1026023098041d48d7515ffba89de056cd1851c23d634e"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "Mature LNSym Hints now executes all four actual BTI encodings in the FEAT_BTI-absent plain projection,with original NOP and adjacent odd-hint behavior and complete API retained. Captured Cortex-A57/QEMU8.2.2 invocation and sole-kernel configuration are source/configuration evidence; live feature-register and patched-text bindings remain explicit. Actual alias Code requires fetched17ffff73. Actual alias BTI,B to a distinct generic symbol and generic BTI execute once on the same program,retaining LR,all non-PC fields,entire memory/profile/history/environment and the original full register relation. Those SAME three native steps feed the existing13 prefix/load/store/RET witnesses. One original C caller-to-caller copy yields both all16 final destination bytes and the complete31-GPR/SP/32-vector/NZCV relation on that same store/return state. Original initialized profile,LR,source Star,actual160/20 release visits,targeted86-clobber-provider/104-architectural-store trace,eight real frees,caller and resource/frontier frames remain. Initial full caller binding,the initialized constant-byte count16 domain,targeted external/cache contracts and actual generic-branch/feature projection remain explicit. Actual generator already emits LINK(next_addr) before LIBC for relocated memcpy/memset BL. Actual Arm64Addressing/Arm64Address whole-unit link admission already passes the kernel using mature private-symbol renaming. LinkProgram names that exact program and binds the original entry and renamed ten-argument writer body,with complete actual ABI/three-local checks; full execution is the next source proof. Next prove the actual exported Arm64Addressing.f_kprog_arm64_link complete C call,then derive native BL PC+4/source code-token binding and feed this same alias witness. Canonical CODE9 keeps raw bits while RETURN10 adds the return origin; actual code-coordinate binding must derive the existing initial premise or preserve it through a code-aware observation generalization with unchanged old APIs. Global code/environment/provenance/physical input-output,whole original observer,universal O1/O2/O4 and recount precede M6. Existing mature MemoryProofs dependencies retain their native execution scope; no new local axiom or cap increase.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
