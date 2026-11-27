@@ -3,6 +3,7 @@ import fcntl
 import io
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -102,6 +103,58 @@ try:
         overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
         source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)
         record['constant_selector_macros'] = [name for name, _ in macros]
+    if mode == 'const-controls':
+        # Make immutable opcode/width/index decoders visible to C constant
+        # folding before LLVM builds SSA for the expanded instruction body.
+        names = set("""__a64_l_reg __a64_l_width __a64_alu_width __a64_alu_op
+            __a64_cmp_width __a64_str_width __a64_srt_width __a64_srt_source
+            __a64_stw_width __a64_stw_action __a64_mbo_has_index __a64_mbo_isrc
+            __a64_l_pp __kprog_a64_adrp_op __kprog_a64_bf_kind
+            __kprog_a64_br_kind __kprog_a64_cneg_op __kprog_a64_cneg_width
+            __kprog_a64_csel_op __kprog_a64_cp_op __kprog_a64_cp_width
+            __kprog_a64_ext_op __kprog_a64_ext_width __kprog_a64_ldrsx_op
+            __kprog_a64_ldrsx_sxop __kprog_a64_lb_width __kprog_a64_lt_op
+            __kprog_a64_lt_width __kprog_a64_mbo_prepost __kprog_a64_mbo_has_index
+            __kprog_a64_mod __kprog_a64_mod_shift __kprog_a64_mod_amount
+            __kprog_a64_mov_op __kprog_a64_mov_width __kprog_a64_movk_shift
+            __kprog_a64_mul_op __kprog_a64_orn_op __kprog_a64_orn_width
+            __kprog_a64_plt_op __kprog_a64_plt_width __kprog_a64_red_op
+            __kprog_a64_shift_op __kprog_a64_shift_width __kprog_a64_shift_32
+            __kprog_a64_stlxr_op __kprog_a64_stlxr_width __kprog_a64_sb_width
+            __kprog_a64_un_op __kprog_a64_un_width""".split())
+        headers = [ROOT/'kprog/arm64/arm64_sim_local_bpf.h',
+                   ROOT/'kprog/arm64/arm64_sim_direct.h',
+                   *sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
+        macros = []
+        record['constant_control_declarations'] = []
+        for header in headers:
+            lines = header.read_text().splitlines(keepends=True)
+            index = 0
+            while index < len(lines):
+                block = lines[index]
+                index += 1
+                if not block.startswith('#define '):
+                    continue
+                while block.rstrip().endswith('\\') and index < len(lines):
+                    block += lines[index]
+                    index += 1
+                changed = []
+                for name in sorted(names):
+                    declaration = r'(?<!const )\b((?:__u(?:8|16|32|64)|__s(?:8|16|32|64)|int)\s+'+name+r'\s*=)'
+                    if not re.search(declaration, block):
+                        continue
+                    writes = re.findall(r'\b'+name+r'\s*(?:=(?!=)|[+*/&|^%-]=|\+\+|--)', block)
+                    assert len(writes) == 1, (header, name, writes)
+                    block = re.sub(declaration, r'const \1', block)
+                    changed.append(name)
+                if changed:
+                    macro = block.split('(', 1)[0].removeprefix('#define ')
+                    macros.append((macro, block))
+                    record['constant_control_declarations'].append(dict(header=str(header), macro=macro, names=changed))
+        marker = ('#include '+json.dumps(str(ROOT/'kprog/arm64/arm64_sim_local_bpf.h'))).encode()
+        overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
+        assert source_bytes.count(marker) == 1
+        source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)
     source.write_bytes(source_bytes)
     record['restored_source'] = str(source)
     record['canonical_outputs_before'] = [str(p) for p in [frontend, frontend.with_name('trusted_arm64.bpf.o')] if p.exists()]
