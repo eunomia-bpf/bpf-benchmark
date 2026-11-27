@@ -96,7 +96,7 @@ theorem writable {initial seed m : CC.Mem} {entry : Arm64Producer.HeaderLocal in
 /-- Compose source81 through its genuine tag-word and destination byte
 stores, the remaining lane gates, and the actual SP and wrapper exits.
 The same current packet and copied prefix reach the original increment. -/
-theorem execute {initial seed calleeBefore before : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
+theorem execute_framed {initial seed calleeBefore before : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : Arm64Producer.TailLocal initial 6} {byte : BitVec 8}
     {gprs : Fin 18 → BitVec 64} {flags : Fin 4 → BitVec 64} {values : Fin 64 → BitVec 64}
     (le : CC.TempEnv) (k : CC.Cont) (i : Fin 16)
@@ -120,7 +120,9 @@ theorem execute {initial seed calleeBefore before : CC.Mem} {entry : Arm64Produc
       CC.Mem.store .Mint8unsigned tagged base.stack.block (80+(i.val : Int)) (.Vint (byte.setWidth 32)) = some after ∧
       CC.Mem.load .Mint8unsigned after base.stack.block (80+(i.val : Int)) = some (.Vint (byte.setWidth 32)) ∧
       Arm64MemcpyReadCurrent.Flag entry cell flagValue after ∧
-      FrameBelow initial.nextblock before after ∧ after.nextblock = before.nextblock := by
+      FrameBelow initial.nextblock before after ∧ after.nextblock = before.nextblock ∧
+      (∀ q : Fin 31, Arm64EntryMemory.gpr after.nextblock after (.Vptr entry.block 0) q.val =
+        Arm64EntryMemory.gpr before.nextblock before (.Vptr entry.block 0) q.val) := by
   let e := (Arm64MemcpySource.allocation calleeBefore).1
   let cont := Arm64MemcpyStoreIndex.continuation (Arm64MemcpyReadCaller.continuation k)
   let tagLe := Arm64MemcpyTagLoop.temps le i base.tags.block
@@ -178,10 +180,42 @@ theorem execute {initial seed calleeBefore before : CC.Mem} {entry : Arm64Produc
   have tagFrame := Arm64MemcpyTagFrame.word_store tagStore prior.packet.tagBytes initial.nextblock
   have live := ((allocated_local_storage (CC.doAllocVariables_sound _ _ _ _ _ _
     (Prod.eta (Arm64Producer.allocation initial)).symm)).1 _ _ base.stack.binding).1
+  have tagOlder := Arm64MemcpyTagFrame.word_store tagStore prior.packet.tagBytes before.nextblock
+  let tagStorage := Arm64MemsetFreeState.storage before.nextblock producerBound tagOlder prior.packet.storage
+  have tagGprs (j : Fin 31) := Arm64MemsetFreeState.gpr before.nextblock producerBound tagOlder prior.packet.storage j
+  have byteGprs (j : Fin 31) := Arm64MemcpyByteStorage.gpr base.stack (80+(i.val : Int)) byte actualStore tagStorage j
   refine ⟨tagged,after,nextLe,next,?_,tagStore,actualStore,actualRead,flagAfter,
-    tagFrame.trans (FrameBelow.store live actualStore),byteNext.trans tagNext⟩
+    tagFrame.trans (FrameBelow.store live actualStore),byteNext.trans tagNext,fun j => (byteGprs j).trans (tagGprs j)⟩
   simpa only [CC.E0,CC.Eapp,List.nil_append] using star_trans tagRun
     (star_trans gatesRun.sound (star_trans byteRun (star_trans enterLanes.sound
       (star_trans lanesRun.sound postRun.sound))))
+/-- The original complete interface uses the same actual execution. -/
+theorem execute {initial seed calleeBefore before : CC.Mem} {entry : Arm64Producer.HeaderLocal initial}
+    {base : Arm64MemsetHeaderView.View initial seed entry} {abi : Arm64Producer.TailLocal initial 6} {byte : BitVec 8}
+    {gprs : Fin 18 → BitVec 64} {flags : Fin 4 → BitVec 64} {values : Fin 64 → BitVec 64}
+    (le : CC.TempEnv) (k : CC.Cont) (i : Fin 16)
+    (prior : Arm64MemcpyLoopState.Invariant base abi byte gprs flags values calleeBefore i.val before le)
+    (producerBound : (Arm64Producer.allocation initial).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (callerBound : (Arm64MemcpySource.allocation calleeBefore).2.nextblock.toNat ≤ before.nextblock.toNat)
+    (hindex : le.get Arm64Program.___a64_stw_index = some (.Vlong (BitVec.ofNat 64 (80+i.val))))
+    (hwidth : le.get Arm64Program.___a64_stw_width = some (.Vint 1))
+    (hvalue : le.get Arm64Program.___a64_stw_value = some (.Vlong (byte.setWidth 64)))
+    (hoff : le.get Arm64Program.___a64_loss_off = some (.Vlong ((-16#64)+BitVec.ofNat 64 i.val)))
+    (cell : Arm64Producer.TailLocal initial 5) (flagValue : BitVec 8)
+    (flag : Arm64MemcpyReadCurrent.Flag entry cell flagValue before) :
+    ∃ tagged after nextLe,
+      ∃ _next : Arm64MemcpyLoopState.Invariant base abi byte gprs flags values calleeBefore i.val after nextLe,
+      CC.Star (CC.Step2 world)
+        (.State handler Arm64Program.s_kprog_arm64_program_memcpy_81
+          (Arm64MemcpyStoreIndex.continuation (Arm64MemcpyReadCaller.continuation k))
+          (Arm64MemcpySource.allocation calleeBefore).1 le before) CC.E0
+        (.State handler .Sskip k (Arm64MemcpySource.allocation calleeBefore).1 nextLe after) ∧
+      CC.Mem.store .Mint64 before base.tags.block 8 (.Vlong 0) = some tagged ∧
+      CC.Mem.store .Mint8unsigned tagged base.stack.block (80+(i.val : Int)) (.Vint (byte.setWidth 32)) = some after ∧
+      CC.Mem.load .Mint8unsigned after base.stack.block (80+(i.val : Int)) = some (.Vint (byte.setWidth 32)) ∧
+      Arm64MemcpyReadCurrent.Flag entry cell flagValue after ∧
+      FrameBelow initial.nextblock before after ∧ after.nextblock = before.nextblock := by
+  obtain ⟨tagged,after,nextLe,next,run,tagStore,byteStore,read,flagAfter,frame,nextBlock,_kept⟩ := execute_framed le k i prior producerBound callerBound hindex hwidth hvalue hoff cell flagValue flag
+  exact ⟨tagged,after,nextLe,next,run,tagStore,byteStore,read,flagAfter,frame,nextBlock⟩
 
 end KProgFormal.ClightRefinement.Arm64MemcpyStoreSuffix
