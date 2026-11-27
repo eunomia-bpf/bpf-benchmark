@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T09:06:09Z",
+  "pid": 962046,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "guest",
+    "CHECK_APP=cilium/agent"
+  ],
+  "revision": "486bb679001f754c66ee3fcbd3316e1fe2fe5ec8",
+  "scope": "ARM Cilium stage2 baseline/post frozen1x10s stats-on functional check, same recipe and common flags; per-request outcomes pending. Full timing frozen.",
+  "compiler_address_space_bytes": 51539607552
+}
