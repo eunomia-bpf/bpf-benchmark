@@ -1,0 +1,105 @@
+{
+  "utc": "2026-11-27T12:04:09Z",
+  "worker_before_sha256": "ccf0c15d78b55c5aca4024319da680d6b4ecfa0547998ccf7ea1f88b5cecc6f7",
+  "worker_after_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
+  "headers_unchanged": true,
+  "macro_overrides": 75,
+  "cases": [
+    {
+      "request": 1,
+      "source_bytes": 111885,
+      "source_sha256": "446338a330e57ae111e5a4f1bc96e2bff23c4172a9678fd18a03e87948c31375",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request1-20261127T115432Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 2,
+      "source_bytes": 294911,
+      "source_sha256": "a59f980e35cf19cecd46bebe5b367e71d72b2f3691c4fc3c2c4a7960ec65b561",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request2-20261127T115439Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 3,
+      "source_bytes": 385455,
+      "source_sha256": "ac8fa7b6a3ecac078ed7673cece5eadb276ac5949a89a8ea6a596ad6ad0edb6e",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request3-20261127T115520Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 4,
+      "source_bytes": 316711,
+      "source_sha256": "7d6d5dc551759c855e16b010e437a17c7ed0bd53fa8f1e0fd0658a8b95210410",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request4-20261127T115709Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 5,
+      "source_bytes": 340125,
+      "source_sha256": "f097bc888e96b9334a2a0ce76cf43bed92f3efc52f6f0e603b8b5413a712a3a2",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request5-20261127T115753Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 6,
+      "source_bytes": 363813,
+      "source_sha256": "c6902c00113c62b06db356558989f3a9987f637bc24c7f623482e66532f8edc9",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request6-20261127T115849Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 7,
+      "source_bytes": 333877,
+      "source_sha256": "666ad277a0995f6c13f22b94ef8d8bc800f1daed06ab5bf195ab4f19b45fcf6f",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request7-20261127T115945Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 8,
+      "source_bytes": 75026,
+      "source_sha256": "119c273c41df12a08dd785da123e86fa706b89108986150caaa8f593738fcca3",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request8-20261127T120038Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 9,
+      "source_bytes": 198176,
+      "source_sha256": "6cf4615729cba63a631d6be63bbb6dcdaf6839996a22433119aa5fb28f5ce3b4",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request9-20261127T120042Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    },
+    {
+      "request": 10,
+      "source_bytes": 533351,
+      "source_sha256": "5819fe8a55959624f965f019e2a2aad446b2f536cf845b7e12b0e2854406385e",
+      "source_byte_equal_compiled_profile": true,
+      "validation_profile": "kprog/results/arm64-loadtime-20261127/const-controls-request10-20261127T120215Z/controller.json",
+      "canonical_archive_members_byte_equal": true
+    }
+  ],
+  "compile_flags_unchanged": true,
+  "constant_overrides_cache_info": "CacheInfo(hits=0, misses=1, maxsize=None, currsize=1)",
+  "tetragon_resident_worker_sha256": "ccf0c15d78b55c5aca4024319da680d6b4ecfa0547998ccf7ea1f88b5cecc6f7",
+  "tetragon_run": "20261127T091129Z",
+  "tetragon_note": "The active service retains the original adapter loaded before its request loop. Subsequent source-identities.json reads will see the new disk worker hash although generated C still comes from the resident old worker. This transition record and preserved before-source disambiguate actual code. Shared headers and binaries remain unchanged.",
+  "breadth_batch_pending": false,
+  "validation_scope": "All ten real Cilium C sources exactly match the already compiled candidate; canonical source/IR/B archives byte-checked. Full stock/native/cold frozen startup validation remains open.",
+  "b_flags_ast_equal": true,
+  "checked_native_compiler_ast_equal": true,
+  "breadth_batch_controller_status": 0,
+  "breadth_batch_frontend_jobs": 10,
+  "original_frontend_seconds": 643.8382972929685,
+  "replay_frontend_seconds": 372.4419132990297,
+  "replay_all_compiler_seconds": 382.85233930603135,
+  "replay_frontend_max_rss_kib": 2548980,
+  "tetragon_sources_after_disk_edit": []
+}
