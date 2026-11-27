@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-11-27T16:24:58Z",
+  "pid": 1070395,
+  "source_revision": "924d9e41aa3b73324a49c2a85335bc4916bb8650",
+  "result": "/workspaces/repository/kprog/results/arm64-scalar-memory-20261127/run-20261127T161303Z",
+  "raw": "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z",
+  "log": "/workspaces/.agent-state/kprog-lanes/perf/scalar-all145.log",
+  "sequence": [
+    "compile.py all145 commonflags/twoCPU16and18/AS48GiB, reuse exact-source successful pilot49",
+    "stock_controller.py all145 pairedARMstock loads, only if all compilations succeeded"
+  ],
+  "expected_inputs": 145,
+  "original_refused": 117,
+  "original_accepted_controls": 28,
+  "pilot_archive_git_blob_verified": "8a306603f19e6ee388a65046312bdf5f0812abc9",
+  "scope": "Finite compile+paired verifier diagnostics, no native install/stage2/frozen startup/runtime acceptance. Capture controls/maps remain fresh empty shapes; stage2 is next after actual verifier results.",
+  "raw_retention": "All145 active inputs and pilot source files retained until complete archive publication and every-file verification. Protected OTel/Cilium090610 FORMAL active sources/Tracee unchanged."
+}
