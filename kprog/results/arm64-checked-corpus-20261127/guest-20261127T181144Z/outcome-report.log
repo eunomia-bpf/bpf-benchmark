@@ -1,0 +1,10 @@
+Corpus/app error error mix {'direct-native': 11, 'failed': 2}
+baseline programs 87 with calls 15 workloads [('stress_ng_tetragon_policy_hot', 0, 11.280269135999987)]
+post_rejit absent; app status error error tetragon/observer loadtime rejit timed out after 900.0s
+1 event_exit_disassociate_ctty ['infinite loop detected at insn 1426']
+2 event_exit_acct_process ['infinite loop detected at insn 1422']
+3 event_wake_up_new_task ["R2 invalid mem access 'scalar'"]
+6 execve_rate ['infinite loop detected at insn 1820']
+7 tg_kp_bprm_committing_creds ["R2 invalid mem access 'scalar'"]
+8 execve_map_update ['383: (55) if r3 != 0x0 goto pc+5 infinite loop detected at insn 389']
+9 generic_kprobe_output ['infinite loop detected at insn 1726']

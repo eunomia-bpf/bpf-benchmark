@@ -38,7 +38,11 @@ with tarfile.open(case/'service.tar.gz') as outer:
     row['b_stock_passed']=False
    for name in ['load-direct.stderr','load.stderr','commands.jsonl']:
     if name in files:row[name]=inner.extractfile(files[name]).read().decode()
-   if 'checked-simulator-verification.json' in files:row['stock_verification']=json.loads(inner.extractfile(files['checked-simulator-verification.json']).read())
+   if 'checked-simulator-verification.json' in files:
+    row['stock_verification']=json.loads(inner.extractfile(files['checked-simulator-verification.json']).read())
+    if row['stock_verification'].get('status') == 0:
+     row['b_generated']=True
+     row['b_stock_passed']=True
    if 'native-commands.jsonl' in files:row['native_commands']=[json.loads(x) for x in inner.extractfile(files['native-commands.jsonl']).read().decode().splitlines() if x.strip()]
   if receipt.get('simulator_failure'):row['simulator_failure']=receipt['simulator_failure']
   # Observed diagnostics only; no execution or admission selection.
