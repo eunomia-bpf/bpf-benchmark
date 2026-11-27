@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py 20261127T044717Z
+Corpus/app ok ok mix {'direct-native': 11, 'checked-sim-c': 1, 'failed': 1}
+baseline programs 12 with calls 2 workloads [('otel_python3_int_loop_0', 0, 12.289785903999999), ('otel_python3_int_loop_1', 0, 12.351677424000002), ('otel_ruby_int_loop_0', 0, 38.279078496), ('otel_ruby_int_loop_1', 0, 39.346333312), ('otel_nodejs_int_loop_0', 0, 39.35474739200001), ('otel_nodejs_int_loop_1', 0, 39.368543360000004), ('otel_perl_int_loop_0', 0, 39.373641456), ('otel_perl_int_loop_1', 0, 39.388417712000006), ('otel_php_int_loop_0', 0, 39.39800324800001), ('otel_php_int_loop_1', 0, 39.40574395200001), ('otel_stress_ng_cpu', 0, 39.42730403200001)]
+post_rejit programs 12 with calls 2 workloads [('otel_python3_int_loop_0', 0, 11.971687343999292), ('otel_python3_int_loop_1', 0, 11.98072904000037), ('otel_ruby_int_loop_0', 0, 30.60976252799992), ('otel_ruby_int_loop_1', 0, 31.142722896000123), ('otel_nodejs_int_loop_0', 0, 31.144917120000173), ('otel_nodejs_int_loop_1', 0, 31.148722703999738), ('otel_perl_int_loop_0', 0, 31.15026467200005), ('otel_perl_int_loop_1', 0, 31.15202279999903), ('otel_php_int_loop_0', 0, 31.153880927999126), ('otel_php_int_loop_1', 0, 31.15652606399999), ('otel_stress_ng_cpu', 0, 31.157984367999234)]
+1 read_task_struct ["R7 invalid mem access 'scalar'"]
+2 perf_unwind_stop ["R6 invalid mem access 'scalar'"]
+7 perf_unwind_python ["R1 invalid mem access 'scalar'"]
+8 perf_unwind_ruby ["R1 invalid mem access 'scalar'"]
+10 perf_go_labels ['R1 unbounded memory access, make sure to bounds check any such access']
+12 native_tracer_entry ["R7 invalid mem access 'scalar'"]
+13 custom__generic ["R1 invalid mem access 'scalar'"]
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

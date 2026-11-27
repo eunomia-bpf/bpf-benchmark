@@ -1,0 +1,14 @@
+request	symbol	prog_type	native_id	source_prog_id	post_prog_id	post_uses_original	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	read_task_struct	17	25	20	25	False	True	False	direct-native	0	None	None	R7 invalid mem access 'scalar'
+2	perf_unwind_stop	7	31	26	31	False	True	False	direct-native	0	0	0	R6 invalid mem access 'scalar'
+3	perf_unwind_native	7	35	32	35	False	False	False	direct-native	0	0	0	
+4	perf_unwind_hotspot	7	39	36	39	False	False	False	direct-native	0	0	0	
+5	perf_unwind_perl	7	43	40	43	False	False	False	direct-native	0	0	0	
+6	perf_unwind_php	7	47	44	47	False	False	False	direct-native	0	0	0	
+7	perf_unwind_python	7	53	48	53	False	True	False	direct-native	0	0	0	R1 invalid mem access 'scalar'
+8	perf_unwind_ruby	7	59	54	59	False	True	False	direct-native	0	0	0	R1 invalid mem access 'scalar'
+9	perf_unwind_v8	7	63	60	63	False	False	False	direct-native	0	0	0	
+10	perf_go_labels	7	69	64	69	False	True	False	direct-native	0	0	0	R1 unbounded memory access, make sure to bounds check any such access
+11	tracepoint__sched_process_free	5	76	70	76	False	True	True	checked-sim-c	0	23	720048	
+12	native_tracer_entry	7	82	77	82	False	True	False	direct-native	0	604313	8994758144	R7 invalid mem access 'scalar'
+13	custom__generic	2	None	83	83	True	True	False	failed	-5	0	0	R1 invalid mem access 'scalar'
