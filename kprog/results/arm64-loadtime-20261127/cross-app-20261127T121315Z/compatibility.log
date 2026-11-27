@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-27T12:53:22Z",
+  "utc": "2026-11-27T13:03:42Z",
   "apps": {
     "bcc/set": {
       "inventory": 23,
@@ -33,14 +33,14 @@
     },
     "otelcol-ebpf-profiler/profiling": {
       "inventory": 13,
-      "completed": 5,
-      "pending": 8,
+      "completed": 6,
+      "pending": 7,
       "replay_status_counts": {
-        "compiled": 5,
-        "pending": 8
+        "compiled": 6,
+        "pending": 7
       },
       "original_generation_failures": 5,
-      "recovered_generation_failures": 3,
+      "recovered_generation_failures": 4,
       "matched_successful_original_frontend_seconds": 125.8995512079855,
       "matched_replay_frontend_seconds": 69.7750955989759,
       "matched_replay_all_compiler_seconds": 71.00048524697195,
@@ -150,7 +150,7 @@
           "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
         ]
       },
-      "replay_status": "pending"
+      "replay_status": "compiled"
     },
     {
       "index": 33,
