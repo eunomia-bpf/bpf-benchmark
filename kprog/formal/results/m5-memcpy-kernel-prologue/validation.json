@@ -1,0 +1,56 @@
+{
+  "confirmed_utc": "2026-11-27T00:46:29.826011+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPrologue"
+    ],
+    "exit": 0,
+    "seconds": 4.911381244659424,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 77,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-prologue/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.3007142543792725,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_native_words": [
+      "8b020024",
+      "8b020005"
+    ],
+    "native_steps": 2,
+    "initial_cursor": "generic origin+4, after BTI",
+    "final_cursor": "generic origin+12",
+    "actual_registers": "X4=source+count; X5=destination+count",
+    "input_count": "arbitrary64",
+    "memory_events": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPrologue.lean",
+      "size_bytes": 6644,
+      "mtime_ns": 1795740223082497467
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

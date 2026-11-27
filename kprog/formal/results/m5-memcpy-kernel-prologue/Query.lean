@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPrologue
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPrologue.decoded
+#print axioms Arm64KernelMemcpyPrologue.decoded
+#check Arm64KernelMemcpyPrologue.execute
+#print axioms Arm64KernelMemcpyPrologue.execute
