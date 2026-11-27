@@ -1,0 +1,55 @@
+{
+  "confirmed_utc": "2026-11-27T01:47:04.516165+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPairWrite"
+    ],
+    "exit": 0,
+    "seconds": 2.052257537841797,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 87,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-pair-write/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1779580116271973,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "actual_STPs": 2,
+    "native_modes": [
+      "two ordered write8",
+      "one write16"
+    ],
+    "new_successful_write_premises": 0,
+    "input": "same original16byte writable range",
+    "output": "actual initialized profile and ordered true-initialization write events",
+    "frame": "all registers/environment preserved, PC+4"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPairWrite.lean",
+      "size_bytes": 12080,
+      "mtime_ns": 1795743916762672426
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

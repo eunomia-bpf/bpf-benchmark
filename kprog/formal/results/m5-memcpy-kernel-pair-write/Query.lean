@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairWrite
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairWrite.effects
+#print axioms Arm64KernelMemcpyPairWrite.effects
+#check Arm64KernelMemcpyPairWrite.reference_step
+#print axioms Arm64KernelMemcpyPairWrite.reference_step
+#check Arm64KernelMemcpyPairWrite.execute
+#print axioms Arm64KernelMemcpyPairWrite.execute
+#check Arm64KernelMemcpyPairWrite.permissions
+#print axioms Arm64KernelMemcpyPairWrite.permissions
+#check Arm64KernelMemcpyPairWrite.frame
+#print axioms Arm64KernelMemcpyPairWrite.frame
