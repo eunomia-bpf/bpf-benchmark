@@ -90,7 +90,7 @@ private def written {initial seed before after : CC.Mem} {entry : HeaderLocal in
     old := obs.2.2.1.trans prior.old
     new := obs.2.2.2.trans prior.new }
 
-theorem step {initial seed m : CC.Mem} {entry : HeaderLocal initial}
+theorem step_framed {initial seed m : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
     {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
     {outerLe le : CC.TempEnv} (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont) (i : Fin 160)
@@ -98,7 +98,9 @@ theorem step {initial seed m : CC.Mem} {entry : HeaderLocal initial}
     ∃ after nextLe trace, ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe (i.val + 1) after nextLe,
       CC.Star (CC.Step2 world) (.State helper loop k CC.emptyEnv le m) trace
         (.State helper loop k CC.emptyEnv nextLe after) ∧
-      FrameBelow initial.nextblock m after ∧ after.access = m.access ∧ after.nextblock = m.nextblock := by
+      FrameBelow initial.nextblock m after ∧ after.access = m.access ∧ after.nextblock = m.nextblock ∧
+      (∀ q : Fin 31, Arm64EntryMemory.gpr after.nextblock after (.Vptr entry.block 0) q.val =
+        Arm64EntryMemory.gpr m.nextblock m (.Vptr entry.block 0) q.val) := by
   let packet := prepared i prior
   by_cases active : Arm64MemsetReleaseLoop.active i = true
   · have low : i.val < 64 := (Arm64MemsetReleaseLoop.active_positions i).mp active
@@ -113,16 +115,53 @@ theorem step {initial seed m : CC.Mem} {entry : HeaderLocal initial}
     let changed := written provided j value stored
     have back := Arm64MemsetReleaseLoop.advance CC.emptyEnv _ after k (Arm64MemsetReleaseLoop.index i) changed.counter
     refine ⟨after,_,trace,advanced i changed,?_,providerFrame.caller.trans frame,
-      access.trans providerFrame.access,next.trans providerFrame.nextblock⟩
-    simpa only [Arm64MemsetReleaseLoop.index,CC.E0,CC.Eapp,List.nil_append,List.append_nil] using
-      star_trans (star_trans setup.sound run) back.sound
+      access.trans providerFrame.access,next.trans providerFrame.nextblock,?_⟩
+    · simpa only [Arm64MemsetReleaseLoop.index,CC.E0,CC.Eapp,List.nil_append,List.append_nil] using
+        star_trans (star_trans setup.sound run) back.sound
+    · intro q
+      exact (Arm64MemsetReleaseStore.gpr_after provided.ready.memory.view j value stored provided.ready.memory.storage q).trans
+        (by simpa only [providerFrame.nextblock] using providerFrame.gpr prior.ready.memory.storage q)
   · have inactive : Arm64MemsetReleaseLoop.active i = false := Bool.eq_false_iff.mpr active
     have run := Arm64MemsetReleaseLoop.inactive CC.emptyEnv le m k entry.block i prior.parameter prior.counter
       prior.old prior.new prior.ready.memory.view.capacity prior.ready.memory.view.bias inactive
-    exact ⟨m,_,CC.E0,advanced i packet,run.sound,FrameBelow.refl _ _,rfl,rfl⟩
+    exact ⟨m,_,CC.E0,advanced i packet,run.sound,FrameBelow.refl _ _,rfl,rfl,by intro q; rfl⟩
+
+/-- Retain the complete original public interface through the same actual execution. -/
+theorem step {initial seed m : CC.Mem} {entry : HeaderLocal initial}
+    {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
+    {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    {outerLe le : CC.TempEnv} (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont) (i : Fin 160)
+    (prior : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe i.val m le) :
+    ∃ after nextLe trace, ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe (i.val + 1) after nextLe,
+      CC.Star (CC.Step2 world) (.State helper loop k CC.emptyEnv le m) trace
+        (.State helper loop k CC.emptyEnv nextLe after) ∧
+      FrameBelow initial.nextblock m after ∧ after.access = m.access ∧ after.nextblock = m.nextblock := by
+  obtain ⟨after,nextLe,trace,current,run,frame,access,next,_kept⟩ := step_framed inputs k i prior
+  exact ⟨after,nextLe,trace,current,run,frame,access,next⟩
 
 /-- Sequentially execute every actual byte index, with ordered real external
 traces and all protected source/copied data bytes and resources retained on each reached heap. -/
+theorem iterations_framed {initial seed before : CC.Mem} {entry : HeaderLocal initial}
+    {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
+    {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    {outerLe le : CC.TempEnv} (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont)
+    (start : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe 0 before le) (n : Nat) (bound : n ≤ 160) :
+    ∃ after nextLe trace, ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe n after nextLe,
+      CC.Star (CC.Step2 world) (.State helper loop k CC.emptyEnv le before) trace
+        (.State helper loop k CC.emptyEnv nextLe after) ∧
+      FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock ∧
+      (∀ q : Fin 31, Arm64EntryMemory.gpr after.nextblock after (.Vptr entry.block 0) q.val =
+        Arm64EntryMemory.gpr before.nextblock before (.Vptr entry.block 0) q.val) := by
+  induction n with
+  | zero => exact ⟨before,le,CC.E0,start,.refl _,FrameBelow.refl _ _,rfl,rfl,by intro q; rfl⟩
+  | succ n ih =>
+    obtain ⟨middle,middleLe,firstTrace,prior,run,frame,access,next,kept⟩ := ih (by omega)
+    let i : Fin 160 := ⟨n,by omega⟩
+    obtain ⟨after,nextLe,secondTrace,current,iteration,iterationFrame,iterationAccess,iterationNext,iterationKept⟩ := step_framed inputs k i prior
+    exact ⟨after,nextLe,CC.Eapp firstTrace secondTrace,current,star_trans run iteration,
+      frame.trans iterationFrame,iterationAccess.trans access,iterationNext.trans next,fun q => (iterationKept q).trans (kept q)⟩
+
+/-- Retain the complete original public interface through the same actual execution. -/
 theorem iterations {initial seed before : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
     {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
@@ -132,14 +171,8 @@ theorem iterations {initial seed before : CC.Mem} {entry : HeaderLocal initial}
       CC.Star (CC.Step2 world) (.State helper loop k CC.emptyEnv le before) trace
         (.State helper loop k CC.emptyEnv nextLe after) ∧
       FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock := by
-  induction n with
-  | zero => exact ⟨before,le,CC.E0,start,.refl _,FrameBelow.refl _ _,rfl,rfl⟩
-  | succ n ih =>
-    obtain ⟨middle,middleLe,firstTrace,prior,run,frame,access,next⟩ := ih (by omega)
-    let i : Fin 160 := ⟨n,by omega⟩
-    obtain ⟨after,nextLe,secondTrace,current,iteration,iterationFrame,iterationAccess,iterationNext⟩ := step inputs k i prior
-    exact ⟨after,nextLe,CC.Eapp firstTrace secondTrace,current,star_trans run iteration,
-      frame.trans iterationFrame,iterationAccess.trans access,iterationNext.trans next⟩
+  obtain ⟨after,nextLe,trace,current,run,frame,access,next,_kept⟩ := iterations_framed inputs k start n bound
+  exact ⟨after,nextLe,trace,current,run,frame,access,next⟩
 
 section Current
 variable {initial seed before : CC.Mem} {entry : HeaderLocal initial}
@@ -160,7 +193,7 @@ private theorem continuation_source (k : CC.Cont) : Arm64MemsetClobberEntry.cont
 /-- The shared helper's real160-index scan retains all64 selected actual
 provider/store effects, ordered external traces, final guard and next tag
 statement, with the actual R0 and same caller/flag packet throughout. -/
-theorem execute
+theorem execute_framed
     (current : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue before)
     (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont) :
     ∃ after nextLe trace,
@@ -169,8 +202,10 @@ theorem execute
         (.State helper loop (Arm64MemsetClobberEntry.continuation k) CC.emptyEnv
           (Arm64MemsetClobberEntry.temps entry.block current.memory.storage.sp.block) before) trace
         (.State helper Arm64MemsetClobberEntry.tags (tagCont k) CC.emptyEnv nextLe after) ∧
-      FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock := by
-  obtain ⟨after,nextLe,trace,packet,run,frame,access,next⟩ := iterations inputs
+      FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock ∧
+      (∀ q : Fin 31, Arm64EntryMemory.gpr after.nextblock after (.Vptr entry.block 0) q.val =
+        Arm64EntryMemory.gpr before.nextblock before (.Vptr entry.block 0) q.val) := by
+  obtain ⟨after,nextLe,trace,packet,run,frame,access,next,kept⟩ := iterations_framed inputs
     (Arm64MemsetClobberEntry.continuation k) (start current) 160 (by decide)
   let finalLe := nextLe.set Arm64Program._t'237 (.Vint 160)
   let finalPacket : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe 160 after finalLe :=
@@ -186,9 +221,23 @@ theorem execute
       (.State helper Arm64MemsetClobberEntry.tags (tagCont k) CC.emptyEnv finalLe after) := by
     rw [continuation_source]
     exact .step trivial (CC.doStep_sound _ _ _ _ rfl) (.refl _)
-  refine ⟨after,finalLe,trace,finalPacket,?_,frame,access,next⟩
+  refine ⟨after,finalLe,trace,finalPacket,?_,frame,access,next,kept⟩
   simpa only [CC.E0,CC.Eapp,List.nil_append,List.append_nil] using
     star_trans (star_trans run leave.sound) nextStatement.sound
+
+/-- Retain the complete original public interface through the same actual execution. -/
+theorem execute
+    (current : Arm64ClobberCoreState.Saved (Arm64MemcpySource.allocation calleeBefore).1 base abi byte rawR0 copiedN cell flagValue before)
+    (inputs : Inputs base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe) (k : CC.Cont) :
+    ∃ after nextLe trace,
+      ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe 160 after nextLe,
+      CC.Star (CC.Step2 world)
+        (.State helper loop (Arm64MemsetClobberEntry.continuation k) CC.emptyEnv
+          (Arm64MemsetClobberEntry.temps entry.block current.memory.storage.sp.block) before) trace
+        (.State helper Arm64MemsetClobberEntry.tags (tagCont k) CC.emptyEnv nextLe after) ∧
+      FrameBelow initial.nextblock before after ∧ after.access = before.access ∧ after.nextblock = before.nextblock := by
+  obtain ⟨after,nextLe,trace,packet,run,frame,access,next,_kept⟩ := execute_framed current inputs k
+  exact ⟨after,nextLe,trace,packet,run,frame,access,next⟩
 
 end Current
 end KProgFormal.ClightRefinement.Arm64ClobberReleaseComplete
