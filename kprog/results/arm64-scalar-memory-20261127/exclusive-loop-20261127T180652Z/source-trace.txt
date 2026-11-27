@@ -1,0 +1,141 @@
+kprog/arm64/arm64_sim_local_bpf.h:1911
+/* The native input ABI supplies an explicit Boolean per dynamic visit.
+ * Its shared header is outside this extraction layer; spell its host protocol
+ * as standard statements for Clight, including the exact invalid-choice exit.
+ * Native callers keep the original macro and BPF private instruction. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(OUTPUT, SITE) \
+    do { unsigned long __a64_exclusive_choice = native_lab_exclusive_failure_choice((unsigned int)(SITE)); \
+        if (__a64_exclusive_choice > 1) { \
+            fputs("native exclusive failure choice must be 0 or 1\n", stderr); \
+            exit(1); \
+        } \
+        (OUTPUT) = __a64_exclusive_choice; \
+    } while (0)
+#else
+#define ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(OUTPUT, SITE) \
+    do { (OUTPUT) = NATIVE_LAB_EXCLUSIVE_FAILURE(SITE); } while (0)
+#endif
+
+/* The actual exclusive-store body: rejection precedes the environment query;
+ * a failed reservation observes no source or memory, then writes W status. */
+#define ARM64_SIM_L_STLXR_STEP(OP, DST, SRC, BASE, AUX, SITE, WIDTH) \
+    do { \
+        if ((DST) == (SRC) || ((BASE) != ARM64_SP && (DST) == (BASE))) \
+            ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+        ARM64_SIM_L_SP_ALIGNMENT(BASE); \
+        __u64 __a64_stlxr_failure; \
+        ARM64_SIM_L_EXCLUSIVE_FAILURE_INTO(__a64_stlxr_failure, (SITE)); \
+        if (!__a64_stlxr_failure) \
+            ARM64_SIM_L_MEM_WRITE_REG((BASE), ARM64_REG_NONE, (AUX), 0, 0, (WIDTH), (SRC)); \
+        __u64 __a64_stlxr_status; \
+        KPROG_ARM64_STLXR_VALUE_INTO(__a64_stlxr_status, (OP), ARM64_WIDTH_32, __a64_stlxr_failure, ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+        ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_stlxr_status, ARM64_WIDTH_32); \
+    } while (0)
+
+
+kinsn/module/include/native_lab_input.h
+/* SPDX-License-Identifier: GPL-2.0 */
+#ifndef NATIVE_LAB_INPUT_H
+#define NATIVE_LAB_INPUT_H
+
+/* Private proof ISA, not a helper call. Entry values refer to the native body
+ * after its host JIT prologue; NUMERIC preserves R1 bits without provenance.
+ * Cached source-function bases additionally require the certified ABI mapping.
+ */
+#define NATIVE_LAB_INPUT_ABI 2
+#define NATIVE_LAB_INPUT_SRC 9
+#define NATIVE_LAB_INPUT_SP 1
+#define NATIVE_LAB_INPUT_CODE 2
+#define NATIVE_LAB_INPUT_RETURN 3
+#define NATIVE_LAB_INPUT_NUMERIC 4
+#define NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE 5
+#define NATIVE_LAB_INPUT_UNSPECIFIED 6
+
+#ifdef __KERNEL__
+static inline bool bpf_native_input_candidate(const struct bpf_insn *insn)
+{
+	return insn->code == (BPF_ALU64 | BPF_MOV | BPF_K) &&
+	       insn->src_reg == NATIVE_LAB_INPUT_SRC;
+}
+#endif
+
+#if defined(__bpf__)
+#define NATIVE_LAB_ENTRY_INPUT(kind) ({ \
+	register unsigned long __native_value asm("r0"); \
+	asm volatile(".8byte %c1" : "=r"(__native_value) : \
+		"i"(0x00000002000090b7UL | ((unsigned long)(kind) << 16))); \
+	__native_value; \
+})
+#define NATIVE_LAB_NUMERIC(value) ({ \
+	register unsigned long __native_value asm("r0"); \
+	register unsigned long __native_pointer asm("r1") = (unsigned long)(value); \
+	asm volatile(".8byte 0x00000002000490b7" : "=r"(__native_value) : \
+		"r"(__native_pointer)); \
+	__native_value; \
+})
+#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
+	register unsigned long __native_value asm("r0"); \
+	asm volatile(".8byte %c1" : "=r"(__native_value) : \
+		"i"(0x00000000000590b7UL | ((unsigned long)(unsigned int)(site) << 32))); \
+	__native_value; \
+})
+#elif !defined(__KERNEL__)
+#include <stdio.h>
+#include <stdlib.h>
+/* Host simulators must supply an explicit outcome for each dynamic visit.
+ * There is deliberately no constant-success or random fallback.
+ */
+extern unsigned long native_lab_entry_input(unsigned int kind);
+#define NATIVE_LAB_ENTRY_INPUT(kind) native_lab_entry_input(kind)
+extern unsigned long native_lab_exclusive_failure_choice(unsigned int site);
+#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ \
+	unsigned long __native_failure = native_lab_exclusive_failure_choice(site); \
+	if (__native_failure > 1) { \
+		fputs("native exclusive failure choice must be 0 or 1\n", stderr); \
+		exit(1); \
+	} \
+	__native_failure; \
+})
+#endif
+#endif
+
+
+kprog/stock-path/include/stock_native_input.h
+/* Compiled with -include ahead of native_lab_input.h: every private input of
+ * the simulator becomes a read of an ordinary, mutable array map. The verifier
+ * marks each such load an unknown scalar, the same abstract value the private
+ * instruction produced, so B needs no verifier extension. */
+#ifndef NATIVE_LAB_INPUT_H
+#define NATIVE_LAB_INPUT_H
+#if defined(__TARGET_ARCH_x86)
+#define KPROG_X86_ENTRY_SAVES_CALLEE 1
+#endif
+#define NATIVE_LAB_INPUT_ABI 2
+#define NATIVE_LAB_INPUT_SRC 9
+#define NATIVE_LAB_INPUT_SP 1
+#define NATIVE_LAB_INPUT_CODE 2
+#define NATIVE_LAB_INPUT_RETURN 3
+#define NATIVE_LAB_INPUT_NUMERIC 4
+#define NATIVE_LAB_INPUT_EXCLUSIVE_FAILURE 5
+#define NATIVE_LAB_INPUT_UNSPECIFIED 6
+#if defined(__bpf__)
+extern unsigned long long kprog_unspecified_input[] __attribute__((section(".ksyms")));
+#define KPROG_UNSPECIFIED_WORD() (*(volatile unsigned long long *)&kprog_unspecified_input[0])
+#define NATIVE_LAB_ENTRY_INPUT(kind) ({ (void)(kind); (unsigned long)KPROG_UNSPECIFIED_WORD(); })
+#define NATIVE_LAB_NUMERIC(value) ({ \
+  unsigned long __kprog_numeric_bits = (unsigned long)(value); \
+  unsigned long __kprog_numeric_scalar = (unsigned long)KPROG_UNSPECIFIED_WORD(); \
+  asm volatile("# kprog_numeric" : "+r"(__kprog_numeric_scalar) : "r"(__kprog_numeric_bits)); \
+  __kprog_numeric_scalar; \
+})
+#define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ (void)(site); (unsigned long)(KPROG_UNSPECIFIED_WORD() & 1); })
+#endif
+#endif
+
+
+kprog/stock-path/bin/clang
+#!/bin/sh
+# BPF compiler for B on the stock path: forces the ordinary-input header.
+exec "${KPROG_REAL_CLANG:-/usr/lib/llvm-18/bin/clang}" -include "$(dirname "$0")/../include/stock_native_input.h" "$@"
+

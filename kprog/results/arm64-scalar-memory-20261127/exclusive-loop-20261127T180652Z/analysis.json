@@ -1,0 +1,56 @@
+{
+  "utc": "2026-11-27T18:06:52Z",
+  "app": "tetragon/observer",
+  "request": 1,
+  "input_index": 49,
+  "symbol": "event_exit_disassociate_ctty",
+  "original_family": "scalar memory access",
+  "after_family": "infinite loop",
+  "after_kernel_errno": 22,
+  "failed_B_instruction": 1426,
+  "evidence_files": {
+    "after.bpf.c": {
+      "bytes": 35871,
+      "sha256": "9a2b15e8c2872bfc165cdcb37ef0275b71a50c5a410dc9d0373fd801be7692fe",
+      "gzip_sha256": "082ac346527697198584610ac3d7bb123f115a4b8a04b81cd7696a91d96310ac"
+    },
+    "after.bpf.o": {
+      "bytes": 157800,
+      "sha256": "d39b72ec2316c4c2595c20b5eb9357f4133e0ecc835e65c5eb0db4fc51efc78c",
+      "gzip_sha256": "f9120dbe1f36d64428894ce14236606e48c9a0ae02fd91f7462e0f3d27a44b89"
+    },
+    "stock-after.verifier.log": {
+      "bytes": 96241,
+      "sha256": "823e0e90f016ca4817b87e1183cb7ab3377a784950e63351eaf9eda21204b703",
+      "gzip_sha256": "8ab26f7887324079e973c7c93ce6dfcce5d607dc0b99d2e0cfc6e7d42a5418f6"
+    },
+    "after.disassembly": {
+      "bytes": 137597,
+      "sha256": "39550e1ba2940038a6a587c16332b8047549b253fa00d48f9ddc2d09b5ba51af",
+      "gzip_sha256": "a9ed1e5bf20e54dee3c9e5faa8ef9a8351483b98b4d18083d664257f2a82de25"
+    }
+  },
+  "source_sha256": {
+    "kprog/arm64/arm64_sim_local_bpf.h": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+    "kprog/stock-path/include/stock_native_input.h": "6db7ea3964833165e696448742efa154dc3454fe057a2a1d6c9a40408445ed33",
+    "kprog/stock-path/bin/clang": "a33c492fe50fe646bdcc4b263d1ada44e6d6eb8f46236c47ca0f8158b440b8ed"
+  },
+  "native_retry": {
+    "load_exclusive": 640,
+    "store_exclusive": 648,
+    "conditional_retry": 652,
+    "target": 640
+  },
+  "source_steps": [
+    "0x280 LDAXR becomes ARM64_OP_LOAD",
+    "0x284 increments loaded value",
+    "0x288 STLXR requests explicit Boolean exclusive failure at site648; failure skips memory write and writes Wstatus1",
+    "0x28c CBNZ on Wstatus returns to0x280"
+  ],
+  "b_retry": "B1418 reads private choice &1; B1420 branches back on failure; B1425 reads load-fault choice; B1426/B1428 reach the retry body. No monotonically bounded loop counter exists.",
+  "reason": "The stock wrapper force-includes stock_native_input.h, translating private exclusive failure into volatile kprog_unspecified_input[0]&1. Each dynamic visit remains unknown to the verifier, so it can fail indefinitely. This is a native exclusive retry, not an unused choice that may be deleted.",
+  "proof_boundary": "native_lab_input.h ABI2 and current Clight path require an explicit0/1 choice per dynamic visit. No constant success, fairness assumption, arbitrary retry cap, map-freeze-to-zero or per-program selection is justified. Any common atomic-loop lowering needs a semantics-preserving argument covering observed effects and failure visits; this report does not implement or prove it.",
+  "scope": "One actual source/B/verifier refusal; no extrapolated family count. Read-only diagnosis during full145paired sweep, not a new compiler/guest/test or successful native install. Current scalar probe fixes one refusal then exposes this next one.",
+  "controller_status": 0
+}

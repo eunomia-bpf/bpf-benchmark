@@ -1,0 +1,9 @@
+# Scalar repair exposes an exclusive retry loop
+
+Tetragon request1 `event_exit_disassociate_ctty` (captured input49) now passes the original scalar load but is refused at B1426 for an infinite loop. The preserved C and source-annotated B disassembly identify the native operation: LDAXR at0x280, increment at0x284, STLXR at0x288, CBNZ retry at0x28c.
+
+The exclusive-store body requests an explicit Boolean failure outcome on every dynamic visit. Failure skips the write and sets Wstatus1, which branches back to the load. The stock compiler's forced header represents the choice as a volatile ordinary-map read masked with1. The verifier may therefore follow a path that fails every time; there is no bounded progress counter. This is an actual native exclusive retry, rather than an unused private input.
+
+The ABI2 header and Clight path deliberately retain per-visit choices and reject invalid values. A repair must preserve those semantics. This diagnosis does not force success, constrain choices, add a retry bound, or claim a proof for atomic-loop replacement. A common atomic-loop lowering would need to justify its relation to the original failed/successful visits and effects. FORMAL is notified of this boundary; its current proof files are untouched.
+
+Four compressed evidence files preserve the exact source, compiled B, full verifier log and disassembly, with SHA256s in analysis.json. source-trace.txt includes the actual local exclusive-store body, private input ABI, stock choice replacement and forced-include compiler wrapper. The B hash matches the completed145-input compile receipt. No compiler, guest, kernel, flags, framework, current sweep input or native install changed. The full sweep and queued Tetragon stage2 remain the sources of complete cross-app outcomes; this single input establishes no family count or broader acceptance.
