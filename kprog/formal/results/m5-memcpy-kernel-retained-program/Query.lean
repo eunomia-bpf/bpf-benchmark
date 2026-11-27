@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.finish_copied
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.finish_copied
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedProgram.complete
