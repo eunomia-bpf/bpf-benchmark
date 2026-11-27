@@ -1,0 +1,31 @@
+{
+  "pid": 1151155,
+  "started_utc": "2026-11-27T20:08:24Z",
+  "source_revision": "1e51a58c98fb51f77e42645ec42aef5793616a4a",
+  "scope": "Current-image x86 OTel eBPF/native host PMU diagnosis under timingEX/imageSH. Effective frozen check settings1sample/10seconds/stats1, no full timing rerun or performance acceptance. Profile observers live outside benchmark.",
+  "effective_check": {
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": 1,
+    "guest_memory": "64G"
+  },
+  "source_sha256": {
+    "kprog/results/x86-otel-perf-20261127/profile_check.py": "99be656d766b842d9ac56860b6267eb36086ed311e08017a58bf4106f01f8840",
+    "kprog/results/profile-20261123/profile-host.sh": "016fac66a9bb66c29fcf6f291d31cb9d3589b7340c21ccffc2a47b15b66ffcb3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83"
+  },
+  "program_dump": "perf_unwind_nat",
+  "command": [
+    "bash",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T200824Z/profile-host-check.sh",
+    "otelcol-ebpf-profiler/profiling",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T200824Z",
+    "perf_unwind_nat"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T200824Z",
+  "map_observer": {
+    "source": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+    "sha256": "30899bb30129c998cd0ada4c41427863a741dab78a55780b28ad9ba263f4c985",
+    "scope": "Read-only program IDs, prog-array targets, per-CPU metric/record bytes, known stress PID LPM hits; no BPF program loaded or workload change."
+  }
+}
