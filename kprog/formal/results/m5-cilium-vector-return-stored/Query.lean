@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_return_body_stored
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_return_body_stored
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_return_body
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_return_body
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_body
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_body
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_bound
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_bound

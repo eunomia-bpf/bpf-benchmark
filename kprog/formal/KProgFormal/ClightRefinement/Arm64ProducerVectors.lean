@@ -220,19 +220,19 @@ theorem vector_layout_bound (world : CC.CGenv) (layout : world.genv_cenv = ge.ge
   · rw [layout]; exact vector_field_offsets
 
 /-- Shared return/store execution, independent of the function and anonymous tag. -/
-theorem vector_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
-    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt) (m supplied after : CC.Mem)
-    (localVector : VectorLocal m) (shape : VectorLayout world tag)
-    (actualBinding : e.get Arm64Entry.___a64_vectors = some (localVector.block, vectorArrayTypeFor tag))
+theorem vector_return_body_stored (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt) (supplied after : CC.Mem) (block : CC.Block)
+    (shape : VectorLayout world tag)
+    (actualBinding : e.get Arm64Entry.___a64_vectors = some (block, vectorArrayTypeFor tag))
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64)
-    (stored : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
+    (stored : CC.Mem.storev .Mint64 supplied (.Vptr block (vectorPointerOffset i))
       (.Vlong value) = some after) :
     InternalRun world 4
       (.Returnstate (.Vlong value) (vectorContinuationFor f e tag temporary i rest le k) supplied)
       (.State f rest k e (le.set temporary (.Vlong value)) after) := by
   have address : CC.doEvalLvalue world e
       (le.set temporary (.Vlong value)) supplied (vectorTargetFor tag i) =
-      some (localVector.block, vectorPointerOffset i, .Full) := by
+      some (block, vectorPointerOffset i, .Full) := by
     simp [vectorTargetFor, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
       CC.lvalOfField, CC.typeof, CC.accessMode, vectorTypeFor, vectorArrayTypeFor,
       shape.binding, shape.size, shape.offsets i, actualBinding,
@@ -264,6 +264,21 @@ theorem vector_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
     (.step trivial (CC.doStep_sound world _ _ _ r1)
       (.step trivial (CC.doStep_sound world _ _ _ assignment)
         (.step trivial (CC.doStep_sound world _ _ _ r3) (.refl _))))
+
+/-- Original full interface delegates once to the same stored execution body. -/
+theorem vector_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (tag temporary : CC.Ident) (i : Fin 64) (rest : CC.Stmt) (m supplied after : CC.Mem)
+    (localVector : VectorLocal m) (shape : VectorLayout world tag)
+    (actualBinding : e.get Arm64Entry.___a64_vectors = some (localVector.block, vectorArrayTypeFor tag))
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64)
+    (stored : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
+      (.Vlong value) = some after) :
+    InternalRun world 4
+      (.Returnstate (.Vlong value) (vectorContinuationFor f e tag temporary i rest le k) supplied)
+      (.State f rest k e (le.set temporary (.Vlong value)) after) :=
+  vector_return_body_stored world f e tag temporary i rest supplied after localVector.block shape
+    actualBinding le k value stored
+
 
 /-- One shared memory witness and readback/frame construction for every visit. -/
 theorem vector_input_returns_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)

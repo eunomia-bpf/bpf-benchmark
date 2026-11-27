@@ -1,0 +1,92 @@
+{
+  "scope": "SAME maturefourstepvectorreturn/storebody takesactualblock/layout/envbinding/realstore;oldvector_return_bodyEXACTfulltype delegatesONCE;oldVectorLocalconsumersonlycallwrapper;actual64store/sequence/notyetclaimed",
+  "source_before_sha256": "5ff3a2459f1815e9a34f8a191743861c796e42d9501a0bfdd1b004dc374399e7",
+  "source_sha256": "233c66e2b749c19fd559569ff4e3b024fb2155a1a0abe0ffbff62375f0d72019",
+  "receipts": {
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64ProducerVectors"
+      ],
+      "exit": 0,
+      "seconds": 14.728087663650513,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "compat1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-vector-return-stored/Compatibility.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2878966331481934,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root3": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 2890.5034964084625,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-vector-return-stored/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2590625286102295,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 153,
+  "full_jobs": 1504,
+  "complete_old_type_examples": 1,
+  "public_queries": 4,
+  "root_queries": [
+    "vector_return_body_stored",
+    "vector_return_body",
+    "vector_input_returns_body",
+    "vector_input_returns_bound"
+  ],
+  "axioms": [
+    "CC.externalFunctionsSem",
+    "CC.inlineAssemblySem",
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "vector_source_commit": "00aef236a7ca76cb8743333e09b612df514bb4e4",
+  "internal_steps": 4,
+  "same_execution_body": true,
+  "source_ast_or_model_changed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
