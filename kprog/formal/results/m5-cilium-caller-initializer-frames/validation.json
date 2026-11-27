@@ -1,0 +1,90 @@
+{
+  "scope": "SAME186actualpointerinitializerbody retains existing non-both-tableloadframe;oldexecuteEXACTfulltype delegatesONCE;62readbacks and2genuineInitializedresources unchanged;no composedentry/native claim",
+  "source_before_sha256": "99f352bb30dab9d31281c760bf6c138e5bd2d5ea0e6bbaaa341cb4140c3a6d0c",
+  "source_sha256": "c59ca7fd42cc40df32aa5f451ba0f2664b82549a0d2f4a091a7be8b1c79e17b4",
+  "receipts": {
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers"
+      ],
+      "exit": 0,
+      "seconds": 15.653673887252808,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "compat1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-initializer-frames/Compatibility.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.733076810836792,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 218.3982903957367,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-initializer-frames/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.36928391456604,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 191,
+  "full_jobs": 1498,
+  "complete_old_type_examples": 1,
+  "public_queries": 4,
+  "root_queries": [
+    "execute_framed",
+    "execute",
+    "initialize_group",
+    "store_row"
+  ],
+  "axioms": [
+    "CC.externalFunctionsSem",
+    "CC.inlineAssemblySem",
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "entry_commit": "3c94a1f94fffb2fa72d0d85dd1493b453ec45c52",
+  "internal_steps": 186,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

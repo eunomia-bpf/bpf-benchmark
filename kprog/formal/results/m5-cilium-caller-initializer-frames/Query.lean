@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.execute_framed
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.execute_framed
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.initialize_group
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.initialize_group
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.store_row
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers.store_row

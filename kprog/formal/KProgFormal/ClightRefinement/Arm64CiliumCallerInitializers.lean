@@ -317,7 +317,7 @@ theorem initialize_group {m before : CC.Mem} (tags : Bool)
 
 /-- All62 ORIGINAL assignments in their real word0..30/tag0..30 order.
 The actual following vector/provider source is retained as afterTables. -/
-theorem execute {m before : CC.Mem} (words : Table false m) (tags : Table true m)
+theorem execute_framed {m before : CC.Mem} (words : Table false m) (tags : Table true m)
     (wordCells : Cells false m) (tagCells : Cells true m)
     (access : before.access = (allocation m).2.access) (le : CC.TempEnv) (k : CC.Cont) :
     ∃ after,
@@ -330,9 +330,11 @@ theorem execute {m before : CC.Mem} (words : Table false m) (tags : Table true m
         some (.Vptr (tagCells.block i) 0)) ∧
       Nonempty (Arm64CiliumCallerTableWrites.Initialized false m after words (lastCell false wordCells)) ∧
       Nonempty (Arm64CiliumCallerTableWrites.Initialized true m after tags (lastCell true tagCells)) ∧
+      (∀ b,b ≠ words.block → b ≠ tags.block → ∀ c o,
+        CC.Mem.load c after b o = CC.Mem.load c before b o) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
-  obtain ⟨middle,wordRun,wordReads,⟨wordEntry⟩,_,wordFrame,wordAccess,wordNext⟩ :=
+  obtain ⟨middle,wordRun,wordReads,⟨wordEntry⟩,wordOther,wordFrame,wordAccess,wordNext⟩ :=
     initialize_group false words wordCells access le k tagStart
   obtain ⟨after,tagRun,tagReads,tagEntry,tagOther,tagFrame,tagAccess,tagNext⟩ :=
     initialize_group true tags tagCells (wordAccess.trans access) le k afterTables
@@ -349,7 +351,29 @@ theorem execute {m before : CC.Mem} (words : Table false m) (tags : Table true m
     exact wordRun.trans tagRun
   exact ⟨after,run,
     (fun i => (tagOther words.block different .Mint64 (8*(i.val : Int))).trans (wordReads i)),
-    tagReads,⟨wordEntry'⟩,tagEntry,wordFrame.trans tagFrame,
+    tagReads,⟨wordEntry'⟩,tagEntry,
+    (fun b notWord notTag c o => (tagOther b notTag c o).trans (wordOther b notWord c o)),
+    wordFrame.trans tagFrame,
     tagAccess.trans wordAccess,tagNext.trans wordNext⟩
+
+/-- Original full API delegates once to the SAME framed186-step execution. -/
+theorem execute {m before : CC.Mem} (words : Table false m) (tags : Table true m)
+    (wordCells : Cells false m) (tagCells : Cells true m)
+    (access : before.access = (allocation m).2.access) (le : CC.TempEnv) (k : CC.Cont) :
+    ∃ after,
+      InternalRun ge 186
+        (.State procedure start k (allocation m).1 le before)
+        (.State procedure afterTables k (allocation m).1 le after) ∧
+      (∀ i,CC.Mem.load .Mint64 after words.block (8*(i.val : Int)) =
+        some (.Vptr (wordCells.block i) 0)) ∧
+      (∀ i,CC.Mem.load .Mint64 after tags.block (8*(i.val : Int)) =
+        some (.Vptr (tagCells.block i) 0)) ∧
+      Nonempty (Arm64CiliumCallerTableWrites.Initialized false m after words (lastCell false wordCells)) ∧
+      Nonempty (Arm64CiliumCallerTableWrites.Initialized true m after tags (lastCell true tagCells)) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨after,run,wordReads,tagReads,wordEntry,tagEntry,_,frame,finalAccess,finalNext⟩ :=
+    execute_framed words tags wordCells tagCells access le k
+  exact ⟨after,run,wordReads,tagReads,wordEntry,tagEntry,frame,finalAccess,finalNext⟩
 
 end KProgFormal.ClightRefinement.Arm64CiliumCallerInitializers
