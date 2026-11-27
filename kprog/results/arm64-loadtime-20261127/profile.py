@@ -64,7 +64,7 @@ try:
     if source.exists() and source.read_bytes() != original_source:
         raise RuntimeError('canonical archived source path contains different data: '+str(source))
     source_bytes = original_source
-    if mode == 'const-selectors':
+    if mode in {'const-selectors', 'direct-cells'}:
         header = ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
         lines = header.read_text().splitlines(keepends=True)
         macros = []
@@ -80,7 +80,24 @@ try:
             declaration = '__u64 __a64_l_reg = (REG);'
             if declaration in block:
                 name = block.split('(', 1)[0].removeprefix('#define ')
-                macros.append((name, block.replace(declaration, 'const '+declaration)))
+                block = block.replace(declaration, 'const '+declaration)
+                if mode == 'direct-cells':
+                    block = block.replace('__a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]',
+                                          'ARM64_SIM_L_CONST_CELL_PTR(REG, __a64_l_reg)')
+                    block = block.replace('__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]',
+                                          'ARM64_SIM_L_CONST_TAG_PTR(REG, __a64_l_reg)')
+                macros.append((name, block))
+        if mode == 'direct-cells':
+            # Compile-time lvalue selection; runtime registers retain their exact
+            # original pointer-table indexing and evaluate REG only once.
+            for name, suffix, fallback in [
+                ('ARM64_SIM_L_CONST_CELL_PTR', '', '__a64_cells[KPROG_ARM64_GPR_CELL(DYNAMIC)]'),
+                ('ARM64_SIM_L_CONST_TAG_PTR', '_tag', '__a64_tag_cells[KPROG_ARM64_GPR_CELL(DYNAMIC)]')]:
+                expression = fallback
+                for number in reversed(range(31)):
+                    condition = f'(__builtin_constant_p(REG) ? ((__u64)(REG) == ARM64_X{number}) : 0)'
+                    expression = f'__builtin_choose_expr({condition}, &__a64_x{number}{suffix}, {expression})'
+                macros.insert(0, (name, f'#define {name}(REG, DYNAMIC) ({expression})\n'))
         marker = ('#include '+json.dumps(str(header))).encode()
         overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
         source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)

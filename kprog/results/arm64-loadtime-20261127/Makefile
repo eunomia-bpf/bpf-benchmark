@@ -9,3 +9,7 @@ early-promote:
 .PHONY: const-selectors
 const-selectors:
 	prlimit --as=51539607552 taskset -c 18 python3 profile.py const-selectors
+
+.PHONY: direct-cells
+direct-cells:
+	prlimit --as=51539607552 taskset -c 18 python3 profile.py direct-cells
