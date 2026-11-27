@@ -10,6 +10,8 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 PATTERNS = [
     ('infinite loop', r'infinite loop detected'),
+    ('map value bounds', r'invalid access to map value'),
+    ('jump sequence complexity', r'The sequence of \d+ jumps is too complex'),
     ('modified context pointer', r'dereference of modified ctx'),
     ('scalar memory access', r'invalid mem access'),
     ('packet bounds', r'invalid access to packet'),

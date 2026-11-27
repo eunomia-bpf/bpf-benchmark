@@ -48,6 +48,34 @@ def publish(paths,note,title,receipt):
    result=dict(commit=git('rev-parse','HEAD').decode().strip(),remote=git('ls-remote','origin','refs/heads/master').decode().strip());(LANE/receipt).write_text(json.dumps(result,indent=2)+'\n');return result
   finally:os.unlink(index)
 
+def stats(rows):return dict(requests=len(rows),before=dict(collections.Counter(r['before']['status'] for r in rows)),after=dict(collections.Counter(r['after']['status'] for r in rows)),transitions=dict(collections.Counter(r['before']['status']+' -> '+r['after']['status'] for r in rows)),after_families=dict(collections.Counter(r['after']['family'] for r in rows if r['after']['status']=='refused')),fixture_before_disagreements=sum(r['before_matches_original'] is False for r in rows))
+
+if '--refine-families' in sys.argv:
+ path=OUT/'outcomes.json';data=json.loads(path.read_text());before_states=[(r['index'],r['before']['status'],r['after']['status'],r['before_matches_original']) for r in data['requests']]
+ assert 'classification_refinement' not in data,'already refined; preserve the existing receipt'
+ initial=data['summary'];patterns_path=ROOT/'kprog/results/arm64-checked-corpus-20261127/refusals.py';tree=ast.parse(patterns_path.read_text());patterns=ast.literal_eval(next(n.value for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='PATTERNS' for t in n.targets)))
+ changed=[]
+ for row in data['requests']:
+  if row['after']['family']!='unclassified':continue
+  for name,pattern in patterns:
+   matches=[s for s in row['after']['verifier_tail'] if re.search(pattern,s)]
+   if matches:
+    row['after'].update(initial_family='unclassified',family=name,diagnostics=matches);changed.append(dict(index=row['index'],family=name,diagnostics=matches));break
+ assert collections.Counter(x['family'] for x in changed)=={'map value bounds':12,'jump sequence complexity':11}
+ rows=data['requests'];summary=dict(all=stats(rows),original_refused=stats([r for r in rows if not r['original_stock_passed']]),accepted_controls=stats([r for r in rows if r['original_stock_passed']]),apps={app:stats([r for r in rows if r['app']==app]) for app in sorted({r['app'] for r in rows})})
+ assert before_states==[(r['index'],r['before']['status'],r['after']['status'],r['before_matches_original']) for r in rows]
+ assert summary['all']['transitions']==initial['all']['transitions'] and summary['all']['fixture_before_disagreements']==0
+ data.update(initial_summary=initial,summary=summary,classification_refinement=dict(utc=now(),source_sha256=digest(patterns_path),basis='Explicit diagnostic lines already preserved in verifier_tail; no new verifier/guest run.',changed=changed,remaining_unclassified=[r['index'] for r in rows if r['after']['family']=='unclassified'],initial_controller_summary='controller.json preserves the original experiment/classifier summary; this derived report retains it as initial_summary.'))
+ path.write_text(json.dumps(data,indent=2)+'\n')
+ with (OUT/'outcomes.tsv').open('w') as f:
+  cols=['index','app','request','symbol','original_stock_passed','original_family','before_status','before_family','after_status','after_family','before_matches_original'];f.write('\t'.join(cols)+'\n')
+  for row in rows:
+   flat=dict(row,before_status=row['before']['status'],before_family=row['before']['family'],after_status=row['after']['status'],after_family=row['after']['family']);f.write('\t'.join(str(flat.get(k,'')) for k in cols)+'\n')
+ (OUT/'stock-outcome.md').write_text('# ARM scalar-memory paired verifier outcomes\n\n'+json.dumps(summary,indent=2)+'\n\n145pairedloads:28beforeacceptances preserved,17newacceptances,100refusals,no preparationerrors or fixture-before disagreements. Classification refinement labels12explicit map-value bounds and11jump-sequence complexity diagnostics. All statuses are unchanged; initial_summary/initial_family preserve earlier labels, while controller.json and archived source snapshots retain the original experiment classifier. One Cilium typed store at physical sk_buff offset134 lacks a precise diagnostic and remains unclassified; no read-only cause is inferred. Fresh maps are verifier fixtures, not live binding/native/stage2 or startup/performance acceptance.\n')
+ paths=[str(p.relative_to(ROOT)) for p in [Path(__file__),patterns_path,path,OUT/'outcomes.tsv',OUT/'stock-outcome.md']]
+ note=f'\n- LANE PERF {now()}: Full145pairedstock refinement fromexistingretaineddiagnosticlines labels12map-value-bounds/11jump-sequence-complexity(formerly23of24unclassified). OneCiliumstoretrustedsk_buff+134withoutprecisereason staysunclassified. Finalafterfamilies={summary["all"]["after_families"]};acceptance45vs28/17new/all28controlspreserved/0fixture-before disagreements/0preperrors UNCHANGED. initial_summary/initial_family retained;controller+archive originalclassifier untouched. Reprocollect.py --refine-families/commonrefusalsPATTERNS,metadataonly/no newguest/compiler/model/header/frozenchange;Tetrastage2actualresult separate.\n'
+ result=publish(paths,note,'Refine complete ARM verifier refusal families from explicit diagnostics','scalar-family-refinement-publication.json');print(json.dumps(dict(publication=result,after_families=summary['all']['after_families'])),flush=True);raise SystemExit(0)
+
 if '--cleanup-receipt' in sys.argv:
  cleanup=json.loads((LANE/'scalar-raw-cleanup.log').read_text());path=ROOT/cleanup['receipt'];r=json.loads(path.read_text())
  note=f'\n- LANE PERF {now()}: Fullscalar145publication verified-duplicate cleanup result removed_allocated_bytes={r["removed_allocated_bytes"]};actions={[(x["raw"],x["status"]) for x in r["actions"]]}. Existingraw_dedup verifiedcommittedGitblob/everyfileSHA-size-fileset beforedeletion;archivepartsretained,stage2ownRAW/FORMAL090610/rawexports untouched. Actualreceipt{cleanup["receipt"]};retained/mismatchcasesarenotsuccess.\n'
@@ -84,7 +112,6 @@ try:
      if matches:family=name;diagnostics=matches;break
    row[phase]=dict(status=status,returncode=load['returncode'],errno=load.get('result',{}).get('errno'),family=family,diagnostics=diagnostics,verifier_tail=text.splitlines()[-8:],verifier_sha256=digest(path) if path.exists() else None,preparation_error=load.get('preparation_error'))
   row['before_matches_original']=None if row['before']['status']=='preparation-error' else (row['before']['status']=='accepted')==row['original_stock_passed'];outcomes.append(row)
- def stats(rows):return dict(requests=len(rows),before=dict(collections.Counter(r['before']['status'] for r in rows)),after=dict(collections.Counter(r['after']['status'] for r in rows)),transitions=dict(collections.Counter(r['before']['status']+' -> '+r['after']['status'] for r in rows)),after_families=dict(collections.Counter(r['after']['family'] for r in rows if r['after']['status']=='refused')),fixture_before_disagreements=sum(r['before_matches_original'] is False for r in rows))
  summary=dict(all=stats(outcomes),original_refused=stats([r for r in outcomes if not r['original_stock_passed']]),accepted_controls=stats([r for r in outcomes if r['original_stock_passed']]),apps={app:stats([r for r in outcomes if r['app']==app]) for app in sorted({r['app'] for r in outcomes})})
  (OUT/'outcomes.json').write_text(json.dumps(dict(utc=now(),scope=record['scope'],summary=summary,requests=outcomes),indent=2)+'\n')
  with (OUT/'outcomes.tsv').open('w') as f:

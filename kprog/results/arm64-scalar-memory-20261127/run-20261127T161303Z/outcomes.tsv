@@ -48,30 +48,30 @@ index	app	request	symbol	original_stock_passed	original_family	before_status	bef
 47	cilium/agent	8	cil_host_policy	True	None	accepted	None	accepted	None	True
 48	cilium/agent	9	tail_handle_ipv4	False	packet bounds	refused	packet bounds	refused	packet bounds	True
 49	tetragon/observer	1	event_exit_disassociate_ctty	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
-50	tetragon/observer	10	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+50	tetragon/observer	10	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 51	tetragon/observer	11	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 52	tetragon/observer	12	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 53	tetragon/observer	13	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 54	tetragon/observer	14	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
-55	tetragon/observer	15	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+55	tetragon/observer	15	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 56	tetragon/observer	16	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 57	tetragon/observer	17	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-58	tetragon/observer	18	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+58	tetragon/observer	18	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 59	tetragon/observer	19	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 60	tetragon/observer	2	event_exit_acct_process	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
-61	tetragon/observer	20	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+61	tetragon/observer	20	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 62	tetragon/observer	21	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 63	tetragon/observer	22	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
 64	tetragon/observer	23	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 65	tetragon/observer	24	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 66	tetragon/observer	25	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 67	tetragon/observer	26	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
-68	tetragon/observer	27	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+68	tetragon/observer	27	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 69	tetragon/observer	28	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
-70	tetragon/observer	29	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+70	tetragon/observer	29	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 71	tetragon/observer	3	event_wake_up_new_task	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
-72	tetragon/observer	30	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
-73	tetragon/observer	31	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+72	tetragon/observer	30	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
+73	tetragon/observer	31	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 74	tetragon/observer	32	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 75	tetragon/observer	33	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 76	tetragon/observer	34	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
@@ -79,7 +79,7 @@ index	app	request	symbol	original_stock_passed	original_family	before_status	bef
 78	tetragon/observer	36	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 79	tetragon/observer	37	generic_retkprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 80	tetragon/observer	38	generic_retkprobe_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-81	tetragon/observer	39	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+81	tetragon/observer	39	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 82	tetragon/observer	4	execve_rate	False	infinite loop	refused	infinite loop	refused	infinite loop	True
 83	tetragon/observer	40	generic_retkprobe_output	False	infinite loop	refused	infinite loop	refused	infinite loop	True
 84	tetragon/observer	41	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
@@ -87,18 +87,18 @@ index	app	request	symbol	original_stock_passed	original_family	before_status	bef
 86	tetragon/observer	43	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 87	tetragon/observer	44	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
 88	tetragon/observer	45	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
-89	tetragon/observer	46	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
-90	tetragon/observer	47	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+89	tetragon/observer	46	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
+90	tetragon/observer	47	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 91	tetragon/observer	48	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-92	tetragon/observer	49	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
-93	tetragon/observer	5	execve_send	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
-94	tetragon/observer	50	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+92	tetragon/observer	49	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
+93	tetragon/observer	5	execve_send	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
+94	tetragon/observer	50	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 95	tetragon/observer	51	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 96	tetragon/observer	52	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 97	tetragon/observer	53	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
 98	tetragon/observer	54	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
-99	tetragon/observer	55	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
-100	tetragon/observer	56	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+99	tetragon/observer	55	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
+100	tetragon/observer	56	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 101	tetragon/observer	57	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
 102	tetragon/observer	58	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 103	tetragon/observer	59	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
@@ -106,29 +106,29 @@ index	app	request	symbol	original_stock_passed	original_family	before_status	bef
 105	tetragon/observer	60	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 106	tetragon/observer	61	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 107	tetragon/observer	62	generic_retkprobe_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-108	tetragon/observer	63	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+108	tetragon/observer	63	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 109	tetragon/observer	64	generic_retkprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 110	tetragon/observer	65	generic_retkprobe_output	False	infinite loop	refused	infinite loop	refused	infinite loop	True
 111	tetragon/observer	66	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
-112	tetragon/observer	67	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
-113	tetragon/observer	68	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+112	tetragon/observer	67	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
+113	tetragon/observer	68	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 114	tetragon/observer	69	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 115	tetragon/observer	7	tg_kp_bprm_committing_creds	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
 116	tetragon/observer	70	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
 117	tetragon/observer	71	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 118	tetragon/observer	72	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 119	tetragon/observer	73	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
-120	tetragon/observer	74	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+120	tetragon/observer	74	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 121	tetragon/observer	75	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 122	tetragon/observer	76	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-123	tetragon/observer	77	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+123	tetragon/observer	77	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 124	tetragon/observer	78	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
 125	tetragon/observer	79	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 126	tetragon/observer	8	execve_map_update	False	infinite loop	refused	infinite loop	refused	infinite loop	True
 127	tetragon/observer	80	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
-128	tetragon/observer	81	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+128	tetragon/observer	81	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	jump sequence complexity	True
 129	tetragon/observer	82	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
-130	tetragon/observer	83	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+130	tetragon/observer	83	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	map value bounds	True
 131	tetragon/observer	84	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
 132	tetragon/observer	85	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
 133	tetragon/observer	9	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True

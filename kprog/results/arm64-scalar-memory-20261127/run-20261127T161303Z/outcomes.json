@@ -25,8 +25,10 @@
         "unbounded memory access": 1,
         "scalar memory access": 8,
         "packet bounds": 13,
-        "unclassified": 24,
-        "stack bounds": 26
+        "unclassified": 1,
+        "map value bounds": 12,
+        "stack bounds": 26,
+        "jump sequence complexity": 11
       },
       "fixture_before_disagreements": 0
     },
@@ -51,8 +53,10 @@
         "unbounded memory access": 1,
         "scalar memory access": 8,
         "packet bounds": 13,
-        "unclassified": 24,
-        "stack bounds": 26
+        "unclassified": 1,
+        "map value bounds": 12,
+        "stack bounds": 26,
+        "jump sequence complexity": 11
       },
       "fixture_before_disagreements": 0
     },
@@ -165,8 +169,9 @@
         },
         "after_families": {
           "infinite loop": 16,
-          "unclassified": 23,
+          "map value bounds": 12,
           "stack bounds": 24,
+          "jump sequence complexity": 11,
           "scalar memory access": 2
         },
         "fixture_before_disagreements": 0
@@ -2455,8 +2460,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -2468,7 +2475,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "acb078db4d890a3db6778a3fa2dba93050a8163601828a6993fe073d962f63ee",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -2679,8 +2687,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -2692,7 +2702,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -2824,8 +2835,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -2837,7 +2850,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "0ef161627fbb66db9f0832f487e0f1961346174dd49fa3c8a748e9177b049f91",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -2960,8 +2974,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -2973,7 +2989,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -3295,8 +3312,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -3308,7 +3327,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "5d1ac9caa42cdfb98f5712a693fb94af33998d2cf84e970a9fb6c171afc34635",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -3379,8 +3399,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -3392,7 +3414,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -3479,8 +3502,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -3492,7 +3517,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "2e1a3b1835129cf6cb4cdf5c5305394837a0bf26d810afc12d808f2c74a36776",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -3529,8 +3555,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -3542,7 +3570,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -3900,8 +3929,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "8188: (69) r5 = *(u16 *)(r5 +0)       ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "8189: (57) r5 &= 65535                ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -3913,7 +3944,8 @@
           "processed 5740 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "72adb46d09294c2ccce5ca1cee036fe3b09c305d0aa70f6628e92c8290144b1b",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4278,8 +4310,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -4291,7 +4325,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "e5d2d381ebe135a0b1eae272e6dcdaf6fdac41195bb045fa45ef58e99be386a1",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4328,8 +4363,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -4341,7 +4378,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4423,8 +4461,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -4436,7 +4476,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4473,8 +4514,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "3463: (ad) if r5 < r3 goto pc+940     ; R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=scalar(id=9704)",
           "3464: (1f) r5 -= r3                   ; R3=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R5=scalar()",
@@ -4486,7 +4529,8 @@
           "processed 198566 insns (limit 1000000) max_states_per_insn 4 total_states 2734 peak_states 2734 mark_read 0"
         ],
         "verifier_sha256": "8ef808a5e79b42247f9d67ad8a612e45cdb0bb4a9604d1e10b1759b37a94d3af",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4521,8 +4565,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -4534,7 +4580,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "3580479233f6305c0cda15670a58cd150cc2e7940dd738896c7b2d81f6b439bc",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4752,8 +4799,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -4765,7 +4814,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -4800,8 +4850,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -4813,7 +4865,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "64228239481a3207651437bd5ffed4c6c1d93a07ae80fcf0a7dee4ce58d23f64",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -5164,8 +5217,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "8188: (69) r5 = *(u16 *)(r5 +0)       ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "8189: (57) r5 &= 65535                ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -5177,7 +5232,8 @@
           "processed 5740 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "26ff769e95ecac1007dabafb3e813ee4a1a6a7fc541625ce1ba52bab8b62182b",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -5368,8 +5424,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -5381,7 +5439,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "0851f256ced11d909991b2d2de166dfe11051e1c4af02cde0a70dd5540f86a4e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -5418,8 +5477,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -5431,7 +5492,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -5735,8 +5797,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -5748,7 +5812,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "f278460a24bfc4768d4fd0ee924b8d50739fb673824a67874f93300ae4c5d453",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -5889,8 +5954,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -5902,7 +5969,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -6113,8 +6181,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 28,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ],
         "verifier_tail": [
           "5083: (18) r2 = 0xff00ffffffffffff    ; R2=0xff00ffffffffffff",
           "5085: (5f) r1 &= r2                   ; R1=0x60000 R2=0xff00ffffffffffff",
@@ -6126,7 +6196,8 @@
           "processed 133971 insns (limit 1000000) max_states_per_insn 4 total_states 2088 peak_states 2088 mark_read 0"
         ],
         "verifier_sha256": "ac56f0fcad39dd911700e6d4c93a400a752c87703c36259c399ae39183ea6b0e",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -6213,8 +6284,10 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
-        "diagnostics": [],
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ],
         "verifier_tail": [
           "10363: (69) r5 = *(u16 *)(r5 +0)      ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
           "10364: (57) r5 &= 65535               ; R5=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff))",
@@ -6226,7 +6299,8 @@
           "processed 5981 insns (limit 1000000) max_states_per_insn 2 total_states 134 peak_states 134 mark_read 0"
         ],
         "verifier_sha256": "1594721ca7f25198609101f1f6268ce0e9102c732fb14d35398a2619be8b0dae",
-        "preparation_error": null
+        "preparation_error": null,
+        "initial_family": "unclassified"
       },
       "before_matches_original": true
     },
@@ -6920,5 +6994,370 @@
       },
       "before_matches_original": true
     }
-  ]
+  ],
+  "initial_summary": {
+    "all": {
+      "requests": 145,
+      "before": {
+        "accepted": 28,
+        "refused": 117
+      },
+      "after": {
+        "accepted": 45,
+        "refused": 100
+      },
+      "transitions": {
+        "accepted -> accepted": 28,
+        "refused -> refused": 100,
+        "refused -> accepted": 17
+      },
+      "after_families": {
+        "infinite loop": 25,
+        "context layout": 1,
+        "typed field layout": 1,
+        "modified context pointer": 1,
+        "unbounded memory access": 1,
+        "scalar memory access": 8,
+        "packet bounds": 13,
+        "unclassified": 24,
+        "stack bounds": 26
+      },
+      "fixture_before_disagreements": 0
+    },
+    "original_refused": {
+      "requests": 117,
+      "before": {
+        "refused": 117
+      },
+      "after": {
+        "refused": 100,
+        "accepted": 17
+      },
+      "transitions": {
+        "refused -> refused": 100,
+        "refused -> accepted": 17
+      },
+      "after_families": {
+        "infinite loop": 25,
+        "context layout": 1,
+        "typed field layout": 1,
+        "modified context pointer": 1,
+        "unbounded memory access": 1,
+        "scalar memory access": 8,
+        "packet bounds": 13,
+        "unclassified": 24,
+        "stack bounds": 26
+      },
+      "fixture_before_disagreements": 0
+    },
+    "accepted_controls": {
+      "requests": 28,
+      "before": {
+        "accepted": 28
+      },
+      "after": {
+        "accepted": 28
+      },
+      "transitions": {
+        "accepted -> accepted": 28
+      },
+      "after_families": {},
+      "fixture_before_disagreements": 0
+    },
+    "apps": {
+      "bcc/set": {
+        "requests": 23,
+        "before": {
+          "accepted": 11,
+          "refused": 12
+        },
+        "after": {
+          "accepted": 11,
+          "refused": 12
+        },
+        "transitions": {
+          "accepted -> accepted": 11,
+          "refused -> refused": 12
+        },
+        "after_families": {
+          "infinite loop": 9,
+          "context layout": 1,
+          "typed field layout": 1,
+          "modified context pointer": 1
+        },
+        "fixture_before_disagreements": 0
+      },
+      "cilium/agent": {
+        "requests": 17,
+        "before": {
+          "accepted": 3,
+          "refused": 14
+        },
+        "after": {
+          "accepted": 3,
+          "refused": 14
+        },
+        "transitions": {
+          "accepted -> accepted": 3,
+          "refused -> refused": 14
+        },
+        "after_families": {
+          "packet bounds": 13,
+          "unclassified": 1
+        },
+        "fixture_before_disagreements": 0
+      },
+      "katran": {
+        "requests": 1,
+        "before": {
+          "accepted": 1
+        },
+        "after": {
+          "accepted": 1
+        },
+        "transitions": {
+          "accepted -> accepted": 1
+        },
+        "after_families": {},
+        "fixture_before_disagreements": 0
+      },
+      "otelcol-ebpf-profiler/profiling": {
+        "requests": 8,
+        "before": {
+          "refused": 7,
+          "accepted": 1
+        },
+        "after": {
+          "accepted": 6,
+          "refused": 2
+        },
+        "transitions": {
+          "refused -> accepted": 5,
+          "refused -> refused": 2,
+          "accepted -> accepted": 1
+        },
+        "after_families": {
+          "unbounded memory access": 1,
+          "scalar memory access": 1
+        },
+        "fixture_before_disagreements": 0
+      },
+      "tetragon/observer": {
+        "requests": 85,
+        "before": {
+          "refused": 75,
+          "accepted": 10
+        },
+        "after": {
+          "refused": 65,
+          "accepted": 20
+        },
+        "transitions": {
+          "refused -> refused": 65,
+          "accepted -> accepted": 10,
+          "refused -> accepted": 10
+        },
+        "after_families": {
+          "infinite loop": 16,
+          "unclassified": 23,
+          "stack bounds": 24,
+          "scalar memory access": 2
+        },
+        "fixture_before_disagreements": 0
+      },
+      "tracee/monitor": {
+        "requests": 11,
+        "before": {
+          "accepted": 2,
+          "refused": 9
+        },
+        "after": {
+          "accepted": 4,
+          "refused": 7
+        },
+        "transitions": {
+          "accepted -> accepted": 2,
+          "refused -> refused": 7,
+          "refused -> accepted": 2
+        },
+        "after_families": {
+          "scalar memory access": 5,
+          "stack bounds": 2
+        },
+        "fixture_before_disagreements": 0
+      }
+    }
+  },
+  "classification_refinement": {
+    "utc": "2026-11-27T18:18:27Z",
+    "source_sha256": "2f362acb7b3864ee5d8eca8169f6d1ea386e944d4a2c3524605015054cd243d0",
+    "basis": "Explicit diagnostic lines already preserved in verifier_tail; no new verifier/guest run.",
+    "changed": [
+      {
+        "index": 50,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 55,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 58,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 61,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 68,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 70,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 72,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 73,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 81,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 89,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 90,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 92,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 93,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 94,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 99,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 100,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 108,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 112,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 113,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 120,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      },
+      {
+        "index": 123,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 128,
+        "family": "jump sequence complexity",
+        "diagnostics": [
+          "The sequence of 8193 jumps is too complex."
+        ]
+      },
+      {
+        "index": 130,
+        "family": "map value bounds",
+        "diagnostics": [
+          "invalid access to map value, value_size=4104 off=8188 size=2"
+        ]
+      }
+    ],
+    "remaining_unclassified": [
+      45
+    ],
+    "initial_controller_summary": "controller.json preserves the original experiment/classifier summary; this derived report retains it as initial_summary."
+  }
 }

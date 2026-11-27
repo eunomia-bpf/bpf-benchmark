@@ -24,8 +24,10 @@
       "unbounded memory access": 1,
       "scalar memory access": 8,
       "packet bounds": 13,
-      "unclassified": 24,
-      "stack bounds": 26
+      "unclassified": 1,
+      "map value bounds": 12,
+      "stack bounds": 26,
+      "jump sequence complexity": 11
     },
     "fixture_before_disagreements": 0
   },
@@ -50,8 +52,10 @@
       "unbounded memory access": 1,
       "scalar memory access": 8,
       "packet bounds": 13,
-      "unclassified": 24,
-      "stack bounds": 26
+      "unclassified": 1,
+      "map value bounds": 12,
+      "stack bounds": 26,
+      "jump sequence complexity": 11
     },
     "fixture_before_disagreements": 0
   },
@@ -164,8 +168,9 @@
       },
       "after_families": {
         "infinite loop": 16,
-        "unclassified": 23,
+        "map value bounds": 12,
         "stack bounds": 24,
+        "jump sequence complexity": 11,
         "scalar memory access": 2
       },
       "fixture_before_disagreements": 0
@@ -194,4 +199,4 @@
   }
 }
 
-All145 originally generated B inputs, including117 refusals and28 accepted controls. Five original generation failures are not B inputs. Before objects are qualified controls and after objects use the general probe-read route with the unchanged common ARM flags. Preparation failures are separate from kernel refusals; fixture-before disagreements with original live outcomes are retained. Fresh maps do not establish live application binding, native install, stage2 workload or frozen startup success. Queued Tetragon stage2 is collected separately. Full per-request diagnostics and original/new families are in outcomes.json/tsv.
+145pairedloads:28beforeacceptances preserved,17newacceptances,100refusals,no preparationerrors or fixture-before disagreements. Classification refinement labels12explicit map-value bounds and11jump-sequence complexity diagnostics. All statuses are unchanged; initial_summary/initial_family preserve earlier labels, while controller.json and archived source snapshots retain the original experiment classifier. One Cilium typed store at physical sk_buff offset134 lacks a precise diagnostic and remains unclassified; no read-only cause is inferred. Fresh maps are verifier fixtures, not live binding/native/stage2 or startup/performance acceptance.
