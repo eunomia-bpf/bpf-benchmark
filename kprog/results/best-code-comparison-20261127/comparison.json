@@ -36,6 +36,7 @@
         }
       ],
       "app_json_present": true,
+      "canonical_app_json_present": true,
       "app_json": {
         "path": "corpus/results/x86_kvm_corpus_20261121_133941_317114/details/apps/cilium__agent.json",
         "bytes": 49151,
@@ -1150,6 +1151,7 @@
         }
       ],
       "app_json_present": true,
+      "canonical_app_json_present": true,
       "app_json": {
         "path": "corpus/results/x86_kvm_corpus_20261124_054725_460151/details/apps/cilium__agent.json",
         "bytes": 47052,
@@ -2162,8 +2164,105 @@
           "text": "[839.259062 pid=2944 tid=2944]   PROG_LOAD -> fd=48 errno=0 kernel_prog_id=16"
         }
       ],
-      "app_json_present": false,
-      "limitation": "Structured app JSON and metadata are absent from the retained run. No counters reconstructed or best result excluded."
+      "app_json_present": true,
+      "canonical_app_json_present": false,
+      "app_json": {
+        "path": "kprog/results/best-code-comparison-20261127/katran-best-recovered/katran.json",
+        "bytes": 50367,
+        "sha256": "47df14498b48d9eaa70dcf3cca55fe9de55ac0e1e7e261be89272bfea268e5fc"
+      },
+      "status": "ok",
+      "arms": {
+        "baseline": {
+          "all_programs": [
+            {
+              "bytes_jited": 13641,
+              "bytes_xlated": 23840,
+              "id": 9,
+              "name": "balancer_ingres",
+              "run_cnt_delta": 1212522649,
+              "run_time_ns_delta": 234534524562,
+              "type": "xdp"
+            }
+          ],
+          "program_count": 1,
+          "positive_count_programs": 1,
+          "calls": 1212522649,
+          "ns": 234534524562,
+          "ns_per_call": 193.42692258608687
+        },
+        "post_rejit": {
+          "all_programs": [
+            {
+              "bytes_jited": 12990,
+              "bytes_xlated": 16,
+              "id": 16,
+              "name": "balancer_ingres",
+              "run_cnt_delta": 1327620636,
+              "run_time_ns_delta": 234795773991,
+              "type": "xdp"
+            }
+          ],
+          "program_count": 1,
+          "positive_count_programs": 1,
+          "calls": 1327620636,
+          "ns": 234795773991,
+          "ns_per_call": 176.85456795731818
+        }
+      },
+      "baseline_over_post_per_call": 1.0937061158226247,
+      "recovered_metadata": {
+        "source": {
+          "path": "kprog/results/best-code-comparison-20261127/katran-best-recovered/metadata.json",
+          "bytes": 987,
+          "sha256": "bb591bc8f9343746c4fd4b974b47f58c0fd81bbcbcc9b07bf8e24215539feed8"
+        },
+        "value": {
+          "bpf_stats": true,
+          "completed_at": "2026-11-16T15:19:01.425493+00:00",
+          "config": {
+            "enabled_passes": [
+              "noop",
+              "map_inline",
+              "const_prop",
+              "dce",
+              "rotate",
+              "cond_select",
+              "extract",
+              "endian_fusion",
+              "lea",
+              "ccmp",
+              "bulk_memory",
+              "prefetch",
+              "wide_mem",
+              "bounds_check_merge",
+              "skb_load_bytes_spec",
+              "noop",
+              "const_prop",
+              "dce"
+            ]
+          },
+          "details_dir": "details",
+          "generated_at": "2026-11-16T15:19:01.425497+00:00",
+          "last_updated_at": "2026-11-16T15:19:01.425493+00:00",
+          "launcher_boot_id": "0d54804f-9819-4dbb-965e-837dad99a0d5",
+          "launcher_pid": 1783,
+          "launcher_start_ticks": 10208,
+          "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+          "run_type": "x86_kvm_corpus",
+          "samples": 3,
+          "started_at": "2026-11-16T14:54:08.662903+00:00",
+          "status": "completed",
+          "suite": "corpus",
+          "workload_only": false,
+          "workload_seconds": 180.0
+        }
+      },
+      "recovery_receipt": {
+        "path": "kprog/results/best-code-comparison-20261127/katran-best-recovered/recovery.json",
+        "bytes": 1235,
+        "sha256": "99a4accc383b07b9df784ecd78108492494b355f1c497c07ea15a553b7516f62"
+      }
     },
     "katran_current": {
       "run": "corpus/results/x86_kvm_corpus_20261123_233751_015523",
@@ -2196,6 +2295,7 @@
         }
       ],
       "app_json_present": true,
+      "canonical_app_json_present": true,
       "app_json": {
         "path": "corpus/results/x86_kvm_corpus_20261123_233751_015523/details/apps/katran.json",
         "bytes": 50339,
@@ -2243,6 +2343,12 @@
       "baseline_over_post_per_call": 1.0420444332867624
     }
   },
+  "katran_counter_comparison": {
+    "baseline_ns_per_call_change_percent": -5.658707208032732,
+    "native_ns_per_call_change_percent": -0.9815266938883904,
+    "ratio_change_percent": -4.7235433530519515,
+    "interpretation": "Arithmetic across two retained functional runs, not a controlled causal comparison. Both absolute ns/call values fell; the BPF control fell more, reducing the ratio. The ratio change does not by itself establish a native runtime regression or a compiler/linker cause."
+  },
   "katran_best_original_host_log": {
     "path": "kprog/results/best-code-comparison-20261127/katran-best-host.log",
     "bytes": 3891,
@@ -2253,7 +2359,7 @@
     "Cilium best active cil_from_contai failed both native replacements at instruction 32, source imm 0 versus loaded imm -559038242; original BPF retained. Current active target successfully replaced: 1093/1720 JIT/xlated bytes versus 1686/16. This is BPF fallback versus native, not two native bodies.",
     "Keep Cilium 1.348x as an existing functional/hybrid result. Fallback receipt does not establish a functional defect. No historical active native body exists to restore from these failed installations.",
     "Katran best target was genuinely replaced with native 12990/16; current target native 9757/16, 24.888 percent smaller. Original BPF tag 90e1a12c30a4bce5, native tag 59f4a931744dcdc6 and source hash 0325eddd38cf33c9 match across logs; tags/source hash do not establish identical native bytes.",
-    "Historical Katran installed bytes and exact proof input are not yet located. The same-day shared/copy-hash diagnostic used separate 210136/210724 runs with 10546/12995 bytes, not this best run. May/Nov22 call-order wrong-map evidence likewise is not proof about the Nov16 best run.",
+    "Historical Katran structured app JSON/metadata recovered exactly from S19 cleanup preservation and its best ratio recomputed from the original counters. Installed bytes and exact proof input are still not located. The same-day shared/copy-hash diagnostic used separate 210136/210724 runs with 10546/12995 bytes, not this best run. May/Nov22 call-order wrong-map evidence likewise is not proof about the Nov16 best run.",
     "No causal flag/linker explanation follows from code length or aggregate ns/call. Timing remains frozen; no app/program selector introduced."
   ]
 }

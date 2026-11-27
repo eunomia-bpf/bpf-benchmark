@@ -1,0 +1,23 @@
+{
+  "scope": "Exact retained S19 cleanup copies, not reconstructed run output. Original RAW preserved; frozen corpus paths untouched.",
+  "files": [
+    {
+      "original": "/workspaces/kprog-raw/cleanup/S19-20261121/preserved/corpus/results/x86_kvm_corpus_20261116_145408_662903/metadata.json",
+      "saved": "kprog/results/best-code-comparison-20261127/katran-best-recovered/metadata.json",
+      "bytes": 987,
+      "sha256": "bb591bc8f9343746c4fd4b974b47f58c0fd81bbcbcc9b07bf8e24215539feed8"
+    },
+    {
+      "original": "/workspaces/kprog-raw/cleanup/S19-20261121/preserved/corpus/results/x86_kvm_corpus_20261116_145408_662903/details/result.json",
+      "saved": "kprog/results/best-code-comparison-20261127/katran-best-recovered/result.json",
+      "bytes": 1759,
+      "sha256": "e92b787112a94526df79cf1d22d53c8725a00b6976d6bdf266d691802c9a99d9"
+    },
+    {
+      "original": "/workspaces/kprog-raw/cleanup/S19-20261121/preserved/corpus/results/x86_kvm_corpus_20261116_145408_662903/details/apps/katran.json",
+      "saved": "kprog/results/best-code-comparison-20261127/katran-best-recovered/katran.json",
+      "bytes": 50367,
+      "sha256": "47df14498b48d9eaa70dcf3cca55fe9de55ac0e1e7e261be89272bfea268e5fc"
+    }
+  ]
+}
