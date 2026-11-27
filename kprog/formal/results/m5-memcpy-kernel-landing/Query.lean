@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.word
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.word
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.reference_step
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.generic
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyLanding.generic
