@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T03:24:56.071856+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedRegisters"
+    ],
+    "exit": 0,
+    "seconds": 618.3324825763702,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 573,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-retained-registers/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6834588050842285,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "provider_visits": 18,
+    "actual_stores": 36,
+    "retained": "R19 through R30 entire Option(Val,Val) reads",
+    "source_run": "same original advancing state, targets and trace",
+    "extra_final_map_premises": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyRetainedRegisters.lean",
+      "size_bytes": 4035,
+      "mtime_ns": 1795748975059237691
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
