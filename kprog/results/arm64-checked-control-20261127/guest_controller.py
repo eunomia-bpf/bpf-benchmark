@@ -34,10 +34,12 @@ mount -t tmpfs tmpfs /var/tmp
 mount -t debugfs debugfs /sys/kernel/debug
 mount -t bpf bpffs /sys/fs/bpf
 mount -t 9p -o trans=virtio,version=9p2000.L,access=any workspace /workspaces
+install -d /run/host-python
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any hostpython /run/host-python
 ulimit -l unlimited
 export HOME=/root
 export PATH=/usr/lib/llvm-18/bin:/usr/sbin:/usr/bin:/sbin:/bin
-export PYTHONPATH=/workspaces/repository
+export PYTHONPATH=/workspaces/repository:/run/host-python
 export CLANG=/workspaces/repository/kprog/stock-path/bin/clang
 export KPROG_ARM64_SYSROOT=/workspaces/repository/.cache/aarch64-sysroot
 export KPROG_TRUSTED_COMPILE_STATE=RAW_PATH/broker
@@ -50,6 +52,7 @@ python3 kprog/results/arm64-checked-control-20261127/guest.py RAW_PATH || status
 printf '%s\\n' "$status" > RAW_PATH/guest-status
 sync
 echo o > /proc/sysrq-trigger
+while :; do sleep 60; done
 '''.replace('RAW_PATH',str(RAW))
   init.write_text(body);init.chmod(0o755)
   (OUT/'init-script.txt').write_text(body)
@@ -68,6 +71,8 @@ echo o > /proc/sysrq-trigger
    '-device','virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root',
    '-fsdev','local,id=workspace,path=/workspaces,security_model=none,multidevs=remap',
    '-device','virtio-9p-device,fsdev=workspace,mount_tag=workspace',
+   '-fsdev','local,id=hostpython,path=/usr/lib/python3/dist-packages,security_model=none,multidevs=remap,readonly=on',
+   '-device','virtio-9p-device,fsdev=hostpython,mount_tag=hostpython',
    '-append','console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-perf-checked-init loglevel=4 panic=30 oops=panic raid=noautodetect']
   record.update(guest_command=command,guest_started_utc=now());save()
   with (RAW/'guest.log').open('w') as log:r=subprocess.run(command,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)
