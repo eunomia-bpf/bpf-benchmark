@@ -1,0 +1,58 @@
+{
+  "confirmed_utc": "2026-11-27T00:20:56.130731+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ByteStoreNative",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStorePhysical"
+    ],
+    "exit": 0,
+    "seconds": 11.05265498161316,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 337,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-byte-store-native/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6692590713500977,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "data_register_domain": 31,
+    "base": "X0",
+    "base_data_alias": "included with no writeback",
+    "W1_encoding": "39000001",
+    "W3_encoding": "39000003",
+    "old_W1_API": "instances of shared imported instruction proof"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ByteStoreNative.lean",
+      "size_bytes": 4541,
+      "mtime_ns": 1795738589577672596
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetByteNative.lean",
+      "size_bytes": 3285,
+      "mtime_ns": 1795738669587514147
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
