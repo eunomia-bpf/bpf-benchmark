@@ -1,0 +1,42 @@
+{
+  "utc": "2026-11-27T14:37:44Z",
+  "request_id": 17,
+  "service_started": "1970-01-01T00:20:05.523181+00:00",
+  "service_finished": "1970-01-01T00:20:53.364744+00:00",
+  "service_status": -5,
+  "corpus_error_recorded": "1970-01-01T00:20:49.668684+00:00",
+  "corpus_status": "error",
+  "stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+  "captured_artifacts": {
+    "request.native.o": {
+      "bytes": 1278232,
+      "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80"
+    },
+    "kernel.native.o": {
+      "bytes": 1278232,
+      "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80"
+    },
+    "trusted_arm64.bpf.o": {
+      "bytes": 531128,
+      "sha256": "b39a10479aa9c64e47f24920b85719639834e774f78429ab6b2482ad3c034739"
+    },
+    "trusted_arm64.proof.o": {
+      "bytes": 9160,
+      "sha256": "4f790ce2e56fa524540cac3f4a1fafbd935d9ab6e7dde470bb1f5a6030bab2c3"
+    }
+  },
+  "source_revision": "f5e9128f2f1322803ab2328fa15bf3e7d3382b23",
+  "current_source_sha256": {
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "1ed3f76733b384e1251c62aff4df48b34921a196e39dc4dcfcd85a42e50dec67",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "e5650fd7528f7aad0136b8131b61bbf9e1877564a5eb3d200fd790f1acee7007",
+    "kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e"
+  },
+  "source_trace": [
+    "Loader arm_and_load reports errno from ioctl(NATIVE_LAB_TRUSTED_CHUNK); this message is not a file-open failure.",
+    "native_lab_store_chunk first calls native_lab_active_capsule; absent, abandoned or mismatched active job returns ENOENT.",
+    "native_lab_store_chunk can also return ENOENT when a relocation map ID cannot be found; the stderr alone does not distinguish these branches.",
+    "native_lab_trusted_release marks a closed request owner job abandoned."
+  ],
+  "inference": "Captured native ELF exists. Corpus error is recorded while this request remains in progress; timeout teardown abandoning the request is consistent with the later arming error. The active-capsule versus relocation-map kernel branch was not captured, so the cause is not proven.",
+  "scope": "Archive and source diagnosis only. No new guest, kernel instrumentation, timeout change or successful-install claim."
+}

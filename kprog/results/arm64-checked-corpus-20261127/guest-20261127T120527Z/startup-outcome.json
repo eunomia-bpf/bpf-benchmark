@@ -25,7 +25,11 @@
     "symbol": "tail_ipv4_ct_ingress",
     "status": -5,
     "native_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
-    "native_command_receipts": 0
+    "native_command_receipts": 0,
+    "diagnosis": "arming-failure-17.json",
+    "error_operation": "NATIVE_LAB_TRUSTED_CHUNK ioctl",
+    "native_ELF_archived": true,
+    "causal_limit": "Active-capsule versus relocation-map ENOENT branch not captured. Corpus timeout/error recorded while request17 in progress; abandoned job is consistent, not proven."
   },
   "interpretation": "The common qualifier producer increases completed requests compared with the initial partial run, but actual startup still times out at the unchanged 900 s limit. No post phase or full-app acceptance; the final native install error is observed, its cause remains open. This is not a timing/performance result."
 }
