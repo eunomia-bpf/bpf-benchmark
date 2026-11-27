@@ -1,0 +1,64 @@
+{
+  "scope": "original eager SP read and same original LR-store/reader eight-step prefix",
+  "source_sha256": "b30e862ea4fa5b281860f2af4123491324c12fa60645a22c8044f8016d95bd0c",
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 36.33189582824707,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerWriter"
+      ],
+      "exit": 0,
+      "seconds": 39.02531456947327,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.5646374225616455,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 185,
+  "public_queries": [
+    "writer_source",
+    "sp_local",
+    "sp_after_lr",
+    "read_sp",
+    "begin_allocated"
+  ],
+  "root_full_pending": true,
+  "value_domain": "SP value arbitrary actual allocated contents,not initialized/native SP correspondence",
+  "axioms": "standard Lean logic plus existing CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64CiliumCallerWriter
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.writer_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.writer_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.sp_local
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.sp_local
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.sp_after_lr
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.sp_after_lr
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.read_sp
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.read_sp
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.begin_allocated
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriter.begin_allocated
