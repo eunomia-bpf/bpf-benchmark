@@ -1,0 +1,80 @@
+{
+  "scope": "single original inlineLINK51steps to supplied caller;two genuine initializer resources and real current access boundary;entry-to-site reachability open",
+  "source_sha256": "4513c44d2942b0be0b7c1fad46e7416c85848591fdd0b7a8559d4b537a883020",
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-exit/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.457362413406372,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerExit"
+      ],
+      "exit": 0,
+      "seconds": 2.6977434158325195,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.774768829345703,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-exit/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3964316844940186,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 190,
+  "full_jobs": 1488,
+  "root_queries": [
+    "finish",
+    "execute"
+  ],
+  "source_site": "actual0x54 inline LINK",
+  "source_steps": 51,
+  "word_value": 88,
+  "tag_value": 9,
+  "axioms": "std Lean plus inherited CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
