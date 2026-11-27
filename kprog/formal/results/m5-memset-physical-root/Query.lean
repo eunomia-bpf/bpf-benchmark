@@ -1,0 +1,10 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.store
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetPhysicalByte.store
+#check KProgFormal.ClightRefinement.Arm64MemsetByteNative.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetByteNative.reference_step
+#check KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.execute
+#check KProgFormal.ClightRefinement.Arm64MemsetStorePhysical.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStorePhysical.execute

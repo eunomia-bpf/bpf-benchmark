@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T00:05:27.043827+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 7.745154142379761,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1372,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-physical-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.216649293899536,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22072,
+      "sha256": "736507876d744bda9bc492e8fada2cd9c4debed5ce0a5c363d9f13355a95aaac"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 7402,
+      "sha256": "f8d3ec4e71a21d7d831bc36470df567cf95cb0d65840494c03d67c189fc1f8c9"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports actual per-byte physical memory refinement. Source capacity160/bias96 maps actual memset indices64..79 to physical origin-32..-17 under an injective wrapping64 coordinate. Represents retains actual source byte loads, permissions and native initialization, with source Vundef for arbitrary uninitialized native contents. The true source tag/volatile-byte stores execute once, and SAME actual effects derive native write permission, checked STRB W1,[X0] execution, output error/history and complete memory/register/code/environment frame. The original producer route derives ranges/separation/tag word8 and retains caller FrameBelow, source continuation, permissions and current View. Native word39000001 is kernel-decoded, fetched and executed by the mature checked ISA with PC+4 and exactly one real ordered write. Explicit initial physical memory/code/register bindings remain. Full native helper loops, memcpy reads/writes, environment and original whole-program observations, universal domains/recount and M6 continue in order.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

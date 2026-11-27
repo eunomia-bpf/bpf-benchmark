@@ -56,6 +56,15 @@ exact published type. Public theorem types expose the live source heap and
 code domains; the worklist orders physical native memory/helper execution and
 whole-program input/output correspondence next.
 
+The original AArch64 memset byte-store route also pairs its real private tag
+update and volatile byte write with a decoded, fetched checked STRB. Actual
+producer resources derive source permissions and block separation. Stack
+bias 96 maps its sixteen source offsets 64..79 to native origin-32..-17. The
+byte relation preserves arbitrary uninitialized contents, defined source
+loads, permissions, the complete native frame and the real ordered write.
+The worklist continues with memcpy byte reads and complete native helper-loop
+execution on those same physical memory observations.
+
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
 represents GPRs, six flag bytes, XMM0 and initialized cache bytes of the exact

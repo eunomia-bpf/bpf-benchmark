@@ -1,0 +1,7 @@
+# Actual producer byte stores and checked native physical memory
+
+The root exports actual per-byte physical memory refinement. Source capacity160/bias96 maps actual memset indices64..79 to physical origin-32..-17 under an injective wrapping64 coordinate. Represents retains actual source byte loads, permissions and native initialization, with source Vundef for arbitrary uninitialized native contents. The true source tag/volatile-byte stores execute once, and SAME actual effects derive native write permission, checked STRB W1,[X0] execution, output error/history and complete memory/register/code/environment frame. The original producer route derives ranges/separation/tag word8 and retains caller FrameBelow, source continuation, permissions and current View. Native word39000001 is kernel-decoded, fetched and executed by the mature checked ISA with PC+4 and exactly one real ordered write. Explicit initial physical memory/code/register bindings remain. Full native helper loops, memcpy reads/writes, environment and original whole-program observations, universal domains/recount and M6 continue in order.
+
+Full current lake build 1372 jobs and4 root public type/axiom queries pass under shared timing, CPU17, one worker,32GiB and original200000/512 caps. Full also holds exclusive formal-full-check. Component queries expose exact actual dependencies; the concrete native decoder certificate uses no axioms. V owns unified makecheck.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
