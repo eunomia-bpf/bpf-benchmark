@@ -66,6 +66,45 @@
     "begin_allocated"
   ],
   "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
-  "full_root_pending": true,
-  "axioms": "standard Lean logic plus existing CompCert externalFunctionsSem/inlineAssemblySem semantic parameters;see public log"
+  "full_root_pending": false,
+  "axioms": "standard Lean logic plus existing CompCert externalFunctionsSem/inlineAssemblySem semantic parameters;see public log",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 6.167404413223267,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1482,
+  "root_public": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-link/RootQuery.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.319833517074585,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "root_queries": [
+    "entry_valid",
+    "begin_link",
+    "preserves_other_locals"
+  ],
+  "source_commit": "4b72a9339c082ff1780d2b3914cfefe041b2a59c"
 }

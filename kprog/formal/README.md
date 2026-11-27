@@ -266,3 +266,10 @@ make -C kprog/formal check
 This builds the proof library and executable reference and runs semantic
 oracles, including division faults and permissions. Focused commands and
 validation output are retained in receipts. Benchmark settings stay frozen.
+
+The retained Cilium caller has a checked original entry/allocation certificate
+and first inline LINK LR write:all795 locals/256 temporary chunks,4 source
+steps to LR=88,same-store readback/caller and other-local frames. The default
+root includes this proof;Lake1482 jobs and3 root queries pass. Actual site
+reachability,remaining inline writer,and whole source/native obligations
+remain. See results/m5-cilium-caller-link.

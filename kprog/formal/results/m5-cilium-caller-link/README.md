@@ -24,3 +24,5 @@ Validation.json and the three compressed logs record full direct,focused and
 heartbeat200000/recursion512. All finite metadata uses kernel reduction.
 The default root integration/full build is pending this step's related batch;
 V retains unified makecheck ownership. Earlier attempts remain in raw storage.
+
+The default root now imports the same accepted caller entry/LR proof. Full Lake1482 jobs and3 root type/axiom queries pass at original caps. This verifies integration,not additional source-prefix/native/universal coverage.

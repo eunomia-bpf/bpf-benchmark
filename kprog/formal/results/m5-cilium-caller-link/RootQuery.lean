@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.entry_valid
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_link
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_link
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.preserves_other_locals
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.preserves_other_locals
