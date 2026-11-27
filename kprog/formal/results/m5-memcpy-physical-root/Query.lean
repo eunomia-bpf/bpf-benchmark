@@ -1,0 +1,11 @@
+import KProgFormal
+
+open KProgFormal.ClightRefinement
+#check Arm64MemcpyPhysicalByteRead.load
+#print axioms Arm64MemcpyPhysicalByteRead.load
+#check Arm64MemcpyByteNativeRead.reference_step
+#print axioms Arm64MemcpyByteNativeRead.reference_step
+#check Arm64MemsetStackPhysical.pair_stores
+#print axioms Arm64MemsetStackPhysical.pair_stores
+#check Arm64MemcpyBodyPhysical.execute
+#print axioms Arm64MemcpyBodyPhysical.execute

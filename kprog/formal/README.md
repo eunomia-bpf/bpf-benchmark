@@ -62,8 +62,18 @@ producer resources derive source permissions and block separation. Stack
 bias 96 maps its sixteen source offsets 64..79 to native origin-32..-17. The
 byte relation preserves arbitrary uninitialized contents, defined source
 loads, permissions, the complete native frame and the real ordered write.
-The worklist continues with memcpy byte reads and complete native helper-loop
-execution on those same physical memory observations.
+The original memcpy body now composes its complete reader call, actual local
+allocation/freeing and saved-caller resume with the real bias/index/mask/action
+and tag/byte stores, each once. The same reached physical machine executes
+fetched LDRB W3,[X1] and then STRB W3,[X0]; original program and PC+4 derive the
+second fetch, and the loaded X3 supplies the write. Source indices 80..95 map
+to native origin-16..-1. Actual source loop/caller/flag frames, initialized
+bytes, all other native fields and bytes, PC+8 and ordered read/write history
+remain. One shared checked STRB proof covers registers 0..30 and retains the
+previous W1 interface. These per-byte statements expose their physical input,
+register and two-word code premises. The worklist continues with the original
+guard/increment, actual native helper code and its loop/environment binding,
+then whole-program input/output correspondence.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
