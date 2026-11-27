@@ -120,8 +120,14 @@ provider outcomes use genuine kind6 external calls and supplied-heap cache
 frames; these targeted environment premises remain explicit. The original
 release stage, all 104 targeted stores, eight frees and caller return preserve
 those exact maps. The existing single-step APIs retain their complete types.
-Native caller/landing-pad/alternative feature binding, global provider evidence
-and whole-program observer continue on these same witnesses.
+The same returned call now derives the actual post-free entry pointer-table
+readers for all 32 vectors, R1 through R18 with tag0, the complete NZCV tuple,
+source R0=-16/tag4 and borrowed SP=-32. Its original stack-origin and physical
+SP=-32+stackOrigin contracts bind both R0 and SP through the existing
+provenance map. All reads use the exported C layout and real retained loads.
+The R19–R30 source/native frame, native caller/landing-pad/alternative feature
+binding, global provider evidence and whole-program observer continue on
+these same witnesses.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

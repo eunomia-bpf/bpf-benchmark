@@ -1,0 +1,10 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetView.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetView.observe
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetView.vectors
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetView.vectors
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.observe
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyObservedEntry.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyObservedEntry.execute
