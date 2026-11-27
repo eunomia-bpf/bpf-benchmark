@@ -1,0 +1,45 @@
+{
+  "controller_status": 0,
+  "files": {
+    "native.blob.frozen.proof.o": {
+      "bytes": 443248,
+      "sha256": "f2896b31b903fe4eb0e5beb71431e5416d3ab75c6789391ab6d5e3c6e1a729a4"
+    },
+    "native.map-patches.tsv": {
+      "bytes": 2736,
+      "sha256": "81706b25fc9a61b2e9ae62dc10b314067e786e37d755392178142f1fd799a0dc"
+    },
+    "captured.link-plan.json": {
+      "bytes": 50562,
+      "sha256": "60d21fc3e9c52ca5c6255d08e96fa760c22a470ea006a4684033fc47024b0029"
+    },
+    "input.proof.o": {
+      "bytes": 1435728,
+      "sha256": "30ab6c8365d3ba37dc6f03366902c11d38c4cf6647fd03277613be2cdfafbf0d"
+    },
+    "native.relocs.bin": {
+      "bytes": 1728,
+      "sha256": "67ce7240becdea5bb2c3e5cda4cf63818fecf5bdae89c561f13b0fc023ad8394"
+    },
+    "native.blob.bin": {
+      "bytes": 14327,
+      "sha256": "b2878bc32f5562b7b7cfc1115add5a841db7998933ef863fffcadbc95eda546d"
+    },
+    "native.abi.tsv": {
+      "bytes": 10415,
+      "sha256": "aa06637fc387dede607f214a1c09b719dac16596c7ed95f6425f7e49b5b7b973"
+    },
+    "optimized-undefined.txt": {
+      "bytes": 1085,
+      "sha256": "a2db8f3eed928808c1c05c7fb47a7c02532887c0e49fa4f6a1e75bf6a4daafa4"
+    }
+  },
+  "verified_files": 8,
+  "parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/frozen-link-integration-20261127/evidence.tar.gz",
+      "bytes": 425981,
+      "sha256": "a6bec6aa996ab2edf2c8851b4da7e7203b42d207517c29ce303d9359f257d75d"
+    }
+  ]
+}

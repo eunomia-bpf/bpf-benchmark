@@ -60,6 +60,7 @@ use std::fs;
 use std::path::PathBuf;
 
 mod x86;
+mod frozen_ir;
 
 const ARM64_THREAD_INFO_CPU_OFFSET_HELPER_KEY: &str = "__native_arm64_thread_info_cpu_offset";
 const ARM64_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_arm64_bpf_map_max_entries_offset";
@@ -431,6 +432,17 @@ fn main() -> Result<()> {
         lookup_sites,
         lookup_maps,
     } = load_link_side_inputs(&args)?;
+    // A proof retains frontend IR as non-allocated metadata. Frozen map
+    // bytes are available only now, at the normal structured link boundary.
+    let specialized = frozen_ir::specialize(
+        &args, &elf, &const_values,
+        std::path::Path::new("/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto"),
+        &std::env::current_exe()?,
+    )?;
+    let elf = match specialized.as_ref() {
+        Some(bytes) => object::File::parse(&**bytes).context("parse specialized proof")?,
+        None => elf,
+    };
     let RewriteResult {
         blob,
         relocs,
@@ -533,6 +545,10 @@ fn main() -> Result<()> {
             &proof_relocs,
             &proof_data_relocs,
             callee_saved_mask,
+            if elf.architecture() == object::Architecture::X86_64 {
+                elf.section_by_name(".llvmbc").map(|section| section.data()).transpose()
+                    .context("read proof frontend IR")?
+            } else { None },
         )?;
         eprintln!(
             "native-link: wrote proof object {} bytes, {} reloc(s) -> {}",
@@ -616,6 +632,7 @@ fn write_proof_object(
     proof_relocs: &[ProofReloc],
     proof_data_relocs: &[ProofDataReloc],
     callee_saved_mask: u8,
+    frontend_ir: Option<&[u8]>,
 ) -> Result<()> {
     let mut object = WriteObject::new(BinaryFormat::Elf, arch, Endianness::Little);
     let text_section = object.section_id(StandardSection::Text);
@@ -814,6 +831,10 @@ fn write_proof_object(
         object.append_section_data(section, &serde_json::to_vec(&x86::proof_effects(text)?)?, 1);
     }
 
+    if let Some(ir) = frontend_ir {
+        let section = object.add_section(Vec::new(), b".llvmbc".to_vec(), SectionKind::Other);
+        object.append_section_data(section, ir, 1);
+    }
     let bytes = object.write().context("write proof ELF object")?;
     fs::write(path, bytes).with_context(|| format!("write {}", path.display()))
 }

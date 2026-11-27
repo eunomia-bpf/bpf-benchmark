@@ -1,0 +1,10 @@
+native-link: entry=perf_unwind_native (28346 bytes), 1 reachable symbol(s) total
+  - perf_unwind_native (vaddr 0x0, 28346 bytes) [entry]
+native-link: wrote proof object 28417 bytes, 445 reloc(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/input.proof.o
+native-link: entry=perf_unwind_native (13124 bytes), 1 reachable symbol(s) total
+  - perf_unwind_native (vaddr 0x0, 13124 bytes) [entry]
+native-link: wrote 14327 bytes -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/native.blob.bin (108 relocs)
+native-link: wrote 108 relocs -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/native.relocs.bin
+native-link: wrote 103 map patch site(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/native.map-patches.tsv
+native-link: wrote ABI metadata, 534 load site(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/native.abi.tsv
+14327 /workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127/native.blob.bin

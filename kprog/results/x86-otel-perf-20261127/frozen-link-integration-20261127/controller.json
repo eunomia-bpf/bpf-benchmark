@@ -1,0 +1,26 @@
+{
+  "pid": 1123244,
+  "controller_status": 0,
+  "ended_utc": "2026-11-27T19:45:06.981738+00:00",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/link-integration-20261127",
+  "scope": "Actual native-link proof/kernel CLI on staged exact captured P and boot link plan in existing runtime container. Not an installed program or performance claim.",
+  "build": {
+    "release_returncode": 0,
+    "unit_tests": 12,
+    "failed_tests": 0
+  },
+  "source_sha256": {
+    "kprog/x86/native_lab/native_link/src/main.rs": "d5aaf1a6bc47913e65349a65a4e59b4d0e6ac3c63e96899489983f6f7960d491",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "38ffe80a24da3f7d050a77bd726d30d7e5fbf8b65f73b858154057c389d91181"
+  },
+  "linker_sha256": "821209928622921ace6a85d007839adb9bf5a90066f597e8784fe68e13886694",
+  "old_image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+  "native_blob_bytes": 14327,
+  "native_blob_sha256": "b2878bc32f5562b7b7cfc1115add5a841db7998933ef863fffcadbc95eda546d",
+  "debug_helper_relocations": 0,
+  "callee_saved_mask": 15,
+  "load_sites": 534,
+  "compiler_cap_bytes": 51539607552,
+  "compiler_parallelism": 1,
+  "initial_offline_launch_error": "Docker --ulimit as is unsupported; initial exit125 retained, corrected prlimit inside existing container before executing actual CLI."
+}

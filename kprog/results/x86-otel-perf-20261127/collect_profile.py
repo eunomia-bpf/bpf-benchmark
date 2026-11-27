@@ -1,5 +1,5 @@
 """Collect the completed PMU observation with explicit limits and verified archives."""
-import hashlib,json,os,struct,subprocess,tarfile,traceback
+import hashlib,json,os,re,struct,subprocess,tarfile,traceback
 from pathlib import Path
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent;LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
 out=Path(json.loads((LANE/'otel-performance-profile.json').read_text())['result']);c=json.loads((out/'controller.json').read_text());assert c['controller_status']==0
@@ -23,13 +23,15 @@ try:
   g={ph:dict(samples=sum(v['samples'] for n,v in d['phases'][ph]['symbols'].items() if member(name,n)),sampled_period_per_entry=sum(v['period_per_entry_call'] for n,v in d['phases'][ph]['symbols'].items() if member(name,n))) for ph in ['baseline','post_rejit']}
   g['native_over_ebpf']=g['post_rejit']['sampled_period_per_entry']/g['baseline']['sampled_period_per_entry'];groups[name]=g
  boot={line.split()[2]:int(line.split()[0],16) for line in (raw/'kallsyms.txt').read_text().splitlines() if len(line.split())>=3}
- objects=[p for p in (raw/'linkcache/native_kernel_link_cache').glob('*.proof.o') if any(line.split()[-1:] == ['perf_unwind_native'] for line in subprocess.check_output(['llvm-nm-18','--defined-only',str(p)],text=True).splitlines())];assert len(objects)==1,objects;obj=objects[0]
+ objects=[p for p in (raw/'linkcache/native_kernel_link_cache').glob('*.proof.o') if re.fullmatch(r'[0-9a-f]{16}\.proof\.o',p.name) and any(line.split()[-1:] == ['perf_unwind_native'] for line in subprocess.check_output(['llvm-nm-18','--defined-only',str(p)],text=True).splitlines())];assert len(objects)==1,objects;obj=objects[0]
  prefix=obj.name.split('.')[0];blob=obj.with_name(prefix+'.blob.bin');relocs=obj.with_name(prefix+'.relocs.bin');trie=boot['trie_lookup_elem']
+ input_proof=obj;optimized=list(obj.parent.glob(prefix+'*.frozen.proof.o'));assert len(optimized)<=1,optimized
+ if optimized:obj=optimized[0]
  direct=[dict(offset=a,kind=b,target=t) for a,b,t in struct.iter_unpack('<IIQ',relocs.read_bytes()) if t==trie]
  plans=[]
  for p in obj.parent.glob(prefix+'*.link-plan.json'):
   plan=json.loads(p.read_text());plans.append(dict(path=str(p.relative_to(raw)),trie_helper=[h for h in plan['helpers'] if h['name']=='trie_lookup_elem'],lookup_sites=plan['lookup_sites']))
- diagnosis=dict(utc=now(),corpus_status='ok',image=c['profile-image.txt'],entry_counters=d['entry_counters'],entry_per_call_speedup=d['entry_per_call_speedup'],groups=groups,own_qemu_pid=d['own_qemu_pid'],phase_windows=d['windows'],native_unwinder=dict(object_sha256=sha(obj),blob_bytes=blob.stat().st_size,blob_sha256=sha(blob),direct_trie_relocations=direct,plans=plans),interpretation='Group directions are specific to this observation. PMU differences identify residual work to investigate; they do not establish a causal per-call latency or justify changing a kernel function.',limits='Whole measurement socket windows are approximations of stats boundaries; PMU period sums have skid/frequency/multiplexing limits. Different entry counts and changing lookup/query paths prevent assigning exact kernel ns or causal call-cost changes. Native direct relocation count is static, not dynamic helper invocation parity. This10s PMU check is separate from full timing and does not establish a new optimization gain.')
+ diagnosis=dict(utc=now(),corpus_status='ok',image=c['profile-image.txt'],entry_counters=d['entry_counters'],entry_per_call_speedup=d['entry_per_call_speedup'],groups=groups,own_qemu_pid=d['own_qemu_pid'],phase_windows=d['windows'],native_unwinder=dict(input_proof=str(input_proof.relative_to(raw)),optimized_proof=str(obj.relative_to(raw)) if optimized else None,object_sha256=sha(obj),blob_bytes=blob.stat().st_size,blob_sha256=sha(blob),direct_trie_relocations=direct,plans=plans),interpretation='Group directions are specific to this observation. PMU differences identify residual work to investigate; they do not establish a causal per-call latency or justify changing a kernel function.',limits='Whole measurement socket windows are approximations of stats boundaries; PMU period sums have skid/frequency/multiplexing limits. Different entry counts and changing lookup/query paths prevent assigning exact kernel ns or causal call-cost changes. Native direct relocation count is static, not dynamic helper invocation parity. This10s PMU check is separate from full timing and does not establish a new optimization gain.')
  (out/'diagnosis.json').write_text(json.dumps(diagnosis,indent=2)+'\n')
  entry=d['entry_counters']; ebpf=entry['baseline']; native=entry['post_rejit']
  md=f'# Current-image OTel PMU observation\n\nBoth corpus phases succeeded. Entry: eBPF{ebpf['ns_per_call']:.2f}ns, native{native['ns_per_call']:.2f}ns, diagnostic ratio{d['entry_per_call_speedup']:.5f}x. This does not replace full timing.\n\n| Group | eBPF sampled periods / entry | Native | Native / eBPF |\n|---|---:|---:|---:|\n'
