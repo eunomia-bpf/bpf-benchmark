@@ -1,0 +1,55 @@
+{
+  "confirmed_utc": "2026-11-27T02:03:25.467157+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPairProfile"
+    ],
+    "exit": 0,
+    "seconds": 2.7851979732513428,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 97,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-pair-profile/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5377466678619385,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 6,
+  "source_steps": {
+    "actual_modes": [
+      "two wrapping8byte updates",
+      "one wrapping16byte update"
+    ],
+    "full_profile": "identical across modes",
+    "destination_initialized_bytes": 16,
+    "outside_initialization": "original arbitrary value retained",
+    "repeated_STPs": "idempotent actual destination update",
+    "local_native_dependencies": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPairProfile.lean",
+      "size_bytes": 3542,
+      "mtime_ns": 1795744896145773628
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

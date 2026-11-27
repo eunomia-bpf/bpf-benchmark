@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairProfile
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairProfile.split_initialized
+#print axioms Arm64KernelMemcpyPairProfile.split_initialized
+#check Arm64KernelMemcpyPairProfile.profile_eq
+#print axioms Arm64KernelMemcpyPairProfile.profile_eq
+#check Arm64KernelMemcpyPairProfile.inside
+#print axioms Arm64KernelMemcpyPairProfile.inside
+#check Arm64KernelMemcpyPairProfile.outside
+#print axioms Arm64KernelMemcpyPairProfile.outside
+#check Arm64KernelMemcpyPairProfile.idempotent
+#print axioms Arm64KernelMemcpyPairProfile.idempotent
+#check Arm64KernelMemcpyPairProfile.repeated_profile_eq
+#print axioms Arm64KernelMemcpyPairProfile.repeated_profile_eq
