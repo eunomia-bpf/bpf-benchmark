@@ -1,0 +1,10 @@
+{
+  "utc": "2026-11-27T19:51:00Z",
+  "image": "sha256:6e09c8fce19dc7af825a77b52f25b9811acbd0f5bb63179096d35edc0373c1f7",
+  "old_image_absent": true,
+  "refresh_returncode": 0,
+  "wrapper_returncode": 1,
+  "wrapper_error": "old image rm returned no-such-image after successful build; current successful inventory proves it already absent",
+  "action": "start same frozen OTel check without another image build",
+  "source_refresh_controller": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/frozen-link-integration-20261127/refresh-controller.json"
+}

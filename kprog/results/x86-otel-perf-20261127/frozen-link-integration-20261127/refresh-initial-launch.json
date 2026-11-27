@@ -1,0 +1,10 @@
+{
+  "pid": 1125885,
+  "started_utc": "2026-11-27T19:48:27Z",
+  "source_revision": "e6d02b380402c0eca1d034724353245764b6cebf",
+  "scope": "In-place sole-image linker replacement with existing frozen runtime recipe and unchanged compiled P/kernel inputs, then one frozen effective1x10s OTel stats-on diagnostic with actual in-phase code capture. No full timing.",
+  "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/frozen-link-integration-20261127",
+  "controller": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/frozen-link-integration-20261127/refresh-controller.json",
+  "log": "/workspaces/.agent-state/kprog-lanes/perf/frozen-link-refresh.log",
+  "expected_order": "sole image build then frozen effective1x10s stats-on OTel phase/code capture; no full timing"
+}
