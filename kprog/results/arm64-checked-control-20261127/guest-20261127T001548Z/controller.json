@@ -1,0 +1,87 @@
+{
+  "started_utc": "2026-11-27T00:15:48Z",
+  "pid": 831857,
+  "raw": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001548Z",
+  "revision": "0fc1f9099db5ebf8a7221b5f72bebabef2ce4c91",
+  "scope": "Existing service client XDP and TC constant2 controls, real ARM kernel/stock verifier/checked-native install/TEST_RUN. Cortex-A57 fourCPUs/eightGiB matches current ARM entry; no apps or timing.",
+  "broker_command": [
+    "prlimit",
+    "--as=17179869184",
+    "taskset",
+    "-c",
+    "16",
+    "python3",
+    "/workspaces/repository/kprog/trusted_compile.py",
+    "serve",
+    "--scope",
+    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001548Z",
+    "--state",
+    "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001548Z/broker",
+    "--clang",
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "--arm64-sysroot",
+    "/workspaces/repository/.cache/aarch64-sysroot"
+  ],
+  "guest_command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "cortex-a57",
+    "-smp",
+    "4",
+    "-m",
+    "8G",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/.cache/qemu-arm64-root,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root",
+    "-fsdev",
+    "local,id=workspace,path=/workspaces,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=workspace,mount_tag=workspace",
+    "-append",
+    "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-perf-checked-init loglevel=4 panic=30 oops=panic raid=noautodetect"
+  ],
+  "guest_started_utc": "2026-11-27T00:15:48Z",
+  "qemu_returncode": 0,
+  "exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/arm64-checked-control-20261127/guest_controller.py\", line 75, in <module>\n    status=int((RAW/'guest-status').read_text())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1029, in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/pathlib.py\", line 1015, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001548Z/guest-status'\n",
+  "broker_returncode": 0,
+  "controller_status": 1,
+  "ended_utc": "2026-11-27T00:16:21Z",
+  "archive_commands": [
+    [
+      "tar",
+      "-C",
+      "/workspaces/kprog-raw/perf/arm64-checked-control-20261127",
+      "-cf",
+      "-",
+      "20261127T001548Z"
+    ],
+    [
+      "zstd",
+      "-T1",
+      "-3",
+      "-c"
+    ],
+    [
+      "split",
+      "-b",
+      "48000000",
+      "-",
+      "/workspaces/repository/kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/evidence.tar.zst.part-"
+    ]
+  ],
+  "archive_returncodes": [
+    0,
+    0,
+    0
+  ]
+}
