@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T11:22:30Z",
+  "pid": 989622,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-loadtime-20261127",
+    "profile"
+  ],
+  "revision": "72bbd39a1670dcb0487e299561d61820b82dc6eb",
+  "compiler_cpu": 18,
+  "compiler_address_space_bytes": 51539607552,
+  "scope": "Diagnostic compile of archived original Cilium request10; original B flags plus time-report/trace. Tetragon remains active on unchanged source/binaries; total at most two compiles."
+}
