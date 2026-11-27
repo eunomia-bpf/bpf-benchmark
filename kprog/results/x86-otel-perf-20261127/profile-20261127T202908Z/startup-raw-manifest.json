@@ -1,0 +1,74 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T202908Z",
+  "archive": "kprog/results/x86-otel-perf-20261127/profile-20261127T202908Z/startup-raw.tar.gz",
+  "archive_bytes": 23174,
+  "archive_sha256": "f120c9dbd8852a565211dd7e033d0bc647611880d171c5330575aaa60fec61be",
+  "files": [
+    {
+      "path": "controller.log",
+      "bytes": 2551,
+      "sha256": "cd2dee0e6449afccb1687fdfac3c9d185acd38ec91409121b3fb126b5b132f57"
+    },
+    {
+      "path": "guest-exit.txt",
+      "bytes": 4,
+      "sha256": "ce8bafb38615aeb5d44ebbabe78ec14ac35a5de87bdc5ad5ea82a72656024ce4"
+    },
+    {
+      "path": "guest.log",
+      "bytes": 118,
+      "sha256": "8da8328bc87b6cd9d8117e4e641c322633217873711568d2ad13e35bb09ca256"
+    },
+    {
+      "path": "guest.sh",
+      "bytes": 2092,
+      "sha256": "46c73425b64f4dde29c8097e0f4d622f41715328490759a985cc1b217970f659"
+    },
+    {
+      "path": "host-perf.data",
+      "bytes": 195076,
+      "sha256": "a2d0b410383173afcd818197ad4ba9694dfcdc550cb0e65f4d2c1bfa47ff9289"
+    },
+    {
+      "path": "host-rt-minus-uptime.txt",
+      "bytes": 19,
+      "sha256": "afbb6c1a5bf6c0a5341f83fe140c4efe8721fbc69fc29203606c20903e14fcd2"
+    },
+    {
+      "path": "perf-exit.txt",
+      "bytes": 4,
+      "sha256": "9d9b18720961e9b4689fd763b85e7b6f36160ccd3a8a1c9ddc5103bb0f66c396"
+    },
+    {
+      "path": "perf-stop-requested.txt",
+      "bytes": 30,
+      "sha256": "8822df0325e7be29b69973f74532a6166a860b039152b3c934457eeafd61bbe8"
+    },
+    {
+      "path": "perf.log",
+      "bytes": 175,
+      "sha256": "8d82eac7c7352582e0364d361283fdc18013d991a3584c42f9634fa94370c848"
+    },
+    {
+      "path": "profile-host-check.sh",
+      "bytes": 6029,
+      "sha256": "11b1ce42277029f6bbc1ddbb4a9282fa376ac0c045e82434b7fd4a9113c3a7f3"
+    },
+    {
+      "path": "profile-image.txt",
+      "bytes": 72,
+      "sha256": "d5f00194f47321a9073e964f7cf0ed14b58758e8b18ca0b2986a0c7236792928"
+    },
+    {
+      "path": "profile-source.txt",
+      "bytes": 41,
+      "sha256": "9fa00c52d73bba25b3fcfe17bc9709ecaee71424cf1e90de343f9c2c63c08b86"
+    },
+    {
+      "path": "run_dir",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Complete terminal failed-startup raw including host perf receipt; all file bytes verified. Current retry RAW excluded."
+}

@@ -1,0 +1,24 @@
+{
+  "started_utc": "2026-11-27T20:59:18Z",
+  "pid": 1164271,
+  "command": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "python3",
+    "/workspaces/repository/kprog/results/x86-otel-perf-20261127/profile_check.py",
+    "perf_unwind_nat",
+    "observe-maps"
+  ],
+  "log": "/workspaces/.agent-state/kprog-lanes/perf/otel-guest-retry-20261127T205918Z.log",
+  "image": "sha256:c103a86a0636c7a07aee29dcd91a8f814291e62f38fb4b45a8df95bb745527f3",
+  "source_revision": "06fad8ea5f7b1e3152a92444f994b6a8fcef1bfb",
+  "launcher_address_space_limit_bytes": [
+    -1,
+    -1
+  ],
+  "replaces_failed_check": "profile-20261127T202908Z",
+  "scope": "Retry only QEMU pre-boot AS-cap startup failure, frozen effective1x10s stats1/64G OTel check with unchanged current image/kernel/P and read-only observer. No image rebuild/full timing."
+}
