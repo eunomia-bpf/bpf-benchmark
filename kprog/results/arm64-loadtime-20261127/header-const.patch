@@ -1,0 +1,876 @@
+--- a/kprog/arm64/arm64_sim_local_bpf.h
++++ b/kprog/arm64/arm64_sim_local_bpf.h
+@@ -437,7 +437,7 @@
+ 
+ #define ARM64_SIM_L_READ_REG_RAW_INTO(OUTPUT, REG) \
+ do { \
+-    __u64 __a64_l_reg = (REG); \
++    const __u64 __a64_l_reg = (REG); \
+     (OUTPUT) = __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
+         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; \
+@@ -450,7 +450,7 @@
+ 
+ #define ARM64_SIM_L_READ_REG_PTR_INTO(OUTPUT, REG) \
+ do { \
+-    __u64 __a64_l_reg = (REG); \
++    const __u64 __a64_l_reg = (REG); \
+     (OUTPUT) = __a64_l_reg == ARM64_SP ? (void *)(long)__a64_sp : \
+         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr : (void *)0; \
+@@ -463,7 +463,7 @@
+ 
+ #define ARM64_SIM_L_REG_TAG_INTO(OUTPUT, REG) \
+ do { \
+-    __u64 __a64_l_reg = (REG); \
++    const __u64 __a64_l_reg = (REG); \
+     (OUTPUT) = __a64_l_reg == ARM64_SP ? ARM64_SIM_TAG_STACK : \
+         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
+         *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; \
+@@ -490,7 +490,7 @@
+    __a64_read_result; })
+ 
+ #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) \
+-	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
++	do { __s64 __a64_write_old_sp=__a64_sp;  const __u64 __a64_l_reg = (REG); \
+ 	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
+ 	     if (__a64_l_reg == ARM64_SP) { \
+ 	       __u64 __a64_write_base; \
+@@ -510,7 +510,7 @@
+ 	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_SCALAR)
+ 
+ #define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG) \
+-	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
++	do { __s64 __a64_write_old_sp=__a64_sp;  const __u64 __a64_l_reg = (REG); \
+ 	     void *__a64_l_next_ptr = (void *)(VALUE); \
+ 	     __u8 __a64_l_next_tag = (TAG); \
+ 	     if (__a64_l_reg == ARM64_SP) { \
+@@ -833,7 +833,7 @@
+ 	do {                                                                 \
+ 		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
+-		__u8 __a64_str_width = (WIDTH);                           \
++		const __u8 __a64_str_width = (WIDTH);                           \
+ 		__u64 __a64_str_value;                                    \
+ 		if (KPROG_ARM64_STACK_ARM(                         \
+ 			    __a64_str_width ==                            \
+@@ -871,8 +871,8 @@
+ 	do {                                                                 \
+ 		__u64 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
+-		__u8 __a64_srt_width = (WIDTH);                           \
+-		__u8 __a64_srt_source =                                   \
++		const __u8 __a64_srt_width = (WIDTH);                           \
++		const __u8 __a64_srt_source =                                   \
+ 			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
+ 				__a64_srt_width == ARM64_WIDTH_64,        \
+ 				KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index));\
+@@ -904,9 +904,9 @@
+ 	do {                                                               \
+ 		__u64 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
+ 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
+-		__u8 __a64_stw_width = (WIDTH);                           \
++		const __u8 __a64_stw_width = (WIDTH);                           \
+ 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
+-		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
++		const __u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
+ 			__a64_stw_width == ARM64_WIDTH_64,                \
+ 			KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index));  \
+ 		if (__a64_stw_action ==                              \
+@@ -1084,8 +1084,8 @@
+ 
+ #define ARM64_SIM_L_MEM_BASE_OFF_INTO(OUTPUT, AUX, INDEX, IMM) \
+     do { \
+-        __u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX); \
+-        __u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index); \
++        const __u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX); \
++        const __u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index); \
+         __u64 __a64_mbo_imm = (IMM), __a64_mbo_index = 0, __a64_mbo_result; \
+         if (__a64_mbo_isrc == KPROG_ARM64_MEM_INDEX_VALUE_REGISTER) \
+             ARM64_SIM_L_MOD_VALUE_INTO(__a64_mbo_index, (INDEX), \
+@@ -1111,7 +1111,7 @@
+  * as its own writeback rather than in the offset. */
+ #define ARM64_SIM_L_MEM_PREPOST_STEP(BASE, DELTA)                           \
+ 	do {                                                               \
+-		__s64 __a64_l_pp = (__s64)(DELTA);                        \
++		const __s64 __a64_l_pp = (__s64)(DELTA);                        \
+ 		if (__a64_l_pp != 0) {                                    \
+ 			if ((BASE) == ARM64_SP)                           \
+ 				ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP,   \
+@@ -1740,13 +1740,13 @@
+ 
+ #define ARM64_SIM_L_EXEC_ALU(OP, DST, SRC, SRC2, FLAGS, AUX, IMM)           \
+ 	do {                                                               \
+-		__u8 __a64_alu_width = (FLAGS);                           \
++		const __u8 __a64_alu_width = (FLAGS);                           \
+ 		__u64 __a64_alu_lhs = ARM64_SIM_L_READ_REG(SRC);          \
+ 		ARM64_SIM_L_VALUE(__u64, __a64_alu_rhs, KPROG_ARM64_ALU_RHS,               \
+ 			KPROG_ARM64_ALU_OPERAND_SELECT((OP)), (IMM), ARM64_SIM_L_MOD(AUX),\
+ 			ARM64_SIM_L_READ_REG(SRC2), ARM64_SIM_L_SHIFT(AUX),\
+ 			__a64_alu_width);                                  \
+-		__u8 __a64_alu_op = (AUX) & 0xffU;                        \
++		const __u8 __a64_alu_op = (AUX) & 0xffU;                        \
+ 		__u8 __a64_alu_src_tag = ARM64_SIM_L_REG_TAG(SRC);        \
+ 		ARM64_SIM_L_VALUE(__u64, __a64_alu_result, KPROG_ALU64_RESULT, __a64_alu_op, __a64_alu_lhs,   \
+ 				__a64_alu_rhs,                            \
+@@ -1959,7 +1959,7 @@
+ 
+ #define ARM64_SIM_L_EXEC(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)         \
+ 	do {                                                               \
+-		__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
++		const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
+ 		if (KPROG_ARM64_DISP_NOP_HANDLED(OP)) {                    \
+ 			(void)0;                                           \
+ 		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \
+@@ -2758,7 +2758,7 @@
+  * KProgFormal.Arm64CompareCond proves this from the existing SUB/NZCV rules. */
+ #define ARM64_SIM_A64_CMP_GT(OP, LHS, RHS, WIDTH, AUX, IMM, LABEL)          \
+     do {                                                                 \
+-        __u8 __a64_cmp_width = (WIDTH);                                  \
++        const __u8 __a64_cmp_width = (WIDTH);                                  \
+         __u64 __a64_cmp_lhs = ARM64_SIM_L_READ_REG(LHS);                  \
+         __u64 __a64_cmp_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),           \
+             ARM64_SIM_L_MOD_VALUE((RHS), ARM64_SIM_L_MOD(AUX),           \
+--- a/kprog/arm64/arm64_sim_direct.h
++++ b/kprog/arm64/arm64_sim_direct.h
+@@ -3,19 +3,19 @@
+ #define ARM64_SIM_DIRECT_H
+ #define ARM64_SIM_DIRECT_BODY_0(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ (void)0; \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_1(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_EXEC_ADRP((OP), (DST), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_2(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ if (ARM64_SIM_L_MOV_PTR_TAG_PATH((OP), __a64_l_width)) { \
+ 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), \
+@@ -29,20 +29,20 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_3(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_value, ARM64_SIM_L_MOVK_VALUE, (DST), (IMM), ARM64_SIM_L_SHIFT(AUX)); \
+ 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_value, __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_4(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_5(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_amount, KPROG_ARM64_IMM_RHS, (OP), (IMM), \
+ 				ARM64_SIM_L_READ_REG(SRC2)); \
+@@ -51,14 +51,14 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_6(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_MUL_VALUE, (OP), (SRC), (SRC2), (SRC3), __a64_l_width); \
+ 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_7(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_result, KPROG_ARM64_UNARY_VALUE, (OP), \
+ 					ARM64_SIM_L_MOD_VALUE((SRC), ARM64_SIM_L_MOD(AUX), \
+@@ -68,7 +68,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_8(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_CNEG_VALUE, (OP), (SRC), \
+ 					ARM64_SIM_L_EVAL_COND(AUX), __a64_l_width); \
+@@ -76,14 +76,14 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_9(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_EXTREV_VALUE, (OP), (SRC), (SRC2), (IMM), __a64_l_width); \
+ 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_10(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_bf_result, ARM64_SIM_L_BITFIELD_VALUE, (AUX) & 0xffU, \
+ 					ARM64_SIM_L_READ_REG(SRC), \
+@@ -94,7 +94,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_11(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -109,7 +109,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_12(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -124,7 +124,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_13(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			__u64 __a64_l_rhs = (__u64)(IMM); \
+@@ -136,7 +136,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_14(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC), \
+@@ -150,7 +150,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_15(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -163,7 +163,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_16(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -177,7 +177,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_17(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC), \
+@@ -192,7 +192,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_18(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
+ 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC2), \
+@@ -208,7 +208,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_19(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -223,7 +223,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_20(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_VALUE(__u64, __a64_l_result, ARM64_SIM_L_ORN_VALUE, (OP), ARM64_SIM_L_READ_REG(SRC), \
+ 					ARM64_SIM_L_MOD_VALUE((SRC2), ARM64_SIM_L_MOD(AUX), \
+@@ -233,7 +233,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_21(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
+ 			ARM64_SIM_L_VALUE(__u64, __a64_l_rhs, KPROG_ARM64_FLAG_RHS, (OP), (IMM), \
+@@ -247,7 +247,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_22(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
+ 			if (KPROG_ARM64_CSEL_PTR_TAG_PATH((OP), __a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
+@@ -266,87 +266,87 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_23(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_LOAD_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_24(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_LDRSX_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_25(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_STORE_STEP((DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_26(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_add, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_27(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_or, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_28(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_29(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_STLXR_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_30(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_LDP((DST), (SRC), (SRC2), (SRC3), \
+ 				(AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_31(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_STP((DST), (SRC), (SRC2), (SRC3), \
+ 				(AUX), (IMM), __a64_l_width); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_32(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_LOAD_D0_MEM((SRC), (SRC2), (AUX), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_33(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_STORE_D0_MEM((DST), (SRC2), (AUX), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_34(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_LOAD_Q0_MEM((SRC), (SRC2), (AUX), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_35(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_STORE_Q0_MEM((DST), (SRC2), (AUX), (IMM)); \
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_36(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ unsigned __a64_fmov_index = (SRC2) == ARM64_REG_NONE ? 0U : (SRC2); \
+ 			if (__a64_fmov_index >= 32U) { \
+@@ -368,7 +368,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_37(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ __u64 __a64_red_hi = (AUX) == 16 ? \
+ 				ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0_hi) : 0; \
+@@ -382,7 +382,7 @@
+ } while (0)
+ #define ARM64_SIM_DIRECT_BODY_38(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
+ do { \
+-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
++const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+ (void)__a64_l_width; \
+ ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
+ } while (0)
+--- a/kprog/formal/generated/arm64_adrp.h
++++ b/kprog/formal/generated/arm64_adrp.h
+@@ -26,7 +26,7 @@
+  */
+ #define KPROG_ARM64_ADRP_TAG_INTO(OUTPUT, OP, UNSUPPORTED) \
+ 	do { \
+-		__u8 __kprog_a64_adrp_op = (OP); \
++		const __u8 __kprog_a64_adrp_op = (OP); \
+ 		__u8 __kprog_a64_adrp_tag = 0; \
+  \
+ 		switch (__kprog_a64_adrp_op) { \
+--- a/kprog/formal/generated/arm64_bitfield.h
++++ b/kprog/formal/generated/arm64_bitfield.h
+@@ -35,7 +35,7 @@
+ 	do { \
+ 		__u64 __kprog_a64_bf_src = (SRC); \
+ 		__u64 __kprog_a64_bf_dst = (DST); \
+-		__u8 __kprog_a64_bf_kind = (KIND); \
++		const __u8 __kprog_a64_bf_kind = (KIND); \
+ 		__u8 __kprog_a64_bf_lsb = (LSB); \
+ 		__u8 __kprog_a64_bf_bits = (BITS); \
+ 		__u64 __kprog_a64_bf_mask = \
+--- a/kprog/formal/generated/arm64_branch.h
++++ b/kprog/formal/generated/arm64_branch.h
+@@ -31,7 +31,7 @@
+  * int (1 = branch taken).
+  */
+ #define KPROG_ARM64_BRANCH_TEST_DECL(NAME, KIND, VALUE, BIT)                           \
+-		__u64 __kprog_a64_br_kind = (KIND); \
++		const __u64 __kprog_a64_br_kind = (KIND); \
+ 		__u64 __kprog_a64_br_value = (VALUE); \
+ 		__u64 __kprog_a64_br_bit = (BIT) & 63ULL; \
+ 		int NAME = 0; \
+--- a/kprog/formal/generated/arm64_cneg.h
++++ b/kprog/formal/generated/arm64_cneg.h
+@@ -24,10 +24,10 @@
+  */
+ #define KPROG_ARM64_CNEG_VALUE_INTO(OUTPUT, OP, VALUE, TAKEN, WIDTH, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_cneg_op = (OP); \
++		const __u64 __kprog_a64_cneg_op = (OP); \
+ 		__u64 __kprog_a64_cneg_value = (VALUE); \
+ 		int __kprog_a64_cneg_taken = (TAKEN) ? 1 : 0; \
+-		__u64 __kprog_a64_cneg_width = (WIDTH); \
++		const __u64 __kprog_a64_cneg_width = (WIDTH); \
+ 		__u64 __kprog_a64_cneg_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_cneg_width); \
+ 		__u64 __kprog_a64_cneg_result = 0; \
+  \
+--- a/kprog/formal/generated/arm64_csel.h
++++ b/kprog/formal/generated/arm64_csel.h
+@@ -44,7 +44,7 @@
+  */
+ #define KPROG_ARM64_CSEL_VALUE_INTO(OUTPUT, OP, SRC, SRC2, TAKEN, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_csel_op = (OP); \
++		const __u64 __kprog_a64_csel_op = (OP); \
+ 		__u64 __kprog_a64_csel_src = (SRC); \
+ 		__u64 __kprog_a64_csel_src2 = (SRC2); \
+ 		int __kprog_a64_csel_taken = (TAKEN) ? 1 : 0; \
+--- a/kprog/formal/generated/arm64_csel_ptr.h
++++ b/kprog/formal/generated/arm64_csel_ptr.h
+@@ -26,8 +26,8 @@
+  * ARM64_SIM_L_WRITE_REG_WIDTH (dropping the tag).
+  */
+ #define KPROG_ARM64_CSEL_PTR_TAG_PATH_DECL(NAME, OP, WIDTH, UNSUPPORTED) \
+-		__u64 __kprog_a64_cp_op = (OP); \
+-		__u64 __kprog_a64_cp_width = (WIDTH); \
++		const __u64 __kprog_a64_cp_op = (OP); \
++		const __u64 __kprog_a64_cp_width = (WIDTH); \
+ 		__u64 NAME = 0; \
+  \
+ 		switch (__kprog_a64_cp_op) { \
+--- a/kprog/formal/generated/arm64_extrev.h
++++ b/kprog/formal/generated/arm64_extrev.h
+@@ -40,11 +40,11 @@
+  */
+ #define KPROG_ARM64_EXTREV_VALUE_INTO(OUTPUT, OP, SRC, SRC2, SHIFT, WIDTH, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_ext_op = (OP); \
++		const __u64 __kprog_a64_ext_op = (OP); \
+ 		__u64 __kprog_a64_ext_src = (SRC); \
+ 		__u64 __kprog_a64_ext_src2 = (SRC2); \
+ 		__u64 __kprog_a64_ext_shift = (SHIFT); \
+-		__u64 __kprog_a64_ext_width = (WIDTH); \
++		const __u64 __kprog_a64_ext_width = (WIDTH); \
+ 		__u64 __kprog_a64_ext_bits = \
+ 			KPROG_ARM64_WIDTH_BITS(__kprog_a64_ext_width); \
+ 		__u64 __kprog_a64_ext_result = 0; \
+--- a/kprog/formal/generated/arm64_ldrsx.h
++++ b/kprog/formal/generated/arm64_ldrsx.h
+@@ -28,7 +28,7 @@
+  */
+ #define KPROG_ARM64_LDRSX_LOAD_WIDTH_INTO(OUTPUT, OP, UNSUPPORTED)                       \
+ 	do { \
+-		__u64 __kprog_a64_ldrsx_op = (OP); \
++		const __u64 __kprog_a64_ldrsx_op = (OP); \
+ 		__u64 __kprog_a64_ldrsx_width = 0; \
+  \
+ 		switch (__kprog_a64_ldrsx_op) { \
+--- a/kprog/formal/generated/arm64_ldrsx_op.h
++++ b/kprog/formal/generated/arm64_ldrsx_op.h
+@@ -22,7 +22,7 @@
+  */
+ #define KPROG_ARM64_LDRSX_SXOP_INTO(OUTPUT, OP, UNSUPPORTED)                             \
+ 	do { \
+-		__u64 __kprog_a64_ldrsx_sxop = (OP); \
++		const __u64 __kprog_a64_ldrsx_sxop = (OP); \
+ 		__u64 __kprog_a64_ldrsx_sx = 0; \
+  \
+ 		switch (__kprog_a64_ldrsx_sxop) { \
+--- a/kprog/formal/generated/arm64_load_bytes.h
++++ b/kprog/formal/generated/arm64_load_bytes.h
+@@ -50,7 +50,7 @@
+ 	do { \
+ 		volatile const __u8 *__kprog_a64_lb_addr = \
+ 			(volatile const __u8 *)(ADDR); \
+-		__u8 __kprog_a64_lb_width = (WIDTH); \
++		const __u8 __kprog_a64_lb_width = (WIDTH); \
+ 		__u64 __kprog_a64_lb_value; \
+ 		if (__kprog_a64_lb_width == ARM64_WIDTH_64) \
+ 			KPROG_ARM64_LOAD_ACCESS_OFFSET(64, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \
+--- a/kprog/formal/generated/arm64_load_tag.h
++++ b/kprog/formal/generated/arm64_load_tag.h
+@@ -20,9 +20,9 @@
+  */
+ #define KPROG_ARM64_LOAD_TAG_PRESERVE_INTO(OUTPUT, OP, TAG, WIDTH, UNSUPPORTED)          \
+ 	do { \
+-		__u64 __kprog_a64_lt_op = (OP); \
++		const __u64 __kprog_a64_lt_op = (OP); \
+ 		__u64 __kprog_a64_lt_tag = (TAG); \
+-		__u64 __kprog_a64_lt_width = (WIDTH); \
++		const __u64 __kprog_a64_lt_width = (WIDTH); \
+ 		__u64 __kprog_a64_lt_preserve = 0; \
+ \
+ 		switch (__kprog_a64_lt_op) { \
+--- a/kprog/formal/generated/arm64_mem_offset.h
++++ b/kprog/formal/generated/arm64_mem_offset.h
+@@ -18,8 +18,8 @@
+ 	do { \
+ 		__u64 __kprog_a64_mbo_imm = (IMM); \
+ 		__u64 __kprog_a64_mbo_index = (INDEX); \
+-		int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0; \
+-		int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0; \
++		const int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0; \
++		const int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0; \
+ 		__u64 __kprog_a64_mbo_base = \
+ 			__kprog_a64_mbo_prepost ? 0ULL : __kprog_a64_mbo_imm; \
+ 		__u64 __kprog_a64_mbo_result = __kprog_a64_mbo_base; \
+--- a/kprog/formal/generated/arm64_mod.h
++++ b/kprog/formal/generated/arm64_mod.h
+@@ -51,9 +51,9 @@
+ #define KPROG_ARM64_MOD_VALUE_INTO(OUTPUT, MOD, VALUE, SHIFT, WIDTH) \
+ 	do { \
+ 		__u64 __kprog_a64_mod_value = (VALUE); \
+-		__u8 __kprog_a64_mod = (MOD); \
+-		__u8 __kprog_a64_mod_shift = (SHIFT); \
+-		__u8 __kprog_a64_mod_amount = \
++		const __u8 __kprog_a64_mod = (MOD); \
++		const __u8 __kprog_a64_mod_shift = (SHIFT); \
++		const __u8 __kprog_a64_mod_amount = \
+ 			(__u8)(__kprog_a64_mod_shift & \
+ 			      ((WIDTH) == ARM64_WIDTH_32 ? 31U : 63U)); \
+  \
+--- a/kprog/formal/generated/arm64_mov.h
++++ b/kprog/formal/generated/arm64_mov.h
+@@ -25,8 +25,8 @@
+  * must be written through ARM64_SIM_L_WRITE_REG_WIDTH (dropping the tag).
+  */
+ #define KPROG_ARM64_MOV_PTR_TAG_PATH_DECL(NAME, OP, WIDTH, UNSUPPORTED) \
+-		__u64 __kprog_a64_mov_op = (OP); \
+-		__u64 __kprog_a64_mov_width = (WIDTH); \
++		const __u64 __kprog_a64_mov_op = (OP); \
++		const __u64 __kprog_a64_mov_width = (WIDTH); \
+ 		__u64 NAME = 0; \
+  \
+ 		switch (__kprog_a64_mov_op) { \
+--- a/kprog/formal/generated/arm64_movk.h
++++ b/kprog/formal/generated/arm64_movk.h
+@@ -25,7 +25,7 @@
+ #define KPROG_ARM64_MOVK_INSERT_DECL(NAME, DST, IMM, SHIFT, UNSUPPORTED) \
+ 		__u64 __kprog_a64_movk_dst = (DST); \
+ 		__u64 __kprog_a64_movk_imm = (IMM); \
+-		__u64 __kprog_a64_movk_shift = (SHIFT); \
++		const __u64 __kprog_a64_movk_shift = (SHIFT); \
+ 		__u64 __kprog_a64_movk_mask; \
+ 		__u64 NAME; \
+  \
+--- a/kprog/formal/generated/arm64_mul.h
++++ b/kprog/formal/generated/arm64_mul.h
+@@ -47,7 +47,7 @@
+  */
+ #define KPROG_ARM64_MUL_VALUE_INTO(OUTPUT, OP, LHS, RHS, ADDEND, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_mul_op = (OP); \
++		const __u64 __kprog_a64_mul_op = (OP); \
+ 		__u64 __kprog_a64_mul_lhs = (LHS); \
+ 		__u64 __kprog_a64_mul_rhs = (RHS); \
+ 		__u64 __kprog_a64_mul_addend = (ADDEND); \
+--- a/kprog/formal/generated/arm64_orn.h
++++ b/kprog/formal/generated/arm64_orn.h
+@@ -23,10 +23,10 @@
+  * width-narrowed raw 64-bit value the caller writes back.
+  */
+ #define KPROG_ARM64_ORN_VALUE_DECL(NAME, OP, LHS, RHS, WIDTH, UNSUPPORTED) \
+-		__u64 __kprog_a64_orn_op = (OP); \
++		const __u64 __kprog_a64_orn_op = (OP); \
+ 		__u64 __kprog_a64_orn_lhs = (LHS); \
+ 		__u64 __kprog_a64_orn_rhs = (RHS); \
+-		__u64 __kprog_a64_orn_width = (WIDTH); \
++		const __u64 __kprog_a64_orn_width = (WIDTH); \
+ 		__u64 __kprog_a64_orn_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_orn_width); \
+ 		__u64 NAME = 0; \
+  \
+--- a/kprog/formal/generated/arm64_pair_load_tag.h
++++ b/kprog/formal/generated/arm64_pair_load_tag.h
+@@ -22,10 +22,10 @@
+  */
+ #define KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO(OUTPUT, OP, TAG_LO, TAG_HI, WIDTH, UNSUPPORTED)\
+ 	do { \
+-		__u64 __kprog_a64_plt_op = (OP); \
++		const __u64 __kprog_a64_plt_op = (OP); \
+ 		__u64 __kprog_a64_plt_lo = (TAG_LO); \
+ 		__u64 __kprog_a64_plt_hi = (TAG_HI); \
+-		__u64 __kprog_a64_plt_width = (WIDTH); \
++		const __u64 __kprog_a64_plt_width = (WIDTH); \
+ 		__u64 __kprog_a64_plt_mask = 0; \
+ \
+ 		switch (__kprog_a64_plt_op) { \
+--- a/kprog/formal/generated/arm64_reduction.h
++++ b/kprog/formal/generated/arm64_reduction.h
+@@ -30,7 +30,7 @@
+  * The result is the raw 64-bit value; the caller stores it back into v0.
+  */
+ #define KPROG_ARM64_REDUCTION_VALUE_DECL(NAME, OP, VALUE, UNSUPPORTED) \
+-		__u64 __kprog_a64_red_op = (OP); \
++		const __u64 __kprog_a64_red_op = (OP); \
+ 		__u64 __kprog_a64_red_value = (VALUE); \
+ 		__u64 __kprog_a64_red_out = 0; \
+ 		__u64 NAME = 0; \
+--- a/kprog/formal/generated/arm64_shift.h
++++ b/kprog/formal/generated/arm64_shift.h
+@@ -34,11 +34,11 @@
+  */
+ #define KPROG_ARM64_SHIFT_VALUE_INTO(OUTPUT, SHIFT, VALUE, AMOUNT, WIDTH, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_shift_op = (SHIFT); \
++		const __u64 __kprog_a64_shift_op = (SHIFT); \
+ 		__u64 __kprog_a64_shift_value = (VALUE); \
+ 		__u64 __kprog_a64_shift_amount = (AMOUNT); \
+-		__u64 __kprog_a64_shift_width = (WIDTH); \
+-		int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32; \
++		const __u64 __kprog_a64_shift_width = (WIDTH); \
++		const int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32; \
+ 		__u64 __kprog_a64_shift_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_shift_width); \
+ 		__u64 __kprog_a64_shift_k = __kprog_a64_shift_amount & (__kprog_a64_shift_width == ARM64_WIDTH_32 ? 31ULL : 63ULL); \
+ 		__u64 __kprog_a64_shift_result = 0; \
+--- a/kprog/formal/generated/arm64_stlxr.h
++++ b/kprog/formal/generated/arm64_stlxr.h
+@@ -20,8 +20,8 @@
+  */
+ #define KPROG_ARM64_STLXR_VALUE_INTO(OUTPUT, OP, WIDTH, FAILURE, UNSUPPORTED)            \
+ 	do { \
+-		__u64 __kprog_a64_stlxr_op = (OP); \
+-		__u64 __kprog_a64_stlxr_width = (WIDTH); \
++		const __u64 __kprog_a64_stlxr_op = (OP); \
++		const __u64 __kprog_a64_stlxr_width = (WIDTH); \
+ 		__u64 __kprog_a64_stlxr_failure = !!(FAILURE); \
+ 		__u64 __kprog_a64_stlxr_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_stlxr_width); \
+ 		__u64 __kprog_a64_stlxr_result = 0; \
+--- a/kprog/formal/generated/arm64_store_bytes.h
++++ b/kprog/formal/generated/arm64_store_bytes.h
+@@ -35,7 +35,7 @@
+ 	do { \
+ 		volatile __u8 *__kprog_a64_sb_addr = \
+ 			(volatile __u8 *)(ADDR); \
+-		__u8 __kprog_a64_sb_width = (WIDTH); \
++		const __u8 __kprog_a64_sb_width = (WIDTH); \
+ 		__u64 __kprog_a64_sb_value = \
+ 			KPROG_ARM64_APPLY_WIDTH((VALUE), __kprog_a64_sb_width); \
+ 		if (__kprog_a64_sb_width == ARM64_WIDTH_64) \
+--- a/kprog/formal/generated/arm64_unary.h
++++ b/kprog/formal/generated/arm64_unary.h
+@@ -26,9 +26,9 @@
+  */
+ #define KPROG_ARM64_UNARY_VALUE_INTO(OUTPUT, OP, VALUE, WIDTH, UNSUPPORTED) \
+ 	do { \
+-		__u64 __kprog_a64_un_op = (OP); \
++		const __u64 __kprog_a64_un_op = (OP); \
+ 		__u64 __kprog_a64_un_value = (VALUE); \
+-		__u64 __kprog_a64_un_width = (WIDTH); \
++		const __u64 __kprog_a64_un_width = (WIDTH); \
+ 		__u64 __kprog_a64_un_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_un_width); \
+ 		__u64 __kprog_a64_un_result = 0; \
+  \
+--- a/kprog/arm64/generate_sim_dispatch.py
++++ b/kprog/arm64/generate_sim_dispatch.py
+@@ -67,7 +67,7 @@
+     output = ['/* Generated from the canonical C dispatcher by generate_sim_dispatch.py. */',
+               '#ifndef ARM64_SIM_DIRECT_H', '#define ARM64_SIM_DIRECT_H']
+     for index, (_, body) in enumerate(arms):
+-        lines = ['do {', '__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);',
++        lines = ['do {', 'const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);',
+                  '(void)__a64_l_width;', *body.splitlines(), '} while (0)']
+         output.append(f'#define ARM64_SIM_DIRECT_BODY_{index}({PARAMS}) \\')
+         output.extend(line.rstrip()+' \\' for line in lines[:-1])
+--- a/kprog/arm64/trusted_specializer.py
++++ b/kprog/arm64/trusted_specializer.py
+@@ -4,13 +4,11 @@
+ """
+ from __future__ import annotations
+ 
+-import functools
+ import hashlib
+ import importlib.util
+ import json
+ import os
+ from pathlib import Path
+-import re
+ import shutil
+ import subprocess
+ import sys
+@@ -45,52 +43,6 @@
+     return flags
+ 
+ 
+-@functools.cache
+-def _constant_decoder_overrides() -> str:
+-    """Expose immutable ARM decoder locals to C folding before LLVM SSA.
+-
+-    The service uses one source profile for every request. Snapshot these
+-    common macro bodies once per worker; B and checked-native compilation
+-    still consume the same saved frontend IR.
+-    """
+-    names = """__a64_l_reg __a64_l_width __a64_alu_width __a64_alu_op
+-        __a64_cmp_width __a64_str_width __a64_srt_width __a64_srt_source
+-        __a64_stw_width __a64_stw_action __a64_mbo_has_index __a64_mbo_isrc
+-        __a64_l_pp __kprog_a64_adrp_op __kprog_a64_bf_kind
+-        __kprog_a64_br_kind __kprog_a64_cneg_op __kprog_a64_cneg_width
+-        __kprog_a64_csel_op __kprog_a64_cp_op __kprog_a64_cp_width
+-        __kprog_a64_ext_op __kprog_a64_ext_width __kprog_a64_ldrsx_op
+-        __kprog_a64_ldrsx_sxop __kprog_a64_lb_width __kprog_a64_lt_op
+-        __kprog_a64_lt_width __kprog_a64_mbo_prepost __kprog_a64_mbo_has_index
+-        __kprog_a64_mod __kprog_a64_mod_shift __kprog_a64_mod_amount
+-        __kprog_a64_mov_op __kprog_a64_mov_width __kprog_a64_movk_shift
+-        __kprog_a64_mul_op __kprog_a64_orn_op __kprog_a64_orn_width
+-        __kprog_a64_plt_op __kprog_a64_plt_width __kprog_a64_red_op
+-        __kprog_a64_shift_op __kprog_a64_shift_width __kprog_a64_shift_32
+-        __kprog_a64_stlxr_op __kprog_a64_stlxr_width __kprog_a64_sb_width
+-        __kprog_a64_un_op __kprog_a64_un_width""".split()
+-    declaration = re.compile(r'(?<!const )\b((?:__u(?:8|16|32|64)|__s(?:8|16|32|64)|int)\s+(?:'
+-                             + '|'.join(names) + r')\s*=)')
+-    headers = [ROOT/'kprog/arm64/arm64_sim_local_bpf.h',
+-               ROOT/'kprog/arm64/arm64_sim_direct.h',
+-               *sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
+-    overrides = []
+-    for header in headers:
+-        lines = header.read_text().splitlines(keepends=True)
+-        index = 0
+-        while index < len(lines):
+-            block = lines[index]
+-            index += 1
+-            if not block.startswith('#define '):
+-                continue
+-            while block.rstrip().endswith('\\') and index < len(lines):
+-                block += lines[index]
+-                index += 1
+-            qualified = declaration.sub(r'const \1', block)
+-            if qualified != block:
+-                name = block.split('(', 1)[0].removeprefix('#define ')
+-                overrides.append('#undef '+name+'\n'+qualified)
+-    return '\n'.join(overrides)
+ 
+ 
+ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
+@@ -123,7 +75,7 @@
+         trusted_map_bindings=[dict(native_symbol=m["name"], value_offset=m.get("value_offset")) for m in metadata["maps"]])
+     header = '#include ' + json.dumps(str(ROOT / "kprog/arm64/arm64_sim_local_bpf.h"))
+     text = text.replace('#include "../arm64_sim_local_bpf.h"',
+-                        header + '\n' + _constant_decoder_overrides())
++                        header)
+     source.write_text(text)
+     obj = output_dir / (name + ".bpf.o")
+     frontend = source.with_suffix(".frontend.bc")
+--- a/kprog/results/arm64-loadtime-20261127/cross_app.py
++++ b/kprog/results/arm64-loadtime-20261127/cross_app.py
+@@ -15,7 +15,7 @@
+ HERE = Path(__file__).resolve().parent
+ LANE = Path('/workspaces/.agent-state/kprog-lanes/perf')
+ sys.path.insert(0, str(ROOT/'kprog'))
+-from arm64.trusted_specializer import _constant_decoder_overrides, b_flags
++from arm64.trusted_specializer import b_flags
+ 
+ def now():
+     return subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip()
+@@ -56,9 +56,6 @@
+         if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
+             record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
+     record['coverage_gaps']=['tracee/monitor has no completed ARM checked archive yet; its live stage2 remains queued.', 'Cilium all ten captured requests already compiled in corpus-20261127T115432Z; this job avoids repeating them.']
+-    overrides=_constant_decoder_overrides().encode()
+-    record['macro_profile_sha256']=hashlib.sha256(overrides).hexdigest()
+-    record['macro_override_count']=overrides.count(b'#undef ')
+     header_paths=[ROOT/'kprog/arm64/arm64_sim_local_bpf.h',ROOT/'kprog/arm64/arm64_sim_direct.h',*sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
+     record['header_sha256']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in header_paths}
+     with tarfile.open(RAW/'source-headers.tar','w') as t:
+@@ -93,7 +90,6 @@
+                         marker=('#include '+json.dumps(str(ROOT/'kprog/arm64/arm64_sim_local_bpf.h'))).encode()
+                         if source.count(marker)!=1 or b'#undef ARM64_SIM_L_READ_REG_RAW_INTO' in source:
+                             raise RuntimeError('Archived input is not the original unqualified ARM producer source.')
+-                        source=source.replace(marker,marker+b'\n'+overrides)
+                         c=case/'trusted_arm64.bpf.c';ir=case/'trusted_arm64.bpf.frontend.bc';obj=case/'trusted_arm64.bpf.o'
+                         c.write_bytes(source)
+                         row['source_sha256']=hashlib.sha256(source).hexdigest()
+--- a/kprog/results/arm64-loadtime-20261127/cross_app_report.py
++++ b/kprog/results/arm64-loadtime-20261127/cross_app_report.py
+@@ -70,7 +70,7 @@
+                   completed_replay_frontend_max_rss_kib=max((c['max_rss_kib'] for r in completed for c in r['replay_commands'] if '-emit-llvm' in c['command']),default=0))
+ result=dict(utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip(),
+             controller='controller.json',controller_status_at_snapshot=record.get('controller_status'),
+-            producer_sha256=record['producer_sha256'],macro_profile_sha256=record['macro_profile_sha256'],
++            producer_sha256=record['producer_sha256'],macro_profile_sha256=record.get('macro_profile_sha256'),compiler_header_sha256=record.get('header_sha256'),
+             scope='Point-in-time original/replay compiler receipt pairing. Completed app compilation does not establish stock verification, native installation or frozen startup. Timing pairs contain only original-success/replay-success inputs; original generation failures/recoveries stay separate.',
+             apps=apps,requests=rows)
+ (OUT/'compatibility.json').write_text(json.dumps(result,indent=2)+'\n')
