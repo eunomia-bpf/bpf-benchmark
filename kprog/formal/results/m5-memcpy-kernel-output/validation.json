@@ -1,0 +1,54 @@
+{
+  "confirmed_utc": "2026-11-27T02:04:31.400729+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyOutput"
+    ],
+    "exit": 0,
+    "seconds": 3.703141212463379,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 98,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-output/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5548515319824219,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "actual_STPs": 2,
+    "same_witness": "existing TwoLoads and one actual TwoStores result",
+    "copied_bytes": 16,
+    "input_bytes": "original arbitrary physical source bytes",
+    "destination": "exact actual destination addresses",
+    "outside_memory": "retained across both writes",
+    "output_profile": "original with exactly16byte destination initialized",
+    "entry_scope": "post-BTI captured generic count16 path"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyOutput.lean",
+      "size_bytes": 5373,
+      "mtime_ns": 1795744772894336482
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

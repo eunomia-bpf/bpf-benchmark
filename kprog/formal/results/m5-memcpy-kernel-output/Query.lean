@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyOutput
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyOutput.readback
+#print axioms Arm64KernelMemcpyOutput.readback
+#check Arm64KernelMemcpyOutput.outside
+#print axioms Arm64KernelMemcpyOutput.outside
+#check Arm64KernelMemcpyOutput.profile
+#print axioms Arm64KernelMemcpyOutput.profile
+#check Arm64KernelMemcpyOutput.complete_from_loads
+#print axioms Arm64KernelMemcpyOutput.complete_from_loads
