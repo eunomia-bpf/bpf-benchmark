@@ -364,7 +364,7 @@ mature:
 # Clight is a build product. Profile inputs are sole checked-in C snapshots;
 # build symlinks preserve the frontend source_file metadata and include paths.
 .DELETE_ON_ERROR:
-CLIGHT_MODULES := Arm64Access Arm64Address Arm64Addressing Arm64Entry Arm64Numeric Arm64PayloadProfile Arm64Program Arm64ProgramContext Arm64ProgramFixture Arm64Stack X86Context X86ContextSkb X86ContextXdp X86Helpers X86Inline X86Memory X86Numeric X86Pointer X86ProgramProfile X86ReadonlyProfile X86StackProfile200 X86StackProfile376 X86TetragonWake
+CLIGHT_MODULES := Arm64CiliumCaller Arm64Access Arm64Address Arm64Addressing Arm64Entry Arm64Numeric Arm64PayloadProfile Arm64Program Arm64ProgramContext Arm64ProgramFixture Arm64Stack X86Context X86ContextSkb X86ContextXdp X86Helpers X86Inline X86Memory X86Numeric X86Pointer X86ProgramProfile X86ReadonlyProfile X86StackProfile200 X86StackProfile376 X86TetragonWake
 CLIGHT_OUTPUTS := $(addprefix KProgFormal/Clight/,$(addsuffix .lean,$(CLIGHT_MODULES)))
 CLIGHT_INCLUDES := -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src
 CLIGHT_PLAIN := Arm64Access Arm64Address Arm64Addressing Arm64Entry Arm64Numeric Arm64Program Arm64ProgramContext Arm64ProgramFixture Arm64Stack X86Context X86Helpers X86Inline X86Memory X86Numeric X86Pointer
@@ -394,8 +394,13 @@ build/%.bpf.c: c/%.bpf.c | build
 external/clean/clightgen:
 	$(error Existing clightgen is required; toolchain builds are disabled)
 
-$(CLIGHT_OUTPUTS): Makefile external/clean/clightgen | build KProgFormal/Clight
+$(filter-out KProgFormal/Clight/Arm64CiliumCaller.lean,$(CLIGHT_OUTPUTS)): Makefile external/clean/clightgen | build KProgFormal/Clight
 	external/clean/clightgen -lean -normalize $(CLIGHT_OPTIONS) $(CLIGHT_INCLUDES) -MD -MP -MF build/clight-$(@F:.lean=.d) -MT $@ -o $@ $(firstword $(filter %.c,$^))
+
+# One complete retained caller; only module packaging changes after export.
+KProgFormal/Clight/Arm64CiliumCaller.lean: Makefile c/Arm64CiliumCallerUnit.c c/Arm64CiliumCaller.c c/Arm64OriginalLinkBinding.h results/m5-cilium-caller-export/package_export.py external/clean/clightgen | build KProgFormal/Clight
+	external/clean/clightgen -lean -normalize -fstruct-passing -DKPROG_ARM64_PROGRAM_EXPORT=1 -include c/ProgramSections.h $(CLIGHT_INCLUDES) -MD -MP -MF build/clight-Arm64CiliumCaller.d -MT $@ -o build/Arm64CiliumCaller.lean c/Arm64CiliumCallerUnit.c
+	python3 results/m5-cilium-caller-export/package_export.py build/Arm64CiliumCaller.lean $@
 
 -include $(wildcard build/clight-*.d)
 

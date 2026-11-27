@@ -1,0 +1,156 @@
+{
+  "confirmed_utc": "2026-11-27T12:41:19.019014+00:00",
+  "checks": {
+    "cilium-caller-export1": {
+      "command": [
+        "external/clean/clightgen",
+        "-lean",
+        "-normalize",
+        "-fstruct-passing",
+        "-include",
+        "c/ProgramSections.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-o",
+        "results/m5-cilium-caller-export/Arm64CiliumCaller.lean",
+        "c/Arm64CiliumCaller.c"
+      ],
+      "exit": 2,
+      "seconds": 0.37569141387939453,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-export2": {
+      "command": [
+        "external/clean/clightgen",
+        "-lean",
+        "-normalize",
+        "-fstruct-passing",
+        "-DKPROG_ARM64_PROGRAM_EXPORT=1",
+        "-include",
+        "c/ProgramSections.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-o",
+        "results/m5-cilium-caller-export/Arm64CiliumCaller.lean",
+        "c/Arm64CiliumCaller.c"
+      ],
+      "exit": 0,
+      "seconds": 25.778614044189453,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-export3": {
+      "command": [
+        "external/clean/clightgen",
+        "-lean",
+        "-normalize",
+        "-fstruct-passing",
+        "-DKPROG_ARM64_PROGRAM_EXPORT=1",
+        "-include",
+        "c/ProgramSections.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-o",
+        "results/m5-cilium-caller-export/Arm64CiliumCaller.lean",
+        "c/Arm64CiliumCallerUnit.c"
+      ],
+      "exit": 0,
+      "seconds": 25.65984344482422,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-lean-stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-export/Arm64CiliumCaller.lean"
+      ],
+      "exit": 1,
+      "seconds": 54.64894700050354,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-parts2": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.Clight.Arm64CiliumCaller"
+      ],
+      "exit": 0,
+      "seconds": 264.0369279384613,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-reexport1": {
+      "command": [
+        "make",
+        "KProgFormal/Clight/Arm64CiliumCaller.lean"
+      ],
+      "exit": 0,
+      "seconds": 28.332078456878662,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-artifact1": {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "results/m5-cilium-caller-export/inspect_export.py"
+      ],
+      "exit": 0,
+      "seconds": 0.333446741104126,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-export-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-export/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3263626098632812,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 76,
+  "public_queries": 2,
+  "source_abi_examples": 2,
+  "full_build": "following related-batch integration",
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "artifact_sha256": "675d2fb757a37e9948933e3b8d11bf564a82f2abdf5ecbbcaf73788b46581a25",
+  "packaging_sha256": "8d9e2586c4a7781e173602048fe98ebad755a5d414817d6875db168853123305",
+  "source_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+  "full_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+  "all_declarations_preserved": true
+}
