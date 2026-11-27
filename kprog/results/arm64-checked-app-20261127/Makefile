@@ -10,3 +10,6 @@ link-arm-build:
 .PHONY: section-replay
 section-replay:
 	python3 section_replay.py
+.PHONY: opensnoop-callback-audit
+opensnoop-callback-audit:
+	python3 opensnoop_callback_audit.py

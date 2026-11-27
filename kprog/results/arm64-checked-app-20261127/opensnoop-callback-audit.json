@@ -1,0 +1,59 @@
+{
+  "utc": "2026-11-27T01:04:28Z",
+  "controller_status": 0,
+  "revision": "203501fca79ddf090f59050f5c0dc19fbb1fd425",
+  "archive_files": 54,
+  "archive_bytes": 1384980,
+  "requests": [
+    {
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "source_prog_id": 9,
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 12,
+        "phase": "verify",
+        "status": 0
+      },
+      "native_prog_id": 15,
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "native_command_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "source_prog_id": 17,
+      "stock_verification": {
+        "request_id": 2,
+        "prog_id": 20,
+        "phase": "verify",
+        "status": 0
+      },
+      "native_prog_id": 23,
+      "execution_path": "checked-sim-c",
+      "status": 0,
+      "native_command_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "publication_log": "[master 45d018ea6] Record actual ARM checked application startup\n 5 files changed, 164 insertions(+)\n create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T005711Z/archive.log\n create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T005711Z/controller.json\n create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T005711Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T005711Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T005711Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   ca577f3ce..45d018ea6  master -> master\n",
+  "application_returncode": 0,
+  "stdout_rows": 146,
+  "event_rows": 144,
+  "test_run": "Application startup/attachment and real tracing events; no TEST_RUN oracle was invoked.",
+  "conclusion": "Published19fe9abdb outcome agrees with raw/archive receipts. Both stock accepted and checked installed;144real open events/no direct fallback/no loader or app stderr. Existing203501fca repair verified; no new failure, source change or rerun required. Full timing frozen."
+}
