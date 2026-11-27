@@ -4,13 +4,11 @@ The shared service owns request transport and map/helper resolution.
 """
 from __future__ import annotations
 
-import functools
 import hashlib
 import importlib.util
 import json
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import sys
@@ -45,54 +43,6 @@ def b_flags(*, sysroot=None) -> list:
     return flags
 
 
-@functools.cache
-def _constant_decoder_overrides() -> str:
-    """Expose immutable ARM decoder locals to C folding before LLVM SSA.
-
-    The service uses one source profile for every request. Snapshot these
-    common macro bodies once per worker; B and checked-native compilation
-    still consume the same saved frontend IR.
-    """
-    names = """__a64_l_reg __a64_l_width __a64_alu_width __a64_alu_op
-        __a64_cmp_width __a64_str_width __a64_srt_width __a64_srt_source
-        __a64_stw_width __a64_stw_action __a64_mbo_has_index __a64_mbo_isrc
-        __a64_l_pp __kprog_a64_adrp_op __kprog_a64_bf_kind
-        __kprog_a64_br_kind __kprog_a64_cneg_op __kprog_a64_cneg_width
-        __kprog_a64_csel_op __kprog_a64_cp_op __kprog_a64_cp_width
-        __kprog_a64_ext_op __kprog_a64_ext_width __kprog_a64_ldrsx_op
-        __kprog_a64_ldrsx_sxop __kprog_a64_lb_width __kprog_a64_lt_op
-        __kprog_a64_lt_width __kprog_a64_mbo_prepost __kprog_a64_mbo_has_index
-        __kprog_a64_mod __kprog_a64_mod_shift __kprog_a64_mod_amount
-        __kprog_a64_mov_op __kprog_a64_mov_width __kprog_a64_movk_shift
-        __kprog_a64_mul_op __kprog_a64_orn_op __kprog_a64_orn_width
-        __kprog_a64_plt_op __kprog_a64_plt_width __kprog_a64_red_op
-        __kprog_a64_shift_op __kprog_a64_shift_width __kprog_a64_shift_32
-        __kprog_a64_stlxr_op __kprog_a64_stlxr_width __kprog_a64_sb_width
-        __kprog_a64_un_op __kprog_a64_un_width""".split()
-    declaration = re.compile(r'(?<!const )\b((?:__u(?:8|16|32|64)|__s(?:8|16|32|64)|int)\s+(?:'
-                             + '|'.join(names) + r')\s*=)')
-    headers = [ROOT/'kprog/arm64/arm64_sim_local_bpf.h',
-               ROOT/'kprog/arm64/arm64_sim_direct.h',
-               *sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
-    overrides = []
-    for header in headers:
-        lines = header.read_text().splitlines(keepends=True)
-        index = 0
-        while index < len(lines):
-            block = lines[index]
-            index += 1
-            if not block.startswith('#define '):
-                continue
-            while block.rstrip().endswith('\\') and index < len(lines):
-                block += lines[index]
-                index += 1
-            qualified = declaration.sub(r'const \1', block)
-            if qualified != block:
-                name = block.split('(', 1)[0].removeprefix('#define ')
-                overrides.append('#undef '+name+'\n'+qualified)
-    return '\n'.join(overrides)
-
-
 def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
                output_dir: Path, native_link: Path) -> dict:
     """Generate fresh simulator source and objects in the worker job directory."""
@@ -123,7 +73,7 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
         trusted_map_bindings=[dict(native_symbol=m["name"], value_offset=m.get("value_offset")) for m in metadata["maps"]])
     header = '#include ' + json.dumps(str(ROOT / "kprog/arm64/arm64_sim_local_bpf.h"))
     text = text.replace('#include "../arm64_sim_local_bpf.h"',
-                        header + '\n' + _constant_decoder_overrides())
+                        header)
     source.write_text(text)
     obj = output_dir / (name + ".bpf.o")
     frontend = source.with_suffix(".frontend.bc")

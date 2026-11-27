@@ -83,7 +83,7 @@ for app in sorted({r['app'] for r in rows}):
                   completed_replay_frontend_max_rss_kib=max((c['max_rss_kib'] for r in completed for c in r['replay_commands'] if '-emit-llvm' in c['command']),default=0))
 result=dict(utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip(),
             controller='controller.json',controller_status_at_snapshot=record.get('controller_status'),
-            producer_sha256=record['producer_sha256'],macro_profile_sha256=record['macro_profile_sha256'],
+            producer_sha256=record['producer_sha256'],macro_profile_sha256=record.get('macro_profile_sha256'),compiler_header_sha256=record.get('header_sha256'),
             scope='Point-in-time original/replay compiler receipt pairing. Completed app compilation does not establish stock verification, native installation or frozen startup. Timing pairs contain only original-success/replay-success inputs; original generation failures/recoveries stay separate.',
             apps=apps,requests=rows)
 (OUT/'compatibility.json').write_text(json.dumps(result,indent=2)+'\n')

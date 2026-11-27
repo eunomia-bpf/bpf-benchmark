@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-27T15:22:19Z",
+  "producer_sha256": "06a7e43ebfa1cca9ff041161a15a01b0f499bcb08f3329201357993599beac34",
+  "removed_runtime_helper": true,
+  "unchanged_function_AST": [
+    "b_flags",
+    "compile_checked_simulator"
+  ],
+  "all93_header_declarations_at_reviewed_after_hashes": true,
+  "canonical_owner_notice": "FORMAL2026-11-27T15:18:05Z",
+  "canonical_publication": "FORMAL-owned publication pending or concurrent; current sources match exact reviewed plan",
+  "validation_script": "kprog/results/arm64-loadtime-20261127/header_source_check.py",
+  "validation_scope": "first input of each six apps plus slowest captured OTel/Cilium frontend; code/nonmetadata sections/relocs versus wholeELF/debug distinguished",
+  "validation_status": "not yet run"
+}

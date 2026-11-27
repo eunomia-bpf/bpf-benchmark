@@ -15,7 +15,7 @@ ROOT = Path('/workspaces/repository')
 HERE = Path(__file__).resolve().parent
 LANE = Path('/workspaces/.agent-state/kprog-lanes/perf')
 sys.path.insert(0, str(ROOT/'kprog'))
-from arm64.trusted_specializer import _constant_decoder_overrides, b_flags
+from arm64.trusted_specializer import b_flags
 
 def now():
     return subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip()
@@ -69,9 +69,6 @@ try:
             if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
                 record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
     record['coverage_gaps']=['tracee/monitor has no completed ARM checked archive yet; its live stage2 remains queued.', 'Cilium all ten captured requests already compiled in corpus-20261127T115432Z; this job avoids repeating them.']
-    overrides=_constant_decoder_overrides().encode()
-    record['macro_profile_sha256']=hashlib.sha256(overrides).hexdigest()
-    record['macro_override_count']=overrides.count(b'#undef ')
     header_paths=[ROOT/'kprog/arm64/arm64_sim_local_bpf.h',ROOT/'kprog/arm64/arm64_sim_direct.h',*sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
     record['header_sha256']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in header_paths}
     with tarfile.open(RAW/'source-headers.tar','w') as t:
@@ -80,7 +77,6 @@ try:
     record['common_flags']=flags
     if 'recovery_of' in record:
         assert flags==prior['common_flags']
-        assert record['macro_profile_sha256']==prior['macro_profile_sha256']
         assert record['header_sha256']==prior['header_sha256']
     save()
     with (LANE.parent/'locks/timing').open('a') as lock:
@@ -111,7 +107,6 @@ try:
                         marker=('#include '+json.dumps(str(ROOT/'kprog/arm64/arm64_sim_local_bpf.h'))).encode()
                         if source.count(marker)!=1 or b'#undef ARM64_SIM_L_READ_REG_RAW_INTO' in source:
                             raise RuntimeError('Archived input is not the original unqualified ARM producer source.')
-                        source=source.replace(marker,marker+b'\n'+overrides)
                         c=case/'trusted_arm64.bpf.c';ir=case/'trusted_arm64.bpf.frontend.bc';obj=case/'trusted_arm64.bpf.o'
                         c.write_bytes(source)
                         row['source_sha256']=hashlib.sha256(source).hexdigest()
