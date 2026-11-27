@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+if ! mountpoint -q /dev; then mount -t devtmpfs devtmpfs /dev; fi
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+mount -t tmpfs tmpfs /var/tmp
+mount -t debugfs debugfs /sys/kernel/debug
+mount -t bpf bpffs /sys/fs/bpf
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any workspace /workspaces
+install -d /run/host-python
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any hostpython /run/host-python
+ulimit -l unlimited
+export HOME=/root
+export PATH=/usr/lib/llvm-18/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PYTHONPATH=/workspaces/repository:/run/host-python
+export CLANG=/workspaces/repository/kprog/stock-path/bin/clang
+export KPROG_ARM64_SYSROOT=/workspaces/repository/.cache/qemu-arm64-root
+export KPROG_TRUSTED_COMPILE_STATE=/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/broker
+# /var/tmp is private in the guest, so use the retained native input in RAW.
+install -d /var/tmp/kprog-tmp/perf/arm64-checked-control
+cp /workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/control.o /var/tmp/kprog-tmp/perf/arm64-checked-control/control.o
+status=0
+cd /workspaces/repository
+python3 kprog/results/arm64-checked-control-20261127/guest.py /workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z || status=$?
+printf '%s\n' "$status" > /workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/guest-status
+sync
+echo o > /proc/sysrq-trigger
+while :; do sleep 60; done
