@@ -1,0 +1,1754 @@
+[
+  {
+    "pid": 998475,
+    "tid": 998476,
+    "ph": "X",
+    "ts": 0,
+    "dur": 69220387,
+    "name": "Total ExecuteCompiler",
+    "args": {
+      "count": 1,
+      "avg ms": 69220
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998477,
+    "ph": "X",
+    "ts": 0,
+    "dur": 46473833,
+    "name": "Total Backend",
+    "args": {
+      "count": 1,
+      "avg ms": 46473
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998478,
+    "ph": "X",
+    "ts": 0,
+    "dur": 46472703,
+    "name": "Total Optimizer",
+    "args": {
+      "count": 1,
+      "avg ms": 46472
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998479,
+    "ph": "X",
+    "ts": 0,
+    "dur": 41222845,
+    "name": "Total PassManager<Function>",
+    "args": {
+      "count": 11,
+      "avg ms": 3747
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998480,
+    "ph": "X",
+    "ts": 0,
+    "dur": 38559366,
+    "name": "Total ModuleToFunctionPassAdaptor",
+    "args": {
+      "count": 7,
+      "avg ms": 5508
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998481,
+    "ph": "X",
+    "ts": 0,
+    "dur": 33916505,
+    "name": "Total SROAPass",
+    "args": {
+      "count": 6,
+      "avg ms": 5652
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998482,
+    "ph": "X",
+    "ts": 0,
+    "dur": 22731169,
+    "name": "Total Frontend",
+    "args": {
+      "count": 2,
+      "avg ms": 11365
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998483,
+    "ph": "X",
+    "ts": 0,
+    "dur": 15086792,
+    "name": "Total ParseDeclarationOrFunctionDefinition",
+    "args": {
+      "count": 420,
+      "avg ms": 35
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998484,
+    "ph": "X",
+    "ts": 0,
+    "dur": 15076571,
+    "name": "Total ParseFunctionDefinition",
+    "args": {
+      "count": 4,
+      "avg ms": 3769
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998485,
+    "ph": "X",
+    "ts": 0,
+    "dur": 7631351,
+    "name": "Total CodeGen Function",
+    "args": {
+      "count": 3,
+      "avg ms": 2543
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998486,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2856922,
+    "name": "Total ModuleInlinerWrapperPass",
+    "args": {
+      "count": 1,
+      "avg ms": 2856
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998487,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2813804,
+    "name": "Total ModuleToPostOrderCGSCCPassAdaptor",
+    "args": {
+      "count": 1,
+      "avg ms": 2813
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998488,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2775941,
+    "name": "Total DevirtSCCRepeatedPass",
+    "args": {
+      "count": 1,
+      "avg ms": 2775
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998489,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2735240,
+    "name": "Total PassManager<LazyCallGraph::SCC, CGSCCAnalysisManager, LazyCallGraph &, CGSCCUpdateResult &>",
+    "args": {
+      "count": 1,
+      "avg ms": 2735
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998490,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2685637,
+    "name": "Total CGSCCToFunctionPassAdaptor",
+    "args": {
+      "count": 2,
+      "avg ms": 1342
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998491,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2675901,
+    "name": "Total SimplifyCFGPass",
+    "args": {
+      "count": 18,
+      "avg ms": 148
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998492,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2476884,
+    "name": "Total IPSCCPPass",
+    "args": {
+      "count": 1,
+      "avg ms": 2476
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998493,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1739219,
+    "name": "Total EvaluateAsRValue",
+    "args": {
+      "count": 1149124,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998494,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1506057,
+    "name": "Total EvaluateForOverflow",
+    "args": {
+      "count": 591403,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998495,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1227122,
+    "name": "Total InstCombinePass",
+    "args": {
+      "count": 10,
+      "avg ms": 122
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998496,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1155717,
+    "name": "Total EvaluateAsInt",
+    "args": {
+      "count": 458663,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998497,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1046559,
+    "name": "Total AssignmentTrackingPass",
+    "args": {
+      "count": 1,
+      "avg ms": 1046
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998498,
+    "ph": "X",
+    "ts": 0,
+    "dur": 921206,
+    "name": "Total isIntegerConstantExpr",
+    "args": {
+      "count": 722768,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998499,
+    "ph": "X",
+    "ts": 0,
+    "dur": 808379,
+    "name": "Total EarlyCSEPass",
+    "args": {
+      "count": 4,
+      "avg ms": 202
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998500,
+    "ph": "X",
+    "ts": 0,
+    "dur": 663013,
+    "name": "Total JumpThreadingPass",
+    "args": {
+      "count": 2,
+      "avg ms": 331
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998501,
+    "ph": "X",
+    "ts": 0,
+    "dur": 568528,
+    "name": "Total EvaluateAsBooleanCondition",
+    "args": {
+      "count": 149290,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998502,
+    "ph": "X",
+    "ts": 0,
+    "dur": 516454,
+    "name": "Total BitcodeWriterPass",
+    "args": {
+      "count": 1,
+      "avg ms": 516
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998503,
+    "ph": "X",
+    "ts": 0,
+    "dur": 448676,
+    "name": "Total DominatorTreeAnalysis",
+    "args": {
+      "count": 17,
+      "avg ms": 26
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998504,
+    "ph": "X",
+    "ts": 0,
+    "dur": 320240,
+    "name": "Total CalledValuePropagationPass",
+    "args": {
+      "count": 1,
+      "avg ms": 320
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998505,
+    "ph": "X",
+    "ts": 0,
+    "dur": 304497,
+    "name": "Total BPFAbstractMemberAccessPass",
+    "args": {
+      "count": 3,
+      "avg ms": 101
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998506,
+    "ph": "X",
+    "ts": 0,
+    "dur": 239936,
+    "name": "Total AlwaysInlinerPass",
+    "args": {
+      "count": 1,
+      "avg ms": 239
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998507,
+    "ph": "X",
+    "ts": 0,
+    "dur": 237352,
+    "name": "Total GlobalOptPass",
+    "args": {
+      "count": 2,
+      "avg ms": 118
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998508,
+    "ph": "X",
+    "ts": 0,
+    "dur": 182742,
+    "name": "Total MemorySSAAnalysis",
+    "args": {
+      "count": 4,
+      "avg ms": 45
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998509,
+    "ph": "X",
+    "ts": 0,
+    "dur": 173605,
+    "name": "Total BlockFrequencyAnalysis",
+    "args": {
+      "count": 3,
+      "avg ms": 57
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998510,
+    "ph": "X",
+    "ts": 0,
+    "dur": 158528,
+    "name": "Total CorrelatedValuePropagationPass",
+    "args": {
+      "count": 2,
+      "avg ms": 79
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998511,
+    "ph": "X",
+    "ts": 0,
+    "dur": 153908,
+    "name": "Total BPFAdjustOptPass",
+    "args": {
+      "count": 1,
+      "avg ms": 153
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998512,
+    "ph": "X",
+    "ts": 0,
+    "dur": 145510,
+    "name": "Total LowerExpectIntrinsicPass",
+    "args": {
+      "count": 3,
+      "avg ms": 48
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998513,
+    "ph": "X",
+    "ts": 0,
+    "dur": 139899,
+    "name": "Total BranchProbabilityAnalysis",
+    "args": {
+      "count": 3,
+      "avg ms": 46
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998514,
+    "ph": "X",
+    "ts": 0,
+    "dur": 132212,
+    "name": "Total TailCallElimPass",
+    "args": {
+      "count": 2,
+      "avg ms": 66
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998515,
+    "ph": "X",
+    "ts": 0,
+    "dur": 120733,
+    "name": "Total GVNPass",
+    "args": {
+      "count": 1,
+      "avg ms": 120
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998516,
+    "ph": "X",
+    "ts": 0,
+    "dur": 119242,
+    "name": "Total BPFPreserveStaticOffsetPass",
+    "args": {
+      "count": 4,
+      "avg ms": 29
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998517,
+    "ph": "X",
+    "ts": 0,
+    "dur": 119048,
+    "name": "Total BPFPreserveDITypePass",
+    "args": {
+      "count": 3,
+      "avg ms": 39
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998518,
+    "ph": "X",
+    "ts": 0,
+    "dur": 118717,
+    "name": "Total EvaluateKnownConstInt",
+    "args": {
+      "count": 120780,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998519,
+    "ph": "X",
+    "ts": 0,
+    "dur": 113388,
+    "name": "Total ADCEPass",
+    "args": {
+      "count": 1,
+      "avg ms": 113
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998520,
+    "ph": "X",
+    "ts": 0,
+    "dur": 109818,
+    "name": "Total BPFIRPeepholePass",
+    "args": {
+      "count": 3,
+      "avg ms": 36
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998521,
+    "ph": "X",
+    "ts": 0,
+    "dur": 92015,
+    "name": "Total DebugType",
+    "args": {
+      "count": 372624,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998522,
+    "ph": "X",
+    "ts": 0,
+    "dur": 69100,
+    "name": "Total FunctionToLoopPassAdaptor",
+    "args": {
+      "count": 5,
+      "avg ms": 13
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998523,
+    "ph": "X",
+    "ts": 0,
+    "dur": 62434,
+    "name": "Total SCCPPass",
+    "args": {
+      "count": 1,
+      "avg ms": 62
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998524,
+    "ph": "X",
+    "ts": 0,
+    "dur": 61288,
+    "name": "Total ReassociatePass",
+    "args": {
+      "count": 1,
+      "avg ms": 61
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998525,
+    "ph": "X",
+    "ts": 0,
+    "dur": 54076,
+    "name": "Total CallGraphAnalysis",
+    "args": {
+      "count": 2,
+      "avg ms": 27
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998526,
+    "ph": "X",
+    "ts": 0,
+    "dur": 49359,
+    "name": "Total BDCEPass",
+    "args": {
+      "count": 1,
+      "avg ms": 49
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998527,
+    "ph": "X",
+    "ts": 0,
+    "dur": 47575,
+    "name": "Total EvaluateAsInitializer",
+    "args": {
+      "count": 48344,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998528,
+    "ph": "X",
+    "ts": 0,
+    "dur": 43152,
+    "name": "Total InferAlignmentPass",
+    "args": {
+      "count": 2,
+      "avg ms": 21
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998529,
+    "ph": "X",
+    "ts": 0,
+    "dur": 43041,
+    "name": "Total RequireAnalysisPass<llvm::GlobalsAA, llvm::Module, llvm::AnalysisManager<Module>>",
+    "args": {
+      "count": 1,
+      "avg ms": 43
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998530,
+    "ph": "X",
+    "ts": 0,
+    "dur": 43030,
+    "name": "Total GlobalsAA",
+    "args": {
+      "count": 1,
+      "avg ms": 43
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998531,
+    "ph": "X",
+    "ts": 0,
+    "dur": 42937,
+    "name": "Total MemCpyOptPass",
+    "args": {
+      "count": 1,
+      "avg ms": 42
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998532,
+    "ph": "X",
+    "ts": 0,
+    "dur": 42658,
+    "name": "Total LoopAnalysis",
+    "args": {
+      "count": 8,
+      "avg ms": 5
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998533,
+    "ph": "X",
+    "ts": 0,
+    "dur": 40670,
+    "name": "Total AggressiveInstCombinePass",
+    "args": {
+      "count": 1,
+      "avg ms": 40
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998534,
+    "ph": "X",
+    "ts": 0,
+    "dur": 33981,
+    "name": "Total PostDominatorTreeAnalysis",
+    "args": {
+      "count": 4,
+      "avg ms": 8
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998535,
+    "ph": "X",
+    "ts": 0,
+    "dur": 33078,
+    "name": "Total GlobalDCEPass",
+    "args": {
+      "count": 2,
+      "avg ms": 16
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998536,
+    "ph": "X",
+    "ts": 0,
+    "dur": 30793,
+    "name": "Total InlinerPass",
+    "args": {
+      "count": 1,
+      "avg ms": 30
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998537,
+    "ph": "X",
+    "ts": 0,
+    "dur": 28417,
+    "name": "Total InstSimplifyPass",
+    "args": {
+      "count": 1,
+      "avg ms": 28
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998538,
+    "ph": "X",
+    "ts": 0,
+    "dur": 27052,
+    "name": "Total VectorCombinePass",
+    "args": {
+      "count": 2,
+      "avg ms": 13
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998539,
+    "ph": "X",
+    "ts": 0,
+    "dur": 24368,
+    "name": "Total DSEPass",
+    "args": {
+      "count": 1,
+      "avg ms": 24
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998540,
+    "ph": "X",
+    "ts": 0,
+    "dur": 23531,
+    "name": "Total ConstraintEliminationPass",
+    "args": {
+      "count": 1,
+      "avg ms": 23
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998541,
+    "ph": "X",
+    "ts": 0,
+    "dur": 21456,
+    "name": "Total Source",
+    "args": {
+      "count": 1,
+      "avg ms": 21
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998542,
+    "ph": "X",
+    "ts": 0,
+    "dur": 19903,
+    "name": "Total SLPVectorizerPass",
+    "args": {
+      "count": 1,
+      "avg ms": 19
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998543,
+    "ph": "X",
+    "ts": 0,
+    "dur": 19371,
+    "name": "Total LibCallsShrinkWrapPass",
+    "args": {
+      "count": 1,
+      "avg ms": 19
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998544,
+    "ph": "X",
+    "ts": 0,
+    "dur": 18733,
+    "name": "Total PostOrderFunctionAttrsPass",
+    "args": {
+      "count": 2,
+      "avg ms": 9
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998545,
+    "ph": "X",
+    "ts": 0,
+    "dur": 18380,
+    "name": "Total DebugConstGlobalVariable",
+    "args": {
+      "count": 20075,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998546,
+    "ph": "X",
+    "ts": 0,
+    "dur": 16911,
+    "name": "Total PassManager<Loop, LoopAnalysisManager, LoopStandardAnalysisResults &, LPMUpdater &>",
+    "args": {
+      "count": 43,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998547,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11982,
+    "name": "Total LowerConstantIntrinsicsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 11
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998548,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11906,
+    "name": "Total InjectTLIMappings",
+    "args": {
+      "count": 1,
+      "avg ms": 11
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998549,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11347,
+    "name": "Total Float2IntPass",
+    "args": {
+      "count": 1,
+      "avg ms": 11
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998550,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11334,
+    "name": "Total RecomputeGlobalsAAPass",
+    "args": {
+      "count": 1,
+      "avg ms": 11
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998551,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11292,
+    "name": "Total ReversePostOrderFunctionAttrsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 11
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998552,
+    "ph": "X",
+    "ts": 0,
+    "dur": 10346,
+    "name": "Total DivRemPairsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 10
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998553,
+    "ph": "X",
+    "ts": 0,
+    "dur": 10209,
+    "name": "Total LoopFullUnrollPass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998554,
+    "ph": "X",
+    "ts": 0,
+    "dur": 8707,
+    "name": "Total DeadArgumentEliminationPass",
+    "args": {
+      "count": 1,
+      "avg ms": 8
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998555,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2815,
+    "name": "Total IndVarSimplifyPass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998556,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2584,
+    "name": "Total AAManager",
+    "args": {
+      "count": 13,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998557,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2420,
+    "name": "Total BasicAA",
+    "args": {
+      "count": 13,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998558,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2256,
+    "name": "Total LoopRotatePass",
+    "args": {
+      "count": 23,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998559,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1206,
+    "name": "Total LoopSimplifyPass",
+    "args": {
+      "count": 5,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998560,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1074,
+    "name": "Total ScalarEvolutionAnalysis",
+    "args": {
+      "count": 6,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998561,
+    "ph": "X",
+    "ts": 0,
+    "dur": 911,
+    "name": "Total EvaluateKnownConstIntCheckOverflow",
+    "args": {
+      "count": 1109,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998562,
+    "ph": "X",
+    "ts": 0,
+    "dur": 539,
+    "name": "Total LICMPass",
+    "args": {
+      "count": 46,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998563,
+    "ph": "X",
+    "ts": 0,
+    "dur": 270,
+    "name": "Total LoopInstSimplifyPass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998564,
+    "ph": "X",
+    "ts": 0,
+    "dur": 265,
+    "name": "Total LCSSAPass",
+    "args": {
+      "count": 5,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998565,
+    "ph": "X",
+    "ts": 0,
+    "dur": 262,
+    "name": "Total ConstantMergePass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998566,
+    "ph": "X",
+    "ts": 0,
+    "dur": 250,
+    "name": "Total LoopUnrollPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998567,
+    "ph": "X",
+    "ts": 0,
+    "dur": 248,
+    "name": "Total LoopIdiomRecognizePass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998568,
+    "ph": "X",
+    "ts": 0,
+    "dur": 239,
+    "name": "Total MergedLoadStoreMotionPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998569,
+    "ph": "X",
+    "ts": 0,
+    "dur": 190,
+    "name": "Total LoopDeletionPass",
+    "args": {
+      "count": 23,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998570,
+    "ph": "X",
+    "ts": 0,
+    "dur": 128,
+    "name": "Total MoveAutoInitPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998571,
+    "ph": "X",
+    "ts": 0,
+    "dur": 125,
+    "name": "Total LoopVectorizePass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998572,
+    "ph": "X",
+    "ts": 0,
+    "dur": 86,
+    "name": "Total InferFunctionAttrsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998573,
+    "ph": "X",
+    "ts": 0,
+    "dur": 63,
+    "name": "Total PromotePass",
+    "args": {
+      "count": 3,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998574,
+    "ph": "X",
+    "ts": 0,
+    "dur": 60,
+    "name": "Total TargetLibraryAnalysis",
+    "args": {
+      "count": 19,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998575,
+    "ph": "X",
+    "ts": 0,
+    "dur": 57,
+    "name": "Total SimpleLoopUnswitchPass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998576,
+    "ph": "X",
+    "ts": 0,
+    "dur": 54,
+    "name": "Total LoopLoadEliminationPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998577,
+    "ph": "X",
+    "ts": 0,
+    "dur": 53,
+    "name": "Total LoopSimplifyCFGPass",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998578,
+    "ph": "X",
+    "ts": 0,
+    "dur": 49,
+    "name": "Total LazyCallGraphAnalysis",
+    "args": {
+      "count": 2,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998579,
+    "ph": "X",
+    "ts": 0,
+    "dur": 43,
+    "name": "Total CGProfilePass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998580,
+    "ph": "X",
+    "ts": 0,
+    "dur": 36,
+    "name": "Total AssumptionAnalysis",
+    "args": {
+      "count": 7,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998581,
+    "ph": "X",
+    "ts": 0,
+    "dur": 28,
+    "name": "Total InnerAnalysisManagerProxy<CGSCCAnalysisManager, Module>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998582,
+    "ph": "X",
+    "ts": 0,
+    "dur": 28,
+    "name": "Total DebugGlobalVariable",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998583,
+    "ph": "X",
+    "ts": 0,
+    "dur": 20,
+    "name": "Total TargetIRAnalysis",
+    "args": {
+      "count": 8,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998584,
+    "ph": "X",
+    "ts": 0,
+    "dur": 12,
+    "name": "Total DebugFunction",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998585,
+    "ph": "X",
+    "ts": 0,
+    "dur": 12,
+    "name": "Total LoopDistributePass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998586,
+    "ph": "X",
+    "ts": 0,
+    "dur": 11,
+    "name": "Total AnnotationRemarksPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998587,
+    "ph": "X",
+    "ts": 0,
+    "dur": 9,
+    "name": "Total FunctionAnalysisManagerCGSCCProxy",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998588,
+    "ph": "X",
+    "ts": 0,
+    "dur": 8,
+    "name": "Total RelLookupTableConverterPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998589,
+    "ph": "X",
+    "ts": 0,
+    "dur": 7,
+    "name": "Total RequireAnalysisPass<llvm::ShouldNotRunFunctionPassesAnalysis, llvm::Function, llvm::AnalysisManager<Function>>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998590,
+    "ph": "X",
+    "ts": 0,
+    "dur": 6,
+    "name": "Total CoroEarlyPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998591,
+    "ph": "X",
+    "ts": 0,
+    "dur": 6,
+    "name": "Total OuterAnalysisManagerProxy<FunctionAnalysisManager, Loop, LoopStandardAnalysisResults &>",
+    "args": {
+      "count": 20,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998592,
+    "ph": "X",
+    "ts": 0,
+    "dur": 6,
+    "name": "Total OuterAnalysisManagerProxy<ModuleAnalysisManager, Function>",
+    "args": {
+      "count": 4,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998593,
+    "ph": "X",
+    "ts": 0,
+    "dur": 5,
+    "name": "Total Annotation2MetadataPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998594,
+    "ph": "X",
+    "ts": 0,
+    "dur": 5,
+    "name": "Total InnerAnalysisManagerProxy<LoopAnalysisManager, Function>",
+    "args": {
+      "count": 5,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998595,
+    "ph": "X",
+    "ts": 0,
+    "dur": 5,
+    "name": "Total OptimizationRemarkEmitterAnalysis",
+    "args": {
+      "count": 4,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998596,
+    "ph": "X",
+    "ts": 0,
+    "dur": 4,
+    "name": "Total DemandedBitsAnalysis",
+    "args": {
+      "count": 3,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998597,
+    "ph": "X",
+    "ts": 0,
+    "dur": 4,
+    "name": "Total TypeBasedAA",
+    "args": {
+      "count": 4,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998598,
+    "ph": "X",
+    "ts": 0,
+    "dur": 4,
+    "name": "Total ProfileSummaryAnalysis",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998599,
+    "ph": "X",
+    "ts": 0,
+    "dur": 3,
+    "name": "Total PerformPendingInstantiations",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998600,
+    "ph": "X",
+    "ts": 0,
+    "dur": 3,
+    "name": "Total WarnMissedTransformationsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998601,
+    "ph": "X",
+    "ts": 0,
+    "dur": 3,
+    "name": "Total MemoryDependenceAnalysis",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998602,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2,
+    "name": "Total InnerAnalysisManagerProxy<FunctionAnalysisManager, Module>",
+    "args": {
+      "count": 6,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998603,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2,
+    "name": "Total SpeculativeExecutionPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998604,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2,
+    "name": "Total LazyValueAnalysis",
+    "args": {
+      "count": 2,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998605,
+    "ph": "X",
+    "ts": 0,
+    "dur": 2,
+    "name": "Total CoroCleanupPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998606,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total ScopedNoAliasAA",
+    "args": {
+      "count": 4,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998607,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total CoroSplitPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998608,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total EliminateAvailableExternallyPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998609,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total InvalidateAnalysisPass<llvm::AAManager>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998610,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total InvalidateAnalysisPass<llvm::ShouldNotRunFunctionPassesAnalysis>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998611,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total CoroElidePass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998612,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total OpenMPOptPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998613,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total OpenMPOptCGSCCPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998614,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total LoopAccessAnalysis",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998615,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total AlignmentFromAssumptionsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998616,
+    "ph": "X",
+    "ts": 0,
+    "dur": 1,
+    "name": "Total OuterAnalysisManagerProxy<ModuleAnalysisManager, LazyCallGraph::SCC, LazyCallGraph &>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998617,
+    "ph": "X",
+    "ts": 0,
+    "dur": 0,
+    "name": "Total ForceFunctionAttrsPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998618,
+    "ph": "X",
+    "ts": 0,
+    "dur": 0,
+    "name": "Total LoopSinkPass",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998619,
+    "ph": "X",
+    "ts": 0,
+    "dur": 0,
+    "name": "Total ShouldNotRunFunctionPassesAnalysis",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998620,
+    "ph": "X",
+    "ts": 0,
+    "dur": 0,
+    "name": "Total InlineAdvisorAnalysis",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  },
+  {
+    "pid": 998475,
+    "tid": 998621,
+    "ph": "X",
+    "ts": 0,
+    "dur": 0,
+    "name": "Total RequireAnalysisPass<llvm::ProfileSummaryAnalysis, llvm::Module, llvm::AnalysisManager<Module>>",
+    "args": {
+      "count": 1,
+      "avg ms": 0
+    }
+  }
+]
