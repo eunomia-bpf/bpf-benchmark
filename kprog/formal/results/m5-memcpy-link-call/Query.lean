@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkCall
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.tail_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.tail_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.call_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.call_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.writer_lookup
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.writer_lookup
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.setup
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.setup
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.call_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.call_step
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.continue_after_tables
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.continue_after_tables
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.initialized_parameters
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.initialized_parameters
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.lr_readback
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.lr_readback
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCall.execute

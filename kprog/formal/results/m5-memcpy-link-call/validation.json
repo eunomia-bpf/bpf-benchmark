@@ -1,0 +1,91 @@
+{
+  "confirmed_utc": "2026-11-27T10:26:40.165322+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyLinkCall"
+    ],
+    "exit": 0,
+    "seconds": 57.53837203979492,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 149,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-call/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5237789154052734,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 9,
+  "source_steps": {
+    "original_entry_and_tables": 373,
+    "lr_and_seven_header_reads": 26,
+    "actual_C_CALL": 1,
+    "total_to_real_writer": 400,
+    "actual_arguments": 10,
+    "full_writer_body": "remaining"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkCall.lean",
+      "size_bytes": 15022,
+      "mtime_ns": 1795774921055681426
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 3.5306899547576904,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1435,
+  "direct_final_stage": 4,
+  "direct_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-call/Proof.lean"
+    ],
+    "exit": 0,
+    "seconds": 55.318888425827026,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkCall.lean": "c71c9627807eecdc2a2774aa2ae9d11a4c880ab3cf2fbc7cfb35a1fbf408dc78",
+    "kprog/formal/KProgFormal.lean": "918878a7185fd8e103efceec8097653bc59471b6ae2c0cb39ad54290df7688ff",
+    "kprog/formal/README.md": "2258e8852b997769c9197e11a834ab77f5f1077b064a888ffb3fe4f0c87707e5"
+  }
+}

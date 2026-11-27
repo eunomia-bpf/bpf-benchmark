@@ -1,0 +1,9 @@
+# Enter the genuine ten-argument writer from the same LINK call
+
+The actual afterTables tail is bound to its original loop,LR temp assignment,seven real header reads,ten-argument Scall and original return statement. Original typed caller-header observations plus the SAME reached initialization frame derive all current loads. The actual LR/header setup executes26 real transitions on that same heap. Mature source-linker symbol/function resolution and the unshadowed name supply the genuine renamed Arm64Address pointer writer. The actual CALL evaluates all ten argument casts,including original unsigned-to-signed-long then void-pointer address casts,register30 and tag9;one more real transition enters that body with the true saved LINK environment/temps/loop/return continuation. One original FunctionEntry2 and both31-row source table lists feed this SAME27-step continuation once:400 actual transitions from original LINK Callstate to real writer Callstate. Both original pointer tables,actual saved LR temp,original input params,raw caller memory/permissions,access and nextblock remain. The initialized prefix is not replayed. Full writer execution,inner three-local and outer two-local freeLists/return,native BL/code-coordinate/provenance binding and global/universal domains remain. No runtime,oracle,source export,canonical materialize,ISA model or benchmark change.
+
+Focused build 149 and 9 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+Root-integrated default Lake build also passes (1435 jobs),with exclusive formal-full-check. Full writer body and actual inner/outer freeLists remain outside this call-admission step.

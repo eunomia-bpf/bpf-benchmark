@@ -166,8 +166,10 @@ pointer-table initializations: 373 true entry/body transitions retain both
 typed pointer tables, every actual temporary update and the original caller
 frame and access map. Original header reads and allocated ownership derive
 each current read and store permission. The previous complete first-row API
-delegates to that same generic row proof. LR setup, the ten-argument writer
-call and both actual free-lists still follow.
+delegates to that same generic row proof. Actual LR setup and seven header
+reads now enter the genuinely linked ten-argument writer in 400 source
+transitions from that original entry, with the real saved caller and casts.
+The writer body, its three-local and the outer two-local free-lists still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
