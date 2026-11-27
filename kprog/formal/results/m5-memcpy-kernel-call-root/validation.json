@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T02:23:03.013583+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 7.482568025588989,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1409,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-call-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.8113925457000732,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22505,
+      "sha256": "5d30aa031d3494818b474da96455e3523518155d3100f3bf46c0d49a628255d3"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 11293,
+      "sha256": "d6f97e507b08faffcc34d14b88c9d4f3bd41490a46bc804a848f7bc97526473a"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports one complete original C caller-to-caller memcpy execution and the same actual native path/output witnesses. The existing afterCopy invariant continues through all real tag transfers, both active positions, actual clobber/provider trace, all eight local frees and saved caller env/temps restoration once. One original physical Code, post-BTI PC, count16 and no-error derive the eight-step native prefix and same reached physical representation/pointers. Real source loads derive original readable16, followed once by two actual LDPs, two real STPs and captured RET. All13 actual step witnesses,16 final source/native byte observations, true original LR, exact initialized profile, source packet/free/caller/frontier frames remain. The same witnesses derive the full architectural frame outside genuine scratch/NZCV destinations, actual final CMP16 flags and outside-memory equality to original native input. Final real source R0=-16/tag4 agrees with physical returned X0 through the existing provenance map. Existing source provider outputs remain explicit: exact register/flag/vector/native environment binding, original native caller/BTI/live-alternative/global/universal domains and recount continue before M6. Public logs retain inherited mature MemoryProofs native and CC external/assembly dependencies; local proofs introduce no new axiom.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

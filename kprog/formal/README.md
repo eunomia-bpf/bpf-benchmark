@@ -105,9 +105,17 @@ has the same Mint8unsigned observation as that same source heap. The captured
 RET then consumes the original LR and retains all copied bytes, initialized
 profile, registers and environment. Public queries record the mature imported
 MemoryProofs computation dependencies; kprog's local range proofs use kernel
-arithmetic. Next comes the same source witness's tag transfer, clobbers,
-free/caller return and native caller/landing-pad/alternative feature binding,
-then the complete helper/environment and whole-program observer.
+arithmetic. The same source witness now continues through all tag transfers,
+the actual clobber/provider trace, eight local frees and saved caller return.
+One original physical Code, post-BTI PC and count16 derive all thirteen
+actual native prefix/load/store/RET steps, preserving those same source and
+native witnesses. Final byte observations, initialized profile, original LR
+and caller frames remain. The native field frame retains every field outside
+the real scratch/NZCV destinations, final flags are the actual CMP16 flags,
+and outside physical bytes match the original input. The final source R0/tag4
+agrees with returned X0 through the existing provenance map. Exact native
+register/flag/vector provider outputs, native caller/landing-pad/alternative
+feature binding and whole-program observer are the next correspondence domains.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
