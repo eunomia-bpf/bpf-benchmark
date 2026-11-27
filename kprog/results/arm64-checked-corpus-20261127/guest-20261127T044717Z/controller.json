@@ -1,0 +1,111 @@
+{
+  "started_utc": "2026-11-27T04:47:17Z",
+  "pid": 925749,
+  "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z",
+  "revision": "e3aa59fbe1dabd3a856ce12874e8b9db67bfeb48",
+  "app": "otelcol-ebpf-profiler/profiling",
+  "scope": "Frozen otelcol-ebpf-profiler/profiling corpus workload, baseline and registered checked native post phase; one10second functional sample withstats. Cortex-A57 fourCPUs/eightGiB matches current ARM entry. Diagnostic only, full timing frozen.",
+  "run_token": "96bbd19c",
+  "broker_command": [
+    "prlimit",
+    "--as=51539607552",
+    "taskset",
+    "-c",
+    "16",
+    "python3",
+    "/workspaces/repository/kprog/trusted_compile.py",
+    "serve",
+    "--scope",
+    "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z",
+    "--state",
+    "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/broker",
+    "--clang",
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "--arm64-sysroot",
+    "/workspaces/repository/.cache/qemu-arm64-root"
+  ],
+  "guest_command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "cortex-a57",
+    "-smp",
+    "4",
+    "-m",
+    "8G",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/.cache/qemu-arm64-root,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root",
+    "-fsdev",
+    "local,id=workspace,path=/workspaces,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=workspace,mount_tag=workspace",
+    "-fsdev",
+    "local,id=hostpython,path=/usr/lib/python3/dist-packages,security_model=none,multidevs=remap,readonly=on",
+    "-device",
+    "virtio-9p-device,fsdev=hostpython,mount_tag=hostpython",
+    "-append",
+    "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-perf-checked-init loglevel=4 panic=30 oops=panic raid=noautodetect"
+  ],
+  "guest_started_utc": "2026-11-27T04:47:17Z",
+  "qemu_returncode": 0,
+  "cases": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "command": [
+        "bash",
+        "/workspaces/repository/kprog/test/run_checked_otel.sh",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling",
+        "otelcol-ebpf-profiler/profiling",
+        "",
+        "",
+        "arm64"
+      ],
+      "returncode": 0,
+      "corpus_paths": [
+        "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000021_644727",
+        "/workspaces/repository/corpus/results/verified-captures-gum27vnj"
+      ]
+    }
+  ],
+  "broker_returncode": 0,
+  "controller_status": 0,
+  "ended_utc": "2026-11-27T07:09:06Z",
+  "archive_commands": [
+    [
+      "tar",
+      "-C",
+      "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127",
+      "-cf",
+      "-",
+      "20261127T044717Z"
+    ],
+    [
+      "zstd",
+      "-T1",
+      "-3",
+      "-c"
+    ],
+    [
+      "split",
+      "-b",
+      "48000000",
+      "-",
+      "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/evidence.tar.zst.part-"
+    ]
+  ],
+  "archive_returncodes": [
+    0,
+    0,
+    0
+  ]
+}
