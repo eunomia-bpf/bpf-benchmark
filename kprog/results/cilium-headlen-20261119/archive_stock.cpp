@@ -69,8 +69,20 @@ try {
     opts.expected_attach_type = static_cast<bpf_attach_type>(json_required_u32(facts, "expected_attach_type"));
     opts.prog_flags = json_required_u32(facts, "prog_flags");
     opts.prog_ifindex = json_required_u32(facts, "prog_ifindex");
-    for (const char *field : {"attach_btf_id", "attach_btf_obj_id", "attach_prog_id"})
-        if (json_required_u32(facts, field)) fail("archived attachment requires its live resource");
+    if (json_required_u32(facts, "attach_prog_id"))
+        fail("archived program attachment requires its live resource");
+    opts.attach_btf_id = json_required_u32(facts, "attach_btf_id");
+    if (const auto id = json_required_u32(facts, "attach_btf_obj_id")) {
+        ScopedFd btf(bpf_btf_get_fd_by_id(id));
+        char name[128]{};
+        bpf_btf_info info{}; info.name = reinterpret_cast<uint64_t>(name);
+        info.name_len = sizeof(name); uint32_t size = sizeof(info);
+        if (btf.get() < 0 || bpf_obj_get_info_by_fd(btf.get(), &info, &size) ||
+            !info.kernel_btf || std::strcmp(name, "vmlinux"))
+            fail("archived BTF attachment requires its live module resource");
+        // The diagnostic boots the identical kernel; vmlinux uses the default
+        // BTF object. Module/program identities cannot be reconstructed here.
+    }
     const auto type = static_cast<bpf_prog_type>(json_required_u32(facts, "prog_type"));
     ScopedFd loaded(bpf_prog_load(type, "archived_B", json_required_u32(facts, "gpl_compatible") ? "GPL" : "BSD",
                                 proof.data(), proof.size(), &opts));

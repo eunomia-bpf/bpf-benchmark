@@ -1351,6 +1351,42 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
         (OUTPUT) = __a64_mrd_value; \
     } while (0)
 
+/* Untyped/kernel addresses use the same probe-read route as x86 B. A caller
+ * slot avoids adding an eight-byte callee frame to tail-call programs. Typed
+ * stack/context/packet/map accesses and relocation-pointer loads stay direct. */
+#if defined(__bpf__) || defined(__BPF__)
+static __attribute__((noinline)) __u64
+arm64_sim_bpf_probe_load_into(__u64 *value, const void *base,
+                            __s64 displacement, __u8 width)
+{
+    const void *address = (const __u8 *)base + displacement;
+    if (width == ARM64_WIDTH_64) {
+        bpf_probe_read_kernel(value, sizeof(__u64), address);
+        return *value;
+    } else if (width >= ARM64_WIDTH_32) {
+        bpf_probe_read_kernel(value, sizeof(__u32), address);
+        return *(__u32 *)value;
+    } else if (width >= ARM64_WIDTH_16) {
+        bpf_probe_read_kernel(value, sizeof(__u16), address);
+        return *(__u16 *)value;
+    }
+    bpf_probe_read_kernel(value, sizeof(__u8), address);
+    return *(__u8 *)value;
+}
+#define ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG) \
+    ((TAG) != ARM64_SIM_TAG_STACK && (TAG) != ARM64_SIM_TAG_ABI && \
+     (TAG) != ARM64_SIM_TAG_PACKET && (TAG) != ARM64_SIM_TAG_PACKET_END && \
+     (TAG) != ARM64_SIM_TAG_MAP_PTR && (TAG) != ARM64_SIM_TAG_MAP_VALUE)
+#define ARM64_SIM_L_KERNEL_LOAD_INTO(OUTPUT, BASE, OFF, WIDTH) \
+    do { __u64 __a64_probe_value; \
+         (OUTPUT) = arm64_sim_bpf_probe_load_into(&__a64_probe_value, (BASE), (OFF), (WIDTH)); \
+    } while (0)
+#else
+#define ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG) 0
+#define ARM64_SIM_L_KERNEL_LOAD_INTO(OUTPUT, BASE, OFF, WIDTH) \
+    KPROG_ARM64_LOAD_BYTES_OFFSET_INTO((OUTPUT), (BASE), (OFF), (WIDTH))
+#endif
+
 /* A known context displacement uses the entry base as the BPF instruction
  * operand. CompCert uses the generic base+offset access at that same address;
  * it has no __builtin_constant_p or physical cross-block pointer subtraction.
@@ -1364,7 +1400,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
         void *__a64_mra_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mra_pointer, (BASE)); \
         __s64 __a64_mra_ctx_off = (__s64)((__u64)(long)__a64_mra_pointer - \
             (__u64)(long)__a64_sim_helper_ctx + (__u64)(OFF)); \
-        if ((TAG) == ARM64_SIM_TAG_ABI && __builtin_constant_p(__a64_mra_ctx_off)) { \
+        if ((SOURCE) == KPROG_ARM64_MEM_SRC_NORMAL_LOAD && ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG)) { \
+            ARM64_SIM_L_KERNEL_LOAD_INTO((OUTPUT), __a64_mra_pointer, (OFF), (WIDTH)); \
+        } else if ((TAG) == ARM64_SIM_TAG_ABI && __builtin_constant_p(__a64_mra_ctx_off)) { \
             KPROG_ARM64_LOAD_BYTES_OFFSET_INTO((OUTPUT), __a64_sim_helper_ctx, __a64_mra_ctx_off, (WIDTH)); \
         } else ARM64_SIM_L_MEM_READ_DISPATCH_INTO((OUTPUT), (BASE), (OFF), (WIDTH), (SOURCE)); \
     } while (0)

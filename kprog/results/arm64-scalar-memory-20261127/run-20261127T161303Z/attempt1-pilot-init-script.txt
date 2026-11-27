@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+if ! mountpoint -q /dev; then mount -t devtmpfs devtmpfs /dev; fi
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+mount -t tmpfs tmpfs /var/tmp
+mount -t debugfs debugfs /sys/kernel/debug
+mount -t bpf bpffs /sys/fs/bpf
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any workspace /workspaces
+ulimit -l unlimited
+export HOME=/root
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+status=0
+insmod /workspaces/.agent-state/kprog-ck/verified-module/arm64/bpf_arm64_native_lab.ko || status=$?
+if [ "$status" = 0 ]; then
+ python3 /workspaces/repository/kprog/results/arm64-scalar-memory-20261127/stock.py /workspaces/repository/kprog/results/arm64-scalar-memory-20261127/run-20261127T161303Z --pilot > /workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/guest-pilot.stdout 2> /workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/guest-pilot.stderr || status=$?
+fi
+printf '%s\n' "$status" > /workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/pilot-guest-status
+sync
+echo o > /proc/sysrq-trigger
+while :; do sleep 60; done

@@ -1,0 +1,86 @@
+{
+  "pid": 1069604,
+  "mode": "pilot",
+  "started_utc": "2026-11-27T16:20:35Z",
+  "kernel_sha256": "9e31db5e9b8a6c3740cd5a2277b0063ab20ec9e197cc8b5793d322c7e420894b",
+  "module_sha256": "6262d6cf65ee5fe7d5ba9a0101c7918e33cc82b60db3d80d4498b75e5787ac65",
+  "command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "cortex-a57",
+    "-smp",
+    "4",
+    "-m",
+    "8G",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/.cache/qemu-arm64-root,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root",
+    "-fsdev",
+    "local,id=workspace,path=/workspaces,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=workspace,mount_tag=workspace",
+    "-append",
+    "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-perf-scalar-init loglevel=4 panic=30 oops=panic raid=noautodetect"
+  ],
+  "qemu_returncode": 0,
+  "guest_status": 0,
+  "controller_status": 0,
+  "stock": {
+    "scope": "Paired stock verifier loads on the identical ARM kernel using production relocations and fresh empty map shapes. Live application binding/native install/workload and frozen startup remain separate.",
+    "cases": [
+      {
+        "index": 49,
+        "app": "tetragon/observer",
+        "request": 1,
+        "symbol": "event_exit_disassociate_ctty",
+        "original_stock_passed": false,
+        "loads": {
+          "before": {
+            "command": [
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/tools/archive-stock",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/const-control.bpf.o",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/generation.metadata.json",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/kernel.facts.json",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/stock-before.verifier.log"
+            ],
+            "returncode": 2,
+            "wall_seconds": 0.7024613440000005,
+            "result": {
+              "stock_loaded": false,
+              "errno": 13,
+              "instructions": 2067
+            }
+          },
+          "after": {
+            "command": [
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/tools/archive-stock",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/after.bpf.o",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/generation.metadata.json",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/kernel.facts.json",
+              "/workspaces/kprog-raw/perf/arm64-scalar-memory-20261127/20261127T161303Z/49/stock-after.verifier.log"
+            ],
+            "returncode": 2,
+            "wall_seconds": 0.9600535519999998,
+            "result": {
+              "stock_loaded": false,
+              "errno": 22,
+              "instructions": 2077
+            }
+          }
+        }
+      }
+    ],
+    "controller_status": 0
+  },
+  "ended_utc": "2026-11-27T16:21:12Z"
+}
