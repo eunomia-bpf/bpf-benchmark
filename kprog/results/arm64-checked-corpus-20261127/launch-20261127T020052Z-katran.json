@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T02:00:52Z",
+  "pid": 873820,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "guest",
+    "CHECK_APP=katran"
+  ],
+  "revision": "2a45afa5afd5535b4d4f1e5dbc925e8ef6e1dabd",
+  "scope": "Katran existing frozen corpus baseline/post 1x10s stats-on; same checked mechanism and compiler flags. No full timing.",
+  "log": "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/launch-20261127T020052Z-katran.log"
+}
