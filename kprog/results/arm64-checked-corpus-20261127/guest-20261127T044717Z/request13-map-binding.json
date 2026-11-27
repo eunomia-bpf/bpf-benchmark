@@ -1,0 +1,166 @@
+{
+  "utc": "2026-11-27T09:18:45Z",
+  "revision": "443e81d95e88d149d2d3488c06a5a6e2ab87a69f",
+  "source_controller": "guest-20261127T044717Z",
+  "source_request": 13,
+  "symbol": "custom__generic",
+  "archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/service.tar.gz",
+  "source_capture": "/workspaces/repository/corpus/results/verified-captures-gum27vnj/bpfrejit_643_f80f4eeb6ebef7c5.bpf",
+  "capture_instruction_count": 1271,
+  "shim_log": "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000021_644727/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log",
+  "map_creates": {
+    "perf_progs": {
+      "fd": 27,
+      "map_id": 143
+    },
+    "kprobe_progs": {
+      "fd": 32,
+      "map_id": 147
+    }
+  },
+  "shim_evidence": [
+    {
+      "line": 112,
+      "text": "[136.977337 pid=643 tid=655] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=10 name=perf_progs"
+    },
+    {
+      "line": 113,
+      "text": "[136.978133 pid=643 tid=655]   MAP_CREATE -> fd=27 errno=0 kernel_map_id=143"
+    },
+    {
+      "line": 123,
+      "text": "[137.011163 pid=643 tid=655] BPF_MAP_CREATE type=3 key_size=4 value_size=4 max_entries=10 name=kprobe_progs"
+    },
+    {
+      "line": 124,
+      "text": "[137.013848 pid=643 tid=655]   MAP_CREATE -> fd=32 errno=0 kernel_map_id=147"
+    }
+  ],
+  "captured_map_fd_loads": [
+    {
+      "slot": 16,
+      "fd": 26
+    },
+    {
+      "slot": 26,
+      "fd": 25
+    },
+    {
+      "slot": 56,
+      "fd": 25
+    },
+    {
+      "slot": 191,
+      "fd": 44
+    },
+    {
+      "slot": 199,
+      "fd": 33
+    },
+    {
+      "slot": 253,
+      "fd": 44
+    },
+    {
+      "slot": 267,
+      "fd": 25
+    },
+    {
+      "slot": 281,
+      "fd": 44
+    },
+    {
+      "slot": 294,
+      "fd": 32
+    },
+    {
+      "slot": 394,
+      "fd": 23
+    },
+    {
+      "slot": 404,
+      "fd": 40
+    },
+    {
+      "slot": 738,
+      "fd": 40
+    },
+    {
+      "slot": 773,
+      "fd": 44
+    },
+    {
+      "slot": 795,
+      "fd": 23
+    },
+    {
+      "slot": 841,
+      "fd": 12
+    },
+    {
+      "slot": 886,
+      "fd": 44
+    },
+    {
+      "slot": 971,
+      "fd": 42
+    },
+    {
+      "slot": 1018,
+      "fd": 44
+    },
+    {
+      "slot": 1060,
+      "fd": 20
+    },
+    {
+      "slot": 1097,
+      "fd": 44
+    },
+    {
+      "slot": 1110,
+      "fd": 49
+    },
+    {
+      "slot": 1155,
+      "fd": 44
+    }
+  ],
+  "tail_array_loads": [
+    {
+      "slot": 294,
+      "fd": 32
+    }
+  ],
+  "envelope_tail_array": {
+    "name": "perf_progs",
+    "map_id": 143,
+    "map_type": 3,
+    "key_size": 4,
+    "value_size": 4,
+    "max_entries": 10,
+    "map_flags": 0,
+    "value_offset": null
+  },
+  "native_patch": {
+    "symbol": "perf_progs",
+    "offset": 17400,
+    "blob_bytes": 17452
+  },
+  "native_patch_table": "custom_context_map\t4528\nper_cpu_records\t4536\nwith_debug_output\t4544\nmetrics\t4552\nkernel_stackmap\t4560\ntask_stack_offset\t4568\nstack_ptregs_offset\t4576\ninverse_pac_mask\t4584\npid_page_to_mapping_info\t17392\nperf_progs\t17400\nreported_pids\t17408\npid_events\t17416\ninhibit_events\t17424\nreport_events\t17432\ninterpreter_offsets\t17440\n",
+  "load_direct_stderr": "native: reloading without foreign PROG_ARRAY map(s) 143\ntrusted-native-loader: service simulator verification failed: Unknown error 524\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n",
+  "manifest_entry": {
+    "native_object": "otelcol-ebpf-profiler.native.o",
+    "program": "custom__generic",
+    "symbol": "custom__generic"
+  },
+  "existing_coordinator_assignment": "COORDINATION.md 2026-11-26T06:21Z: first shape, captured source object and instructions composed by bind_original_source_maps, assigned OMP after Cilium packet bounds.",
+  "source_paths": {
+    "bind": "kprog/libnativeloader/src/native_loader_trusted.cpp:2266",
+    "retry": "kprog/libnativeloader/src/native_loader_trusted.cpp:3086",
+    "kernel_relocation": "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c:2046",
+    "kernel_runtime": "vendor/linux-framework/kernel/bpf/core.c:2587"
+  },
+  "interpretation": "Captured slot294 uses fd32/kprobe_progs147, while envelope and native patch use perf_progs143. The recorded retry drops143 from fd_array; the map relocation still needs143 among used_maps. ARM native JIT relocation failure explains runtime ENOTSUPP524. This source-grounded explanation extends the existing x86 request14 record.",
+  "scope": "Read-only archived/current-source attribution. Live corrected map binding and native acceptance remain to be established by the existing OMP repair and affected rerun. Current runtime and queued applications retained."
+}
