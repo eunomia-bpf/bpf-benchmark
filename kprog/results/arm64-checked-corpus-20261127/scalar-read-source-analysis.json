@@ -1,0 +1,66 @@
+{
+  "utc": "2026-11-27T09:55:59Z",
+  "revision": "fd8698770ea9185e1a12ae5ec6dbcb8d6920477f",
+  "scope": "Read-only source attribution using one completed request archive while the overall Tetragon stage2 run continues. Application totals, corrected stock acceptance and causal impact across all scalar refusals remain pending.",
+  "request_archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/tetragon-observer/state/session-m37va1er/requests/1.success.tar.gz",
+  "request": 1,
+  "symbol": "event_exit_disassociate_ctty",
+  "generated_source_excerpts": [
+    {
+      "line_start": 100,
+      "text": "\t/* 0x48: bl 0 <bpf_get_current_task> */\n\tARM64_SIM_A64_LINK(0x4cULL);\n\tARM64_SIM_BPF_CALL_bpf_get_current_task();\narm64_l_4c:\n\t/* 0x4c: mov x22, x0 */\n\tARM64_SIM_RUN_KNOWN_OP3(ARM64_OP_MOV_REG, ARM64_X22, ARM64_X0, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 0);"
+    },
+    {
+      "line_start": 147,
+      "text": "arm64_l_84:\n\t/* 0x84: adds x2, x22, #0x86c */\n\tARM64_SIM_RUN_KNOWN_OP3(ARM64_OP_ADDS_IMM, ARM64_X2, ARM64_X22, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, 0, 2156ULL);\narm64_l_88:\n\t/* 0x88: ldr x8, [x19, #8] */\n\tARM64_SIM_RUN_KNOWN_OP3(ARM64_OP_LOAD, ARM64_X8, ARM64_X19, ARM64_REG_NONE, ARM64_REG_NONE, ARM64_WIDTH_64, ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0), 8ULL);"
+    }
+  ],
+  "verifier_tail": "ff=16) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n639: (bf) r2 = r8                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R8=map_value(map=exit_heap_map,ks=4,vs=40)\n640: (07) r2 += 20                    ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=20)\n641: (b7) r1 = 0                      ; R1=0\n642: (63) *(u32 *)(r2 +0) = r1        ; R1=0 R2=map_value(map=exit_heap_map,ks=4,vs=40,off=20)\n643: (79) r3 = *(u64 *)(r10 -120)     ; R3=scalar(id=12) R10=fp0 fp-120=scalar(id=12)\n644: (07) r3 += 2156                  ; R3=scalar(id=12+2156)\n645: (79) r2 = *(u64 *)(r6 +0)        ; R2=scalar() R6=map_value(map=kprog_unspec,ks=4,vs=8)\n646: (55) if r2 != 0x0 goto pc+2      ; R2=0\n647: (79) r1 = *(u64 *)(r10 -104)     ; R1=map_value(map=execve_map,ks=4,vs=896) R10=fp0 fp-104=map_value(map=execve_map,ks=4,vs=896)\n648: (79) r1 = *(u64 *)(r1 +8)        ; R1=scalar()\n649: (bf) r2 = r8                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R8=map_value(map=exit_heap_map,ks=4,vs=40)\n650: (07) r2 += 36                    ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=36)\n651: (63) *(u32 *)(r2 +0) = r7        ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=36) R7=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))\n652: (bf) r2 = r8                     ; R2=map_value(map=exit_heap_map,ks=4,vs=40) R8=map_value(map=exit_heap_map,ks=4,vs=40)\n653: (07) r2 += 24                    ; R2=map_value(map=exit_heap_map,ks=4,vs=40,off=24)\n654: (7b) *(u64 *)(r2 +0) = r1        ; R1=scalar() R2=map_value(map=exit_heap_map,ks=4,vs=40,off=24)\n655: (65) if r3 s> 0xffffffff goto pc+313     ; R3=scalar(id=12+2156,smax=-1,umin=0x8000000000000000,var_off=(0x8000000000000000; 0x7fffffffffffffff)) fp-120=scalar(id=12,umin=0x7ffffffffffff794,umax=0xfffffffffffff793)\n656: (b7) r1 = 0                      ; R1=0\n657: (79) r2 = *(u64 *)(r6 +0)        ; R2=scalar() R6=map_value(map=kprog_unspec,ks=4,vs=8)\n658: (55) if r2 != 0x0 goto pc+3      ; R2=0\n659: (61) r1 = *(u32 *)(r3 +0)\nR3 invalid mem access 'scalar'\nverification time 186938 usec\nstack depth 128\nprocessed 650 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0\n\n",
+  "source_evidence": [
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "line_start": 204,
+      "line_end": 225,
+      "text": "#define ARM64_SIM_L_READ_FAULT_INTO(OUTPUT, BASE, INDEX, AUX, IMM) \\\n    do { \\\n        int __a64_fault_result = 0; \\\n        if ((BASE) != ARM64_SP) { \\\n            __u8 __a64_fault_tag; ARM64_SIM_L_REG_TAG_INTO(__a64_fault_tag, (BASE)); \\\n            if (__a64_fault_tag != ARM64_SIM_TAG_STACK && \\\n                __a64_fault_tag != ARM64_SIM_TAG_RELOC_ADDR && \\\n                !((__a64_sim_is_xdp || __a64_sim_abi_kind == KPROG_ABI_KIND_SKB) && \\\n                  __a64_fault_tag == ARM64_SIM_TAG_ABI)) { \\\n                if (__a64_fault_tag == ARM64_SIM_TAG_SCALAR) { \\\n                    __u64 __a64_fault_raw; __s64 __a64_fault_off; \\\n                    ARM64_SIM_L_READ_REG_RAW_INTO(__a64_fault_raw, (BASE)); \\\n                    ARM64_SIM_L_MEM_BASE_OFF_INTO(__a64_fault_off, (AUX), (INDEX), (IMM)); \\\n                    __a64_fault_result = (__a64_fault_raw + (__u64)__a64_fault_off + \\\n                        (__u64)KPROG_ARM64_MEM_PREPOST_PRE_DELTA((AUX), (IMM))) < 4096ULL; \\\n                } \\\n                if (!__a64_fault_result) __a64_fault_result = !!ARM64_SIM_L_UNSPECIFIED(); \\\n            } \\\n        } \\\n        (OUTPUT) = __a64_fault_result; \\\n    } while (0)\n#define ARM64_SIM_L_READ_FAULT(BASE, INDEX, AUX, IMM) \\"
+    },
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "line_start": 1313,
+      "line_end": 1352,
+      "text": "      } else { void *__a64_sw_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_sw_pointer, (BASE)); \\\n          ARM64_SIM_L_STORE_ADDR((__u8 *)__a64_sw_pointer+(OFF),(WIDTH),__a64_sw_value); } \\\n } while (0)\n\n/* The generic memory dispatch retains stack observation, typed pointer loads,\n * relocation-offset rejection and ordinary native-width loads. */\n#define ARM64_SIM_L_MEM_READ_DISPATCH_INTO(OUTPUT, BASE, OFF, WIDTH, SOURCE) \\\n    do { \\\n        __u64 __a64_mrd_value; \\\n        switch (SOURCE) { \\\n        case KPROG_ARM64_MEM_SRC_STACK: { \\\n            __s64 __a64_mrd_base; \\\n            if (KPROG_ARM64_MEM_BASE_SRC((BASE) == ARM64_SP) == KPROG_ARM64_MEM_BASE_SRC_SP_REGISTER) \\\n                __a64_mrd_base = __a64_sp; \\\n            else { void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \\\n                __a64_mrd_base = (__s64)(long)__a64_mrd_pointer; } \\\n            ARM64_SIM_L_STACK_READ_INTO(__a64_mrd_value, __a64_mrd_base + (OFF), (WIDTH)); \\\n            break; \\\n        } \\\n        case KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD: { \\\n            void *__a64_mrd_pointer, *__a64_mrd_loaded; \\\n            ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \\\n            ARM64_SIM_L_LOAD_PTR_AT_INTO(__a64_mrd_loaded, __a64_mrd_pointer, (OFF)); \\\n            __a64_mrd_value = (__u64)(long)__a64_mrd_loaded; \\\n            break; \\\n        } \\\n        case KPROG_ARM64_MEM_SRC_RELOC_PTR: { \\\n            if ((OFF) != 0) ARM64_SIM_L_UNSUPPORTED_OPCODE(); \\\n            void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \\\n            __a64_mrd_value = (__u64)(long)__a64_mrd_pointer; \\\n            break; \\\n        } \\\n        default: { \\\n            void *__a64_mrd_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mrd_pointer, (BASE)); \\\n            KPROG_ARM64_LOAD_BYTES_OFFSET_INTO(__a64_mrd_value, __a64_mrd_pointer, (OFF), (WIDTH)); \\\n            break; \\\n        } \\\n        } \\\n        (OUTPUT) = __a64_mrd_value; \\\n    } while (0)"
+    },
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "line_start": 2470,
+      "line_end": 2471,
+      "text": "#define ARM64_SIM_BPF_CALL_bpf_get_current_task() \\\n\tARM64_SIM_L_HELPER_SCALAR_RESULT(bpf_get_current_task())"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_bytes.h",
+      "line_start": 15,
+      "line_end": 30,
+      "text": "#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \\\n\t__asm__ __volatile__(\"%0 = *(u\" #BITS \" *)(%1 + 0)\" : \"=r\"(OUT) : \"r\"(ADDR) : \"memory\")\n#define KPROG_ARM64_LOAD_ACCESS_OFFSET(BITS, BASE, OFFSET, OUT) \\\n\tdo { \\\n\t\tif (__builtin_constant_p(OFFSET) && (OFFSET) >= -32768 && (OFFSET) <= 32767) { \\\n\t\t\tif ((OFFSET) < 0) \\\n\t\t\t\t__asm__ __volatile__(\"%0 = *(u\" #BITS \" *)(%1 - %2)\" : \"=r\"(OUT) : \"r\"(BASE), \"i\"(-(OFFSET)) : \"memory\"); \\\n\t\t\telse \\\n\t\t\t\t__asm__ __volatile__(\"%0 = *(u\" #BITS \" *)(%1 + %2)\" : \"=r\"(OUT) : \"r\"(BASE), \"i\"(OFFSET) : \"memory\"); \\\n\t\t} else \\\n\t\t\tKPROG_ARM64_LOAD_ACCESS(BITS, (const __u8 *)(BASE) + (OFFSET), OUT); \\\n\t} while (0)\n#elif defined(__COMPCERT__)\n#include \"../c/Platform.h\"\n#define KPROG_ARM64_LOAD_ACCESS(BITS, ADDR, OUT) \\\n    KPROG_C_UNALIGNED_LOAD_INTO((OUT), __u##BITS, (ADDR), 0)"
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "line_start": 942,
+      "line_end": 953,
+      "text": "/* The verifier types an address whose base carries a stack, context,\n * packet or map tag; B keeps the direct access for those. Every other\n * address is kernel memory, and B reads it through the probe-read callee\n * (design: \u8bfb\u5185\u6838\u5185\u5b58\u8981\u8c03\u7528 bpf_probe_read), as the fixed-displacement arm\n * already does. Host and Clight builds read the same bytes directly. */\n#if defined(__bpf__) || defined(__BPF__)\n#define X86_SIM_L_TAG_KERNEL_MEMORY(TAG) \\\n    ((TAG)!=X86_SIM_TAG_STACK && (TAG)!=X86_SIM_TAG_ABI && \\\n     (TAG)!=X86_SIM_TAG_PACKET && (TAG)!=X86_SIM_TAG_PACKET_END && \\\n     (TAG)!=X86_SIM_TAG_MAP_PTR && (TAG)!=X86_SIM_TAG_MAP_VALUE)\n#else\n#define X86_SIM_L_TAG_KERNEL_MEMORY(TAG) 0"
+    },
+    {
+      "path": "kprog/x86/x86_sim_local_bpf.h",
+      "line_start": 982,
+      "line_end": 999,
+      "text": "#define X86_SIM_L_LOAD_ADDR_TAGGED_INTO(OUTPUT, ADDR, WIDTH, TAG) \\\n    do { __u64 __x86_alias_observed; \\\n         if (X86_SIM_L_TAG_KERNEL_MEMORY(TAG)) \\\n             __x86_alias_observed=KPROG_X86_MEM_LOAD_FIXED((ADDR),0,(WIDTH)); \\\n         else __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \\\n         X86_SIM_L_OBSERVE_STACK_LOAD(__x86_alias_observed,ADDR,WIDTH,TAG); \\\n         (OUTPUT)=__x86_alias_observed; } while(0)\n#define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \\\n    ({ __u64 __x86_alias_result; \\\n       X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_alias_result, ADDR, WIDTH, TAG); \\\n       __x86_alias_result; })\n#define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \\\n    do { __u64 __x86_data_observed; \\\n         if (X86_SIM_L_TAG_KERNEL_MEMORY(TAG)) \\\n             __x86_data_observed=KPROG_X86_MEM_LOAD_FIXED((BASE),(OFF),(WIDTH)); \\\n         else __x86_data_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \\\n         X86_SIM_L_OBSERVE_STACK_LOAD(__x86_data_observed,KPROG_PTR_ADD64_BITS((BASE),(OFF)),WIDTH,TAG); \\\n         (OUTPUT)=__x86_data_observed; } while(0)"
+    },
+    {
+      "path": "kprog/formal/generated/x86_mem_access.h",
+      "line_start": 85,
+      "line_end": 114,
+      "text": "#if defined(__bpf__) || defined(__BPF__)\nstatic __attribute__((noinline)) __u64\nkprog_x86_mem_load_fixed_into(__u64 *value, const void *base,\n                               long long displacement, __u8 width)\n{\n    const void *address=(const __u8 *)base + displacement;\n    switch (width ? width : X86_WIDTH_64) {\n    case X86_WIDTH_8:\n        bpf_probe_read_kernel(value, sizeof(__u8), address);\n        return (__u8)*value;\n    case X86_WIDTH_16:\n        bpf_probe_read_kernel(value, sizeof(__u16), address);\n        return (__u16)*value;\n    case X86_WIDTH_32:\n        bpf_probe_read_kernel(value, sizeof(__u32), address);\n        return (__u32)*value;\n    case X86_WIDTH_64:\n        bpf_probe_read_kernel(value, sizeof(__u64), address);\n        return *value;\n    default:\n        /* KPROG_C_TRAP is illegal in BPF; this arm is unreachable for a\n         * width the emitter produced. */\n        __asm__ volatile(\"r0 = 0; exit;\" ::: \"r0\", \"memory\");\n        __builtin_unreachable();\n    }\n}\n#define KPROG_X86_MEM_LOAD_FIXED(BASE, DISP, WIDTH) \\\n    ({ __u64 __kprog_fixed_value; \\\n       kprog_x86_mem_load_fixed_into(&__kprog_fixed_value, (BASE), (DISP), (WIDTH)); })\n#else"
+    }
+  ],
+  "finding": "ARM get_current_task uses scalar-result tagging; generic non-stack/ABI/relocation memory dispatch emits direct width-specific BPF loads. Tetragon request1 has task+2156 as scalar and fails direct u32 load at B instruction659. Existing x86 B separates untyped/kernel addresses from stack/context/packet/map classes and routes them through probe_read_kernel. This is an evidenced common mechanism difference, with future affected before/after stock and fault-path results required for a repair claim.",
+  "repair_scope": "Common ARM B untyped/kernel-memory lowering across apps, preserving actual width, typed stack/map/ABI/packet access and existing nondeterministic read-fault/fallthrough semantics. Canonical ARM load contract has formal source ownership; coordinate any change with FORMAL and preserve OMP simulator work.",
+  "production_source_changes": false
+}
