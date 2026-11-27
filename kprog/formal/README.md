@@ -71,9 +71,21 @@ to native origin-16..-1. Actual source loop/caller/flag frames, initialized
 bytes, all other native fields and bytes, PC+8 and ordered read/write history
 remain. One shared checked STRB proof covers registers 0..30 and retains the
 previous W1 interface. These per-byte statements expose their physical input,
-register and two-word code premises. The worklist continues with the original
-guard/increment, actual native helper code and its loop/environment binding,
-then whole-program input/output correspondence.
+register and two-word code premises. The original true guard and unsigned
+increment/backedge now surround that same body, extending the actual copied
+prefix to i+1 with its packet and caller frames.
+
+The recorded sole-kernel memcpy object and vmlinux agree byte for byte at all
+four inspected symbols. Its real generic 16-byte path uses two LDP and two STP
+instructions, including the repeated tail accesses. Kernel-checked decoder
+certificates bind its first fourteen words. The two actual source/destination
+end additions execute on arbitrary physical addresses and count, retaining
+the complete frame; their input PC is generic origin+4 after BTI. For count16,
+each of the three real comparisons and branches produces its actual NZCV and
+falls through, retaining GPRs, memory and history. The next work composes
+these reached native states under one code certificate, binds the real pair
+accesses and landing-pad/alternative feature domains, and joins the complete
+helper/environment to the original source entry and whole-program observer.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
