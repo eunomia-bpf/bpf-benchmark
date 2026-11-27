@@ -11,7 +11,7 @@ def sha(p):
 r=dict(pid=os.getpid(),started_utc=now(),controller_status=None,phase='image-refresh',source_revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),scope='In-place sole-image linker replacement with existing frozen runtime recipe and unchanged compiled P/kernel inputs, then one frozen effective1x10s OTel stats-on diagnostic with actual in-phase code capture. No full timing.')
 def save():(HERE/'refresh-controller.json').write_text(json.dumps(r,indent=2)+'\n')
 try:
- save();resource.setrlimit(resource.RLIMIT_AS,(51539607552,51539607552));os.sched_setaffinity(0,{16,18})
+ save()
  assert (HERE/'build.exit').read_text().strip()=='0' and (HERE/'offline.exit').read_text().strip()=='0'
  with (LOCKS/'timing').open('a') as timing,(LOCKS/'image').open('a') as image:
   fcntl.flock(timing,fcntl.LOCK_SH);fcntl.flock(image,fcntl.LOCK_EX)
@@ -23,7 +23,9 @@ try:
   cmd=['make','-C',str(ROOT),'-o',str(kernel)]
   for target in targets:cmd+=['-o',target]
   cmd+=['x86-runner-runtime-image-tar','HOST_KERNEL_BUILD_DIR_X86=/workspaces/.agent-state/kprog-ck/build-x86','X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current','X86_RUNTIME_KERNEL_IMAGE='+str(kernel),'JOBS=2','IMAGE_BUILD_JOBS=2'];r['command']=cmd;save()
-  with (HERE/'image-refresh.log').open('wb') as log:rc=subprocess.run(cmd,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT).returncode
+  def build_limits():
+   resource.setrlimit(resource.RLIMIT_AS,(51539607552,51539607552));os.sched_setaffinity(0,{16,18})
+  with (HERE/'image-refresh.log').open('wb') as log:rc=subprocess.run(cmd,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,preexec_fn=build_limits).returncode
   r['image_returncode']=rc;save();assert rc==0,rc
   r['new_image']=image_id();r['kernel_unchanged']=sha(kernel)==r['kernel_sha256'];r['native_inputs_unchanged']=inputs=={str(p.relative_to(stage)):sha(p) for p in stage.rglob('*') if p.is_file()};assert r['kernel_unchanged'] and r['native_inputs_unchanged'];save()
   # The old untagged image is a rebuildable product; retain all evidence and

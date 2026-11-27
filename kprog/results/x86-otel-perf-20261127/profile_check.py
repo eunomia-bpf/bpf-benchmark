@@ -1,5 +1,5 @@
 """Host-PMU OTel diagnosis using the frozen check's effective guest settings."""
-import hashlib,json,os,re,subprocess,traceback,sys
+import hashlib,json,os,re,resource,subprocess,traceback,sys
 from pathlib import Path
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent;LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
 def now():return subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip()
@@ -10,6 +10,7 @@ record=dict(pid=os.getpid(),started_utc=stamp,raw=str(raw),source_revision=subpr
 def save():(out/'controller.json').write_text(json.dumps(record,indent=2)+'\n')
 (LANE/'otel-performance-profile.json').write_text(json.dumps(dict(result=str(out),raw=str(raw),pid=os.getpid()),indent=2)+'\n')
 try:
+ record['host_address_space_limit_bytes']=list(resource.getrlimit(resource.RLIMIT_AS))
  save();entry=ROOT/'kprog/perf/one-image/Makefile';text=entry.read_text();check=text.split('\ncheck:\n',1)[1]
  assert 'corpus APPS=$$a SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1' in check
  assert re.search(r'^VM_MEM \?= 64G$',text,re.M)

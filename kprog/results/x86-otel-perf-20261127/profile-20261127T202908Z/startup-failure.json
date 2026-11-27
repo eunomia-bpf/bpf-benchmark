@@ -1,0 +1,62 @@
+{
+  "cause": "refresh_check.py applied compiler/image-build RLIMIT_AS=48GiB to its entire process with hard limit 48GiB, inherited by profile controller, shell, vng and QEMU; frozen guest needs64GiB. QEMU failed before guest/benchmark.",
+  "scope": "No memory touched in reservation reproduction; no benchmark/image/kernel change. Limit now scoped to image-build child only; compiles remain capped48GiB, guest keeps original operator environment.",
+  "reservation_reproduction": [
+    {
+      "case": "inherited_48GiB",
+      "returncode": 1,
+      "output": "{\"limit\": [51539607552, 51539607552]}\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nOSError: [Errno 12] Cannot allocate memory\n"
+    },
+    {
+      "case": "fresh_operator_environment",
+      "returncode": 0,
+      "output": "{\"limit\": [-1, -1]}\n64GiB virtual reservation PASS; no pages touched\n"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "guest.log",
+      "bytes": 118,
+      "sha256": "8da8328bc87b6cd9d8117e4e641c322633217873711568d2ad13e35bb09ca256"
+    },
+    {
+      "path": "guest-exit.txt",
+      "bytes": 4,
+      "sha256": "ce8bafb38615aeb5d44ebbabe78ec14ac35a5de87bdc5ad5ea82a72656024ce4"
+    },
+    {
+      "path": "perf-exit.txt",
+      "bytes": 4,
+      "sha256": "9d9b18720961e9b4689fd763b85e7b6f36160ccd3a8a1c9ddc5103bb0f66c396"
+    },
+    {
+      "path": "profile-image.txt",
+      "bytes": 72,
+      "sha256": "d5f00194f47321a9073e964f7cf0ed14b58758e8b18ca0b2986a0c7236792928"
+    },
+    {
+      "path": "profile-source.txt",
+      "bytes": 41,
+      "sha256": "9fa00c52d73bba25b3fcfe17bc9709ecaee71424cf1e90de343f9c2c63c08b86"
+    },
+    {
+      "path": "profile-host-check.sh",
+      "bytes": 6029,
+      "sha256": "11b1ce42277029f6bbc1ddbb4a9282fa376ac0c045e82434b7fd4a9113c3a7f3"
+    },
+    {
+      "path": "guest.sh",
+      "bytes": 2092,
+      "sha256": "46c73425b64f4dde29c8097e0f4d622f41715328490759a985cc1b217970f659"
+    },
+    {
+      "path": "controller.log",
+      "bytes": 2551,
+      "sha256": "cd2dee0e6449afccb1687fdfac3c9d185acd38ec91409121b3fb126b5b132f57"
+    }
+  ],
+  "old_profile_status": 1,
+  "old_guest_exit": 255,
+  "run_dir": "",
+  "old_failed_run_preserved": true
+}
