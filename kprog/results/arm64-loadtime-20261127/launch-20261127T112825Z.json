@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T11:28:25Z",
+  "pid": 991109,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-loadtime-20261127",
+    "early-promote"
+  ],
+  "revision": "a5efe721e805b929a464d738a344c136eb6a63b9",
+  "compiler_cpu": 18,
+  "compiler_address_space_bytes": 51539607552,
+  "scope": "Archived Cilium request10 early mem2reg/simplifycfg control; same architecture flags, timed frontend stages and original artifact comparisons. Tetragon retains original code; at most two compiles."
+}
