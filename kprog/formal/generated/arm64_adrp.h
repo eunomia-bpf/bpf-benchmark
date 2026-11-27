@@ -26,7 +26,7 @@ _Static_assert(KPROG_ARM64_ADRP_HANDLED(ARM64_OP_ADRP_RODATA), "arm64 adrp cover
  */
 #define KPROG_ARM64_ADRP_TAG_INTO(OUTPUT, OP, UNSUPPORTED) \
 	do { \
-		__u8 __kprog_a64_adrp_op = (OP); \
+		const __u8 __kprog_a64_adrp_op = (OP); \
 		__u8 __kprog_a64_adrp_tag = 0; \
  \
 		switch (__kprog_a64_adrp_op) { \

@@ -23,10 +23,10 @@ _Static_assert(KPROG_ARM64_ORN_HANDLED(ARM64_OP_ORN_REG), "arm64 orn coverage dr
  * width-narrowed raw 64-bit value the caller writes back.
  */
 #define KPROG_ARM64_ORN_VALUE_DECL(NAME, OP, LHS, RHS, WIDTH, UNSUPPORTED) \
-		__u64 __kprog_a64_orn_op = (OP); \
+		const __u64 __kprog_a64_orn_op = (OP); \
 		__u64 __kprog_a64_orn_lhs = (LHS); \
 		__u64 __kprog_a64_orn_rhs = (RHS); \
-		__u64 __kprog_a64_orn_width = (WIDTH); \
+		const __u64 __kprog_a64_orn_width = (WIDTH); \
 		__u64 __kprog_a64_orn_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_orn_width); \
 		__u64 NAME = 0; \
  \

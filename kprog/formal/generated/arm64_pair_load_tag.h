@@ -22,10 +22,10 @@ _Static_assert(ARM64_OP_LDP == 33U, "arm64 pair-load-tag code drift");
  */
 #define KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO(OUTPUT, OP, TAG_LO, TAG_HI, WIDTH, UNSUPPORTED)\
 	do { \
-		__u64 __kprog_a64_plt_op = (OP); \
+		const __u64 __kprog_a64_plt_op = (OP); \
 		__u64 __kprog_a64_plt_lo = (TAG_LO); \
 		__u64 __kprog_a64_plt_hi = (TAG_HI); \
-		__u64 __kprog_a64_plt_width = (WIDTH); \
+		const __u64 __kprog_a64_plt_width = (WIDTH); \
 		__u64 __kprog_a64_plt_mask = 0; \
 \
 		switch (__kprog_a64_plt_op) { \

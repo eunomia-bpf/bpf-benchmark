@@ -51,9 +51,9 @@ _Static_assert(KPROG_ARM64_MOD_HANDLED(ARM64_MOD_SXTB), "arm64 modifier coverage
 #define KPROG_ARM64_MOD_VALUE_INTO(OUTPUT, MOD, VALUE, SHIFT, WIDTH) \
 	do { \
 		__u64 __kprog_a64_mod_value = (VALUE); \
-		__u8 __kprog_a64_mod = (MOD); \
-		__u8 __kprog_a64_mod_shift = (SHIFT); \
-		__u8 __kprog_a64_mod_amount = \
+		const __u8 __kprog_a64_mod = (MOD); \
+		const __u8 __kprog_a64_mod_shift = (SHIFT); \
+		const __u8 __kprog_a64_mod_amount = \
 			(__u8)(__kprog_a64_mod_shift & \
 			      ((WIDTH) == ARM64_WIDTH_32 ? 31U : 63U)); \
  \

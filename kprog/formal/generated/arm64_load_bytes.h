@@ -50,7 +50,7 @@ typedef __u64 kprog_arm64_load_u64_unaligned __attribute__((aligned(1),may_alias
 	do { \
 		volatile const __u8 *__kprog_a64_lb_addr = \
 			(volatile const __u8 *)(ADDR); \
-		__u8 __kprog_a64_lb_width = (WIDTH); \
+		const __u8 __kprog_a64_lb_width = (WIDTH); \
 		__u64 __kprog_a64_lb_value; \
 		if (__kprog_a64_lb_width == ARM64_WIDTH_64) \
 			KPROG_ARM64_LOAD_ACCESS_OFFSET(64, __kprog_a64_lb_addr, (OFFSET), __kprog_a64_lb_value); \

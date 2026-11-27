@@ -26,9 +26,9 @@ _Static_assert(KPROG_ARM64_UNARY_HANDLED(ARM64_OP_NEG), "arm64 unary coverage dr
  */
 #define KPROG_ARM64_UNARY_VALUE_INTO(OUTPUT, OP, VALUE, WIDTH, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_un_op = (OP); \
+		const __u64 __kprog_a64_un_op = (OP); \
 		__u64 __kprog_a64_un_value = (VALUE); \
-		__u64 __kprog_a64_un_width = (WIDTH); \
+		const __u64 __kprog_a64_un_width = (WIDTH); \
 		__u64 __kprog_a64_un_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_un_width); \
 		__u64 __kprog_a64_un_result = 0; \
  \

@@ -40,11 +40,11 @@ _Static_assert(KPROG_ARM64_EXTREV_HANDLED(ARM64_OP_SXTB), "arm64 extract coverag
  */
 #define KPROG_ARM64_EXTREV_VALUE_INTO(OUTPUT, OP, SRC, SRC2, SHIFT, WIDTH, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_ext_op = (OP); \
+		const __u64 __kprog_a64_ext_op = (OP); \
 		__u64 __kprog_a64_ext_src = (SRC); \
 		__u64 __kprog_a64_ext_src2 = (SRC2); \
 		__u64 __kprog_a64_ext_shift = (SHIFT); \
-		__u64 __kprog_a64_ext_width = (WIDTH); \
+		const __u64 __kprog_a64_ext_width = (WIDTH); \
 		__u64 __kprog_a64_ext_bits = \
 			KPROG_ARM64_WIDTH_BITS(__kprog_a64_ext_width); \
 		__u64 __kprog_a64_ext_result = 0; \

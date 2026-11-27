@@ -25,7 +25,7 @@ _Static_assert(KPROG_ARM64_MOVK_HANDLED(48U), "arm64 movk column coverage drift"
 #define KPROG_ARM64_MOVK_INSERT_DECL(NAME, DST, IMM, SHIFT, UNSUPPORTED) \
 		__u64 __kprog_a64_movk_dst = (DST); \
 		__u64 __kprog_a64_movk_imm = (IMM); \
-		__u64 __kprog_a64_movk_shift = (SHIFT); \
+		const __u64 __kprog_a64_movk_shift = (SHIFT); \
 		__u64 __kprog_a64_movk_mask; \
 		__u64 NAME; \
  \

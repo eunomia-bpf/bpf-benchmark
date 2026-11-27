@@ -34,11 +34,11 @@ _Static_assert(KPROG_ARM64_SHIFT_HANDLED(ARM64_SHIFT_ROR), "arm64 shift coverage
  */
 #define KPROG_ARM64_SHIFT_VALUE_INTO(OUTPUT, SHIFT, VALUE, AMOUNT, WIDTH, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_shift_op = (SHIFT); \
+		const __u64 __kprog_a64_shift_op = (SHIFT); \
 		__u64 __kprog_a64_shift_value = (VALUE); \
 		__u64 __kprog_a64_shift_amount = (AMOUNT); \
-		__u64 __kprog_a64_shift_width = (WIDTH); \
-		int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32; \
+		const __u64 __kprog_a64_shift_width = (WIDTH); \
+		const int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32; \
 		__u64 __kprog_a64_shift_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_shift_width); \
 		__u64 __kprog_a64_shift_k = __kprog_a64_shift_amount & (__kprog_a64_shift_width == ARM64_WIDTH_32 ? 31ULL : 63ULL); \
 		__u64 __kprog_a64_shift_result = 0; \

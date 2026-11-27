@@ -28,7 +28,7 @@ _Static_assert(KPROG_ARM64_LDRSX_HANDLED(ARM64_OP_LDRSH), "arm64 ldrsx coverage 
  */
 #define KPROG_ARM64_LDRSX_LOAD_WIDTH_INTO(OUTPUT, OP, UNSUPPORTED)                       \
 	do { \
-		__u64 __kprog_a64_ldrsx_op = (OP); \
+		const __u64 __kprog_a64_ldrsx_op = (OP); \
 		__u64 __kprog_a64_ldrsx_width = 0; \
  \
 		switch (__kprog_a64_ldrsx_op) { \

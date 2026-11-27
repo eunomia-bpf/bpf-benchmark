@@ -22,7 +22,7 @@ _Static_assert(ARM64_OP_SXTH == 21U, "arm64 ldrsx op sign code drift");
  */
 #define KPROG_ARM64_LDRSX_SXOP_INTO(OUTPUT, OP, UNSUPPORTED)                             \
 	do { \
-		__u64 __kprog_a64_ldrsx_sxop = (OP); \
+		const __u64 __kprog_a64_ldrsx_sxop = (OP); \
 		__u64 __kprog_a64_ldrsx_sx = 0; \
  \
 		switch (__kprog_a64_ldrsx_sxop) { \

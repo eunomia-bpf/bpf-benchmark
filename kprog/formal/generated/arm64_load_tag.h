@@ -20,9 +20,9 @@ _Static_assert(ARM64_OP_LOAD == 31U, "arm64 load-tag code drift");
  */
 #define KPROG_ARM64_LOAD_TAG_PRESERVE_INTO(OUTPUT, OP, TAG, WIDTH, UNSUPPORTED)          \
 	do { \
-		__u64 __kprog_a64_lt_op = (OP); \
+		const __u64 __kprog_a64_lt_op = (OP); \
 		__u64 __kprog_a64_lt_tag = (TAG); \
-		__u64 __kprog_a64_lt_width = (WIDTH); \
+		const __u64 __kprog_a64_lt_width = (WIDTH); \
 		__u64 __kprog_a64_lt_preserve = 0; \
 \
 		switch (__kprog_a64_lt_op) { \

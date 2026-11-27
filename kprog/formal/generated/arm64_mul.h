@@ -47,7 +47,7 @@ _Static_assert(KPROG_ARM64_MUL_HANDLED(ARM64_OP_SMADDL), "arm64 multiply coverag
  */
 #define KPROG_ARM64_MUL_VALUE_INTO(OUTPUT, OP, LHS, RHS, ADDEND, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_mul_op = (OP); \
+		const __u64 __kprog_a64_mul_op = (OP); \
 		__u64 __kprog_a64_mul_lhs = (LHS); \
 		__u64 __kprog_a64_mul_rhs = (RHS); \
 		__u64 __kprog_a64_mul_addend = (ADDEND); \

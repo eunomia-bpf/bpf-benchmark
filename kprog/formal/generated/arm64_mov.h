@@ -25,8 +25,8 @@ _Static_assert(KPROG_ARM64_MOV_HANDLED(ARM64_OP_MOV_REG), "arm64 mov coverage dr
  * must be written through ARM64_SIM_L_WRITE_REG_WIDTH (dropping the tag).
  */
 #define KPROG_ARM64_MOV_PTR_TAG_PATH_DECL(NAME, OP, WIDTH, UNSUPPORTED) \
-		__u64 __kprog_a64_mov_op = (OP); \
-		__u64 __kprog_a64_mov_width = (WIDTH); \
+		const __u64 __kprog_a64_mov_op = (OP); \
+		const __u64 __kprog_a64_mov_width = (WIDTH); \
 		__u64 NAME = 0; \
  \
 		switch (__kprog_a64_mov_op) { \

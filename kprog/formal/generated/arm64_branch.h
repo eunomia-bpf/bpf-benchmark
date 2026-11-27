@@ -31,7 +31,7 @@ _Static_assert(KPROG_ARM64_BRANCH_HANDLED(KPROG_ARM64_BRANCH_TBNZ), "arm64 branc
  * int (1 = branch taken).
  */
 #define KPROG_ARM64_BRANCH_TEST_DECL(NAME, KIND, VALUE, BIT)                           \
-		__u64 __kprog_a64_br_kind = (KIND); \
+		const __u64 __kprog_a64_br_kind = (KIND); \
 		__u64 __kprog_a64_br_value = (VALUE); \
 		__u64 __kprog_a64_br_bit = (BIT) & 63ULL; \
 		int NAME = 0; \

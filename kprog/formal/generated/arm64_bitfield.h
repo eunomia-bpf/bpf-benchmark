@@ -35,7 +35,7 @@ _Static_assert(KPROG_ARM64_BITFIELD_HANDLED(ARM64_BITFIELD_BFI), "arm64 bitfield
 	do { \
 		__u64 __kprog_a64_bf_src = (SRC); \
 		__u64 __kprog_a64_bf_dst = (DST); \
-		__u8 __kprog_a64_bf_kind = (KIND); \
+		const __u8 __kprog_a64_bf_kind = (KIND); \
 		__u8 __kprog_a64_bf_lsb = (LSB); \
 		__u8 __kprog_a64_bf_bits = (BITS); \
 		__u64 __kprog_a64_bf_mask = \

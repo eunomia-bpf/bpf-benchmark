@@ -35,7 +35,7 @@ typedef __u64 kprog_arm64_store_u64_unaligned __attribute__((aligned(1),may_alia
 	do { \
 		volatile __u8 *__kprog_a64_sb_addr = \
 			(volatile __u8 *)(ADDR); \
-		__u8 __kprog_a64_sb_width = (WIDTH); \
+		const __u8 __kprog_a64_sb_width = (WIDTH); \
 		__u64 __kprog_a64_sb_value = \
 			KPROG_ARM64_APPLY_WIDTH((VALUE), __kprog_a64_sb_width); \
 		if (__kprog_a64_sb_width == ARM64_WIDTH_64) \

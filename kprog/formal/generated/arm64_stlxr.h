@@ -20,8 +20,8 @@ _Static_assert(KPROG_ARM64_STLXR_HANDLED(ARM64_OP_STLXR), "arm64 stlxr coverage 
  */
 #define KPROG_ARM64_STLXR_VALUE_INTO(OUTPUT, OP, WIDTH, FAILURE, UNSUPPORTED)            \
 	do { \
-		__u64 __kprog_a64_stlxr_op = (OP); \
-		__u64 __kprog_a64_stlxr_width = (WIDTH); \
+		const __u64 __kprog_a64_stlxr_op = (OP); \
+		const __u64 __kprog_a64_stlxr_width = (WIDTH); \
 		__u64 __kprog_a64_stlxr_failure = !!(FAILURE); \
 		__u64 __kprog_a64_stlxr_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_stlxr_width); \
 		__u64 __kprog_a64_stlxr_result = 0; \

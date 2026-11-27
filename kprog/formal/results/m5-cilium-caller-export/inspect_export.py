@@ -13,8 +13,28 @@ with tarfile.open(fileobj=io.BytesIO(nested)) as request:
  ids=json.loads(get('source-identities.json'));original=json.loads(get('generated/artifacts.json'))
 assert source==(FORMAL/'c/Arm64CiliumCaller.c').read_bytes()
 assert sha(native)==original['native_sha256']
-header=ROOT/'kprog/arm64/arm64_sim_local_bpf.h';text=header.read_text()
-assert sha(header.read_bytes())==ids[str(header)]
+header=ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
+current_header_sha256=sha(header.read_bytes())
+captured_header_sha256=ids[str(header)]
+text=header.read_text()
+header_relation='current header byteexact to captured identity'
+qualifier_plan_sha256=None
+if current_header_sha256 != captured_header_sha256:
+ plan_path=ROOT/'kprog/results/arm64-loadtime-20261127/header-const-plan.json'
+ plan=json.loads(plan_path.read_text());relative=str(header.relative_to(ROOT))
+ row=next(x for x in plan['files'] if x['path']==relative)
+ assert row['before_sha256']==captured_header_sha256
+ assert row['after_sha256']==current_header_sha256
+ for declaration in (x for x in plan['declarations'] if x['path']==relative):
+  start=text.index('#define '+declaration['macro']+'(')
+  end=text.find('\n#define ',start+1)
+  if end<0:end=len(text)
+  macro=text[start:end]
+  assert macro.count(declaration['after'])==1
+  text=text[:start]+macro.replace(declaration['after'],declaration['before'],1)+text[end:]
+ assert sha(text.encode())==captured_header_sha256
+ header_relation='exact inverse of approved const declarations restores captured header bytes'
+ qualifier_plan_sha256=sha(plan_path.read_bytes())
 start=text.index('#define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG)')
 end=text.index('\n#define ARM64_SIM_L_WRITE_REG_MAP_PTR',start)
 expected=text[start:end].strip().replace('ARM64_SIM_L_WRITE_REG_PTR_TAG','KPROG_ARM64_ORIGINAL_LINK_WRITE',1)
@@ -47,6 +67,6 @@ for token in dep.split(':',1)[1].split():
  path=Path(token);path=path if path.is_absolute() else FORMAL/path
  assert path.is_file(),str(path)
  inputs[str(path.resolve())]=sha(path.read_bytes())
-record={'archive':str(archive),'archive_sha256':sha(archive.read_bytes()),'request_member_sha256':sha(nested),'native_sha256':sha(native),'literal_c_sha256':sha(source),'original_local_header_sha256':sha(header.read_bytes()),'export_sha256':sha(reconstructed),'export_bytes':len(reconstructed),'module_parts':len(package['parts']),'declarations':package['declarations'],'kernel_only_ast_data':package['kernel_only_ast_data'],'source_and_packaging_byteequal':True,'frontend_inputs_now':inputs,'scope':'One real retained Cilium caller complete source,existing extraction bindings and original pointer-writer statements inline for LINK. Other operations keep existing formal extraction interfaces;whole-function fidelity/prefix simulation is not asserted. Captured local header matches exactly;all current frontend inputs are recorded separately. Eight BPF-helper sites are not memcpy evidence;loaded symbol/relocation remains explicit.'}
+record={'archive':str(archive),'archive_sha256':sha(archive.read_bytes()),'request_member_sha256':sha(nested),'native_sha256':sha(native),'literal_c_sha256':sha(source),'original_local_header_sha256':captured_header_sha256,'current_local_header_sha256':current_header_sha256,'local_header_relation':header_relation,'local_header_qualifier_plan_sha256':qualifier_plan_sha256,'export_sha256':sha(reconstructed),'export_bytes':len(reconstructed),'module_parts':len(package['parts']),'declarations':package['declarations'],'kernel_only_ast_data':package['kernel_only_ast_data'],'source_and_packaging_byteequal':True,'frontend_inputs_now':inputs,'scope':'One real retained Cilium caller complete source,existing extraction bindings and original pointer-writer statements inline for LINK. Other operations keep existing formal extraction interfaces;whole-function fidelity/prefix simulation is not asserted. Original inline LINK is checked against captured header bytes;current readonly header evolution,when present,must exactly invert the approved const-only plan to those bytes. All current frontend inputs are recorded separately. Eight BPF-helper sites are not memcpy evidence;loaded symbol/relocation remains explicit.'}
 Path(__file__).with_name('artifact.json').write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps({k:v for k,v in record.items() if k!='frontend_inputs_now'},indent=2))

@@ -18,8 +18,8 @@
 	do { \
 		__u64 __kprog_a64_mbo_imm = (IMM); \
 		__u64 __kprog_a64_mbo_index = (INDEX); \
-		int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0; \
-		int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0; \
+		const int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0; \
+		const int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0; \
 		__u64 __kprog_a64_mbo_base = \
 			__kprog_a64_mbo_prepost ? 0ULL : __kprog_a64_mbo_imm; \
 		__u64 __kprog_a64_mbo_result = __kprog_a64_mbo_base; \

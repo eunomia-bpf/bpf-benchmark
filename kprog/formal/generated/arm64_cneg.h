@@ -24,10 +24,10 @@ _Static_assert(KPROG_ARM64_CNEG_HANDLED(ARM64_OP_CNEG), "arm64 cneg coverage dri
  */
 #define KPROG_ARM64_CNEG_VALUE_INTO(OUTPUT, OP, VALUE, TAKEN, WIDTH, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_cneg_op = (OP); \
+		const __u64 __kprog_a64_cneg_op = (OP); \
 		__u64 __kprog_a64_cneg_value = (VALUE); \
 		int __kprog_a64_cneg_taken = (TAKEN) ? 1 : 0; \
-		__u64 __kprog_a64_cneg_width = (WIDTH); \
+		const __u64 __kprog_a64_cneg_width = (WIDTH); \
 		__u64 __kprog_a64_cneg_wmask = KPROG_ARM64_WIDTH_MASK(__kprog_a64_cneg_width); \
 		__u64 __kprog_a64_cneg_result = 0; \
  \

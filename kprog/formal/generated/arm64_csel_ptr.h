@@ -26,8 +26,8 @@ _Static_assert(ARM64_OP_CSNEG == 69U, "arm64 csel-ptr code drift");
  * ARM64_SIM_L_WRITE_REG_WIDTH (dropping the tag).
  */
 #define KPROG_ARM64_CSEL_PTR_TAG_PATH_DECL(NAME, OP, WIDTH, UNSUPPORTED) \
-		__u64 __kprog_a64_cp_op = (OP); \
-		__u64 __kprog_a64_cp_width = (WIDTH); \
+		const __u64 __kprog_a64_cp_op = (OP); \
+		const __u64 __kprog_a64_cp_width = (WIDTH); \
 		__u64 NAME = 0; \
  \
 		switch (__kprog_a64_cp_op) { \

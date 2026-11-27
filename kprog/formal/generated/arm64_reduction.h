@@ -30,7 +30,7 @@ _Static_assert(KPROG_ARM64_REDUCTION_HANDLED(ARM64_OP_UADDLV), "arm64 reduction 
  * The result is the raw 64-bit value; the caller stores it back into v0.
  */
 #define KPROG_ARM64_REDUCTION_VALUE_DECL(NAME, OP, VALUE, UNSUPPORTED) \
-		__u64 __kprog_a64_red_op = (OP); \
+		const __u64 __kprog_a64_red_op = (OP); \
 		__u64 __kprog_a64_red_value = (VALUE); \
 		__u64 __kprog_a64_red_out = 0; \
 		__u64 NAME = 0; \

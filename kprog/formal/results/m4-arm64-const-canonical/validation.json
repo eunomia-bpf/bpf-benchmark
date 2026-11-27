@@ -1,0 +1,639 @@
+{
+  "utc": "2026-11-27T15:18:05Z",
+  "authority": "PERF2026-11-27T15:10:40Z/allguestsandactualreplayended;coordinator12:19Z",
+  "plan_sha256": "58fda2af09788761f6a3558374e1c4d62cc801bd61001e024ce057a91785d4de",
+  "declarations": [
+    {
+      "path": "kprog/formal/generated/arm64_adrp.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_ADRP_TAG_INTO",
+      "line": 29,
+      "before": "__u8 __kprog_a64_adrp_op = (OP);",
+      "after": "const __u8 __kprog_a64_adrp_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_bitfield.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_BITFIELD_VALUE_INTO",
+      "line": 38,
+      "before": "__u8 __kprog_a64_bf_kind = (KIND);",
+      "after": "const __u8 __kprog_a64_bf_kind = (KIND);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_branch.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_BRANCH_TEST_DECL",
+      "line": 34,
+      "before": "__u64 __kprog_a64_br_kind = (KIND);",
+      "after": "const __u64 __kprog_a64_br_kind = (KIND);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_cneg.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_CNEG_VALUE_INTO",
+      "line": 27,
+      "before": "__u64 __kprog_a64_cneg_op = (OP);",
+      "after": "const __u64 __kprog_a64_cneg_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_cneg.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_CNEG_VALUE_INTO",
+      "line": 30,
+      "before": "__u64 __kprog_a64_cneg_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_cneg_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_csel.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_CSEL_VALUE_INTO",
+      "line": 47,
+      "before": "__u64 __kprog_a64_csel_op = (OP);",
+      "after": "const __u64 __kprog_a64_csel_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_csel_ptr.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_CSEL_PTR_TAG_PATH_DECL",
+      "line": 29,
+      "before": "__u64 __kprog_a64_cp_op = (OP);",
+      "after": "const __u64 __kprog_a64_cp_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_csel_ptr.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_CSEL_PTR_TAG_PATH_DECL",
+      "line": 30,
+      "before": "__u64 __kprog_a64_cp_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_cp_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_extrev.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_EXTREV_VALUE_INTO",
+      "line": 43,
+      "before": "__u64 __kprog_a64_ext_op = (OP);",
+      "after": "const __u64 __kprog_a64_ext_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_extrev.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_EXTREV_VALUE_INTO",
+      "line": 47,
+      "before": "__u64 __kprog_a64_ext_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_ext_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_ldrsx.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_LDRSX_LOAD_WIDTH_INTO",
+      "line": 31,
+      "before": "__u64 __kprog_a64_ldrsx_op = (OP);",
+      "after": "const __u64 __kprog_a64_ldrsx_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_ldrsx_op.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_LDRSX_SXOP_INTO",
+      "line": 25,
+      "before": "__u64 __kprog_a64_ldrsx_sxop = (OP);",
+      "after": "const __u64 __kprog_a64_ldrsx_sxop = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_bytes.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_LOAD_BYTES_OFFSET_INTO",
+      "line": 53,
+      "before": "__u8 __kprog_a64_lb_width = (WIDTH);",
+      "after": "const __u8 __kprog_a64_lb_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_tag.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_LOAD_TAG_PRESERVE_INTO",
+      "line": 23,
+      "before": "__u64 __kprog_a64_lt_op = (OP);",
+      "after": "const __u64 __kprog_a64_lt_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_tag.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_LOAD_TAG_PRESERVE_INTO",
+      "line": 25,
+      "before": "__u64 __kprog_a64_lt_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_lt_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mem_offset.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MEM_OFFSET_INTO",
+      "line": 21,
+      "before": "int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0;",
+      "after": "const int __kprog_a64_mbo_prepost = (PREPOST) ? 1 : 0;"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mem_offset.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MEM_OFFSET_INTO",
+      "line": 22,
+      "before": "int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0;",
+      "after": "const int __kprog_a64_mbo_has_index = (HAS_INDEX) ? 1 : 0;"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mod.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOD_VALUE_INTO",
+      "line": 54,
+      "before": "__u8 __kprog_a64_mod = (MOD);",
+      "after": "const __u8 __kprog_a64_mod = (MOD);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mod.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOD_VALUE_INTO",
+      "line": 55,
+      "before": "__u8 __kprog_a64_mod_shift = (SHIFT);",
+      "after": "const __u8 __kprog_a64_mod_shift = (SHIFT);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mod.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOD_VALUE_INTO",
+      "line": 56,
+      "before": "__u8 __kprog_a64_mod_amount = \\\n\t\t\t(__u8)(__kprog_a64_mod_shift & \\\n\t\t\t      ((WIDTH) == ARM64_WIDTH_32 ? 31U : 63U));",
+      "after": "const __u8 __kprog_a64_mod_amount = \\\n\t\t\t(__u8)(__kprog_a64_mod_shift & \\\n\t\t\t      ((WIDTH) == ARM64_WIDTH_32 ? 31U : 63U));"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mov.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOV_PTR_TAG_PATH_DECL",
+      "line": 28,
+      "before": "__u64 __kprog_a64_mov_op = (OP);",
+      "after": "const __u64 __kprog_a64_mov_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mov.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOV_PTR_TAG_PATH_DECL",
+      "line": 29,
+      "before": "__u64 __kprog_a64_mov_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_mov_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_movk.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MOVK_INSERT_DECL",
+      "line": 28,
+      "before": "__u64 __kprog_a64_movk_shift = (SHIFT);",
+      "after": "const __u64 __kprog_a64_movk_shift = (SHIFT);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mul.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_MUL_VALUE_INTO",
+      "line": 50,
+      "before": "__u64 __kprog_a64_mul_op = (OP);",
+      "after": "const __u64 __kprog_a64_mul_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_orn.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_ORN_VALUE_DECL",
+      "line": 26,
+      "before": "__u64 __kprog_a64_orn_op = (OP);",
+      "after": "const __u64 __kprog_a64_orn_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_orn.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_ORN_VALUE_DECL",
+      "line": 29,
+      "before": "__u64 __kprog_a64_orn_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_orn_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_pair_load_tag.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO",
+      "line": 25,
+      "before": "__u64 __kprog_a64_plt_op = (OP);",
+      "after": "const __u64 __kprog_a64_plt_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_pair_load_tag.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO",
+      "line": 28,
+      "before": "__u64 __kprog_a64_plt_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_plt_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_reduction.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_REDUCTION_VALUE_DECL",
+      "line": 33,
+      "before": "__u64 __kprog_a64_red_op = (OP);",
+      "after": "const __u64 __kprog_a64_red_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_shift.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_SHIFT_VALUE_INTO",
+      "line": 37,
+      "before": "__u64 __kprog_a64_shift_op = (SHIFT);",
+      "after": "const __u64 __kprog_a64_shift_op = (SHIFT);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_shift.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_SHIFT_VALUE_INTO",
+      "line": 40,
+      "before": "__u64 __kprog_a64_shift_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_shift_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_shift.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_SHIFT_VALUE_INTO",
+      "line": 41,
+      "before": "int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32;",
+      "after": "const int __kprog_a64_shift_32 = __kprog_a64_shift_width == ARM64_WIDTH_32;"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_stlxr.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_STLXR_VALUE_INTO",
+      "line": 23,
+      "before": "__u64 __kprog_a64_stlxr_op = (OP);",
+      "after": "const __u64 __kprog_a64_stlxr_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_stlxr.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_STLXR_VALUE_INTO",
+      "line": 24,
+      "before": "__u64 __kprog_a64_stlxr_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_stlxr_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_store_bytes.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_STORE_BYTES",
+      "line": 38,
+      "before": "__u8 __kprog_a64_sb_width = (WIDTH);",
+      "after": "const __u8 __kprog_a64_sb_width = (WIDTH);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_unary.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_UNARY_VALUE_INTO",
+      "line": 29,
+      "before": "__u64 __kprog_a64_un_op = (OP);",
+      "after": "const __u64 __kprog_a64_un_op = (OP);"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_unary.h",
+      "owner": "FORMAL",
+      "macro": "KPROG_ARM64_UNARY_VALUE_INTO",
+      "line": 31,
+      "before": "__u64 __kprog_a64_un_width = (WIDTH);",
+      "after": "const __u64 __kprog_a64_un_width = (WIDTH);"
+    }
+  ],
+  "files": [
+    {
+      "path": "kprog/formal/generated/arm64_adrp.h",
+      "before_sha256": "72f1646a83089f36b5756c7e7584eeb20bde6a6a5f50a4750fa631761a88d6fc",
+      "after_sha256": "30292ff8a6ab9da663cc72a3de5c139f8f29a8591825b7648a26e86e76427180",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_bitfield.h",
+      "before_sha256": "f03544fe8f083425c7ee96504f60e8208c619e3490fd93382d830e6ef28def0d",
+      "after_sha256": "2b3c15fe73c1b161623581b5fa946ee09440770fc2a170e42248f534c2613490",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_branch.h",
+      "before_sha256": "30a73f00317cb7cf0f5f790ba18d4726d8123622609a06b3aaddc4f9a08b508d",
+      "after_sha256": "55c536d50553aceaf96b61148c8cc2a73f4f4a7506304036dc3cf14ca13ebb39",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_cneg.h",
+      "before_sha256": "1984e0e602495a05a45fcb143966446bee9f2ea571bc858e0549336d1bafe4d8",
+      "after_sha256": "f45aefbd2b7e8fde7a8e5c9ba6ce2667e6960fc9dea3c7b515934dff915a8c3a",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_csel.h",
+      "before_sha256": "3c3c66663823b1f3d37b628bd62cc631e14346d983e90b7499c2c06bf99addda",
+      "after_sha256": "816f7a34fbbabacdf9b128354f099d5510caeb48d4e0da4c4120a26c54654913",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_csel_ptr.h",
+      "before_sha256": "cc3b8d774ea13039869b7d3360974d882a712a554f172a368f3eb33b8d8f16c6",
+      "after_sha256": "0ed1884c9d7d789b10c210d247c02d8a434c2f80158fa1262cb1b41c76ac3051",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_extrev.h",
+      "before_sha256": "9b4392689eec7960b13d21631be4174a62579d224b6c9b7f671c9ec5873701e3",
+      "after_sha256": "6cce55fcc1761c6f50269ed6f5b8b550fc9065e27b3730b3ca7726e4c797ee2d",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_ldrsx.h",
+      "before_sha256": "b65b0bc5f8f63019be989ec45977d05fd9caa8e7ef2f61a738a3eab622b585fe",
+      "after_sha256": "0822e4b3fc3a61aeb73027f96f76f2493808e42f36a59dae2e13a6c5b4d14009",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_ldrsx_op.h",
+      "before_sha256": "795c97c831b96935901b218f622a14df52cf10ccac87f745e15e4a842522bca1",
+      "after_sha256": "dc83baad8862163c41bcfea6d416dda615c340491b671fecf6ccdf8f302e1862",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_bytes.h",
+      "before_sha256": "7dac8d2d17f11a6981ed08e7c685cbd59015dfed3df1d80d540090a03b643e08",
+      "after_sha256": "8039cf12ea310511f2de1fff9b3a0a952e14061a9cebbe7afe7001d18ff489d6",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_load_tag.h",
+      "before_sha256": "04e8b4e96b8d28ea516382669470e1717759247c0a7d0d1bd39f7110923db540",
+      "after_sha256": "10be30ec174cb62ad001c32f18d92770f1deda068c654132c4a577fe6d3cc318",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mem_offset.h",
+      "before_sha256": "6511f62bdaa2bf06ce7c01b5d2e1b0a99dd684b6a603f8eafbb175dde8a0bde2",
+      "after_sha256": "0bad72265ef9f192981280a24912f024893f4e17fdee65f8f0bfa19be60799dc",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mod.h",
+      "before_sha256": "f0182fbe97671c04e678cfb9331f8f8e333fe22cda20d58da3811dd9efe1ef3b",
+      "after_sha256": "327af93a1c716259d3806ecd867ec032c36edc9f8cacb971c90d615285dd7764",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mov.h",
+      "before_sha256": "31cbc3557fcad8ff7250533071cf504618411242f7520c0fae9bef3bf9370b5f",
+      "after_sha256": "49441db011ee509dfc07ac7510d107551462a10d3599567c33cf659cf508ce89",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_movk.h",
+      "before_sha256": "d7d5ee13880d241c8bbf6239331a38123c1dc278782954f2d0d9390a831f2913",
+      "after_sha256": "3cd4076a9bb81cdf490670177f7c5f76dd497bd12f0b517a9f5196b90cd1bc28",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_mul.h",
+      "before_sha256": "f5dae43160d252c2561473084a2f0ccf89eb344cbf0c2a749b759c7269a947e3",
+      "after_sha256": "40c87cab735b2b48a6251b2b9f4b1d0721a593a6c8423c293a3d2e725955f6ad",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_orn.h",
+      "before_sha256": "89ac7496d1b5d47572ad3c97bee4bebdf3cea1dad811666ececdb4bb85c73e5a",
+      "after_sha256": "6f0ec8779946400493c188c120ccc747bee710a7c769b4e125f312dff1de9dd5",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_pair_load_tag.h",
+      "before_sha256": "08e05fb1dc91f28eec51a934105f193420692ec468d0c0a49c811a9f213d01e1",
+      "after_sha256": "8a4ef71533372cbf6cf05c6e16da1a0d68c27bada44bf75647f460a6db8bf561",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_reduction.h",
+      "before_sha256": "e4eb731303bbf858119eb88811c88c62a21f0a3b27b918b98d85c1bd362619d6",
+      "after_sha256": "612cccde5bb81aae1e364fdf70079f6087367c3eca7137cb9e2a3d340baad804",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_shift.h",
+      "before_sha256": "9248dee327698bc8fb6a444570a8dbe01470cab5f6aa082a80382937f8f3e693",
+      "after_sha256": "0f6cdeb7942d9b5d17a667e18737f16d4741505cd80a4ceb0a41d1a4e095088a",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_stlxr.h",
+      "before_sha256": "9d16330fbb71a49aaba7dd66e0019ac5a014d255d5593c8b52eebd65cd0ff09d",
+      "after_sha256": "5f4fef2eaf54fc0aac1b14a6afa82d28212378546f624d3967a1fd2e0725728d",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_store_bytes.h",
+      "before_sha256": "5faf28ab367acdf285b19f6b0192c262a914272178a0b97ac16025453ea6cba1",
+      "after_sha256": "b1ce8c3a005c75733b80882111fcf0925cce634d1c93f88e5f81ee8a93261730",
+      "working_diff_from_HEAD": false
+    },
+    {
+      "path": "kprog/formal/generated/arm64_unary.h",
+      "before_sha256": "bf7b4be7a2652cdf1ab2dce693c50be74258fc7d1e79234d4bfb957d23fe09f0",
+      "after_sha256": "1e46047d8aadf5b408fc643e89f55e3c26c2e356b711f390318d542e2f70a419",
+      "working_diff_from_HEAD": false
+    }
+  ],
+  "source_change": "exact37 const additions/23 owned canonical headers only",
+  "validation": "all Clight file hashes unchanged after exact const deltas;default root PASS;captured/canonical caller identities checked separately",
+  "receipts": {
+    "export1": {
+      "command": [
+        "make",
+        "-j1",
+        "clight-sources"
+      ],
+      "exit": 0,
+      "seconds": 47.2252311706543,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 2.6921651363372803,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "artifact1": {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "results/m5-cilium-caller-export/inspect_export.py"
+      ],
+      "exit": 0,
+      "seconds": 0.5083973407745361,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "exported_lean_files": 61,
+  "clight_byteidentical": true,
+  "full_jobs": 1484,
+  "artifact": {
+    "archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/service.tar.gz",
+    "archive_sha256": "c93a211df6f32ccf524865057ae164a0ea918bc6e14ab7c694a07d28d83093dd",
+    "request_member_sha256": "6951ad71c8137b1a224c5f4d466ee396027f9e18b1ffe3422b31e7f0f98a368e",
+    "native_sha256": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230",
+    "literal_c_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_local_header_sha256": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+    "current_local_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "local_header_relation": "exact inverse of approved const declarations restores captured header bytes",
+    "local_header_qualifier_plan_sha256": "58fda2af09788761f6a3558374e1c4d62cc801bd61001e024ce057a91785d4de",
+    "export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "export_bytes": 26564297,
+    "module_parts": 37,
+    "declarations": 37519,
+    "kernel_only_ast_data": true,
+    "source_and_packaging_byteequal": true,
+    "frontend_inputs_now": {
+      "/workspaces/repository/kprog/formal/c/Arm64CiliumCallerUnit.c": "39b142dd2b69e9891380ed8d2b3277390d722257687f1f18a3da794d6a3d1e23",
+      "/usr/include/stdc-predef.h": "8db4f65e62cade8ae4d9b77960ee6aee093255acc1b637e3fb37d79179733b15",
+      "/workspaces/repository/kprog/formal/c/ProgramSections.h": "212ca001c75400b4f1eb9f8385d2233e3f693fda6135dbde0a6069111e7cd7af",
+      "/workspaces/repository/kprog/formal/c/Platform.h": "7e849c24b4e9850cf54493552c8bba6f62c5c466697575e45c1e291a0ba87201",
+      "/usr/include/linux/types.h": "4152b3c5d095f5cf0adf5cc13ee0670e737eb7c4efef5fa08e9d1eb87e68ed78",
+      "/usr/include/x86_64-linux-gnu/asm/types.h": "b6bdcd528bce555b2ecb58e8a1624e3e13e09312c31318023c4e86b957e2b01f",
+      "/usr/include/asm-generic/types.h": "09b4477d655ddd2c5657e83a0761700d6706f012c7365f310a6b0a6696936a10",
+      "/usr/include/asm-generic/int-ll64.h": "eb8b891e775ebb50af0353fdcbc625854fd98780399b3a57a404d36af6c29749",
+      "/usr/include/x86_64-linux-gnu/asm/bitsperlong.h": "8ef5efeb3f25ae47ce03ba892f5caf77631b1257715fc12de72c21e61db17e43",
+      "/usr/include/asm-generic/bitsperlong.h": "55995b9cdfd3fcec2c6ac1f698a7405e99ff86b94ddf3124ba55485c95e6db9c",
+      "/usr/include/linux/posix_types.h": "bc68636a383418f235d3457e4b21cf27cefc7c7f3edea4c1f6706f1018db196f",
+      "/workspaces/repository/vendor/libbpf/include/uapi/linux/stddef.h": "c2c7d115bf7e719ecd8634319f218273d0b1ebebb0bc7036bfcd1e340a749d9c",
+      "/usr/include/x86_64-linux-gnu/asm/posix_types.h": "983090c7e5e7eaff27114ec216889a8ad26e40ad8fbb78b8ae6c09391dc61543",
+      "/usr/include/x86_64-linux-gnu/asm/posix_types_64.h": "5cdabc01dac0a3e9731ac16353210a615ca44e85b6ec9eafd2e79206e0b26c76",
+      "/usr/include/asm-generic/posix_types.h": "8d273280f282bf9e810f00ad9905977161dec3f103ef789892ceec8c453e1398",
+      "/workspaces/repository/vendor/libbpf/src/bpf_helpers.h": "04575f99655917175eef6f44ecc50c081f4e4bfe9b1242d5ecc82f2a57cb3865",
+      "/workspaces/repository/vendor/libbpf/src/bpf_helper_defs.h": "05e718b9297813159527482b0174fcb5a3e705a4bea836cd46af206857fd3697",
+      "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+      "/workspaces/repository/kinsn/module/include/native_lab_input.h": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918",
+      "/usr/include/stdio.h": "b4f6709d12c8493e2a42f740845abe2994deb27fc78fb85fcaa6e27228a87d62",
+      "/usr/include/x86_64-linux-gnu/bits/libc-header-start.h": "e86638082f9ce98c82e3022018fa5be175473445c824fe17bd32bf9668582368",
+      "/usr/include/features.h": "940d486d050fc87420d8ffc008e17f31ffb04467534ad1b039ed25abc52382f9",
+      "/usr/include/features-time64.h": "345acb98767d04277e413c4951fbb199b0500be23d43cddf17c6cd9fb319a8da",
+      "/usr/include/x86_64-linux-gnu/bits/wordsize.h": "716d8459074e2a082d65a28192b32eddbfd7587348372395b1c283a723ae4c18",
+      "/usr/include/x86_64-linux-gnu/bits/timesize.h": "8b686ad5fec2c4d6f759a6594d7c216337774d059623677547b7e182cc5269ae",
+      "/usr/include/x86_64-linux-gnu/sys/cdefs.h": "173afb522c6877dda3be1c93742c2061cd6e748ce395d2b3ae833fb49bfbfc4f",
+      "/usr/include/x86_64-linux-gnu/bits/long-double.h": "40367287cd437d78a05313f6ec52cb0f0a711e1b6711fdcc3699bf2bf28e810f",
+      "/usr/include/x86_64-linux-gnu/gnu/stubs.h": "ef444295a0a9e8f5c40918399a00cc91ba0bd79774110cdf6e652baa6cfadb2e",
+      "/usr/include/x86_64-linux-gnu/gnu/stubs-64.h": "0b6ab3e2ed3ba79b30fe6ba81a68fc41f57965b8d56662763633431b703c9289",
+      "/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h": "9efc696d6c7eb8bb1831b149c6a92f88a775809cd63e4007312b617915f81188",
+      "/usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h": "5a443943e67d7bab17203591b4ccb508757587d9b955ee883a053d755ed09321",
+      "/usr/include/x86_64-linux-gnu/bits/types.h": "371847ed3adab1c19db392034f6a22407d321b1dc5f2440563f4b0b8b6c5386b",
+      "/usr/include/x86_64-linux-gnu/bits/typesizes.h": "047ee5ab17a95364c4b0f14c3eb0750e84e457c408f9a65a6c225ece585e0c14",
+      "/usr/include/x86_64-linux-gnu/bits/time64.h": "2be9170ce3621ea6062f10edef68bbc2db09bb454ec4397534263dd37b8f1f6a",
+      "/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h": "603e58ab31ed75b7e0ab09a2ca94e99955f7fbc63310466321ce27c906227eb4",
+      "/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h": "c561df72d5b987ccbd022059fdb1bcb6899c3e94b403997a0576ef3e1afb0f94",
+      "/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h": "8afae3abf006beb39fd9d4d4bae38745cdf08a91e6217ddf25833c8d4b04751b",
+      "/usr/include/x86_64-linux-gnu/bits/types/__FILE.h": "26c909942e8a6bc82725e9c402f393aed9e32d94190257ddf71e1b5f819b4e5e",
+      "/usr/include/x86_64-linux-gnu/bits/types/FILE.h": "37515f78be386f2edad4746f2947c928f480728c56d9a94e25302ebbdaef3c96",
+      "/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h": "79ad5bbe87e2be78d83990f8e28e0b20163e7ee03b733dc7cbea4eed94b8314f",
+      "/usr/include/x86_64-linux-gnu/bits/stdio_lim.h": "509fc0d1fba9f06fe85d61b6b9c0b2208c8fe8e63af55fcfdd7e4ad5eabe6927",
+      "/usr/include/x86_64-linux-gnu/bits/floatn.h": "273e3eac154e0fd777b8e7c6edd9cd64af69a0d215370da12243d5b22378c2dc",
+      "/usr/include/x86_64-linux-gnu/bits/floatn-common.h": "b31050f2b142f1b5bedfa97158b1baa06575dd0d12dde4531b3815b57069e3da",
+      "/usr/include/stdlib.h": "21500d5cb6062df47d6507baef6111cc951ceece4e2df26289a420fcf05ebec4",
+      "/usr/include/x86_64-linux-gnu/bits/stdlib-float.h": "ba3d25100d93a324122c4c8121759c689607656aedf0efa148f0bfe8826c9794",
+      "/workspaces/repository/kprog/arm64/arm64_sim.h": "6f5ea8b98f7c5f0b00e98aacc423a9600ea4136d0de07ebfe070a93a9b5f51bd",
+      "/workspaces/repository/kprog/formal/generated/arm64_decode.h": "c72bcc47b9a4d0a5481089d6b89da2bf8649d7d5ec531f877ecaaea4cc7ca4e6",
+      "/workspaces/repository/kprog/formal/generated/arm64_aux.h": "157bb24a73de350f3098579df35841b0ad729e2ae1a786106353b6939f0bc748",
+      "/workspaces/repository/kprog/formal/generated/arm64_width.h": "4e9a7903d54437fb4ab25f21b8eeb28a855dd7cecd43dd7a3229f3bf9a6d7a0e",
+      "/workspaces/repository/kprog/formal/generated/abi_load.h": "c19f12c7a53673e7924339abbd888675fc32189c7f880b680e9346f8c125a7d0",
+      "/workspaces/repository/kprog/formal/generated/arm64_cond.h": "2b81d2e273495985471ae865136ddd3f4f422067b81789a0a2cce34052617168",
+      "/workspaces/repository/kprog/formal/generated/ptr_add.h": "df56d528ecc8e5e377794f22d3aa7d660cd6854f49b0ce71ca5b540e6b798940",
+      "/workspaces/repository/kprog/formal/generated/arm64_flags.h": "6e19692d7e8af016b99e2f30bb7508fead052e7f903c41171251b17850bf6e93",
+      "/workspaces/repository/kprog/formal/generated/arm64_alu_result.h": "46a4823435a3271e6f0319d89022813162b90190c9adfc9c1beea565e777dce4",
+      "/workspaces/repository/kprog/formal/generated/arm64_alu_handler.h": "a1a858acc2a8f285b2594be4ca3c5795dffd998f128c2dc69d05ea816ab0c2ad",
+      "/workspaces/repository/kprog/formal/generated/arm64_flag_handler.h": "df51bf430cc2ab3353243b9ecf0b0e84fa468a292dc20deadb2408a55f625eed",
+      "/workspaces/repository/kprog/formal/generated/arm64_logic_flag_handler.h": "b3cfada43a045029f59c695a0b070c19910288f36201efb7172deaa26c553321",
+      "/workspaces/repository/kprog/formal/generated/arm64_ccmp_handler.h": "b4f8fc4a7b04166e4e328402048eae109aaf36d6a9494c1fa2ee303c18b97f45",
+      "/workspaces/repository/kprog/formal/generated/arm64_ccmp_decode.h": "092352151105f272d00651144ad28e19fb8ed8b8c6bf76b3449464fb870d1876",
+      "/workspaces/repository/kprog/formal/generated/arm64_mod.h": "327af93a1c716259d3806ecd867ec032c36edc9f8cacb971c90d615285dd7764",
+      "/workspaces/repository/kprog/formal/generated/arm64_alu_operand.h": "b3655de90a7a59bd1ca81e2f421f5060639ee1e0b53187bc2e82aae786ea9573",
+      "/workspaces/repository/kprog/formal/generated/arm64_alu_operand_select.h": "68b4a829db6980fec70f053f4a9f15fb3f024565d672d592c2feba237f01530b",
+      "/workspaces/repository/kprog/formal/generated/arm64_flag_operand.h": "6c99a0b1105ab22044f81beef478695f356a8c300effb70ec89ad4a4b48305d2",
+      "/workspaces/repository/kprog/formal/generated/arm64_dispatch_family.h": "e6e52690a4a19d278d27f32731e5be773b462f0e3c73c42523bdba7a3a46074a",
+      "/workspaces/repository/kprog/formal/generated/arm64_dispatch_singleton.h": "4874fbd243dbcbaa6b8f2ce36eec0ef5857ba7195d968835a740d584945cd76a",
+      "/workspaces/repository/kprog/formal/generated/arm64_imm_operand.h": "3edf65f07eba1f1ca3b0cdb74b7a2858f15d92f90db16d695aa3b09c41df64f8",
+      "/workspaces/repository/kprog/formal/generated/arm64_bitfield.h": "2b3c15fe73c1b161623581b5fa946ee09440770fc2a170e42248f534c2613490",
+      "/workspaces/repository/kprog/formal/generated/arm64_mul.h": "40c87cab735b2b48a6251b2b9f4b1d0721a593a6c8423c293a3d2e725955f6ad",
+      "/workspaces/repository/kprog/formal/generated/arm64_extrev.h": "6cce55fcc1761c6f50269ed6f5b8b550fc9065e27b3730b3ca7726e4c797ee2d",
+      "/workspaces/repository/kprog/formal/generated/arm64_csel.h": "816f7a34fbbabacdf9b128354f099d5510caeb48d4e0da4c4120a26c54654913",
+      "/workspaces/repository/kprog/formal/generated/arm64_csel_ptr.h": "0ed1884c9d7d789b10c210d247c02d8a434c2f80158fa1262cb1b41c76ac3051",
+      "/workspaces/repository/kprog/formal/generated/arm64_branch.h": "55c536d50553aceaf96b61148c8cc2a73f4f4a7506304036dc3cf14ca13ebb39",
+      "/workspaces/repository/kprog/formal/generated/arm64_branch_emit.h": "ca3d322f1f4bb3df84d08273b083b2b38fb53a670f955b95929d49c5ff78b6ea",
+      "/workspaces/repository/kprog/formal/generated/arm64_movk.h": "3cd4076a9bb81cdf490670177f7c5f76dd497bd12f0b517a9f5196b90cd1bc28",
+      "/workspaces/repository/kprog/formal/generated/arm64_shift.h": "0f6cdeb7942d9b5d17a667e18737f16d4741505cd80a4ceb0a41d1a4e095088a",
+      "/workspaces/repository/kprog/formal/generated/arm64_reduction.h": "612cccde5bb81aae1e364fdf70079f6087367c3eca7137cb9e2a3d340baad804",
+      "/workspaces/repository/kprog/formal/generated/x86_popcount.h": "98b1bcfedee0b28b540569080ab4d7a78b2c6d46b0e137e1992418247e921266",
+      "/workspaces/repository/kprog/formal/generated/arm64_unary.h": "1e46047d8aadf5b408fc643e89f55e3c26c2e356b711f390318d542e2f70a419",
+      "/workspaces/repository/kprog/formal/generated/arm64_cneg.h": "f45aefbd2b7e8fde7a8e5c9ba6ce2667e6960fc9dea3c7b515934dff915a8c3a",
+      "/workspaces/repository/kprog/formal/generated/arm64_orn.h": "6f0ec8779946400493c188c120ccc747bee710a7c769b4e125f312dff1de9dd5",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_offset.h": "0bad72265ef9f192981280a24912f024893f4e17fdee65f8f0bfa19be60799dc",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_index.h": "23cd13c4b0b9deffb9b799adfb222e9511514be6b696de996f43c0ee4701d3c0",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_index_value.h": "39a58eb1a52f399ffbc9c6c548fa1bfc3ad59badd4028473bc7c0577b37937b7",
+      "/workspaces/repository/kprog/formal/generated/arm64_reg_presence.h": "9d4d2a398bb91b262e478c3d388f957e613cf9e05044597ffa32edb6a5ffb90e",
+      "/workspaces/repository/kprog/formal/generated/arm64_reg_dispatch.h": "9304faea78d2da229dd7920135b49ac887fa6e4169e7a69fd111fe3241158471",
+      "/workspaces/repository/kprog/formal/generated/arm64_fmov.h": "42400724627a22397797d66cad617acc2868f6dff1807382a5eaf25d062caff2",
+      "/workspaces/repository/kprog/formal/generated/arm64_fmov_dest.h": "5ada3159243d87c5960a014f3ff09a69e46a4a48aa0cc3c7ca1685dc33a23d05",
+      "/workspaces/repository/kprog/formal/generated/arm64_load_bytes.h": "8039cf12ea310511f2de1fff9b3a0a952e14061a9cebbe7afe7001d18ff489d6",
+      "/workspaces/repository/kprog/formal/generated/arm64_store_bytes.h": "b1ce8c3a005c75733b80882111fcf0925cce634d1c93f88e5f81ee8a93261730",
+      "/workspaces/repository/kprog/formal/generated/arm64_byte_lane.h": "d13c21f614e807a0da673bfd6f4413a7890bbf68352ce803c8eaa294930b7e00",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_dispatch.h": "e43dcb10291c959d3583cc122d589e3a261c662e8c3d1361bc5cfa85dbe73e53",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_tag.h": "df779a5f46b36f1b9150b81786d6007e46e0028f05e5531da76aa4471f3517d7",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_arm.h": "d33dd983562393c8ad2b2c008e1e1270320b857705768a90e88f4b1f787fe710",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_arena.h": "8ef351d82b42d9bf0e8fb806836f8079d9016f83b8d91ec0bda6fc642bc04ff7",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_index.h": "722f1f2b98f7a0c44dc4d117610449e716b5a27681b65b18d592cd96f37ea2af",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_write_lanes.h": "4d2ff1bd4fceec597f1fa636b76cc4883af469434b2cbe6bbfcfcc8b08fb427f",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_write_tag_action.h": "cd89a10e172b57ab6e2b06a4a859bd7a55c436334d715cef4ee3f7a6d112b559",
+      "/workspaces/repository/kprog/formal/generated/arm64_stack_read_tag_source.h": "2a100cfb413347233afaee95d84fb6a1ef8f015992eb6ab1ae6016c6d040a787",
+      "/workspaces/repository/kprog/formal/generated/arm64_helper_arg_ptr.h": "c6ba192451c2860370d2c7ec06df7a2fe1a1e06f224a94b7915df4a77631d48c",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_base_src.h": "64c4248415dbfd6450138d6218c1b7bad69c14b07483e3711294ff432e7c6088",
+      "/workspaces/repository/kprog/formal/generated/arm64_dq_mem.h": "848210b37ee2ab90a5f778f9f18c647f4a40484c74fffb2218d4acb15797aaf9",
+      "/workspaces/repository/kprog/formal/generated/arm64_dq_mem_extra.h": "19d45473fd6692219e7ddcdd61997ac5d2e23e1569ffbd9b1e2bc92316fcc471",
+      "/workspaces/repository/kprog/formal/generated/arm64_pair_mem.h": "b74bd4cdab3c7651e138002fb6af8407ccc844de2faa7def7a690c26640eb69c",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_prepost.h": "417af3e04490b8e22b00a9035aa82a40acf022ae531f1372f66b98158fd69362",
+      "/workspaces/repository/kprog/formal/generated/arm64_vreg.h": "11607bf2858d00c8930161c8eef4305e098ae4bcd0afad6aab704cf316a08d7d",
+      "/workspaces/repository/kprog/formal/generated/arm64_vreg_field.h": "5d18d07424cd813cf01c1f069dc82aa52d6b0ec9f55439909f1e822186617022",
+      "/workspaces/repository/kprog/formal/generated/arm64_write_arm.h": "8202d47836e5a6ef66c06fdc07af84b8fe58e24c9aae4c109c21b9b8527c5c13",
+      "/workspaces/repository/kprog/formal/generated/arm64_mem_write_arm.h": "acb64b1c193a186d37214cb9ddd1bd2068df2b1f0699c6a1a3bbb3be4251b168",
+      "/workspaces/repository/kprog/formal/generated/arm64_adrp.h": "30292ff8a6ab9da663cc72a3de5c139f8f29a8591825b7648a26e86e76427180",
+      "/workspaces/repository/kprog/formal/generated/arm64_stlxr.h": "5f4fef2eaf54fc0aac1b14a6afa82d28212378546f624d3967a1fd2e0725728d",
+      "/workspaces/repository/kprog/formal/generated/arm64_mov.h": "49441db011ee509dfc07ac7510d107551462a10d3599567c33cf659cf508ce89",
+      "/workspaces/repository/kprog/formal/generated/arm64_ldrsx.h": "0822e4b3fc3a61aeb73027f96f76f2493808e42f36a59dae2e13a6c5b4d14009",
+      "/workspaces/repository/kprog/formal/generated/arm64_ldrsx_op.h": "dc83baad8862163c41bcfea6d416dda615c340491b671fecf6ccdf8f302e1862",
+      "/workspaces/repository/kprog/formal/generated/arm64_load_tag.h": "10be30ec174cb62ad001c32f18d92770f1deda068c654132c4a577fe6d3cc318",
+      "/workspaces/repository/kprog/formal/generated/arm64_pair_load_tag.h": "8a4ef71533372cbf6cf05c6e16da1a0d68c27bada44bf75647f460a6db8bf561",
+      "/workspaces/repository/kprog/arm64/arm64_sim_direct.h": "0694204d6372920a1bfb37841be08f0061eedbebdc3642b053c9aa331b2ccba1",
+      "/workspaces/repository/kprog/formal/c/Arm64ProgramBinding.h": "a81feca5abc76f34005aec5d0c283fd9d58cd4fa062ee8dbaf1f89cbe3501cd7",
+      "/workspaces/repository/kprog/formal/c/Arm64Program.h": "173019f1436b08c689cff46e6aa27535f7ea74a1e31a5c6e172713e5b7cbec36",
+      "/workspaces/repository/kprog/formal/c/Arm64Entry.h": "983b1113eb49932f0e853eed10baf600b9f66312bc52258932881922604a2cf7",
+      "/workspaces/repository/kprog/formal/c/Arm64Addressing.h": "8184650481d7867a95bd3cb5425a2819f3bfa7421dc51e2885ec3846ac3fcbae",
+      "/workspaces/repository/kprog/formal/c/Arm64Address.h": "2b26e8d138843cc973effd1c87fa921eb61cbcfa8b1b7b8bdd59ec28f54830b3",
+      "/workspaces/repository/kprog/formal/c/Arm64HelperCalls.h": "09e4cae8ac99687eafb31f64823967011c74b92990c7e730058e505a9af0dc8c",
+      "/workspaces/repository/kprog/formal/c/Arm64ProgramExpressions.h": "35f92399ddda4c675f9b3276907232190119a518ca6b3dc3ae51c0ad1f2fa4ab",
+      "/workspaces/repository/kprog/formal/c/Arm64OriginalLinkBinding.h": "8039a80e423b48389273baa729c1a6f6b79af2b00416ebc5fec233c4a88cace4",
+      "/workspaces/repository/kprog/formal/c/Arm64CiliumCaller.c": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f"
+    },
+    "scope": "One real retained Cilium caller complete source,existing extraction bindings and original pointer-writer statements inline for LINK. Other operations keep existing formal extraction interfaces;whole-function fidelity/prefix simulation is not asserted. Original inline LINK is checked against captured header bytes;current readonly header evolution,when present,must exactly invert the approved const-only plan to those bytes. All current frontend inputs are recorded separately. Eight BPF-helper sites are not memcpy evidence;loaded symbol/relocation remains explicit."
+  },
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

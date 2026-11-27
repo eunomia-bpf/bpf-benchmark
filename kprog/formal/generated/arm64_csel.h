@@ -44,7 +44,7 @@ _Static_assert(KPROG_ARM64_CSEL_HANDLED(ARM64_OP_CSNEG), "arm64 conditional-sele
  */
 #define KPROG_ARM64_CSEL_VALUE_INTO(OUTPUT, OP, SRC, SRC2, TAKEN, UNSUPPORTED) \
 	do { \
-		__u64 __kprog_a64_csel_op = (OP); \
+		const __u64 __kprog_a64_csel_op = (OP); \
 		__u64 __kprog_a64_csel_src = (SRC); \
 		__u64 __kprog_a64_csel_src2 = (SRC2); \
 		int __kprog_a64_csel_taken = (TAKEN) ? 1 : 0; \
