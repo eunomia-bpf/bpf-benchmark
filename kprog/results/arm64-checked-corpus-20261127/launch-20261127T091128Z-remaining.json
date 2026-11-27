@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-27T09:11:28Z",
+  "pid": 963634,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "remaining-apps"
+  ],
+  "revision": "62092f0d389e068ef030104fc234eb2da3c1a15a",
+  "predecessor_controller": 962047,
+  "predecessor_directory": "guest-20261127T090610Z",
+  "apps": [
+    "tetragon/observer",
+    "tracee/monitor"
+  ],
+  "scope": "Sequential remaining ARM stage2 baseline/post frozen1x10s statson functional checks via existingguest recipe and imageEX. Each outcome is archived and published byits controller. Fulltimingfrozen.",
+  "compiler_address_space_bytes": 51539607552
+}
