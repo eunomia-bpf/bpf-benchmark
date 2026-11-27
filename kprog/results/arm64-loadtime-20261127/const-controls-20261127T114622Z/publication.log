@@ -1,0 +1,9 @@
+[master c96dc5113] Record real ARM B frontend const-controls profile
+ 5 files changed, 4211 insertions(+)
+ create mode 100644 kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/archive.log
+ create mode 100644 kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/controller.json
+ create mode 100644 kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/publication.log
+ create mode 100644 kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/trace-totals.json
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   85b1962be..c96dc5113  master -> master

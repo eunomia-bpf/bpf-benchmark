@@ -103,7 +103,7 @@ try:
         overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
         source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)
         record['constant_selector_macros'] = [name for name, _ in macros]
-    if mode == 'const-controls':
+    if mode in {'const-controls', 'inline-mod'}:
         # Make immutable opcode/width/index decoders visible to C constant
         # folding before LLVM builds SSA for the expanded instruction body.
         names = set("""__a64_l_reg __a64_l_width __a64_alu_width __a64_alu_op
@@ -154,6 +154,22 @@ try:
         marker = ('#include '+json.dumps(str(ROOT/'kprog/arm64/arm64_sim_local_bpf.h'))).encode()
         overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
         assert source_bytes.count(marker) == 1
+        if mode == 'inline-mod':
+            # The actual emitter supplies pure modifier/shift/width decodes.
+            # Build the helper from the same canonical body before rebinding
+            # its output-form macro. VALUE is still evaluated exactly once.
+            overrides += b'''
+static __always_inline __u64 kprog_arm64_profile_mod(__u8 mod, __u64 value, __u8 shift, __u64 width)
+{
+    __u64 result;
+    KPROG_ARM64_MOD_VALUE_INTO(result, mod, value, shift, width);
+    return result;
+}
+#undef KPROG_ARM64_MOD_VALUE_INTO
+#define KPROG_ARM64_MOD_VALUE_INTO(OUTPUT, MOD, VALUE, SHIFT, WIDTH) \\
+    do { (OUTPUT) = kprog_arm64_profile_mod((MOD), (VALUE), (SHIFT), (WIDTH)); } while (0)
+'''
+            record['inline_pure_helpers'] = ['KPROG_ARM64_MOD_VALUE_INTO']
         source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)
     source.write_bytes(source_bytes)
     record['restored_source'] = str(source)
