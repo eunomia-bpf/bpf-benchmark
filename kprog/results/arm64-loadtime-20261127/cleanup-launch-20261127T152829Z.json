@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T15:28:29Z",
+  "pid": 1054862,
+  "source_revision": "40b1a12cbb0b6d910f2fb2150d75219be86e1459",
+  "log": "kprog/results/arm64-loadtime-20261127/cleanup-20261127T152829Z.log",
+  "scope": "Verify committed archive blobs and every raw file SHA/size/file-set before deleting completed BCC/Katran/Tetragon raw duplicates. Preserve archives/parts and all active header validation crossapp/Cilium/Tracee/header inputs plus OTel map-repair evidence.",
+  "controllers": [
+    "guest-20261127T012418Z",
+    "guest-20261127T020053Z",
+    "guest-20261127T091129Z"
+  ],
+  "cpu": 19,
+  "address_space_bytes": 51539607552
+}
