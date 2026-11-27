@@ -101,5 +101,25 @@
   "replay_frontend_seconds": 372.4419132990297,
   "replay_all_compiler_seconds": 382.85233930603135,
   "replay_frontend_max_rss_kib": 2548980,
-  "tetragon_sources_after_disk_edit": []
+  "tetragon_sources_after_disk_edit": [],
+  "tetragon_completed_requests_after_disk_edit": [
+    {
+      "archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/tetragon-observer/state/session-m37va1er/requests/50.success.tar.gz",
+      "generated_source_bytes": 166946,
+      "generated_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "generated_source_override_count": 0,
+      "identity_file_disk_worker_sha256": "ccf0c15d78b55c5aca4024319da680d6b4ecfa0547998ccf7ea1f88b5cecc6f7",
+      "actual_resident_worker_sha256": "ccf0c15d78b55c5aca4024319da680d6b4ecfa0547998ccf7ea1f88b5cecc6f7"
+    },
+    {
+      "archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/tetragon-observer/state/session-m37va1er/requests/51.success.tar.gz",
+      "generated_source_bytes": 45720,
+      "generated_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "generated_source_override_count": 0,
+      "identity_file_disk_worker_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
+      "actual_resident_worker_sha256": "ccf0c15d78b55c5aca4024319da680d6b4ecfa0547998ccf7ea1f88b5cecc6f7"
+    }
+  ],
+  "tetragon_headers_still_unchanged": true,
+  "tetragon_transition_evidence": "Completed request51 records the new disk worker hash, while its generated C contains zero override macros. serve loaded its worker once before the loop, so the actual resident source remains the preserved before-version. The earlier empty active-source list was only a between-request observation."
 }
