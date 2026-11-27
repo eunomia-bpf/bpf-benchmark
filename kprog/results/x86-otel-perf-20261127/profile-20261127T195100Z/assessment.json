@@ -1,0 +1,46 @@
+{
+  "image": "sha256:6e09c8fce19dc7af825a77b52f25b9811acbd0f5bb63179096d35edc0373c1f7",
+  "entry_counters": {
+    "baseline": {
+      "prog_id": "17",
+      "calls": 8341211,
+      "runtime_ns": 25374251680,
+      "ns_per_call": 3042.0345055412217
+    },
+    "post_rejit": {
+      "prog_id": "48",
+      "calls": 7887727,
+      "runtime_ns": 2009887511,
+      "ns_per_call": 254.812002367729
+    }
+  },
+  "diagnostic_ratio": 11.938348575712476,
+  "app_status": "ok",
+  "installed_unwinder": {
+    "baseline": {
+      "bytes": 21868,
+      "instructions": 5019,
+      "stack_operand_instructions": 637,
+      "calls_by_target": {
+        "__htab_map_lookup_elem": 8,
+        "bpf_map_lookup_elem": 72,
+        "bpf_probe_read_user": 24,
+        "trie_lookup_elem": 4
+      }
+    },
+    "post_rejit": {
+      "bytes": 14373,
+      "instructions": 3435,
+      "stack_operand_instructions": 747,
+      "calls_by_target": {
+        "kprog_htab_elem_k16": 4,
+        "bpf_map_lookup_elem": 72,
+        "bpf_probe_read_user": 24,
+        "trie_lookup_elem": 4,
+        "kprog_htab_elem_k8": 4
+      }
+    }
+  },
+  "observation": "Native unwinder, array helper and copy-from-user have zero resolved samples in this native window while baseline contains substantial samples. Different execution paths remain a live hypothesis, not proved by sample absence alone.",
+  "interpretation": "Retain the successful app result and 11.938x diagnostic. This10s result does not replace full timing or establish a causal/equal-work optimization gain. Host frontend and linked early-path comparisons agree; actual dynamic map/tail/counter observations follow without changing workload or image."
+}

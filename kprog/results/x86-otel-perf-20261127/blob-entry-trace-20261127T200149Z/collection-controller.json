@@ -1,0 +1,53 @@
+{
+  "controller_status": 0,
+  "files": {
+    "exit-unmodelled-gs": {
+      "bytes": 4,
+      "sha256": "690e07064753123c967bbac0180f32da6a753a5bd8b79a47644cef58e776d9f0"
+    },
+    "trace.log": {
+      "bytes": 283,
+      "sha256": "a95251e4e5b54b0234bd35b690f7b1a639da59e0567519e219d0753528283728"
+    },
+    "trace-symbol-retry.log": {
+      "bytes": 249,
+      "sha256": "ae4b82113da7e17b908d7ffd0ee614a93ec1e8b32a3cb167b3e68c98381ab82b"
+    },
+    "result.json": {
+      "bytes": 2785,
+      "sha256": "fdb07471d7b5121b2c8c8f57cec50526a57249d129a324155c61a3ac3906bec9"
+    },
+    "exit-initial": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "trace-initial.log": {
+      "bytes": 249,
+      "sha256": "6b96564183557e42fc8d8042d14301a003383a59f8c629514a1f903af0857a59"
+    },
+    "stubs.so": {
+      "bytes": 16888,
+      "sha256": "0de328c4216f68a3294b25c9852a2fa9de57e987904111be37ed40b16760637d"
+    },
+    "exit-symbol-retry": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "exit": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "trace-unmodelled-gs.log": {
+      "bytes": 7,
+      "sha256": "fc9274b0480aa3a048f458200f4eb167cbade82b6f13552a0896f95493f99898"
+    }
+  },
+  "verified_files": 10,
+  "parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/blob-entry-trace-20261127T200149Z/evidence.tar.gz",
+      "bytes": 5334,
+      "sha256": "a05e0033ca1c1398e806eb7e61162b5c0237ecd7744c33f983171fd3a9dacf46"
+    }
+  ]
+}

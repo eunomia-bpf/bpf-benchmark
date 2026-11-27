@@ -1,0 +1,157 @@
+{
+  "pid": 1147759,
+  "controller_status": 0,
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/blob-entry-trace-20261127T200149Z",
+  "ended_utc": "2026-11-27T20:04:42.946569+00:00",
+  "scope": "Actual captured linked entry with deterministic helper, per-CPU array and native ABI model. Early paths only; no live guest/full-work/tail-transfer equivalence claim.",
+  "initial_failures": {
+    "missing_boot_helper_symbol": 1,
+    "missing_module_symbol": 1,
+    "unmodelled_kernel_GS": 139
+  },
+  "result": {
+    "returns": [
+      0,
+      -1
+    ],
+    "targets": [
+      {
+        "offset": 10,
+        "names": [
+          "bpf_get_current_pid_tgid",
+          "bpf_get_current_pid_tgid"
+        ],
+        "stub": "bpf_get_current_pid_tgid"
+      },
+      {
+        "offset": 25,
+        "names": [
+          "ktime_get_mono_fast_ns",
+          "ktime_get_mono_fast_ns"
+        ],
+        "stub": "ktime_get_mono_fast_ns"
+      },
+      {
+        "offset": 289,
+        "names": [
+          "memset",
+          "memset",
+          "__memset",
+          "__pi_memset"
+        ],
+        "stub": "memset"
+      },
+      {
+        "offset": 336,
+        "names": [
+          "bpf_get_current_comm",
+          "bpf_get_current_comm"
+        ],
+        "stub": "bpf_get_current_comm"
+      },
+      {
+        "offset": 431,
+        "names": [
+          "bpf_get_stackid",
+          "bpf_get_stackid_pe"
+        ],
+        "stub": "bpf_get_stackid"
+      },
+      {
+        "offset": 731,
+        "names": [
+          "memset",
+          "memset",
+          "__memset",
+          "__pi_memset"
+        ],
+        "stub": "memset"
+      },
+      {
+        "offset": 785,
+        "names": [
+          "bpf_get_current_comm",
+          "bpf_get_current_comm"
+        ],
+        "stub": "bpf_get_current_comm"
+      },
+      {
+        "offset": 880,
+        "names": [
+          "bpf_get_stackid",
+          "bpf_get_stackid_pe"
+        ],
+        "stub": "bpf_get_stackid"
+      },
+      {
+        "offset": 1891,
+        "names": [
+          "trie_lookup_elem"
+        ],
+        "stub": "bpf_map_lookup_elem"
+      },
+      {
+        "offset": 1985,
+        "names": [
+          "kprog_htab_elem_k4"
+        ],
+        "stub": "bpf_map_lookup_elem"
+      },
+      {
+        "offset": 2018,
+        "names": [
+          "ktime_get_mono_fast_ns",
+          "ktime_get_mono_fast_ns"
+        ],
+        "stub": "ktime_get_mono_fast_ns"
+      },
+      {
+        "offset": 2236,
+        "names": [
+          "bpf_map_update_elem",
+          "bpf_map_update_elem"
+        ],
+        "stub": "bpf_map_update_elem"
+      },
+      {
+        "offset": 2358,
+        "names": [
+          "trie_lookup_elem"
+        ],
+        "stub": "bpf_map_lookup_elem"
+      },
+      {
+        "offset": 2449,
+        "names": [
+          "kprog_htab_elem_k8"
+        ],
+        "stub": "bpf_map_lookup_elem"
+      },
+      {
+        "offset": 2642,
+        "names": [
+          "bpf_map_update_elem",
+          "bpf_map_update_elem"
+        ],
+        "stub": "bpf_map_update_elem"
+      },
+      {
+        "offset": 2726,
+        "names": [
+          "bpf_map_update_elem",
+          "bpf_map_update_elem"
+        ],
+        "stub": "bpf_map_update_elem"
+      },
+      {
+        "offset": 2837,
+        "names": [
+          "bpf_perf_event_output",
+          "bpf_perf_event_output_tp"
+        ],
+        "stub": "bpf_perf_event_output"
+      }
+    ],
+    "scope": "Captured actual linked code with deterministic early-path helper stubs and native ABI wrapper; no guest/full-work equivalence claim."
+  }
+}

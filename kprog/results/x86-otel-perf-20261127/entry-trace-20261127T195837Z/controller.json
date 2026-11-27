@@ -1,0 +1,127 @@
+{
+  "pid": 1143691,
+  "started_utc": "2026-11-27T19:58:37Z",
+  "controller_status": 0,
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z",
+  "scope": "Original actual P versus current frozen-LTO re-emission, deterministic helper boundary trace; debug test, no performance or whole-app equivalence claim.",
+  "input_sha256": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8",
+  "facts": {
+    "filter_error_frames": "00",
+    "filter_idle_frames": "00",
+    "inverse_pac_mask": "0000000000000000",
+    "off_cpu_threshold": "00000000",
+    "stack_ptregs_offset": "00000000",
+    "task_stack_offset": "00000000",
+    "tpbase_offset": "0000000000000000",
+    "with_debug_output": "00000000"
+  },
+  "commands": [
+    {
+      "label": "reemission",
+      "argv": [
+        "docker",
+        "run",
+        "--rm",
+        "--cpuset-cpus",
+        "16",
+        "-v",
+        "/workspaces:/workspaces",
+        "--entrypoint",
+        "prlimit",
+        "bpf-benchmark/kprog:current",
+        "--as=51539607552",
+        "--",
+        "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--kernel-btf",
+        "/sys/kernel/btf/vmlinux",
+        "--prog-type",
+        "0",
+        "--immutable-globals",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/immutable.json",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/optimized.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "build-harness",
+      "argv": [
+        "clang-18",
+        "-O2",
+        "-rdynamic",
+        "/workspaces/repository/kprog/results/x86-otel-perf-20261127/entry_trace_stub.c",
+        "-ldl",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/harness"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "link-original",
+      "argv": [
+        "clang-18",
+        "-shared",
+        "-Wl,-Bsymbolic",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/original.so"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "original-missing",
+      "argv": [
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/harness",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/original.so"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "original-present",
+      "argv": [
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/harness",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/original.so",
+        "present"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "link-optimized",
+      "argv": [
+        "clang-18",
+        "-shared",
+        "-Wl,-Bsymbolic",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/optimized.o",
+        "-o",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/optimized.so"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "optimized-missing",
+      "argv": [
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/harness",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/optimized.so"
+      ],
+      "returncode": 0
+    },
+    {
+      "label": "optimized-present",
+      "argv": [
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/harness",
+        "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/entry-trace-20261127T195837Z/optimized.so",
+        "present"
+      ],
+      "returncode": 0
+    }
+  ],
+  "traces_equal": {
+    "missing": true,
+    "present": true
+  },
+  "ended_utc": "2026-11-27T19:58:38Z"
+}

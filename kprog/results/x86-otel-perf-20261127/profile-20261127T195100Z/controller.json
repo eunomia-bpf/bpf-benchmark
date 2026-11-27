@@ -1,0 +1,41 @@
+{
+  "pid": 1140621,
+  "started_utc": "2026-11-27T19:51:00Z",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T195100Z",
+  "source_revision": "e6d02b380402c0eca1d034724353245764b6cebf",
+  "phase": "finished",
+  "controller_status": 0,
+  "scope": "Current-image x86 OTel eBPF/native host PMU diagnosis under timingEX/imageSH. Effective frozen check settings1sample/10seconds/stats1, no full timing rerun or performance acceptance. Profile observers live outside benchmark.",
+  "source_sha256": {
+    "kprog/results/x86-otel-perf-20261127/profile_check.py": "809577dea1eb58cef8944850b12e7ebd75b9d3aca9bc6b9db8637ac20415b74b",
+    "kprog/results/profile-20261123/profile-host.sh": "016fac66a9bb66c29fcf6f291d31cb9d3589b7340c21ccffc2a47b15b66ffcb3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83"
+  },
+  "observer_changes": {
+    "SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_STATS=0": "SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1",
+    "--cpus 8 --memory 32G": "--cpus 8 --memory 64G",
+    "taskset -c 8-23 $PERF": "taskset -c 19 $PERF",
+    "sleep 30": "sleep 2"
+  },
+  "effective_check": {
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": 1,
+    "guest_memory": "64G"
+  },
+  "program_dump": "perf_unwind_nat",
+  "command": [
+    "bash",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T195100Z/profile-host-check.sh",
+    "otelcol-ebpf-profiler/profiling",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T195100Z",
+    "perf_unwind_nat"
+  ],
+  "profile_returncode": 0,
+  "guest-exit.txt": "0",
+  "perf-exit.txt": "143",
+  "profile-image.txt": "sha256:6e09c8fce19dc7af825a77b52f25b9811acbd0f5bb63179096d35edc0373c1f7",
+  "profile-source.txt": "e6d02b380402c0eca1d034724353245764b6cebf",
+  "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261127_195229_541531",
+  "ended_utc": "2026-11-27T19:53:28Z"
+}

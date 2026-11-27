@@ -1,0 +1,7 @@
+# Installed frozen-scalar result and open path question
+
+Guest/corpus/app all succeeded on image6e09c8fce19d. The exact in-phase JIT unwinder remains21,868bytes/5,019instructions; installed native is14,373bytes/3,435instructions, with0debug-print calls (previous native29,964bytes/5,734instructions/106calls). Stack operands637/747include locals and arguments, not just compiler spills. Static map/probe/trie calls remain72/24/4in both images; named hash targets differ as before.
+
+Entry eBPF8,341,211calls/25,374,251,680ns=3,042.035ns; native7,887,727/2,009,887,511=254.812ns, diagnostic11.938349x. This completed observation is retained in full. Native resolved unwinder/array/copy samples disappear and trie sampled periods per entry fall2494.02→321.50; this warrants investigating execution-path work. Sampling absence alone is not proof of invalid execution, and no run is discarded on counts or PMU noise. It is not full timing or a causal/equal-work gain claim.
+
+Actual original-P versus re-emitted-P controlled helper traces agree on two early mapping paths. The captured linked blob also preserves those keys/returns when its per-CPU ABI is modeled. This narrows those frontend/early-lowering hypotheses; it does not establish successful tail transfers or complete unwinding. The next same-image frozen check adds only read-only program-array target, map-hit, per-CPU record and metric snapshots outside the benchmark. Kernel, P flags, app, framework, timing settings and full timing remain unchanged.

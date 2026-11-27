@@ -1,0 +1,511 @@
+
+/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T195100Z/linkcache/native_kernel_link_cache/99d6a07ff2e5d4b3.tmp.3106.3114.blob.frozen.proof.o:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000000000000 <native_tracer_entry>:
+       0:      	pushq	%rbp
+       1:      	pushq	%r12
+       3:      	subq	$0x38, %rsp
+       7:      	movq	%rdi, %rbx
+       a:      	callq	0xf <native_tracer_entry+0xf>
+		000000000000000b:  R_X86_64_PLT32	bpf_get_current_pid_tgid-0x4
+       f:      	movq	%rax, %r15
+      12:      	movq	%rax, %r13
+      15:      	shrq	$0x20, %r13
+      19:      	callq	0x1e <native_tracer_entry+0x1e>
+		000000000000001a:  R_X86_64_PLT32	ktime_get_mono_fast_ns-0x4
+      1e:      	movq	%rax, %r12
+      21:      	testq	%r13, %r13
+      24:      	je	0x1a4 <native_tracer_entry+0x1a4>
+      2a:      	movl	$0x0, (%rsp)
+      31:      	movq	(%rip), %rdi            # 0x38 <native_tracer_entry+0x38>
+		0000000000000034:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+      38:      	movq	%rsp, %rsi
+      3b:      	callq	0x40 <native_tracer_entry+0x40>
+		000000000000003c:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      40:      	movl	$0xffffffff, %ebp       # imm = 0xFFFFFFFF
+      45:      	testq	%rax, %rax
+      48:      	je	0x51f <native_tracer_entry+0x51f>
+      4e:      	movq	%rax, %r14
+      51:      	movq	$0x0, 0xf00(%rax)
+      5c:      	movb	$0x0, 0xf30(%rax)
+      63:      	movq	$0x0, 0xed0(%rax)
+      6e:      	movq	$0x0, 0xed8(%rax)
+      79:      	movq	$0x0, 0xee0(%rax)
+      84:      	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+      89:      	movq	%rax, 0xf28(%r14)
+      90:      	movl	$0x0, 0x1380(%r14)
+      9b:      	movw	$0x100, 0x1384(%r14)    # imm = 0x100
+      a5:      	movq	$0x0, 0xf38(%r14)
+      b0:      	movq	$0x0, 0xf40(%r14)
+      bb:      	movq	$0x0, 0xf58(%r14)
+      c6:      	movq	$0x0, 0xf60(%r14)
+      d1:      	movq	$0x0, 0xf68(%r14)
+      dc:      	movq	$0x0, 0xf70(%r14)
+      e7:      	movq	$0x0, 0xf78(%r14)
+      f2:      	movq	%rax, 0x2bc(%r14)
+      f9:      	leaq	0x20(%r14), %rdi
+      fd:      	movl	$0x29c, %edx            # imm = 0x29C
+     102:      	xorl	%esi, %esi
+     104:      	callq	0x109 <native_tracer_entry+0x109>
+		0000000000000105:  R_X86_64_PLT32	memset-0x4
+     109:      	movl	$0x1, 0x2c4(%r14)
+     114:      	movl	%r13d, (%r14)
+     117:      	movl	%r15d, 0x4(%r14)
+     11b:      	movq	%r12, 0x8(%r14)
+     11f:      	movq	$0x0, 0x2c8(%r14)
+     12a:      	leaq	0x10(%r14), %rdi
+     12e:      	movl	$0x10, %esi
+     133:      	callq	0x138 <native_tracer_entry+0x138>
+		0000000000000134:  R_X86_64_PLT32	bpf_get_current_comm-0x4
+     138:      	testq	%rax, %rax
+     13b:      	jns	0x15b <native_tracer_entry+0x15b>
+     13d:      	movl	$0x34, (%rsp)
+     144:      	movq	(%rip), %rdi            # 0x14b <native_tracer_entry+0x14b>
+		0000000000000147:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     14b:      	movq	%rsp, %rsi
+     14e:      	callq	0x153 <native_tracer_entry+0x153>
+		000000000000014f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     153:      	testq	%rax, %rax
+     156:      	je	0x15b <native_tracer_entry+0x15b>
+     158:      	incq	(%rax)
+     15b:      	movq	(%rip), %rsi            # 0x162 <native_tracer_entry+0x162>
+		000000000000015e:  R_X86_64_REX_GOTPCRELX	kernel_stackmap-0x4
+     162:      	movl	$0x400, %edx            # imm = 0x400
+     167:      	movq	%rbx, %rdi
+     16a:      	callq	0x16f <native_tracer_entry+0x16f>
+		000000000000016b:  R_X86_64_PLT32	bpf_get_stackid-0x4
+     16f:      	movl	%eax, 0x2bc(%r14)
+     176:      	movq	(%rbx), %rax
+     179:      	cmpq	$0x2b, 0xa0(%rax)
+     181:      	movq	%rbx, 0x20(%rsp)
+     186:      	jne	0x36d <native_tracer_entry+0x36d>
+     18c:      	cmpq	$0x23, 0x88(%rax)
+     194:      	jne	0x52d <native_tracer_entry+0x52d>
+     19a:      	movl	$0xfb1, %ebx            # imm = 0xFB1
+     19f:      	jmp	0x483 <native_tracer_entry+0x483>
+     1a4:      	movl	$0x0, (%rsp)
+     1ab:      	movq	(%rip), %rdi            # 0x1b2 <native_tracer_entry+0x1b2>
+		00000000000001ae:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     1b2:      	movq	%rsp, %rsi
+     1b5:      	callq	0x1ba <native_tracer_entry+0x1ba>
+		00000000000001b6:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     1ba:      	testq	%rax, %rax
+     1bd:      	je	0x505 <native_tracer_entry+0x505>
+     1c3:      	movq	%rax, %r14
+     1c6:      	movq	$0x0, 0xf00(%rax)
+     1d1:      	movb	$0x0, 0xf30(%rax)
+     1d8:      	movq	$0x0, 0xed0(%rax)
+     1e3:      	movq	$0x0, 0xed8(%rax)
+     1ee:      	movq	$0x0, 0xee0(%rax)
+     1f9:      	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     1fe:      	movq	%rax, 0xf28(%r14)
+     205:      	movl	$0x0, 0x1380(%r14)
+     210:      	movw	$0x100, 0x1384(%r14)    # imm = 0x100
+     21a:      	movq	$0x0, 0xf38(%r14)
+     225:      	movq	$0x0, 0xf40(%r14)
+     230:      	movq	$0x0, 0xf58(%r14)
+     23b:      	movq	$0x0, 0xf60(%r14)
+     246:      	movq	$0x0, 0xf68(%r14)
+     251:      	movq	$0x0, 0xf70(%r14)
+     25c:      	movq	$0x0, 0xf78(%r14)
+     267:      	movq	%rax, 0x2bc(%r14)
+     26e:      	leaq	0x20(%r14), %rdi
+     272:      	movl	$0x29c, %edx            # imm = 0x29C
+     277:      	xorl	%esi, %esi
+     279:      	callq	0x27e <native_tracer_entry+0x27e>
+		000000000000027a:  R_X86_64_PLT32	memset-0x4
+     27e:      	movl	$0x1, 0x2c4(%r14)
+     289:      	movl	$0x0, (%r14)
+     290:      	movl	%r15d, 0x4(%r14)
+     294:      	movq	%r12, 0x8(%r14)
+     298:      	movq	$0x0, 0x2c8(%r14)
+     2a3:      	movq	%r14, %rdi
+     2a6:      	addq	$0x10, %rdi
+     2aa:      	movl	$0x10, %esi
+     2af:      	callq	0x2b4 <native_tracer_entry+0x2b4>
+		00000000000002b0:  R_X86_64_PLT32	bpf_get_current_comm-0x4
+     2b4:      	testq	%rax, %rax
+     2b7:      	jns	0x2d7 <native_tracer_entry+0x2d7>
+     2b9:      	movl	$0x34, (%rsp)
+     2c0:      	movq	(%rip), %rdi            # 0x2c7 <native_tracer_entry+0x2c7>
+		00000000000002c3:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     2c7:      	movq	%rsp, %rsi
+     2ca:      	callq	0x2cf <native_tracer_entry+0x2cf>
+		00000000000002cb:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     2cf:      	testq	%rax, %rax
+     2d2:      	je	0x2d7 <native_tracer_entry+0x2d7>
+     2d4:      	incq	(%rax)
+     2d7:      	movq	(%rip), %rsi            # 0x2de <native_tracer_entry+0x2de>
+		00000000000002da:  R_X86_64_REX_GOTPCRELX	kernel_stackmap-0x4
+     2de:      	movl	$0x400, %edx            # imm = 0x400
+     2e3:      	movq	%rbx, %rdi
+     2e6:      	callq	0x2eb <native_tracer_entry+0x2eb>
+		00000000000002e7:  R_X86_64_PLT32	bpf_get_stackid-0x4
+     2eb:      	movl	%eax, 0x2bc(%r14)
+     2f2:      	movl	$0x0, (%rsp)
+     2f9:      	movq	(%rip), %rdi            # 0x300 <native_tracer_entry+0x300>
+		00000000000002fc:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     300:      	movq	%rsp, %rsi
+     303:      	callq	0x308 <native_tracer_entry+0x308>
+		0000000000000304:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     308:      	testq	%rax, %rax
+     30b:      	je	0x35c <native_tracer_entry+0x35c>
+     30d:      	movzbl	0x1384(%rax), %ecx
+     314:      	cmpb	$0x1d, %cl
+     317:      	jb	0x354 <native_tracer_entry+0x354>
+     319:      	movq	%rbx, %r14
+     31c:      	movq	%rax, %rbx
+     31f:      	movl	$0x5, 0xf2c(%rax)
+     329:      	movl	$0x44, (%rsp)
+     330:      	movq	(%rip), %rdi            # 0x337 <native_tracer_entry+0x337>
+		0000000000000333:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     337:      	movq	%rsp, %rsi
+     33a:      	callq	0x33f <native_tracer_entry+0x33f>
+		000000000000033b:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     33f:      	testq	%rax, %rax
+     342:      	je	0x347 <native_tracer_entry+0x347>
+     344:      	incq	(%rax)
+     347:      	movq	%rbx, %rax
+     34a:      	movzbl	0x1384(%rbx), %ecx
+     351:      	movq	%r14, %rbx
+     354:      	incb	%cl
+     356:      	movb	%cl, 0x1384(%rax)
+     35c:      	movq	(%rip), %rsi            # 0x363 <native_tracer_entry+0x363>
+		000000000000035f:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     363:      	xorl	%ebp, %ebp
+     365:      	movq	%rbx, %rdi
+     368:      	jmp	0x518 <native_tracer_entry+0x518>
+     36d:      	callq	0x372 <native_tracer_entry+0x372>
+		000000000000036e:  R_X86_64_PLT32	bpf_get_current_task-0x4
+     372:      	testq	%rax, %rax
+     375:      	jns	0x460 <native_tracer_entry+0x460>
+     37b:      	movq	(%rax), %rdx
+     37e:      	testq	%rdx, %rdx
+     381:      	je	0x460 <native_tracer_entry+0x460>
+     387:      	testq	%rdx, %rdx
+     38a:      	jns	0x460 <native_tracer_entry+0x460>
+     390:      	movq	(%rdx), %rbx
+     393:      	movq	0x8(%rdx), %rax
+     397:      	movq	0x10(%rdx), %rax
+     39b:      	movq	%rax, 0x30(%rsp)
+     3a0:      	movq	0x18(%rdx), %rax
+     3a4:      	movq	0x20(%rdx), %rsi
+     3a8:      	movq	0x28(%rdx), %rax
+     3ac:      	movq	0x30(%rdx), %rdi
+     3b0:      	movq	0x38(%rdx), %rax
+     3b4:      	movq	0x40(%rdx), %r8
+     3b8:      	movq	0x48(%rdx), %rax
+     3bc:      	movq	0x50(%rdx), %r9
+     3c0:      	movq	0x58(%rdx), %rax
+     3c4:      	movq	0x60(%rdx), %rax
+     3c8:      	movq	0x68(%rdx), %rax
+     3cc:      	movq	0x70(%rdx), %rax
+     3d0:      	movq	0x78(%rdx), %r10
+     3d4:      	movq	0x80(%rdx), %r11
+     3db:      	movq	0x88(%rdx), %rcx
+     3e2:      	movq	0x90(%rdx), %rax
+     3e9:      	movq	0x98(%rdx), %rax
+     3f0:      	movq	0xa0(%rdx), %rdx
+     3f7:      	xorl	%r12d, %r12d
+     3fa:      	cmpq	$0x2b, %rdx
+     3fe:      	jne	0x6b2 <native_tracer_entry+0x6b2>
+     404:      	movq	%rbx, %rdx
+     407:      	movl	$0xfb1, %ebx            # imm = 0xFB1
+     40c:      	cmpq	$0x23, %rcx
+     410:      	je	0x486 <native_tracer_entry+0x486>
+     412:      	movq	%r11, 0xed0(%r14)
+     419:      	movq	%rax, 0xed8(%r14)
+     420:      	movq	%rsi, 0xee0(%r14)
+     427:      	movq	%r9, 0xee8(%r14)
+     42e:      	movq	%r8, 0xef0(%r14)
+     435:      	movq	%rdi, 0xef8(%r14)
+     43c:      	movq	0x30(%rsp), %rax
+     441:      	movq	%rax, 0xf00(%r14)
+     448:      	movq	%rdx, 0xf08(%r14)
+     44f:      	cmpq	$-0x1, %r10
+     453:      	setne	%al
+     456:      	movq	0x20(%rsp), %rbx
+     45b:      	jmp	0x58c <native_tracer_entry+0x58c>
+     460:      	movl	$0x52, (%rsp)
+     467:      	movq	(%rip), %rdi            # 0x46e <native_tracer_entry+0x46e>
+		000000000000046a:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     46e:      	movq	%rsp, %rsi
+     471:      	callq	0x476 <native_tracer_entry+0x476>
+		0000000000000472:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     476:      	testq	%rax, %rax
+     479:      	je	0x47e <native_tracer_entry+0x47e>
+     47b:      	incq	(%rax)
+     47e:      	movl	$0xfa9, %ebx            # imm = 0xFA9
+     483:      	xorl	%r12d, %r12d
+     486:      	movl	%ebx, 0xf2c(%r14)
+     48d:      	movl	$0x0, (%rsp)
+     494:      	movq	(%rip), %rdi            # 0x49b <native_tracer_entry+0x49b>
+		0000000000000497:  R_X86_64_REX_GOTPCRELX	per_cpu_records-0x4
+     49b:      	movq	%rsp, %rsi
+     49e:      	callq	0x4a3 <native_tracer_entry+0x4a3>
+		000000000000049f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     4a3:      	testq	%rax, %rax
+     4a6:      	je	0x50c <native_tracer_entry+0x50c>
+     4a8:      	movzbl	0x1384(%rax), %ecx
+     4af:      	cmpb	$0x1d, %cl
+     4b2:      	jb	0x4ec <native_tracer_entry+0x4ec>
+     4b4:      	movq	%rax, %rbx
+     4b7:      	movl	$0x5, 0xf2c(%rax)
+     4c1:      	movl	$0x44, (%rsp)
+     4c8:      	movq	(%rip), %rdi            # 0x4cf <native_tracer_entry+0x4cf>
+		00000000000004cb:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     4cf:      	movq	%rsp, %rsi
+     4d2:      	callq	0x4d7 <native_tracer_entry+0x4d7>
+		00000000000004d3:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     4d7:      	testq	%rax, %rax
+     4da:      	je	0x4df <native_tracer_entry+0x4df>
+     4dc:      	incq	(%rax)
+     4df:      	movq	%rbx, %rax
+     4e2:      	movzbl	0x1384(%rbx), %ecx
+     4e9:      	xorl	%r12d, %r12d
+     4ec:      	incb	%cl
+     4ee:      	movb	%cl, 0x1384(%rax)
+     4f4:      	movq	(%rip), %rsi            # 0x4fb <native_tracer_entry+0x4fb>
+		00000000000004f7:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     4fb:      	movq	0x20(%rsp), %rdi
+     500:      	movl	%r12d, %edx
+     503:      	jmp	0x51a <native_tracer_entry+0x51a>
+     505:      	movl	$0xffffffff, %ebp       # imm = 0xFFFFFFFF
+     50a:      	jmp	0x51f <native_tracer_entry+0x51f>
+     50c:      	movq	(%rip), %rsi            # 0x513 <native_tracer_entry+0x513>
+		000000000000050f:  R_X86_64_REX_GOTPCRELX	perf_progs-0x4
+     513:      	movq	0x20(%rsp), %rdi
+     518:      	xorl	%edx, %edx
+     51a:      	callq	0x51f <native_tracer_entry+0x51f>
+		000000000000051b:  R_X86_64_PLT32	bpf_tail_call-0x4
+     51f:      	movl	%ebp, %eax
+     521:      	addq	$0x38, %rsp
+     525:      	popq	%r12
+     527:      	popq	%rbp
+     528:      	jmp	0x8d6 <native_tracer_entry+0x8d6>
+     52d:      	movq	0x80(%rax), %rcx
+     534:      	movq	%rcx, 0xed0(%r14)
+     53b:      	movq	0x98(%rax), %rcx
+     542:      	movq	%rcx, 0xed8(%r14)
+     549:      	movq	0x20(%rax), %rcx
+     54d:      	movq	%rcx, 0xee0(%r14)
+     554:      	movq	0x50(%rax), %rcx
+     558:      	movq	%rcx, 0xee8(%r14)
+     55f:      	movq	0x40(%rax), %rcx
+     563:      	movq	%rcx, 0xef0(%r14)
+     56a:      	movq	0x30(%rax), %rcx
+     56e:      	movq	%rcx, 0xef8(%r14)
+     575:      	movq	0x10(%rax), %rcx
+     579:      	movq	%rcx, 0xf00(%r14)
+     580:      	movq	(%rax), %rax
+     583:      	movq	%rax, 0xf08(%r14)
+     58a:      	xorl	%eax, %eax
+     58c:      	movb	%al, 0xf30(%r14)
+     593:      	movl	$0x60, (%rsp)
+     59a:      	movbel	%r13d, 0x4(%rsp)
+     5a1:      	movq	$0x0, 0x8(%rsp)
+     5aa:      	movq	(%rip), %rdi            # 0x5b1 <native_tracer_entry+0x5b1>
+		00000000000005ad:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+     5b1:      	movq	%rsp, %rsi
+     5b4:      	callq	0x5b9 <native_tracer_entry+0x5b9>
+		00000000000005b5:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     5b9:      	testq	%rax, %rax
+     5bc:      	je	0x5f5 <native_tracer_entry+0x5f5>
+     5be:      	movq	%r14, %rax
+     5c1:      	addq	$0xed0, %rax            # imm = 0xED0
+     5c7:      	movq	(%rax), %r15
+     5ca:      	testq	%r15, %r15
+     5cd:      	je	0x67f <native_tracer_entry+0x67f>
+     5d3:      	movq	%r15, %rax
+     5d6:      	shrq	$0x38, %rax
+     5da:      	je	0x694 <native_tracer_entry+0x694>
+     5e0:      	movl	$0xb, 0xf28(%r14)
+     5eb:      	movl	$0xfab, %ebx            # imm = 0xFAB
+     5f0:      	jmp	0x483 <native_tracer_entry+0x483>
+     5f5:      	movq	%r15, 0x28(%rsp)
+     5fa:      	movl	%r13d, 0x18(%rsp)
+     5ff:      	movq	(%rip), %rdi            # 0x606 <native_tracer_entry+0x606>
+		0000000000000602:  R_X86_64_REX_GOTPCRELX	reported_pids-0x4
+     606:      	leaq	0x18(%rsp), %rsi
+     60b:      	callq	0x610 <native_tracer_entry+0x610>
+		000000000000060c:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     610:      	movq	%rax, %r14
+     613:      	callq	0x618 <native_tracer_entry+0x618>
+		0000000000000614:  R_X86_64_PLT32	ktime_get_mono_fast_ns-0x4
+     618:      	testq	%r14, %r14
+     61b:      	je	0x6b9 <native_tracer_entry+0x6b9>
+     621:      	movq	(%r14), %rdx
+     624:      	movq	%rdx, %rcx
+     627:      	andq	$-0x20, %rcx
+     62b:      	movq	%rax, %rsi
+     62e:      	subq	%rcx, %rsi
+     631:      	movl	%edx, %ecx
+     633:      	andb	$0xf, %cl
+     636:      	movl	$0x5f5e100, %edi        # imm = 0x5F5E100
+     63b:      	shlxq	%rcx, %rdi, %rdi
+     640:      	cmpq	%rdi, %rsi
+     643:      	jb	0x70d <native_tracer_entry+0x70d>
+     649:      	movl	%edx, %ecx
+     64b:      	andb	$0x10, %cl
+     64e:      	movl	$0xffffffff, %r8d       # imm = 0xFFFFFFFF
+     654:      	addq	%r8, %rdi
+     657:      	addq	$0x2a05f201, %rdi       # imm = 0x2A05F201
+     65e:      	cmpq	%rdi, %rsi
+     661:      	jae	0x6bb <native_tracer_entry+0x6bb>
+     663:      	andl	$0xf, %edx
+     666:      	xorl	%esi, %esi
+     668:      	testb	%cl, %cl
+     66a:      	sete	%sil
+     66e:      	leal	0x4(,%rsi,4), %esi
+     675:      	cmpl	%esi, %edx
+     677:      	adcb	$0x0, %dl
+     67a:      	movzbl	%dl, %edx
+     67d:      	jmp	0x6bd <native_tracer_entry+0x6bd>
+     67f:      	movl	$0x1, 0xf28(%r14)
+     68a:      	movl	$0xfad, %ebx            # imm = 0xFAD
+     68f:      	jmp	0x483 <native_tracer_entry+0x483>
+     694:      	cmpq	$0xfff, %r15            # imm = 0xFFF
+     69b:      	ja	0x714 <native_tracer_entry+0x714>
+     69d:      	movl	$0x31, 0xf28(%r14)
+     6a8:      	movl	$0xfae, %ebx            # imm = 0xFAE
+     6ad:      	jmp	0x483 <native_tracer_entry+0x483>
+     6b2:      	xorl	%ebx, %ebx
+     6b4:      	jmp	0x486 <native_tracer_entry+0x486>
+     6b9:      	xorl	%ecx, %ecx
+     6bb:      	xorl	%edx, %edx
+     6bd:      	andq	$-0x20, %rax
+     6c1:      	movzbl	%cl, %ecx
+     6c4:      	orq	%rax, %rcx
+     6c7:      	orq	%rdx, %rcx
+     6ca:      	movq	%rcx, (%rsp)
+     6ce:      	movq	(%rip), %rdi            # 0x6d5 <native_tracer_entry+0x6d5>
+		00000000000006d1:  R_X86_64_REX_GOTPCRELX	reported_pids-0x4
+     6d5:      	leaq	0x18(%rsp), %rsi
+     6da:      	movq	%rsp, %rdx
+     6dd:      	xorl	%ecx, %ecx
+     6df:      	callq	0x6e4 <native_tracer_entry+0x6e4>
+		00000000000006e0:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     6e4:      	testl	%eax, %eax
+     6e6:      	je	0x801 <native_tracer_entry+0x801>
+     6ec:      	movl	$0x3d, 0x1c(%rsp)
+     6f4:      	movq	(%rip), %rdi            # 0x6fb <native_tracer_entry+0x6fb>
+		00000000000006f7:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     6fb:      	leaq	0x1c(%rsp), %rsi
+     700:      	callq	0x705 <native_tracer_entry+0x705>
+		0000000000000701:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     705:      	testq	%rax, %rax
+     708:      	je	0x70d <native_tracer_entry+0x70d>
+     70a:      	incq	(%rax)
+     70d:      	xorl	%ebp, %ebp
+     70f:      	jmp	0x51f <native_tracer_entry+0x51f>
+     714:      	movl	(%r14), %eax
+     717:      	movl	$0x60, (%rsp)
+     71e:      	movbel	%eax, 0x4(%rsp)
+     724:      	movbeq	%r15, 0x8(%rsp)
+     72b:      	movq	(%rip), %rdi            # 0x732 <native_tracer_entry+0x732>
+		000000000000072e:  R_X86_64_REX_GOTPCRELX	pid_page_to_mapping_info-0x4
+     732:      	movq	%rsp, %rsi
+     735:      	callq	0x73a <native_tracer_entry+0x73a>
+		0000000000000736:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     73a:      	testq	%rax, %rax
+     73d:      	je	0x82e <native_tracer_entry+0x82e>
+     743:      	movabsq	$0xffffffffffffff, %rcx # imm = 0xFFFFFFFFFFFFFF
+     74d:      	movq	0x8(%rax), %r12
+     751:      	andq	%r12, %rcx
+     754:      	movq	%rcx, 0xf20(%r14)
+     75b:      	movq	(%rax), %rax
+     75e:      	movq	%rax, 0xf10(%r14)
+     765:      	shrq	$0x38, %r12
+     769:      	subq	%rcx, %r15
+     76c:      	movq	%r15, 0xf18(%r14)
+     773:      	xorl	%ebx, %ebx
+     775:      	cmpq	$0x1, %r12
+     779:      	jne	0x486 <native_tracer_entry+0x486>
+     77f:      	movq	%rax, (%rsp)
+     783:      	movq	(%rip), %rdi            # 0x78a <native_tracer_entry+0x78a>
+		0000000000000786:  R_X86_64_REX_GOTPCRELX	interpreter_offsets-0x4
+     78a:      	movq	%rsp, %rsi
+     78d:      	callq	0x792 <native_tracer_entry+0x792>
+		000000000000078e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     792:      	movl	$0x1, %r12d
+     798:      	testq	%rax, %rax
+     79b:      	je	0x486 <native_tracer_entry+0x486>
+     7a1:      	cmpq	%r15, (%rax)
+     7a4:      	ja	0x7ac <native_tracer_entry+0x7ac>
+     7a6:      	cmpq	%r15, 0x8(%rax)
+     7aa:      	jae	0x7c0 <native_tracer_entry+0x7c0>
+     7ac:      	cmpq	%r15, 0x10(%rax)
+     7b0:      	ja	0x486 <native_tracer_entry+0x486>
+     7b6:      	cmpq	%r15, 0x18(%rax)
+     7ba:      	jb	0x486 <native_tracer_entry+0x486>
+     7c0:      	movl	0x1380(%r14), %ecx
+     7c7:      	movl	0x20(%rax), %edx
+     7ca:      	btl	%edx, %ecx
+     7cd:      	jb	0x486 <native_tracer_entry+0x486>
+     7d3:      	movq	%rax, %r15
+     7d6:      	movl	$0x0, 0x28(%rsp)
+     7de:      	movq	(%rip), %rdi            # 0x7e5 <native_tracer_entry+0x7e5>
+		00000000000007e1:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     7e5:      	leaq	0x28(%rsp), %rsi
+     7ea:      	callq	0x7ef <native_tracer_entry+0x7ef>
+		00000000000007eb:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     7ef:      	testq	%rax, %rax
+     7f2:      	je	0x7f7 <native_tracer_entry+0x7f7>
+     7f4:      	incq	(%rax)
+     7f7:      	movzwl	0x20(%r15), %r12d
+     7fc:      	jmp	0x486 <native_tracer_entry+0x486>
+     801:      	movb	$0x1, 0x17(%rsp)
+     806:      	movq	(%rip), %rdi            # 0x80d <native_tracer_entry+0x80d>
+		0000000000000809:  R_X86_64_REX_GOTPCRELX	pid_events-0x4
+     80d:      	leaq	0x28(%rsp), %rsi
+     812:      	leaq	0x17(%rsp), %rdx
+     817:      	xorl	%ecx, %ecx
+     819:      	callq	0x81e <native_tracer_entry+0x81e>
+		000000000000081a:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     81e:      	testl	%eax, %eax
+     820:      	je	0x843 <native_tracer_entry+0x843>
+     822:      	movl	$0x3e, (%rsp)
+     829:      	jmp	0x8b9 <native_tracer_entry+0x8b9>
+     82e:      	movl	$0xc, 0xf28(%r14)
+     839:      	movl	$0xfac, %ebx            # imm = 0xFAC
+     83e:      	jmp	0x483 <native_tracer_entry+0x483>
+     843:      	movl	$0x1, 0x1c(%rsp)
+     84b:      	movb	$0x1, 0x18(%rsp)
+     850:      	movq	(%rip), %rdi            # 0x857 <native_tracer_entry+0x857>
+		0000000000000853:  R_X86_64_REX_GOTPCRELX	inhibit_events-0x4
+     857:      	leaq	0x1c(%rsp), %rsi
+     85c:      	leaq	0x18(%rsp), %rdx
+     861:      	movl	$0x1, %ecx
+     866:      	callq	0x86b <native_tracer_entry+0x86b>
+		0000000000000867:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     86b:      	testq	%rax, %rax
+     86e:      	js	0x8b2 <native_tracer_entry+0x8b2>
+     870:      	movl	$0x42, (%rsp)
+     877:      	movq	(%rip), %rdi            # 0x87e <native_tracer_entry+0x87e>
+		000000000000087a:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     87e:      	movq	%rsp, %rsi
+     881:      	callq	0x886 <native_tracer_entry+0x886>
+		0000000000000882:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     886:      	testq	%rax, %rax
+     889:      	je	0x88e <native_tracer_entry+0x88e>
+     88b:      	incq	(%rax)
+     88e:      	movl	$0x1, (%rsp)
+     895:      	movq	(%rip), %rsi            # 0x89c <native_tracer_entry+0x89c>
+		0000000000000898:  R_X86_64_REX_GOTPCRELX	report_events-0x4
+     89c:      	movq	%rsp, %rcx
+     89f:      	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+     8a4:      	movl	$0x4, %r8d
+     8aa:      	movq	%rbx, %rdi
+     8ad:      	callq	0x8b2 <native_tracer_entry+0x8b2>
+		00000000000008ae:  R_X86_64_PLT32	bpf_perf_event_output-0x4
+     8b2:      	movl	$0x3f, (%rsp)
+     8b9:      	movq	(%rip), %rdi            # 0x8c0 <native_tracer_entry+0x8c0>
+		00000000000008bc:  R_X86_64_REX_GOTPCRELX	metrics-0x4
+     8c0:      	movq	%rsp, %rsi
+     8c3:      	callq	0x8c8 <native_tracer_entry+0x8c8>
+		00000000000008c4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     8c8:      	testq	%rax, %rax
+     8cb:      	jne	0x70a <native_tracer_entry+0x70a>
+     8d1:      	jmp	0x70d <native_tracer_entry+0x70d>

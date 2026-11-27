@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent;LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
 def now():return subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip()
 program_name=sys.argv[1] if len(sys.argv)>1 else 'native_tracer_e'
+map_observer=len(sys.argv)>2 and sys.argv[2]=='observe-maps'
 stamp=now();token=stamp.replace('-','').replace(':','');out=HERE/('profile-'+token);out.mkdir();raw=Path('/workspaces/kprog-raw/perf/x86-otel-perf-20261127')/token;raw.mkdir(parents=True)
 record=dict(pid=os.getpid(),started_utc=stamp,raw=str(raw),source_revision=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),phase='profile',controller_status=None,scope='Current-image x86 OTel eBPF/native host PMU diagnosis under timingEX/imageSH. Effective frozen check settings1sample/10seconds/stats1, no full timing rerun or performance acceptance. Profile observers live outside benchmark.')
 def save():(out/'controller.json').write_text(json.dumps(record,indent=2)+'\n')
@@ -17,6 +18,12 @@ try:
  for a,b in replacements.items():assert script.count(a)==1,(a,script.count(a));script=script.replace(a,b)
  # Workload settings are the frozen check recipe, rather than the historical
  # profile's60s/stats-off settings. Poll only metadata more often for10s phases.
+ if map_observer:
+  line=next(x for x in script.splitlines() if 'if [ -n "$XLATED" ]' in x)
+  script=script.replace(line,line+'\n  python3 '+str(HERE/'observe_otel_maps.py')+' /var/tmp/map-observe/\\$u > /var/tmp/map-observe/\\$u.log 2>&1')
+  script=script.replace('$V/stack-requests.txt; do','$V/stack-requests.txt $V/map-observe; do')
+  script=script.replace('mkdir -p /var/tmp/linkcache','mkdir -p /var/tmp/linkcache /var/tmp/map-observe')
+  record['map_observer']=dict(source=str(HERE/'observe_otel_maps.py'),sha256=hashlib.sha256((HERE/'observe_otel_maps.py').read_bytes()).hexdigest(),scope='Read-only program IDs, prog-array targets, per-CPU metric/record bytes, known stress PID LPM hits; no BPF program loaded or workload change.')
  path=raw/'profile-host-check.sh';path.write_text(script);path.chmod(0o755)
  record['source_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in [Path(__file__),old,entry]}
  record['observer_changes']=replacements;record['effective_check']=dict(samples=1,workload_seconds=10,bpf_stats=1,guest_memory='64G')
