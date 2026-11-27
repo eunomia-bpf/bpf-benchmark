@@ -1,0 +1,18 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py
+Corpus/app ok ok mix {'checked-sim-c': 11, 'direct-native': 12}
+baseline programs 23 with calls 13 workloads [(0, 13.205327728)]
+post_rejit programs 23 with calls 13 workloads [(0, 14.79802414400001)]
+2 fentry_vfs_read ['infinite loop detected at insn 103']
+7 inet_sock_set_state ['dereference of modified ctx ptr R3 off=20 disallowed']
+10 fentry_vfs_write ['infinite loop detected at insn 104']
+11 tcp_v4_connect_ret ["R1 invalid mem access 'scalar'"]
+12 block_rq_insert ["func 'block_rq_insert' doesn't have 2-th argument", 'invalid bpf_context access off=8 size=8']
+13 sys_exit ['infinite loop detected at insn 870']
+16 fentry_vfs_fsync ['infinite loop detected at insn 104']
+18 block_rq_issue ["struct (anon) doesn't have field at offset 4"]
+19 sched_switch ['infinite loop detected at insn 1800']
+20 fentry_vfs_open ['infinite loop detected at insn 104']
+21 tcp_v6_connect_ret ["R1 invalid mem access 'scalar'"]
+23 fentry_vfs_create ['infinite loop detected at insn 104']
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

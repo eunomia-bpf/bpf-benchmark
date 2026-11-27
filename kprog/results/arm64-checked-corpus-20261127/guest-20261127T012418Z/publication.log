@@ -1,0 +1,9 @@
+[master ce1944c6c] Record actual ARM checked BCC corpus check
+ 5 files changed, 143 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T012418Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T012418Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T012418Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T012418Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T012418Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   816d5d18a..ce1944c6c  master -> master

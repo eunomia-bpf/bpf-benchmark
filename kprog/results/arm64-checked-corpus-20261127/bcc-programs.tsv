@@ -1,0 +1,24 @@
+request	symbol	prog_type	native_id	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	tracepoint__syscalls__sys_enter_openat	5	130	True	True	checked-sim-c	0	12211	116940368	
+2	fentry_vfs_read	26	137	True	False	direct-native	0	179	637296	infinite loop detected at insn 103
+3	tcp_v4_connect	2	144	True	True	checked-sim-c	0	0	0	
+4	blk_account_io_merge_bio	2	152	True	True	checked-sim-c	0	0	0	
+5	sys_enter	5	160	True	True	checked-sim-c	0	366751	3341957616	
+6	sched_wakeup	26	168	True	True	checked-sim-c	0	55746	324865744	
+7	inet_sock_set_state	5	175	True	False	direct-native	0	0	0	dereference of modified ctx ptr R3 off=20 disallowed
+8	kprobe__cap_capable_entry	2	183	True	True	checked-sim-c	0	16630	84715024	
+9	tracepoint__syscalls__sys_exit_openat	5	191	True	True	checked-sim-c	0	12211	1043187184	
+10	fentry_vfs_write	26	197	True	False	direct-native	0	110	442592	infinite loop detected at insn 104
+11	tcp_v4_connect_ret	2	203	True	False	direct-native	0	0	0	R1 invalid mem access 'scalar'
+12	block_rq_insert	26	209	True	False	direct-native	0	0	0	func 'block_rq_insert' doesn't have 2-th argument; invalid bpf_context access off=8 size=8
+13	sys_exit	5	215	True	False	direct-native	0	366721	2446389408	infinite loop detected at insn 870
+14	sched_wakeup_new	26	222	True	True	checked-sim-c	0	40	517264	
+15	kprobe__cap_capable_exit	2	229	True	True	checked-sim-c	0	16625	180028624	
+16	fentry_vfs_fsync	26	235	True	False	direct-native	0	0	0	infinite loop detected at insn 104
+17	tcp_v6_connect	2	242	True	True	checked-sim-c	0	0	0	
+18	block_rq_issue	26	248	True	False	direct-native	0	0	0	struct (anon) doesn't have field at offset 4
+19	sched_switch	26	254	True	False	direct-native	0	99831	500812688	infinite loop detected at insn 1800
+20	fentry_vfs_open	26	259	True	False	direct-native	0	12214	32706192	infinite loop detected at insn 104
+21	tcp_v6_connect_ret	2	265	True	False	direct-native	0	0	0	R1 invalid mem access 'scalar'
+22	block_rq_complete	26	272	True	True	checked-sim-c	0	0	0	
+23	fentry_vfs_create	26	277	True	False	direct-native	0	2	5552	infinite loop detected at insn 104
