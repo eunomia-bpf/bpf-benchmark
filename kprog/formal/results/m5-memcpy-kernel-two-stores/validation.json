@@ -1,0 +1,54 @@
+{
+  "confirmed_utc": "2026-11-27T01:48:52.731721+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyTwoStores"
+    ],
+    "exit": 0,
+    "seconds": 1.802001953125,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 88,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-two-stores/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.503084421157837,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "actual_STPs": 2,
+    "prior_actual_LDPs": 2,
+    "same_witness": "original TwoLoads result plus equality of reached state",
+    "writes": "same destination16byte interval twice, true loaded words",
+    "final_PC": "generic origin+52",
+    "next_fetch": "actual captured RET",
+    "fresh_successful_write_premises": 0,
+    "memory": "exact imported state views retained"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyTwoStores.lean",
+      "size_bytes": 12471,
+      "mtime_ns": 1795744088946393407
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
