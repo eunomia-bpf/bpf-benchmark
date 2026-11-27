@@ -67,7 +67,7 @@ typedef signed int __s32;
     output = ['/* Generated from the canonical C dispatcher by generate_sim_dispatch.py. */',
               '#ifndef ARM64_SIM_DIRECT_H', '#define ARM64_SIM_DIRECT_H']
     for index, (_, body) in enumerate(arms):
-        lines = ['do {', '__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);',
+        lines = ['do {', 'const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);',
                  '(void)__a64_l_width;', *body.splitlines(), '} while (0)']
         output.append(f'#define ARM64_SIM_DIRECT_BODY_{index}({PARAMS}) \\')
         output.extend(line.rstrip()+' \\' for line in lines[:-1])

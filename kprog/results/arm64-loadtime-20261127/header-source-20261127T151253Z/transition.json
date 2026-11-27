@@ -1,0 +1,28 @@
+{
+  "utc": "2026-11-27T15:12:53Z",
+  "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/header-source-20261127T151253Z",
+  "result": "kprog/results/arm64-loadtime-20261127/header-source-20261127T151253Z",
+  "qualifier_declarations": 56,
+  "files": {
+    "kprog/arm64/arm64_sim_direct.h": {
+      "before_sha256": "5590d19f6c2cf6ef5b2d0b80cba64c889125a5bb0fda569341a7cc31ac114349",
+      "after_sha256": "0694204d6372920a1bfb37841be08f0061eedbebdc3642b053c9aa331b2ccba1"
+    },
+    "kprog/arm64/arm64_sim_local_bpf.h": {
+      "before_sha256": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+      "after_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92"
+    }
+  },
+  "generator": "kprog/arm64/generate_sim_dispatch.py",
+  "baseline_macro_count": 75,
+  "baseline_macro_sha256": "cfd18af86163d8ba848f680bdba9e116eac5334990926329f4fc16223e559597",
+  "source_revision": "47ff9ec9e264347432363d02bf3422cdf40542fd",
+  "canonical_FORMAL_declarations_pending": 37,
+  "helper_removed": false,
+  "scope": "Only PERF-owned reviewed header/generator qualifiers applied under imageEX after all guests/replay completed. OMP workfile preserved; private publication must stage only these qualifier deltas. FORMAL canonical changes and final helper deletion/sameB validation remain pending.",
+  "publication_header_sha256": {
+    "kprog/arm64/arm64_sim_direct.h": "b7c62e6977b0a079830332bcd4c70fbd78432eb0df569428d9c5eb0695ef424c",
+    "kprog/arm64/arm64_sim_local_bpf.h": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "kprog/arm64/generate_sim_dispatch.py": "583d0681ee41f7cb92e967cdf6624809cf977b285199ffc0ffaa90cd9ec9dc0a"
+  }
+}

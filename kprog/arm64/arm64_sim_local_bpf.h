@@ -437,7 +437,7 @@ do { \
 
 #define ARM64_SIM_L_READ_REG_RAW_INTO(OUTPUT, REG) \
 do { \
-    __u64 __a64_l_reg = (REG); \
+    const __u64 __a64_l_reg = (REG); \
     (OUTPUT) = __a64_l_reg == ARM64_SP ? (__u64)__a64_sp : \
         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->x : 0ULL; \
@@ -450,7 +450,7 @@ do { \
 
 #define ARM64_SIM_L_READ_REG_PTR_INTO(OUTPUT, REG) \
 do { \
-    __u64 __a64_l_reg = (REG); \
+    const __u64 __a64_l_reg = (REG); \
     (OUTPUT) = __a64_l_reg == ARM64_SP ? (void *)(long)__a64_sp : \
         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
         __a64_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)]->ptr : (void *)0; \
@@ -463,7 +463,7 @@ do { \
 
 #define ARM64_SIM_L_REG_TAG_INTO(OUTPUT, REG) \
 do { \
-    __u64 __a64_l_reg = (REG); \
+    const __u64 __a64_l_reg = (REG); \
     (OUTPUT) = __a64_l_reg == ARM64_SP ? ARM64_SIM_TAG_STACK : \
         __a64_l_reg < KPROG_ARM64_GPR_COUNT ? \
         *__a64_tag_cells[KPROG_ARM64_GPR_CELL(__a64_l_reg)] : ARM64_SIM_TAG_SCALAR; \
@@ -490,7 +490,7 @@ do { \
    __a64_read_result; })
 
 #define ARM64_SIM_L_WRITE_REG_WIDTH(REG, VALUE, WIDTH) \
-	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
+	do { __s64 __a64_write_old_sp=__a64_sp;  const __u64 __a64_l_reg = (REG); \
 	     __u64 __a64_l_next = KPROG_ARM64_APPLY_WIDTH((VALUE), (WIDTH)); \
 	     if (__a64_l_reg == ARM64_SP) { \
 	       __u64 __a64_write_base; \
@@ -510,7 +510,7 @@ do { \
 	ARM64_SIM_L_WRITE_REG_PTR_TAG((REG), (VALUE), ARM64_SIM_TAG_SCALAR)
 
 #define ARM64_SIM_L_WRITE_REG_PTR_TAG(REG, VALUE, TAG) \
-	do { __s64 __a64_write_old_sp=__a64_sp;  __u64 __a64_l_reg = (REG); \
+	do { __s64 __a64_write_old_sp=__a64_sp;  const __u64 __a64_l_reg = (REG); \
 	     void *__a64_l_next_ptr = (void *)(VALUE); \
 	     __u8 __a64_l_next_tag = (TAG); \
 	     if (__a64_l_reg == ARM64_SP) { \
@@ -833,7 +833,7 @@ do { \
 	do {                                                                 \
 		__u64 __a64_str_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_str_index, (WIDTH));     \
-		__u8 __a64_str_width = (WIDTH);                           \
+		const __u8 __a64_str_width = (WIDTH);                           \
 		__u64 __a64_str_value;                                    \
 		if (KPROG_ARM64_STACK_ARM(                         \
 			    __a64_str_width ==                            \
@@ -871,8 +871,8 @@ do { \
 	do {                                                                 \
 		__u64 __a64_srt_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_srt_index, (WIDTH));     \
-		__u8 __a64_srt_width = (WIDTH);                           \
-		__u8 __a64_srt_source =                                   \
+		const __u8 __a64_srt_width = (WIDTH);                           \
+		const __u8 __a64_srt_source =                                   \
 			KPROG_ARM64_STACK_READ_TAG_SOURCE(                \
 				__a64_srt_width == ARM64_WIDTH_64,        \
 				KPROG_ARM64_STACK_WORD_ALIGNED(__a64_srt_index));\
@@ -904,9 +904,9 @@ do { \
 	do {                                                               \
 		__u64 __a64_stw_index = ARM64_SIM_L_STACK_INDEX(OFF);     \
 		ARM64_SIM_L_STACK_INDEX_OPACITY(__a64_stw_index, (WIDTH));     \
-		__u8 __a64_stw_width = (WIDTH);                           \
+		const __u8 __a64_stw_width = (WIDTH);                           \
 		__u64 __a64_stw_value = KPROG_ARM64_APPLY_WIDTH((VALUE), __a64_stw_width);\
-		__u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
+		const __u8 __a64_stw_action = KPROG_ARM64_STACK_WRITE_TAG_ACTION(\
 			__a64_stw_width == ARM64_WIDTH_64,                \
 			KPROG_ARM64_STACK_WORD_ALIGNED(__a64_stw_index));  \
 		if (__a64_stw_action ==                              \
@@ -1084,8 +1084,8 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 
 #define ARM64_SIM_L_MEM_BASE_OFF_INTO(OUTPUT, AUX, INDEX, IMM) \
     do { \
-        __u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX); \
-        __u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index); \
+        const __u8 __a64_mbo_has_index = KPROG_ARM64_MEM_INDEX_PRESENT(INDEX); \
+        const __u8 __a64_mbo_isrc = KPROG_ARM64_MEM_INDEX_VALUE(__a64_mbo_has_index); \
         __u64 __a64_mbo_imm = (IMM), __a64_mbo_index = 0, __a64_mbo_result; \
         if (__a64_mbo_isrc == KPROG_ARM64_MEM_INDEX_VALUE_REGISTER) \
             ARM64_SIM_L_MOD_VALUE_INTO(__a64_mbo_index, (INDEX), \
@@ -1111,7 +1111,7 @@ typedef void *arm64_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
  * as its own writeback rather than in the offset. */
 #define ARM64_SIM_L_MEM_PREPOST_STEP(BASE, DELTA)                           \
 	do {                                                               \
-		__s64 __a64_l_pp = (__s64)(DELTA);                        \
+		const __s64 __a64_l_pp = (__s64)(DELTA);                        \
 		if (__a64_l_pp != 0) {                                    \
 			if ((BASE) == ARM64_SP)                           \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_SP,   \
@@ -1740,13 +1740,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 
 #define ARM64_SIM_L_EXEC_ALU(OP, DST, SRC, SRC2, FLAGS, AUX, IMM)           \
 	do {                                                               \
-		__u8 __a64_alu_width = (FLAGS);                           \
+		const __u8 __a64_alu_width = (FLAGS);                           \
 		__u64 __a64_alu_lhs = ARM64_SIM_L_READ_REG(SRC);          \
 		ARM64_SIM_L_VALUE(__u64, __a64_alu_rhs, KPROG_ARM64_ALU_RHS,               \
 			KPROG_ARM64_ALU_OPERAND_SELECT((OP)), (IMM), ARM64_SIM_L_MOD(AUX),\
 			ARM64_SIM_L_READ_REG(SRC2), ARM64_SIM_L_SHIFT(AUX),\
 			__a64_alu_width);                                  \
-		__u8 __a64_alu_op = (AUX) & 0xffU;                        \
+		const __u8 __a64_alu_op = (AUX) & 0xffU;                        \
 		__u8 __a64_alu_src_tag = ARM64_SIM_L_REG_TAG(SRC);        \
 		ARM64_SIM_L_VALUE(__u64, __a64_alu_result, KPROG_ALU64_RESULT, __a64_alu_op, __a64_alu_lhs,   \
 				__a64_alu_rhs,                            \
@@ -1959,7 +1959,7 @@ do { \
 
 #define ARM64_SIM_L_EXEC(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM)         \
 	do {                                                               \
-		__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
+		const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS);\
 		if (KPROG_ARM64_DISP_NOP_HANDLED(OP)) {                    \
 			(void)0;                                           \
 		} else if (KPROG_ARM64_ADRP_HANDLED(OP)) {                 \
@@ -2758,7 +2758,7 @@ ARM64_SIM_CONCAT(__a64_sim_jcc_fallthrough_, ID):                            \
  * KProgFormal.Arm64CompareCond proves this from the existing SUB/NZCV rules. */
 #define ARM64_SIM_A64_CMP_GT(OP, LHS, RHS, WIDTH, AUX, IMM, LABEL)          \
     do {                                                                 \
-        __u8 __a64_cmp_width = (WIDTH);                                  \
+        const __u8 __a64_cmp_width = (WIDTH);                                  \
         __u64 __a64_cmp_lhs = ARM64_SIM_L_READ_REG(LHS);                  \
         __u64 __a64_cmp_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM),           \
             ARM64_SIM_L_MOD_VALUE((RHS), ARM64_SIM_L_MOD(AUX),           \

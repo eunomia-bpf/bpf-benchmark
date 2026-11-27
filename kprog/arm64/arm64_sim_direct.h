@@ -3,20 +3,20 @@
 #define ARM64_SIM_DIRECT_H
 #define ARM64_SIM_DIRECT_BODY_0(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 (void)0; \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_1(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)(IMM), \
 				ARM64_SIM_L_ADRP_TAG((OP))); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_2(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 if (ARM64_SIM_L_MOV_PTR_TAG_PATH((OP), __a64_l_width)) { \
 				ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), \
@@ -31,7 +31,7 @@ if (ARM64_SIM_L_MOV_PTR_TAG_PATH((OP), __a64_l_width)) { \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_3(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_value = \
 				ARM64_SIM_L_MOVK_VALUE((DST), (IMM), ARM64_SIM_L_SHIFT(AUX)); \
@@ -39,13 +39,13 @@ __u64 __a64_l_value = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_4(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_EXEC_ALU((OP), (DST), (SRC), (SRC2), __a64_l_width, (AUX), (IMM)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_5(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_amount = KPROG_ARM64_IMM_RHS((OP), (IMM), \
 				ARM64_SIM_L_READ_REG(SRC2)); \
@@ -54,14 +54,14 @@ __u64 __a64_l_amount = KPROG_ARM64_IMM_RHS((OP), (IMM), \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_6(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = ARM64_SIM_L_MUL_VALUE((OP), (SRC), (SRC2), (SRC3), __a64_l_width); \
 			ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_l_result, __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_7(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = \
 				KPROG_ARM64_UNARY_VALUE((OP), \
@@ -72,7 +72,7 @@ __u64 __a64_l_result = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_8(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = \
 				ARM64_SIM_L_CNEG_VALUE((OP), (SRC), \
@@ -81,7 +81,7 @@ __u64 __a64_l_result = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_9(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = \
 				ARM64_SIM_L_EXTREV_VALUE((OP), (SRC), (SRC2), (IMM), __a64_l_width); \
@@ -89,7 +89,7 @@ __u64 __a64_l_result = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_10(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_bf_result = \
 				ARM64_SIM_L_BITFIELD_VALUE((AUX) & 0xffU, \
@@ -101,7 +101,7 @@ __u64 __a64_bf_result = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_11(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -116,7 +116,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_12(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -131,7 +131,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_13(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = (__u64)(IMM); \
@@ -143,7 +143,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_14(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC), \
@@ -157,7 +157,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_15(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -170,7 +170,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_16(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -184,7 +184,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_17(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC), \
@@ -199,7 +199,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_18(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 			__u64 __a64_l_rhs = ARM64_SIM_L_MOD_VALUE((SRC2), \
@@ -215,7 +215,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_19(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -230,7 +230,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(SRC); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_20(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_result = \
 				ARM64_SIM_L_ORN_VALUE((OP), ARM64_SIM_L_READ_REG(SRC), \
@@ -241,7 +241,7 @@ __u64 __a64_l_result = \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_21(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 			__u64 __a64_l_rhs = KPROG_ARM64_FLAG_RHS((OP), (IMM), \
@@ -255,7 +255,7 @@ __u64 __a64_l_lhs = ARM64_SIM_L_READ_REG(DST); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_22(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 			if (KPROG_ARM64_CSEL_PTR_TAG_PATH((OP), __a64_l_width, ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
@@ -275,84 +275,84 @@ int __a64_l_taken = ARM64_SIM_L_EVAL_COND(AUX) ? 1 : 0; \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_23(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
     ARM64_SIM_L_LOAD_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_24(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
     ARM64_SIM_L_LDRSX_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_25(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-    __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+    const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
     ARM64_SIM_L_STORE_STEP((DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_26(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_add, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_27(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_or, 0, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_28(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, (DST), (SRC), (SRC2), __a64_l_width, (AUX)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_29(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_STLXR_STEP((OP), (DST), (SRC), (SRC2), (AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_30(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_LDP((DST), (SRC), (SRC2), (SRC3), \
 				(AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_31(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_STP((DST), (SRC), (SRC2), (SRC3), \
 				(AUX), (IMM), __a64_l_width); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_32(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_LOAD_D0_MEM((SRC), (SRC2), (AUX), (IMM)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_33(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_STORE_D0_MEM((DST), (SRC2), (AUX), (IMM)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_34(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_LOAD_Q0_MEM((SRC), (SRC2), (AUX), (IMM)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_35(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_STORE_Q0_MEM((DST), (SRC2), (AUX), (IMM)); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_36(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 unsigned __a64_fmov_index = (SRC2) == ARM64_REG_NONE ? 0U : (SRC2); \
 			if (__a64_fmov_index >= 32U) { \
@@ -375,7 +375,7 @@ unsigned __a64_fmov_index = (SRC2) == ARM64_REG_NONE ? 0U : (SRC2); \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_37(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 __u64 __a64_red_hi = (AUX) == 16 ? \
 				ARM64_SIM_L_REDUCTION_VALUE((OP), __a64_v0_hi) : 0; \
@@ -389,7 +389,7 @@ __u64 __a64_red_hi = (AUX) == 16 ? \
 } while (0)
 #define ARM64_SIM_DIRECT_BODY_38(OP, DST, SRC, SRC2, SRC3, FLAGS, AUX, IMM) \
 do { \
-__u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
+const __u8 __a64_l_width = ARM64_SIM_L_EFFECTIVE_WIDTH(FLAGS); \
 (void)__a64_l_width; \
 ARM64_SIM_L_UNSUPPORTED_OPCODE(); \
 } while (0)
