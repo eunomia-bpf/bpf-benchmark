@@ -1,0 +1,59 @@
+{
+  "utc": "2026-11-27T18:29:13Z",
+  "status": "source-grounded relation boundary; no new theorem or production admission",
+  "LNSym_revision": "d8cb51933327ca3dbe05fc7c816d9a700a29b8f7",
+  "inputs": [
+    {
+      "path": "kprog/arm64/arm64_sim_local_bpf.h",
+      "bytes": 176296,
+      "sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341"
+    },
+    {
+      "path": "kprog/formal/generated/arm64_stlxr.h",
+      "bytes": 1917,
+      "sha256": "5f4fef2eaf54fc0aac1b14a6afa82d28212378546f624d3967a1fd2e0725728d"
+    },
+    {
+      "path": "kinsn/module/include/native_lab_input.h",
+      "bytes": 2320,
+      "sha256": "e48ddf8c7158b23115028b51a0b36e9ab199e821f31943f963c8bdc82f053918"
+    },
+    {
+      "path": "kprog/formal/external/LNSym/Arm/Insts/LDST/Exclusive_single.lean",
+      "bytes": 4636,
+      "sha256": "31f221e0980308d6f2f0d88881b3c711e6c152e48d0ff1356167e39fb83b1086"
+    },
+    {
+      "path": "kprog/formal/KProgFormal/Reference/AArch64.lean",
+      "bytes": 8236,
+      "sha256": "9fad869ff43fe6310dc7baa179e8c5c78d99d79b29510b8ff8a20540ac6cafde"
+    },
+    {
+      "path": "kprog/formal/tools/check_reference_exclusive.py",
+      "bytes": 6556,
+      "sha256": "5c4b998a7af3986581b185c04ed67edbdbe5911d62442d0ad3deb14762edb3d0"
+    },
+    {
+      "path": "kprog/results/arm64-scalar-memory-20261127/exclusive-loop-20261127T180652Z/source-trace.txt",
+      "bytes": 5905,
+      "sha256": "4a073b9539580bbbeaa496bf3233a922a92f108eb9ad3c67bff1a0a80c593dd3"
+    },
+    {
+      "path": "kprog/results/arm64-scalar-memory-20261127/exclusive-contract-20261127T182532Z/contract.json",
+      "bytes": 285654,
+      "sha256": "36d7067438f7ce6474ac4e7d69ec2c840c2929b92b61602995c404c4443cbc64"
+    },
+    {
+      "path": "kprog/results/arm64-scalar-memory-20261127/exclusive-census-20261127T181210Z/census.json",
+      "bytes": 232453,
+      "sha256": "2d1b484cbaf7aa72972f24dad4c302f140b01335d9f9b3da9f00f33245f09db5"
+    }
+  ],
+  "repository_head": "751b3e1e06ea5a04a0dd1f65e9c2d4a486d3982a",
+  "source_review": {
+    "actual_failure_macro_skips_write_on_failure": true,
+    "native_checked_permission_precedes_attempt": true,
+    "finite_prefix_and_complete_behavior_distinguished": true,
+    "no_production_or_model_change": true
+  }
+}
