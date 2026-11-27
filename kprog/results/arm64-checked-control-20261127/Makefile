@@ -34,3 +34,6 @@ broker-lookup:
 .PHONY: report
 report:
 	python3 report.py
+.PHONY: callback-audit
+callback-audit:
+	python3 callback_audit.py

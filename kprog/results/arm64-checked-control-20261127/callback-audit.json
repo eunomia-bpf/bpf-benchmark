@@ -1,0 +1,313 @@
+{
+  "utc": "2026-11-27T00:27:25Z",
+  "runs": [
+    {
+      "directory": "guest-20261127T001548Z",
+      "controller_status": 1,
+      "qemu_returncode": 0,
+      "archive_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "cases": [],
+      "archive_files": 6,
+      "archive_bytes": 6017,
+      "later_raw_files": [],
+      "publication_log": "[master ed46f1e8f] Record actual ARM checked-native control guest\n 5 files changed, 114 insertions(+)\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/archive.log\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/controller.json\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001548Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   0ae8df60a..ed46f1e8f  master -> master\n"
+    },
+    {
+      "directory": "guest-20261127T001642Z",
+      "controller_status": 1,
+      "qemu_returncode": 0,
+      "archive_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "cases": [
+        {
+          "kind": "xdp",
+          "client_returncode": 1
+        },
+        {
+          "kind": "tc",
+          "client_returncode": 1
+        }
+      ],
+      "archive_files": 12,
+      "archive_bytes": 12787,
+      "later_raw_files": [],
+      "publication_log": "[master 9129844d8] Record actual ARM checked-native control guest\n 5 files changed, 187 insertions(+)\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001642Z/archive.log\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001642Z/controller.json\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001642Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001642Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001642Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   a08a54e7e..9129844d8  master -> master\n"
+    },
+    {
+      "directory": "guest-20261127T001831Z",
+      "controller_status": 0,
+      "qemu_returncode": 0,
+      "archive_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "cases": [
+        {
+          "kind": "xdp",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:11.671360+00:00",
+              "prog_id": 9,
+              "phase": "load-direct",
+              "status": 0,
+              "execution_path": "direct-native",
+              "b_generated": false,
+              "b_stock_passed": false,
+              "simulator_failure": {
+                "stage": "generation",
+                "error": "Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 257, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 86, in specialize\n    run([sys.executable, ROOT / \"kprog/trusted_compile.py\", \"exec\",\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 65, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/request-gl34ngep/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.\n"
+              },
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/state/session-thsquhir/requests/1.success.tar.gz",
+              "finished": "1970-01-01T00:00:15.877236+00:00"
+            }
+          ],
+          "client_stdout": "{\"ok\":true,\"original_prog_id\":6,\"native_prog_id\":9,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/xdp/service.tar.gz\"}\n"
+        },
+        {
+          "kind": "tc",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 12,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:22.598729+00:00",
+              "prog_id": 15,
+              "phase": "load-direct",
+              "status": 0,
+              "execution_path": "direct-native",
+              "b_generated": false,
+              "b_stock_passed": false,
+              "simulator_failure": {
+                "stage": "generation",
+                "error": "Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.",
+                "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 257, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 86, in specialize\n    run([sys.executable, ROOT / \"kprog/trusted_compile.py\", \"exec\",\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 65, in run\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/usr/bin/python3', '/workspaces/repository/kprog/trusted_compile.py', 'exec', '--state', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/broker', '--output', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.compiler.json', '--', '/workspaces/repository/kprog/stock-path/bin/clang', '-w', '-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/aarch64-sysroot', '-I', '/workspaces/repository/.cache/aarch64-sysroot/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/request-3pfrs6sn/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1.\n"
+              },
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/state/session-nva3owqg/requests/2.success.tar.gz",
+              "finished": "1970-01-01T00:00:26.547607+00:00"
+            }
+          ],
+          "client_stdout": "{\"ok\":true,\"original_prog_id\":12,\"native_prog_id\":15,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001831Z/tc/service.tar.gz\"}\n"
+        }
+      ],
+      "archive_files": 19,
+      "archive_bytes": 35415,
+      "later_raw_files": [],
+      "publication_log": "[master 165992868] Record actual ARM checked-native control guest\n 5 files changed, 194 insertions(+)\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001831Z/archive.log\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001831Z/controller.json\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001831Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001831Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001831Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   6024c7191..165992868  master -> master\n"
+    },
+    {
+      "directory": "guest-20261127T001949Z",
+      "controller_status": 1,
+      "qemu_returncode": 0,
+      "archive_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "cases": [
+        {
+          "kind": "xdp",
+          "client_returncode": 1,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:14.526763+00:00",
+              "status": -5,
+              "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+              "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/request-nv9h2zti/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+              "failure_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/state/session-ozdsckgx/requests/1.failure.tar.gz",
+              "finished": "1970-01-01T00:00:24.185264+00:00"
+            }
+          ],
+          "stock_verification": {
+            "request_id": 1,
+            "prog_id": 9,
+            "phase": "verify",
+            "status": 0
+          },
+          "verifier_log": "verification time 30590 usec\nstack depth 0\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+          "native_command_returncodes": [
+            0,
+            1
+          ],
+          "client_stdout": "{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/xdp/service.tar.gz\"}\n"
+        },
+        {
+          "kind": "tc",
+          "client_returncode": 1,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 12,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:33.673754+00:00",
+              "status": -5,
+              "error": "Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.",
+              "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 265, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 197, in load_service_artifacts\n    artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 172, in compile_checked_simulator\n    undefined = set(run([\"llvm-nm-18\", \"-u\", \"-j\", lowered]).splitlines())\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/arm64/trusted_specializer.py\", line 146, in run\n    raise subprocess.CalledProcessError(returncode, command, stdout, stderr)\nsubprocess.CalledProcessError: Command '['llvm-nm-18', '-u', '-j', '/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/request-qtddxk95/generated/checked-simulator.native.bc']' returned non-zero exit status 1.\n",
+              "failure_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/state/session-tokhah8u/requests/2.failure.tar.gz",
+              "finished": "1970-01-01T00:00:44.030997+00:00"
+            }
+          ],
+          "stock_verification": {
+            "request_id": 2,
+            "prog_id": 15,
+            "phase": "verify",
+            "status": 0
+          },
+          "verifier_log": "verification time 29739 usec\nstack depth 0\nprocessed 102 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+          "native_command_returncodes": [
+            0,
+            1
+          ],
+          "client_stdout": "{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T001949Z/tc/service.tar.gz\"}\n"
+        }
+      ],
+      "archive_files": 31,
+      "archive_bytes": 123090,
+      "later_raw_files": [
+        "host-name-lookup.native.bc"
+      ],
+      "publication_log": "[master 271686611] Record actual ARM checked-native control guest\n 5 files changed, 194 insertions(+)\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/archive.log\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/controller.json\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T001949Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   17ed1d633..271686611  master -> master\n"
+    },
+    {
+      "directory": "guest-20261127T002212Z",
+      "controller_status": 0,
+      "qemu_returncode": 0,
+      "archive_returncodes": [
+        0,
+        0,
+        0
+      ],
+      "cases": [
+        {
+          "kind": "xdp",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 1,
+              "source_prog_id": 6,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:13.406386+00:00",
+              "prog_id": 12,
+              "phase": "load",
+              "status": 0,
+              "execution_path": "checked-sim-c",
+              "b_generated": true,
+              "b_stock_passed": true,
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/state/session-174kztlr/requests/1.success.tar.gz",
+              "finished": "1970-01-01T00:00:31.470003+00:00"
+            }
+          ],
+          "stock_verification": {
+            "request_id": 1,
+            "prog_id": 9,
+            "phase": "verify",
+            "status": 0
+          },
+          "verifier_log": "verification time 30308 usec\nstack depth 0\nprocessed 101 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+          "native_command_returncodes": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "client_stdout": "{\"ok\":true,\"original_prog_id\":6,\"native_prog_id\":12,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/xdp/service.tar.gz\"}\n"
+        },
+        {
+          "kind": "tc",
+          "client_returncode": 0,
+          "service_receipts": [
+            {
+              "ready": true,
+              "arch": 2,
+              "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+            },
+            {
+              "request_id": 2,
+              "source_prog_id": 15,
+              "native_sha256": "b97d12d9a549fc44e501c197f0fffba22b508f31bedfda630f4de7400b2ea16d",
+              "execution_mode": "checked-sim-c",
+              "started": "1970-01-01T00:00:39.419440+00:00",
+              "prog_id": 21,
+              "phase": "load",
+              "status": 0,
+              "execution_path": "checked-sim-c",
+              "b_generated": true,
+              "b_stock_passed": true,
+              "artifact_archive": "/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/state/session-_temr70k/requests/2.success.tar.gz",
+              "finished": "1970-01-01T00:00:56.228056+00:00"
+            }
+          ],
+          "stock_verification": {
+            "request_id": 2,
+            "prog_id": 18,
+            "phase": "verify",
+            "status": 0
+          },
+          "verifier_log": "verification time 29811 usec\nstack depth 0\nprocessed 102 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n",
+          "native_command_returncodes": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "client_stdout": "{\"ok\":true,\"original_prog_id\":15,\"native_prog_id\":21,\"retval\":2,\"prebuilt_proof\":false}\n{\"trusted_service_archive\": \"/workspaces/kprog-raw/perf/arm64-checked-control-20261127/20261127T002212Z/tc/service.tar.gz\"}\n"
+        }
+      ],
+      "archive_files": 47,
+      "archive_bytes": 162872,
+      "later_raw_files": [],
+      "publication_log": "[master 77bd2d965] Record actual ARM checked-native control guest\n 5 files changed, 194 insertions(+)\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T002212Z/archive.log\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T002212Z/controller.json\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T002212Z/evidence.tar.zst.part-aa\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T002212Z/init-script.txt\n create mode 100644 kprog/results/arm64-checked-control-20261127/guest-20261127T002212Z/publication.log\nTo https://github.com/eunomia-bpf/bpf-benchmark.git\n   acea7bf30..77bd2d965  master -> master\n"
+    }
+  ],
+  "conclusion": "All five queued callbacks already resolved. Boot-only failure; import-only failure; direct-native fallback twice with no B; B stock acceptance then host LLVM-name failure; finally XDP and TC checked-sim-c installation and TEST_RUN2. Existing common fix acea7bf30 and outcomes b933f7ea2 remain accurate. No new execution or source fix required."
+}
