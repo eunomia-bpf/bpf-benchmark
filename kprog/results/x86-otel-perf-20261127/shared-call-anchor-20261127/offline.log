@@ -1,0 +1,27 @@
+native-link: entry=native_tracer_entry (6213 bytes), 1 reachable symbol(s) total
+  - native_tracer_entry (vaddr 0x0, 6213 bytes) [entry]
+native-link: wrote proof object 6203 bytes, 121 reloc(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127/entry.proof.o
+native-link: entry=native_tracer_entry (2262 bytes), 1 reachable symbol(s) total
+  - native_tracer_entry (vaddr 0x0, 2262 bytes) [entry]
+native-link: wrote 2822 bytes -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127/entry.blob.bin (17 relocs)
+native-link: wrote 17 relocs -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127/entry.relocs.bin
+native-link: wrote 26 map patch site(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127/entry.map-patches.tsv
+native-link: wrote ABI metadata, 102 load site(s) -> /workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127/entry.abi.tsv
+CASE 0
+lookup mapping 60 00 00 00 00 00 12 34 00 00 00 00 00 00 00 00
+lookup reported
+map update
+map update
+map update
+perf output
+RETURN 0
+CASE 1
+lookup mapping 60 00 00 00 00 00 12 34 00 00 00 00 00 00 00 00
+lookup mapping 60 00 00 00 00 00 12 34 00 00 00 01 23 45 67 89
+RETURN -1
+CASE 2
+lookup mapping 60 00 00 00 00 00 12 34 00 00 00 00 00 00 00 00
+lookup mapping 60 00 00 00 00 00 12 34 00 00 00 01 23 45 67 89
+lookup other
+RETURN 777
+TAIL_BRANCH [1, 136081603285152, 441260048, 441260048, 1, 0, 0, 0] expected_counter 1 map 441182048

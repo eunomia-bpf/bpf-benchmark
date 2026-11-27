@@ -556,15 +556,18 @@ fn push_x86_synthetic(
     insn_local_ip: &mut Vec<u64>,
     next_ip: &mut u64,
     mut insn: Instruction,
+    source_local_ip: Option<u64>,
 ) -> Result<()> {
     let len = u64::try_from(insn.len()).map_err(|_| anyhow!("instruction length overflow"))?;
-    insn.set_ip(*next_ip);
+    // The first instruction replacing a call keeps its address: source
+    // branches may enter the call directly, rather than fall through to it.
+    insn.set_ip(source_local_ip.unwrap_or(*next_ip));
     *next_ip = next_ip
         .checked_add(len.max(1))
         .ok_or_else(|| anyhow!("synthetic x86 instruction IP overflow"))?;
     local.push(insn);
     kinds.push(None);
-    insn_local_ip.push(u64::MAX);
+    insn_local_ip.push(source_local_ip.unwrap_or(u64::MAX));
     Ok(())
 }
 
@@ -1327,19 +1330,20 @@ pub(super) fn rewrite_x86(
                                 local_ip
                             );
                         }
-                        for ib in build_x86_tail_call_inline(
+                        for (i, ib) in build_x86_tail_call_inline(
                             helper_addrs,
                             callee_saved_mask,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
-                        )? {
+                        )?.into_iter().enumerate() {
                             push_x86_synthetic(
                                 &mut local,
                                 &mut kinds,
                                 &mut insn_local_ip,
                                 &mut next_synthetic_ip,
                                 ib,
+                                (i == 0).then_some(local_ip),
                             )?;
                         }
                         resolved_helper_call_sites.insert(site_key);
@@ -1348,13 +1352,14 @@ pub(super) fn rewrite_x86(
                     }
                     if name == "bpf_get_current_task" || name == "bpf_get_current_task_btf" {
                         if let Some(inline) = build_x86_get_current_task_inline(helper_addrs)? {
-                            for ib in inline {
+                            for (i, ib) in inline.into_iter().enumerate() {
                                 push_x86_synthetic(
                                     &mut local,
                                     &mut kinds,
                                     &mut insn_local_ip,
                                     &mut next_synthetic_ip,
                                     ib,
+                                    (i == 0).then_some(local_ip),
                                 )?;
                             }
                             resolved_helper_call_sites.insert(site_key);
@@ -1364,13 +1369,14 @@ pub(super) fn rewrite_x86(
                     }
                     if name == "bpf_get_smp_processor_id" {
                         if let Some(inline) = build_x86_get_smp_processor_id_inline(helper_addrs)? {
-                            for ib in inline {
+                            for (i, ib) in inline.into_iter().enumerate() {
                                 push_x86_synthetic(
                                     &mut local,
                                     &mut kinds,
                                     &mut insn_local_ip,
                                     &mut next_synthetic_ip,
                                     ib,
+                                    (i == 0).then_some(local_ip),
                                 )?;
                             }
                             resolved_helper_call_sites.insert(site_key);
@@ -1402,13 +1408,14 @@ pub(super) fn rewrite_x86(
                         lookup_call_specs.insert(site_key, spec.clone());
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray | LookupKind::ArrayOfMaps => {
-                                for ib in build_x86_array_lookup(&spec)? {
+                                for (i, ib) in build_x86_array_lookup(&spec)?.into_iter().enumerate() {
                                     push_x86_synthetic(
                                         &mut local,
                                         &mut kinds,
                                         &mut insn_local_ip,
                                         &mut next_synthetic_ip,
                                         ib,
+                                        (i == 0).then_some(local_ip),
                                     )?;
                                 }
                                 resolved_helper_call_sites.insert(site_key);
@@ -1442,6 +1449,7 @@ pub(super) fn rewrite_x86(
                                         &mut insn_local_ip,
                                         &mut next_synthetic_ip,
                                         ib,
+                                        None,
                                     )?;
                                 }
                                 resolved_helper_call_sites.insert(site_key);
@@ -3978,6 +3986,32 @@ mod tests {
             assert_eq!(output.blob, [body, &proof_return[..]].concat());
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
             assert_eq!(output.callee_saved_mask, if preserve { 0 } else { 1 });
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn expanded_call_preserves_direct_branch_entry() -> Result<()> {
+        for branch in [Code::Jmp_rel32_64, Code::Jne_rel32_64] {
+            let mut jump = Instruction::with_branch(branch, 5)?;
+            jump.set_ip(0);
+            let mut local = vec![jump];
+            let mut kinds = vec![None];
+            let mut origins = vec![0];
+            let mut synthetic = 0x1000;
+            push_x86_synthetic(&mut local, &mut kinds, &mut origins, &mut synthetic,
+                Instruction::with2(Code::Mov_r32_imm32, Register::EAX, 42u32)?, Some(5))?;
+            push_x86_synthetic(&mut local, &mut kinds, &mut origins, &mut synthetic,
+                Instruction::with(Code::Nopd), None)?;
+            let mut ret = Instruction::with(Code::Retnq);
+            ret.set_ip(10);
+            local.push(ret);
+            origins.push(10);
+            let encoded = encode_x86_local_block("expanded-call", 11, &local, &origins)?;
+            let mut decoder = Decoder::with_ip(64, &encoded.code_buffer, 0, DecoderOptions::NONE);
+            let entry = decoder.decode();
+            assert_eq!(entry.near_branch_target(), encoded.new_instruction_offsets[1] as u64);
+            assert_ne!(entry.near_branch_target(), encoded.new_instruction_offsets[3] as u64);
         }
         Ok(())
     }

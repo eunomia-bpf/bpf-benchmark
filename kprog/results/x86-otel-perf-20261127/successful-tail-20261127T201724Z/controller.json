@@ -1,0 +1,10 @@
+{
+  "pid": 1156446,
+  "controller_status": 1,
+  "ended_utc": "2026-11-27T20:26:51Z",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/successful-tail-20261127T201724Z",
+  "expected_bug_reproduced": true,
+  "source_blob_sha256": "7b63d4050139b7f04075d0e48c58b8657dde9e7f01cae72ab8b7962ad9b7d3d9",
+  "cause": "Branch targeting shared bpf_tail_call address loses its anchor and skips inline expansion. Populated slot1/count0 returns-1, no transfer, counter0; diagnostic failure branches not reached.",
+  "initial_harness_error": "Path concatenation TypeError retained; subsequent populated-map oracle failure is the actual reproduced linker bug."
+}

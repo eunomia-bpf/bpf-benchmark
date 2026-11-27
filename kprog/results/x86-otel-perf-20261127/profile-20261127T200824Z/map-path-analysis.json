@@ -1,0 +1,1160 @@
+{
+  "image": "sha256:6e09c8fce19dc7af825a77b52f25b9811acbd0f5bb63179096d35edc0373c1f7",
+  "corpus_status": "ok",
+  "source_p_sha256": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8",
+  "metric_enum_sha256": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f",
+  "layouts": {
+    "PerCPURecord": {
+      "trace": 0,
+      "state": 3792,
+      "perlUnwindState": 3896,
+      "pythonUnwindState": 3928,
+      "phpUnwindState": 3936,
+      "rubyUnwindState": 3944,
+      "customLabelsState": 3960,
+      "dotnetUnwindScratch": 0,
+      "hotspotUnwindScratch": 0,
+      "v8UnwindScratch": 0,
+      "pythonUnwindScratch": 0,
+      "goMapBucket": 0,
+      "labels": 0,
+      "unwindersDone": 4992,
+      "tailCalls": 4996,
+      "ratelimitAction": 4997
+    },
+    "Trace": {
+      "pid": 0,
+      "tid": 4,
+      "ktime": 8,
+      "comm": 16,
+      "apm_transaction_id": 32,
+      "apm_trace_id": 40,
+      "custom_labels": 56,
+      "kernel_stack_id": 700,
+      "stack_len": 704,
+      "origin": 708,
+      "context_value": 712,
+      "frames": 720
+    },
+    "UnwindState": {
+      "pc": 0,
+      "sp": 8,
+      "fp": 16,
+      "rax": 24,
+      "r9": 32,
+      "r11": 40,
+      "r13": 48,
+      "r15": 56,
+      "text_section_id": 64,
+      "text_section_offset": 72,
+      "text_section_bias": 80,
+      "error_metric": 88,
+      "unwind_error": 92,
+      "return_address": 96
+    }
+  },
+  "metric_labels": {
+    "0": "metricID_UnwindCallInterpreter",
+    "1": "metricID_UnwindErrZeroPC",
+    "2": "metricID_UnwindErrStackLengthExceeded",
+    "3": "metricID_UnwindErrBadTSDAddr",
+    "4": "metricID_UnwindErrBadTPBaseAddr",
+    "5": "metricID_UnwindNativeAttempts",
+    "6": "metricID_UnwindNativeFrames",
+    "7": "metricID_UnwindNativeStackDeltaStop",
+    "8": "metricID_UnwindNativeErrLookupTextSection",
+    "9": "metricID_UnwindNativeErrLookupIterations",
+    "10": "metricID_UnwindNativeErrLookupRange",
+    "11": "metricID_UnwindNativeErrKernelAddress",
+    "12": "metricID_UnwindNativeErrWrongTextSection",
+    "13": "metricID_UnwindNativeErrStackDeltaInvalid",
+    "14": "metricID_UnwindNativeErrPCRead",
+    "15": "metricID_UnwindPerlAttempts",
+    "16": "metricID_UnwindPerlFrames",
+    "17": "metricID_UnwindPerlTSD",
+    "18": "metricID_UnwindPerlReadStackInfo",
+    "19": "metricID_UnwindPerlReadContextStackEntry",
+    "20": "metricID_UnwindPerlResolveEGV",
+    "21": "metricID_UnwindPythonAttempts",
+    "22": "metricID_UnwindPythonFrames",
+    "23": "metricID_UnwindPythonErrBadPyThreadStateCurrentAddr",
+    "24": "metricID_UnwindPythonErrZeroThreadState",
+    "25": "metricID_UnwindPythonErrBadThreadStateFrameAddr",
+    "26": "metricID_UnwindPythonErrBadFrameObjectBackAddr",
+    "27": "metricID_UnwindPythonErrBadFrameCodeObjectAddr",
+    "28": "metricID_UnwindPythonZeroFrameCodeObject",
+    "29": "metricID_UnwindPythonErrBadFrameLastInstructionAddr",
+    "30": "metricID_UnwindPythonErrBadCodeObjectArgCountAddr",
+    "31": "metricID_UnwindPythonErrBadCodeObjectKWOnlyArgCountAddr",
+    "32": "metricID_UnwindPythonErrBadCodeObjectFlagsAddr",
+    "33": "metricID_UnwindPythonErrBadCodeObjectFirstLineNumberAddr",
+    "34": "metricID_UnwindPHPAttempts",
+    "35": "metricID_UnwindPHPFrames",
+    "36": "metricID_UnwindPHPErrBadCurrentExecuteData",
+    "37": "metricID_UnwindPHPErrBadZendExecuteData",
+    "38": "metricID_UnwindPHPErrBadZendFunction",
+    "39": "metricID_UnwindPHPErrBadZendOpline",
+    "40": "metricID_ErrEmptyStack",
+    "41": "metricID_UnwindHotspotAttempts",
+    "42": "metricID_UnwindHotspotFrames",
+    "43": "metricID_UnwindHotspotErrNoCodeblob",
+    "44": "metricID_UnwindHotspotErrInvalidCodeblob",
+    "45": "metricID_UnwindHotspotErrInterpreterFP",
+    "46": "metricID_UnwindHotspotErrInvalidRA",
+    "47": "metricID_UnwindHotspotErrLrUnwindingMidTrace",
+    "48": "metricID_UnwindHotspotUnsupportedFrameSize",
+    "49": "metricID_UnwindNativeSmallPC",
+    "50": "metricID_UnwindNativeErrLookupStackDeltaInnerMap",
+    "51": "metricID_UnwindNativeErrLookupStackDeltaOuterMap",
+    "52": "metricID_ErrBPFCurrentComm",
+    "53": "metricID_UnwindRubyAttempts",
+    "54": "metricID_UnwindRubyFrames",
+    "55": "metricID_UnwindV8Attempts",
+    "56": "metricID_UnwindV8Frames",
+    "57": "metricID_UnwindV8ErrBadFP",
+    "58": "metricID_UnwindV8ErrBadJSFunc",
+    "59": "metricID_UnwindV8ErrBadCode",
+    "60": "metricID_UnwindNativeLr0",
+    "61": "metricID_ReportedPIDsErr",
+    "62": "metricID_PIDEventsErr",
+    "63": "metricID_NumProcNew",
+    "64": "metricID_NumProcExit",
+    "65": "metricID_NumUnknownPC",
+    "66": "metricID_NumGenericPID",
+    "67": "metricID_UnwindPythonErrBadCFrameFrameAddr",
+    "68": "metricID_MaxTailCalls",
+    "69": "metricID_UnwindPythonErrNoProcInfo",
+    "70": "metricID_UnwindPythonErrBadAutoTlsKeyAddr",
+    "71": "metricID_UnwindPythonErrReadThreadStateAddr",
+    "72": "metricID_UnwindPythonErrReadTsdBase",
+    "73": "metricID_UnwindRubyErrNoProcInfo",
+    "74": "metricID_UnwindRubyErrReadStackPtr",
+    "75": "metricID_UnwindRubyErrReadStackSize",
+    "76": "metricID_UnwindRubyErrReadCfp",
+    "77": "metricID_UnwindRubyErrReadEp",
+    "78": "metricID_UnwindRubyErrReadIseqBody",
+    "79": "metricID_UnwindRubyErrReadIseqEncoded",
+    "80": "metricID_UnwindRubyErrReadIseqSize",
+    "81": "metricID_UnwindNativeErrLrUnwindingMidTrace",
+    "82": "metricID_UnwindNativeErrReadKernelModeRegs",
+    "83": "metricID_UnwindNativeErrChaseIrqStackLink",
+    "84": "metricID_UnwindV8ErrNoProcInfo",
+    "85": "metricID_UnwindNativeErrBadUnwindInfoIndex",
+    "86": "metricID_UnwindApmIntErrReadTsdBase",
+    "87": "metricID_UnwindApmIntErrReadCorrBufPtr",
+    "88": "metricID_UnwindApmIntErrReadCorrBuf",
+    "89": "metricID_UnwindApmIntReadSuccesses",
+    "90": "metricID_UnwindDotnetAttempts",
+    "91": "metricID_UnwindDotnetFrames",
+    "92": "metricID_UnwindDotnetErrNoProcInfo",
+    "93": "metricID_UnwindDotnetErrBadFP",
+    "94": "metricID_UnwindDotnetErrCodeHeader",
+    "95": "metricID_UnwindDotnetErrCodeTooLarge",
+    "96": "metricID_UnwindGoLabelsAttempts",
+    "97": "metricID_UnwindGoLabelsFailures",
+    "98": "metricID_BeginCumulative",
+    "99": "metricID_Max"
+  },
+  "phases": {
+    "baseline": {
+      "window": [
+        95.037501,
+        106.284551
+      ],
+      "entry_id": "17",
+      "calls": 6256692,
+      "runtime_ns": 26051768827,
+      "ns_per_call": 4163.824721913753,
+      "snapshots": [
+        {
+          "uptime": 98.27,
+          "entry_present": true,
+          "stress_pids": [
+            2855,
+            2865
+          ],
+          "program_arrays": [
+            {
+              "map_id": 11,
+              "targets": [
+                {
+                  "slot": 0,
+                  "program_id": 6,
+                  "program": {
+                    "id": 6,
+                    "type": 7,
+                    "name": "perf_unwind_sto",
+                    "bytes_jited": 3650
+                  }
+                },
+                {
+                  "slot": 1,
+                  "program_id": 7,
+                  "program": {
+                    "id": 7,
+                    "type": 7,
+                    "name": "perf_unwind_nat",
+                    "bytes_jited": 21868
+                  }
+                },
+                {
+                  "slot": 2,
+                  "program_id": 8,
+                  "program": {
+                    "id": 8,
+                    "type": 7,
+                    "name": "perf_unwind_hot",
+                    "bytes_jited": 18424
+                  }
+                },
+                {
+                  "slot": 3,
+                  "program_id": 9,
+                  "program": {
+                    "id": 9,
+                    "type": 7,
+                    "name": "perf_unwind_per",
+                    "bytes_jited": 18264
+                  }
+                },
+                {
+                  "slot": 4,
+                  "program_id": 11,
+                  "program": {
+                    "id": 11,
+                    "type": 7,
+                    "name": "perf_unwind_pyt",
+                    "bytes_jited": 19605
+                  }
+                },
+                {
+                  "slot": 5,
+                  "program_id": 10,
+                  "program": {
+                    "id": 10,
+                    "type": 7,
+                    "name": "perf_unwind_php",
+                    "bytes_jited": 14983
+                  }
+                },
+                {
+                  "slot": 6,
+                  "program_id": 12,
+                  "program": {
+                    "id": 12,
+                    "type": 7,
+                    "name": "perf_unwind_rub",
+                    "bytes_jited": 17840
+                  }
+                },
+                {
+                  "slot": 7,
+                  "program_id": 13,
+                  "program": {
+                    "id": 13,
+                    "type": 7,
+                    "name": "perf_unwind_v8",
+                    "bytes_jited": 20215
+                  }
+                },
+                {
+                  "slot": 8,
+                  "program_id": 14,
+                  "program": {
+                    "id": 14,
+                    "type": 7,
+                    "name": "perf_unwind_dot",
+                    "bytes_jited": 22797
+                  }
+                },
+                {
+                  "slot": 9,
+                  "program_id": 15,
+                  "program": {
+                    "id": 15,
+                    "type": 7,
+                    "name": "perf_go_labels",
+                    "bytes_jited": 1572
+                  }
+                }
+              ]
+            }
+          ],
+          "pid_queries": [
+            {
+              "map_id": 56,
+              "queries": [
+                {
+                  "pid": 2855,
+                  "returncode": 0,
+                  "errno": 0,
+                  "value": "00000000000000000000000000000001"
+                },
+                {
+                  "pid": 2865,
+                  "returncode": 0,
+                  "errno": 0,
+                  "value": "00000000000000000000000000000001"
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "map_id": 25,
+              "values": {
+                "0": 17125777,
+                "1": 6,
+                "2": 0,
+                "3": 2755400,
+                "4": 0,
+                "5": 87895455,
+                "6": 80737239,
+                "7": 6738001,
+                "8": 3223,
+                "9": 2,
+                "10": 0,
+                "11": 0,
+                "12": 61491,
+                "13": 310843,
+                "14": 106156,
+                "15": 1411354,
+                "16": 0,
+                "17": 1411354,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 1344059,
+                "22": 0,
+                "23": 0,
+                "24": 0,
+                "25": 0,
+                "26": 0,
+                "27": 0,
+                "28": 0,
+                "29": 0,
+                "30": 0,
+                "31": 0,
+                "32": 0,
+                "33": 0,
+                "34": 1422562,
+                "35": 2555198,
+                "36": 0,
+                "37": 0,
+                "38": 0,
+                "39": 0,
+                "40": 33600,
+                "41": 0,
+                "42": 0,
+                "43": 0,
+                "44": 0,
+                "45": 0,
+                "46": 0,
+                "47": 0,
+                "48": 0,
+                "49": 1,
+                "50": 5,
+                "51": 0,
+                "52": 0,
+                "53": 1331539,
+                "54": 545693,
+                "55": 2686014,
+                "56": 12463938,
+                "57": 0,
+                "58": 521,
+                "59": 0,
+                "60": 0,
+                "61": 0,
+                "62": 0,
+                "63": 237,
+                "64": 112,
+                "65": 77,
+                "66": 182,
+                "67": 0,
+                "68": 5099,
+                "69": 684,
+                "70": 0,
+                "71": 1344245,
+                "72": 0,
+                "73": 1,
+                "74": 0,
+                "75": 0,
+                "76": 0,
+                "77": 0,
+                "78": 0,
+                "79": 0,
+                "80": 0,
+                "81": 0,
+                "82": 284689,
+                "83": 0,
+                "84": 1,
+                "85": 0,
+                "86": 0,
+                "87": 0,
+                "88": 0,
+                "89": 0,
+                "90": 0,
+                "91": 0,
+                "92": 0,
+                "93": 0,
+                "94": 0,
+                "95": 0,
+                "96": 0,
+                "97": 0,
+                "98": 0
+              }
+            }
+          ],
+          "records": [
+            {
+              "cpu": 0,
+              "map_id": 34,
+              "pid": 2910,
+              "stack_len": 1,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 4009,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 1,
+              "map_id": 34,
+              "pid": 2846,
+              "stack_len": 15,
+              "pc": 94236100085221,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 6
+            },
+            {
+              "cpu": 2,
+              "map_id": 34,
+              "pid": 2865,
+              "stack_len": 7,
+              "pc": 94746748692021,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 3
+            },
+            {
+              "cpu": 3,
+              "map_id": 34,
+              "pid": 2839,
+              "stack_len": 11,
+              "pc": 6650373,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 6
+            },
+            {
+              "cpu": 4,
+              "map_id": 34,
+              "pid": 2842,
+              "stack_len": 21,
+              "pc": 139706427234465,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 5
+            },
+            {
+              "cpu": 5,
+              "map_id": 34,
+              "pid": 2844,
+              "stack_len": 7,
+              "pc": 94806548735637,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 5
+            },
+            {
+              "cpu": 6,
+              "map_id": 34,
+              "pid": 2628,
+              "stack_len": 5,
+              "pc": 17367909,
+              "error_metric": 13,
+              "unwind_error": 4005,
+              "tail_calls": 2
+            },
+            {
+              "cpu": 7,
+              "map_id": 34,
+              "pid": 2843,
+              "stack_len": 16,
+              "pc": 140501670629968,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 4
+            }
+          ]
+        },
+        {
+          "uptime": 103.9,
+          "entry_present": true,
+          "stress_pids": [
+            2855
+          ],
+          "program_arrays": [
+            {
+              "map_id": 11,
+              "targets": [
+                {
+                  "slot": 0,
+                  "program_id": 6,
+                  "program": {
+                    "id": 6,
+                    "type": 7,
+                    "name": "perf_unwind_sto",
+                    "bytes_jited": 3650
+                  }
+                },
+                {
+                  "slot": 1,
+                  "program_id": 7,
+                  "program": {
+                    "id": 7,
+                    "type": 7,
+                    "name": "perf_unwind_nat",
+                    "bytes_jited": 21868
+                  }
+                },
+                {
+                  "slot": 2,
+                  "program_id": 8,
+                  "program": {
+                    "id": 8,
+                    "type": 7,
+                    "name": "perf_unwind_hot",
+                    "bytes_jited": 18424
+                  }
+                },
+                {
+                  "slot": 3,
+                  "program_id": 9,
+                  "program": {
+                    "id": 9,
+                    "type": 7,
+                    "name": "perf_unwind_per",
+                    "bytes_jited": 18264
+                  }
+                },
+                {
+                  "slot": 4,
+                  "program_id": 11,
+                  "program": {
+                    "id": 11,
+                    "type": 7,
+                    "name": "perf_unwind_pyt",
+                    "bytes_jited": 19605
+                  }
+                },
+                {
+                  "slot": 5,
+                  "program_id": 10,
+                  "program": {
+                    "id": 10,
+                    "type": 7,
+                    "name": "perf_unwind_php",
+                    "bytes_jited": 14983
+                  }
+                },
+                {
+                  "slot": 6,
+                  "program_id": 12,
+                  "program": {
+                    "id": 12,
+                    "type": 7,
+                    "name": "perf_unwind_rub",
+                    "bytes_jited": 17840
+                  }
+                },
+                {
+                  "slot": 7,
+                  "program_id": 13,
+                  "program": {
+                    "id": 13,
+                    "type": 7,
+                    "name": "perf_unwind_v8",
+                    "bytes_jited": 20215
+                  }
+                },
+                {
+                  "slot": 8,
+                  "program_id": 14,
+                  "program": {
+                    "id": 14,
+                    "type": 7,
+                    "name": "perf_unwind_dot",
+                    "bytes_jited": 22797
+                  }
+                },
+                {
+                  "slot": 9,
+                  "program_id": 15,
+                  "program": {
+                    "id": 15,
+                    "type": 7,
+                    "name": "perf_go_labels",
+                    "bytes_jited": 1572
+                  }
+                }
+              ]
+            }
+          ],
+          "pid_queries": [
+            {
+              "map_id": 56,
+              "queries": [
+                {
+                  "pid": 2855,
+                  "returncode": 0,
+                  "errno": 0,
+                  "value": "00000000000000000000000000000001"
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "map_id": 25,
+              "values": {
+                "0": 22906878,
+                "1": 6,
+                "2": 0,
+                "3": 3532836,
+                "4": 0,
+                "5": 114191061,
+                "6": 104924365,
+                "7": 8689180,
+                "8": 3970,
+                "9": 4,
+                "10": 0,
+                "11": 0,
+                "12": 68525,
+                "13": 432254,
+                "14": 141283,
+                "15": 1697752,
+                "16": 0,
+                "17": 1697752,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 1835091,
+                "22": 0,
+                "23": 0,
+                "24": 0,
+                "25": 0,
+                "26": 0,
+                "27": 0,
+                "28": 0,
+                "29": 0,
+                "30": 0,
+                "31": 0,
+                "32": 0,
+                "33": 0,
+                "34": 1728367,
+                "35": 3102899,
+                "36": 0,
+                "37": 0,
+                "38": 0,
+                "39": 0,
+                "40": 36811,
+                "41": 0,
+                "42": 0,
+                "43": 0,
+                "44": 0,
+                "45": 0,
+                "46": 0,
+                "47": 0,
+                "48": 0,
+                "49": 2,
+                "50": 5,
+                "51": 0,
+                "52": 0,
+                "53": 1739265,
+                "54": 697810,
+                "55": 3679029,
+                "56": 17054287,
+                "57": 0,
+                "58": 553,
+                "59": 0,
+                "60": 0,
+                "61": 0,
+                "62": 0,
+                "63": 260,
+                "64": 138,
+                "65": 105,
+                "66": 251,
+                "67": 0,
+                "68": 6329,
+                "69": 684,
+                "70": 0,
+                "71": 1835137,
+                "72": 0,
+                "73": 1,
+                "74": 0,
+                "75": 0,
+                "76": 0,
+                "77": 0,
+                "78": 0,
+                "79": 0,
+                "80": 0,
+                "81": 0,
+                "82": 329338,
+                "83": 0,
+                "84": 1,
+                "85": 0,
+                "86": 0,
+                "87": 0,
+                "88": 0,
+                "89": 0,
+                "90": 0,
+                "91": 0,
+                "92": 0,
+                "93": 0,
+                "94": 0,
+                "95": 0,
+                "96": 0,
+                "97": 0,
+                "98": 0
+              }
+            }
+          ],
+          "records": [
+            {
+              "cpu": 0,
+              "map_id": 34,
+              "pid": 0,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 1,
+              "map_id": 34,
+              "pid": 0,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 2,
+              "map_id": 34,
+              "pid": 0,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 3,
+              "map_id": 34,
+              "pid": 2953,
+              "stack_len": 14,
+              "pc": 6650373,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 6
+            },
+            {
+              "cpu": 4,
+              "map_id": 34,
+              "pid": 2843,
+              "stack_len": 17,
+              "pc": 140501672277337,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 6
+            },
+            {
+              "cpu": 5,
+              "map_id": 34,
+              "pid": 2842,
+              "stack_len": 34,
+              "pc": 139706427239086,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 10
+            },
+            {
+              "cpu": 6,
+              "map_id": 34,
+              "pid": 0,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 7,
+              "map_id": 34,
+              "pid": 0,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            }
+          ]
+        }
+      ]
+    },
+    "post_rejit": {
+      "window": [
+        125.975546,
+        136.273627
+      ],
+      "entry_id": "48",
+      "calls": 5598389,
+      "runtime_ns": 2455128569,
+      "ns_per_call": 438.54197502174287,
+      "snapshots": [
+        {
+          "uptime": 126.53,
+          "entry_present": true,
+          "stress_pids": [
+            3278,
+            3286
+          ],
+          "program_arrays": [
+            {
+              "map_id": 286,
+              "targets": [
+                {
+                  "slot": 0,
+                  "program_id": 26,
+                  "program": {
+                    "id": 26,
+                    "type": 7,
+                    "name": "perf_unwind_sto",
+                    "bytes_jited": 2274
+                  }
+                },
+                {
+                  "slot": 1,
+                  "program_id": 28,
+                  "program": {
+                    "id": 28,
+                    "type": 7,
+                    "name": "perf_unwind_nat",
+                    "bytes_jited": 14373
+                  }
+                },
+                {
+                  "slot": 2,
+                  "program_id": 30,
+                  "program": {
+                    "id": 30,
+                    "type": 7,
+                    "name": "perf_unwind_hot",
+                    "bytes_jited": 14154
+                  }
+                },
+                {
+                  "slot": 3,
+                  "program_id": 32,
+                  "program": {
+                    "id": 32,
+                    "type": 7,
+                    "name": "perf_unwind_per",
+                    "bytes_jited": 12532
+                  }
+                },
+                {
+                  "slot": 4,
+                  "program_id": 36,
+                  "program": {
+                    "id": 36,
+                    "type": 7,
+                    "name": "perf_unwind_pyt",
+                    "bytes_jited": 9913
+                  }
+                },
+                {
+                  "slot": 5,
+                  "program_id": 34,
+                  "program": {
+                    "id": 34,
+                    "type": 7,
+                    "name": "perf_unwind_php",
+                    "bytes_jited": 11572
+                  }
+                },
+                {
+                  "slot": 6,
+                  "program_id": 38,
+                  "program": {
+                    "id": 38,
+                    "type": 7,
+                    "name": "perf_unwind_rub",
+                    "bytes_jited": 16443
+                  }
+                },
+                {
+                  "slot": 7,
+                  "program_id": 40,
+                  "program": {
+                    "id": 40,
+                    "type": 7,
+                    "name": "perf_unwind_v8",
+                    "bytes_jited": 12952
+                  }
+                },
+                {
+                  "slot": 8,
+                  "program_id": 42,
+                  "program": {
+                    "id": 42,
+                    "type": 7,
+                    "name": "perf_unwind_dot",
+                    "bytes_jited": 18638
+                  }
+                },
+                {
+                  "slot": 9,
+                  "program_id": 44,
+                  "program": {
+                    "id": 44,
+                    "type": 7,
+                    "name": "perf_go_labels",
+                    "bytes_jited": 1014
+                  }
+                }
+              ]
+            }
+          ],
+          "pid_queries": [
+            {
+              "map_id": 258,
+              "queries": [
+                {
+                  "pid": 3278,
+                  "returncode": 0,
+                  "errno": 0,
+                  "value": "00000000000000000000000000000001"
+                },
+                {
+                  "pid": 3286,
+                  "returncode": 0,
+                  "errno": 0,
+                  "value": "00000000000000000000000000000001"
+                }
+              ]
+            }
+          ],
+          "metrics": [
+            {
+              "map_id": 302,
+              "values": {
+                "0": 970255,
+                "1": 0,
+                "2": 0,
+                "3": 0,
+                "4": 0,
+                "5": 0,
+                "6": 0,
+                "7": 0,
+                "8": 0,
+                "9": 0,
+                "10": 0,
+                "11": 0,
+                "12": 0,
+                "13": 0,
+                "14": 0,
+                "15": 0,
+                "16": 0,
+                "17": 0,
+                "18": 0,
+                "19": 0,
+                "20": 0,
+                "21": 0,
+                "22": 0,
+                "23": 0,
+                "24": 0,
+                "25": 0,
+                "26": 0,
+                "27": 0,
+                "28": 0,
+                "29": 0,
+                "30": 0,
+                "31": 0,
+                "32": 0,
+                "33": 0,
+                "34": 0,
+                "35": 0,
+                "36": 0,
+                "37": 0,
+                "38": 0,
+                "39": 0,
+                "40": 0,
+                "41": 0,
+                "42": 0,
+                "43": 0,
+                "44": 0,
+                "45": 0,
+                "46": 0,
+                "47": 0,
+                "48": 0,
+                "49": 0,
+                "50": 0,
+                "51": 0,
+                "52": 0,
+                "53": 0,
+                "54": 0,
+                "55": 0,
+                "56": 0,
+                "57": 0,
+                "58": 0,
+                "59": 0,
+                "60": 0,
+                "61": 0,
+                "62": 0,
+                "63": 152,
+                "64": 84,
+                "65": 0,
+                "66": 138,
+                "67": 0,
+                "68": 0,
+                "69": 0,
+                "70": 0,
+                "71": 0,
+                "72": 0,
+                "73": 0,
+                "74": 0,
+                "75": 0,
+                "76": 0,
+                "77": 0,
+                "78": 0,
+                "79": 0,
+                "80": 0,
+                "81": 0,
+                "82": 133458,
+                "83": 0,
+                "84": 0,
+                "85": 0,
+                "86": 0,
+                "87": 0,
+                "88": 0,
+                "89": 0,
+                "90": 0,
+                "91": 0,
+                "92": 0,
+                "93": 0,
+                "94": 0,
+                "95": 0,
+                "96": 0,
+                "97": 0,
+                "98": 0
+              }
+            }
+          ],
+          "records": [
+            {
+              "cpu": 0,
+              "map_id": 287,
+              "pid": 3327,
+              "stack_len": 0,
+              "pc": 140538363107402,
+              "error_metric": 12,
+              "unwind_error": 4012,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 1,
+              "map_id": 287,
+              "pid": 3329,
+              "stack_len": 0,
+              "pc": 0,
+              "error_metric": -1,
+              "unwind_error": 4009,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 2,
+              "map_id": 287,
+              "pid": 3260,
+              "stack_len": 0,
+              "pc": 139912931340880,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 3,
+              "map_id": 287,
+              "pid": 3259,
+              "stack_len": 0,
+              "pc": 6158026,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 4,
+              "map_id": 287,
+              "pid": 3264,
+              "stack_len": 0,
+              "pc": 140320573513524,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 5,
+              "map_id": 287,
+              "pid": 3002,
+              "stack_len": 0,
+              "pc": 16718149,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 6,
+              "map_id": 287,
+              "pid": 3276,
+              "stack_len": 0,
+              "pc": 140620204480525,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            },
+            {
+              "cpu": 7,
+              "map_id": 287,
+              "pid": 3263,
+              "stack_len": 0,
+              "pc": 140081632973693,
+              "error_metric": -1,
+              "unwind_error": 0,
+              "tail_calls": 1
+            }
+          ]
+        },
+        {
+          "uptime": 134.18,
+          "entry_present": false,
+          "stress_pids": [],
+          "program_arrays": [
+            {
+              "map_id": 286,
+              "targets": []
+            }
+          ],
+          "pid_queries": [],
+          "metrics": [],
+          "records": []
+        }
+      ]
+    }
+  },
+  "diagnostic_ratio": 9.494700528284232,
+  "conclusion": "Known stress PIDs have initial mapping hits and native program-array slot1 points to installed native unwinder28. Native per-CPU records have zero stack frames and one requested tail call; native unwind attempt/frame counters remain zero. Actual native entry has an unconditional branch to its shared tail helper that the linker remaps past the inline expansion. Thus the earlier large ratio includes skipped unwinding, not an equal-work optimization gain.",
+  "limits": "Snapshots are non-atomic and sparse. The finish socket envelope includes program teardown; rows with entry_present=false remain explicitly recorded. No benchmark is excluded on counts or PMU noise; the causal defect is backed by actual branch targets and a populated-map host reproduction."
+}

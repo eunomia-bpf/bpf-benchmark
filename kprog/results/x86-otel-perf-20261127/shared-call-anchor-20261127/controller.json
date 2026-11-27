@@ -1,0 +1,30 @@
+{
+  "pid": 1157455,
+  "controller_status": 0,
+  "ended_utc": "2026-11-27T20:26:51Z",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/shared-call-anchor-20261127",
+  "build_returncode": 0,
+  "tests_passed": 13,
+  "tests_failed": 0,
+  "offline_cli_returncode": 0,
+  "returns": [
+    0,
+    -1,
+    777
+  ],
+  "successful_transfer": {
+    "case": 2,
+    "transferred": true,
+    "count": 1,
+    "context": 136081603285152,
+    "stack": 441260048,
+    "frame": 441260048,
+    "expected_context": 136081603285152,
+    "expected_stack": 441260048
+  },
+  "source_sha256": "52364ae8bd2a95980c9822efee3a137bddf3ac0ac142094447d45cf25d9e1751",
+  "linker_sha256": "20ccb120f748fee39031e7cc11a322dc3a488161b5b964074e79d065ee71bd37",
+  "fixed_blob_bytes": 2822,
+  "fixed_blob_sha256": "e87ab9121f850525dd6a1d24517ecf13aa791af3e77e42e4c466c9e3e02fe8af",
+  "scope": "Common x86 inline-expansion branch entry preservation and actual captured entry/helper/counter/ABI host regression. Installed guest work after repair pending."
+}

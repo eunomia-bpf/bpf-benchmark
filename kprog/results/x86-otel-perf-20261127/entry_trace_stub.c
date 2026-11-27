@@ -15,7 +15,7 @@ uint64_t bpf_get_stackid(void *ctx,void *map,uint64_t flags){return 7;}
 void *bpf_map_lookup_elem(void *map,void *key){
  if(map==per_cpu_records){printf("lookup record %08x\n",*(uint32_t*)key);return record;}
  if(map==metrics){printf("lookup metric %u\n",*(uint32_t*)key);return metric;}
- if(map==pid_page_to_mapping_info){unsigned char *k=key;printf("lookup mapping");for(int i=0;i<16;i++)printf(" %02x",k[i]);puts("");return present && lookup_count++==0?mapping:NULL;}
+ if(map==pid_page_to_mapping_info){unsigned char *k=key;printf("lookup mapping");for(int i=0;i<16;i++)printf(" %02x",k[i]);puts("");return present==2 || (present && lookup_count++==0)?mapping:NULL;}
  if(map==reported_pids){puts("lookup reported");return metric;}
  puts("lookup other");return NULL;
 }
@@ -38,7 +38,7 @@ int main(int argc,char **argv){
 }
 void configure_maps(void *a,void *b,void *c,void*d,int flag){
  per_cpu_records=a;metrics=b;pid_page_to_mapping_info=c;reported_pids=d;present=flag;lookup_count=0;
- memset(record,0,sizeof(record));memset(metric,0,sizeof(metric));memset(mapping,0,sizeof(mapping));setvbuf(stdout,NULL,_IONBF,0);
+ memset(record,0,sizeof(record));memset(metric,0,sizeof(metric));memset(mapping,0,sizeof(mapping));if(flag==2)mapping[15]=1;setvbuf(stdout,NULL,_IONBF,0);
 }
 void *record_address(void){return record;}
 void *metric_address(void){return metric;}

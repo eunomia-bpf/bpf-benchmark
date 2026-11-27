@@ -1,0 +1,57 @@
+{
+  "controller_status": 0,
+  "files": {
+    "entry.relocs.bin": {
+      "bytes": 272,
+      "sha256": "f6f9afbda33a25b06375b3a0167c15066476279e1fbb68ea4b5a7fac78d9dc42"
+    },
+    "kallsyms.txt": {
+      "bytes": 9270454,
+      "sha256": "ac94c66dd96a0d2916ffe9bdba55b8a5ec323d20826b88ba46ae125729b50405"
+    },
+    "entry.blob.frozen.proof.o": {
+      "bytes": 66632,
+      "sha256": "6e434b4c456429cefe9252d469a4fae09b79a049b441454ff7df21eb395784ee"
+    },
+    "entry.proof.o": {
+      "bytes": 806304,
+      "sha256": "8522163b3d553e414d669c8174bbb5558dd47efbdbe07ed11cb94b4cdec4149c"
+    },
+    "entry.abi.tsv": {
+      "bytes": 1973,
+      "sha256": "3fb9ac8bdd62e33565e9a7534cdd9ef45d938082c50ef1ea10a1666a6a362aa5"
+    },
+    "kallsyms-bpf-134.18.txt": {
+      "bytes": 74237,
+      "sha256": "58109880dc3630475463f04c35a8ce8af002c1c9d88222598fde63d1b8150d09"
+    },
+    "entry.map-patches.tsv": {
+      "bytes": 460,
+      "sha256": "ace3b63f620393f21b106b51c03c046c139235835af0b9e62e69ee6c71423539"
+    },
+    "entry.link-plan.json": {
+      "bytes": 35881,
+      "sha256": "7202d2530f07ea3030676bc4b607a83938d2b988833eb767cadf0e422013c12b"
+    },
+    "entry.blob.bin": {
+      "bytes": 2822,
+      "sha256": "e87ab9121f850525dd6a1d24517ecf13aa791af3e77e42e4c466c9e3e02fe8af"
+    },
+    "host/result.json": {
+      "bytes": 3471,
+      "sha256": "b44b1b485d01e24b42eca289fdf615c5b62acef7bcc9acb7ece0a9490eae8bfb"
+    },
+    "host/stubs.so": {
+      "bytes": 16888,
+      "sha256": "243b810c2d02f724904880b1f2e88637e9a1eb545c11ee058a989b9db6b9662c"
+    }
+  },
+  "verified_files": 11,
+  "parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/shared-call-anchor-20261127/evidence.tar.gz",
+      "bytes": 1853698,
+      "sha256": "d891169465325a3d56f9a0b9c15412f70652f84247e8753d72a0db858a363ccf"
+    }
+  ]
+}

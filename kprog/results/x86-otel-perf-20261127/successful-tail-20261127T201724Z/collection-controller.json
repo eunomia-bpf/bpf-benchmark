@@ -1,0 +1,41 @@
+{
+  "controller_status": 0,
+  "files": {
+    "trace-oracle-failure.log": {
+      "bytes": 1047,
+      "sha256": "e26711a7f200884b8c7baab8ac2cd47355d1a5f3004ca56318e97d78145cdbb4"
+    },
+    "trace.log": {
+      "bytes": 1117,
+      "sha256": "c604abb67589faf750b127db043e06ca53bd26e4164ec66bb67c639da86a5194"
+    },
+    "exit-initial": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "trace-initial.log": {
+      "bytes": 467,
+      "sha256": "31b9e7d983bc8879f8c482673961c6e473b0a0346690ccbb970c5a58e0d4af79"
+    },
+    "exit-oracle-failure": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    },
+    "stubs.so": {
+      "bytes": 16888,
+      "sha256": "243b810c2d02f724904880b1f2e88637e9a1eb545c11ee058a989b9db6b9662c"
+    },
+    "exit": {
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    }
+  },
+  "verified_files": 7,
+  "parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/successful-tail-20261127T201724Z/evidence.tar.gz",
+      "bytes": 5210,
+      "sha256": "af0fa2f380f060d6257c1fd3d043aee88cbb7c85b0db6c8f0f97df8debeaae3b"
+    }
+  ]
+}

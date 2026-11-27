@@ -1,0 +1,26 @@
+{
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/metadata.json": {
+    "bytes": 985,
+    "sha256": "f3c014c382827ddf391a283384b438c4dc93d394039fb13b3f715e7f86db6677"
+  },
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/details/result.json": {
+    "bytes": 1758,
+    "sha256": "c26b2754a3e0c035bc6f52b22cdba7aeef11d5cac8990d3f87d0ceed7169433e"
+  },
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/details/progress.json": {
+    "bytes": 103,
+    "sha256": "98b0d50e83b6ba8224c716690d149776fd8c4baac92c27c5df2fb3cae4618792"
+  },
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log": {
+    "bytes": 57003,
+    "sha256": "0093584cd525c4fb85cf5260dc41097fc5a3bbb6e478dbdf81093cf322155248"
+  },
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/details/shim-logs/otelcol-ebpf-profiler__profiling.baseline.log": {
+    "bytes": 57842,
+    "sha256": "f369297b10c5f83aa2f205f760400475b4b6fb52627e5d8eef067cb546d3fd93"
+  },
+  "corpus/results/x86_kvm_corpus_20261127_200946_092873/details/apps/otelcol-ebpf-profiler__profiling.json": {
+    "bytes": 30419,
+    "sha256": "7a8898adf7d39ee9a8ea388015b4c1e3b7a03a5045f126f53269dc7deb65b675"
+  }
+}
