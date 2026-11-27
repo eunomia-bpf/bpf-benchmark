@@ -1,0 +1,13 @@
+{
+  "pid": 1167058,
+  "command": [
+    "taskset",
+    "-c",
+    "19",
+    "python3",
+    "/workspaces/repository/kprog/results/x86-otel-perf-20261127/analyse_profile.py",
+    "/workspaces/repository/kprog/results/x86-otel-perf-20261127/profile-20261127T205918Z"
+  ],
+  "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/profile-20261127T205918Z/pmu-analysis.log",
+  "purpose": "Resolve completed repaired-image guest PMU once; no new measurement. Follow actual process/log/pmu-analysis.json before collection."
+}

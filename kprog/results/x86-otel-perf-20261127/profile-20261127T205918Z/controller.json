@@ -1,0 +1,50 @@
+{
+  "pid": 1164271,
+  "started_utc": "2026-11-27T20:59:18Z",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z",
+  "source_revision": "06fad8ea5f7b1e3152a92444f994b6a8fcef1bfb",
+  "phase": "finished",
+  "controller_status": 0,
+  "scope": "Current-image x86 OTel eBPF/native host PMU diagnosis under timingEX/imageSH. Effective frozen check settings1sample/10seconds/stats1, no full timing rerun or performance acceptance. Profile observers live outside benchmark.",
+  "host_address_space_limit_bytes": [
+    -1,
+    -1
+  ],
+  "map_observer": {
+    "source": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+    "sha256": "30899bb30129c998cd0ada4c41427863a741dab78a55780b28ad9ba263f4c985",
+    "scope": "Read-only program IDs, prog-array targets, per-CPU metric/record bytes, known stress PID LPM hits; no BPF program loaded or workload change."
+  },
+  "source_sha256": {
+    "kprog/results/x86-otel-perf-20261127/profile_check.py": "d8435d177a47f36759820b99107287fe40f390e7539e4cdfde9606d12991b010",
+    "kprog/results/profile-20261123/profile-host.sh": "016fac66a9bb66c29fcf6f291d31cb9d3589b7340c21ccffc2a47b15b66ffcb3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83"
+  },
+  "observer_changes": {
+    "SAMPLES=1 WORKLOAD_DURATION=60 BPFREJIT_CORPUS_BPF_STATS=0": "SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1",
+    "--cpus 8 --memory 32G": "--cpus 8 --memory 64G",
+    "taskset -c 8-23 $PERF": "taskset -c 19 $PERF",
+    "sleep 30": "sleep 2"
+  },
+  "effective_check": {
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": 1,
+    "guest_memory": "64G"
+  },
+  "program_dump": "perf_unwind_nat",
+  "command": [
+    "bash",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z/profile-host-check.sh",
+    "otelcol-ebpf-profiler/profiling",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T205918Z",
+    "perf_unwind_nat"
+  ],
+  "profile_returncode": 0,
+  "guest-exit.txt": "0",
+  "perf-exit.txt": "143",
+  "profile-image.txt": "sha256:c103a86a0636c7a07aee29dcd91a8f814291e62f38fb4b45a8df95bb745527f3",
+  "profile-source.txt": "57d7770d4201073bd86bbbe0e071c51bf5355743",
+  "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261127_210728_646166",
+  "ended_utc": "2026-11-27T21:08:59Z"
+}
