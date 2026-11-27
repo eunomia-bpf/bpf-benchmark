@@ -1,0 +1,48 @@
+{
+  "confirmed_utc": "2026-11-27T04:39:09.428012+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryControl"
+    ],
+    "exit": 0,
+    "seconds": 12.666735887527466,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 143,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-entry-control/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.938765048980713,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "real_control_steps": 3,
+    "input_domain": "actual fetched Code and mature feature-absent BTI projection"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyEntryControl.lean",
+      "size_bytes": 5543,
+      "mtime_ns": 1795753919445437399
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
