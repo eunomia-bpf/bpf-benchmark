@@ -1,0 +1,30 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.allocated
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.allocated
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.enter
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.enter
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.allocation_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.allocation_frame
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.local_storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.local_storage
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.tables_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.tables_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_layout
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_layout
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.table_storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.table_storage
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.table_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.table_store
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.run_table
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.run_table
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.parameter_reads
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.parameter_reads
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_write
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.stack_write
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.initialize_writer
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.initialize_writer
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkWriter.execute

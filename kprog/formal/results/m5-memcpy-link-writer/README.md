@@ -1,0 +1,9 @@
+# Initialize the genuine writer in the same original LINK execution
+
+The actual linked ten-argument writer uses its own FunctionEntry2 and real three-local allocator: two31-pointer arrays and the original stack descriptor. Allocated bindings,Freeable ownership,block separation and exact current access derive every successful store. Each real table row executes3 steps;both complete31-row tables execute186 steps,then the actual stack descriptor store executes3. With entry1,the genuine writer initialization is190 real transitions. The SAME original LINK400 prefix feeds this initialization once,for590 actual source transitions to the original ordinary writer loop with the true saved LINK continuation. Both outer and both inner31-slot tables and the actual descriptor read back the original header pointer values,with arbitrary original pointers and wrapping offsets. Raw old-block contents/Cur-Max permissions,caller frame and exact allocator access/nextblock remain. No original prefix,table or call is replayed;no successful-store assumption is added. The ordinary reg30 word/tag9 branch,its eager coordinate/SP read,the real inner/outer freeLists and complete return remain next. Native BL/code-coordinate/provenance binding and global/universal O1/O2/O4/recount still precede M6. Runtime,exports,oracle,model and benchmark unchanged.
+
+Focused build 150 and 14 public type/axiom queries pass under shared timing, CPU17, one worker and32GiB at original200000/512 proof caps. The public log records actual axiom dependencies. V owns whole confirmation.
+
+Raw evidence: /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z.
+
+Root-integrated default Lake build also passes (1436 jobs),with exclusive formal-full-check. Ordinary reg30 stores,eager coordinate read and actual inner/outer freeLists remain outside this initialization step.

@@ -169,7 +169,11 @@ each current read and store permission. The previous complete first-row API
 delegates to that same generic row proof. Actual LR setup and seven header
 reads now enter the genuinely linked ten-argument writer in 400 source
 transitions from that original entry, with the real saved caller and casts.
-The writer body, its three-local and the outer two-local free-lists still follow.
+The same execution now enters that writer's actual three-local allocator,
+initializes both of its 31-pointer tables and writes its real stack descriptor:
+590 source transitions preserve all four tables and the caller's raw frame.
+The ordinary reg30 stores, eager coordinate read and actual inner/outer
+free-lists and return still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
