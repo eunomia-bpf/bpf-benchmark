@@ -1,0 +1,23 @@
+{
+  "receipt": "kprog/results/arm64-loadtime-20261127/raw-dedup-20261127T152829Z.json",
+  "removed_allocated_bytes": 509915136,
+  "free_before_bytes": 16004468736,
+  "free_after_bytes": 16514330624,
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T012418Z",
+      "status": "retained",
+      "reason": "File sets differ: raw-only=['bcc-set/ctx20-diagnostic/generation.metadata.json', 'bcc-set/ctx20-diagnostic/kernel.facts.json', 'bcc-set/ctx20-diagnostic/no-avoid-speculation/disassembly.txt', 'bcc-set/ctx20-diagnostic/no-avoid-speculation/replay.bpf.o', 'bcc-set/ctx20-diagnostic/normal/disassembly.txt', 'bcc-set/ctx20-diagnostic/normal/replay.bpf.o', 'bcc-set/ctx20-diagnostic/trusted_arm64.bpf.c', 'bcc-set/ctx20-diagnostic/trusted_arm64.bpf.frontend.bc', 'bcc-set/ctx20-diagnostic/trusted_arm64.bpf.o'] archive-only=[]"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T020053Z",
+      "status": "removed",
+      "reason": null
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z",
+      "status": "removed",
+      "reason": null
+    }
+  ]
+}

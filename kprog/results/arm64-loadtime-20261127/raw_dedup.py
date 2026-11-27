@@ -105,6 +105,22 @@ for controller in requested or sorted(HERE.glob('*/controller.json')):
             for block in iter(lambda:stream.read(1024*1024),b''):pass
             if b is not None and b.wait()!=0:raise ValueError('Archive decompression failed')
             if a.wait()!=0:raise ValueError('Archive part stream failed')
+            # This later diagnostic already has its own committed archive. Verify
+            # its exact members as part of the same raw tree, rather than dropping
+            # the original archive's file-set guard or discarding the extra data.
+            diagnostic=raw/'bcc-set/ctx20-diagnostic'
+            if diagnostic.is_dir():
+                supplemental=ROOT/'kprog/results/arm64-checked-corpus-20261127/ctx20-compile.tar.gz'
+                row['supplemental_archives']=committed([supplemental])
+                with tarfile.open(supplemental,'r:gz') as extra:
+                    for member in extra:
+                        path=Path(member.name)
+                        if path.is_absolute() or '..' in path.parts or not path.parts or path.parts[0]!='ctx20-diagnostic':raise ValueError('Supplemental archive root mismatch')
+                        if member.isdir():continue
+                        if not member.isfile():raise ValueError('Supplemental archive special file')
+                        rel=str(Path('bcc-set')/path)
+                        if rel in archived:raise ValueError('Overlapping archive member: '+rel)
+                        archived[rel]=dict(bytes=member.size,sha256=digest_stream(extra.extractfile(member)))
             if set(files)!=set(archived):raise ValueError('File sets differ: raw-only='+str(sorted(set(files)-set(archived)))+' archive-only='+str(sorted(set(archived)-set(files))))
             if any(files[p]['bytes']!=archived[p]['bytes'] or files[p]['sha256']!=archived[p]['sha256'] for p in files):raise ValueError('A file SHA256 or size differs')
             row.update(files=files,allocated_bytes=sum(f['allocated_bytes'] for f in files.values()),status='verified')

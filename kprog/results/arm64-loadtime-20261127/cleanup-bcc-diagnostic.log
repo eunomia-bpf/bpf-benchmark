@@ -1,0 +1,13 @@
+{
+  "receipt": "kprog/results/arm64-loadtime-20261127/raw-dedup-20261127T153237Z.json",
+  "removed_allocated_bytes": 35586048,
+  "free_before_bytes": 16514125824,
+  "free_after_bytes": 16549695488,
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T012418Z",
+      "status": "removed",
+      "reason": null
+    }
+  ]
+}
