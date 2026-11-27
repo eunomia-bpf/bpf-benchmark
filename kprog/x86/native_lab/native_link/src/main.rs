@@ -877,14 +877,14 @@ fn find_symbol_by_name(elf: &object::File, name: &str) -> Result<SymInfo> {
     bail!("symbol {name} not found in input ELF")
 }
 
-fn find_symbol_at_address(elf: &object::File, address: u64) -> Option<SymInfo> {
+fn find_symbol_at_address(elf: &object::File, section: object::SectionIndex, address: u64) -> Option<SymInfo> {
     for sym in elf.symbols().chain(elf.dynamic_symbols()) {
         let addr = sym.address();
         let size = sym.size();
         if size == 0 {
             continue;
         }
-        if address >= addr && address < addr + size {
+        if sym.section_index() == Some(section) && address >= addr && address < addr + size {
             let name = sym.name().ok()?.to_string();
             let section_index = sym.section_index()?;
             return Some(SymInfo {
@@ -1767,7 +1767,7 @@ fn arm64_reloc_data(elf: &object::File, reloc: &Arm64RelocInfo, max_len: usize) 
 
 fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<SymInfo>> {
     let mut included: Vec<SymInfo> = vec![entry.clone()];
-    let mut seen: std::collections::HashSet<u64> = [entry.address].into_iter().collect();
+    let mut seen: std::collections::HashSet<(object::SectionIndex, u64)> = [(entry.section_index, entry.address)].into_iter().collect();
     let mut queue: Vec<SymInfo> = vec![entry.clone()];
 
     while let Some(sym) = queue.pop() {
@@ -1781,20 +1781,20 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
             let call = relocs
                 .get(&(sym.section_index, sym.address, (word_index * 4) as u64))
                 .filter(|reloc| reloc.r_type == R_AARCH64_CALL26);
-            let target = match call {
+            let (section, target) = match call {
                 Some(reloc) => match reloc.text_target {
-                    Some(target) => target,
+                    Some(target) => (reloc.target_section_index.unwrap(), target),
                     None => continue,
                 },
                 None => match a64_bl_target(sym.address, word_index, insn) {
-                    Some(target) => target,
+                    Some(target) => (sym.section_index, target),
                     None => continue,
                 },
             };
-            if seen.contains(&target) {
+            if seen.contains(&(section, target)) {
                 continue;
             }
-            let called = find_symbol_at_address(elf, target).ok_or_else(|| {
+            let called = find_symbol_at_address(elf, section, target).ok_or_else(|| {
                 anyhow!(
                     "{} calls {target:#x} but no symbol covers that address",
                     sym.name
@@ -1808,7 +1808,7 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
                     called.address
                 );
             }
-            if seen.insert(called.address) {
+            if seen.insert((called.section_index, called.address)) {
                 included.push(called.clone());
                 queue.push(called);
             }
@@ -1821,7 +1821,7 @@ fn discover_reachable_arm64(elf: &object::File, entry: &SymInfo) -> Result<Vec<S
 enum Arm64PatchKind {
     ReturnToTrampoline,
     Bl {
-        target_symbol_address: u64,
+        target_symbol_address: (object::SectionIndex, u64),
     },
     B {
         source_symbol_address: u64,
@@ -1859,6 +1859,7 @@ enum Arm64PatchKind {
 }
 
 struct Arm64Patch {
+    section_index: object::SectionIndex,
     word_index: usize,
     kind: Arm64PatchKind,
 }
@@ -1946,20 +1947,21 @@ fn arm64_callee_saved_bit_index(reg: u32) -> Option<usize> {
 }
 
 fn arm64_branch_target_word(
-    addr_word_offset: &HashMap<u64, usize>,
-    sym_end_word_offset: &HashMap<u64, usize>,
+    addr_word_offset: &HashMap<(object::SectionIndex, u64), usize>,
+    sym_end_word_offset: &HashMap<(object::SectionIndex, u64), usize>,
+    section_index: object::SectionIndex,
     source_symbol_address: u64,
     target_is_symbol_end: bool,
     target_address: u64,
 ) -> Result<usize> {
     if target_is_symbol_end {
         return sym_end_word_offset
-            .get(&source_symbol_address)
+            .get(&(section_index, source_symbol_address))
             .copied()
             .ok_or_else(|| anyhow!("arm64 branch target symbol end not in index map"));
     }
     addr_word_offset
-        .get(&target_address)
+        .get(&(section_index, target_address))
         .copied()
         .ok_or_else(|| anyhow!("arm64 branch target addr not in index map"))
 }
@@ -2068,11 +2070,11 @@ fn arm64_decoded_load_sites(blob: &[u8], code_word_count: usize) -> Vec<LoadSite
 
 /// The TBZ/TBNZ instructions whose target ended up beyond their 14-bit reach.
 #[derive(Debug)]
-struct TbzOutOfRange(Vec<u64>);
+struct TbzOutOfRange(Vec<(object::SectionIndex, u64)>);
 
 impl std::fmt::Display for TbzOutOfRange {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "arm64 TBZ/TBNZ out of range at {:x?}", self.0)
+        write!(f, "arm64 TBZ/TBNZ out of range at {:?}", self.0)
     }
 }
 
@@ -2093,7 +2095,7 @@ fn rewrite_arm64(
     preserve_entry_abi: bool,
     show: bool,
 ) -> Result<RewriteResult> {
-    let mut long_tbz: HashSet<u64> = HashSet::new();
+    let mut long_tbz: HashSet<(object::SectionIndex, u64)> = HashSet::new();
     loop {
         let result = rewrite_arm64_pass(
             elf, entry, included, helper_addrs, map_addrs, const_values, lookup_sites,
@@ -2126,19 +2128,19 @@ fn rewrite_arm64_pass(
     proof_mode: bool,
     preserve_entry_abi: bool,
     show: bool,
-    long_tbz: &HashSet<u64>,
+    long_tbz: &HashSet<(object::SectionIndex, u64)>,
 ) -> Result<RewriteResult> {
     let mut blob = Vec::new();
-    let mut sym_start_word_offset: HashMap<u64, usize> = HashMap::new();
-    let mut sym_end_word_offset: HashMap<u64, usize> = HashMap::new();
-    let mut addr_word_offset: HashMap<u64, usize> = HashMap::new();
+    let mut sym_start_word_offset: HashMap<(object::SectionIndex, u64), usize> = HashMap::new();
+    let mut sym_end_word_offset: HashMap<(object::SectionIndex, u64), usize> = HashMap::new();
+    let mut addr_word_offset: HashMap<(object::SectionIndex, u64), usize> = HashMap::new();
     let mut patches: Vec<Arm64Patch> = Vec::new();
     let relocs = arm64_text_relocations(elf, included)?;
     let mut proof_relocs: Vec<ProofReloc> = Vec::new();
     let mut callee_saved_mask: u8 = 0;
     const A64_MOV_X7_X0: u32 = 0xaa00_03e7;
     for sym in included {
-        let is_entry = sym.address == entry.address;
+        let is_entry = sym.section_index == entry.section_index && sym.address == entry.address;
         let bytes = read_symbol_bytes(elf, sym)?;
         if bytes.is_empty() || bytes.len() % 4 != 0 {
             bail!(
@@ -2156,7 +2158,7 @@ fn rewrite_arm64_pass(
         }
 
         let end = sym.address + sym.size;
-        sym_start_word_offset.insert(sym.address, blob.len() / 4);
+        sym_start_word_offset.insert((sym.section_index, sym.address), blob.len() / 4);
         // The map a register holds is known only along straight-line code: at a branch
         // target another path may bring another map (a jump table may land anywhere).
         let (join_words, any_join) = arm64_branch_targets(&bytes);
@@ -2168,7 +2170,7 @@ fn rewrite_arm64_pass(
             let off = local_word_index * 4;
             let mut insn = u32::from_le_bytes(word.try_into().unwrap());
             let emit_word_index = blob.len() / 4;
-            addr_word_offset.insert(sym.address + off as u64, emit_word_index);
+            addr_word_offset.insert((sym.section_index, sym.address + off as u64), emit_word_index);
             if is_entry && entry_abi_strip.nop_word_indices.contains(&local_word_index) {
                 insn = A64_NOP;
                 blob.extend_from_slice(&insn.to_le_bytes());
@@ -2215,6 +2217,7 @@ fn rewrite_arm64_pass(
                             )
                         })?;
                         patches.push(Arm64Patch {
+                            section_index: sym.section_index,
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::LocalDataAdr {
                                 target_name: reloc.target_name.clone(),
@@ -2238,6 +2241,7 @@ fn rewrite_arm64_pass(
                             continue;
                         }
                         patches.push(Arm64Patch {
+                            section_index: sym.section_index,
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::Nop,
                         });
@@ -2247,16 +2251,17 @@ fn rewrite_arm64_pass(
                     R_AARCH64_CALL26 => {
                         // A call into the object's own text is a call inside the blob.
                         if let Some(target) = reloc.text_target {
-                            if !included.iter().any(|s| s.address == target) {
+                            if !included.iter().any(|s| s.section_index == reloc.target_section_index.unwrap() && s.address == target) {
                                 bail!(
                                     "arm64 call in {} at byte offset {off:#x} targets {target:#x}, outside included symbols",
                                     sym.name
                                 );
                             }
                             patches.push(Arm64Patch {
+                                section_index: sym.section_index,
                                 word_index: emit_word_index,
                                 kind: Arm64PatchKind::Bl {
-                                    target_symbol_address: target,
+                                    target_symbol_address: (reloc.target_section_index.unwrap(), target),
                                 },
                             });
                             blob.extend_from_slice(&insn.to_le_bytes());
@@ -2397,6 +2402,7 @@ fn rewrite_arm64_pass(
                             );
                         }
                         patches.push(Arm64Patch {
+                            section_index: sym.section_index,
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::MapLiteralLoad {
                                 target_name: reloc.target_name.clone(),
@@ -2425,6 +2431,7 @@ fn rewrite_arm64_pass(
                             );
                         }
                         patches.push(Arm64Patch {
+                            section_index: sym.section_index,
                             word_index: emit_word_index,
                             kind: Arm64PatchKind::Nop,
                         });
@@ -2457,16 +2464,17 @@ fn rewrite_arm64_pass(
             }
 
             if let Some(target) = a64_bl_target(sym.address, local_word_index, insn) {
-                if !included.iter().any(|s| s.address == target) {
+                if !included.iter().any(|s| s.section_index == sym.section_index && s.address == target) {
                     bail!(
                         "arm64 BL in {} at byte offset {off:#x} targets {target:#x}, outside included symbols",
                         sym.name
                     );
                 }
                 patches.push(Arm64Patch {
+                    section_index: sym.section_index,
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::Bl {
-                        target_symbol_address: target,
+                        target_symbol_address: (sym.section_index, target),
                     },
                 });
                 blob.extend_from_slice(&insn.to_le_bytes());
@@ -2474,7 +2482,7 @@ fn rewrite_arm64_pass(
             }
 
             if let Some(target) = a64_branch_target(sym.address, local_word_index, insn) {
-                if !proof_mode && is_entry && arm64_is_return_trampoline_target(elf, target)? {
+                if !proof_mode && is_entry && arm64_is_return_trampoline_target(elf, sym.section_index, target)? {
                     if !a64_is_uncond_b(insn) {
                         bail!(
                             "arm64 branch in {} at byte offset {off:#x} conditionally targets return trampoline",
@@ -2482,6 +2490,7 @@ fn rewrite_arm64_pass(
                         );
                     }
                     patches.push(Arm64Patch {
+                        section_index: sym.section_index,
                         word_index: emit_word_index,
                         kind: Arm64PatchKind::ReturnToTrampoline,
                     });
@@ -2495,11 +2504,12 @@ fn rewrite_arm64_pass(
                     );
                 }
                 let target_is_symbol_end = target == end;
-                if a64_is_tbz_tbnz(insn) && long_tbz.contains(&(sym.address + off as u64)) {
+                if a64_is_tbz_tbnz(insn) && long_tbz.contains(&(sym.section_index, sym.address + off as u64)) {
                     // Beyond TBZ reach after expansion: the inverted test skips a B to the target.
                     let skip_b = ((insn ^ (1 << 24)) & !(0x3fff << 5)) | (2 << 5);
                     blob.extend_from_slice(&skip_b.to_le_bytes());
                     patches.push(Arm64Patch {
+                        section_index: sym.section_index,
                         word_index: blob.len() / 4,
                         kind: Arm64PatchKind::B {
                             source_symbol_address: sym.address,
@@ -2547,6 +2557,7 @@ fn rewrite_arm64_pass(
                     );
                 };
                 patches.push(Arm64Patch {
+                    section_index: sym.section_index,
                     word_index: emit_word_index,
                     kind,
                 });
@@ -2554,6 +2565,7 @@ fn rewrite_arm64_pass(
 
             if is_entry && a64_is_ret(insn) && !(proof_mode && preserve_entry_abi) {
                 patches.push(Arm64Patch {
+                    section_index: sym.section_index,
                     word_index: emit_word_index,
                     kind: Arm64PatchKind::ReturnToTrampoline,
                 });
@@ -2562,7 +2574,7 @@ fn rewrite_arm64_pass(
                 blob.extend_from_slice(&insn.to_le_bytes());
             }
         }
-        sym_end_word_offset.insert(sym.address, blob.len() / 4);
+        sym_end_word_offset.insert((sym.section_index, sym.address), blob.len() / 4);
     }
 
     let code_word_count = blob.len() / 4;
@@ -2638,7 +2650,7 @@ fn rewrite_arm64_pass(
     let ret_trampoline_word = blob.len() / 4;
     append_u32(&mut blob, A64_MOV_X7_X0);
 
-    let mut far_tbz: Vec<u64> = Vec::new();
+    let mut far_tbz: Vec<(object::SectionIndex, u64)> = Vec::new();
     for patch in patches.iter().filter(|p| {
         matches!(
             p.kind,
@@ -2670,6 +2682,7 @@ fn rewrite_arm64_pass(
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
+                    patch.section_index,
                     source_symbol_address,
                     target_is_symbol_end,
                     target_address,
@@ -2685,6 +2698,7 @@ fn rewrite_arm64_pass(
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
+                    patch.section_index,
                     source_symbol_address,
                     target_is_symbol_end,
                     target_address,
@@ -2700,6 +2714,7 @@ fn rewrite_arm64_pass(
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
+                    patch.section_index,
                     source_symbol_address,
                     target_is_symbol_end,
                     target_address,
@@ -2716,6 +2731,7 @@ fn rewrite_arm64_pass(
                 let target_word = arm64_branch_target_word(
                     &addr_word_offset,
                     &sym_end_word_offset,
+                    patch.section_index,
                     source_symbol_address,
                     target_is_symbol_end,
                     target_address,
@@ -2723,7 +2739,7 @@ fn rewrite_arm64_pass(
                 match a64_patch_tbz_tbnz(insn, patch.word_index, target_word) {
                     Ok(word) => word,
                     Err(_) => {
-                        far_tbz.push(address);
+                        far_tbz.push((patch.section_index, address));
                         continue;
                     }
                 }
@@ -2770,18 +2786,18 @@ fn rewrite_arm64_pass(
 
 fn arm64_proof_symbols(
     included: &[SymInfo],
-    start_words: &HashMap<u64, usize>,
-    end_words: &HashMap<u64, usize>,
+    start_words: &HashMap<(object::SectionIndex, u64), usize>,
+    end_words: &HashMap<(object::SectionIndex, u64), usize>,
     blob_len: usize,
 ) -> Result<Vec<ProofSymbol>> {
     let mut out = Vec::new();
     for sym in included {
         let start = *start_words
-            .get(&sym.address)
+            .get(&(sym.section_index, sym.address))
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no start", sym.name))?
             * 4;
         let end = *end_words
-            .get(&sym.address)
+            .get(&(sym.section_index, sym.address))
             .ok_or_else(|| anyhow!("arm64 proof symbol {} has no end", sym.name))?
             * 4;
         if end < start || end > blob_len {
@@ -2807,9 +2823,9 @@ fn arm64_proof_symbols(
     Ok(out)
 }
 
-fn arm64_is_return_trampoline_target(elf: &object::File, target: u64) -> Result<bool> {
+fn arm64_is_return_trampoline_target(elf: &object::File, section: object::SectionIndex, target: u64) -> Result<bool> {
     for sym in elf.symbols().chain(elf.dynamic_symbols()) {
-        if sym.address() != target || sym.size() == 0 {
+        if sym.section_index() != Some(section) || sym.address() != target || sym.size() == 0 {
             continue;
         }
         let name = sym
@@ -2832,6 +2848,51 @@ fn disasm_arm64_words(blob: &[u8]) {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn arm64_sections_keep_overlapping_addresses_distinct() {
+        for helper_offset in [0u64, 4] {
+            let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::Aarch64, Endianness::Little);
+            let entry_section = object.add_section(Vec::new(), b"tracepoint/entry".to_vec(), SectionKind::Text);
+            let helper_section = object.section_id(StandardSection::Text);
+            let entry_words = [0x52800000u32, 0x34000080, 0x94000000, 0x52800060, 0xd503201f, 0xd65f03c0];
+            let helper_words = [0x52800040u32, 0xd65f03c0, 0xd503201f, 0xd503201f, 0xd503201f, 0xd503201f];
+            for (section, padding, words) in [(entry_section, 0, entry_words), (helper_section, helper_offset, helper_words)] {
+                let mut bytes = vec![0; padding as usize];
+                for word in words { bytes.extend_from_slice(&word.to_le_bytes()); }
+                object.append_section_data(section, &bytes, 4);
+            }
+            let add_symbol = |object: &mut WriteObject<'_>, name: &str, section, value| {
+                object.add_symbol(WriteSymbol {
+                    name: name.as_bytes().to_vec(), value, size: 24,
+                    kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Section(section), flags: SymbolFlags::None,
+                })
+            };
+            add_symbol(&mut object, "entry", entry_section, 0);
+            let helper = add_symbol(&mut object, "helper", helper_section, helper_offset);
+            object.add_relocation(entry_section, WriteRelocation {
+                offset: 8, symbol: helper, addend: 0,
+                flags: RelocationFlags::Elf { r_type: R_AARCH64_CALL26 },
+            }).unwrap();
+            let bytes = object.write().unwrap();
+            let elf = object::File::parse(bytes.as_slice()).unwrap();
+            let entry = find_symbol_by_name(&elf, "entry").unwrap();
+            let helper = find_symbol_by_name(&elf, "helper").unwrap();
+            let included = discover_reachable_arm64(&elf, &entry).unwrap();
+            assert_eq!(included.len(), 2);
+            // Supply both real symbols independently too: discovery and branch
+            // relocation must each retain the input section identity.
+            let linked = rewrite_arm64(&elf, &entry, &[entry.clone(), helper],
+                &HashMap::new(), &HashMap::new(), &HashMap::new(), &[], &HashMap::new(),
+                true, true, false).unwrap();
+            let word = |offset| u32::from_le_bytes(linked.blob[offset..offset + 4].try_into().unwrap());
+            assert_eq!(a64_branch_target(0, 1, word(4)), Some(20));
+            assert_eq!(a64_bl_target(0, 2, word(8)), Some(24));
+            assert_eq!(linked.proof_symbols.iter().find(|x| x.name == "entry").unwrap().size, 24);
+            assert_eq!(linked.proof_symbols.iter().find(|x| x.name == "helper").unwrap().offset, 24);
+        }
+    }
+
     #[test]
     fn arm64_call_clears_lr_and_preserves_callee_map_facts() {
         let mut maps = std::array::from_fn(|i| Some(format!("map{i}")));

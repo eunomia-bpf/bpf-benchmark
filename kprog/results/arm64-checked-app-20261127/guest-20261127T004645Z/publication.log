@@ -1,0 +1,9 @@
+[master a0a40a432] Record actual ARM checked application startup
+ 5 files changed, 164 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T004645Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T004645Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T004645Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T004645Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-app-20261127/guest-20261127T004645Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   48393b645..a0a40a432  master -> master

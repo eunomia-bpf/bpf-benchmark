@@ -1,0 +1,78 @@
+{
+  "utc": "2026-11-27T00:55:05Z",
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/replay-checked-simulator.native.o",
+        "--symbol",
+        "trusted_arm64_arm64_sim_xdp",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/checked.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=trusted_arm64_arm64_sim_xdp (1844 bytes), 2 reachable symbol(s) total\n  - trusted_arm64_arm64_sim_xdp (vaddr 0x0, 1844 bytes) [entry]\n  - __kprog_hash_key_4 (vaddr 0x50, 248 bytes)\nnative-link: wrote proof object 2100 bytes, 16 reloc(s) -> /workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/checked.proof.o\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/checked.proof.o",
+        "--symbol",
+        "trusted_arm64_arm64_sim_xdp",
+        "--mode",
+        "proof",
+        "--output",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/loader.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=trusted_arm64_arm64_sim_xdp (1844 bytes), 2 reachable symbol(s) total\n  - trusted_arm64_arm64_sim_xdp (vaddr 0x0, 1844 bytes) [entry]\n  - __kprog_hash_key_4 (vaddr 0x734, 248 bytes)\nnative-link: wrote proof object 2100 bytes, 16 reloc(s) -> /workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/loader.proof.o\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/loader.proof.o",
+        "--symbol",
+        "trusted_arm64_arm64_sim_xdp",
+        "--mode",
+        "kernel",
+        "--link-plan",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/replay-2193062d650c4491.tmp.568.link-plan.json",
+        "--output",
+        "/workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/kernel.bin"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: arm64 entry=trusted_arm64_arm64_sim_xdp (1844 bytes), 2 reachable symbol(s) total\n  - trusted_arm64_arm64_sim_xdp (vaddr 0x0, 1844 bytes) [entry]\n  - __kprog_hash_key_4 (vaddr 0x734, 248 bytes)\nnative-link: wrote 2220 bytes -> /workspaces/kprog-raw/perf/arm64-checked-app-20261127/20261127T004645Z/bcc-opensnoop/section-replay/kernel.bin (0 relocs)\n"
+    }
+  ],
+  "branch_offset": 188,
+  "corrected_target": 148,
+  "old_corrupt_target": 1912,
+  "symbols": [
+    {
+      "name": "trusted_arm64_arm64_sim_xdp",
+      "address": 0,
+      "size": 1844
+    },
+    {
+      "name": "__kprog_hash_key_4",
+      "address": 1844,
+      "size": 248
+    },
+    {
+      "name": "__native_link_arm64_ret_trampoline",
+      "address": 2096,
+      "size": 4
+    }
+  ],
+  "kernel_bytes": 2220,
+  "scope": "Actual failed object; host proof/preserved ABI, loader proof, kernel link. No runtime claim."
+}
