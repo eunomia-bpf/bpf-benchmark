@@ -1,0 +1,2454 @@
+{
+  "started_utc": "2026-11-27T11:57:09Z",
+  "pid": 1001496,
+  "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115709Z",
+  "revision": "50318547e1c2baddce1a7ddac6af4894fb974c76",
+  "scope": "Original Cilium request10 frontend with diagnostic time trace/report; existing B flags and source paths retained. One additional compiler CPU18/AS48GiB, alongside active Tetragon. Main pipeline/source/binaries retained.",
+  "mode": "const-controls",
+  "specimen": {
+    "request": 4,
+    "symbol": "cil_from_host",
+    "execution_path": "direct-native",
+    "generated_C_bytes": 242399,
+    "guest_service_seconds": 86.4063,
+    "host_frontend_wall_seconds": 68.93893193200347,
+    "host_frontend_max_rss_kib": 3379900,
+    "host_frontend_command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_arm64",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+      "-I",
+      "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.c",
+      "-o",
+      "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.frontend.bc"
+    ]
+  },
+  "constant_control_declarations": [
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_READ_REG_RAW_INTO",
+      "names": [
+        "__a64_l_reg"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_READ_REG_PTR_INTO",
+      "names": [
+        "__a64_l_reg"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_REG_TAG_INTO",
+      "names": [
+        "__a64_l_reg"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_WRITE_REG_WIDTH",
+      "names": [
+        "__a64_l_reg"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_WRITE_REG_PTR_TAG",
+      "names": [
+        "__a64_l_reg"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_STACK_READ_OWNED_INTO",
+      "names": [
+        "__a64_str_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_STACK_READ_TAG_INTO",
+      "names": [
+        "__a64_srt_source",
+        "__a64_srt_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_STACK_WRITE_OWNED",
+      "names": [
+        "__a64_stw_action",
+        "__a64_stw_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_MEM_BASE_OFF_INTO",
+      "names": [
+        "__a64_mbo_has_index",
+        "__a64_mbo_isrc"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_MEM_PREPOST_STEP",
+      "names": [
+        "__a64_l_pp"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_EXEC_ALU",
+      "names": [
+        "__a64_alu_op",
+        "__a64_alu_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_L_EXEC",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_local_bpf.h",
+      "macro": "ARM64_SIM_A64_CMP_GT",
+      "names": [
+        "__a64_cmp_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_0",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_1",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_2",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_3",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_4",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_5",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_6",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_7",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_8",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_9",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_10",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_11",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_12",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_13",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_14",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_15",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_16",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_17",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_18",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_19",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_20",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_21",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_22",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_23",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_24",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_25",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_26",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_27",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_28",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_29",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_30",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_31",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_32",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_33",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_34",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_35",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_36",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_37",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/arm64/arm64_sim_direct.h",
+      "macro": "ARM64_SIM_DIRECT_BODY_38",
+      "names": [
+        "__a64_l_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_adrp.h",
+      "macro": "KPROG_ARM64_ADRP_TAG_INTO",
+      "names": [
+        "__kprog_a64_adrp_op"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_bitfield.h",
+      "macro": "KPROG_ARM64_BITFIELD_VALUE_INTO",
+      "names": [
+        "__kprog_a64_bf_kind"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_branch.h",
+      "macro": "KPROG_ARM64_BRANCH_TEST_DECL",
+      "names": [
+        "__kprog_a64_br_kind"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_cneg.h",
+      "macro": "KPROG_ARM64_CNEG_VALUE_INTO",
+      "names": [
+        "__kprog_a64_cneg_op",
+        "__kprog_a64_cneg_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_csel.h",
+      "macro": "KPROG_ARM64_CSEL_VALUE_INTO",
+      "names": [
+        "__kprog_a64_csel_op"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_csel_ptr.h",
+      "macro": "KPROG_ARM64_CSEL_PTR_TAG_PATH_DECL",
+      "names": [
+        "__kprog_a64_cp_op",
+        "__kprog_a64_cp_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_extrev.h",
+      "macro": "KPROG_ARM64_EXTREV_VALUE_INTO",
+      "names": [
+        "__kprog_a64_ext_op",
+        "__kprog_a64_ext_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_ldrsx.h",
+      "macro": "KPROG_ARM64_LDRSX_LOAD_WIDTH_INTO",
+      "names": [
+        "__kprog_a64_ldrsx_op"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_ldrsx_op.h",
+      "macro": "KPROG_ARM64_LDRSX_SXOP_INTO",
+      "names": [
+        "__kprog_a64_ldrsx_sxop"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_load_bytes.h",
+      "macro": "KPROG_ARM64_LOAD_BYTES_OFFSET_INTO",
+      "names": [
+        "__kprog_a64_lb_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_load_tag.h",
+      "macro": "KPROG_ARM64_LOAD_TAG_PRESERVE_INTO",
+      "names": [
+        "__kprog_a64_lt_op",
+        "__kprog_a64_lt_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_mem_offset.h",
+      "macro": "KPROG_ARM64_MEM_OFFSET_INTO",
+      "names": [
+        "__kprog_a64_mbo_has_index",
+        "__kprog_a64_mbo_prepost"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_mod.h",
+      "macro": "KPROG_ARM64_MOD_VALUE_INTO",
+      "names": [
+        "__kprog_a64_mod",
+        "__kprog_a64_mod_amount",
+        "__kprog_a64_mod_shift"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_mov.h",
+      "macro": "KPROG_ARM64_MOV_PTR_TAG_PATH_DECL",
+      "names": [
+        "__kprog_a64_mov_op",
+        "__kprog_a64_mov_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_movk.h",
+      "macro": "KPROG_ARM64_MOVK_INSERT_DECL",
+      "names": [
+        "__kprog_a64_movk_shift"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_mul.h",
+      "macro": "KPROG_ARM64_MUL_VALUE_INTO",
+      "names": [
+        "__kprog_a64_mul_op"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_orn.h",
+      "macro": "KPROG_ARM64_ORN_VALUE_DECL",
+      "names": [
+        "__kprog_a64_orn_op",
+        "__kprog_a64_orn_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_pair_load_tag.h",
+      "macro": "KPROG_ARM64_PAIR_LOAD_TAG_ROUTE_INTO",
+      "names": [
+        "__kprog_a64_plt_op",
+        "__kprog_a64_plt_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_reduction.h",
+      "macro": "KPROG_ARM64_REDUCTION_VALUE_DECL",
+      "names": [
+        "__kprog_a64_red_op"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_shift.h",
+      "macro": "KPROG_ARM64_SHIFT_VALUE_INTO",
+      "names": [
+        "__kprog_a64_shift_32",
+        "__kprog_a64_shift_op",
+        "__kprog_a64_shift_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_stlxr.h",
+      "macro": "KPROG_ARM64_STLXR_VALUE_INTO",
+      "names": [
+        "__kprog_a64_stlxr_op",
+        "__kprog_a64_stlxr_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_store_bytes.h",
+      "macro": "KPROG_ARM64_STORE_BYTES",
+      "names": [
+        "__kprog_a64_sb_width"
+      ]
+    },
+    {
+      "header": "/workspaces/repository/kprog/formal/generated/arm64_unary.h",
+      "macro": "KPROG_ARM64_UNARY_VALUE_INTO",
+      "names": [
+        "__kprog_a64_un_op",
+        "__kprog_a64_un_width"
+      ]
+    }
+  ],
+  "restored_source": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.c",
+  "canonical_outputs_before": [],
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+        "-I",
+        "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.frontend.bc",
+        "-ftime-report",
+        "-ftime-trace=/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115709Z/frontend-trace.json"
+      ],
+      "returncode": 0,
+      "wall_seconds": 39.308231018978404,
+      "max_rss_kib": 1294532,
+      "user_seconds": 38.697181,
+      "system_seconds": 0.607694
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O2",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_arm64",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+        "-I",
+        "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.frontend.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.o"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.9973056190065108,
+      "max_rss_kib": 182536,
+      "user_seconds": 0.937943,
+      "system_seconds": 0.058962
+    }
+  ],
+  "frontend_byte_equal_original": false,
+  "B_executable_sections_equal_original": false,
+  "B_entire_object_equal_original": false,
+  "trace_totals": [
+    {
+      "pid": 1001500,
+      "tid": 1001501,
+      "ph": "X",
+      "ts": 0,
+      "dur": 39241627,
+      "name": "Total ExecuteCompiler",
+      "args": {
+        "count": 1,
+        "avg ms": 39241
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001502,
+      "ph": "X",
+      "ts": 0,
+      "dur": 23228662,
+      "name": "Total Backend",
+      "args": {
+        "count": 1,
+        "avg ms": 23228
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001503,
+      "ph": "X",
+      "ts": 0,
+      "dur": 23227709,
+      "name": "Total Optimizer",
+      "args": {
+        "count": 1,
+        "avg ms": 23227
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001504,
+      "ph": "X",
+      "ts": 0,
+      "dur": 20271859,
+      "name": "Total PassManager<Function>",
+      "args": {
+        "count": 8,
+        "avg ms": 2533
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001505,
+      "ph": "X",
+      "ts": 0,
+      "dur": 19241320,
+      "name": "Total ModuleToFunctionPassAdaptor",
+      "args": {
+        "count": 7,
+        "avg ms": 2748
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001506,
+      "ph": "X",
+      "ts": 0,
+      "dur": 16573775,
+      "name": "Total SROAPass",
+      "args": {
+        "count": 5,
+        "avg ms": 3314
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001507,
+      "ph": "X",
+      "ts": 0,
+      "dur": 16008860,
+      "name": "Total Frontend",
+      "args": {
+        "count": 2,
+        "avg ms": 8004
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001508,
+      "ph": "X",
+      "ts": 0,
+      "dur": 10757324,
+      "name": "Total ParseDeclarationOrFunctionDefinition",
+      "args": {
+        "count": 409,
+        "avg ms": 26
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001509,
+      "ph": "X",
+      "ts": 0,
+      "dur": 10746685,
+      "name": "Total ParseFunctionDefinition",
+      "args": {
+        "count": 3,
+        "avg ms": 3582
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001510,
+      "ph": "X",
+      "ts": 0,
+      "dur": 5238007,
+      "name": "Total CodeGen Function",
+      "args": {
+        "count": 2,
+        "avg ms": 2619
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001511,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1519737,
+      "name": "Total SimplifyCFGPass",
+      "args": {
+        "count": 15,
+        "avg ms": 101
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001512,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1474937,
+      "name": "Total IPSCCPPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1474
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001513,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1260098,
+      "name": "Total EvaluateAsRValue",
+      "args": {
+        "count": 825580,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001514,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1102182,
+      "name": "Total ModuleInlinerWrapperPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1102
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001515,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1084591,
+      "name": "Total ModuleToPostOrderCGSCCPassAdaptor",
+      "args": {
+        "count": 1,
+        "avg ms": 1084
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001516,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1067055,
+      "name": "Total DevirtSCCRepeatedPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1067
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001517,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1052047,
+      "name": "Total PassManager<LazyCallGraph::SCC, CGSCCAnalysisManager, LazyCallGraph &, CGSCCUpdateResult &>",
+      "args": {
+        "count": 1,
+        "avg ms": 1052
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001518,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1039302,
+      "name": "Total EvaluateForOverflow",
+      "args": {
+        "count": 404112,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001519,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1033972,
+      "name": "Total CGSCCToFunctionPassAdaptor",
+      "args": {
+        "count": 2,
+        "avg ms": 516
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001520,
+      "ph": "X",
+      "ts": 0,
+      "dur": 847360,
+      "name": "Total EvaluateAsInt",
+      "args": {
+        "count": 339374,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001521,
+      "ph": "X",
+      "ts": 0,
+      "dur": 722565,
+      "name": "Total AssignmentTrackingPass",
+      "args": {
+        "count": 1,
+        "avg ms": 722
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001522,
+      "ph": "X",
+      "ts": 0,
+      "dur": 672135,
+      "name": "Total isIntegerConstantExpr",
+      "args": {
+        "count": 522780,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001523,
+      "ph": "X",
+      "ts": 0,
+      "dur": 498640,
+      "name": "Total InstCombinePass",
+      "args": {
+        "count": 9,
+        "avg ms": 55
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001524,
+      "ph": "X",
+      "ts": 0,
+      "dur": 478376,
+      "name": "Total EarlyCSEPass",
+      "args": {
+        "count": 3,
+        "avg ms": 159
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001525,
+      "ph": "X",
+      "ts": 0,
+      "dur": 428228,
+      "name": "Total EvaluateAsBooleanCondition",
+      "args": {
+        "count": 112920,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001526,
+      "ph": "X",
+      "ts": 0,
+      "dur": 301185,
+      "name": "Total JumpThreadingPass",
+      "args": {
+        "count": 2,
+        "avg ms": 150
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001527,
+      "ph": "X",
+      "ts": 0,
+      "dur": 239753,
+      "name": "Total DominatorTreeAnalysis",
+      "args": {
+        "count": 15,
+        "avg ms": 15
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001528,
+      "ph": "X",
+      "ts": 0,
+      "dur": 215346,
+      "name": "Total BitcodeWriterPass",
+      "args": {
+        "count": 1,
+        "avg ms": 215
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001529,
+      "ph": "X",
+      "ts": 0,
+      "dur": 200039,
+      "name": "Total BPFAbstractMemberAccessPass",
+      "args": {
+        "count": 2,
+        "avg ms": 100
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001530,
+      "ph": "X",
+      "ts": 0,
+      "dur": 173708,
+      "name": "Total CalledValuePropagationPass",
+      "args": {
+        "count": 1,
+        "avg ms": 173
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001531,
+      "ph": "X",
+      "ts": 0,
+      "dur": 105803,
+      "name": "Total GlobalOptPass",
+      "args": {
+        "count": 2,
+        "avg ms": 52
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001532,
+      "ph": "X",
+      "ts": 0,
+      "dur": 99190,
+      "name": "Total EvaluateKnownConstInt",
+      "args": {
+        "count": 102636,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001533,
+      "ph": "X",
+      "ts": 0,
+      "dur": 97093,
+      "name": "Total BPFAdjustOptPass",
+      "args": {
+        "count": 1,
+        "avg ms": 97
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001534,
+      "ph": "X",
+      "ts": 0,
+      "dur": 97023,
+      "name": "Total LowerExpectIntrinsicPass",
+      "args": {
+        "count": 2,
+        "avg ms": 48
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001535,
+      "ph": "X",
+      "ts": 0,
+      "dur": 86795,
+      "name": "Total AlwaysInlinerPass",
+      "args": {
+        "count": 1,
+        "avg ms": 86
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001536,
+      "ph": "X",
+      "ts": 0,
+      "dur": 80093,
+      "name": "Total BPFPreserveDITypePass",
+      "args": {
+        "count": 2,
+        "avg ms": 40
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001537,
+      "ph": "X",
+      "ts": 0,
+      "dur": 78376,
+      "name": "Total CorrelatedValuePropagationPass",
+      "args": {
+        "count": 2,
+        "avg ms": 39
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001538,
+      "ph": "X",
+      "ts": 0,
+      "dur": 75660,
+      "name": "Total MemorySSAAnalysis",
+      "args": {
+        "count": 4,
+        "avg ms": 18
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001539,
+      "ph": "X",
+      "ts": 0,
+      "dur": 73547,
+      "name": "Total BPFPreserveStaticOffsetPass",
+      "args": {
+        "count": 3,
+        "avg ms": 24
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001540,
+      "ph": "X",
+      "ts": 0,
+      "dur": 73161,
+      "name": "Total BPFIRPeepholePass",
+      "args": {
+        "count": 2,
+        "avg ms": 36
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001541,
+      "ph": "X",
+      "ts": 0,
+      "dur": 61445,
+      "name": "Total DebugType",
+      "args": {
+        "count": 244226,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001542,
+      "ph": "X",
+      "ts": 0,
+      "dur": 60487,
+      "name": "Total BlockFrequencyAnalysis",
+      "args": {
+        "count": 2,
+        "avg ms": 30
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001543,
+      "ph": "X",
+      "ts": 0,
+      "dur": 50867,
+      "name": "Total BranchProbabilityAnalysis",
+      "args": {
+        "count": 2,
+        "avg ms": 25
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001544,
+      "ph": "X",
+      "ts": 0,
+      "dur": 41422,
+      "name": "Total EvaluateAsInitializer",
+      "args": {
+        "count": 36440,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001545,
+      "ph": "X",
+      "ts": 0,
+      "dur": 37854,
+      "name": "Total GVNPass",
+      "args": {
+        "count": 1,
+        "avg ms": 37
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001546,
+      "ph": "X",
+      "ts": 0,
+      "dur": 33052,
+      "name": "Total ADCEPass",
+      "args": {
+        "count": 1,
+        "avg ms": 33
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001547,
+      "ph": "X",
+      "ts": 0,
+      "dur": 27950,
+      "name": "Total FunctionToLoopPassAdaptor",
+      "args": {
+        "count": 5,
+        "avg ms": 5
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001548,
+      "ph": "X",
+      "ts": 0,
+      "dur": 23700,
+      "name": "Total ReassociatePass",
+      "args": {
+        "count": 1,
+        "avg ms": 23
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001549,
+      "ph": "X",
+      "ts": 0,
+      "dur": 22998,
+      "name": "Total TailCallElimPass",
+      "args": {
+        "count": 2,
+        "avg ms": 11
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001550,
+      "ph": "X",
+      "ts": 0,
+      "dur": 22806,
+      "name": "Total Source",
+      "args": {
+        "count": 1,
+        "avg ms": 22
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001551,
+      "ph": "X",
+      "ts": 0,
+      "dur": 18688,
+      "name": "Total CallGraphAnalysis",
+      "args": {
+        "count": 2,
+        "avg ms": 9
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001552,
+      "ph": "X",
+      "ts": 0,
+      "dur": 18612,
+      "name": "Total BDCEPass",
+      "args": {
+        "count": 1,
+        "avg ms": 18
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001553,
+      "ph": "X",
+      "ts": 0,
+      "dur": 17538,
+      "name": "Total RequireAnalysisPass<llvm::GlobalsAA, llvm::Module, llvm::AnalysisManager<Module>>",
+      "args": {
+        "count": 1,
+        "avg ms": 17
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001554,
+      "ph": "X",
+      "ts": 0,
+      "dur": 17529,
+      "name": "Total GlobalsAA",
+      "args": {
+        "count": 1,
+        "avg ms": 17
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001555,
+      "ph": "X",
+      "ts": 0,
+      "dur": 16732,
+      "name": "Total AggressiveInstCombinePass",
+      "args": {
+        "count": 1,
+        "avg ms": 16
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001556,
+      "ph": "X",
+      "ts": 0,
+      "dur": 15672,
+      "name": "Total LoopAnalysis",
+      "args": {
+        "count": 7,
+        "avg ms": 2
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001557,
+      "ph": "X",
+      "ts": 0,
+      "dur": 15104,
+      "name": "Total MemCpyOptPass",
+      "args": {
+        "count": 1,
+        "avg ms": 15
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001558,
+      "ph": "X",
+      "ts": 0,
+      "dur": 14426,
+      "name": "Total SCCPPass",
+      "args": {
+        "count": 1,
+        "avg ms": 14
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001559,
+      "ph": "X",
+      "ts": 0,
+      "dur": 14026,
+      "name": "Total InlinerPass",
+      "args": {
+        "count": 1,
+        "avg ms": 14
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001560,
+      "ph": "X",
+      "ts": 0,
+      "dur": 12424,
+      "name": "Total DebugConstGlobalVariable",
+      "args": {
+        "count": 13035,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001561,
+      "ph": "X",
+      "ts": 0,
+      "dur": 11105,
+      "name": "Total PostDominatorTreeAnalysis",
+      "args": {
+        "count": 3,
+        "avg ms": 3
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001562,
+      "ph": "X",
+      "ts": 0,
+      "dur": 9288,
+      "name": "Total ConstraintEliminationPass",
+      "args": {
+        "count": 1,
+        "avg ms": 9
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001563,
+      "ph": "X",
+      "ts": 0,
+      "dur": 9193,
+      "name": "Total DSEPass",
+      "args": {
+        "count": 1,
+        "avg ms": 9
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001564,
+      "ph": "X",
+      "ts": 0,
+      "dur": 8833,
+      "name": "Total VectorCombinePass",
+      "args": {
+        "count": 2,
+        "avg ms": 4
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001565,
+      "ph": "X",
+      "ts": 0,
+      "dur": 8766,
+      "name": "Total PassManager<Loop, LoopAnalysisManager, LoopStandardAnalysisResults &, LPMUpdater &>",
+      "args": {
+        "count": 19,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001566,
+      "ph": "X",
+      "ts": 0,
+      "dur": 6423,
+      "name": "Total LibCallsShrinkWrapPass",
+      "args": {
+        "count": 1,
+        "avg ms": 6
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001567,
+      "ph": "X",
+      "ts": 0,
+      "dur": 6099,
+      "name": "Total LoopFullUnrollPass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001568,
+      "ph": "X",
+      "ts": 0,
+      "dur": 5304,
+      "name": "Total InferAlignmentPass",
+      "args": {
+        "count": 2,
+        "avg ms": 2
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001569,
+      "ph": "X",
+      "ts": 0,
+      "dur": 5229,
+      "name": "Total InstSimplifyPass",
+      "args": {
+        "count": 1,
+        "avg ms": 5
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001570,
+      "ph": "X",
+      "ts": 0,
+      "dur": 4926,
+      "name": "Total SLPVectorizerPass",
+      "args": {
+        "count": 1,
+        "avg ms": 4
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001571,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3997,
+      "name": "Total PostOrderFunctionAttrsPass",
+      "args": {
+        "count": 2,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001572,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3265,
+      "name": "Total GlobalDCEPass",
+      "args": {
+        "count": 2,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001573,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2291,
+      "name": "Total ReversePostOrderFunctionAttrsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 2
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001574,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1446,
+      "name": "Total InjectTLIMappings",
+      "args": {
+        "count": 1,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001575,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1297,
+      "name": "Total LowerConstantIntrinsicsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001576,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1294,
+      "name": "Total IndVarSimplifyPass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001577,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1290,
+      "name": "Total RecomputeGlobalsAAPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001578,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1183,
+      "name": "Total DivRemPairsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001579,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1155,
+      "name": "Total Float2IntPass",
+      "args": {
+        "count": 1,
+        "avg ms": 1
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001580,
+      "ph": "X",
+      "ts": 0,
+      "dur": 938,
+      "name": "Total EvaluateKnownConstIntCheckOverflow",
+      "args": {
+        "count": 1109,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001581,
+      "ph": "X",
+      "ts": 0,
+      "dur": 904,
+      "name": "Total AAManager",
+      "args": {
+        "count": 12,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001582,
+      "ph": "X",
+      "ts": 0,
+      "dur": 789,
+      "name": "Total DeadArgumentEliminationPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001583,
+      "ph": "X",
+      "ts": 0,
+      "dur": 768,
+      "name": "Total BasicAA",
+      "args": {
+        "count": 12,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001584,
+      "ph": "X",
+      "ts": 0,
+      "dur": 557,
+      "name": "Total LoopRotatePass",
+      "args": {
+        "count": 10,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001585,
+      "ph": "X",
+      "ts": 0,
+      "dur": 524,
+      "name": "Total LoopSimplifyPass",
+      "args": {
+        "count": 5,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001586,
+      "ph": "X",
+      "ts": 0,
+      "dur": 413,
+      "name": "Total ScalarEvolutionAnalysis",
+      "args": {
+        "count": 6,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001587,
+      "ph": "X",
+      "ts": 0,
+      "dur": 265,
+      "name": "Total LICMPass",
+      "args": {
+        "count": 20,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001588,
+      "ph": "X",
+      "ts": 0,
+      "dur": 135,
+      "name": "Total LoopIdiomRecognizePass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001589,
+      "ph": "X",
+      "ts": 0,
+      "dur": 129,
+      "name": "Total MergedLoadStoreMotionPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001590,
+      "ph": "X",
+      "ts": 0,
+      "dur": 120,
+      "name": "Total LoopInstSimplifyPass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001591,
+      "ph": "X",
+      "ts": 0,
+      "dur": 107,
+      "name": "Total LCSSAPass",
+      "args": {
+        "count": 5,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001592,
+      "ph": "X",
+      "ts": 0,
+      "dur": 101,
+      "name": "Total LoopUnrollPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001593,
+      "ph": "X",
+      "ts": 0,
+      "dur": 86,
+      "name": "Total LoopDeletionPass",
+      "args": {
+        "count": 10,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001594,
+      "ph": "X",
+      "ts": 0,
+      "dur": 86,
+      "name": "Total InferFunctionAttrsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001595,
+      "ph": "X",
+      "ts": 0,
+      "dur": 48,
+      "name": "Total TargetLibraryAnalysis",
+      "args": {
+        "count": 17,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001596,
+      "ph": "X",
+      "ts": 0,
+      "dur": 41,
+      "name": "Total PromotePass",
+      "args": {
+        "count": 2,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001597,
+      "ph": "X",
+      "ts": 0,
+      "dur": 39,
+      "name": "Total CGProfilePass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001598,
+      "ph": "X",
+      "ts": 0,
+      "dur": 30,
+      "name": "Total MoveAutoInitPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001599,
+      "ph": "X",
+      "ts": 0,
+      "dur": 29,
+      "name": "Total ConstantMergePass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001600,
+      "ph": "X",
+      "ts": 0,
+      "dur": 27,
+      "name": "Total LazyCallGraphAnalysis",
+      "args": {
+        "count": 2,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001601,
+      "ph": "X",
+      "ts": 0,
+      "dur": 27,
+      "name": "Total InnerAnalysisManagerProxy<CGSCCAnalysisManager, Module>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001602,
+      "ph": "X",
+      "ts": 0,
+      "dur": 26,
+      "name": "Total LoopSimplifyCFGPass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001603,
+      "ph": "X",
+      "ts": 0,
+      "dur": 26,
+      "name": "Total SimpleLoopUnswitchPass",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001604,
+      "ph": "X",
+      "ts": 0,
+      "dur": 26,
+      "name": "Total AssumptionAnalysis",
+      "args": {
+        "count": 5,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001605,
+      "ph": "X",
+      "ts": 0,
+      "dur": 24,
+      "name": "Total LoopVectorizePass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001606,
+      "ph": "X",
+      "ts": 0,
+      "dur": 24,
+      "name": "Total DebugGlobalVariable",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001607,
+      "ph": "X",
+      "ts": 0,
+      "dur": 16,
+      "name": "Total LoopLoadEliminationPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001608,
+      "ph": "X",
+      "ts": 0,
+      "dur": 13,
+      "name": "Total TargetIRAnalysis",
+      "args": {
+        "count": 6,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001609,
+      "ph": "X",
+      "ts": 0,
+      "dur": 11,
+      "name": "Total DebugFunction",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001610,
+      "ph": "X",
+      "ts": 0,
+      "dur": 9,
+      "name": "Total CoroEarlyPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001611,
+      "ph": "X",
+      "ts": 0,
+      "dur": 7,
+      "name": "Total FunctionAnalysisManagerCGSCCProxy",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001612,
+      "ph": "X",
+      "ts": 0,
+      "dur": 7,
+      "name": "Total RequireAnalysisPass<llvm::ShouldNotRunFunctionPassesAnalysis, llvm::Function, llvm::AnalysisManager<Function>>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001613,
+      "ph": "X",
+      "ts": 0,
+      "dur": 7,
+      "name": "Total AnnotationRemarksPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001614,
+      "ph": "X",
+      "ts": 0,
+      "dur": 6,
+      "name": "Total RelLookupTableConverterPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001615,
+      "ph": "X",
+      "ts": 0,
+      "dur": 6,
+      "name": "Total LoopDistributePass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001616,
+      "ph": "X",
+      "ts": 0,
+      "dur": 4,
+      "name": "Total DemandedBitsAnalysis",
+      "args": {
+        "count": 3,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001617,
+      "ph": "X",
+      "ts": 0,
+      "dur": 4,
+      "name": "Total OptimizationRemarkEmitterAnalysis",
+      "args": {
+        "count": 3,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001618,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3,
+      "name": "Total InnerAnalysisManagerProxy<LoopAnalysisManager, Function>",
+      "args": {
+        "count": 5,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001619,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3,
+      "name": "Total WarnMissedTransformationsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001620,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3,
+      "name": "Total ProfileSummaryAnalysis",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001621,
+      "ph": "X",
+      "ts": 0,
+      "dur": 3,
+      "name": "Total PerformPendingInstantiations",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001622,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total OuterAnalysisManagerProxy<FunctionAnalysisManager, Loop, LoopStandardAnalysisResults &>",
+      "args": {
+        "count": 9,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001623,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total OuterAnalysisManagerProxy<ModuleAnalysisManager, Function>",
+      "args": {
+        "count": 3,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001624,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total OpenMPOptPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001625,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total InnerAnalysisManagerProxy<FunctionAnalysisManager, Module>",
+      "args": {
+        "count": 6,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001626,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total MemoryDependenceAnalysis",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001627,
+      "ph": "X",
+      "ts": 0,
+      "dur": 2,
+      "name": "Total Annotation2MetadataPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001628,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total SpeculativeExecutionPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001629,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total CoroCleanupPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001630,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total LazyValueAnalysis",
+      "args": {
+        "count": 2,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001631,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total ScopedNoAliasAA",
+      "args": {
+        "count": 3,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001632,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total CoroSplitPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001633,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total InvalidateAnalysisPass<llvm::AAManager>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001634,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total CoroElidePass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001635,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total InvalidateAnalysisPass<llvm::ShouldNotRunFunctionPassesAnalysis>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001636,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total TypeBasedAA",
+      "args": {
+        "count": 3,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001637,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total AlignmentFromAssumptionsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001638,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total OpenMPOptCGSCCPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001639,
+      "ph": "X",
+      "ts": 0,
+      "dur": 1,
+      "name": "Total EliminateAvailableExternallyPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001640,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total ForceFunctionAttrsPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001641,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total InlineAdvisorAnalysis",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001642,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total LoopSinkPass",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001643,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total OuterAnalysisManagerProxy<ModuleAnalysisManager, LazyCallGraph::SCC, LazyCallGraph &>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001644,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total RequireAnalysisPass<llvm::ProfileSummaryAnalysis, llvm::Module, llvm::AnalysisManager<Module>>",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001645,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total LoopAccessAnalysis",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    },
+    {
+      "pid": 1001500,
+      "tid": 1001646,
+      "ph": "X",
+      "ts": 0,
+      "dur": 0,
+      "name": "Total ShouldNotRunFunctionPassesAnalysis",
+      "args": {
+        "count": 1,
+        "avg ms": 0
+      }
+    }
+  ],
+  "controller_status": 0,
+  "ended_utc": "2026-11-27T11:57:49Z",
+  "canonical_stages": [
+    {
+      "path": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.c",
+      "bytes": 316711
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.frontend.bc",
+      "bytes": 3879272
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/state/session-tcynh9wy/requests/request-mkfobjc8/generated/trusted_arm64.bpf.o",
+      "bytes": 857944
+    }
+  ],
+  "archive_commands": [
+    [
+      "tar",
+      "-C",
+      "/workspaces/kprog-raw/perf/arm64-loadtime-20261127",
+      "-cf",
+      "-",
+      "20261127T115709Z"
+    ],
+    [
+      "zstd",
+      "-T1",
+      "-3",
+      "-c"
+    ],
+    [
+      "split",
+      "-b",
+      "48000000",
+      "-",
+      "/workspaces/repository/kprog/results/arm64-loadtime-20261127/const-controls-request4-20261127T115709Z/evidence.tar.zst.part-"
+    ]
+  ],
+  "archive_returncodes": [
+    0,
+    0,
+    0
+  ]
+}
