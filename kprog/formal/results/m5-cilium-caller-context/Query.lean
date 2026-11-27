@@ -1,0 +1,19 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.first_stage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.first_stage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.layout
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.layout
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.abi_storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.abi_storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.callee_lookup
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.callee_lookup
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.call_ready
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.call_ready
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.pointer_writable
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.pointer_writable
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.writeback
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.writeback
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContext.execute_pair
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContext.execute_pair

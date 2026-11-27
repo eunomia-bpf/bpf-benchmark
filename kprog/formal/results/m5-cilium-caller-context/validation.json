@@ -1,0 +1,97 @@
+{
+  "scope": "actual two original context-call sites checked independently;each real external call/ABI store retains supplied heap and trace;whole FunctionEntry composition remains downstream",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim"
+  },
+  "source_sha256": "797d807ff83326680e82a3ba61c7eabb0d2317bde59aced935f8b82ae859742c",
+  "receipts": {
+    "stage7": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-context/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 111.04986953735352,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerContext"
+      ],
+      "exit": 0,
+      "seconds": 162.80122303962708,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.819761037826538,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-context/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.4041759967803955,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 192,
+  "full_jobs": 1490,
+  "root_queries": [
+    "first_stage",
+    "source",
+    "layout",
+    "abi_storage",
+    "callee_lookup",
+    "call_ready",
+    "pointer_writable",
+    "writeback",
+    "execute_pair"
+  ],
+  "source": "actual caller fn_body firsttwo pairs",
+  "actual_external_calls": 2,
+  "internal_call_preparation_steps_per_pair": 3,
+  "internal_writeback_steps_per_pair": 4,
+  "axioms": "std Lean plus inherited CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
