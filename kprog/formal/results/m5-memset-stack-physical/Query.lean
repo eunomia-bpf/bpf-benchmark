@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemsetStackPhysical
+
+#check KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.pair_stores
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.pair_stores
+#check KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemsetStackPhysical.execute

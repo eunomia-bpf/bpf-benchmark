@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T00:02:14.883705+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStackPhysical"
+    ],
+    "exit": 0,
+    "seconds": 1.8984475135803223,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 309,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-stack-physical/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.4799880981445312,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_source_stores": 2,
+    "native_instructions": 1,
+    "native_guest_writes": 1,
+    "private_tag_store": "retained actual source effect, no extra native step",
+    "source_execution": "original complete stack arm",
+    "native_permission": "derived from actual source store"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStackPhysical.lean",
+      "size_bytes": 10732,
+      "mtime_ns": 1795737627712483516
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
