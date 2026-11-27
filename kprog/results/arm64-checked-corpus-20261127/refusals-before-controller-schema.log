@@ -1,0 +1,12 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 refusals.py
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/refusals.py", line 30, in <module>
+    candidates = sorted((r for r in controllers if r['app'] == app), key=lambda r: r['started_utc'])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/refusals.py", line 30, in <genexpr>
+    candidates = sorted((r for r in controllers if r['app'] == app), key=lambda r: r['started_utc'])
+                                                   ~^^^^^^^
+KeyError: 'app'
+make: *** [Makefile:43: refusals] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

@@ -1,0 +1,672 @@
+{
+  "utc": "2026-11-27T09:38:49Z",
+  "scope": "Latest available completed ARM outcome per frozen corpus app. Active and absent app reports retain their state. Groups describe recorded diagnostics; shared causes and corrected acceptance require investigation.",
+  "apps": [
+    {
+      "app": "bcc/set",
+      "latest_controller": "guest-20261127T012418Z",
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T012418Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "corpus_status": "ok",
+      "app_status": "ok",
+      "install_outcomes": {
+        "checked-sim-c": 11,
+        "direct-native": 12
+      },
+      "phases_present": [
+        "baseline",
+        "post_rejit"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "latest_controller": "guest-20261127T044717Z",
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T044717Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "corpus_status": "ok",
+      "app_status": "ok",
+      "install_outcomes": {
+        "direct-native": 11,
+        "checked-sim-c": 1,
+        "failed": 1
+      },
+      "phases_present": [
+        "baseline",
+        "post_rejit"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "latest_controller": "guest-20261127T090610Z",
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T090610Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "corpus_status": "error",
+      "app_status": "error",
+      "install_outcomes": {
+        "checked-sim-c": 2,
+        "direct-native": 8
+      },
+      "phases_present": [
+        "baseline"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "latest_controller": "guest-20261127T091129Z",
+      "latest_controller_status": null,
+      "report_state": "pending"
+    },
+    {
+      "app": "katran",
+      "latest_controller": "guest-20261127T020053Z",
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T020053Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/katran-outcome.json",
+      "corpus_status": "ok",
+      "app_status": "ok",
+      "install_outcomes": {
+        "checked-sim-c": 1
+      },
+      "phases_present": [
+        "baseline",
+        "post_rejit"
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "latest_controller": null,
+      "latest_controller_status": null,
+      "report_state": "pending"
+    }
+  ],
+  "stock_refusals": [
+    {
+      "app": "bcc/set",
+      "request": 2,
+      "symbol": "fentry_vfs_read",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 103"
+      ],
+      "verifier_tail": [
+        "cur state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40) R4=0 R10=fp0",
+        "old state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40) R4=0 R10=fp0",
+        "verification time 34583 usec",
+        "stack depth 0",
+        "processed 120 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 7,
+      "symbol": "inet_sock_set_state",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "modified context pointer",
+      "diagnostics": [
+        "dereference of modified ctx ptr R3 off=20 disallowed"
+      ],
+      "verifier_tail": [
+        "315: (61) r1 = *(u32 *)(r3 +0)",
+        "dereference of modified ctx ptr R3 off=20 disallowed",
+        "verification time 72847 usec",
+        "stack depth 296",
+        "processed 289 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 10,
+      "symbol": "fentry_vfs_write",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 104"
+      ],
+      "verifier_tail": [
+        "cur state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=8) R4=0 R10=fp0",
+        "old state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=8) R4=0 R10=fp0",
+        "verification time 34592 usec",
+        "stack depth 0",
+        "processed 122 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 11,
+      "symbol": "tcp_v4_connect_ret",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "865: (69) r9 = *(u16 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 215733 usec",
+        "stack depth 176",
+        "processed 809 insns (limit 1000000) max_states_per_insn 0 total_states 9 peak_states 9 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 12,
+      "symbol": "block_rq_insert",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "context layout",
+      "diagnostics": [
+        "invalid bpf_context access off=8 size=8"
+      ],
+      "verifier_tail": [
+        "func 'block_rq_insert' doesn't have 2-th argument",
+        "invalid bpf_context access off=8 size=8",
+        "verification time 214530 usec",
+        "stack depth 64",
+        "processed 768 insns (limit 1000000) max_states_per_insn 0 total_states 13 peak_states 13 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 13,
+      "symbol": "sys_exit",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 870"
+      ],
+      "verifier_tail": [
+        "cur state: R0=map_value(map=data,ks=4,vs=32,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=0 R7=map_value(map=kprog_unspec,ks=4,vs=8) R8=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmmmmmm fp-48=scalar() fp-56=0 fp-64=10",
+        "old state: R0=map_value(map=data,ks=4,vs=32,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=0 R7=map_value(map=kprog_unspec,ks=4,vs=8) R8=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmmmmmm fp-48=scalar() fp-56=P0 fp-64=P10",
+        "verification time 156745 usec",
+        "stack depth 64",
+        "processed 588 insns (limit 1000000) max_states_per_insn 1 total_states 17 peak_states 17 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 16,
+      "symbol": "fentry_vfs_fsync",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 104"
+      ],
+      "verifier_tail": [
+        "cur state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=16) R4=0 R10=fp0",
+        "old state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=16) R4=0 R10=fp0",
+        "verification time 35726 usec",
+        "stack depth 0",
+        "processed 122 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 18,
+      "symbol": "block_rq_issue",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "typed field layout",
+      "diagnostics": [
+        "struct (anon) doesn't have field at offset 4"
+      ],
+      "verifier_tail": [
+        "1161: (61) r4 = *(u32 *)(r1 +0)",
+        "struct (anon) doesn't have field at offset 4",
+        "verification time 486546 usec",
+        "stack depth 112",
+        "processed 1257 insns (limit 1000000) max_states_per_insn 0 total_states 23 peak_states 23 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 19,
+      "symbol": "sched_switch",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 1800"
+      ],
+      "verifier_tail": [
+        "cur state: R0=scalar(smin=umin=0x100000000,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff)) R1=map_value(map=hists,ks=4,vs=120,off=100) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R3=map_value(map=kprog_unspec,ks=4,vs=8) R4=0 R5=scalar(smin=umin=smin32=umin32=32,smax=umax=smax32=umax32=33,var_off=(0x20; 0x1)) R6=0 R7=0 R8=0 R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1)) R10=fp0 fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmm???? fp-48=16 fp-56=mmmmmmmm fp-72=0 fp-80=0xa000000090000 fp-88=0 fp-96=map_value(map=hists,ks=4,vs=120)",
+        "old state: R0=scalar(smin=umin=0x100000000,smax=umax=0xffffffffffff,var_off=(0x0; 0xffffffffffff)) R1=map_value(map=hists,ks=4,vs=120,off=100) R2=scalar(smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R3=map_value(map=kprog_unspec,ks=4,vs=8) R4=0 R5=scalar(smin=umin=smin32=umin32=32,smax=umax=smax32=umax32=33,var_off=(0x20; 0x1)) R6=0 R7=0 R8=0 R9=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1)) R10=fp0 fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmm???? fp-48=P16 fp-56=mmmmmmmm fp-72=P0 fp-80=P0xa000000090000 fp-88=0 fp-96=map_value(map=hists,ks=4,vs=120)",
+        "verification time 456164 usec",
+        "stack depth 96",
+        "processed 1141 insns (limit 1000000) max_states_per_insn 0 total_states 28 peak_states 28 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 20,
+      "symbol": "fentry_vfs_open",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 104"
+      ],
+      "verifier_tail": [
+        "cur state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=24) R4=0 R10=fp0",
+        "old state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=24) R4=0 R10=fp0",
+        "verification time 38034 usec",
+        "stack depth 0",
+        "processed 122 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 21,
+      "symbol": "tcp_v6_connect_ret",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "860: (69) r9 = *(u16 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 221348 usec",
+        "stack depth 168",
+        "processed 810 insns (limit 1000000) max_states_per_insn 0 total_states 9 peak_states 9 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "request": 23,
+      "symbol": "fentry_vfs_create",
+      "report": "kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 104"
+      ],
+      "verifier_tail": [
+        "cur state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=32) R4=0 R10=fp0",
+        "old state: R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=map_value(map=vfsstat_.bss,ks=4,vs=40,off=32) R4=0 R10=fp0",
+        "verification time 37565 usec",
+        "stack depth 0",
+        "processed 122 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 1,
+      "symbol": "read_task_struct",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R7 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "438: (79) r1 = *(u64 *)(r7 +0)",
+        "R7 invalid mem access 'scalar'",
+        "verification time 121110 usec",
+        "stack depth 104",
+        "processed 430 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 2,
+      "symbol": "perf_unwind_stop",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "482: (79) r8 = *(u64 *)(r6 +0)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 148304 usec",
+        "stack depth 288",
+        "processed 470 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 7,
+      "symbol": "perf_unwind_python",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "5680: (79) r9 = *(u64 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 198898 usec",
+        "stack depth 296",
+        "processed 611 insns (limit 1000000) max_states_per_insn 0 total_states 9 peak_states 9 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 8,
+      "symbol": "perf_unwind_ruby",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "629: (79) r2 = *(u64 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 20868880 usec",
+        "stack depth 336",
+        "processed 69288 insns (limit 1000000) max_states_per_insn 6 total_states 2424 peak_states 2423 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 10,
+      "symbol": "perf_go_labels",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "unbounded memory access",
+      "diagnostics": [
+        "R1 unbounded memory access, make sure to bounds check any such access"
+      ],
+      "verifier_tail": [
+        "2572: (85) call bpf_probe_read_user#112",
+        "R1 unbounded memory access, make sure to bounds check any such access",
+        "verification time 650340 usec",
+        "stack depth 368",
+        "processed 2306 insns (limit 1000000) max_states_per_insn 0 total_states 52 peak_states 52 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 12,
+      "symbol": "native_tracer_entry",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R7 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "2245: (79) r1 = *(u64 *)(r7 +264)",
+        "R7 invalid mem access 'scalar'",
+        "verification time 1085977 usec",
+        "stack depth 288",
+        "processed 4253 insns (limit 1000000) max_states_per_insn 4 total_states 43 peak_states 43 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 13,
+      "symbol": "custom__generic",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "failed",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1858: (79) r3 = *(u64 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 1172176 usec",
+        "stack depth 304",
+        "processed 4581 insns (limit 1000000) max_states_per_insn 4 total_states 48 peak_states 48 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 2,
+      "symbol": "cil_from_netdev",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "read-only typed object store",
+      "diagnostics": [
+        "only read is supported"
+      ],
+      "verifier_tail": [
+        "429: (6b) *(u16 *)(r0 +0) = r1",
+        "only read is supported",
+        "verification time 384586 usec",
+        "stack depth 296",
+        "processed 1309 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 3,
+      "symbol": "tail_handle_ipv4_cont",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)",
+        "R2 offset is outside of the packet",
+        "verification time 131670 usec",
+        "stack depth 448",
+        "processed 412 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 4,
+      "symbol": "cil_from_host",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)",
+        "R1 offset is outside of the packet",
+        "verification time 81506 usec",
+        "stack depth 328",
+        "processed 255 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 5,
+      "symbol": "tail_ipv4_to_endpoint",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=26 size=4, R2(id=0,off=26,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=26 size=4, R2(id=0,off=26,r=0)",
+        "R2 offset is outside of the packet",
+        "verification time 434033 usec",
+        "stack depth 416",
+        "processed 1515 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 6,
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "read-only typed object store",
+      "diagnostics": [
+        "only read is supported"
+      ],
+      "verifier_tail": [
+        "1398: (6b) *(u16 *)(r2 +0) = r1",
+        "only read is supported",
+        "verification time 388835 usec",
+        "stack depth 408",
+        "processed 1344 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 7,
+      "symbol": "tail_ipv4_policy",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=20 size=2, R8(id=0,off=20,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=20 size=2, R8(id=0,off=20,r=0)",
+        "R8 offset is outside of the packet",
+        "verification time 95350 usec",
+        "stack depth 416",
+        "processed 286 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 9,
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=18 size=2, R2(id=0,off=18,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=18 size=2, R2(id=0,off=18,r=0)",
+        "R2 offset is outside of the packet",
+        "verification time 85507 usec",
+        "stack depth 360",
+        "processed 286 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 10,
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=23 size=1, R9(id=0,off=23,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=23 size=1, R9(id=0,off=23,r=0)",
+        "R9 offset is outside of the packet",
+        "verification time 439094 usec",
+        "stack depth 432",
+        "processed 1438 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    }
+  ],
+  "generation_failures": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 3,
+      "symbol": "perf_unwind_native",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "stage": "generation",
+      "error": "'-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/qemu-arm64-root', '-I', '/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-p44tfn4x/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-p44tfn4x/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1."
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 4,
+      "symbol": "perf_unwind_hotspot",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "stage": "generation",
+      "error": "'-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/qemu-arm64-root', '-I', '/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-5o6g0p42/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-5o6g0p42/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1."
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 5,
+      "symbol": "perf_unwind_perl",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "stage": "generation",
+      "error": "'-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/qemu-arm64-root', '-I', '/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-_ghzaxnq/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-_ghzaxnq/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1."
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 6,
+      "symbol": "perf_unwind_php",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "stage": "generation",
+      "error": "'-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/qemu-arm64-root', '-I', '/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-frmkb1z_/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-frmkb1z_/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1."
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 9,
+      "symbol": "perf_unwind_v8",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "direct-native",
+      "stage": "generation",
+      "error": "'-g', '-O2', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_arm64', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '--sysroot=/workspaces/repository/.cache/qemu-arm64-root', '-I', '/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu', '-emit-llvm', '-c', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-998bs88t/generated/trusted_arm64.bpf.c', '-o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-998bs88t/generated/trusted_arm64.bpf.frontend.bc']' returned non-zero exit status 1."
+    }
+  ],
+  "native_install_failures": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "request": 13,
+      "symbol": "custom__generic",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json",
+      "execution_path": "failed",
+      "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load-direct', '4', '13', '83', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/trusted_arm64.proof.o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', 'inhibit_events', '130', 'null', 'interpreter_offsets', '162', 'null', 'task_stack_offset', '145', '16', 'pid_page_to_mapping_info', '136', 'null', 'perf_progs', '143', 'null', 'per_cpu_records', '137', 'null', 'with_debug_output', '145', '32', 'kernel_stackmap', '146', 'null', 'inverse_pac_mask', '145', '24', 'pid_events', '119', 'null', 'report_events', '170', 'null', 'reported_pids', '159', 'null', 'custom_context_map', '138', 'null', 'metrics', '165', 'null', 'stack_ptregs_offset', '145', '20']' returned non-zero exit status 1.",
+      "load_stderr": "native: reloading without foreign PROG_ARRAY map(s) 143\ntrusted-native-loader: service simulator verification failed: Unknown error 524\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n"
+    }
+  ],
+  "stock_refusal_groups": {
+    "infinite loop": 7,
+    "modified context pointer": 1,
+    "scalar memory access": 8,
+    "context layout": 1,
+    "typed field layout": 1,
+    "unbounded memory access": 1,
+    "read-only typed object store": 2,
+    "packet bounds": 6
+  }
+}

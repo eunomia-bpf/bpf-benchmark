@@ -37,3 +37,7 @@ remaining-apps:
 	printf 'TRACEE_EXIT=%s\n' "$$tracee_status"; \
 	if [ "$$tetragon_status" -ne 0 ]; then exit "$$tetragon_status"; fi; \
 	exit "$$tracee_status"
+
+.PHONY: refusals
+refusals:
+	python3 refusals.py

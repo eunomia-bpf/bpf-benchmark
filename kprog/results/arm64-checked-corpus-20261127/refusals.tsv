@@ -1,0 +1,28 @@
+app	request	symbol	family	execution_path	source_report	diagnostics
+bcc/set	2	fentry_vfs_read	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 103
+bcc/set	7	inet_sock_set_state	modified context pointer	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	dereference of modified ctx ptr R3 off=20 disallowed
+bcc/set	10	fentry_vfs_write	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 104
+bcc/set	11	tcp_v4_connect_ret	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	R1 invalid mem access 'scalar'
+bcc/set	12	block_rq_insert	context layout	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	invalid bpf_context access off=8 size=8
+bcc/set	13	sys_exit	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 870
+bcc/set	16	fentry_vfs_fsync	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 104
+bcc/set	18	block_rq_issue	typed field layout	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	struct (anon) doesn't have field at offset 4
+bcc/set	19	sched_switch	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 1800
+bcc/set	20	fentry_vfs_open	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 104
+bcc/set	21	tcp_v6_connect_ret	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	R1 invalid mem access 'scalar'
+bcc/set	23	fentry_vfs_create	infinite loop	direct-native	kprog/results/arm64-checked-corpus-20261127/bcc-outcome.json	infinite loop detected at insn 104
+otelcol-ebpf-profiler/profiling	1	read_task_struct	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R7 invalid mem access 'scalar'
+otelcol-ebpf-profiler/profiling	2	perf_unwind_stop	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R6 invalid mem access 'scalar'
+otelcol-ebpf-profiler/profiling	7	perf_unwind_python	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R1 invalid mem access 'scalar'
+otelcol-ebpf-profiler/profiling	8	perf_unwind_ruby	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R1 invalid mem access 'scalar'
+otelcol-ebpf-profiler/profiling	10	perf_go_labels	unbounded memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R1 unbounded memory access, make sure to bounds check any such access
+otelcol-ebpf-profiler/profiling	12	native_tracer_entry	scalar memory access	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R7 invalid mem access 'scalar'
+otelcol-ebpf-profiler/profiling	13	custom__generic	scalar memory access	failed	kprog/results/arm64-checked-corpus-20261127/guest-20261127T044717Z/otelcol-ebpf-profiler-outcome.json	R1 invalid mem access 'scalar'
+cilium/agent	2	cil_from_netdev	read-only typed object store	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	only read is supported
+cilium/agent	3	tail_handle_ipv4_cont	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)
+cilium/agent	4	cil_from_host	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)
+cilium/agent	5	tail_ipv4_to_endpoint	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=26 size=4, R2(id=0,off=26,r=0)
+cilium/agent	6	tail_handle_ipv4_from_netdev	read-only typed object store	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	only read is supported
+cilium/agent	7	tail_ipv4_policy	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=20 size=2, R8(id=0,off=20,r=0)
+cilium/agent	9	tail_nodeport_rev_dnat_ipv4	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=18 size=2, R2(id=0,off=18,r=0)
+cilium/agent	10	tail_handle_snat_fwd_ipv4	packet bounds	direct-native	kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json	invalid access to packet, off=23 size=1, R9(id=0,off=23,r=0)
