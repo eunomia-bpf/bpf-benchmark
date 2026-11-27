@@ -1,0 +1,2422 @@
+{
+  "scope": "Selected recent full3x180 stats-on records from the complete available inventory; no global best selection. Earlier/invalid/diagnostic records remain in inventory.json. Ratios do not alone establish absolute latency or a causal code regression.",
+  "x86": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_150245_285011",
+      "run": "x86_kvm_corpus_20261122_150245_285011",
+      "started_at": "2026-11-22T15:02:45.285011+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "84e21783fe04d5a680cbe70af7964f5ff8e402edb071cb95d08230ec5d4785a0",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_150245_285011/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "010cb2656bb0f16d681b3f4415b2fcfcb94b2d9f2399a65da2475ed2c0ef67f3",
+      "phases": {
+        "baseline": {
+          "programs": 13,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 13,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 3201.7006187453253,
+      "native_ns": 3393.4920735134556,
+      "per_call_ratio": 0.9434825688071937,
+      "throughput_ratio": 1.012684259914823,
+      "ebpf_samples": [
+        40934052.97774777,
+        42482857.27915041,
+        41741276.770861655
+      ],
+      "native_samples": [
+        42554182.77814684,
+        41055807.0236544,
+        42270733.97459982
+      ],
+      "throughput_sample_ratios": [
+        1.039579022416368,
+        0.9664087976446826,
+        1.012684259914823
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_152855_732291",
+      "run": "x86_kvm_corpus_20261122_152855_732291",
+      "started_at": "2026-11-22T15:28:55.732291+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "cd91257f49b374c2c020b0ae0653e39c9373b9c5173a20342d6b1922d073d504",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_152855_732291/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "57144fd89c7e176e8caa654686011604f9d19a4daa51ab80a08e6ac58bd9666d",
+      "phases": {
+        "baseline": {
+          "programs": 25,
+          "active": 17
+        },
+        "post_rejit": {
+          "programs": 25,
+          "active": 17
+        }
+      },
+      "ebpf_ns": 103.39999577085483,
+      "native_ns": 104.10778050696135,
+      "per_call_ratio": 0.9932014232494449,
+      "throughput_ratio": 0.9995865925390576,
+      "ebpf_samples": [
+        521930.59,
+        521695.45999999996,
+        522926.07000000007
+      ],
+      "native_samples": [
+        520800.79,
+        522597.02,
+        521714.81999999995
+      ],
+      "throughput_sample_ratios": [
+        0.9978353443510563,
+        1.0017281346477505,
+        0.997683706991315
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_155511_408865",
+      "run": "x86_kvm_corpus_20261122_155511_408865",
+      "started_at": "2026-11-22T15:55:11.408865+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "75eba2664a0451224dcd5498655b54df1e7ad0b16c3c1e835a16f4a7863ea3e0",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_155511_408865/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "70cb2ef004c5eaf4e03f7a7fcd37c4283745b39bfc0828adc91663b6ea210b07",
+      "phases": {
+        "baseline": {
+          "programs": 92,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 56,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 622.9465462726082,
+      "native_ns": 1350.6504263807572,
+      "per_call_ratio": 0.4612196717265134,
+      "throughput_ratio": 0.6978079047033118,
+      "ebpf_samples": [
+        1325517.0,
+        1387945.0,
+        1355598.0
+      ],
+      "native_samples": [
+        945947.0,
+        950080.0,
+        942878.0
+      ],
+      "throughput_sample_ratios": [
+        0.713643808415886,
+        0.6845228016960326,
+        0.6955439591973431
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_162144_505539",
+      "run": "x86_kvm_corpus_20261122_162144_505539",
+      "started_at": "2026-11-22T16:21:44.505539+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "cbdd00e8145835fd87f92c2d11585c03c23142d95f39c76692e361f7231fb496",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_162144_505539/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "bdbb8b1b7be6e57f11721503d3acc9264cf84e7a76b814815b6de07b848036f7",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 740.1593816975495,
+      "native_ns": 330.91611837370095,
+      "per_call_ratio": 2.2366978838476927,
+      "throughput_ratio": 1.3074873677744865,
+      "ebpf_samples": [
+        323161.42000000004,
+        321178.56,
+        318480.7
+      ],
+      "native_samples": [
+        416677.02999999997,
+        423600.26,
+        419936.91
+      ],
+      "throughput_sample_ratios": [
+        1.2893773953586412,
+        1.3188933283716073,
+        1.3185631342809783
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_164820_504768",
+      "run": "x86_kvm_corpus_20261122_164820_504768",
+      "started_at": "2026-11-22T16:48:20.504768+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "47841dc5ae0c6748d8d0ec488783dbf9af9652f2915f204c4f6b66aa369623c6",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_164820_504768/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "f56f3566e986bcf0078551c6c8f0079d3d1189b2795b5e28a3f8ae237d91d0fe",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 64
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 64
+        }
+      },
+      "ebpf_ns": 365.5815528660762,
+      "native_ns": 183.94353993526232,
+      "per_call_ratio": 1.9874661159328573,
+      "throughput_ratio": 1.6807456148800695,
+      "ebpf_samples": [
+        336351.12,
+        339969.04000000004,
+        333831.6400000001
+      ],
+      "native_samples": [
+        577880.27,
+        565320.67,
+        559128.29
+      ],
+      "throughput_sample_ratios": [
+        1.7180863557106634,
+        1.662859270950084,
+        1.6748810568105525
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_171542_684932",
+      "run": "x86_kvm_corpus_20261122_171542_684932",
+      "started_at": "2026-11-22T17:15:42.684932+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "b966f8ad33794b51235d841a507b9885cca8031e6ea911dc715035b1deacd49d",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261122_171542_684932/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "39e74847aadc2baa257fe837e3d0743e7a26aeb6bae74589418aa35891e47b79",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 176.75648502927808,
+      "native_ns": 175.58973152543376,
+      "per_call_ratio": 1.0066447707033217,
+      "throughput_ratio": 1.011444468916842,
+      "ebpf_samples": [
+        2457199.0,
+        2427347.0,
+        2438121.0
+      ],
+      "native_samples": [
+        2466024.0,
+        2483533.0,
+        2421293.0
+      ],
+      "throughput_sample_ratios": [
+        1.0035914877061238,
+        1.0231470819788024,
+        0.993097963554721
+      ],
+      "workload_errors": 3043042598,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_104425_910099",
+      "run": "x86_kvm_corpus_20261123_104425_910099",
+      "started_at": "2026-11-23T10:44:25.910099+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "69955bb91bb66bb866bc0f2c9f78d101d2a22beb425142d134967f5b4b47ab03",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_104425_910099/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "380e518e5e44a4e7b7fdfd1819bd34b5413cb2f8abfe34e7974a343d84c89db4",
+      "phases": {
+        "baseline": {
+          "programs": 13,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 13,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 3161.2304280906133,
+      "native_ns": 3399.6035941296705,
+      "per_call_ratio": 0.9298820702358732,
+      "throughput_ratio": 0.9748627022820467,
+      "ebpf_samples": [
+        41616243.737523854,
+        41919358.47450829,
+        42665877.31342215
+      ],
+      "native_samples": [
+        40865619.08038897,
+        39874222.73537442,
+        42153470.716414854
+      ],
+      "throughput_sample_ratios": [
+        0.9819631809668091,
+        0.9512126183806571,
+        0.9879902481966285
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_111038_481045",
+      "run": "x86_kvm_corpus_20261123_111038_481045",
+      "started_at": "2026-11-23T11:10:38.481045+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "23da753d9d03c9abcbc4e6d871ebadb16b122a51aa5da3f34f836d86df6b67d8",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_111038_481045/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "756d616b5f95e6f6452409ddb7762806b62758f8fb3f89234a70ea98b85d913c",
+      "phases": {
+        "baseline": {
+          "programs": 25,
+          "active": 17
+        },
+        "post_rejit": {
+          "programs": 25,
+          "active": 17
+        }
+      },
+      "ebpf_ns": 106.37746198617107,
+      "native_ns": 108.09287002205205,
+      "per_call_ratio": 0.9841302387888209,
+      "throughput_ratio": 0.9877264163903661,
+      "ebpf_samples": [
+        514804.16000000003,
+        513213.76,
+        514198.64
+      ],
+      "native_samples": [
+        509536.36,
+        507887.57999999996,
+        501856.78
+      ],
+      "throughput_sample_ratios": [
+        0.9897673709551996,
+        0.9896219072536168,
+        0.9759978750624467
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_113701_916596",
+      "run": "x86_kvm_corpus_20261123_113701_916596",
+      "started_at": "2026-11-23T11:37:01.916596+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "5e0f1b910f6475646c82d3be754f118473314d3d653f5d71ebb5a2d5c3a4a83b",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_113701_916596/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "1cd251280ad5e18ca9fe95681eeae205919a30dfe3f08184c2b0ea3177d3fbe7",
+      "phases": {
+        "baseline": {
+          "programs": 90,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 53,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 726.747577518093,
+      "native_ns": 602.9228874019161,
+      "per_call_ratio": 1.2053740083574465,
+      "throughput_ratio": 1.1424121850678806,
+      "ebpf_samples": [
+        1264958.0,
+        1256620.0,
+        1212954.0
+      ],
+      "native_samples": [
+        1416599.0,
+        1435578.0,
+        1484077.0
+      ],
+      "throughput_sample_ratios": [
+        1.1198782884491028,
+        1.1424121850678806,
+        1.223522903589089
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_120320_002937",
+      "run": "x86_kvm_corpus_20261123_120320_002937",
+      "started_at": "2026-11-23T12:03:20.002937+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "02ed6405a2bbb23887b1074b9420963f93490de866fecf790fccc62d8d4472c5",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_120320_002937/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "39ea3413c44062127bdfcf3aeacb14d9f4f3a938306144725430efe2da8be85c",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 747.968119485713,
+      "native_ns": 318.0957129014326,
+      "per_call_ratio": 2.3513932729973126,
+      "throughput_ratio": 1.3444690343226533,
+      "ebpf_samples": [
+        324444.52999999997,
+        317601.32,
+        316401.72
+      ],
+      "native_samples": [
+        427005.14,
+        424314.75,
+        427102.62
+      ],
+      "throughput_sample_ratios": [
+        1.316111385819943,
+        1.3359980682699932,
+        1.3498745202775764
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_122951_540329",
+      "run": "x86_kvm_corpus_20261123_122951_540329",
+      "started_at": "2026-11-23T12:29:51.540329+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "a9bade22954103e1660ff41c407436fe523f52fe11934cd52a9fb42cacb04ff6",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_122951_540329/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "d3e63143a8c23317ed45bba2018e7ddeac48f28329fe95babe208e43f572c338",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 64
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 64
+        }
+      },
+      "ebpf_ns": 378.8010777006574,
+      "native_ns": 211.3209417536968,
+      "per_call_ratio": 1.7925392275705716,
+      "throughput_ratio": 1.3741549505083128,
+      "ebpf_samples": [
+        319496.08,
+        337501.21,
+        309863.87000000005
+      ],
+      "native_samples": [
+        439037.12,
+        443686.35,
+        424112.93000000005
+      ],
+      "throughput_sample_ratios": [
+        1.3741549505083128,
+        1.3146215090606637,
+        1.368707264903133
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_125701_042461",
+      "run": "x86_kvm_corpus_20261123_125701_042461",
+      "started_at": "2026-11-23T12:57:01.042461+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "ba4671db943f68b68c310016009c9068703008315c52fcda2f12d5ab4d17d949",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_125701_042461/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "296385a26dec2f63c4c3921e637caf8de3a80e39fc4466e084a35973fe49e33a",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 180.11340375800523,
+      "native_ns": 179.84137792162068,
+      "per_call_ratio": 1.0015125875898432,
+      "throughput_ratio": 0.9805521567689293,
+      "ebpf_samples": [
+        2407722.0,
+        2386234.0,
+        2408005.0
+      ],
+      "native_samples": [
+        2290549.0,
+        2360897.0,
+        2441247.0
+      ],
+      "throughput_sample_ratios": [
+        0.9513344979196103,
+        0.9893820136667234,
+        1.0138047886113193
+      ],
+      "workload_errors": 3004726852,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_215059_132597",
+      "run": "x86_kvm_corpus_20261123_215059_132597",
+      "started_at": "2026-11-23T21:50:59.132597+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "138529b4318a71214f61a28af0598b95dedca8d13468f387a9886a395cd87fec",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_215059_132597/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "f2a2e3ded67636ef0b26f339555cd3165262c07d44dbeb1b13b958b975488622",
+      "phases": {
+        "baseline": {
+          "programs": 13,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 13,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 3183.6900310861647,
+      "native_ns": 3371.200492999778,
+      "per_call_ratio": 0.9443787273100563,
+      "throughput_ratio": 0.9644705736725999,
+      "ebpf_samples": [
+        42083202.598255366,
+        41731423.11672472,
+        41981139.09605831
+      ],
+      "native_samples": [
+        40489573.30740457,
+        42454686.1438225,
+        40369945.19405761
+      ],
+      "throughput_sample_ratios": [
+        0.9621314635660152,
+        1.0173313770075556,
+        0.9616210056064921
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_221708_962433",
+      "run": "x86_kvm_corpus_20261123_221708_962433",
+      "started_at": "2026-11-23T22:17:08.962433+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "711766f66e3610200f221f66546e475ae90d1736d81e3a846e94fb8fc94247d5",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_221708_962433/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "8d4ccd2c82446a521d9a19cc8c718944a1c8781f8c6adec96975acfb77867899",
+      "phases": {
+        "baseline": {
+          "programs": 60,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 53,
+          "active": 6
+        }
+      },
+      "ebpf_ns": 677.9938293081426,
+      "native_ns": 613.5526778921668,
+      "per_call_ratio": 1.1050295333032536,
+      "throughput_ratio": 1.104607402764176,
+      "ebpf_samples": [
+        1359725.0,
+        1279441.0,
+        1201475.0
+      ],
+      "native_samples": [
+        1420425.0,
+        1413280.0,
+        1402998.0
+      ],
+      "throughput_sample_ratios": [
+        1.0446413796907463,
+        1.104607402764176,
+        1.167729665619343
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_224344_726413",
+      "run": "x86_kvm_corpus_20261123_224344_726413",
+      "started_at": "2026-11-23T22:43:44.726413+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "b42a85f3d543b1616e99b38b00882a3430b843ea3b4ec8defa8afa6501b94395",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_224344_726413/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "831dc854c3c37eaa7d1a302b3ba754b115d906b6684351f903c255b33e6537d8",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 3107.4760837118392,
+      "native_ns": 1080.4972248550257,
+      "per_call_ratio": 2.875968593189844,
+      "throughput_ratio": 2.400846913150153,
+      "ebpf_samples": [
+        159930.63,
+        89659.63,
+        91395.44
+      ],
+      "native_samples": [
+        146856.44,
+        293195.67,
+        219426.46000000002
+      ],
+      "throughput_sample_ratios": [
+        0.9182508691424526,
+        3.270096809455939,
+        2.400846913150153
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_231055_765801",
+      "run": "x86_kvm_corpus_20261123_231055_765801",
+      "started_at": "2026-11-23T23:10:55.765801+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "aedce8d8dba2d529cc1c28faeb9934907993a590946aead3d69bc3c20c2c29eb",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_231055_765801/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "29c39617ca427ef6985cb374a7ca8c3585ac563f634e85ec99872c9228c1be74",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 64
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 64
+        }
+      },
+      "ebpf_ns": 411.0587613580848,
+      "native_ns": 194.58437868969295,
+      "per_call_ratio": 2.1124962040946116,
+      "throughput_ratio": 1.86471721787935,
+      "ebpf_samples": [
+        278192.26000000007,
+        310882.66000000003,
+        278961.59
+      ],
+      "native_samples": [
+        466200.89,
+        520184.48,
+        522325.47
+      ],
+      "throughput_sample_ratios": [
+        1.6758226486962646,
+        1.673250222447273,
+        1.8723920737618391
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_233751_015523",
+      "run": "x86_kvm_corpus_20261123_233751_015523",
+      "started_at": "2026-11-23T23:37:51.015523+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "658514447a3414e80f3de2b68f8e5b27541881d9881ad602f4771b1ea923ed05",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261123_233751_015523/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "816582322ca28add7e3a21007c3602bd00dfbdec93ebc2cfc6e43e30f54c52ed",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 182.48145937543208,
+      "native_ns": 175.11869316345613,
+      "per_call_ratio": 1.0420444332867624,
+      "throughput_ratio": 1.021461396558097,
+      "ebpf_samples": [
+        2345126.0,
+        2397524.0,
+        2386238.0
+      ],
+      "native_samples": [
+        2430843.0,
+        2473149.0,
+        2437450.0
+      ],
+      "throughput_sample_ratios": [
+        1.0365511277432429,
+        1.0315429584855043,
+        1.021461396558097
+      ],
+      "workload_errors": 3062379663,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_052119_515978",
+      "run": "x86_kvm_corpus_20261124_052119_515978",
+      "started_at": "2026-11-24T05:21:19.515978+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "acce9b5363e7fdf051411bb9b8ec5385c45b85fd2f323e753bd3d680b016ae7b",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_052119_515978/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "b1e8a462f4957f00564a3cd64d638680dfa4eaa7b3846ebddb87eb773b9387cf",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 35
+        }
+      },
+      "ebpf_ns": 2666.2477835605264,
+      "native_ns": 956.2537433924476,
+      "per_call_ratio": 2.7882220613345043,
+      "throughput_ratio": 2.355120672660721,
+      "ebpf_samples": [
+        105462.02000000002,
+        114854.93,
+        153614.6
+      ],
+      "native_samples": [
+        370549.49000000005,
+        149534.71,
+        270497.22
+      ],
+      "throughput_sample_ratios": [
+        3.5135823303972367,
+        1.301944200392617,
+        1.7608822338501677
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_054725_460151",
+      "run": "x86_kvm_corpus_20261124_054725_460151",
+      "started_at": "2026-11-24T05:47:25.460151+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "b09d41343ca289dbc10efcabb9495505752b47ba866b26f672d1fca02e174af1",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_054725_460151/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "6803f2a76c65961d9bde4816127aa868e4a74f679d7f1d22d3735620d3e7e5cc",
+      "phases": {
+        "baseline": {
+          "programs": 53,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 53,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 743.686555072697,
+      "native_ns": 595.8161608869901,
+      "per_call_ratio": 1.248181240947833,
+      "throughput_ratio": 1.2000589728888524,
+      "ebpf_samples": [
+        1154696.0,
+        1220900.0,
+        1281445.0
+      ],
+      "native_samples": [
+        1479611.0,
+        1465152.0,
+        1462318.0
+      ],
+      "throughput_sample_ratios": [
+        1.2813857500155885,
+        1.2000589728888524,
+        1.141147688742006
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_061344_709703",
+      "run": "x86_kvm_corpus_20261124_061344_709703",
+      "started_at": "2026-11-24T06:13:44.709703+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "4ba8b73a317e28109a0f9bef6b66134db864cd2883c2a90da4188b2e8bf0dfa6",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_061344_709703/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "175f5e2a4deaa5bbd72636e40104a59ea46a714b551d2b7439c3f7e4ed5b83e0",
+      "phases": {
+        "baseline": {
+          "programs": 13,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 13,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 3374.6601862923567,
+      "native_ns": 3458.6910783075787,
+      "per_call_ratio": 0.9757044239821672,
+      "throughput_ratio": 1.0610530368188438,
+      "ebpf_samples": [
+        38138000.33005722,
+        37290580.682519704,
+        39444625.50672399
+      ],
+      "native_samples": [
+        40466441.06840528,
+        42511415.26163506,
+        40205149.28241559
+      ],
+      "throughput_sample_ratios": [
+        1.0610530368188438,
+        1.1400041105169132,
+        1.0192807959492975
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_063937_100806",
+      "run": "x86_kvm_corpus_20261124_063937_100806",
+      "started_at": "2026-11-24T06:39:37.100806+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "2488f63db729101475829b75606971d72ea8962cc2b4744ac63a5c2b5f6fa022",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_063937_100806/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "66249ed207fbe9eeefacc96781c85aa57e6a65fa1b93c90bca77f8fed4212bb5",
+      "phases": {
+        "baseline": {
+          "programs": 25,
+          "active": 17
+        },
+        "post_rejit": {
+          "programs": 25,
+          "active": 17
+        }
+      },
+      "ebpf_ns": 111.7684156488349,
+      "native_ns": 110.10095623682523,
+      "per_call_ratio": 1.0151448222522519,
+      "throughput_ratio": 1.1006509866957512,
+      "ebpf_samples": [
+        459096.94,
+        446641.92000000004,
+        503396.32999999996
+      ],
+      "native_samples": [
+        505305.50000000006,
+        516236.88,
+        439829.59
+      ],
+      "throughput_sample_ratios": [
+        1.1006509866957512,
+        1.1558182447361858,
+        0.87372426811296
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_073447_416791",
+      "run": "x86_kvm_corpus_20261124_073447_416791",
+      "started_at": "2026-11-24T07:34:47.416791+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "x86_kvm_corpus",
+      "metadata_sha256": "4583b6fa220bd0417628bd7a507cf749b65ed08d9457f8f8ecd8319a9060fe89",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": false,
+      "app_files": 1,
+      "app_file": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261124_073447_416791/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "629260fbf43a56d82565ce689441911d65baf61ccaa3809d83d075e9843680bb",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 35
+        }
+      },
+      "ebpf_ns": 3428.506181997083,
+      "native_ns": 1469.2626205211923,
+      "per_call_ratio": 2.333487651636361,
+      "throughput_ratio": 1.4602583391334991,
+      "ebpf_samples": [
+        81507.6,
+        109881.92,
+        120866.07999999999
+      ],
+      "native_samples": [
+        139005.41,
+        160455.99000000002,
+        282342.26999999996
+      ],
+      "throughput_sample_ratios": [
+        1.7054288189076845,
+        1.4602583391334991,
+        2.3359926126502986
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    }
+  ],
+  "arm_spark": [
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_087865",
+      "run": "arm64_qemu_corpus_19700101_000002_087865",
+      "started_at": "1970-01-01T00:00:02.087865+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "91f81b95aace023053bc657ac9d84c946d8496744d45851c4802e31626ff4dff",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_087865/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "bdcbe8907fb38160b5c621887e4053d10d9f07fcf6280b37a00ce699f5dce46b",
+      "phases": {
+        "baseline": {
+          "programs": 23,
+          "active": 13
+        },
+        "post_rejit": {
+          "programs": 23,
+          "active": 13
+        }
+      },
+      "ebpf_ns": 93.25972204614186,
+      "native_ns": 97.99043205347293,
+      "per_call_ratio": 0.9517227354937108,
+      "throughput_ratio": 0.9268142365679036,
+      "ebpf_samples": [
+        459792.17000000004,
+        468050.73,
+        471170.55999999994
+      ],
+      "native_samples": [
+        433796.07999999996,
+        441742.11,
+        421149.66
+      ],
+      "throughput_sample_ratios": [
+        0.9434612164013143,
+        0.9437910929014041,
+        0.8938369578948226
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_132688",
+      "run": "arm64_qemu_corpus_19700101_000002_132688",
+      "started_at": "1970-01-01T00:00:02.132688+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "6d07963faaeb97db0e1465342f18421a8f456fa8db810b1bae7fdf3f27a9c2d2",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_132688/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "1eaaa6ac3728c95e7c3506d3d9f23a02d87522bcbceb080d2f61af33302992e8",
+      "phases": {
+        "baseline": {
+          "programs": 60,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 64,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 1000.6066108915838,
+      "native_ns": 985.7022533094612,
+      "per_call_ratio": 1.0151205473377805,
+      "throughput_ratio": 1.0608175954977614,
+      "ebpf_samples": [
+        1094250.0,
+        1118377.0,
+        1129019.0
+      ],
+      "native_samples": [
+        1180120.0,
+        1186394.0,
+        1203546.0
+      ],
+      "throughput_sample_ratios": [
+        1.0784738405300434,
+        1.0608175954977614,
+        1.0660104037221694
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_452685",
+      "run": "arm64_qemu_corpus_19700101_000002_452685",
+      "started_at": "1970-01-01T00:00:02.452685+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "4cb88329bafe34bf77824253c2778d595f06558a7b0fa766d26f76a85ee52ace",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_452685/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "d6de84e15a294f068fcd22b2d77540520940189e958d4398d289f9173e05f0da",
+      "phases": {
+        "baseline": {
+          "programs": 12,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 12,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 253.13608661208022,
+      "native_ns": 252.05067656910262,
+      "per_call_ratio": 1.0043063167207171,
+      "throughput_ratio": 0.987711711704973,
+      "ebpf_samples": [
+        46707295.42372322,
+        46938204.97931594,
+        47512960.916868895
+      ],
+      "native_samples": [
+        46838421.75195299,
+        46361414.78447903,
+        46133938.80345027
+      ],
+      "throughput_sample_ratios": [
+        1.0028074057176766,
+        0.987711711704973,
+        0.9709758750705638
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_584947",
+      "run": "arm64_qemu_corpus_19700101_000002_584947",
+      "started_at": "1970-01-01T00:00:02.584947+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "75782e255672cc49b5e52c724b2f75c41bf1aefd69332d342895f33c6ff6d26f",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_584947/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "b1260e8f725054997548b657563490270cd7796255ddf03e099299b65ff3dfb2",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 61
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 61
+        }
+      },
+      "ebpf_ns": 334.1020377644585,
+      "native_ns": 210.75119075720886,
+      "per_call_ratio": 1.5852913407704214,
+      "throughput_ratio": 1.282571933383145,
+      "ebpf_samples": [
+        174102.37,
+        171820.78,
+        170623.89
+      ],
+      "native_samples": [
+        212604.32,
+        224443.46,
+        220372.51
+      ],
+      "throughput_sample_ratios": [
+        1.2211454674626199,
+        1.3062649348932067,
+        1.2915689004628836
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_899917",
+      "run": "arm64_qemu_corpus_19700101_000002_899917",
+      "started_at": "1970-01-01T00:00:02.899917+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "64b24157393be58d705ab7c76337eb68d9cd2eb50912499858d2ec67f84e8bf2",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_899917/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "f64fdee164a7a94d3dc1a249a7256df50adea8b30d11cd9fdf096962f931f6e2",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 165.28886333668274,
+      "native_ns": 172.75514714866824,
+      "per_call_ratio": 0.956781120937831,
+      "throughput_ratio": 0.9913674557042148,
+      "ebpf_samples": [
+        2069610.0,
+        2112074.0,
+        2047081.0
+      ],
+      "native_samples": [
+        2056647.0,
+        2043835.0,
+        2051744.0
+      ],
+      "throughput_sample_ratios": [
+        0.9937365010799136,
+        0.967690999463087,
+        1.002277877621843
+      ],
+      "workload_errors": 8531233099,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_927215",
+      "run": "arm64_qemu_corpus_19700101_000003_927215",
+      "started_at": "1970-01-01T00:00:03.927215+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "4a019c66b3a3499d6c6c50586d2705897fdf5392f2635202e8a704851302a4ad",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run5",
+      "batch_readme": "kprog/results/arm64-spark-run5-20261123/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run5/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_927215/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "409f38a15683b684ba805be1d3a9be09b019ebce07a8fc2b3008f06654147bc0",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 445.97990975181654,
+      "native_ns": 322.19590442288876,
+      "per_call_ratio": 1.3841886368811775,
+      "throughput_ratio": 1.1709326845301957,
+      "ebpf_samples": [
+        197395.24,
+        202086.98,
+        209031.47
+      ],
+      "native_samples": [
+        236630.25,
+        229867.05000000002,
+        236768.46000000002
+      ],
+      "throughput_sample_ratios": [
+        1.1987637087905463,
+        1.137465907006973,
+        1.1326928906924878
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_142305",
+      "run": "arm64_qemu_corpus_19700101_000002_142305",
+      "started_at": "1970-01-01T00:00:02.142305+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "4f0306dedc3582575775343bcc854de367a0befed150dec7a990b1770eb53fcd",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_142305/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "b547c3a715f4846fa623492ecff55ce2ec3a3f3a90a92f9828a80f12fd726923",
+      "phases": {
+        "baseline": {
+          "programs": 23,
+          "active": 13
+        },
+        "post_rejit": {
+          "programs": 23,
+          "active": 13
+        }
+      },
+      "ebpf_ns": 93.01420759652792,
+      "native_ns": 99.19750116886311,
+      "per_call_ratio": 0.9376668414075329,
+      "throughput_ratio": 0.9880846473764981,
+      "ebpf_samples": [
+        475865.9,
+        479258.85,
+        463057.1
+      ],
+      "native_samples": [
+        470195.79,
+        437177.19999999995,
+        478909.75
+      ],
+      "throughput_sample_ratios": [
+        0.9880846473764981,
+        0.9121943183730462,
+        1.034234762840263
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_407621",
+      "run": "arm64_qemu_corpus_19700101_000002_407621",
+      "started_at": "1970-01-01T00:00:02.407621+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "c0398787467edde15ccc7d5059b2e058c645cc29af09f61725a5b781498f1b01",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_407621/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "e7f8483f7e29355e45e4527282190d0092f7a390a1852fa0e8ba8c003ef99419",
+      "phases": {
+        "baseline": {
+          "programs": 12,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 12,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 261.82404020228705,
+      "native_ns": 257.48306203000567,
+      "per_call_ratio": 1.0168592766376823,
+      "throughput_ratio": 0.9903888549788453,
+      "ebpf_samples": [
+        47073060.32696833,
+        46913839.48130899,
+        46841564.95678046
+      ],
+      "native_samples": [
+        46462943.76655496,
+        46396476.361738466,
+        46894486.97549343
+      ],
+      "throughput_sample_ratios": [
+        0.9870389442246688,
+        0.9889720575998336,
+        1.0011298089370368
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_975793",
+      "run": "arm64_qemu_corpus_19700101_000002_975793",
+      "started_at": "1970-01-01T00:00:02.975793+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "1593a672be2105cf58b7f3d36ee17f6527b23f42921603dd4dd50d793cd5ea7a",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_975793/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "b30ca81af51585049c85aa2fa93d76e3ebcd2ed0ded363c63fed5562948a329a",
+      "phases": {
+        "baseline": {
+          "programs": 72,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 54,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 995.302634156028,
+      "native_ns": 978.7240980821507,
+      "per_call_ratio": 1.01693892702383,
+      "throughput_ratio": 1.0913453280267231,
+      "ebpf_samples": [
+        1108084.0,
+        1085683.0,
+        1094484.0
+      ],
+      "native_samples": [
+        1194460.0,
+        1193814.0,
+        1198772.0
+      ],
+      "throughput_sample_ratios": [
+        1.0779507690752688,
+        1.0995972120775586,
+        1.095285084112696
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_334477",
+      "run": "arm64_qemu_corpus_19700101_000002_334477",
+      "started_at": "1970-01-01T00:00:02.334477+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "5cdb7ad0651aa965880cc4db9ef9970dac55ad95ee2695f8a8c5994d20c05c21",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_334477/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "76ed93dacdd3e5f7353893f2741377f5a8618d6049c9c92d70def4fbe96e7c37",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 61
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 61
+        }
+      },
+      "ebpf_ns": 332.8874679048674,
+      "native_ns": 216.99983677754136,
+      "per_call_ratio": 1.5340447847715613,
+      "throughput_ratio": 1.2326917189688917,
+      "ebpf_samples": [
+        165968.37,
+        172652.56999999998,
+        168291.11999999997
+      ],
+      "native_samples": [
+        207451.07,
+        208790.63,
+        206364.01
+      ],
+      "throughput_sample_ratios": [
+        1.2499434078915157,
+        1.2093108721173396,
+        1.2262323169517206
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_826399",
+      "run": "arm64_qemu_corpus_19700101_000002_826399",
+      "started_at": "1970-01-01T00:00:02.826399+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "b010b37a20db7416fd9dfce7addb6e0a5e44dfb3224bdbf3bf827d5c28bc8df2",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_826399/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "e87614c1c5da50c79fa419072f2e73372a0919b9030ddb3ae578364830a130c7",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 162.76203829921744,
+      "native_ns": 174.62662224687,
+      "per_call_ratio": 0.9320574160171318,
+      "throughput_ratio": 0.823073050643387,
+      "ebpf_samples": [
+        2677704.0,
+        2656691.0,
+        2685694.0
+      ],
+      "native_samples": [
+        2203946.0,
+        2427479.0,
+        2176557.0
+      ],
+      "throughput_sample_ratios": [
+        0.823073050643387,
+        0.9137227475833659,
+        0.8104262808793555
+      ],
+      "workload_errors": 7856102027,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_266384",
+      "run": "arm64_qemu_corpus_19700101_000003_266384",
+      "started_at": "1970-01-01T00:00:03.266384+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "b011a0ce5d85b603509018a9f7e7b3beabe2ed5b567d38689ee0bb2489c23f30",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run6",
+      "batch_readme": "kprog/results/arm64-spark-run6-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run6/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_266384/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "8a545891d93a7e9dd83a9fb395fbe91d2ee5a63b75874aa3800910d3f5fafe17",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 446.76429407417294,
+      "native_ns": 322.69204415964145,
+      "per_call_ratio": 1.384491195739399,
+      "throughput_ratio": 1.1808735004289828,
+      "ebpf_samples": [
+        219297.38,
+        199665.33000000002,
+        200707.4
+      ],
+      "native_samples": [
+        237010.05,
+        240229.19,
+        221949.85
+      ],
+      "throughput_sample_ratios": [
+        1.080770094015715,
+        1.2031592565419345,
+        1.10583790134295
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run7/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_467162",
+      "run": "arm64_qemu_corpus_19700101_000002_467162",
+      "started_at": "1970-01-01T00:00:02.467162+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "bcaf991fc4b112e79527fb45c6bda52f239a4400b7298130c72afae81f997668",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run7",
+      "batch_readme": "kprog/results/arm64-spark-run7-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run7/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_467162/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "d18e05f42e015f9a11d42b09de59a0b9f0d9b46ec58532674cd4c76a0b2b538f",
+      "phases": {
+        "baseline": {
+          "programs": 60,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 55,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 1012.3110419024747,
+      "native_ns": 978.2233133762516,
+      "per_call_ratio": 1.0348465713913242,
+      "throughput_ratio": 1.0975663513637617,
+      "ebpf_samples": [
+        1093387.0,
+        1088900.0,
+        1071568.0
+      ],
+      "native_samples": [
+        1195140.0,
+        1192013.0,
+        1200807.0
+      ],
+      "throughput_sample_ratios": [
+        1.0930622003005341,
+        1.0946946459730003,
+        1.1206073716273721
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run7/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_552743",
+      "run": "arm64_qemu_corpus_19700101_000002_552743",
+      "started_at": "1970-01-01T00:00:02.552743+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "580e4102add5ec196ddfc161f9eb119ee7feb0323b85d9450c44a3dba87bdaf5",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run7",
+      "batch_readme": "kprog/results/arm64-spark-run7-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run7/spark-9773/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_552743/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "8bdd96c72bae2e5312f730729b6c6a526fd265736b004ca610ccbf96ba6de79f",
+      "phases": {
+        "baseline": {
+          "programs": 23,
+          "active": 13
+        },
+        "post_rejit": {
+          "programs": 23,
+          "active": 13
+        }
+      },
+      "ebpf_ns": 93.23360351192602,
+      "native_ns": 97.5096446580428,
+      "per_call_ratio": 0.9561475056020103,
+      "throughput_ratio": 0.9402842976215913,
+      "ebpf_samples": [
+        469025.38,
+        469854.68,
+        456739.89
+      ],
+      "native_samples": [
+        441017.19999999995,
+        421366.06,
+        445706.70999999996
+      ],
+      "throughput_sample_ratios": [
+        0.9402842976215913,
+        0.8968008150945735,
+        0.9758436251320198
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run7/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_104398",
+      "run": "arm64_qemu_corpus_19700101_000002_104398",
+      "started_at": "1970-01-01T00:00:02.104398+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "dc4699093b67e1ec51d3f7896f289d87621b4f1e00ec8e1ce7e0c543368a2d91",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run7",
+      "batch_readme": "kprog/results/arm64-spark-run7-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run7/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_104398/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "fa9b399a96230e746d1868814bb1d413bdf3e91015bdf7d8506b882f2ecd3996",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 450.3720247622617,
+      "native_ns": 321.6687073998628,
+      "per_call_ratio": 1.4001114015806617,
+      "throughput_ratio": 1.1300579628838858,
+      "ebpf_samples": [
+        200759.82,
+        207767.44,
+        208415.77
+      ],
+      "native_samples": [
+        233185.30000000002,
+        234789.25,
+        236932.25999999998
+      ],
+      "throughput_sample_ratios": [
+        1.1615137929492068,
+        1.1300579628838858,
+        1.1368250108904907
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run7/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_751078",
+      "run": "arm64_qemu_corpus_19700101_000002_751078",
+      "started_at": "1970-01-01T00:00:02.751078+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "b8cea8857a9f77c8339b8cb353b3515848603ca94a07c157e7a2290eeef3199c",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run7",
+      "batch_readme": "kprog/results/arm64-spark-run7-20261124/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run7/spark-d5fe/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_751078/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "aee7dbb3e9bc2142e567dc6c5740d2639e1b0a2dbf577439839016994faa005a",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 164.51973865881612,
+      "native_ns": 172.44677855230196,
+      "per_call_ratio": 0.9540319630205117,
+      "throughput_ratio": 0.9230849168416677,
+      "ebpf_samples": [
+        2016360.0,
+        2588556.0,
+        2661931.0
+      ],
+      "native_samples": [
+        2383364.0,
+        2389457.0,
+        2404524.0
+      ],
+      "throughput_sample_ratios": [
+        1.182013132575532,
+        0.9230849168416677,
+        0.9033006490401141
+      ],
+      "workload_errors": 8226673268,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_112322",
+      "run": "arm64_qemu_corpus_19700101_000002_112322",
+      "started_at": "1970-01-01T00:00:02.112322+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "ff902cff821647e4c5b6e22efe42fcd17994c52d43e135c7d8d5b0375432cf67",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_112322/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "96597b692be6ed7aa5b56f0ce355dc0b9c7b2c9ea9873084f6476611ff0f79eb",
+      "phases": {
+        "baseline": {
+          "programs": 12,
+          "active": 2
+        },
+        "post_rejit": {
+          "programs": 12,
+          "active": 2
+        }
+      },
+      "ebpf_ns": 253.58744205090676,
+      "native_ns": 240.40442324268548,
+      "per_call_ratio": 1.0548368396487995,
+      "throughput_ratio": 1.0013952121150278,
+      "ebpf_samples": [
+        46349291.28443645,
+        46832087.18998078,
+        46539518.76802109
+      ],
+      "native_samples": [
+        46567169.40632891,
+        46604451.2684338,
+        46966075.53581304
+      ],
+      "throughput_sample_ratios": [
+        1.0047007864814024,
+        0.9951393171817531,
+        1.0091654743986105
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_474574",
+      "run": "arm64_qemu_corpus_19700101_000002_474574",
+      "started_at": "1970-01-01T00:00:02.474574+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "97887cf32396fa134e41330be9090bdf6ac79e950207a6d37cd77f661525fa9c",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_474574/details/apps/cilium__agent.json",
+      "app": "cilium/agent",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "c9863b8036bb47f222587e1aedc660c71175182503c96a850d8d8251da2f35c9",
+      "phases": {
+        "baseline": {
+          "programs": 72,
+          "active": 8
+        },
+        "post_rejit": {
+          "programs": 62,
+          "active": 8
+        }
+      },
+      "ebpf_ns": 988.4390833280492,
+      "native_ns": 969.4394628780253,
+      "per_call_ratio": 1.0195985630640811,
+      "throughput_ratio": 0.9579194259259424,
+      "ebpf_samples": [
+        1130648.0,
+        1116390.0,
+        1125151.0
+      ],
+      "native_samples": [
+        1074413.0,
+        1096534.0,
+        1077804.0
+      ],
+      "throughput_sample_ratios": [
+        0.9502630350029364,
+        0.9822141008070656,
+        0.9579194259259424
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_710250",
+      "run": "arm64_qemu_corpus_19700101_000002_710250",
+      "started_at": "1970-01-01T00:00:02.710250+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "ba0a4f7befbf04667c3ec09ebb3021e2d3790eacd47619f3a0472afd23f651f2",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-9773/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_710250/details/apps/bcc__set.json",
+      "app": "bcc/set",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "3ad52097997da94ffb9d28317444b7f80d89bfbbab1ce83b211fba23f1369990",
+      "phases": {
+        "baseline": {
+          "programs": 23,
+          "active": 13
+        },
+        "post_rejit": {
+          "programs": 23,
+          "active": 13
+        }
+      },
+      "ebpf_ns": 94.59493884151209,
+      "native_ns": 97.45733315442902,
+      "per_call_ratio": 0.9706292567191303,
+      "throughput_ratio": 0.9225487897060046,
+      "ebpf_samples": [
+        447968.31000000006,
+        473347.8,
+        474211.4
+      ],
+      "native_samples": [
+        414968.22,
+        436686.43999999994,
+        447343.28
+      ],
+      "throughput_sample_ratios": [
+        0.9263338739296089,
+        0.9225487897060046,
+        0.9433414717571109
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_146969",
+      "run": "arm64_qemu_corpus_19700101_000002_146969",
+      "started_at": "1970-01-01T00:00:02.146969+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "d6be28ad5bdbd0704f82b1203bbcab92ccfabe531437d80a6cfe5a5058d5af69",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_146969/details/apps/tetragon__observer.json",
+      "app": "tetragon/observer",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "4b0e3fea22a069618880ced77036e6e386392550fa5c898e96985687b9ee05fe",
+      "phases": {
+        "baseline": {
+          "programs": 287,
+          "active": 32
+        },
+        "post_rejit": {
+          "programs": 287,
+          "active": 32
+        }
+      },
+      "ebpf_ns": 447.80366232300696,
+      "native_ns": 312.1492192257529,
+      "per_call_ratio": 1.434582035584545,
+      "throughput_ratio": 1.1496607497850007,
+      "ebpf_samples": [
+        214338.23999999996,
+        204515.39,
+        212489.18000000002
+      ],
+      "native_samples": [
+        244762.44999999998,
+        243246.84,
+        244290.47
+      ],
+      "throughput_sample_ratios": [
+        1.141944853144264,
+        1.1893815912826902,
+        1.1496607497850007
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_839333",
+      "run": "arm64_qemu_corpus_19700101_000002_839333",
+      "started_at": "1970-01-01T00:00:02.839333+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "436a216f51df2b6d13bb2a8a7bf227028a85540e5b2e58dc1d6baa0a80c14ca0",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000002_839333/details/apps/katran.json",
+      "app": "katran",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "7d3ed3975bb51d9e6977c8d1a42c2fff05a517d72a48c19605fe67f5bd6fb8bf",
+      "phases": {
+        "baseline": {
+          "programs": 1,
+          "active": 1
+        },
+        "post_rejit": {
+          "programs": 1,
+          "active": 1
+        }
+      },
+      "ebpf_ns": 164.21648806653954,
+      "native_ns": 165.33648450287967,
+      "per_call_ratio": 0.9932259571158317,
+      "throughput_ratio": 1.2591865006941072,
+      "ebpf_samples": [
+        2087574.0,
+        2081428.0,
+        2116129.0
+      ],
+      "native_samples": [
+        2612246.0,
+        2649268.0,
+        2628645.0
+      ],
+      "throughput_sample_ratios": [
+        1.251330970782353,
+        1.2728127035861918,
+        1.2421950646676077
+      ],
+      "workload_errors": 8177966862,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    },
+    {
+      "path": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_310820",
+      "run": "arm64_qemu_corpus_19700101_000003_310820",
+      "started_at": "1970-01-01T00:00:03.310820+00:00",
+      "samples": 3,
+      "seconds": 180.0,
+      "stats": true,
+      "status": "completed",
+      "result_status": "ok",
+      "image": null,
+      "source_commit": null,
+      "backend": "arm64_qemu_corpus",
+      "metadata_sha256": "49bbedbcafdf611ff251677eb17ec4105c8e45491a6d601538f741d26efe7382",
+      "cohort": "full3x180",
+      "guest_clock_is_epoch": true,
+      "documented_batch": "Spark run8",
+      "batch_readme": "kprog/results/arm64-spark-run8-20261126/README.md",
+      "app_files": 1,
+      "app_file": "/workspaces/kprog-raw/arm64-spark-run8/spark-d5fe/root/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000003_310820/details/apps/tracee__monitor.json",
+      "app": "tracee/monitor",
+      "app_status": "ok",
+      "error": "",
+      "app_sha256": "d2ccb75e3fc5a9e3b5b98bdff8ac620a5b1aa0b57db887be8c39ed798eac6c6d",
+      "phases": {
+        "baseline": {
+          "programs": 167,
+          "active": 61
+        },
+        "post_rejit": {
+          "programs": 167,
+          "active": 61
+        }
+      },
+      "ebpf_ns": 334.180222738477,
+      "native_ns": 203.13248453963405,
+      "per_call_ratio": 1.6451343245066925,
+      "throughput_ratio": 1.25509261951402,
+      "ebpf_samples": [
+        172828.05,
+        172154.44999999998,
+        173917.02
+      ],
+      "native_samples": [
+        216915.21,
+        221455.42,
+        214240.97999999998
+      ],
+      "throughput_sample_ratios": [
+        1.25509261951402,
+        1.2863763905028307,
+        1.231857468578981
+      ],
+      "workload_errors": 0,
+      "provenance_note": "Inspected top-level image fields are absent; join batch README/launcher/nested provenance. Do not infer image from run date."
+    }
+  ],
+  "missingness": {
+    "metadata_paths": 4474,
+    "directories_without_metadata": 417,
+    "rows": 5866,
+    "cohorts": {
+      "('arm64_qemu_corpus', 'full3x180', 'True')": 31,
+      "('arm64_qemu_corpus', 'full3x180', 'False')": 32,
+      "('arm64_qemu_corpus', 'other', 'True')": 63,
+      "('arm64_qemu_corpus', 'check1x10', 'True')": 147,
+      "('aws_arm64_corpus', 'other', 'None')": 23,
+      "('aws_arm64_corpus', 'check1x10', 'None')": 24,
+      "('aws_arm64_corpus', 'other', 'True')": 111,
+      "('aws_arm64_corpus', 'check1x10', 'True')": 18,
+      "('aws_arm64_corpus', 'full3x180', 'True')": 6,
+      "('aws_arm64_corpus', 'full3x180', 'False')": 13,
+      "('aws_x86_corpus', 'other', 'None')": 10,
+      "('aws_x86_corpus', 'other', 'True')": 2,
+      "('vm_corpus', 'other', 'None')": 18,
+      "('vm_corpus_rerun', 'other', 'None')": 1,
+      "('vm_corpus_test', 'other', 'None')": 1,
+      "('x86_docker_corpus', 'check1x10', 'True')": 134,
+      "('x86_docker_corpus', 'other', 'True')": 502,
+      "('x86_docker_corpus', 'other', 'False')": 357,
+      "('x86_docker_corpus', 'check1x10', 'False')": 4,
+      "('x86_kvm_corpus', 'other', 'None')": 1142,
+      "('x86_kvm_corpus', 'check1x10', 'None')": 201,
+      "('x86_kvm_corpus', 'full3x180', 'None')": 4,
+      "('x86_kvm_corpus', 'other', 'False')": 631,
+      "('x86_kvm_corpus', 'other', 'True')": 1263,
+      "('x86_kvm_corpus', 'check1x10', 'False')": 20,
+      "('x86_kvm_corpus', 'check1x10', 'True')": 556,
+      "('x86_kvm_corpus', 'full3x180', 'True')": 249,
+      "('x86_kvm_corpus', 'full3x180', 'False')": 293,
+      "('x86_kvm_p89_kinsn_corpus', 'other', 'None')": 10
+    },
+    "inventory_errors": 258,
+    "missing_image": 5866,
+    "missing_commit": 5866
+  }
+}
