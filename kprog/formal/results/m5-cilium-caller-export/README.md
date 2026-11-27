@@ -9,3 +9,5 @@ Query.lean checks the actual program/function types and two original source-file
 Reproduce with make KProgFormal/Clight/Arm64CiliumCaller.lean,then lake build +KProgFormal.Clight.Arm64CiliumCaller. Existing proof resources remain CPU17,nice0,j1,32GiB,shared timing,default200000 heartbeats/512 recursion. V owns unified makecheck.
 
 The Clight modules remain ignored build products,matching the existing source-first workflow;they are not force-added. Their complete hashes/reconstruction evidence are retained in packaging.json and generated afresh by the Makefile.
+
+Default root Lake1481 jobs passes with the complete exported caller imported. This confirms source/build integration;the real LR/word/tag execution proof is still unadopted and is not counted as a result.

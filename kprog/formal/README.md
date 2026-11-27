@@ -195,6 +195,15 @@ transformation must connect these two interfaces before composition.
 The five retained archives inspected here contain49 successful requests and
 no generated/native memcpy callsite; this is a bounded inventory.
 
+The complete retained Cilium request1 caller now has its own source-first
+Clight export. Its original C bytes/profile remain;LINK uses the original
+inline pointer-writer statements instead of the borrowed four-argument
+wrapper. All37519 declarations/26.56MB are retained in37 sequential modules
+that reconstruct the original export byte for byte under the existing32GiB
+cap. The default root build includes this unit. Actual caller-prefix
+execution/resource correspondence and whole-function extraction fidelity
+remain separate obligations;the eight sites are BPF helpers,not memcpy.
+
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
 represents GPRs, six flag bytes, XMM0 and initialized cache bytes of the exact

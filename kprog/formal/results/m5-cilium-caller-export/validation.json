@@ -145,12 +145,53 @@
   "focused_jobs": 76,
   "public_queries": 2,
   "source_abi_examples": 2,
-  "full_build": "following related-batch integration",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 183.15989899635315,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
   "whole_confirmation_owner": "V",
   "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
   "artifact_sha256": "675d2fb757a37e9948933e3b8d11bf564a82f2abdf5ecbbcaf73788b46581a25",
   "packaging_sha256": "8d9e2586c4a7781e173602048fe98ebad755a5d414817d6875db168853123305",
   "source_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
   "full_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
-  "all_declarations_preserved": true
+  "all_declarations_preserved": true,
+  "full_build_jobs": 1481,
+  "export_publication": {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z/publish-cilium-caller-export-local.py",
+      "cilium-caller-export-accepted",
+      "Export the complete retained caller with original inline LINK"
+    ],
+    "exit": 0,
+    "seconds": 113.39009046554565,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "560b205ab710f3234fd1f6a489c69bb780fb044fccd318fe7860f016b36d646c",
+    "kprog/formal/README.md": "4e19dc3c3df7370036094980ac7af85766f1d0f44f29fe3c896c51e6b7d5f4dc",
+    "kprog/formal/Makefile": "22182d51682a12ae28b4a83a71a1f49c2e695a4d3f52635a6953c257fc302017",
+    "kprog/formal/c/Arm64CiliumCaller.c": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "kprog/formal/c/Arm64CiliumCallerUnit.c": "39b142dd2b69e9891380ed8d2b3277390d722257687f1f18a3da794d6a3d1e23",
+    "kprog/formal/c/Arm64OriginalLinkBinding.h": "8039a80e423b48389273baa729c1a6f6b79af2b00416ebc5fec233c4a88cace4",
+    "kprog/formal/results/m5-cilium-caller-export/package_export.py": "393c4e363ee108193c390be1e94ff9ab567fd6029cfb626bf0825f1ba8b36823",
+    "kprog/formal/results/m5-cilium-caller-export/inspect_export.py": "8031e60bd64c3360cc3121a9f0236b6204ef35f262cea9717ba95792c7b8bcf8"
+  }
 }
