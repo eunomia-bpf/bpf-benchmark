@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T00:13:59.941176+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead"
+    ],
+    "exit": 0,
+    "seconds": 2.089216947555542,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 396,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-physical-byte-read/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6716744899749756,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "source_bytes_read": 1,
+    "native_operation": "imported checked read1",
+    "initialization": "derived from actual source Vint load",
+    "source_heap": "unchanged",
+    "native_event": "one real initialized read"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyPhysicalByteRead.lean",
+      "size_bytes": 4702,
+      "mtime_ns": 1795738326313163087
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

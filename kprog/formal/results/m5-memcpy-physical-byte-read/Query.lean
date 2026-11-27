@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead.observed
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead.observed
+#check KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead.load
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyPhysicalByteRead.load
