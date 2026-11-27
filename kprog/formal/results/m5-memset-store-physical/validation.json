@@ -1,0 +1,59 @@
+{
+  "confirmed_utc": "2026-11-27T00:03:36.144992+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStorePhysical"
+    ],
+    "exit": 0,
+    "seconds": 3.8083391189575195,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 336,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memset-store-physical/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5282528400421143,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "original_source_route_executions": 1,
+    "actual_stores": 2,
+    "native_instructions": 1,
+    "source_index_domain": 16,
+    "source_indices": [
+      64,
+      79
+    ],
+    "physical_offsets": [
+      -32,
+      -17
+    ],
+    "caller": "actual FrameBelow and same reached View retained"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStorePhysical.lean",
+      "size_bytes": 5524,
+      "mtime_ns": 1795737693054943897
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
