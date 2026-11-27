@@ -62,7 +62,7 @@ while :; do sleep 60; done
 '''.replace('RAW_PATH',str(RAW)).replace('CORPUS_TOKEN',record['run_token']).replace('APP_ARG',shlex.quote(APP))
   init.write_text(body);init.chmod(0o755)
   (OUT/'init-script.txt').write_text(body)
-  state=RAW/'broker';broker_cmd=['prlimit','--as=17179869184','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/qemu-arm64-root')]
+  state=RAW/'broker';broker_cmd=['prlimit','--as=51539607552','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/qemu-arm64-root')]
   record['broker_command']=broker_cmd;save()
   env=dict(os.environ,QEMU_LD_PREFIX=str(qroot))
   broker_log=(RAW/'broker.log').open('w')
