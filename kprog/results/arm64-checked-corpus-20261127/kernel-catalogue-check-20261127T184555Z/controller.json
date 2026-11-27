@@ -1,0 +1,52 @@
+{
+  "pid": 1102781,
+  "started_utc": "2026-11-27T18:45:55Z",
+  "raw": "/workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184555Z",
+  "source_revision": "772e79092e0ad635e135bfa4ad898ba6ea3ca8ff",
+  "phase": "failed",
+  "controller_status": 1,
+  "commands": [
+    {
+      "command": [
+        "prlimit",
+        "--as=51539607552",
+        "taskset",
+        "-c",
+        "16",
+        "/usr/bin/aarch64-linux-gnu-g++",
+        "-I/workspaces/repository/kprog/libnativeloader/include",
+        "-I/workspaces/repository/micro/programs/build-arm64",
+        "-I/artifacts/kernel",
+        "-isystem",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include",
+        "-isystem",
+        "/workspaces/repository/vendor/libbpf/include",
+        "-isystem",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-isystem",
+        "/workspaces/repository/.cache/aarch64-sysroot/usr/include",
+        "-O3",
+        "-DNDEBUG",
+        "-std=gnu++20",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-c",
+        "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/kernel_catalogue_check.cpp",
+        "-o",
+        "/workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184555Z/check.o"
+      ],
+      "returncode": 1,
+      "wall_seconds": 2.838436988997273
+    }
+  ],
+  "scope": "Production CPP parser and build_native_link_args, crosscompiled with existing ARM loader flags, checked against the actual one boot kernel. No test mocks, kernel/helper modifications, app workload or native installation acceptance.",
+  "source_sha256": {
+    "kprog/results/arm64-checked-corpus-20261127/kernel_catalogue_check.cpp": "4ed3426b174cdd9510bede0ee1f142a357d3dd9a17c54e1978de8a81a1c3b72f",
+    "kprog/results/arm64-checked-corpus-20261127/kernel_catalogue_check.py": "0247c6c97cca89b9f24fabfe347c324880ff5eac30799b04f35df22cf6e4f069",
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+    "kprog/libnativeloader/src/native_loader_lto.hpp": "da845464694c908dfb465369b320813aaff37f9b8dc505c67bf74065fb381b11",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "fe37b5e916d31ca89204c2f96d816205d5fbc4d14b21e64a0fc5e9f84b6b27c4"
+  },
+  "exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/kernel_catalogue_check.py\", line 25, in <module>\n    command(['/usr/bin/aarch64-linux-gnu-g++',*flags['CXX_DEFINES'],*flags['CXX_INCLUDES'],*flags['CXX_FLAGS'],'-ffunction-sections','-fdata-sections','-c',source,'-o',raw/'check.o'],'compile')\n  File \"/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/kernel_catalogue_check.py\", line 13, in command\n    record['commands'].append(dict(command=cmd,returncode=r.returncode,wall_seconds=time.monotonic()-begin));save();assert r.returncode==0,name\n                                                                                                                           ^^^^^^^^^^^^^^^\nAssertionError: compile\n",
+  "ended_utc": "2026-11-27T18:45:58Z"
+}

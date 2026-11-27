@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+if ! mountpoint -q /dev; then mount -t devtmpfs devtmpfs /dev; fi
+mount -t 9p -o trans=virtio,version=9p2000.L,access=any workspace /workspaces
+status=0
+/workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z/check > /workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z/check.stdout 2> /workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z/check.stderr || status=$?
+grep -E ' (ktime_get_mono_fast_ns|jiffies_64|copy_from_user_nofault|copy_from_kernel_nofault)$' /proc/kallsyms > /workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z/boot-symbols.txt
+printf '%s\n' "$status" > /workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z/guest-status
+sync
+echo o > /proc/sysrq-trigger
+while :; do sleep 60; done
