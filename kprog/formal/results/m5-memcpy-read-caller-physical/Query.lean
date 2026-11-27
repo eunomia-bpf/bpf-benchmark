@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyReadCallerPhysical
+
+open KProgFormal.ClightRefinement
+#check Arm64MemcpySourcePhysicalRead.from_load
+#print axioms Arm64MemcpySourcePhysicalRead.from_load
+#check Arm64MemcpyReadCallerPhysical.source_frame
+#print axioms Arm64MemcpyReadCallerPhysical.source_frame
+#check Arm64MemcpyReadCallerPhysical.execute
+#print axioms Arm64MemcpyReadCallerPhysical.execute

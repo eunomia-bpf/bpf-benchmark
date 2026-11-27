@@ -27,25 +27,16 @@ structure Result (m : CC.Mem) (stack : CC.Block) (origin : BitVec 64)
   atomic : final.machine.atomicAccesses = native.machine.atomicAccesses
   thread : final.machine.threadPointerInputs = native.machine.threadPointerInputs
 
-/-- The actual source volatile byte path and native fetched LDRB execute on
-one concrete byte load. Output error/history and initialization are derived. -/
-theorem execute (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
-    (entry stack : CC.Block) (i : Fin 160) (value : BitVec 8)
-    (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
-    (hindex : le.get Arm64Program.___a64_str_index = some (.Vlong (BitVec.ofNat 64 i.val)))
-    (pointer : CC.Mem.load CC.Mptr m entry 608 = some (.Vptr stack 0))
+/-- Build only the native observation from the SAME actual source load.
+Source callers compose this with their own existing C run exactly once. -/
+theorem from_load {m : CC.Mem} {stack : CC.Block} {origin : BitVec 64} {profile : MemoryProfile}
+    (native : Reference.AArch64.State) (represented : Represents m stack origin profile native.machine)
+    (i : Fin 160) (value : BitVec 8)
     (loaded : CC.Mem.load .Mint8unsigned m stack (i.val : Int) = some (.Vint (value.setWidth 32)))
-    (origin : BitVec 64) (profile : MemoryProfile) (native : Reference.AArch64.State)
-    (represented : Represents m stack origin profile native.machine)
     (base : Reference.AArch64.gpr native 1 = address origin i)
     (noError : read_err native.machine = .None)
     (fetched : fetch_inst (read_pc native.machine) native.machine = some Arm64MemcpyByteNativeRead.instruction.encoding) :
-    ∃ result : Result m stack origin profile native i value,
-      CC.Star (CC.Step2 world) (.State reader Arm64MemcpyReadByte.bytes k e le m) CC.E0
-        (.State reader Arm64MemcpyReadByte.remaining k e (Arm64MemcpyReadByte.temps le stack value) m) ∧
-      (Arm64MemcpyReadByte.temps le stack value).get Arm64Program.___a64_str_value =
-        some (.Vlong (Reference.AArch64.gpr result.final 3)) := by
-  have source := Arm64MemcpyReadByte.execute e le m k entry stack i value hentry hindex pointer loaded
+    Nonempty (Result m stack origin profile native i value) := by
   obtain ⟨readState,checked,mapped,initialized,memory,profileSame,history,program,exclusive,atomic,thread,fields⟩ :=
     Arm64MemcpyPhysicalByteRead.load represented i value loaded
   have afterError : read_err readState = .None := (fields .ERR).trans noError
@@ -73,6 +64,28 @@ theorem execute (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
     exclusive := by simpa [final,Arm64MemcpyByteNativeRead.after,write_pc,write_gpr_zr,write_gpr,w,write_base_pc,write_base_gpr] using exclusive
     atomic := by simpa [final,Arm64MemcpyByteNativeRead.after,write_pc,write_gpr_zr,write_gpr,w,write_base_pc,write_base_gpr] using atomic
     thread := by simpa [final,Arm64MemcpyByteNativeRead.after,write_pc,write_gpr_zr,write_gpr,w,write_base_pc,write_base_gpr] using thread }
+  exact ⟨result⟩
+
+/-- The actual source volatile byte path and native fetched LDRB execute on
+one concrete byte load. Output error/history and initialization are derived. -/
+theorem execute (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont)
+    (entry stack : CC.Block) (i : Fin 160) (value : BitVec 8)
+    (hentry : le.get Arm64Program._entry = some (.Vptr entry 0))
+    (hindex : le.get Arm64Program.___a64_str_index = some (.Vlong (BitVec.ofNat 64 i.val)))
+    (pointer : CC.Mem.load CC.Mptr m entry 608 = some (.Vptr stack 0))
+    (loaded : CC.Mem.load .Mint8unsigned m stack (i.val : Int) = some (.Vint (value.setWidth 32)))
+    (origin : BitVec 64) (profile : MemoryProfile) (native : Reference.AArch64.State)
+    (represented : Represents m stack origin profile native.machine)
+    (base : Reference.AArch64.gpr native 1 = address origin i)
+    (noError : read_err native.machine = .None)
+    (fetched : fetch_inst (read_pc native.machine) native.machine = some Arm64MemcpyByteNativeRead.instruction.encoding) :
+    ∃ result : Result m stack origin profile native i value,
+      CC.Star (CC.Step2 world) (.State reader Arm64MemcpyReadByte.bytes k e le m) CC.E0
+        (.State reader Arm64MemcpyReadByte.remaining k e (Arm64MemcpyReadByte.temps le stack value) m) ∧
+      (Arm64MemcpyReadByte.temps le stack value).get Arm64Program.___a64_str_value =
+        some (.Vlong (Reference.AArch64.gpr result.final 3)) := by
+  have source := Arm64MemcpyReadByte.execute e le m k entry stack i value hentry hindex pointer loaded
+  obtain ⟨result⟩ := from_load native represented i value loaded base noError fetched
   refine ⟨result,source,?_⟩
   rw [result.data]
   exact CC.PTree.gss _ _ _
