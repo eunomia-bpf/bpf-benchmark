@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-27T09:38:49Z",
+  "utc": "2026-11-27T14:51:27Z",
   "scope": "Latest available completed ARM outcome per frozen corpus app. Active and absent app reports retain their state. Groups describe recorded diagnostics; shared causes and corrected acceptance require investigation.",
   "apps": [
     {
@@ -41,16 +41,17 @@
     },
     {
       "app": "cilium/agent",
-      "latest_controller": "guest-20261127T090610Z",
+      "latest_controller": "guest-20261127T120527Z",
       "latest_controller_status": 0,
       "report_state": "available",
-      "controller": "guest-20261127T090610Z",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "controller": "guest-20261127T120527Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
       "corpus_status": "error",
       "app_status": "error",
       "install_outcomes": {
-        "checked-sim-c": 2,
-        "direct-native": 8
+        "checked-sim-c": 3,
+        "direct-native": 13,
+        "failed": 1
       },
       "phases_present": [
         "baseline"
@@ -59,8 +60,20 @@
     {
       "app": "tetragon/observer",
       "latest_controller": "guest-20261127T091129Z",
-      "latest_controller_status": null,
-      "report_state": "pending"
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T091129Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "corpus_status": "ok",
+      "app_status": "ok",
+      "install_outcomes": {
+        "direct-native": 75,
+        "checked-sim-c": 10
+      },
+      "phases_present": [
+        "baseline",
+        "post_rejit"
+      ]
     },
     {
       "app": "katran",
@@ -81,9 +94,22 @@
     },
     {
       "app": "tracee/monitor",
-      "latest_controller": null,
-      "latest_controller_status": null,
-      "report_state": "pending"
+      "latest_controller": "guest-20261127T140827Z",
+      "latest_controller_status": 0,
+      "report_state": "available",
+      "controller": "guest-20261127T140827Z",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "corpus_status": "ok",
+      "app_status": "ok",
+      "install_outcomes": {
+        "checked-sim-c": 2,
+        "direct-native": 8,
+        "failed": 1
+      },
+      "phases_present": [
+        "baseline",
+        "post_rejit"
+      ]
     }
   ],
   "stock_refusals": [
@@ -451,103 +477,27 @@
     {
       "app": "cilium/agent",
       "request": 2,
-      "symbol": "cil_from_netdev",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "symbol": "cil_to_host",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
       "execution_path": "direct-native",
       "family": "read-only typed object store",
       "diagnostics": [
         "only read is supported"
       ],
       "verifier_tail": [
-        "429: (6b) *(u16 *)(r0 +0) = r1",
+        "5191: (63) *(u32 *)(r1 +0) = r9",
         "only read is supported",
-        "verification time 384586 usec",
-        "stack depth 296",
-        "processed 1309 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        "verification time 1129527 usec",
+        "stack depth 312",
+        "processed 4018 insns (limit 1000000) max_states_per_insn 7 total_states 56 peak_states 48 mark_read 0",
         ""
       ]
     },
     {
       "app": "cilium/agent",
       "request": 3,
-      "symbol": "tail_handle_ipv4_cont",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
-      "execution_path": "direct-native",
-      "family": "packet bounds",
-      "diagnostics": [
-        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)"
-      ],
-      "verifier_tail": [
-        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)",
-        "R2 offset is outside of the packet",
-        "verification time 131670 usec",
-        "stack depth 448",
-        "processed 412 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
-        ""
-      ]
-    },
-    {
-      "app": "cilium/agent",
-      "request": 4,
-      "symbol": "cil_from_host",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
-      "execution_path": "direct-native",
-      "family": "packet bounds",
-      "diagnostics": [
-        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)"
-      ],
-      "verifier_tail": [
-        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)",
-        "R1 offset is outside of the packet",
-        "verification time 81506 usec",
-        "stack depth 328",
-        "processed 255 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
-        ""
-      ]
-    },
-    {
-      "app": "cilium/agent",
-      "request": 5,
-      "symbol": "tail_ipv4_to_endpoint",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
-      "execution_path": "direct-native",
-      "family": "packet bounds",
-      "diagnostics": [
-        "invalid access to packet, off=26 size=4, R2(id=0,off=26,r=0)"
-      ],
-      "verifier_tail": [
-        "invalid access to packet, off=26 size=4, R2(id=0,off=26,r=0)",
-        "R2 offset is outside of the packet",
-        "verification time 434033 usec",
-        "stack depth 416",
-        "processed 1515 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
-        ""
-      ]
-    },
-    {
-      "app": "cilium/agent",
-      "request": 6,
-      "symbol": "tail_handle_ipv4_from_netdev",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
-      "execution_path": "direct-native",
-      "family": "read-only typed object store",
-      "diagnostics": [
-        "only read is supported"
-      ],
-      "verifier_tail": [
-        "1398: (6b) *(u16 *)(r2 +0) = r1",
-        "only read is supported",
-        "verification time 388835 usec",
-        "stack depth 408",
-        "processed 1344 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
-        ""
-      ]
-    },
-    {
-      "app": "cilium/agent",
-      "request": 7,
       "symbol": "tail_ipv4_policy",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
       "execution_path": "direct-native",
       "family": "packet bounds",
       "diagnostics": [
@@ -556,7 +506,7 @@
       "verifier_tail": [
         "invalid access to packet, off=20 size=2, R8(id=0,off=20,r=0)",
         "R8 offset is outside of the packet",
-        "verification time 95350 usec",
+        "verification time 96626 usec",
         "stack depth 416",
         "processed 286 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
         ""
@@ -564,9 +514,123 @@
     },
     {
       "app": "cilium/agent",
+      "request": 4,
+      "symbol": "tail_handle_ipv4_from_host",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=30 size=4, R9(id=0,off=30,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=30 size=4, R9(id=0,off=30,r=0)",
+        "R9 offset is outside of the packet",
+        "verification time 270566 usec",
+        "stack depth 168",
+        "processed 923 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 5,
+      "symbol": "tail_handle_ipv4_cont",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=30 size=4, R2(id=0,off=30,r=0)",
+        "R2 offset is outside of the packet",
+        "verification time 150857 usec",
+        "stack depth 448",
+        "processed 412 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 6,
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "read-only typed object store",
+      "diagnostics": [
+        "only read is supported"
+      ],
+      "verifier_tail": [
+        "1392: (6b) *(u16 *)(r2 +0) = r1",
+        "only read is supported",
+        "verification time 408496 usec",
+        "stack depth 408",
+        "processed 1339 insns (limit 1000000) max_states_per_insn 0 total_states 11 peak_states 11 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 7,
+      "symbol": "tail_ipv4_ct_egress",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=23 size=1, R5(id=0,off=23,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=23 size=1, R5(id=0,off=23,r=0)",
+        "R5 offset is outside of the packet",
+        "verification time 346774 usec",
+        "stack depth 248",
+        "processed 1133 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
       "request": 9,
+      "symbol": "tail_handle_ipv4",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=20 size=2, R2(id=0,off=20,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=20 size=2, R2(id=0,off=20,r=0)",
+        "R2 offset is outside of the packet",
+        "verification time 79901 usec",
+        "stack depth 360",
+        "processed 201 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 10,
+      "symbol": "cil_from_netdev",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "read-only typed object store",
+      "diagnostics": [
+        "only read is supported"
+      ],
+      "verifier_tail": [
+        "429: (6b) *(u16 *)(r0 +0) = r1",
+        "only read is supported",
+        "verification time 405934 usec",
+        "stack depth 296",
+        "processed 1304 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 11,
       "symbol": "tail_nodeport_rev_dnat_ipv4",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
       "execution_path": "direct-native",
       "family": "packet bounds",
       "diagnostics": [
@@ -575,7 +639,7 @@
       "verifier_tail": [
         "invalid access to packet, off=18 size=2, R2(id=0,off=18,r=0)",
         "R2 offset is outside of the packet",
-        "verification time 85507 usec",
+        "verification time 90581 usec",
         "stack depth 360",
         "processed 286 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
         ""
@@ -583,9 +647,66 @@
     },
     {
       "app": "cilium/agent",
-      "request": 10,
+      "request": 12,
+      "symbol": "cil_from_host",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)",
+        "R1 offset is outside of the packet",
+        "verification time 87353 usec",
+        "stack depth 328",
+        "processed 255 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 14,
+      "symbol": "cil_to_netdev",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=12 size=2, R1(id=0,off=12,r=0)",
+        "R1 offset is outside of the packet",
+        "verification time 73919 usec",
+        "stack depth 408",
+        "processed 203 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 15,
+      "symbol": "cil_to_container",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "direct-native",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=12 size=2, R3(id=0,off=12,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=12 size=2, R3(id=0,off=12,r=0)",
+        "R3 offset is outside of the packet",
+        "verification time 64026 usec",
+        "stack depth 304",
+        "processed 200 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 16,
       "symbol": "tail_handle_snat_fwd_ipv4",
-      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/cilium-outcome.json",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
       "execution_path": "direct-native",
       "family": "packet bounds",
       "diagnostics": [
@@ -594,9 +715,1624 @@
       "verifier_tail": [
         "invalid access to packet, off=23 size=1, R9(id=0,off=23,r=0)",
         "R9 offset is outside of the packet",
-        "verification time 439094 usec",
+        "verification time 448813 usec",
         "stack depth 432",
-        "processed 1438 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        "processed 1433 insns (limit 1000000) max_states_per_insn 0 total_states 11 peak_states 11 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "request": 17,
+      "symbol": "tail_ipv4_ct_ingress",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "failed",
+      "family": "packet bounds",
+      "diagnostics": [
+        "invalid access to packet, off=23 size=1, R5(id=0,off=23,r=0)"
+      ],
+      "verifier_tail": [
+        "invalid access to packet, off=23 size=1, R5(id=0,off=23,r=0)",
+        "R5 offset is outside of the packet",
+        "verification time 331268 usec",
+        "stack depth 248",
+        "processed 1085 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 1,
+      "symbol": "event_exit_disassociate_ctty",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "659: (61) r1 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 186938 usec",
+        "stack depth 128",
+        "processed 650 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 2,
+      "symbol": "event_exit_acct_process",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "655: (61) r1 = *(u32 *)(r3 +0)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 179779 usec",
+        "stack depth 128",
+        "processed 646 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 3,
+      "symbol": "event_wake_up_new_task",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "160: (61) r4 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 45711 usec",
+        "stack depth 376",
+        "processed 154 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 4,
+      "symbol": "execve_rate",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 1826"
+      ],
+      "verifier_tail": [
+        "cur state: R0=map_value(map=tg_stats_map,ks=4,vs=14336) R1=map_value(map=tg_stats_map,ks=4,vs=14336,off=1512) R2=map_value(map=kprog_unspec,ks=4,vs=8) R3=0 R4=scalar() R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R8=map_value(map=throttle_heap_m,ks=4,vs=160) R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=0000000m fp-64=scalar() fp-72=0000???? fp-112=????000m fp-120=0000???? fp-136=0 fp-144=0 fp-152=0xa0000 fp-160=ctx() fp-168=map_value(map=cgroup_rate_map,ks=8,vs=40)",
+        "old state: R0=map_value(map=tg_stats_map,ks=4,vs=14336) R1=map_value(map=tg_stats_map,ks=4,vs=14336,off=1512) R2=map_value(map=kprog_unspec,ks=4,vs=8) R3=0 R4=scalar() R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=scalar(smax=-12,umin=0x8000000000000000,umax=0xfffffffffffffff4,var_off=(0x8000000000000000; 0x7fffffffffffffff)) R8=map_value(map=throttle_heap_m,ks=4,vs=160) R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-56=0000000m fp-64=scalar() fp-72=0000???? fp-112=????000m fp-120=0000???? fp-136=P0 fp-144=0 fp-152=P0xa0000 fp-160=ctx() fp-168=map_value(map=cgroup_rate_map,ks=8,vs=40)",
+        "verification time 914672 usec",
+        "stack depth 168",
+        "processed 3299 insns (limit 1000000) max_states_per_insn 4 total_states 42 peak_states 42 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 5,
+      "symbol": "execve_send",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "694: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'",
+        "verification time 173862 usec",
+        "stack depth 368",
+        "processed 568 insns (limit 1000000) max_states_per_insn 0 total_states 6 peak_states 6 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 6,
+      "symbol": "event_execve",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-608 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -608) = r1",
+        "invalid write to stack R10 off=-608 size=8",
+        "verification time 92992 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 7,
+      "symbol": "tg_kp_bprm_committing_creds",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "470: (79) r2 = *(u64 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 126448 usec",
+        "stack depth 112",
+        "processed 461 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 8,
+      "symbol": "execve_map_update",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "383: (55) if r3 != 0x0 goto pc+4 infinite loop detected at insn 388"
+      ],
+      "verifier_tail": [
+        "cur state: R0=map_value(map=execve_map,ks=4,vs=896,off=880) R1=scalar() R2=scalar() R3=1 R6=map_value(map=execve_map_upda,ks=4,vs=131080) R7=1023 R8=map_value(map=kprog_unspec,ks=4,vs=8) R9=0xffffffff00ffffff R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmm???? fp-48=scalar() fp-56=0000???? fp-72=0 fp-80=0xa0000",
+        "old state: R0=map_value(map=execve_map,ks=4,vs=896,off=880) R1=scalar() R2=scalar() R3=1 R6=map_value(map=execve_map_upda,ks=4,vs=131080) R7=P1023 R8=map_value(map=kprog_unspec,ks=4,vs=8) R9=0xffffffff00ffffff R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=mmmm???? fp-48=scalar() fp-56=0000???? fp-72=P0 fp-80=P0xa0000",
+        "verification time 39447707 usec",
+        "stack depth 80",
+        "processed 152118 insns (limit 1000000) max_states_per_insn 4 total_states 1042 peak_states 1042 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 9,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 849127 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 10,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1867038 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 11,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 161598 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 13,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 161265 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 14,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 276996 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 15,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 140146 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 16,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 832855 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 17,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 162697 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 18,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1838169 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 20,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 123904 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 21,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 157627 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 22,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 282143 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 23,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 862008 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 24,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 148057 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 25,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 157403 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 26,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 272667 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 27,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1862963 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 29,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 141006 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 30,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1850148 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 31,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 136981 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 32,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 147850 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 34,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 161051 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 35,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 274878 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 36,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 846344 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 37,
+      "symbol": "generic_retkprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1315: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 844530 usec",
+        "stack depth 488",
+        "processed 1293 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 38,
+      "symbol": "generic_retkprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-720 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -720) = r1",
+        "invalid write to stack R10 off=-720 size=8",
+        "verification time 66136 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 39,
+      "symbol": "generic_retkprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4964: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1820580 usec",
+        "stack depth 440",
+        "processed 6841 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 40,
+      "symbol": "generic_retkprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 551"
+      ],
+      "verifier_tail": [
+        "cur state: R0=map_value(map=policy_stats,ks=4,vs=80,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=map_value(map=process_call_he,ks=4,vs=25632) R8=9000 R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=0000000m fp-48=0000???? fp-56=0 fp-64=0xa0000",
+        "old state: R0=map_value(map=policy_stats,ks=4,vs=80,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=map_value(map=process_call_he,ks=4,vs=25632) R8=9000 R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=0000000m fp-48=0000???? fp-56=P0 fp-64=P0xa0000",
+        "verification time 213557 usec",
+        "stack depth 64",
+        "processed 724 insns (limit 1000000) max_states_per_insn 1 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 41,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 152340 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 42,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 168639 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 43,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 845183 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 44,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 271838 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 46,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1863453 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 47,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 138104 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 48,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 162431 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 49,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 124621 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 50,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1807609 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 51,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 149128 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 52,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 861191 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 53,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 273572 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 55,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 142110 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 56,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1883743 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 57,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 287914 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 58,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 184386 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 59,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 869754 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 61,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 155742 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 62,
+      "symbol": "generic_retkprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-720 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -720) = r1",
+        "invalid write to stack R10 off=-720 size=8",
+        "verification time 95848 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 63,
+      "symbol": "generic_retkprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4964: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1814293 usec",
+        "stack depth 440",
+        "processed 6841 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 64,
+      "symbol": "generic_retkprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1315: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 841829 usec",
+        "stack depth 488",
+        "processed 1293 insns (limit 1000000) max_states_per_insn 0 total_states 10 peak_states 10 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 65,
+      "symbol": "generic_retkprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "infinite loop",
+      "diagnostics": [
+        "infinite loop detected at insn 551"
+      ],
+      "verifier_tail": [
+        "cur state: R0=map_value(map=policy_stats,ks=4,vs=80,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=map_value(map=process_call_he,ks=4,vs=25632) R8=9000 R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=0000000m fp-48=0000???? fp-56=0 fp-64=0xa0000",
+        "old state: R0=map_value(map=policy_stats,ks=4,vs=80,off=8) R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar() R3=0 R6=map_value(map=kprog_unspec,ks=4,vs=8) R7=map_value(map=process_call_he,ks=4,vs=25632) R8=9000 R9=map_value(map=kprog_unspec,ks=4,vs=8) R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar() fp-32=scalar() fp-40=0000000m fp-48=0000???? fp-56=P0 fp-64=P0xa0000",
+        "verification time 205150 usec",
+        "stack depth 64",
+        "processed 724 insns (limit 1000000) max_states_per_insn 1 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 66,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 157073 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 67,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1989609 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 68,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 140379 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 69,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 877561 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 70,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 282722 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 72,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 159078 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 73,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 287674 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 74,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1941773 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 75,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 168557 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 76,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 851592 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 77,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 140160 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 78,
+      "symbol": "generic_kprobe_process_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-1088 size=8"
+      ],
+      "verifier_tail": [
+        "0: (7b) *(u64 *)(r10 -1088) = r1",
+        "invalid write to stack R10 off=-1088 size=8",
+        "verification time 184157 usec",
+        "stack depth 0",
+        "processed 1 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 80,
+      "symbol": "generic_kprobe_event",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "1261: (79) r3 = *(u64 *)(r6 +2896)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 280077 usec",
+        "stack depth 128",
+        "processed 996 insns (limit 1000000) max_states_per_insn 0 total_states 12 peak_states 12 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 81,
+      "symbol": "generic_kprobe_process_filter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R2 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "373: (61) r1 = *(u32 *)(r2 +0)",
+        "R2 invalid mem access 'scalar'",
+        "verification time 128310 usec",
+        "stack depth 376",
+        "processed 366 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 82,
+      "symbol": "generic_kprobe_filter_arg",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-528 size=8"
+      ],
+      "verifier_tail": [
+        "1391: (7b) *(u64 *)(r10 -528) = r3",
+        "invalid write to stack R10 off=-528 size=8",
+        "verification time 839529 usec",
+        "stack depth 504",
+        "processed 1364 insns (limit 1000000) max_states_per_insn 0 total_states 15 peak_states 15 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 83,
+      "symbol": "generic_kprobe_actions",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'map_value_or_null'"
+      ],
+      "verifier_tail": [
+        "4382: (79) r2 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'map_value_or_null'",
+        "verification time 1882482 usec",
+        "stack depth 464",
+        "processed 7064 insns (limit 1000000) max_states_per_insn 2 total_states 163 peak_states 163 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "request": 84,
+      "symbol": "generic_kprobe_output",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/tetragon-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R3 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "540: (79) r2 = *(u64 *)(r3 +2896)",
+        "R3 invalid mem access 'scalar'",
+        "verification time 164769 usec",
+        "stack depth 88",
+        "processed 532 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 3,
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R0 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "227: (79) r1 = *(u64 *)(r0 +0)",
+        "R0 invalid mem access 'scalar'",
+        "verification time 65985 usec",
+        "stack depth 48",
+        "processed 225 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 4,
+      "symbol": "sys_enter_init",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "447: (79) r3 = *(u64 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 132317 usec",
+        "stack depth 184",
+        "processed 441 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 5,
+      "symbol": "sys_enter_submit",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "922: (61) r1 = *(u32 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 289580 usec",
+        "stack depth 480",
+        "processed 915 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 6,
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "129: (61) r7 = *(u32 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 36402 usec",
+        "stack depth 48",
+        "processed 127 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 7,
+      "symbol": "sys_exit_init",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "450: (61) r3 = *(u32 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 126822 usec",
+        "stack depth 192",
+        "processed 443 insns (limit 1000000) max_states_per_insn 0 total_states 4 peak_states 4 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 8,
+      "symbol": "sys_exit_submit",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "stack bounds",
+      "diagnostics": [
+        "invalid write to stack R10 off=-520 size=8"
+      ],
+      "verifier_tail": [
+        "548: (7b) *(u64 *)(r10 -520) = r1",
+        "invalid write to stack R10 off=-520 size=8",
+        "verification time 218352 usec",
+        "stack depth 512",
+        "processed 538 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 9,
+      "symbol": "trace_sys_enter",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "928: (61) r1 = *(u32 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 296829 usec",
+        "stack depth 408",
+        "processed 916 insns (limit 1000000) max_states_per_insn 0 total_states 6 peak_states 6 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 10,
+      "symbol": "trace_sys_exit",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "direct-native",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R1 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "928: (61) r1 = *(u32 *)(r1 +0)",
+        "R1 invalid mem access 'scalar'",
+        "verification time 285151 usec",
+        "stack depth 408",
+        "processed 916 insns (limit 1000000) max_states_per_insn 0 total_states 6 peak_states 6 mark_read 0",
+        ""
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 11,
+      "symbol": "trace_ptrace",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "failed",
+      "family": "scalar memory access",
+      "diagnostics": [
+        "R6 invalid mem access 'scalar'"
+      ],
+      "verifier_tail": [
+        "648: (79) r2 = *(u64 *)(r6 +0)",
+        "R6 invalid mem access 'scalar'",
+        "verification time 183932 usec",
+        "stack depth 184",
+        "processed 639 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0",
         ""
       ]
     }
@@ -657,16 +2393,35 @@
       "execution_path": "failed",
       "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load-direct', '4', '13', '83', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/trusted_arm64.proof.o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T044717Z/otelcol-ebpf-profiler-profiling/state/session-h_ue8dqm/requests/request-24qt5m1h/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', 'inhibit_events', '130', 'null', 'interpreter_offsets', '162', 'null', 'task_stack_offset', '145', '16', 'pid_page_to_mapping_info', '136', 'null', 'perf_progs', '143', 'null', 'per_cpu_records', '137', 'null', 'with_debug_output', '145', '32', 'kernel_stackmap', '146', 'null', 'inverse_pac_mask', '145', '24', 'pid_events', '119', 'null', 'report_events', '170', 'null', 'reported_pids', '159', 'null', 'custom_context_map', '138', 'null', 'metrics', '165', 'null', 'stack_ptregs_offset', '145', '20']' returned non-zero exit status 1.",
       "load_stderr": "native: reloading without foreign PROG_ARRAY map(s) 143\ntrusted-native-loader: service simulator verification failed: Unknown error 524\nprocessed 4 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n"
+    },
+    {
+      "app": "cilium/agent",
+      "request": 17,
+      "symbol": "tail_ipv4_ct_ingress",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T120527Z/cilium-outcome.json",
+      "execution_path": "failed",
+      "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load-direct', '4', '17', '327', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T120527Z/cilium-agent/state/session-xhvlq8do/requests/request-08stepze/generated/request.native.o', 'tail_ipv4_ct_ingress', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T120527Z/cilium-agent/state/session-xhvlq8do/requests/request-08stepze/generated/trusted_arm64.proof.o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T120527Z/cilium-agent/state/session-xhvlq8do/requests/request-08stepze/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_conntrack_accounting', '170', '108', 'cilium_tail_call_buffer4', '171', 'null', '__config_enable_jiffies', '170', '6', '__config_enable_ipv4_fragments', '170', '201', '__config_kernel_hz', '170', '8', 'cilium_calls', '169', 'null', 'cilium_ct4_global', '142', 'null', 'cilium_metrics', '115', 'null', 'cilium_ct_any4_global', '143', 'null', '__config_security_label', '170', '152', '__config_endpoint_id', '170', '160', 'cilium_ipv4_frag_datagrams', '144', 'null', '__config_enable_extended_ip_protocols', '170', '203', '__config_trace_payload_len', '170', '84']' returned non-zero exit status 1.",
+      "load_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n"
+    },
+    {
+      "app": "tracee/monitor",
+      "request": 11,
+      "symbol": "trace_ptrace",
+      "report": "kprog/results/arm64-checked-corpus-20261127/guest-20261127T140827Z/tracee-outcome.json",
+      "execution_path": "failed",
+      "error": "Command '['/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader', 'load-direct', '4', '11', '260', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T140827Z/tracee-monitor/state/session-9n_4r2fk/requests/request-qxqlhmn7/generated/request.native.o', 'trace_ptrace', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T140827Z/tracee-monitor/state/session-9n_4r2fk/requests/request-qxqlhmn7/generated/trusted_arm64.proof.o', '/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T140827Z/tracee-monitor/state/session-9n_4r2fk/requests/request-qxqlhmn7/generated/trusted_arm64.bpf.o', 'trusted_arm64_arm64_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link', '0', '0', '0', '0', '0', '0', 'config_map', '377', 'null', 'task_info_map', '376', 'null', 'scratch_map', '419', 'null', 'kconfig_map', '400', 'null', 'generic_sys_enter_tails', '384', 'null']' returned non-zero exit status 1.",
+      "load_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n"
     }
   ],
   "stock_refusal_groups": {
-    "infinite loop": 7,
+    "infinite loop": 11,
     "modified context pointer": 1,
-    "scalar memory access": 8,
+    "scalar memory access": 63,
     "context layout": 1,
     "typed field layout": 1,
     "unbounded memory access": 1,
-    "read-only typed object store": 2,
-    "packet bounds": 6
+    "read-only typed object store": 3,
+    "packet bounds": 11,
+    "stack bounds": 25
   }
 }

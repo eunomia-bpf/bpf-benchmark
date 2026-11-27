@@ -1,11 +1,8 @@
-make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
-python3 refusals.py
 bcc/set available ok {'checked-sim-c': 11, 'direct-native': 12}
 otelcol-ebpf-profiler/profiling available ok {'direct-native': 11, 'checked-sim-c': 1, 'failed': 1}
-cilium/agent available error {'checked-sim-c': 2, 'direct-native': 8}
-tetragon/observer pending None None
+cilium/agent available error {'checked-sim-c': 3, 'direct-native': 13, 'failed': 1}
+tetragon/observer available ok {'direct-native': 75, 'checked-sim-c': 10}
 katran available ok {'checked-sim-c': 1}
-tracee/monitor pending None None
-Stock refusal groups: {'infinite loop': 7, 'modified context pointer': 1, 'scalar memory access': 8, 'context layout': 1, 'typed field layout': 1, 'unbounded memory access': 1, 'read-only typed object store': 2, 'packet bounds': 6}
-Generation failures: 5 native install failures: 1
-make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+tracee/monitor available ok {'checked-sim-c': 2, 'direct-native': 8, 'failed': 1}
+Stock refusal groups: {'infinite loop': 11, 'modified context pointer': 1, 'scalar memory access': 63, 'context layout': 1, 'typed field layout': 1, 'unbounded memory access': 1, 'read-only typed object store': 3, 'packet bounds': 11, 'stack bounds': 25}
+Generation failures: 5 native install failures: 3
