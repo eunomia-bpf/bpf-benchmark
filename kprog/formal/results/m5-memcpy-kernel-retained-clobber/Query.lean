@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.execute
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.complete
