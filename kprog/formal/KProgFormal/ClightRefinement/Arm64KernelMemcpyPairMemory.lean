@@ -76,21 +76,44 @@ theorem readback (s : Reference.AArch64.State) (i : Fin 2) (profile : MemoryProf
     exact (Arm64KernelMemcpyReadMemory.bytes_same _ _ same 16 address).trans
       (read_mem_bytes_of_write_mem_bytes_same (by decide))
 
+private theorem byte_separate (address other last : BitVec 64) (bound : last < other-address) :
+    mem_separate other other address (address+last) = true := by
+  have endDistance : address+last-address = last := by bv_omega
+  have baseNe : address ≠ other := by
+    intro same
+    subst other
+    simpa only [BitVec.sub_self,BitVec.not_lt_zero] using bound
+  have endNe : address+last ≠ other := by
+    intro same
+    have distance : other-address = last := same ▸ endDistance
+    rw [distance] at bound
+    exact (BitVec.lt_irrefl last) bound
+  have baseOutside : ¬ address-other ≤ 0#64 := by
+    simpa only [BitVec.le_zero_iff,BitVec.sub_eq_iff_eq_add,BitVec.zero_add] using baseNe
+  have endOutside : ¬ address+last-other ≤ 0#64 := by
+    simpa only [BitVec.le_zero_iff,BitVec.sub_eq_iff_eq_add,BitVec.zero_add] using endNe
+  have tooFar : ¬ other-address ≤ last := BitVec.not_le.mpr bound
+  simp only [mem_separate,mem_overlap,BitVec.sub_self,endDistance,baseOutside,endOutside,tooFar,
+    decide_false,Bool.false_or,Bool.not_false]
+
 /-- A byte outside the real wrapping store interval is physically retained
 in either native pair mode. -/
 theorem outside (s : Reference.AArch64.State) (i : Fin 2) (profile : MemoryProfile) (address other : BitVec 64)
     (notWritten : 16 ≤ (other-address).toNat) :
     read_mem other (Arm64KernelMemcpyPairWrite.after s i profile address).machine = read_mem other s.machine := by
-  have distance : (16#64) ≤ other-address := notWritten
-  have sep16 : mem_separate other other address (address+15#64) = true := by
-    simp only [mem_separate,mem_overlap]
-    bv_decide
-  have sepLow : mem_separate other other address (address+7#64) = true := by
-    simp only [mem_separate,mem_overlap]
-    bv_decide
+  have sep16 : mem_separate other other address (address+15#64) = true :=
+    byte_separate address other (15#64) (show (15#64) < other-address from by change 15 < (other-address).toNat; omega)
+  have sepLow : mem_separate other other address (address+7#64) = true :=
+    byte_separate address other (7#64) (show (7#64) < other-address from by change 7 < (other-address).toNat; omega)
+  have delta : other-(address+8#64) = (other-address)-8#64 := by bv_omega
+  have enough : (8#64) ≤ other-address := by change 8 ≤ (other-address).toNat; omega
+  have highDistance : 8 ≤ (other-(address+8#64)).toNat := by
+    rw [delta,BitVec.toNat_sub_of_le enough]
+    change 8 ≤ (other-address).toNat-8
+    omega
   have sepHigh : mem_separate other other (address+8#64) (address+15#64) = true := by
-    simp only [mem_separate,mem_overlap]
-    bv_decide
+    simpa only [BitVec.add_assoc,show (8#64)+(7#64) = 15#64 by decide] using
+      byte_separate (address+8#64) other (7#64) (show (7#64) < other-(address+8#64) from by change 7 < (other-(address+8#64)).toNat; omega)
   cases mode : profile.pairSingleAccess with
   | false =>
     have same : (Arm64KernelMemcpyPairWrite.after s i profile address).machine.mem =

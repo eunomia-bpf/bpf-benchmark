@@ -1,0 +1,19 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairMemory
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairMemory.join_read
+#print axioms Arm64KernelMemcpyPairMemory.join_read
+#check Arm64KernelMemcpyPairMemory.separate
+#print axioms Arm64KernelMemcpyPairMemory.separate
+#check Arm64KernelMemcpyPairMemory.split_readback
+#print axioms Arm64KernelMemcpyPairMemory.split_readback
+#check Arm64KernelMemcpyPairMemory.memory
+#print axioms Arm64KernelMemcpyPairMemory.memory
+#check Arm64KernelMemcpyPairMemory.readback
+#print axioms Arm64KernelMemcpyPairMemory.readback
+#check Arm64KernelMemcpyPairMemory.outside
+#print axioms Arm64KernelMemcpyPairMemory.outside
+#check Arm64KernelMemcpyPairMemory.byte_at
+#print axioms Arm64KernelMemcpyPairMemory.byte_at
+#check Arm64KernelMemcpyPairMemory.mode_memory_eq
+#print axioms Arm64KernelMemcpyPairMemory.mode_memory_eq

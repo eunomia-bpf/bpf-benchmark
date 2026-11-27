@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T02:02:19.167757+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPairMemory"
+    ],
+    "exit": 0,
+    "seconds": 2.3695826530456543,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 96,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-pair-memory-kernel/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.4029412269592285,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 8,
+  "source_steps": {
+    "local_native_dependencies": 0,
+    "scope": "same actual STP memory/frame statements",
+    "imported_native_dependencies": "existing mature MemoryProofs, public names retained",
+    "address_domain": "all wrapping64",
+    "proof": "unsigned interval separation and kernel arithmetic"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPairMemory.lean",
+      "size_bytes": 11175,
+      "mtime_ns": 1795744882472370131
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
