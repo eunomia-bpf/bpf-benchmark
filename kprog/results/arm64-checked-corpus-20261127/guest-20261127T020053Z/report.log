@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py 20261127T020053Z
+Corpus/app ok ok mix {'checked-sim-c': 1}
+baseline programs 1 with calls 1 workloads [(0, 13.587387359999994)]
+post_rejit programs 1 with calls 1 workloads [(0, 12.922551823999981)]
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

@@ -1,0 +1,9 @@
+[master 174be5062] Record actual ARM checked katran corpus check
+ 5 files changed, 144 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T020053Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   0895a3e22..174be5062  master -> master

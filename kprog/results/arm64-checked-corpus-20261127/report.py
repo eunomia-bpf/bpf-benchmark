@@ -1,14 +1,16 @@
-"""Read actual BCC workload and stock/checked/direct receipts outside the framework."""
+"""Read actual corpus workload and stock/checked/direct receipts outside the framework."""
 import collections
 import io
 import json
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 HERE=Path(__file__).resolve().parent
-folder=HERE/'guest-20261127T012418Z';controller=json.loads((folder/'controller.json').read_text());raw=Path(controller['raw']);case=raw/'bcc-set'
+folder=HERE/('guest-'+sys.argv[1] if len(sys.argv)>1 else 'guest-20261127T012418Z');controller=json.loads((folder/'controller.json').read_text());raw=Path(controller['raw']);app_name=controller['cases'][0]['app'];case=raw/app_name.replace('/','-')
+destination=folder if len(sys.argv)>1 else HERE;prefix=app_name.split('/')[0]
 paths=json.loads((case/'corpus-paths.json').read_text());run=next(Path(x) for x in paths if Path(x).name.startswith('arm64_qemu_corpus_'))
-corpus=json.loads((run/'details/result.json').read_text());app=json.loads((run/'details/apps/bcc__set.json').read_text())
+corpus=json.loads((run/'details/result.json').read_text());app=json.loads((run/'details/apps'/(app_name.replace('/','__')+'.json')).read_text())
 report=dict(utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip(),controller_status=controller['controller_status'],revision=controller['revision'],corpus_status=corpus['status'],app_status=app['status'],app_error=app['error'],samples=corpus['samples'],requested_workload_seconds=corpus['workload_seconds'],warmups=corpus['warmups'],bpf_stats=corpus['bpf_stats'],workload=app['selected_workload'],phases={},requests=[])
 for phase in ['baseline','post_rejit']:
  data=app[phase];report['phases'][phase]=dict(programs=data['bpf'],workloads=data['workloads'],installed_programs=len(data['bpf']),programs_with_calls=sum(x['run_cnt_delta']>0 for x in data['bpf'].values()))
@@ -33,9 +35,9 @@ with tarfile.open(case/'service.tar.gz') as outer:
   report['requests'].append(row)
 report['counts']=dict(collections.Counter(x['execution_path'] for x in report['requests']))
 report['test_run']='Frozen corpus baseline/post workload and attachment, no separate TEST_RUN oracle.'
-report['scope']='One BCC/set functional sample per phase on ARM QEMU. Direct fallbacks are not checked proof coverage; no timing/performance claim.'
-(HERE/'bcc-outcome.json').write_text(json.dumps(report,indent=2)+'\n')
-with (HERE/'bcc-programs.tsv').open('w') as f:
+report['scope']=f'One {app_name} functional sample per phase on ARM QEMU. Direct fallbacks are not checked proof coverage; no timing/performance claim.'
+(destination/(prefix+'-outcome.json')).write_text(json.dumps(report,indent=2)+'\n')
+with (destination/(prefix+'-programs.tsv')).open('w') as f:
  f.write('request\tsymbol\tprog_type\tnative_id\tb_generated\tb_stock_passed\texecution_path\tstatus\trun_cnt_delta\trun_time_ns_delta\tdiagnostics\n')
  for x in report['requests']:
   f.write('\t'.join(str(v) for v in [x['request_id'],x['symbol'],x['metadata']['prog_type'],x['prog_id'],x['b_generated'],x['b_stock_passed'],x['execution_path'],x['status'],x['post_counters']['run_cnt_delta'],x['post_counters']['run_time_ns_delta'],'; '.join(x.get('diagnostics',[]))])+'\n')

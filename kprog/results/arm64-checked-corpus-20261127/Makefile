@@ -3,7 +3,7 @@ guest:
 	python3 guest_controller.py $(CHECK_APP)
 .PHONY: report
 report:
-	python3 report.py
+	python3 report.py $(CHECK_TOKEN)
 .PHONY: ctx-compile
 ctx-compile:
 	prlimit --as=17179869184 taskset -c 16 python3 ctx_compile.py
@@ -15,4 +15,4 @@ ctx-operand:
 
 .PHONY: callback-audit
 callback-audit:
-	python3 callback_audit.py
+	python3 callback_audit.py $(CHECK_TOKEN)

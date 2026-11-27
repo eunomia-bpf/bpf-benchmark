@@ -1,0 +1,145 @@
+{
+  "utc": "2026-11-27T02:11:18Z",
+  "controller_status": 0,
+  "archived_files_equal_raw": 33,
+  "members": [
+    {
+      "member": "20261127T020053Z/katran/stderr",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T020053Z/katran/stdout",
+      "bytes": 1156
+    },
+    {
+      "member": "20261127T020053Z/katran/service.tar.gz",
+      "bytes": 14917642
+    },
+    {
+      "member": "20261127T020053Z/katran/corpus-paths.json",
+      "bytes": 157
+    },
+    {
+      "member": "20261127T020053Z/katran/corpus.tar.gz",
+      "bytes": 11274
+    },
+    {
+      "member": "20261127T020053Z/guest.log",
+      "bytes": 1627
+    },
+    {
+      "member": "20261127T020053Z/broker.log",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T020053Z/cases.json",
+      "bytes": 484
+    },
+    {
+      "member": "20261127T020053Z/broker/c8894ebd82fd43a89c8143d13567fad8.request.json",
+      "bytes": 951
+    },
+    {
+      "member": "20261127T020053Z/broker/1034364ee5e849d1b07a1eb926fe9efa.request.json",
+      "bytes": 218
+    },
+    {
+      "member": "20261127T020053Z/broker/0844a3d8433d4aa28394265af1c61db6.request.json",
+      "bytes": 211
+    },
+    {
+      "member": "20261127T020053Z/broker/addaa89f63a249169bdd936fa087d391.result.json",
+      "bytes": 1017
+    },
+    {
+      "member": "20261127T020053Z/broker/6f78c4b5feea49b69ef56b61e10d5af2.result.json",
+      "bytes": 1202
+    },
+    {
+      "member": "20261127T020053Z/broker/jobs.jsonl",
+      "bytes": 10046
+    },
+    {
+      "member": "20261127T020053Z/broker/24ba7b3ba4a543ac860abcb63eee3f4f.result.json",
+      "bytes": 1486
+    },
+    {
+      "member": "20261127T020053Z/broker/e00fb80b3fdc4add918952ae279dfb5a.result.json",
+      "bytes": 1061
+    },
+    {
+      "member": "20261127T020053Z/broker/24ba7b3ba4a543ac860abcb63eee3f4f.request.json",
+      "bytes": 1114
+    },
+    {
+      "member": "20261127T020053Z/broker/e00fb80b3fdc4add918952ae279dfb5a.request.json",
+      "bytes": 778
+    },
+    {
+      "member": "20261127T020053Z/broker/STOP",
+      "bytes": 22
+    },
+    {
+      "member": "20261127T020053Z/broker/72d5336db6dd4b60b2685a6291121bdd.request.json",
+      "bytes": 550
+    },
+    {
+      "member": "20261127T020053Z/broker/19d437b5dd8b4130ae123793cd1bb746.request.json",
+      "bytes": 790
+    },
+    {
+      "member": "20261127T020053Z/broker/addaa89f63a249169bdd936fa087d391.request.json",
+      "bytes": 759
+    },
+    {
+      "member": "20261127T020053Z/broker/72d5336db6dd4b60b2685a6291121bdd.result.json",
+      "bytes": 1212
+    },
+    {
+      "member": "20261127T020053Z/broker/6f78c4b5feea49b69ef56b61e10d5af2.request.json",
+      "bytes": 459
+    },
+    {
+      "member": "20261127T020053Z/broker/c46767332488419fa428668d65edc689.result.json",
+      "bytes": 1259
+    },
+    {
+      "member": "20261127T020053Z/broker/c8894ebd82fd43a89c8143d13567fad8.result.json",
+      "bytes": 1369
+    },
+    {
+      "member": "20261127T020053Z/broker/1034364ee5e849d1b07a1eb926fe9efa.result.json",
+      "bytes": 681
+    },
+    {
+      "member": "20261127T020053Z/broker/c46767332488419fa428668d65edc689.request.json",
+      "bytes": 574
+    },
+    {
+      "member": "20261127T020053Z/broker/owner.lock",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T020053Z/broker/19d437b5dd8b4130ae123793cd1bb746.result.json",
+      "bytes": 1040
+    },
+    {
+      "member": "20261127T020053Z/broker/ready.json",
+      "bytes": 251
+    },
+    {
+      "member": "20261127T020053Z/broker/0844a3d8433d4aa28394265af1c61db6.result.json",
+      "bytes": 819
+    },
+    {
+      "member": "20261127T020053Z/guest-status",
+      "bytes": 2
+    }
+  ],
+  "requests": 1,
+  "execution_paths": {
+    "checked-sim-c": 1
+  },
+  "cleanup": "No own deletion or preprocessing cleanup in this guest/callback; retained raw directories and archives.",
+  "test_run": "Frozen corpus baseline/post workload and attachment, no separate TEST_RUN oracle."
+}
