@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64CiliumCallerLink
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.label_present
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.label_present
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.site_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.site_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.allocated
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.allocated
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.entry_valid
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.lr_local
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.lr_local
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_link
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_link
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.preserves_other_locals
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.preserves_other_locals
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_allocated
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerLink.begin_allocated

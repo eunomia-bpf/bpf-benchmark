@@ -1,0 +1,71 @@
+{
+  "scope": "actual complete Cilium caller entry and first inline LINK LR store only",
+  "source_sha256": "ae4a1ce7507e29515b2977678f336cb96201eb6c667569074c0a848c705525db",
+  "full_local_declarations": 795,
+  "temporary_chunks": 256,
+  "actual_label": "0x54",
+  "original_next_token": 88,
+  "source_steps": 4,
+  "receipts": {
+    "stage10": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-link/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1530.3095684051514,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerLink"
+      ],
+      "exit": 0,
+      "seconds": 1504.2994437217712,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-link/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.4593780040740967,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 184,
+  "public_queries": [
+    "label_present",
+    "site_source",
+    "allocated",
+    "entry_valid",
+    "lr_local",
+    "begin_link",
+    "preserves_other_locals",
+    "begin_allocated"
+  ],
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_root_pending": true,
+  "axioms": "standard Lean logic plus existing CompCert externalFunctionsSem/inlineAssemblySem semantic parameters;see public log"
+}
