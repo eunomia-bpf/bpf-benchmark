@@ -1,0 +1,27 @@
+{
+  "pid": 1116994,
+  "started_utc": "2026-11-27T19:23:32Z",
+  "source_revision": "83760d2044f0613ac588c1bf006dfd83cfc40a7a",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T192332Z",
+  "scope": "Current-image x86 OTel eBPF/native host PMU diagnosis under timingEX/imageSH. Effective frozen check settings1sample/10seconds/stats1, no full timing rerun or performance acceptance. Profile observers live outside benchmark.",
+  "effective_check": {
+    "samples": 1,
+    "workload_seconds": 10,
+    "bpf_stats": 1,
+    "guest_memory": "64G"
+  },
+  "source_sha256": {
+    "kprog/results/x86-otel-perf-20261127/profile_check.py": "809577dea1eb58cef8944850b12e7ebd75b9d3aca9bc6b9db8637ac20415b74b",
+    "kprog/results/profile-20261123/profile-host.sh": "016fac66a9bb66c29fcf6f291d31cb9d3589b7340c21ccffc2a47b15b66ffcb3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83"
+  },
+  "program_dump": "perf_unwind_nat",
+  "command": [
+    "bash",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T192332Z/profile-host-check.sh",
+    "otelcol-ebpf-profiler/profiling",
+    "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261127T192332Z",
+    "perf_unwind_nat"
+  ],
+  "purpose": "Capture exact current-image unwinder JIT and native code for instruction/call/spill/probe comparison; no repeat-until-win or gain claim."
+}
