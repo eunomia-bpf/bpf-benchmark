@@ -154,7 +154,7 @@
       "build"
     ],
     "exit": 0,
-    "seconds": 183.15989899635315,
+    "seconds": 12.006355047225952,
     "cpu": 17,
     "workers": 1,
     "nice": 0,
@@ -163,8 +163,8 @@
   },
   "whole_confirmation_owner": "V",
   "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
-  "artifact_sha256": "675d2fb757a37e9948933e3b8d11bf564a82f2abdf5ecbbcaf73788b46581a25",
-  "packaging_sha256": "8d9e2586c4a7781e173602048fe98ebad755a5d414817d6875db168853123305",
+  "artifact_sha256": "76db417a49e86f8759849074d1a66b4efb254ee5d024ad267a13e672ef12940e",
+  "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
   "source_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
   "full_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
   "all_declarations_preserved": true,
@@ -186,12 +186,87 @@
   },
   "owned_source_sha256": {
     "kprog/formal/KProgFormal.lean": "560b205ab710f3234fd1f6a489c69bb780fb044fccd318fe7860f016b36d646c",
-    "kprog/formal/README.md": "4e19dc3c3df7370036094980ac7af85766f1d0f44f29fe3c896c51e6b7d5f4dc",
+    "kprog/formal/README.md": "8f71a024f368d10944fbaa0d63ce2690eb4f529e340eb2d1fc50159f40a0928c",
     "kprog/formal/Makefile": "22182d51682a12ae28b4a83a71a1f49c2e695a4d3f52635a6953c257fc302017",
     "kprog/formal/c/Arm64CiliumCaller.c": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
     "kprog/formal/c/Arm64CiliumCallerUnit.c": "39b142dd2b69e9891380ed8d2b3277390d722257687f1f18a3da794d6a3d1e23",
     "kprog/formal/c/Arm64OriginalLinkBinding.h": "8039a80e423b48389273baa729c1a6f6b79af2b00416ebc5fec233c4a88cace4",
-    "kprog/formal/results/m5-cilium-caller-export/package_export.py": "393c4e363ee108193c390be1e94ff9ab567fd6029cfb626bf0825f1ba8b36823",
-    "kprog/formal/results/m5-cilium-caller-export/inspect_export.py": "8031e60bd64c3360cc3121a9f0236b6204ef35f262cea9717ba95792c7b8bcf8"
-  }
+    "kprog/formal/results/m5-cilium-caller-export/package_export.py": "5121216375246aa3b765a652412b68cd7b997a50a4ad43a7bd38213f0bcbae06",
+    "kprog/formal/results/m5-cilium-caller-export/inspect_export.py": "1ebd59298abf048f5dba28817b26bc61b79df94cb25fd3e0c7d0c0051914911f"
+  },
+  "logical_ast_checks": {
+    "cilium-caller-logical-reexport1": {
+      "command": [
+        "make",
+        "KProgFormal/Clight/Arm64CiliumCaller.lean"
+      ],
+      "exit": 0,
+      "seconds": 27.966525077819824,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-logical-parts1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.Clight.Arm64CiliumCaller"
+      ],
+      "exit": 0,
+      "seconds": 142.62557816505432,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-logical-artifact2": {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "results/m5-cilium-caller-export/inspect_export.py"
+      ],
+      "exit": 0,
+      "seconds": 0.9458324909210205,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-logical-public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-export/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.6693346500396729,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "cilium-caller-logical-root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 12.006355047225952,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "kernel_only_ast_data": true
 }

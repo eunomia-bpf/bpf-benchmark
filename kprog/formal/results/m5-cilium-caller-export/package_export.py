@@ -24,17 +24,19 @@ records=[];reconstructed=prefix
 for index,group in enumerate(groups):
  name='Part'+str(index).zfill(3);path=directory/(name+'.lean')
  header=prefix if index==0 else 'import '+module+'Part'+str(index-1).zfill(3)+'\nopen CC\n\nnamespace '+namespace+'\n\n'
- complete=header+group+suffix
+ logical=re.sub(r'(?m)^(@\[noinline\] )?def ',lambda m:(m[1] or '')+'noncomputable def ',group)
+ complete=header+logical+suffix
  path.write_text(complete)
  actual=path.read_text()
  assert actual.startswith(header) and actual.endswith(suffix)
  payload=actual[len(header):-len(suffix)]
- assert payload==group
- reconstructed+=payload
- records.append({'path':str(path.resolve().relative_to(Path(__file__).resolve().parents[2])),'header_bytes':len(header.encode()),'body_bytes':len(group.encode()),'sha256':hashlib.sha256(actual.encode()).hexdigest()})
+ restored=re.sub(r'(?m)^(@\[noinline\] )?noncomputable def ',lambda m:(m[1] or '')+'def ',payload)
+ assert restored==group
+ reconstructed+=restored
+ records.append({'path':str(path.resolve().relative_to(Path(__file__).resolve().parents[2])),'header_bytes':len(header.encode()),'body_bytes':len(logical.encode()),'original_body_bytes':len(group.encode()),'sha256':hashlib.sha256(actual.encode()).hexdigest()})
 reconstructed+=suffix
 assert reconstructed.encode()==raw
 target.write_text('import '+module+'Part'+str(len(groups)-1).zfill(3)+'\n')
-record={'original_export_sha256':hashlib.sha256(raw).hexdigest(),'original_export_bytes':len(raw),'original_export_lines':text.count('\n'),'declarations':len(declarations),'parts':records,'reconstruction_byteequal':True,'scope':'Only import/namespace packaging changes;every original declaration,including all functions,globals,types,source metadata and complete caller body,is retained in order.'}
+record={'original_export_sha256':hashlib.sha256(raw).hexdigest(),'original_export_bytes':len(raw),'original_export_lines':text.count('\n'),'declarations':len(declarations),'parts':records,'reconstruction_byteequal':True,'kernel_only_ast_data':True,'scope':'Import/namespace packaging and noncomputable declaration modifiers suppress native AST initialization;every original type/value declaration,including all functions,globals,types,source metadata and complete caller body,is retained in order.'}
 Path(__file__).with_name('packaging.json').write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps({k:v for k,v in record.items() if k!='parts'},indent=2));print('parts',len(records))

@@ -34,7 +34,9 @@ for i,row in enumerate(package['parts']):
  if i==0:pieces.append(part[:row['header_bytes']])
  payload=part[row['header_bytes']:-len(suffix.encode())]
  assert len(payload)==row['body_bytes']
- pieces.append(payload)
+ restored=re.sub(r'(?m)^(@\[noinline\] )?noncomputable def ',lambda m:(m[1] or '')+'def ',payload.decode()).encode()
+ assert len(restored)==row['original_body_bytes']
+ pieces.append(restored)
 pieces.append(suffix.encode());reconstructed=b''.join(pieces)
 assert sha(reconstructed)==package['original_export_sha256']
 assert reconstructed==(RAW/'cilium-caller-inline-export3.lean').read_bytes()
@@ -45,6 +47,6 @@ for token in dep.split(':',1)[1].split():
  path=Path(token);path=path if path.is_absolute() else FORMAL/path
  assert path.is_file(),str(path)
  inputs[str(path.resolve())]=sha(path.read_bytes())
-record={'archive':str(archive),'archive_sha256':sha(archive.read_bytes()),'request_member_sha256':sha(nested),'native_sha256':sha(native),'literal_c_sha256':sha(source),'original_local_header_sha256':sha(header.read_bytes()),'export_sha256':sha(reconstructed),'export_bytes':len(reconstructed),'module_parts':len(package['parts']),'declarations':package['declarations'],'source_and_packaging_byteequal':True,'frontend_inputs_now':inputs,'scope':'One real retained Cilium caller complete source,existing extraction bindings and original pointer-writer statements inline for LINK. Other operations keep existing formal extraction interfaces;whole-function fidelity/prefix simulation is not asserted. Captured local header matches exactly;all current frontend inputs are recorded separately. Eight BPF-helper sites are not memcpy evidence;loaded symbol/relocation remains explicit.'}
+record={'archive':str(archive),'archive_sha256':sha(archive.read_bytes()),'request_member_sha256':sha(nested),'native_sha256':sha(native),'literal_c_sha256':sha(source),'original_local_header_sha256':sha(header.read_bytes()),'export_sha256':sha(reconstructed),'export_bytes':len(reconstructed),'module_parts':len(package['parts']),'declarations':package['declarations'],'kernel_only_ast_data':package['kernel_only_ast_data'],'source_and_packaging_byteequal':True,'frontend_inputs_now':inputs,'scope':'One real retained Cilium caller complete source,existing extraction bindings and original pointer-writer statements inline for LINK. Other operations keep existing formal extraction interfaces;whole-function fidelity/prefix simulation is not asserted. Captured local header matches exactly;all current frontend inputs are recorded separately. Eight BPF-helper sites are not memcpy evidence;loaded symbol/relocation remains explicit.'}
 Path(__file__).with_name('artifact.json').write_text(json.dumps(record,indent=2)+'\n')
 print(json.dumps({k:v for k,v in record.items() if k!='frontend_inputs_now'},indent=2))

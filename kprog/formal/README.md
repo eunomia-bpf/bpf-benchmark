@@ -199,7 +199,8 @@ The complete retained Cilium request1 caller now has its own source-first
 Clight export. Its original C bytes/profile remain;LINK uses the original
 inline pointer-writer statements instead of the borrowed four-argument
 wrapper. All37519 declarations/26.56MB are retained in37 sequential modules
-that reconstruct the original export byte for byte under the existing32GiB
+whose unchanged type/value declarations reconstruct the original export
+after erasing packaging-only noncomputable modifiers,under the existing32GiB
 cap. The default root build includes this unit. Actual caller-prefix
 execution/resource correspondence and whole-function extraction fidelity
 remain separate obligations;the eight sites are BPF helpers,not memcpy.
