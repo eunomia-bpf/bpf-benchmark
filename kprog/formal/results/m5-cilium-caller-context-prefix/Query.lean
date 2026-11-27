@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.Inputs
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.Inputs
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.execute_from_body
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.execute_from_body
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerContextPrefix.execute
