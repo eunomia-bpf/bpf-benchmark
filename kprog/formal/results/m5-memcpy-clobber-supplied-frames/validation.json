@@ -1,0 +1,63 @@
+{
+  "confirmed_utc": "2026-11-27T03:10:50.060503+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ClobberVectorsComplete"
+    ],
+    "exit": 0,
+    "seconds": 11.606171369552612,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 465,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-clobber-supplied-frames/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.8430898189544678,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 15,
+  "source_steps": {
+    "gpr_pairs": 18,
+    "flag_pairs": 4,
+    "vector_half_pairs": 64,
+    "unchanged_GPRs": "all except actual GPR destination; all31 for flag/vector pairs",
+    "retained_values": "entire actual Option(Val,Val) reads including original tags",
+    "proof_bodies_per_stage": 1,
+    "old_type_checks": 6
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberRegisterComplete.lean",
+      "size_bytes": 16687,
+      "mtime_ns": 1795748869769273201
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberFlagsComplete.lean",
+      "size_bytes": 17857,
+      "mtime_ns": 1795748869769566563
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberVectorsComplete.lean",
+      "size_bytes": 20028,
+      "mtime_ns": 1795748869769812462
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

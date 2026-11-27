@@ -93,6 +93,42 @@ private def written {initial seed before after : CC.Mem} {entry : HeaderLocal in
 
 /-- One original provider pair consumes its actual supplied value, trace
 and heap, retaining both true stores and the exact updated register map. -/
+theorem step_supplied_framed {initial seed m : CC.Mem} {entry : HeaderLocal initial}
+    {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
+    {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
+    {outerLe le : CC.TempEnv} {values : Fin 18 → BitVec 64}
+    (k : CC.Cont) (i : Fin 18)
+    (prior : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe i.val values m le)
+    (value : BitVec 64) (trace : CC.Trace) (provided : CC.Mem)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (6#32)] m trace (.Vlong value) provided)
+    (cache : Arm64ProgramEntryCacheFrame.Frame initial false m provided) :
+    ∃ after nextLe, ∃ _current : Invariant base abi byte calleeBefore rawR0 copiedN cell flagValue outerLe
+      (i.val + 1) (updated values i value) after nextLe,
+      CC.Star (CC.Step2 world) (.State helper (stage i.val) k CC.emptyEnv le m) trace
+        (.State helper (stage (i.val + 1)) k CC.emptyEnv nextLe after) ∧
+      FrameBelow initial.nextblock m after ∧ after.access = m.access ∧ after.nextblock = m.nextblock ∧
+      (∀ j : Fin 31, j ≠ (declaration i).reg → Arm64EntryMemory.gpr after.nextblock after (.Vptr entry.block 0) j.val =
+        Arm64EntryMemory.gpr m.nextblock m (.Vptr entry.block 0) j.val) := by
+  let packet := supplied prior cache
+  have enter := Arm64MemsetClobberRegisters.ready i le m k
+  have external : CC.Star (CC.Step2 world)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (Arm64MemsetClobberRegisters.callCont i le k) m)
+      trace (.Returnstate (.Vlong value) (Arm64MemsetClobberRegisters.callCont i le k) provided) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp only [CC.E0,CC.Eapp,List.append_nil])
+  obtain ⟨after,effect,stores⟩ := Arm64MemsetClobberRegisterStores.returned_write packet.ready.memory.storage i le value packet.parameter k
+  refine ⟨after,_,written i packet value effect,?_,cache.caller.trans effect.caller,
+    effect.access.trans cache.access,effect.nextblock.trans cache.nextblock,?_⟩
+  · have actual := star_trans (star_trans enter.sound external) stores.sound
+    rw [next_source i] at actual
+    simpa only [stage,i.isLt,dite_eq_left,CC.E0,CC.Eapp,List.nil_append,List.append_nil] using actual
+  · intro j different
+    exact (Arm64MemsetClobberRegisterState.other effect j different).trans
+      (by simpa only [cache.nextblock] using cache.gpr prior.ready.memory.storage j)
+
+/-- The complete original supplied-word interface uses the same real
+source pair and retains its exact published type. -/
 theorem step_supplied {initial seed m : CC.Mem} {entry : HeaderLocal initial}
     {base : Arm64MemsetHeaderView.View initial seed entry} {abi : TailLocal initial 6} {byte : BitVec 8}
     {calleeBefore : CC.Mem} {rawR0 : BitVec 64} {copiedN : Nat} {cell : TailLocal initial 5} {flagValue : BitVec 8}
@@ -108,19 +144,9 @@ theorem step_supplied {initial seed m : CC.Mem} {entry : HeaderLocal initial}
       CC.Star (CC.Step2 world) (.State helper (stage i.val) k CC.emptyEnv le m) trace
         (.State helper (stage (i.val + 1)) k CC.emptyEnv nextLe after) ∧
       FrameBelow initial.nextblock m after ∧ after.access = m.access ∧ after.nextblock = m.nextblock := by
-  let packet := supplied prior cache
-  have enter := Arm64MemsetClobberRegisters.ready i le m k
-  have external : CC.Star (CC.Step2 world)
-      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (Arm64MemsetClobberRegisters.callCont i le k) m)
-      trace (.Returnstate (.Vlong value) (Arm64MemsetClobberRegisters.callCont i le k) provided) :=
-    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
-      (by simp only [CC.E0,CC.Eapp,List.append_nil])
-  obtain ⟨after,effect,stores⟩ := Arm64MemsetClobberRegisterStores.returned_write packet.ready.memory.storage i le value packet.parameter k
-  refine ⟨after,_,written i packet value effect,?_,cache.caller.trans effect.caller,
-    effect.access.trans cache.access,effect.nextblock.trans cache.nextblock⟩
-  have actual := star_trans (star_trans enter.sound external) stores.sound
-  rw [next_source i] at actual
-  simpa only [stage,i.isLt,dite_eq_left,CC.E0,CC.Eapp,List.nil_append,List.append_nil] using actual
+  obtain ⟨after,nextLe,current,run,frame,access,next,_kept⟩ :=
+    step_supplied_framed k i prior value trace provided provider cache
+  exact ⟨after,nextLe,current,run,frame,access,next⟩
 
 /-- Original existential-provider interface delegates to the same supplied
 pair while retaining its complete published type. -/
