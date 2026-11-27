@@ -1,0 +1,15 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.names
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.names
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_reads
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_reads
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.prefix_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.prefix_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_prefix
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.stored_prefix
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.input_returns
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.literal_zero
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRFrames.literal_zero
