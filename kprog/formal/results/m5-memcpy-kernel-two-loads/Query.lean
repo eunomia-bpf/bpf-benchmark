@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyTwoLoads
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyTwoLoads.execute
+#print axioms Arm64KernelMemcpyTwoLoads.execute
+#check Arm64KernelMemcpyTwoLoads.continue_from_prefix
+#print axioms Arm64KernelMemcpyTwoLoads.continue_from_prefix

@@ -1,0 +1,57 @@
+{
+  "confirmed_utc": "2026-11-27T01:25:13.717593+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyTwoLoads"
+    ],
+    "exit": 0,
+    "seconds": 1.7099032402038574,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 83,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-two-loads/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7971465587615967,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_LDP_steps": 2,
+    "prior_actual_prefix_steps": 8,
+    "native_modes": [
+      "two ordered read8 per LDP",
+      "one read16 per LDP"
+    ],
+    "source_access": "same16byte interval read twice",
+    "final_PC": "generic origin+44",
+    "next_fetch": "actual captured first STP",
+    "composition": "same original prefix witness and reached-state equality",
+    "new_successful_read_equations": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyTwoLoads.lean",
+      "size_bytes": 9837,
+      "mtime_ns": 1795742594656789488
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
