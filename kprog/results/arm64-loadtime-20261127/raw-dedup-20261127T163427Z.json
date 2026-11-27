@@ -1,0 +1,2633 @@
+{
+  "utc": "2026-11-27T16:34:27Z",
+  "git_revision": "e33ad50f9d89c0c2e21108cf6e8c2795af37596e",
+  "authority": "Coordinator 2026-11-27T12:19Z: remove verified raw duplicates after SHA256 match against committed Git archives; preserve archive parts.",
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cilium-source-20261127T163046Z",
+      "kind": "completed-run-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/cilium-source-20261127T163046Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/cilium-source-20261127T163046Z/evidence.tar.zst.part-aa",
+          "git_blob": "820cabe83583da2e0bd870b3482121ee36b1e353",
+          "bytes": 692189,
+          "sha256": "0a8b23b1e2ae041365ff49488ab99c487d274e49b1c42d7203f2e95710bcb14d"
+        }
+      ],
+      "files": {
+        "analysis-sources.tar": {
+          "bytes": 20480,
+          "sha256": "56c773326a0654e0b87f9f1ac44d4a33d2581a6b33e832fb3dfb67749d296a3d",
+          "allocated_bytes": 20480
+        },
+        "x86/30/kernel.entry": {
+          "bytes": 25,
+          "sha256": "1317755a99d546c0090d6e613ed54a04714ad08e8b706ac25602731801d71da0",
+          "allocated_bytes": 4096
+        },
+        "x86/30/generation.metadata.json": {
+          "bytes": 2416,
+          "sha256": "2fdf42b295b9cb30286c70cb6917d6b56d985f98ea4015192dfeb1ffb677f1c2",
+          "allocated_bytes": 4096
+        },
+        "x86/30/kernel.facts.json": {
+          "bytes": 1992,
+          "sha256": "86311872dfbbb2084a419eaa4510906a90fdc114e59c9ff7fd3a1240602d6828",
+          "allocated_bytes": 4096
+        },
+        "x86/30/trusted_x86.bpf.c": {
+          "bytes": 291687,
+          "sha256": "7448926e475b21f9aa7912febd12a3b95c127370f76285828a2f820cbcac61ea",
+          "allocated_bytes": 294912
+        },
+        "x86/30/commands.jsonl": {
+          "bytes": 5614,
+          "sha256": "fbed70dde8a46f94f57317f1013384886424f2a762329e6a8b263c6af56041c1",
+          "allocated_bytes": 8192
+        },
+        "x86/30/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/9/kernel.entry": {
+          "bytes": 19,
+          "sha256": "370c8a5f303666e7363bb6034e4b42f644c94812588c469dc1bed4cd2d133ed0",
+          "allocated_bytes": 4096
+        },
+        "x86/9/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "6709674622933a4fdebfc2dd8ec1bfb4fef20e9b979a4e5febc1e90733df7b5c",
+          "allocated_bytes": 4096
+        },
+        "x86/9/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "d1f36f1acc1999ca223edc2854e2a8b7e0ae43046d016fa5c622c895adf76fc8",
+          "allocated_bytes": 4096
+        },
+        "x86/9/trusted_x86.bpf.c": {
+          "bytes": 123756,
+          "sha256": "fbfe39429e017aae21713a134fdaecad06ab6559e0b7dfcd9b91695c41b279cb",
+          "allocated_bytes": 126976
+        },
+        "x86/9/commands.jsonl": {
+          "bytes": 4922,
+          "sha256": "d9eb1226f98c6e3889841235a4809f16863c1771e64e6972b6a10f329a4bf956",
+          "allocated_bytes": 8192
+        },
+        "x86/9/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/20/kernel.entry": {
+          "bytes": 13,
+          "sha256": "2f4e9ed2cc150b7b13535295080d820dbaeee458df6af5c46c3e70f0a6c6fce4",
+          "allocated_bytes": 4096
+        },
+        "x86/20/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "f75d6ab80929f002f295178dba09812236c047f2e935ba0e8f2eae0b0c7df109",
+          "allocated_bytes": 4096
+        },
+        "x86/20/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "3e8a2f7398475194af081c28560c124c207f2f4ca88a3d2954ac2c1a4d1af438",
+          "allocated_bytes": 4096
+        },
+        "x86/20/trusted_x86.bpf.c": {
+          "bytes": 57528,
+          "sha256": "98608b38121c8fb5240daa237b2a02acf57fd81360f4c5f9aecb6b3a3a78a57b",
+          "allocated_bytes": 61440
+        },
+        "x86/20/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "93bd2ebf02f68df1cf50df24058fef259faef437c29f600deb5a2327876d157f",
+          "allocated_bytes": 8192
+        },
+        "x86/20/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/17/kernel.entry": {
+          "bytes": 27,
+          "sha256": "0c9d2a36c0b6f0b90189e32b869aead4e090445f378f615fdf69bb4162afa451",
+          "allocated_bytes": 4096
+        },
+        "x86/17/generation.metadata.json": {
+          "bytes": 1451,
+          "sha256": "620e5163b4ad50a4b5efc377189621deac912059ce166ae2f12bb5007237bfb1",
+          "allocated_bytes": 4096
+        },
+        "x86/17/kernel.facts.json": {
+          "bytes": 1268,
+          "sha256": "99836dd0e201f59ea4cde59a4c258d2c10297d4f1359c78350f7649cb1eddfeb",
+          "allocated_bytes": 4096
+        },
+        "x86/17/trusted_x86.bpf.c": {
+          "bytes": 80140,
+          "sha256": "dc0880114cef0189285cb805506fe83892c739061cd65bf177efb4e1fe7c3020",
+          "allocated_bytes": 81920
+        },
+        "x86/17/commands.jsonl": {
+          "bytes": 4946,
+          "sha256": "a5afe751ee90d9d30c333f1af965186161f0e428569b58099220044bf1c9d628",
+          "allocated_bytes": 8192
+        },
+        "x86/17/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/37/kernel.entry": {
+          "bytes": 21,
+          "sha256": "8bdf1d6413c2659a82afbe869c841af6ec8cd34cdc50f16552f5d82191fc74b0",
+          "allocated_bytes": 4096
+        },
+        "x86/37/generation.metadata.json": {
+          "bytes": 2600,
+          "sha256": "387e1012a36dfeeb435bcf5521f42031772cbe9778ff89b1b9ce10893a401880",
+          "allocated_bytes": 4096
+        },
+        "x86/37/kernel.facts.json": {
+          "bytes": 2142,
+          "sha256": "d7b67c7da381f29e7019ae86b29ea413ab02095c70132061947161f1e3a1897a",
+          "allocated_bytes": 4096
+        },
+        "x86/37/trusted_x86.bpf.c": {
+          "bytes": 125292,
+          "sha256": "30fb44987f695807309a6286363d3d69e56bacf5e3ceab79ab28ed17087f3e09",
+          "allocated_bytes": 126976
+        },
+        "x86/37/commands.jsonl": {
+          "bytes": 4931,
+          "sha256": "0d0d388c2df5cf53b38975d847665d6b2bc01af140b56585364d3ac07a2e2b1b",
+          "allocated_bytes": 8192
+        },
+        "x86/37/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/63/kernel.entry": {
+          "bytes": 26,
+          "sha256": "6a2a9d65bc4d12c747d6f05919fcd2d55e5b9bd4025d6e3a55036c472c30de9c",
+          "allocated_bytes": 4096
+        },
+        "x86/63/generation.metadata.json": {
+          "bytes": 1250,
+          "sha256": "cf6ced610fa5123424a777548cec47a8aace98b1e2ce97119e8c1dded53ef8bd",
+          "allocated_bytes": 4096
+        },
+        "x86/63/kernel.facts.json": {
+          "bytes": 1130,
+          "sha256": "d44ca94be2668260f76625213732767d722fda16ba684845c87bf64e5c03787b",
+          "allocated_bytes": 4096
+        },
+        "x86/63/trusted_x86.bpf.c": {
+          "bytes": 27109,
+          "sha256": "04cc0ff8d5f4ea9cbd01ec352e2e0a0d8e97524ea899338b8abda95d5fc58101",
+          "allocated_bytes": 28672
+        },
+        "x86/63/commands.jsonl": {
+          "bytes": 4938,
+          "sha256": "96a0e75646c7598a434afbc30815ce1df4dfba159fca4d2c120cf82dd0cadeb1",
+          "allocated_bytes": 8192
+        },
+        "x86/63/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/36/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "x86/36/generation.metadata.json": {
+          "bytes": 294,
+          "sha256": "b39f7357b9eb64810cb1ba757d357d5b90ece9be74202a07e5f4854c7e2ab0e7",
+          "allocated_bytes": 4096
+        },
+        "x86/36/kernel.facts.json": {
+          "bytes": 398,
+          "sha256": "f1ca2ff11307b4d2e1e715fa7d7f12ae056836de15fc9635244e6338de90c537",
+          "allocated_bytes": 4096
+        },
+        "x86/36/trusted_x86.bpf.c": {
+          "bytes": 9776,
+          "sha256": "558f60fc4ceb6197fc9fb4e77e0218b65a8ee9acd2ed2ab2ca6f28a4faa4efb0",
+          "allocated_bytes": 12288
+        },
+        "x86/36/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "91b635acf49242c1985a06d2a97791a42fa2ea6679742e1f426f42f570c6f846",
+          "allocated_bytes": 8192
+        },
+        "x86/36/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/56/kernel.entry": {
+          "bytes": 29,
+          "sha256": "8ea95a7824d846dbf56dc2d08f46aa412769d662524ebff5f1beefe2185248f6",
+          "allocated_bytes": 4096
+        },
+        "x86/56/generation.metadata.json": {
+          "bytes": 1446,
+          "sha256": "0d0456dbe5475ba7eac42a26746e328c3be3458eccc1bd7276ff053e27a7c5e7",
+          "allocated_bytes": 4096
+        },
+        "x86/56/kernel.facts.json": {
+          "bytes": 1258,
+          "sha256": "e14acda080e9bd22d67048eea15cc2ad19d9dcac919692a9deabc6f0cd26e855",
+          "allocated_bytes": 4096
+        },
+        "x86/56/trusted_x86.bpf.c": {
+          "bytes": 146875,
+          "sha256": "8ce10c16b4244ec7502c1df0c8e6ae8f14077d05e0ee152b006858e114dd99b4",
+          "allocated_bytes": 147456
+        },
+        "x86/56/commands.jsonl": {
+          "bytes": 4955,
+          "sha256": "886b2bc1202cf3ac39f54677e76b70eb892cfb7336e6ba83d876dedf1d347035",
+          "allocated_bytes": 8192
+        },
+        "x86/56/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/52/kernel.entry": {
+          "bytes": 30,
+          "sha256": "3c357dfaaf80c7fc5b6b981805487486cb617ca37e98eb763bb7d8605e7562a1",
+          "allocated_bytes": 4096
+        },
+        "x86/52/generation.metadata.json": {
+          "bytes": 1650,
+          "sha256": "e399cb85053cff199e93a9241fdaaec7ce5ed0a1ab99e51a7c659784a094bed7",
+          "allocated_bytes": 4096
+        },
+        "x86/52/kernel.facts.json": {
+          "bytes": 1415,
+          "sha256": "fcce07a5a04ad761f820949602ac74a9b391d6c94be0dbea39121db3e6188206",
+          "allocated_bytes": 4096
+        },
+        "x86/52/trusted_x86.bpf.c": {
+          "bytes": 193719,
+          "sha256": "1ca8110f706b9c45d31da0e25f333cb33f51625f7d48433219772752475ea0c3",
+          "allocated_bytes": 196608
+        },
+        "x86/52/commands.jsonl": {
+          "bytes": 4958,
+          "sha256": "ed6b92321fb2daa92979356583f9c011f0aa5e76d361a1ccd81c7453cd677509",
+          "allocated_bytes": 8192
+        },
+        "x86/52/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/33/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "x86/33/generation.metadata.json": {
+          "bytes": 294,
+          "sha256": "b39f7357b9eb64810cb1ba757d357d5b90ece9be74202a07e5f4854c7e2ab0e7",
+          "allocated_bytes": 4096
+        },
+        "x86/33/kernel.facts.json": {
+          "bytes": 398,
+          "sha256": "d90e8d04c4783bb16798fd3eaa99b266cc3ed310380f6011cf2349ce57e88ec4",
+          "allocated_bytes": 4096
+        },
+        "x86/33/trusted_x86.bpf.c": {
+          "bytes": 9776,
+          "sha256": "2256f84731a0e8c513f383d21dfefeb9ccd40ec476a15309da70ddfb80d502b8",
+          "allocated_bytes": 12288
+        },
+        "x86/33/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "6131bdbe6b82a3bf94118e6f5811a971dbbbe55f8c2ff16257859cfc678df906",
+          "allocated_bytes": 8192
+        },
+        "x86/33/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/45/kernel.entry": {
+          "bytes": 27,
+          "sha256": "0c9d2a36c0b6f0b90189e32b869aead4e090445f378f615fdf69bb4162afa451",
+          "allocated_bytes": 4096
+        },
+        "x86/45/generation.metadata.json": {
+          "bytes": 1451,
+          "sha256": "620e5163b4ad50a4b5efc377189621deac912059ce166ae2f12bb5007237bfb1",
+          "allocated_bytes": 4096
+        },
+        "x86/45/kernel.facts.json": {
+          "bytes": 1268,
+          "sha256": "7c6072ed1c5f84c25a444db14382d009bd1f891cdb45ad3a7d2091c4c91283ff",
+          "allocated_bytes": 4096
+        },
+        "x86/45/trusted_x86.bpf.c": {
+          "bytes": 80140,
+          "sha256": "dc0880114cef0189285cb805506fe83892c739061cd65bf177efb4e1fe7c3020",
+          "allocated_bytes": 81920
+        },
+        "x86/45/commands.jsonl": {
+          "bytes": 4946,
+          "sha256": "4028957c09c23a413b646593cc4170fb5ea4d972eb892b9547d2a1c29a0a835f",
+          "allocated_bytes": 8192
+        },
+        "x86/45/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/2/kernel.entry": {
+          "bytes": 30,
+          "sha256": "3c357dfaaf80c7fc5b6b981805487486cb617ca37e98eb763bb7d8605e7562a1",
+          "allocated_bytes": 4096
+        },
+        "x86/2/generation.metadata.json": {
+          "bytes": 1650,
+          "sha256": "e399cb85053cff199e93a9241fdaaec7ce5ed0a1ab99e51a7c659784a094bed7",
+          "allocated_bytes": 4096
+        },
+        "x86/2/kernel.facts.json": {
+          "bytes": 1415,
+          "sha256": "8ba82abc64b52e7f79070d8251cfade9282b42a7811990bc9757178daa09a3b7",
+          "allocated_bytes": 4096
+        },
+        "x86/2/trusted_x86.bpf.c": {
+          "bytes": 193719,
+          "sha256": "1ca8110f706b9c45d31da0e25f333cb33f51625f7d48433219772752475ea0c3",
+          "allocated_bytes": 196608
+        },
+        "x86/2/commands.jsonl": {
+          "bytes": 4958,
+          "sha256": "25188a92c12be219947e7e9b3423297ac468af32ffe319450b1f038bd7fbd966",
+          "allocated_bytes": 8192
+        },
+        "x86/2/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/24/kernel.entry": {
+          "bytes": 20,
+          "sha256": "b5c6ee8e76ae6d6b42898247f7bc8fe98e3ed2475287073d3bf9952bd4976d66",
+          "allocated_bytes": 4096
+        },
+        "x86/24/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "460db0f4d4be65edf04d3ba6b4c0abd79f133967c8b48cb167b0ee660444744b",
+          "allocated_bytes": 4096
+        },
+        "x86/24/kernel.facts.json": {
+          "bytes": 543,
+          "sha256": "86e28d8d4c2f59874bb335e8d481a1bc07ed1a99af6c1e59f868bd35db797ada",
+          "allocated_bytes": 4096
+        },
+        "x86/24/trusted_x86.bpf.c": {
+          "bytes": 68694,
+          "sha256": "4d0fede7f0020c14f7fc967e07d5ced3bb5f9a260da353bda0fd956927e44d14",
+          "allocated_bytes": 69632
+        },
+        "x86/24/commands.jsonl": {
+          "bytes": 4925,
+          "sha256": "be6206d5889a7972effb5e583f9fb462ac883535e1b2a992fe1a64b5a6446a6e",
+          "allocated_bytes": 8192
+        },
+        "x86/24/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/10/kernel.entry": {
+          "bytes": 15,
+          "sha256": "d3c966e4f413fdcfd607d8e8dde9ca22d8fbe448a0968e28ee419c4e73486dea",
+          "allocated_bytes": 4096
+        },
+        "x86/10/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "ccde5c1af6ee91f476591141ca6ab214fbb8ef49209395f4a51d7f28aec98ccc",
+          "allocated_bytes": 4096
+        },
+        "x86/10/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "fc72145df2ee96176a45c462e45a6bf2f83a046e1951fa4dbdd1c827387795df",
+          "allocated_bytes": 4096
+        },
+        "x86/10/trusted_x86.bpf.c": {
+          "bytes": 52891,
+          "sha256": "9aa50019930ce9c502a111ba76302615adb9483d12775c4dfbb3d6c17e91b5ea",
+          "allocated_bytes": 53248
+        },
+        "x86/10/commands.jsonl": {
+          "bytes": 4910,
+          "sha256": "af3bde5226767d1d39a449bb4f3257c2b5fab466b20e82322729222b2203fb59",
+          "allocated_bytes": 8192
+        },
+        "x86/10/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/14/kernel.entry": {
+          "bytes": 29,
+          "sha256": "8ea95a7824d846dbf56dc2d08f46aa412769d662524ebff5f1beefe2185248f6",
+          "allocated_bytes": 4096
+        },
+        "x86/14/generation.metadata.json": {
+          "bytes": 1446,
+          "sha256": "0d0456dbe5475ba7eac42a26746e328c3be3458eccc1bd7276ff053e27a7c5e7",
+          "allocated_bytes": 4096
+        },
+        "x86/14/kernel.facts.json": {
+          "bytes": 1258,
+          "sha256": "7acc4b5adecaac04777ba485dfc8e1ac68e52155635e463d3387c6f5b38f778d",
+          "allocated_bytes": 4096
+        },
+        "x86/14/trusted_x86.bpf.c": {
+          "bytes": 146875,
+          "sha256": "8ce10c16b4244ec7502c1df0c8e6ae8f14077d05e0ee152b006858e114dd99b4",
+          "allocated_bytes": 147456
+        },
+        "x86/14/commands.jsonl": {
+          "bytes": 4955,
+          "sha256": "21d356d20320f6d23166921ca4c104a2c6200ea3d4d0c228950be72fc9035bf2",
+          "allocated_bytes": 8192
+        },
+        "x86/14/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/23/kernel.entry": {
+          "bytes": 16,
+          "sha256": "ec0b915cff0934f025c3826ace18e6e7ad20b76536c74df26c70b040d475d407",
+          "allocated_bytes": 4096
+        },
+        "x86/23/generation.metadata.json": {
+          "bytes": 2032,
+          "sha256": "f2ee3eb42d1cb7fac218100cb961902c8b367e51efb13aa3fe8e68e311687e7a",
+          "allocated_bytes": 4096
+        },
+        "x86/23/kernel.facts.json": {
+          "bytes": 1703,
+          "sha256": "8e96b15e09c2f6d7d80dfbf3a84049b4422178f847f9082ca5e7b320fb380060",
+          "allocated_bytes": 4096
+        },
+        "x86/23/trusted_x86.bpf.c": {
+          "bytes": 120111,
+          "sha256": "a859eaea648fc416691f52fe48f0cfa5406f95efe15a1a46397a47b98ec22048",
+          "allocated_bytes": 122880
+        },
+        "x86/23/commands.jsonl": {
+          "bytes": 4916,
+          "sha256": "ee93fff5142ccddf8a363c3da462c9be21d26f17c1f19f7965ecbfd3589522e7",
+          "allocated_bytes": 8192
+        },
+        "x86/23/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/42/kernel.entry": {
+          "bytes": 28,
+          "sha256": "f0ae90514c20e14173f6285d8b6a0166f68805e729d11563d7ed137e750bf9d5",
+          "allocated_bytes": 4096
+        },
+        "x86/42/generation.metadata.json": {
+          "bytes": 2441,
+          "sha256": "f948612ef6b9c595c220c319ca790b13e423d9f0b92a705649901e462a8c2c8b",
+          "allocated_bytes": 4096
+        },
+        "x86/42/kernel.facts.json": {
+          "bytes": 2007,
+          "sha256": "cf33f01b01b795862f78614908a1ee25c970b0f95da360b94161284aab900702",
+          "allocated_bytes": 4096
+        },
+        "x86/42/trusted_x86.bpf.c": {
+          "bytes": 157944,
+          "sha256": "7dc659cd48fdedf69341d2509299d081274cc6e519064cda5310a5c8e3c5c5a2",
+          "allocated_bytes": 159744
+        },
+        "x86/42/commands.jsonl": {
+          "bytes": 4952,
+          "sha256": "4fc20e8a1bf73ac3460bd4a4cd8976eda01351c895eafd636a07b4bb1718a37c",
+          "allocated_bytes": 8192
+        },
+        "x86/42/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/22/kernel.entry": {
+          "bytes": 28,
+          "sha256": "f0ae90514c20e14173f6285d8b6a0166f68805e729d11563d7ed137e750bf9d5",
+          "allocated_bytes": 4096
+        },
+        "x86/22/generation.metadata.json": {
+          "bytes": 2441,
+          "sha256": "5c3698fd10fdacbecf2a855d1462fa951063d9d4dc9a09a19efb979f5345b85a",
+          "allocated_bytes": 4096
+        },
+        "x86/22/kernel.facts.json": {
+          "bytes": 2007,
+          "sha256": "9507d26f7f33f02ff01f98f03012ed5eeee3cda0fb3719b4a9051be64b0611bc",
+          "allocated_bytes": 4096
+        },
+        "x86/22/trusted_x86.bpf.c": {
+          "bytes": 158662,
+          "sha256": "34ad809f4d9a297a44db4230c9fbfaf84403851b2cb6dc63c356ca1ea2adc769",
+          "allocated_bytes": 159744
+        },
+        "x86/22/commands.jsonl": {
+          "bytes": 4952,
+          "sha256": "d5aab8649ce598380bb766005a8a7747c67943ffd5adf4045b886e65183d8c05",
+          "allocated_bytes": 8192
+        },
+        "x86/22/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/28/kernel.entry": {
+          "bytes": 26,
+          "sha256": "6a2a9d65bc4d12c747d6f05919fcd2d55e5b9bd4025d6e3a55036c472c30de9c",
+          "allocated_bytes": 4096
+        },
+        "x86/28/generation.metadata.json": {
+          "bytes": 1250,
+          "sha256": "cf6ced610fa5123424a777548cec47a8aace98b1e2ce97119e8c1dded53ef8bd",
+          "allocated_bytes": 4096
+        },
+        "x86/28/kernel.facts.json": {
+          "bytes": 1130,
+          "sha256": "c4e26819998235d7cbbc0f25fbc2cd14e5aeb77501578aeb65b48d9fd5407abf",
+          "allocated_bytes": 4096
+        },
+        "x86/28/trusted_x86.bpf.c": {
+          "bytes": 27109,
+          "sha256": "04cc0ff8d5f4ea9cbd01ec352e2e0a0d8e97524ea899338b8abda95d5fc58101",
+          "allocated_bytes": 28672
+        },
+        "x86/28/commands.jsonl": {
+          "bytes": 4938,
+          "sha256": "d1ae486f9ca9fac590cec337f7844eba413c4969f56c46a76d7f9000efa0aaa0",
+          "allocated_bytes": 8192
+        },
+        "x86/28/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/31/kernel.entry": {
+          "bytes": 14,
+          "sha256": "93021dbb5fd96664def32a019b3e406f1f9ba950d6bb922297ef09f8fa02f721",
+          "allocated_bytes": 4096
+        },
+        "x86/31/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "6709674622933a4fdebfc2dd8ec1bfb4fef20e9b979a4e5febc1e90733df7b5c",
+          "allocated_bytes": 4096
+        },
+        "x86/31/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "b57a86b9e7e1d8f82db4e0c67aefe25e52c900bfdf3edd2794a2bbe4839537d9",
+          "allocated_bytes": 4096
+        },
+        "x86/31/trusted_x86.bpf.c": {
+          "bytes": 106167,
+          "sha256": "399544d2e2f4f55521417644735f2b024db8b301befb84086b0309d46222b6c9",
+          "allocated_bytes": 106496
+        },
+        "x86/31/commands.jsonl": {
+          "bytes": 4907,
+          "sha256": "3b5b207d34e41d815f96135ff261c3ff8bd09d0efa6601759ae5a0b51601f595",
+          "allocated_bytes": 8192
+        },
+        "x86/31/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/5/kernel.entry": {
+          "bytes": 21,
+          "sha256": "27b1656e1fd891e271c60b738ac198274c61384017fe59893ddb208ac8a0c73e",
+          "allocated_bytes": 4096
+        },
+        "x86/5/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "x86/5/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "b58d5b594166d2594e7768e60b4311b3ae0d9fdb0fcb2a9b9cee1210d8aded6c",
+          "allocated_bytes": 4096
+        },
+        "x86/5/trusted_x86.bpf.c": {
+          "bytes": 676,
+          "sha256": "e0e68bc968d89e5da55b1e1f98bf683f5481c5e4ea0ccded690e68d9ce4f1a25",
+          "allocated_bytes": 4096
+        },
+        "x86/5/commands.jsonl": {
+          "bytes": 4912,
+          "sha256": "d5b63c9e42ce791fd2486a7a6846d6af6fa7169510415c14614926e5d2327b26",
+          "allocated_bytes": 8192
+        },
+        "x86/5/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/47/kernel.entry": {
+          "bytes": 16,
+          "sha256": "8092e59435d552f30decfc44316f3c4f61fa1cf1dab2c386b9132e56e09d14a8",
+          "allocated_bytes": 4096
+        },
+        "x86/47/generation.metadata.json": {
+          "bytes": 2452,
+          "sha256": "609d11df88a0371697b44f70f3c3903890c32c46f7ab39e700ceeb403779be37",
+          "allocated_bytes": 4096
+        },
+        "x86/47/kernel.facts.json": {
+          "bytes": 2002,
+          "sha256": "e3efe1033202efc9ede89dfebb38bfffa44fdd4df4d7f65b99f03ad093ba8c3c",
+          "allocated_bytes": 4096
+        },
+        "x86/47/trusted_x86.bpf.c": {
+          "bytes": 119293,
+          "sha256": "a170a911c7190ec11b159598e2ced330d44a0beffd3121f7a4aa814fb5a57f4a",
+          "allocated_bytes": 122880
+        },
+        "x86/47/commands.jsonl": {
+          "bytes": 4913,
+          "sha256": "7938e301138ce24480b445502b8f9e8a9359083ed04283adb6b2e3ee7f77a873",
+          "allocated_bytes": 8192
+        },
+        "x86/47/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/34/kernel.entry": {
+          "bytes": 11,
+          "sha256": "1a4187e432e15f487e2b6e967888e4baee3ba35ceffdecaada8c6d81c0c96639",
+          "allocated_bytes": 4096
+        },
+        "x86/34/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "f37536d0dfa510b30719e444376864780d4a40dabd250f51f89eb59db7a0f92c",
+          "allocated_bytes": 4096
+        },
+        "x86/34/kernel.facts.json": {
+          "bytes": 542,
+          "sha256": "56add9336d48562f1c8128a03f3895a0bda3eb3ec116ad5d58b9f3819305a4d0",
+          "allocated_bytes": 4096
+        },
+        "x86/34/trusted_x86.bpf.c": {
+          "bytes": 13359,
+          "sha256": "a312cca60b5ef549995c614cd7cba98a94f6fe01ecfdbc9f490cbebb4ba65a43",
+          "allocated_bytes": 16384
+        },
+        "x86/34/commands.jsonl": {
+          "bytes": 4889,
+          "sha256": "ce2b98a25024eba6eaebc6e544c03b54127efbfdff2c6f5edb563d87bea20c9c",
+          "allocated_bytes": 8192
+        },
+        "x86/34/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/64/kernel.entry": {
+          "bytes": 28,
+          "sha256": "f0ae90514c20e14173f6285d8b6a0166f68805e729d11563d7ed137e750bf9d5",
+          "allocated_bytes": 4096
+        },
+        "x86/64/generation.metadata.json": {
+          "bytes": 2441,
+          "sha256": "f948612ef6b9c595c220c319ca790b13e423d9f0b92a705649901e462a8c2c8b",
+          "allocated_bytes": 4096
+        },
+        "x86/64/kernel.facts.json": {
+          "bytes": 2007,
+          "sha256": "8866f61cefe3ef002e00f15549658f9a8537664b5efcfc6bfde1fbcd5fb5c7de",
+          "allocated_bytes": 4096
+        },
+        "x86/64/trusted_x86.bpf.c": {
+          "bytes": 157944,
+          "sha256": "7dc659cd48fdedf69341d2509299d081274cc6e519064cda5310a5c8e3c5c5a2",
+          "allocated_bytes": 159744
+        },
+        "x86/64/commands.jsonl": {
+          "bytes": 4952,
+          "sha256": "8cfb7a180066b10f20edbeea305f51654f41a5132596b992fceb95a434567cdd",
+          "allocated_bytes": 8192
+        },
+        "x86/64/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/29/kernel.entry": {
+          "bytes": 21,
+          "sha256": "c8b3645ee5e26f5a29d20a08fe96731a58c40782f329c141b75fbb0f897ee5fc",
+          "allocated_bytes": 4096
+        },
+        "x86/29/generation.metadata.json": {
+          "bytes": 2619,
+          "sha256": "58fda201c678915108f19c1a11f1314c331869eeba7baea985ab58633b7b6cd4",
+          "allocated_bytes": 4096
+        },
+        "x86/29/kernel.facts.json": {
+          "bytes": 2143,
+          "sha256": "dcc8d72d89589db2c8ceee8456c880a0536f2617f7eea1af7cd6e202895dd4b7",
+          "allocated_bytes": 4096
+        },
+        "x86/29/trusted_x86.bpf.c": {
+          "bytes": 135132,
+          "sha256": "0815fab7c610ac0ff0aeba250abd5beafc13080a6199324ea3fbc9fc0f4cf60d",
+          "allocated_bytes": 135168
+        },
+        "x86/29/commands.jsonl": {
+          "bytes": 4932,
+          "sha256": "6f2fdea2f65b75cb9eb6bd4b281bc43f566bcd51f33f4b5e3ab9f76f9ca626e9",
+          "allocated_bytes": 8192
+        },
+        "x86/29/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/26/kernel.entry": {
+          "bytes": 30,
+          "sha256": "3c357dfaaf80c7fc5b6b981805487486cb617ca37e98eb763bb7d8605e7562a1",
+          "allocated_bytes": 4096
+        },
+        "x86/26/generation.metadata.json": {
+          "bytes": 1650,
+          "sha256": "e399cb85053cff199e93a9241fdaaec7ce5ed0a1ab99e51a7c659784a094bed7",
+          "allocated_bytes": 4096
+        },
+        "x86/26/kernel.facts.json": {
+          "bytes": 1415,
+          "sha256": "68caa24db5a1c29428fca15b8c17f2a8ae40e29055aaea8e79bf4e6da6b02f4c",
+          "allocated_bytes": 4096
+        },
+        "x86/26/trusted_x86.bpf.c": {
+          "bytes": 193719,
+          "sha256": "1ca8110f706b9c45d31da0e25f333cb33f51625f7d48433219772752475ea0c3",
+          "allocated_bytes": 196608
+        },
+        "x86/26/commands.jsonl": {
+          "bytes": 4958,
+          "sha256": "6df855b9318368bcec5f11e1efa86cc7cd4361a930f6a078eb51604999c761b9",
+          "allocated_bytes": 8192
+        },
+        "x86/26/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/18/kernel.entry": {
+          "bytes": 26,
+          "sha256": "6a2a9d65bc4d12c747d6f05919fcd2d55e5b9bd4025d6e3a55036c472c30de9c",
+          "allocated_bytes": 4096
+        },
+        "x86/18/generation.metadata.json": {
+          "bytes": 1250,
+          "sha256": "cf6ced610fa5123424a777548cec47a8aace98b1e2ce97119e8c1dded53ef8bd",
+          "allocated_bytes": 4096
+        },
+        "x86/18/kernel.facts.json": {
+          "bytes": 1130,
+          "sha256": "83122af678145259070b4a5ea0f3a8ff61c2937ea780df79ccca1e6d2c7cf9f3",
+          "allocated_bytes": 4096
+        },
+        "x86/18/trusted_x86.bpf.c": {
+          "bytes": 27109,
+          "sha256": "04cc0ff8d5f4ea9cbd01ec352e2e0a0d8e97524ea899338b8abda95d5fc58101",
+          "allocated_bytes": 28672
+        },
+        "x86/18/commands.jsonl": {
+          "bytes": 4938,
+          "sha256": "6df53669c16b0a22238c0136361db3f27361e2a4e9980c3560d60c614f4d74e7",
+          "allocated_bytes": 8192
+        },
+        "x86/18/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/27/kernel.entry": {
+          "bytes": 16,
+          "sha256": "8092e59435d552f30decfc44316f3c4f61fa1cf1dab2c386b9132e56e09d14a8",
+          "allocated_bytes": 4096
+        },
+        "x86/27/generation.metadata.json": {
+          "bytes": 2452,
+          "sha256": "609d11df88a0371697b44f70f3c3903890c32c46f7ab39e700ceeb403779be37",
+          "allocated_bytes": 4096
+        },
+        "x86/27/kernel.facts.json": {
+          "bytes": 2002,
+          "sha256": "d579b50ccee7f4c37fde0d6b135b5c0080189550b6b35e92ac0818cdc371e1b3",
+          "allocated_bytes": 4096
+        },
+        "x86/27/trusted_x86.bpf.c": {
+          "bytes": 119293,
+          "sha256": "a4049b66675883888b981b9287edcd0e312662b2ff44506f0352e152d0e8e3a7",
+          "allocated_bytes": 122880
+        },
+        "x86/27/commands.jsonl": {
+          "bytes": 4913,
+          "sha256": "aea8ad332c7f2f64e30f129289589c6faca7492721bbc63920100bbf076b2f69",
+          "allocated_bytes": 8192
+        },
+        "x86/27/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/1/kernel.entry": {
+          "bytes": 13,
+          "sha256": "a50721a388822afc40c8f33ad625fa9c3309f3f69dbc99aa6fb1fae66c16c2cb",
+          "allocated_bytes": 4096
+        },
+        "x86/1/generation.metadata.json": {
+          "bytes": 683,
+          "sha256": "8d7fc8af995ac9e628310c01d53629c92f1f95359b607f770724c94256291081",
+          "allocated_bytes": 4096
+        },
+        "x86/1/kernel.facts.json": {
+          "bytes": 696,
+          "sha256": "1f50f378162a524058dbf510300cb3d5cdf97587df08a0392d6439716f1bac03",
+          "allocated_bytes": 4096
+        },
+        "x86/1/trusted_x86.bpf.c": {
+          "bytes": 11493,
+          "sha256": "43573b3ac91ff9957abd0d63f02b1d0501912641b1c873d60e075468b5057bcc",
+          "allocated_bytes": 12288
+        },
+        "x86/1/commands.jsonl": {
+          "bytes": 4898,
+          "sha256": "df1a8afad85038964d0fcf51f225b587ac0b89bc81f76d872f050ab007eb6e25",
+          "allocated_bytes": 8192
+        },
+        "x86/1/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/11/kernel.entry": {
+          "bytes": 20,
+          "sha256": "28c0b07d734449f52381d2ad5cef236fc7db0f05a3d339a5c1aac83088aa241b",
+          "allocated_bytes": 4096
+        },
+        "x86/11/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "7684e5431e2580b6ed9c19ec9fed64610be1caae3eff7ff42e7fb5f1eada628e",
+          "allocated_bytes": 4096
+        },
+        "x86/11/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "cda8caa18766add05a04aaf9e934306365cbef5a78abb5df40fb4ab740f731ac",
+          "allocated_bytes": 4096
+        },
+        "x86/11/trusted_x86.bpf.c": {
+          "bytes": 95198,
+          "sha256": "df7199687ee86a0ade41d034d5df07206ab983228f8d040a280acd5681cf0e06",
+          "allocated_bytes": 98304
+        },
+        "x86/11/commands.jsonl": {
+          "bytes": 4925,
+          "sha256": "c1f27d711746a9e9b7e8dfd87c51894756c97986560f912e4cc2ed65bd505d49",
+          "allocated_bytes": 8192
+        },
+        "x86/11/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/21/kernel.entry": {
+          "bytes": 18,
+          "sha256": "ba419b5dbe3eaeeabfae124e5c95c501cfe1e5332fd2733fc0ff4d5770590673",
+          "allocated_bytes": 4096
+        },
+        "x86/21/generation.metadata.json": {
+          "bytes": 663,
+          "sha256": "f3d8b58606db5ade30a1cc32ff5b9223e6d9b0fe73fd8c1d4a3cbb692c99810e",
+          "allocated_bytes": 4096
+        },
+        "x86/21/kernel.facts.json": {
+          "bytes": 683,
+          "sha256": "222f1fb51bceb9069431754a785af7006e516a1f41e2ebb7fa9a67fb71432d15",
+          "allocated_bytes": 4096
+        },
+        "x86/21/trusted_x86.bpf.c": {
+          "bytes": 21030,
+          "sha256": "320116b3e33d48f505ae377840e77c822b757f01b3d0a112d76001dc1e840c04",
+          "allocated_bytes": 24576
+        },
+        "x86/21/commands.jsonl": {
+          "bytes": 4913,
+          "sha256": "8cc1dfd788d77345ae313ca01610e12dd078c55377eef9c7138c0972f057f8fb",
+          "allocated_bytes": 8192
+        },
+        "x86/21/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/35/kernel.entry": {
+          "bytes": 21,
+          "sha256": "c8b3645ee5e26f5a29d20a08fe96731a58c40782f329c141b75fbb0f897ee5fc",
+          "allocated_bytes": 4096
+        },
+        "x86/35/generation.metadata.json": {
+          "bytes": 2619,
+          "sha256": "58fda201c678915108f19c1a11f1314c331869eeba7baea985ab58633b7b6cd4",
+          "allocated_bytes": 4096
+        },
+        "x86/35/kernel.facts.json": {
+          "bytes": 2143,
+          "sha256": "ca63a5ba32d3184fa44f1144b73551b4fcdc342c3b8ff762c1086467cbe8f7a8",
+          "allocated_bytes": 4096
+        },
+        "x86/35/trusted_x86.bpf.c": {
+          "bytes": 135132,
+          "sha256": "00bb5f75551cda5e371063ec5a9849887f01ff60d700bbcc2d4f4dde71845ffd",
+          "allocated_bytes": 135168
+        },
+        "x86/35/commands.jsonl": {
+          "bytes": 4932,
+          "sha256": "86df4de45ae8deb085066de2c985ff0709ce6fd7f9048f7ff8f65e82b4b54c77",
+          "allocated_bytes": 8192
+        },
+        "x86/35/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/7/kernel.entry": {
+          "bytes": 21,
+          "sha256": "8bdf1d6413c2659a82afbe869c841af6ec8cd34cdc50f16552f5d82191fc74b0",
+          "allocated_bytes": 4096
+        },
+        "x86/7/generation.metadata.json": {
+          "bytes": 2600,
+          "sha256": "387e1012a36dfeeb435bcf5521f42031772cbe9778ff89b1b9ce10893a401880",
+          "allocated_bytes": 4096
+        },
+        "x86/7/kernel.facts.json": {
+          "bytes": 2142,
+          "sha256": "5c6ef0e65117360894e8636ab122e57a27659101ea6a5f22ba00b440c72f4e61",
+          "allocated_bytes": 4096
+        },
+        "x86/7/trusted_x86.bpf.c": {
+          "bytes": 125292,
+          "sha256": "d313fcebe8fc8b7f6e6b14da531ccc14e63081048f290e4fb178241fd87ce937",
+          "allocated_bytes": 126976
+        },
+        "x86/7/commands.jsonl": {
+          "bytes": 4931,
+          "sha256": "235cee37bc06500e9d72200431130886e2868475d4888aaf4ab13a87935275cc",
+          "allocated_bytes": 8192
+        },
+        "x86/7/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/48/kernel.entry": {
+          "bytes": 13,
+          "sha256": "2f4e9ed2cc150b7b13535295080d820dbaeee458df6af5c46c3e70f0a6c6fce4",
+          "allocated_bytes": 4096
+        },
+        "x86/48/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "f75d6ab80929f002f295178dba09812236c047f2e935ba0e8f2eae0b0c7df109",
+          "allocated_bytes": 4096
+        },
+        "x86/48/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "d97e4d80d6e726214090e658f3a66df9445b5b8b764b090260c26331a9ef1f87",
+          "allocated_bytes": 4096
+        },
+        "x86/48/trusted_x86.bpf.c": {
+          "bytes": 57528,
+          "sha256": "98608b38121c8fb5240daa237b2a02acf57fd81360f4c5f9aecb6b3a3a78a57b",
+          "allocated_bytes": 61440
+        },
+        "x86/48/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "a1d0380de2884956d967d573bfefb1d636468d81566b8348cc234dcc19a29955",
+          "allocated_bytes": 8192
+        },
+        "x86/48/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/60/kernel.entry": {
+          "bytes": 11,
+          "sha256": "1a4187e432e15f487e2b6e967888e4baee3ba35ceffdecaada8c6d81c0c96639",
+          "allocated_bytes": 4096
+        },
+        "x86/60/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "f37536d0dfa510b30719e444376864780d4a40dabd250f51f89eb59db7a0f92c",
+          "allocated_bytes": 4096
+        },
+        "x86/60/kernel.facts.json": {
+          "bytes": 542,
+          "sha256": "53b6a5376af18fed1ae031683b74df5334b51bad8c1503c0deff9fbceb560599",
+          "allocated_bytes": 4096
+        },
+        "x86/60/trusted_x86.bpf.c": {
+          "bytes": 13359,
+          "sha256": "a312cca60b5ef549995c614cd7cba98a94f6fe01ecfdbc9f490cbebb4ba65a43",
+          "allocated_bytes": 16384
+        },
+        "x86/60/commands.jsonl": {
+          "bytes": 4889,
+          "sha256": "9f7291f08a83815c83738ad86a34f89a494f81d2d7e463fe720b01175f5f13cc",
+          "allocated_bytes": 8192
+        },
+        "x86/60/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/43/kernel.entry": {
+          "bytes": 16,
+          "sha256": "ec0b915cff0934f025c3826ace18e6e7ad20b76536c74df26c70b040d475d407",
+          "allocated_bytes": 4096
+        },
+        "x86/43/generation.metadata.json": {
+          "bytes": 2032,
+          "sha256": "f2ee3eb42d1cb7fac218100cb961902c8b367e51efb13aa3fe8e68e311687e7a",
+          "allocated_bytes": 4096
+        },
+        "x86/43/kernel.facts.json": {
+          "bytes": 1703,
+          "sha256": "4d7d43e7426ecea3f0a8d3db5ee9bec02beaa9276e5dfe822ae502a9d08415ed",
+          "allocated_bytes": 4096
+        },
+        "x86/43/trusted_x86.bpf.c": {
+          "bytes": 120111,
+          "sha256": "17e0550a1985f82380731dc8438483ef367e01e88e3e2cd58f03974c93da0326",
+          "allocated_bytes": 122880
+        },
+        "x86/43/commands.jsonl": {
+          "bytes": 4916,
+          "sha256": "1ac3521e0fd1b63577b65e9fed3ffa4be4495cb2f1721cb67e74520d513285ed",
+          "allocated_bytes": 8192
+        },
+        "x86/43/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/44/kernel.entry": {
+          "bytes": 15,
+          "sha256": "db42757064eb3fb07c2a9091265dd9d13eb24ff44780ac85bf0fb805e2f202ac",
+          "allocated_bytes": 4096
+        },
+        "x86/44/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "x86/44/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "7deb30382fa3565f05c65d7636ad52c31b84b67dd4c5c0881d0d680eab20aa8c",
+          "allocated_bytes": 4096
+        },
+        "x86/44/trusted_x86.bpf.c": {
+          "bytes": 670,
+          "sha256": "989ce6158d4c1a2bdfae63c660ba1b1f6eacebb416e8bfed06c37587c9618e40",
+          "allocated_bytes": 4096
+        },
+        "x86/44/commands.jsonl": {
+          "bytes": 4893,
+          "sha256": "fe1a0bf1ff43bc97fbbecf7eaf87e87b090af4d9dd41af80be0fa5f46d49c068",
+          "allocated_bytes": 8192
+        },
+        "x86/44/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/49/kernel.entry": {
+          "bytes": 15,
+          "sha256": "122f38091c281eb85a391632aff1a249a4a8138afb9ba2ef1c1bad5be938f9f5",
+          "allocated_bytes": 4096
+        },
+        "x86/49/generation.metadata.json": {
+          "bytes": 871,
+          "sha256": "0b5c25051c2aa562a69ed8e440210113771ce1bb90e979c38a317d8e4ce43624",
+          "allocated_bytes": 4096
+        },
+        "x86/49/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "3e012af2b269a7bb52d8fac7a26a971dcf3289e765995d670ecc57075c47cfb9",
+          "allocated_bytes": 4096
+        },
+        "x86/49/trusted_x86.bpf.c": {
+          "bytes": 22144,
+          "sha256": "3828557f8d5c8904d850f8393a774ae2b20b6b0e2394533f346b41e5ae959081",
+          "allocated_bytes": 24576
+        },
+        "x86/49/commands.jsonl": {
+          "bytes": 4905,
+          "sha256": "525cf97996c62ad383bce7729f5789a81338adcac9a26c7e1dfa59e0a103b959",
+          "allocated_bytes": 8192
+        },
+        "x86/49/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/15/kernel.entry": {
+          "bytes": 14,
+          "sha256": "93021dbb5fd96664def32a019b3e406f1f9ba950d6bb922297ef09f8fa02f721",
+          "allocated_bytes": 4096
+        },
+        "x86/15/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "6709674622933a4fdebfc2dd8ec1bfb4fef20e9b979a4e5febc1e90733df7b5c",
+          "allocated_bytes": 4096
+        },
+        "x86/15/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "d57335436f175b026ceb03e6ea6f7db11ca185d03637733ccd7a6f1bdc889f91",
+          "allocated_bytes": 4096
+        },
+        "x86/15/trusted_x86.bpf.c": {
+          "bytes": 106167,
+          "sha256": "ea52fb065c314f767c70a3d9656107ca546de6c8ad0861511ce5b58ffe179bd9",
+          "allocated_bytes": 106496
+        },
+        "x86/15/commands.jsonl": {
+          "bytes": 4907,
+          "sha256": "b5060505b1211c884849d74463fd8f20432caa4e5bff5edd249489ff1aea66fb",
+          "allocated_bytes": 8192
+        },
+        "x86/15/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/55/kernel.entry": {
+          "bytes": 19,
+          "sha256": "370c8a5f303666e7363bb6034e4b42f644c94812588c469dc1bed4cd2d133ed0",
+          "allocated_bytes": 4096
+        },
+        "x86/55/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "6709674622933a4fdebfc2dd8ec1bfb4fef20e9b979a4e5febc1e90733df7b5c",
+          "allocated_bytes": 4096
+        },
+        "x86/55/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "5966ef1ef12f515fd827c066e724d43009464fd769fb14c34c273be36583603b",
+          "allocated_bytes": 4096
+        },
+        "x86/55/trusted_x86.bpf.c": {
+          "bytes": 123756,
+          "sha256": "8f80026940aee46e152c21979e8d5d83fd3169ff1d5e2d4a80c513b2195a1c0a",
+          "allocated_bytes": 126976
+        },
+        "x86/55/commands.jsonl": {
+          "bytes": 4922,
+          "sha256": "65eeb55b80819247c20a0de63b539bfea198a4bc7a79ddda81ea20ed1420ad6f",
+          "allocated_bytes": 8192
+        },
+        "x86/55/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/41/kernel.entry": {
+          "bytes": 18,
+          "sha256": "ba419b5dbe3eaeeabfae124e5c95c501cfe1e5332fd2733fc0ff4d5770590673",
+          "allocated_bytes": 4096
+        },
+        "x86/41/generation.metadata.json": {
+          "bytes": 663,
+          "sha256": "f3d8b58606db5ade30a1cc32ff5b9223e6d9b0fe73fd8c1d4a3cbb692c99810e",
+          "allocated_bytes": 4096
+        },
+        "x86/41/kernel.facts.json": {
+          "bytes": 683,
+          "sha256": "4d5b15aac75d71eed3d5807dd0fb214ee494dd0e463dcb166760f3c786f6d7d0",
+          "allocated_bytes": 4096
+        },
+        "x86/41/trusted_x86.bpf.c": {
+          "bytes": 21030,
+          "sha256": "cabb01bd68288837895f479d5ab33042dc7d93197c5922ec4881b0045b19594c",
+          "allocated_bytes": 24576
+        },
+        "x86/41/commands.jsonl": {
+          "bytes": 4913,
+          "sha256": "066e0dc96063c59c5eb418552530d1ff88ef0b1cd6b4c23ba094d00d4823cb2b",
+          "allocated_bytes": 8192
+        },
+        "x86/41/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/25/kernel.entry": {
+          "bytes": 20,
+          "sha256": "b5c6ee8e76ae6d6b42898247f7bc8fe98e3ed2475287073d3bf9952bd4976d66",
+          "allocated_bytes": 4096
+        },
+        "x86/25/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "460db0f4d4be65edf04d3ba6b4c0abd79f133967c8b48cb167b0ee660444744b",
+          "allocated_bytes": 4096
+        },
+        "x86/25/kernel.facts.json": {
+          "bytes": 543,
+          "sha256": "acb23f74b81e6f9cbe1488f013a67a67e35631ac6c8aaa56aa7db779652cd9d1",
+          "allocated_bytes": 4096
+        },
+        "x86/25/trusted_x86.bpf.c": {
+          "bytes": 68879,
+          "sha256": "40984e559d830161616d66bad6d7924ef5606297f9108362c97b42e94ebf1c7a",
+          "allocated_bytes": 69632
+        },
+        "x86/25/commands.jsonl": {
+          "bytes": 4928,
+          "sha256": "30475fe931f8f5e54602783b402b95324c6147a4aeaad8d54e0d8f906b0b8dba",
+          "allocated_bytes": 8192
+        },
+        "x86/25/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/12/kernel.entry": {
+          "bytes": 11,
+          "sha256": "1a4187e432e15f487e2b6e967888e4baee3ba35ceffdecaada8c6d81c0c96639",
+          "allocated_bytes": 4096
+        },
+        "x86/12/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "f37536d0dfa510b30719e444376864780d4a40dabd250f51f89eb59db7a0f92c",
+          "allocated_bytes": 4096
+        },
+        "x86/12/kernel.facts.json": {
+          "bytes": 542,
+          "sha256": "6bf4249758c9645264d5b5c6279c47dcba1baf948d5bbb8b5ed1ee94892f6cb3",
+          "allocated_bytes": 4096
+        },
+        "x86/12/trusted_x86.bpf.c": {
+          "bytes": 13359,
+          "sha256": "a312cca60b5ef549995c614cd7cba98a94f6fe01ecfdbc9f490cbebb4ba65a43",
+          "allocated_bytes": 16384
+        },
+        "x86/12/commands.jsonl": {
+          "bytes": 4889,
+          "sha256": "6390298877a8066c95d06ed307a22bed2a098709c67e567dd055920b1feef032",
+          "allocated_bytes": 8192
+        },
+        "x86/12/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/58/kernel.entry": {
+          "bytes": 13,
+          "sha256": "b1ccef4ec9fc999cb585a671cd045cc8fce6830513e4873ca54e42755ea70d1c",
+          "allocated_bytes": 4096
+        },
+        "x86/58/generation.metadata.json": {
+          "bytes": 1633,
+          "sha256": "ac0280e3a43e6f8e258946e99478a19bac347327715e940b98cae0d6190ae067",
+          "allocated_bytes": 4096
+        },
+        "x86/58/kernel.facts.json": {
+          "bytes": 1408,
+          "sha256": "c3989f9545a3316a6428626578d5c133081a80e8789e41eda60893c4b8105be1",
+          "allocated_bytes": 4096
+        },
+        "x86/58/trusted_x86.bpf.c": {
+          "bytes": 102252,
+          "sha256": "0419e63a62900d07efbbe23362f1483cc0e7f19a97b7621353d9901cd0045af6",
+          "allocated_bytes": 102400
+        },
+        "x86/58/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "59ed97ee3ac1ff7fe081970fe182c7ae0f69240ed169cd76e9e1e011c2babbca",
+          "allocated_bytes": 8192
+        },
+        "x86/58/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/13/kernel.entry": {
+          "bytes": 15,
+          "sha256": "122f38091c281eb85a391632aff1a249a4a8138afb9ba2ef1c1bad5be938f9f5",
+          "allocated_bytes": 4096
+        },
+        "x86/13/generation.metadata.json": {
+          "bytes": 871,
+          "sha256": "0b5c25051c2aa562a69ed8e440210113771ce1bb90e979c38a317d8e4ce43624",
+          "allocated_bytes": 4096
+        },
+        "x86/13/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "bf754e3998e6d2bd389cdef6d77ff2e6ec94e2a17424df2ba044759aed87f150",
+          "allocated_bytes": 4096
+        },
+        "x86/13/trusted_x86.bpf.c": {
+          "bytes": 22144,
+          "sha256": "3828557f8d5c8904d850f8393a774ae2b20b6b0e2394533f346b41e5ae959081",
+          "allocated_bytes": 24576
+        },
+        "x86/13/commands.jsonl": {
+          "bytes": 4905,
+          "sha256": "055dfdd5917955d79fe0ef168ed5e7fea09993a8881925933cf90aa8076bf08f",
+          "allocated_bytes": 8192
+        },
+        "x86/13/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/59/kernel.entry": {
+          "bytes": 15,
+          "sha256": "d3c966e4f413fdcfd607d8e8dde9ca22d8fbe448a0968e28ee419c4e73486dea",
+          "allocated_bytes": 4096
+        },
+        "x86/59/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "ccde5c1af6ee91f476591141ca6ab214fbb8ef49209395f4a51d7f28aec98ccc",
+          "allocated_bytes": 4096
+        },
+        "x86/59/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "77f9eb5169a7f875d34fe77b3621c7a519ccca20f1025f8beb55ce36feef1b1d",
+          "allocated_bytes": 4096
+        },
+        "x86/59/trusted_x86.bpf.c": {
+          "bytes": 52891,
+          "sha256": "9aa50019930ce9c502a111ba76302615adb9483d12775c4dfbb3d6c17e91b5ea",
+          "allocated_bytes": 53248
+        },
+        "x86/59/commands.jsonl": {
+          "bytes": 4910,
+          "sha256": "4a0359ab5cd28f249568324b3169e2ebefa9f175f355f4a68d1a5af12128af77",
+          "allocated_bytes": 8192
+        },
+        "x86/59/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/3/kernel.entry": {
+          "bytes": 16,
+          "sha256": "f1f238485bce94abbdab6c75cf9ff62a72272594dbb2412d8a532028636a520c",
+          "allocated_bytes": 4096
+        },
+        "x86/3/generation.metadata.json": {
+          "bytes": 663,
+          "sha256": "ec4d557fb8b50dcba93e43ad1820856fa5dc0ed2bce5c32e380ff82228f63a8b",
+          "allocated_bytes": 4096
+        },
+        "x86/3/kernel.facts.json": {
+          "bytes": 683,
+          "sha256": "94e14388ddf4e26a9d318b4d982b711bbdd2706dde085b160decb4080c4129e9",
+          "allocated_bytes": 4096
+        },
+        "x86/3/trusted_x86.bpf.c": {
+          "bytes": 29102,
+          "sha256": "c1de4e250254a2afed8ea51b24b475def80157d829a82a2c0eac302e157da2f3",
+          "allocated_bytes": 32768
+        },
+        "x86/3/commands.jsonl": {
+          "bytes": 4908,
+          "sha256": "9cca4d4e93bfc5f55f7080777faeeb0f1f93fc9e9c23be2a1bef6d1fe11b893e",
+          "allocated_bytes": 8192
+        },
+        "x86/3/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/62/kernel.entry": {
+          "bytes": 15,
+          "sha256": "db42757064eb3fb07c2a9091265dd9d13eb24ff44780ac85bf0fb805e2f202ac",
+          "allocated_bytes": 4096
+        },
+        "x86/62/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "x86/62/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "d036f3d34af208eaed66ecfad548e4e89adad3ed0f4cb1a6abf55bbe18019e7b",
+          "allocated_bytes": 4096
+        },
+        "x86/62/trusted_x86.bpf.c": {
+          "bytes": 670,
+          "sha256": "989ce6158d4c1a2bdfae63c660ba1b1f6eacebb416e8bfed06c37587c9618e40",
+          "allocated_bytes": 4096
+        },
+        "x86/62/commands.jsonl": {
+          "bytes": 4893,
+          "sha256": "44152905d34ee61369986c07b7e7cd6363284abad387d9a8960dfec817f46392",
+          "allocated_bytes": 8192
+        },
+        "x86/62/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/51/kernel.entry": {
+          "bytes": 21,
+          "sha256": "27b1656e1fd891e271c60b738ac198274c61384017fe59893ddb208ac8a0c73e",
+          "allocated_bytes": 4096
+        },
+        "x86/51/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "x86/51/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "8ce858bdf86f3dbaab661aafd7221bf14aba6ba5c30b563b922522635222f9ab",
+          "allocated_bytes": 4096
+        },
+        "x86/51/trusted_x86.bpf.c": {
+          "bytes": 676,
+          "sha256": "e0e68bc968d89e5da55b1e1f98bf683f5481c5e4ea0ccded690e68d9ce4f1a25",
+          "allocated_bytes": 4096
+        },
+        "x86/51/commands.jsonl": {
+          "bytes": 4912,
+          "sha256": "26412ec440865a474b6c4cc669d77ed0d79b90ccfdf842c1c40f788c6ec13dba",
+          "allocated_bytes": 8192
+        },
+        "x86/51/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/16/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "x86/16/generation.metadata.json": {
+          "bytes": 294,
+          "sha256": "b39f7357b9eb64810cb1ba757d357d5b90ece9be74202a07e5f4854c7e2ab0e7",
+          "allocated_bytes": 4096
+        },
+        "x86/16/kernel.facts.json": {
+          "bytes": 398,
+          "sha256": "10b7df0578c9a7efe85380c4ae06f6a4cbda1b7e78d2a881b4dc95c8165af597",
+          "allocated_bytes": 4096
+        },
+        "x86/16/trusted_x86.bpf.c": {
+          "bytes": 9776,
+          "sha256": "558f60fc4ceb6197fc9fb4e77e0218b65a8ee9acd2ed2ab2ca6f28a4faa4efb0",
+          "allocated_bytes": 12288
+        },
+        "x86/16/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "32e1a3ad3a36f28922108afb9c228705fe26d97660885abeea501ca6a85ea275",
+          "allocated_bytes": 8192
+        },
+        "x86/16/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/19/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "x86/19/generation.metadata.json": {
+          "bytes": 294,
+          "sha256": "b39f7357b9eb64810cb1ba757d357d5b90ece9be74202a07e5f4854c7e2ab0e7",
+          "allocated_bytes": 4096
+        },
+        "x86/19/kernel.facts.json": {
+          "bytes": 398,
+          "sha256": "22a4bf58c9fc160a4de3e52413e6fa159e19ee8f574c24cfd768b3935d750900",
+          "allocated_bytes": 4096
+        },
+        "x86/19/trusted_x86.bpf.c": {
+          "bytes": 9776,
+          "sha256": "b9be182fdb9b2609b97e27aaffc1b8b4f1366aee2d2787e9ba0cc17c6506af38",
+          "allocated_bytes": 12288
+        },
+        "x86/19/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "2b98ebda357275f06986582be7e0543707e2ef453c7abf95997a60ace09deef7",
+          "allocated_bytes": 8192
+        },
+        "x86/19/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/6/kernel.entry": {
+          "bytes": 13,
+          "sha256": "b1ccef4ec9fc999cb585a671cd045cc8fce6830513e4873ca54e42755ea70d1c",
+          "allocated_bytes": 4096
+        },
+        "x86/6/generation.metadata.json": {
+          "bytes": 1633,
+          "sha256": "ac0280e3a43e6f8e258946e99478a19bac347327715e940b98cae0d6190ae067",
+          "allocated_bytes": 4096
+        },
+        "x86/6/kernel.facts.json": {
+          "bytes": 1408,
+          "sha256": "bf23371d5321f668fe4053691703dce6b2769dfa596f8eb8da085f573b659790",
+          "allocated_bytes": 4096
+        },
+        "x86/6/trusted_x86.bpf.c": {
+          "bytes": 102251,
+          "sha256": "ba2443affca5d8750b2da72ab5415232430604af203605e420fb2a6b8f502012",
+          "allocated_bytes": 102400
+        },
+        "x86/6/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "337a7f09616c0957f9cbb6a519e520417cdc58135440565549244503604aaf06",
+          "allocated_bytes": 8192
+        },
+        "x86/6/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/4/kernel.entry": {
+          "bytes": 25,
+          "sha256": "1317755a99d546c0090d6e613ed54a04714ad08e8b706ac25602731801d71da0",
+          "allocated_bytes": 4096
+        },
+        "x86/4/generation.metadata.json": {
+          "bytes": 2416,
+          "sha256": "2fdf42b295b9cb30286c70cb6917d6b56d985f98ea4015192dfeb1ffb677f1c2",
+          "allocated_bytes": 4096
+        },
+        "x86/4/kernel.facts.json": {
+          "bytes": 1992,
+          "sha256": "e38aa97d97140c9d82909741dcf349d5bde4702ccd3b43429c8132dfa43ddf88",
+          "allocated_bytes": 4096
+        },
+        "x86/4/trusted_x86.bpf.c": {
+          "bytes": 293046,
+          "sha256": "59d00e9c08f01c9d1d4d89e65a4e910cae10dd236bb352ca29f9975d54131275",
+          "allocated_bytes": 294912
+        },
+        "x86/4/commands.jsonl": {
+          "bytes": 5614,
+          "sha256": "01083b196b42e0ccfa537b2df3cb396043f734c24bd0846dc90c9e0a599741f7",
+          "allocated_bytes": 8192
+        },
+        "x86/4/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/8/kernel.entry": {
+          "bytes": 15,
+          "sha256": "db42757064eb3fb07c2a9091265dd9d13eb24ff44780ac85bf0fb805e2f202ac",
+          "allocated_bytes": 4096
+        },
+        "x86/8/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "x86/8/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "9d8b9553b666ebce3c593ac607048d7d0b8f8ac4b09147920956354fe713a8c5",
+          "allocated_bytes": 4096
+        },
+        "x86/8/trusted_x86.bpf.c": {
+          "bytes": 670,
+          "sha256": "989ce6158d4c1a2bdfae63c660ba1b1f6eacebb416e8bfed06c37587c9618e40",
+          "allocated_bytes": 4096
+        },
+        "x86/8/commands.jsonl": {
+          "bytes": 4893,
+          "sha256": "7725295fd9d93fe90168b3a812d6d9e966ac8a6cdd1a88c1ba52f55899af5823",
+          "allocated_bytes": 8192
+        },
+        "x86/8/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/61/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "x86/61/generation.metadata.json": {
+          "bytes": 294,
+          "sha256": "b39f7357b9eb64810cb1ba757d357d5b90ece9be74202a07e5f4854c7e2ab0e7",
+          "allocated_bytes": 4096
+        },
+        "x86/61/kernel.facts.json": {
+          "bytes": 398,
+          "sha256": "0bf7ac1815d9126357262d018effbdbe6f1e3579d220c2afe6adc80156508ad1",
+          "allocated_bytes": 4096
+        },
+        "x86/61/trusted_x86.bpf.c": {
+          "bytes": 9776,
+          "sha256": "558f60fc4ceb6197fc9fb4e77e0218b65a8ee9acd2ed2ab2ca6f28a4faa4efb0",
+          "allocated_bytes": 12288
+        },
+        "x86/61/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "dcdffbd6e7e13217f4ca961cabaee1b85d3ab635d1af08c7f43adf4757a631a8",
+          "allocated_bytes": 8192
+        },
+        "x86/61/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/32/kernel.entry": {
+          "bytes": 13,
+          "sha256": "2f4e9ed2cc150b7b13535295080d820dbaeee458df6af5c46c3e70f0a6c6fce4",
+          "allocated_bytes": 4096
+        },
+        "x86/32/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "f75d6ab80929f002f295178dba09812236c047f2e935ba0e8f2eae0b0c7df109",
+          "allocated_bytes": 4096
+        },
+        "x86/32/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "00ce3bad2a1d7e011c7be9d77e57f387eae5ecf00b5b435163779fdb3b1cee90",
+          "allocated_bytes": 4096
+        },
+        "x86/32/trusted_x86.bpf.c": {
+          "bytes": 57528,
+          "sha256": "98608b38121c8fb5240daa237b2a02acf57fd81360f4c5f9aecb6b3a3a78a57b",
+          "allocated_bytes": 61440
+        },
+        "x86/32/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "fdc305692a9cd576665f1003ac5bd272603a8852906c8acf88db51121e45fdc8",
+          "allocated_bytes": 8192
+        },
+        "x86/32/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/53/kernel.entry": {
+          "bytes": 20,
+          "sha256": "b5c6ee8e76ae6d6b42898247f7bc8fe98e3ed2475287073d3bf9952bd4976d66",
+          "allocated_bytes": 4096
+        },
+        "x86/53/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "460db0f4d4be65edf04d3ba6b4c0abd79f133967c8b48cb167b0ee660444744b",
+          "allocated_bytes": 4096
+        },
+        "x86/53/kernel.facts.json": {
+          "bytes": 543,
+          "sha256": "30f73d743efe9977aa53f4bfedf4550e711e162be6576fceecc9ea315679fd14",
+          "allocated_bytes": 4096
+        },
+        "x86/53/trusted_x86.bpf.c": {
+          "bytes": 68879,
+          "sha256": "40984e559d830161616d66bad6d7924ef5606297f9108362c97b42e94ebf1c7a",
+          "allocated_bytes": 69632
+        },
+        "x86/53/commands.jsonl": {
+          "bytes": 4928,
+          "sha256": "e1bc94eb7dac834c044f83b3c0bf7ef324f48e1387c845174b1d221499925c0d",
+          "allocated_bytes": 8192
+        },
+        "x86/53/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/50/kernel.entry": {
+          "bytes": 20,
+          "sha256": "b5c6ee8e76ae6d6b42898247f7bc8fe98e3ed2475287073d3bf9952bd4976d66",
+          "allocated_bytes": 4096
+        },
+        "x86/50/generation.metadata.json": {
+          "bytes": 481,
+          "sha256": "460db0f4d4be65edf04d3ba6b4c0abd79f133967c8b48cb167b0ee660444744b",
+          "allocated_bytes": 4096
+        },
+        "x86/50/kernel.facts.json": {
+          "bytes": 543,
+          "sha256": "de7d99e8f601aa6fefebbf352687becc75a082bbdcedbc4180e4e56bdcf4db34",
+          "allocated_bytes": 4096
+        },
+        "x86/50/trusted_x86.bpf.c": {
+          "bytes": 68694,
+          "sha256": "4d0fede7f0020c14f7fc967e07d5ced3bb5f9a260da353bda0fd956927e44d14",
+          "allocated_bytes": 69632
+        },
+        "x86/50/commands.jsonl": {
+          "bytes": 4925,
+          "sha256": "d59dff6b3db10ee8458ac2cd678a7f47c598ca6cf85f3f9a83a11fabde23e096",
+          "allocated_bytes": 8192
+        },
+        "x86/50/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/46/kernel.entry": {
+          "bytes": 15,
+          "sha256": "d3c966e4f413fdcfd607d8e8dde9ca22d8fbe448a0968e28ee419c4e73486dea",
+          "allocated_bytes": 4096
+        },
+        "x86/46/generation.metadata.json": {
+          "bytes": 859,
+          "sha256": "ccde5c1af6ee91f476591141ca6ab214fbb8ef49209395f4a51d7f28aec98ccc",
+          "allocated_bytes": 4096
+        },
+        "x86/46/kernel.facts.json": {
+          "bytes": 833,
+          "sha256": "aeaa02ada38b91dbbc6869d09a62639ec5be38e25071435283cb08453b4474a7",
+          "allocated_bytes": 4096
+        },
+        "x86/46/trusted_x86.bpf.c": {
+          "bytes": 52891,
+          "sha256": "9aa50019930ce9c502a111ba76302615adb9483d12775c4dfbb3d6c17e91b5ea",
+          "allocated_bytes": 53248
+        },
+        "x86/46/commands.jsonl": {
+          "bytes": 4910,
+          "sha256": "a8eee56a2ef0e196aed987da90a74aea0d6b1dd1fec82c613bad83f376eceb4c",
+          "allocated_bytes": 8192
+        },
+        "x86/46/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/39/kernel.entry": {
+          "bytes": 20,
+          "sha256": "28c0b07d734449f52381d2ad5cef236fc7db0f05a3d339a5c1aac83088aa241b",
+          "allocated_bytes": 4096
+        },
+        "x86/39/generation.metadata.json": {
+          "bytes": 1264,
+          "sha256": "7684e5431e2580b6ed9c19ec9fed64610be1caae3eff7ff42e7fb5f1eada628e",
+          "allocated_bytes": 4096
+        },
+        "x86/39/kernel.facts.json": {
+          "bytes": 1122,
+          "sha256": "52b6df69786f583a9ebaff7f8841a8071eb56d72531d10f0be86199696ea9e8f",
+          "allocated_bytes": 4096
+        },
+        "x86/39/trusted_x86.bpf.c": {
+          "bytes": 95198,
+          "sha256": "a5f098005b926989695b9e268cd92ac6d7366c4c79df7dc11488b7221daacca9",
+          "allocated_bytes": 98304
+        },
+        "x86/39/commands.jsonl": {
+          "bytes": 4925,
+          "sha256": "7b54cb9097da2d757ce43490a82e4043de8671fbd38eb12ea59bf3a3ec5cd6f6",
+          "allocated_bytes": 8192
+        },
+        "x86/39/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/38/kernel.entry": {
+          "bytes": 29,
+          "sha256": "8ea95a7824d846dbf56dc2d08f46aa412769d662524ebff5f1beefe2185248f6",
+          "allocated_bytes": 4096
+        },
+        "x86/38/generation.metadata.json": {
+          "bytes": 1446,
+          "sha256": "0d0456dbe5475ba7eac42a26746e328c3be3458eccc1bd7276ff053e27a7c5e7",
+          "allocated_bytes": 4096
+        },
+        "x86/38/kernel.facts.json": {
+          "bytes": 1258,
+          "sha256": "f3d4c6c35f4df5b78d488fffaf56d94971fda57436dae72287d1305589466dd9",
+          "allocated_bytes": 4096
+        },
+        "x86/38/trusted_x86.bpf.c": {
+          "bytes": 146875,
+          "sha256": "8ce10c16b4244ec7502c1df0c8e6ae8f14077d05e0ee152b006858e114dd99b4",
+          "allocated_bytes": 147456
+        },
+        "x86/38/commands.jsonl": {
+          "bytes": 4955,
+          "sha256": "51db4a4766a4ba4616c4638102833d4ee14f9bf23dff515ff9f5144fe3aed805",
+          "allocated_bytes": 8192
+        },
+        "x86/38/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/54/kernel.entry": {
+          "bytes": 25,
+          "sha256": "1317755a99d546c0090d6e613ed54a04714ad08e8b706ac25602731801d71da0",
+          "allocated_bytes": 4096
+        },
+        "x86/54/generation.metadata.json": {
+          "bytes": 2416,
+          "sha256": "558818b2460c71bdf6272e0cb60c08c046bea53569c389beb808599037de205b",
+          "allocated_bytes": 4096
+        },
+        "x86/54/kernel.facts.json": {
+          "bytes": 1992,
+          "sha256": "6d152704a781098f7867d321eac276517e346c0f957ab6fe4bfc7a17466c7aee",
+          "allocated_bytes": 4096
+        },
+        "x86/54/trusted_x86.bpf.c": {
+          "bytes": 291976,
+          "sha256": "5c097144e25a0a6b041171cde710bdc0b3fae644ea318649de207741bd6efb58",
+          "allocated_bytes": 294912
+        },
+        "x86/54/commands.jsonl": {
+          "bytes": 5614,
+          "sha256": "fdfbcefdf2655fbeaa97123d70479b6f6eb5f9d76288d623570a20dd6302c733",
+          "allocated_bytes": 8192
+        },
+        "x86/54/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/57/kernel.entry": {
+          "bytes": 16,
+          "sha256": "f1f238485bce94abbdab6c75cf9ff62a72272594dbb2412d8a532028636a520c",
+          "allocated_bytes": 4096
+        },
+        "x86/57/generation.metadata.json": {
+          "bytes": 663,
+          "sha256": "ec4d557fb8b50dcba93e43ad1820856fa5dc0ed2bce5c32e380ff82228f63a8b",
+          "allocated_bytes": 4096
+        },
+        "x86/57/kernel.facts.json": {
+          "bytes": 683,
+          "sha256": "1a22a43ebf2b131eb0ef725c2c6ebdb5155684a071604ee90ba843ae1619a284",
+          "allocated_bytes": 4096
+        },
+        "x86/57/trusted_x86.bpf.c": {
+          "bytes": 29102,
+          "sha256": "f8f6d1a1d90a46054ca214bc847127b21158333fcb1034dcc490db9bd2fb9701",
+          "allocated_bytes": 32768
+        },
+        "x86/57/commands.jsonl": {
+          "bytes": 4908,
+          "sha256": "d91f244691089e436adee5426e58088678a3c851d1ceea27363022f841d2e530",
+          "allocated_bytes": 8192
+        },
+        "x86/57/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "x86/40/kernel.entry": {
+          "bytes": 13,
+          "sha256": "b1ccef4ec9fc999cb585a671cd045cc8fce6830513e4873ca54e42755ea70d1c",
+          "allocated_bytes": 4096
+        },
+        "x86/40/generation.metadata.json": {
+          "bytes": 1633,
+          "sha256": "ac0280e3a43e6f8e258946e99478a19bac347327715e940b98cae0d6190ae067",
+          "allocated_bytes": 4096
+        },
+        "x86/40/kernel.facts.json": {
+          "bytes": 1408,
+          "sha256": "b91e4760f9e231dbdeadcfa1e5fad905213da43851ecd74dff92f9b358782473",
+          "allocated_bytes": 4096
+        },
+        "x86/40/trusted_x86.bpf.c": {
+          "bytes": 102251,
+          "sha256": "660df3d736b59e5cdd25840d178dbd4ebb30f4c1f6652c4b49a9884d7109de2d",
+          "allocated_bytes": 102400
+        },
+        "x86/40/commands.jsonl": {
+          "bytes": 4904,
+          "sha256": "0824605e91725193a466fbad6a0d865fdc5dd88a98e5536c2afaf8c646272dc0",
+          "allocated_bytes": 8192
+        },
+        "x86/40/source-identities.json": {
+          "bytes": 2754,
+          "sha256": "2e24f219047b60977e862ed280af7d0e6388b12ad1541d28c916b85b0954b2cd",
+          "allocated_bytes": 4096
+        },
+        "arm64/9/kernel.entry": {
+          "bytes": 16,
+          "sha256": "8092e59435d552f30decfc44316f3c4f61fa1cf1dab2c386b9132e56e09d14a8",
+          "allocated_bytes": 4096
+        },
+        "arm64/9/trusted_arm64.bpf.c": {
+          "bytes": 285052,
+          "sha256": "0e0af739df62f8e9a01748ec4cd16061fa0868e8a36f07ef9ede56af88a03f46",
+          "allocated_bytes": 286720
+        },
+        "arm64/9/generation.metadata.json": {
+          "bytes": 5030,
+          "sha256": "1419a4ba03d16346e60ee20160fb03739a33db33271f58a98759dbab971dbcbd",
+          "allocated_bytes": 8192
+        },
+        "arm64/9/kernel.facts.json": {
+          "bytes": 3886,
+          "sha256": "8423fca6dd242316cdda45d8e899c63eecc4b9bf27af6d079451244cb5b50514",
+          "allocated_bytes": 4096
+        },
+        "arm64/9/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1023,
+          "sha256": "7af6cc99707762bf4daa3084d60dd7b8c7ce56f91ddc962e8ca75e2f0ca09f2e",
+          "allocated_bytes": 4096
+        },
+        "arm64/9/commands.jsonl": {
+          "bytes": 2832,
+          "sha256": "c0f9ef727a9160f3ff383aa8123a37b3eaeb57686b8fd03577134ac3bfef0a31",
+          "allocated_bytes": 4096
+        },
+        "arm64/9/source-without-obsolete-overrides.c": {
+          "bytes": 210740,
+          "sha256": "e6681525883edd704c870c05a292bde0d7026c24f2a759d1832c9d10eaf46e51",
+          "allocated_bytes": 212992
+        },
+        "arm64/9/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/kernel.entry": {
+          "bytes": 20,
+          "sha256": "28c0b07d734449f52381d2ad5cef236fc7db0f05a3d339a5c1aac83088aa241b",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/trusted_arm64.bpf.c": {
+          "bytes": 256120,
+          "sha256": "b746e8175c1c8cf42d02dd2c1981fda8c58af39ec78f470e2fa063da67491143",
+          "allocated_bytes": 258048
+        },
+        "arm64/17/generation.metadata.json": {
+          "bytes": 2855,
+          "sha256": "48ef98185c3e679f5cfb276e4b29cfeea9d9fa35e1a74756347880a51d0f6730",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/kernel.facts.json": {
+          "bytes": 2281,
+          "sha256": "b27bb02d0dc97ff821394dbd78528725b88edad37b2e4faf333edddd595b6e21",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "69fa3e855c014ab575aa567e69d2980f59168cc9c94aeb3791649d9440c6c496",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/commands.jsonl": {
+          "bytes": 2844,
+          "sha256": "1ff5855381908e7aee0eeb5c3e6984136f423f7af665dc71f44d4ec1e33caa7e",
+          "allocated_bytes": 4096
+        },
+        "arm64/17/source-without-obsolete-overrides.c": {
+          "bytes": 181808,
+          "sha256": "1f8a7b78c3b989cb7023f8297fb6aabe785860963684df43ef04d5c4930140fb",
+          "allocated_bytes": 184320
+        },
+        "arm64/17/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/kernel.entry": {
+          "bytes": 11,
+          "sha256": "1a4187e432e15f487e2b6e967888e4baee3ba35ceffdecaada8c6d81c0c96639",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/trusted_arm64.bpf.c": {
+          "bytes": 196946,
+          "sha256": "55cd75c010dbee9d06865d5234cfad267b57ccaa0b6eda88ac0e4e23ac8214aa",
+          "allocated_bytes": 200704
+        },
+        "arm64/2/generation.metadata.json": {
+          "bytes": 3631,
+          "sha256": "155f44fb2e910f3b1c9ad5b9aac1db444b8a1e84c91fcb15ecbd0a5387afc621",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/kernel.facts.json": {
+          "bytes": 2850,
+          "sha256": "b5cf2f3afaffd446656bcd79ed257dd72d2fa1ab6ffc10b598fbcc7c7810b9c1",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "110ea45ce24312c9746a7606263da0baad9abb50759048e64aca99ae84ececa0",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/commands.jsonl": {
+          "bytes": 2817,
+          "sha256": "fe5ab318cf1fbfe3fda71f989dc23d845600b66e93a552c1da439c2d3766d134",
+          "allocated_bytes": 4096
+        },
+        "arm64/2/source-without-obsolete-overrides.c": {
+          "bytes": 122634,
+          "sha256": "07bfe83df31e1288aec70e61ab26d6b3b72291fc91062fe291bb4b32de12e76e",
+          "allocated_bytes": 122880
+        },
+        "arm64/2/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/kernel.entry": {
+          "bytes": 15,
+          "sha256": "d3c966e4f413fdcfd607d8e8dde9ca22d8fbe448a0968e28ee419c4e73486dea",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/trusted_arm64.bpf.c": {
+          "bytes": 294911,
+          "sha256": "a59f980e35cf19cecd46bebe5b367e71d72b2f3691c4fc3c2c4a7960ec65b561",
+          "allocated_bytes": 294912
+        },
+        "arm64/10/generation.metadata.json": {
+          "bytes": 3632,
+          "sha256": "683498e080ee796973842f5ecc14fc2c06fa002ad0f1d3861c3db40caad30543",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/kernel.facts.json": {
+          "bytes": 2853,
+          "sha256": "45fc1a378cb6f514e7f9f9eae9f0327af7bf9f637c52662eabdf556163fb236e",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "64e6724de8de65625ae1e14d36418659cfb3fade09a9959c0995aa160cc3dfb1",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/commands.jsonl": {
+          "bytes": 2829,
+          "sha256": "f24dfb98b8bb77d341bf208a26dc2e264326ce15be2da4e8476f296f72ccbe97",
+          "allocated_bytes": 4096
+        },
+        "arm64/10/source-without-obsolete-overrides.c": {
+          "bytes": 220599,
+          "sha256": "d43c6e0053dbbdbd6e8261f4384ba0bd2f1128488834fa0314b4e0460dd5a714",
+          "allocated_bytes": 221184
+        },
+        "arm64/10/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/14/kernel.entry": {
+          "bytes": 13,
+          "sha256": "b1ccef4ec9fc999cb585a671cd045cc8fce6830513e4873ca54e42755ea70d1c",
+          "allocated_bytes": 4096
+        },
+        "arm64/14/trusted_arm64.bpf.c": {
+          "bytes": 293179,
+          "sha256": "11cd416a5a34d7d2d7a4f9c5a075c5df3e6492f32d5830a87dd0a2b1dbc5cdf4",
+          "allocated_bytes": 294912
+        },
+        "arm64/14/generation.metadata.json": {
+          "bytes": 5198,
+          "sha256": "29eb25f29a57530e294c5c14b26ec61b218469971f2a605b9b1a5546ff3aa549",
+          "allocated_bytes": 8192
+        },
+        "arm64/14/kernel.facts.json": {
+          "bytes": 4010,
+          "sha256": "dfb113476fbb5db3977d6283680749b1201ec80ecd776dd343e08e11e971b4bf",
+          "allocated_bytes": 4096
+        },
+        "arm64/14/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1032,
+          "sha256": "569b584be17f40fb3046802a2c250e7f0447d36f1d313e2cb4988548c8d419f1",
+          "allocated_bytes": 4096
+        },
+        "arm64/14/commands.jsonl": {
+          "bytes": 2823,
+          "sha256": "e6ab8882ffe19777f9fc56dc640e4c454b0f38b4d074bf4f8d1db60df819c84b",
+          "allocated_bytes": 4096
+        },
+        "arm64/14/source-without-obsolete-overrides.c": {
+          "bytes": 218867,
+          "sha256": "90148a1ffc039c316a17531b33128c531dd6c1b7bc8d3112c7c7c078047b9f98",
+          "allocated_bytes": 221184
+        },
+        "arm64/14/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/5/kernel.entry": {
+          "bytes": 21,
+          "sha256": "8bdf1d6413c2659a82afbe869c841af6ec8cd34cdc50f16552f5d82191fc74b0",
+          "allocated_bytes": 4096
+        },
+        "arm64/5/trusted_arm64.bpf.c": {
+          "bytes": 385455,
+          "sha256": "ac8fa7b6a3ecac078ed7673cece5eadb276ac5949a89a8ea6a596ad6ad0edb6e",
+          "allocated_bytes": 389120
+        },
+        "arm64/5/generation.metadata.json": {
+          "bytes": 6372,
+          "sha256": "2379f662a1c447df087c44c69dafc65e6e6642677a327e0826d8716f41a133a7",
+          "allocated_bytes": 8192
+        },
+        "arm64/5/kernel.facts.json": {
+          "bytes": 4889,
+          "sha256": "17651803cc270caf148d025ec5188d38695af11f1e9268969fcb6be5ce96ea4d",
+          "allocated_bytes": 8192
+        },
+        "arm64/5/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "857287f1f971002148833c3be6095f305dc24933289c538d5a5aadf1465b66b2",
+          "allocated_bytes": 4096
+        },
+        "arm64/5/commands.jsonl": {
+          "bytes": 2847,
+          "sha256": "a5aa5664f652b14c9af5ceef741a39ff02daba3ef0c0864d59e4cd384c5c17b1",
+          "allocated_bytes": 4096
+        },
+        "arm64/5/source-without-obsolete-overrides.c": {
+          "bytes": 311143,
+          "sha256": "1e80dd0286a51dd0c03231eabc2e211e4a4dbd22d09cc781b1498e94d6229ab7",
+          "allocated_bytes": 311296
+        },
+        "arm64/5/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/kernel.entry": {
+          "bytes": 13,
+          "sha256": "a50721a388822afc40c8f33ad625fa9c3309f3f69dbc99aa6fb1fae66c16c2cb",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/trusted_arm64.bpf.c": {
+          "bytes": 111885,
+          "sha256": "446338a330e57ae111e5a4f1bc96e2bff23c4172a9678fd18a03e87948c31375",
+          "allocated_bytes": 114688
+        },
+        "arm64/1/generation.metadata.json": {
+          "bytes": 1280,
+          "sha256": "6463f3e071db48d69fe7b323a831900b079fdabdb43db121df87b6a60229503a",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/kernel.facts.json": {
+          "bytes": 1126,
+          "sha256": "4892f1b0fe039664e01e9bb40eefb0a33b6fcd7ecd5eff6906dad5f16105365a",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1020,
+          "sha256": "d4ef1f71f304c543362e2f658435fc9f9e254ced194c8e94328cf398ae4466cd",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/commands.jsonl": {
+          "bytes": 2819,
+          "sha256": "7d9ff18ba56ffb1a5956f88f19890926fa100f01ad8841606de6ab702f959790",
+          "allocated_bytes": 4096
+        },
+        "arm64/1/source-without-obsolete-overrides.c": {
+          "bytes": 37573,
+          "sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+          "allocated_bytes": 40960
+        },
+        "arm64/1/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/kernel.entry": {
+          "bytes": 27,
+          "sha256": "0c9d2a36c0b6f0b90189e32b869aead4e090445f378f615fdf69bb4162afa451",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/trusted_arm64.bpf.c": {
+          "bytes": 198176,
+          "sha256": "6cf4615729cba63a631d6be63bbb6dcdaf6839996a22433119aa5fb28f5ce3b4",
+          "allocated_bytes": 200704
+        },
+        "arm64/11/generation.metadata.json": {
+          "bytes": 3040,
+          "sha256": "8733538ad60b721c43e7d7be1ebc3dafaa8739340c445eecd726ec86b8ca5461",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/kernel.facts.json": {
+          "bytes": 2427,
+          "sha256": "df827dc65c3caed079f2273c4062b2e9a01b2c445af96b58734844aa44364ef7",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1021,
+          "sha256": "733d7377c3d40bf0676283cdd8abc35144456f82a2806f43909410d5bc8581fb",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/commands.jsonl": {
+          "bytes": 2864,
+          "sha256": "7420175c619ec1a1a6b3abb503cc846866f0a86bb0f4b538f460586650004dac",
+          "allocated_bytes": 4096
+        },
+        "arm64/11/source-without-obsolete-overrides.c": {
+          "bytes": 123864,
+          "sha256": "b0d113df345139dae3ed794dfd7fc8a341cc6371ca2a96a0bd27ff796153ca5b",
+          "allocated_bytes": 126976
+        },
+        "arm64/11/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/kernel.entry": {
+          "bytes": 19,
+          "sha256": "370c8a5f303666e7363bb6034e4b42f644c94812588c469dc1bed4cd2d133ed0",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/trusted_arm64.bpf.c": {
+          "bytes": 313612,
+          "sha256": "c2d576cf54244658b5ee31cc9ab4de250ad6bc8cf62833faee0b50c45b255276",
+          "allocated_bytes": 315392
+        },
+        "arm64/7/generation.metadata.json": {
+          "bytes": 2662,
+          "sha256": "0ff85126d927906f59ce536f19cb76995fff29924cb963f6d7bd40a6e5fbedad",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/kernel.facts.json": {
+          "bytes": 2136,
+          "sha256": "254519dbae2775051b6182b301a6963230ba5c60f0f265b1791d9094dd230403",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "ae8c3e570d3aee0b0bd34df7eb8673cfaaf97bc56638e58d31792d77c9a42cc4",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/commands.jsonl": {
+          "bytes": 2841,
+          "sha256": "fcbed9d5b1e2e691926a383ab8858ea346ada0b40886547e235704cf383a14ed",
+          "allocated_bytes": 4096
+        },
+        "arm64/7/source-without-obsolete-overrides.c": {
+          "bytes": 239300,
+          "sha256": "b163884fb92b303f8d47ab838d60e6d8794cf02e7deb20616a08cf337df7977f",
+          "allocated_bytes": 241664
+        },
+        "arm64/7/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/kernel.entry": {
+          "bytes": 16,
+          "sha256": "f1f238485bce94abbdab6c75cf9ff62a72272594dbb2412d8a532028636a520c",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/trusted_arm64.bpf.c": {
+          "bytes": 181461,
+          "sha256": "baefd5377a88389de0ece8c2a747cd13d652c93777fe79be508472dd23668dee",
+          "allocated_bytes": 184320
+        },
+        "arm64/15/generation.metadata.json": {
+          "bytes": 2632,
+          "sha256": "b427cd736dbf02b534999f7f8fa3f66c8ed9d87a5d85be9416715f700b72d71c",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/kernel.facts.json": {
+          "bytes": 2126,
+          "sha256": "52f47960461084e314aa69c40ba39d659fcc880f13a6970d153379d84fe2a57a",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "919b7c749d31191014ab78409f4986b2093cb290e6a91264a499d98a72cd67bc",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/commands.jsonl": {
+          "bytes": 2831,
+          "sha256": "cdcdbcba471c1d67fcf5418c1dfad2366ec7c1558946c4e24369e52a1f9643e8",
+          "allocated_bytes": 4096
+        },
+        "arm64/15/source-without-obsolete-overrides.c": {
+          "bytes": 107149,
+          "sha256": "6fbf20f8fe8063c0dd724124150351eda2360da4753c787858d44c86a5255670",
+          "allocated_bytes": 110592
+        },
+        "arm64/15/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/kernel.entry": {
+          "bytes": 13,
+          "sha256": "2f4e9ed2cc150b7b13535295080d820dbaeee458df6af5c46c3e70f0a6c6fce4",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/trusted_arm64.bpf.c": {
+          "bytes": 316711,
+          "sha256": "7d6d5dc551759c855e16b010e437a17c7ed0bd53fa8f1e0fd0658a8b95210410",
+          "allocated_bytes": 319488
+        },
+        "arm64/12/generation.metadata.json": {
+          "bytes": 3827,
+          "sha256": "028b843d65df40eafea82bb5ac3d860e4bc03b0bf57a952f7f6fb77fe38753ae",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/kernel.facts.json": {
+          "bytes": 2998,
+          "sha256": "fe05527ffbcdba4096602e6b06a6de0b6650902c495a004b93235e871154927b",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "f91bad6a1466b3e18d693e92ba91cdf1ce8a2327304b577e75f6b4e003d1d1e5",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/commands.jsonl": {
+          "bytes": 2823,
+          "sha256": "539e21e45960df603064e1af77244ab85ffe4e8dc75cb3c678867ad6699dfa11",
+          "allocated_bytes": 4096
+        },
+        "arm64/12/source-without-obsolete-overrides.c": {
+          "bytes": 242399,
+          "sha256": "efd453b110b75bbf7acf3a6af21173937413d37868eb94a8da94537454c491d7",
+          "allocated_bytes": 245760
+        },
+        "arm64/12/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/kernel.entry": {
+          "bytes": 16,
+          "sha256": "dcf09382b03525a48f3ec4bd0150d9297320cf671ed141fa6a0e98bce21e6ac7",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/trusted_arm64.bpf.c": {
+          "bytes": 105391,
+          "sha256": "b3548847f1809d8ce2e2f6f880a5bad2211e94df5cca7c960174a6309f9d1466",
+          "allocated_bytes": 106496
+        },
+        "arm64/13/generation.metadata.json": {
+          "bytes": 1872,
+          "sha256": "43678d0d3cecd3cf7ab5f08a868da0f97adee2d841b4e149eb704685c63f3524",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/kernel.facts.json": {
+          "bytes": 1551,
+          "sha256": "ec7f02ca1f654802b2ce88869b44d2dd729b83d56f9983328ff07d56c2f0b51e",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1032,
+          "sha256": "4ab933d744b2799661addfc1cb1e21a2c9321dd68c7cca2cce52c9a10b60d13f",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/commands.jsonl": {
+          "bytes": 2826,
+          "sha256": "740af929f82e2b3dea934a05cabaaa012d67b861ff9a71024fe24c2d99292cc3",
+          "allocated_bytes": 4096
+        },
+        "arm64/13/source-without-obsolete-overrides.c": {
+          "bytes": 31079,
+          "sha256": "da81f00b1f1ae00981f7652408091312611fa1d9a1a960be6e87389e53f482d2",
+          "allocated_bytes": 32768
+        },
+        "arm64/13/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/3/kernel.entry": {
+          "bytes": 16,
+          "sha256": "ec0b915cff0934f025c3826ace18e6e7ad20b76536c74df26c70b040d475d407",
+          "allocated_bytes": 4096
+        },
+        "arm64/3/trusted_arm64.bpf.c": {
+          "bytes": 333877,
+          "sha256": "666ad277a0995f6c13f22b94ef8d8bc800f1daed06ab5bf195ab4f19b45fcf6f",
+          "allocated_bytes": 335872
+        },
+        "arm64/3/generation.metadata.json": {
+          "bytes": 5998,
+          "sha256": "82524d1a418f4711ef631e78001ed65c033e3b13ff385cd74b4c2365495b990f",
+          "allocated_bytes": 8192
+        },
+        "arm64/3/kernel.facts.json": {
+          "bytes": 4595,
+          "sha256": "3b34c0b6eac648e6ac435dc82809154b1334fa58cfe8f0c520b23fe1718dc363",
+          "allocated_bytes": 8192
+        },
+        "arm64/3/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "0ece7739e3381e4ad22c1fd4c04d64160c0c87954aef12244f31e223895877ff",
+          "allocated_bytes": 4096
+        },
+        "arm64/3/commands.jsonl": {
+          "bytes": 2832,
+          "sha256": "9a808578cd8f91d37007c54e5b078fa3d605da99be7ed3b1c27976db80f0831b",
+          "allocated_bytes": 4096
+        },
+        "arm64/3/source-without-obsolete-overrides.c": {
+          "bytes": 259565,
+          "sha256": "9c85ac07dab31af9cb8ca157ca0c83bb7be10aff77e6295321c8a966f5f7b7bb",
+          "allocated_bytes": 262144
+        },
+        "arm64/3/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/16/kernel.entry": {
+          "bytes": 25,
+          "sha256": "1317755a99d546c0090d6e613ed54a04714ad08e8b706ac25602731801d71da0",
+          "allocated_bytes": 4096
+        },
+        "arm64/16/trusted_arm64.bpf.c": {
+          "bytes": 533351,
+          "sha256": "5819fe8a55959624f965f019e2a2aad446b2f536cf845b7e12b0e2854406385e",
+          "allocated_bytes": 536576
+        },
+        "arm64/16/generation.metadata.json": {
+          "bytes": 5803,
+          "sha256": "8c5e6078b2b9d2d671c294554da59b968d7a78b0817612574817b984d952d7fc",
+          "allocated_bytes": 8192
+        },
+        "arm64/16/kernel.facts.json": {
+          "bytes": 4449,
+          "sha256": "0398011e6e64ff8f8315012e370cb511ec19fa639c7084b39ac14c991ac630b9",
+          "allocated_bytes": 8192
+        },
+        "arm64/16/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1022,
+          "sha256": "38c02ff1fccc0eb13f9b41b3b2a1ac99829e11a8bce2ea98f5ffe28f0f4b5f42",
+          "allocated_bytes": 4096
+        },
+        "arm64/16/commands.jsonl": {
+          "bytes": 2859,
+          "sha256": "c248d7052705faaaf7f31ffe656148199822f59cbd47db986fc67a56bc7a0048",
+          "allocated_bytes": 4096
+        },
+        "arm64/16/source-without-obsolete-overrides.c": {
+          "bytes": 459039,
+          "sha256": "79d602661222b06303398d66d441508db7434f9892312280c403f3c2903dfdf5",
+          "allocated_bytes": 462848
+        },
+        "arm64/16/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/kernel.entry": {
+          "bytes": 28,
+          "sha256": "f0ae90514c20e14173f6285d8b6a0166f68805e729d11563d7ed137e750bf9d5",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/trusted_arm64.bpf.c": {
+          "bytes": 363813,
+          "sha256": "c6902c00113c62b06db356558989f3a9987f637bc24c7f623482e66532f8edc9",
+          "allocated_bytes": 364544
+        },
+        "arm64/6/generation.metadata.json": {
+          "bytes": 4039,
+          "sha256": "00894005c629b74a1c491447bcae8e4f69458e7257a8a8a7ad06067584c8d229",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/kernel.facts.json": {
+          "bytes": 3166,
+          "sha256": "4894f50f2ac20c15b80890a8db7163bcee8ce3cfbf0e71e3107049e8a11d8488",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1032,
+          "sha256": "f7e13aa80899f066be8d11ebb91104793b54e89696cc71b6c949f45af09ecfab",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/commands.jsonl": {
+          "bytes": 2868,
+          "sha256": "7d668db2b2df896cac1f91f781c249c685eb3f3d585d768d610bc24cc1d36caa",
+          "allocated_bytes": 4096
+        },
+        "arm64/6/source-without-obsolete-overrides.c": {
+          "bytes": 289501,
+          "sha256": "e842fa162c81a2d86a5bce61d0e10172837c321718f83921dcd9f4e8131121fd",
+          "allocated_bytes": 290816
+        },
+        "arm64/6/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/kernel.entry": {
+          "bytes": 26,
+          "sha256": "6a2a9d65bc4d12c747d6f05919fcd2d55e5b9bd4025d6e3a55036c472c30de9c",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/trusted_arm64.bpf.c": {
+          "bytes": 114383,
+          "sha256": "90238e82f704b008a8c85ffed315d88c7217eff22742f34b4242d54dd386ba13",
+          "allocated_bytes": 114688
+        },
+        "arm64/4/generation.metadata.json": {
+          "bytes": 1848,
+          "sha256": "53c92ba28c9da587d5f51d2ae0cb9f7cb4d5571c9ba8423aed35cf19dc3b13f3",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/kernel.facts.json": {
+          "bytes": 1565,
+          "sha256": "52a7535b7b046d5dd6cdbdf51d9104ccbe9aaa50399af9f7a376fc6f0be75cf4",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1031,
+          "sha256": "185e3f0bbae6adbcd4ea30e11e9fe0c8faa16884b076750857860ea7c66cc2fb",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/commands.jsonl": {
+          "bytes": 2858,
+          "sha256": "361c61cc3e12f0511387d7e5182d14afaf98c6ea8472311f0a9de84876c5c938",
+          "allocated_bytes": 4096
+        },
+        "arm64/4/source-without-obsolete-overrides.c": {
+          "bytes": 40071,
+          "sha256": "601ac44da49fc335bfbc7428d11360f33929772d58216d6ba9df8c090635e466",
+          "allocated_bytes": 40960
+        },
+        "arm64/4/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/kernel.entry": {
+          "bytes": 15,
+          "sha256": "db42757064eb3fb07c2a9091265dd9d13eb24ff44780ac85bf0fb805e2f202ac",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/trusted_arm64.bpf.c": {
+          "bytes": 75026,
+          "sha256": "119c273c41df12a08dd785da123e86fa706b89108986150caaa8f593738fcca3",
+          "allocated_bytes": 77824
+        },
+        "arm64/8/generation.metadata.json": {
+          "bytes": 110,
+          "sha256": "161f1c4712e8ba487882c88fec30689c0a98b332a03140cd199547228822d8b1",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/kernel.facts.json": {
+          "bytes": 256,
+          "sha256": "c13efff3e1998ffa5cbd69cc289bdcffcad75b1b855972c2ef5a810204c52f01",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/trusted_arm64.bpf.frontend.compiler.json.broker.json": {
+          "bytes": 1020,
+          "sha256": "c17f3c06175977d145b9c2bf9dc028eb6ac104627662d52fad298f3ff532d21f",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/commands.jsonl": {
+          "bytes": 2816,
+          "sha256": "ee32c2c2b78e7285878c059cc872571596f75b590f90de99a50818da39fad76c",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/source-without-obsolete-overrides.c": {
+          "bytes": 714,
+          "sha256": "0b8c162d060a5ee000e5689fa904c090a1b77db3667e2176ba927a8294f816e9",
+          "allocated_bytes": 4096
+        },
+        "arm64/8/source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d",
+          "allocated_bytes": 4096
+        }
+      },
+      "allocated_bytes": 15134720,
+      "status": "removed"
+    }
+  ],
+  "free_before_bytes": 16505741312,
+  "ended_utc": "2026-11-27T16:34:27Z",
+  "free_after_bytes": 16521113600,
+  "removed_allocated_bytes": 15134720
+}
