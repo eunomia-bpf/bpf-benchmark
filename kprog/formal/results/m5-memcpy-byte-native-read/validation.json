@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T00:17:07.482834+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead"
+    ],
+    "exit": 0,
+    "seconds": 2.8522911071777344,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 397,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-byte-native-read/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.203418254852295,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "native_word": "39400023",
+    "instruction": "LDRB W3,[X1]",
+    "native_steps": 1,
+    "destination": "zero-extended byte in X3",
+    "source_pointer": "X1 retained",
+    "native_event": "actual initialized read"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyByteNativeRead.lean",
+      "size_bytes": 4391,
+      "mtime_ns": 1795738555442260948
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

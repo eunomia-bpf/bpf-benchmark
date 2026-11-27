@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.decoded_word
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.decoded_word
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.destination
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.destination
+#check KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyByteNativeRead.reference_step
