@@ -1,0 +1,12 @@
+{
+  "compared_rows": 1883,
+  "ratio_disagreements_over_rounding": 0,
+  "other_source": "kprog/results/timing-history-20261127/all-runs.tsv",
+  "other_sha256": "98785cd4e32ce939daeba38b1f8097939650819b274e1820cd763d061c531c7e",
+  "methods": "All positive-call counters compared with independent coordinator scan; threshold100-compatible fields separate. Undefined numbers are null.",
+  "definitions": {
+    "ebpf_ns_native_ns_per_call_ratio": "Existing may29 evaluator: sum elapsed/sum calls for programs with run_cnt_delta>=100",
+    "all_programs_aggregate": "Same raw counters over every program with positive calls, matching coordinator timing-history scan; both variants retained",
+    "undefined": "Non-finite aggregate values are JSON null, not numeric observations"
+  }
+}

@@ -88,4 +88,6 @@ The existing common cmov change's paired short check is3326.1/3463.1ns, versus35
 - kprog/results/arm64-spark-run7-20261124/README.md
 - kprog/results/arm64-spark-run8-20261126/README.md
 
+The main per-call fields reuse the published may29 evaluator, which retains programs with at least100calls. all_programs_aggregate/all_programs_ratio additionally retain every positive-call program, matching the coordinator timing-history scan. Undefined aggregates are null. These definitions are explicit rather than silently mixed with the old published per-program geometric-mean table.
+
 The inventory preserves source paths, app/metadata hashes, phase program/active counts, sample counts, throughput samples, errors and missingness. It supports a broad audit; it does not silently manufacture absent image/source provenance or treat failed/incomplete runs as performance gains.

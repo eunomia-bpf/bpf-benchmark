@@ -1,5 +1,5 @@
 """Summarize the inventory with explicit measurement and provenance cohorts."""
-import collections,json
+import collections,csv,hashlib,json
 from pathlib import Path
 ROOT=Path('/workspaces/repository');LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
 out=Path(json.loads((LANE/'performance-data-audit.json').read_text())['result']);data=json.loads((out/'inventory.json').read_text());rows=data['runs']
@@ -63,7 +63,23 @@ The existing common cmov change's paired short check is3326.1/3463.1ns, versus35
 - kprog/results/arm64-spark-run7-20261124/README.md
 - kprog/results/arm64-spark-run8-20261126/README.md
 
+The main per-call fields reuse the published may29 evaluator, which retains programs with at least100calls. all_programs_aggregate/all_programs_ratio additionally retain every positive-call program, matching the coordinator timing-history scan. Undefined aggregates are null. These definitions are explicit rather than silently mixed with the old published per-program geometric-mean table.
+
 The inventory preserves source paths, app/metadata hashes, phase program/active counts, sample counts, throughput samples, errors and missingness. It supports a broad audit; it does not silently manufacture absent image/source provenance or treat failed/incomplete runs as performance gains.
 """
 (out/'README.md').write_text(text)
 print('REVIEW',len(x86),'x86 full points',len(arm),'Spark full points',out)
+
+
+aliases={'otelcol-ebpf-profiler/profiling':'OTel','bcc/set':'BCC','cilium/agent':'Cilium','tetragon/observer':'Tetragon','tracee/monitor':'Tracee','katran':'Katran'}
+reference=ROOT/'kprog/results/timing-history-20261127/all-runs.tsv'
+other={(r['run'],r['app']):r for r in csv.DictReader(reference.open(),delimiter='	')}
+matched=0;different=[]
+for row in rows:
+ prior=other.get((row['run'],aliases.get(row.get('app'))));value=row.get('all_programs_ratio')
+ if prior is None or value is None:continue
+ matched+=1
+ if abs(value-float(prior['ratio']))>.000501:different.append(dict(run=row['run'],app=row.get('app'),ours=value,reference=prior['ratio']))
+assert not different,different[:5]
+receipt=dict(compared_rows=matched,ratio_disagreements_over_rounding=len(different),other_source=str(reference.relative_to(ROOT)),other_sha256=hashlib.sha256(reference.read_bytes()).hexdigest(),methods='All positive-call counters compared with independent coordinator scan; threshold100-compatible fields separate. Undefined numbers are null.',definitions=json.loads((out/'controller.json').read_text())['metric_definitions'])
+(out/'counter-definition-crosscheck.json').write_text(json.dumps(receipt,indent=2)+chr(10))

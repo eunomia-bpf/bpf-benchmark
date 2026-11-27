@@ -1,6 +1,6 @@
 {
-  "pid": 1109277,
-  "started_utc": "2026-11-27T19:07:51Z",
+  "pid": 1114514,
+  "started_utc": "2026-11-27T19:17:05Z",
   "controller_status": 0,
   "scope": "All available canonical corpus/result metadata plus retained Spark5-8 raw roots. Inventory, not all historical archives decoded or a causal attribution. Source/image missingness and invalid/error runs remain explicit; full3x180 timing and10s diagnostics stay separate.",
   "metadata_paths": 4474,
@@ -12,6 +12,11 @@
     "/workspaces/kprog-raw/arm64-spark-run8"
   ],
   "canonical_directories_without_metadata": 417,
+  "metric_definitions": {
+    "ebpf_ns_native_ns_per_call_ratio": "Existing may29 evaluator: sum elapsed/sum calls for programs with run_cnt_delta>=100",
+    "all_programs_aggregate": "Same raw counters over every program with positive calls, matching coordinator timing-history scan; both variants retained",
+    "undefined": "Non-finite aggregate values are JSON null, not numeric observations"
+  },
   "summary": {
     "metadata_paths": 4474,
     "directories_without_metadata": 417,
@@ -51,5 +56,5 @@
     "missing_image": 5866,
     "missing_commit": 5866
   },
-  "ended_utc": "2026-11-27T19:07:59Z"
+  "ended_utc": "2026-11-27T19:17:13Z"
 }

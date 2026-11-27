@@ -22,6 +22,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "010cb2656bb0f16d681b3f4415b2fcfcb94b2d9f2399a65da2475ed2c0ef67f3",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 420179821,
+          "runtime_ns": 1345289992880,
+          "ns_per_call": 3201.7006187453253
+        },
+        "post_rejit": {
+          "calls": 408860279,
+          "runtime_ns": 1387464115961,
+          "ns_per_call": 3393.4920735134556
+        }
+      },
+      "all_programs_ratio": 0.9434825688071937,
       "phases": {
         "baseline": {
           "programs": 13,
@@ -75,6 +88,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "57144fd89c7e176e8caa654686011604f9d19a4daa51ab80a08e6ac58bd9666d",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 7593780556,
+          "runtime_ns": 785196875326,
+          "ns_per_call": 103.39999550100246
+        },
+        "post_rejit": {
+          "calls": 7607268609,
+          "runtime_ns": 791975849477,
+          "ns_per_call": 104.10778035890964
+        }
+      },
+      "all_programs_ratio": 0.993201422069829,
       "phases": {
         "baseline": {
           "programs": 25,
@@ -128,6 +154,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "70cb2ef004c5eaf4e03f7a7fcd37c4283745b39bfc0828adc91663b6ea210b07",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 732239912,
+          "runtime_ns": 456146330237,
+          "ns_per_call": 622.9465544852736
+        },
+        "post_rejit": {
+          "calls": 510872501,
+          "runtime_ns": 690010162480,
+          "ns_per_call": 1350.6504286869024
+        }
+      },
+      "all_programs_ratio": 0.461219677019538,
       "phases": {
         "baseline": {
           "programs": 92,
@@ -181,6 +220,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "bdbb8b1b7be6e57f11721503d3acc9264cf84e7a76b814815b6de07b848036f7",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 2915594700,
+          "runtime_ns": 2158005801610,
+          "ns_per_call": 740.1597353740559
+        },
+        "post_rejit": {
+          "calls": 4691208419,
+          "runtime_ns": 1552397657741,
+          "ns_per_call": 330.9163693204482
+        }
+      },
+      "all_programs_ratio": 2.236697256451857,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -234,6 +286,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "f56f3566e986bcf0078551c6c8f0079d3d1189b2795b5e28a3f8ae237d91d0fe",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 6877997342,
+          "runtime_ns": 2514469210933,
+          "ns_per_call": 365.5815909637785
+        },
+        "post_rejit": {
+          "calls": 11293239496,
+          "runtime_ns": 2077318678912,
+          "ns_per_call": 183.9435601846374
+        }
+      },
+      "all_programs_ratio": 1.9874661042594695,
       "phases": {
         "baseline": {
           "programs": 167,
@@ -287,6 +352,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "39e74847aadc2baa257fe837e3d0743e7a26aeb6bae74589418aa35891e47b79",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1317710936,
+          "runtime_ns": 232913953332,
+          "ns_per_call": 176.75648502927808
+        },
+        "post_rejit": {
+          "calls": 1326262018,
+          "runtime_ns": 232877991673,
+          "ns_per_call": 175.58973152543376
+        }
+      },
+      "all_programs_ratio": 1.0066447707033217,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -340,6 +418,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "380e518e5e44a4e7b7fdfd1819bd34b5413cb2f8abfe34e7974a343d84c89db4",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 419808504,
+          "runtime_ns": 1327111416816,
+          "ns_per_call": 3161.2304280906133
+        },
+        "post_rejit": {
+          "calls": 413107911,
+          "runtime_ns": 1404403138999,
+          "ns_per_call": 3399.6035941296705
+        }
+      },
+      "all_programs_ratio": 0.9298820702358732,
       "phases": {
         "baseline": {
           "programs": 13,
@@ -393,6 +484,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "756d616b5f95e6f6452409ddb7762806b62758f8fb3f89234a70ea98b85d913c",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 7461964931,
+          "runtime_ns": 793784888820,
+          "ns_per_call": 106.37746172221993
+        },
+        "post_rejit": {
+          "calls": 7332982848,
+          "runtime_ns": 792643161808,
+          "ns_per_call": 108.09287001457882
+        }
+      },
+      "all_programs_ratio": 0.9841302364149687,
       "phases": {
         "baseline": {
           "programs": 25,
@@ -446,6 +550,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "1cd251280ad5e18ca9fe95681eeae205919a30dfe3f08184c2b0ea3177d3fbe7",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 672053019,
+          "runtime_ns": 488412909834,
+          "ns_per_call": 726.7475869102524
+        },
+        "post_rejit": {
+          "calls": 780240871,
+          "runtime_ns": 470425085751,
+          "ns_per_call": 602.9228962949314
+        }
+      },
+      "all_programs_ratio": 1.205374006156087,
       "phases": {
         "baseline": {
           "programs": 90,
@@ -499,6 +616,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "39ea3413c44062127bdfcf3aeacb14d9f4f3a938306144725430efe2da8be85c",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 2899891642,
+          "runtime_ns": 2169027578907,
+          "ns_per_call": 747.9684921644393
+        },
+        "post_rejit": {
+          "calls": 4780991392,
+          "runtime_ns": 1520814005826,
+          "ns_per_call": 318.0959514737399
+        }
+      },
+      "all_programs_ratio": 2.351392681041988,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -552,6 +682,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "d3e63143a8c23317ed45bba2018e7ddeac48f28329fe95babe208e43f572c338",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 6541347262,
+          "runtime_ns": 2477869719516,
+          "ns_per_call": 378.8011276989441
+        },
+        "post_rejit": {
+          "calls": 8660506367,
+          "runtime_ns": 1830146558341,
+          "ns_per_call": 211.3209644778499
+        }
+      },
+      "all_programs_ratio": 1.7925392714107595,
       "phases": {
         "baseline": {
           "programs": 167,
@@ -605,6 +748,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "296385a26dec2f63c4c3921e637caf8de3a80e39fc4466e084a35973fe49e33a",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1296192336,
+          "runtime_ns": 233461613562,
+          "ns_per_call": 180.11340375800523
+        },
+        "post_rejit": {
+          "calls": 1276319098,
+          "runtime_ns": 229534985252,
+          "ns_per_call": 179.84137792162068
+        }
+      },
+      "all_programs_ratio": 1.0015125875898432,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -658,6 +814,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "f2a2e3ded67636ef0b26f339555cd3165262c07d44dbeb1b13b958b975488622",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 420128378,
+          "runtime_ns": 1337558528815,
+          "ns_per_call": 3183.6900310861647
+        },
+        "post_rejit": {
+          "calls": 413178685,
+          "runtime_ns": 1392908186569,
+          "ns_per_call": 3371.200492999778
+        }
+      },
+      "all_programs_ratio": 0.9443787273100563,
       "phases": {
         "baseline": {
           "programs": 13,
@@ -711,6 +880,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "8d4ccd2c82446a521d9a19cc8c718944a1c8781f8c6adec96975acfb77867899",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 691100313,
+          "runtime_ns": 468561755133,
+          "ns_per_call": 677.9938401402518
+        },
+        "post_rejit": {
+          "calls": 762494022,
+          "runtime_ns": 467830252907,
+          "ns_per_call": 613.5526829179521
+        }
+      },
+      "all_programs_ratio": 1.1050295419063747,
       "phases": {
         "baseline": {
           "programs": 60,
@@ -764,6 +946,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "831dc854c3c37eaa7d1a302b3ba754b115d906b6684351f903c255b33e6537d8",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1058739138,
+          "runtime_ns": 3290007176640,
+          "ns_per_call": 3107.4766753734575
+        },
+        "post_rejit": {
+          "calls": 2480094199,
+          "runtime_ns": 2679747368475,
+          "ns_per_call": 1080.5022525174659
+        }
+      },
+      "all_programs_ratio": 2.875955758660694,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -817,6 +1012,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "29c39617ca427ef6985cb374a7ca8c3585ac563f634e85ec99872c9228c1be74",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 5801054387,
+          "runtime_ns": 2384574552137,
+          "ns_per_call": 411.0588167352412
+        },
+        "post_rejit": {
+          "calls": 9999794868,
+          "runtime_ns": 1945804152292,
+          "ns_per_call": 194.5844067780531
+        }
+      },
+      "all_programs_ratio": 2.1124961837466407,
       "phases": {
         "baseline": {
           "programs": 167,
@@ -870,6 +1078,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "816582322ca28add7e3a21007c3602bd00dfbdec93ebc2cfc6e43e30f54c52ed",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1282724129,
+          "runtime_ns": 234073371036,
+          "ns_per_call": 182.48145937543208
+        },
+        "post_rejit": {
+          "calls": 1321274591,
+          "runtime_ns": 231379879686,
+          "ns_per_call": 175.11869316345613
+        }
+      },
+      "all_programs_ratio": 1.0420444332867624,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -923,6 +1144,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "b1e8a462f4957f00564a3cd64d638680dfa4eaa7b3846ebddb87eb773b9387cf",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1190194709,
+          "runtime_ns": 3173356869555,
+          "ns_per_call": 2666.2501904593832
+        },
+        "post_rejit": {
+          "calls": 2786044874,
+          "runtime_ns": 2664166961580,
+          "ns_per_call": 956.2541459552959
+        }
+      },
+      "all_programs_ratio": 2.7882234045592607,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -976,6 +1210,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "6803f2a76c65961d9bde4816127aa868e4a74f679d7f1d22d3735620d3e7e5cc",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 658044351,
+          "runtime_ns": 489378742995,
+          "ns_per_call": 743.6865649728828
+        },
+        "post_rejit": {
+          "calls": 793215221,
+          "runtime_ns": 472610454846,
+          "ns_per_call": 595.8161698538561
+        }
+      },
+      "all_programs_ratio": 1.248181238779231,
       "phases": {
         "baseline": {
           "programs": 53,
@@ -1029,6 +1276,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "175f5e2a4deaa5bbd72636e40104a59ea46a714b551d2b7439c3f7e4ed5b83e0",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 400007600,
+          "runtime_ns": 1349889670923,
+          "ns_per_call": 3374.6600587663834
+        },
+        "post_rejit": {
+          "calls": 395500902,
+          "runtime_ns": 1367915441210,
+          "ns_per_call": 3458.6910783075787
+        }
+      },
+      "all_programs_ratio": 0.975704387111001,
       "phases": {
         "baseline": {
           "programs": 13,
@@ -1082,6 +1342,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "66249ed207fbe9eeefacc96781c85aa57e6a65fa1b93c90bca77f8fed4212bb5",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 6807642553,
+          "runtime_ns": 760879421262,
+          "ns_per_call": 111.76841547397267
+        },
+        "post_rejit": {
+          "calls": 7038348665,
+          "runtime_ns": 774928916083,
+          "ns_per_call": 110.10095591548817
+        }
+      },
+      "all_programs_ratio": 1.0151448236268212,
       "phases": {
         "baseline": {
           "programs": 25,
@@ -1135,6 +1408,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "629260fbf43a56d82565ce689441911d65baf61ccaa3809d83d075e9843680bb",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 978884698,
+          "runtime_ns": 3356120824499,
+          "ns_per_call": 3428.514953146198
+        },
+        "post_rejit": {
+          "calls": 2120237472,
+          "runtime_ns": 3115186474328,
+          "ns_per_call": 1469.263002596343
+        }
+      },
+      "all_programs_ratio": 2.333493014584625,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -1192,6 +1478,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "bdcbe8907fb38160b5c621887e4053d10d9f07fcf6280b37a00ce699f5dce46b",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 5910314311,
+          "runtime_ns": 551194268560,
+          "ns_per_call": 93.25972182801566
+        },
+        "post_rejit": {
+          "calls": 5523921973,
+          "runtime_ns": 541291500656,
+          "ns_per_call": 97.990432033932
+        }
+      },
+      "all_programs_ratio": 0.9517227334575054,
       "phases": {
         "baseline": {
           "programs": 23,
@@ -1247,6 +1546,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "1eaaa6ac3728c95e7c3506d3d9f23a02d87522bcbceb080d2f61af33302992e8",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 601392933,
+          "runtime_ns": 601757744992,
+          "ns_per_call": 1000.6066117042317
+        },
+        "post_rejit": {
+          "calls": 642524316,
+          "runtime_ns": 633337668912,
+          "ns_per_call": 985.7022577056835
+        }
+      },
+      "all_programs_ratio": 1.0151205436347883,
       "phases": {
         "baseline": {
           "programs": 60,
@@ -1302,6 +1614,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "d6de84e15a294f068fcd22b2d77540520940189e958d4398d289f9173e05f0da",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 218368709,
+          "runtime_ns": 55277164512,
+          "ns_per_call": 253.13683798899962
+        },
+        "post_rejit": {
+          "calls": 217693585,
+          "runtime_ns": 54870097936,
+          "ns_per_call": 252.05197450352063
+        }
+      },
+      "all_programs_ratio": 1.0043041261137347,
       "phases": {
         "baseline": {
           "programs": 12,
@@ -1357,6 +1682,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "b1260e8f725054997548b657563490270cd7796255ddf03e099299b65ff3dfb2",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 3347130402,
+          "runtime_ns": 1118283325920,
+          "ns_per_call": 334.10210885473595
+        },
+        "post_rejit": {
+          "calls": 4144984066,
+          "runtime_ns": 873560502512,
+          "ns_per_call": 210.75123296071072
+        }
+      },
+      "all_programs_ratio": 1.5852913606300034,
       "phases": {
         "baseline": {
           "programs": 167,
@@ -1412,6 +1750,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "f64fdee164a7a94d3dc1a249a7256df50adea8b30d11cd9fdf096962f931f6e2",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1142612364,
+          "runtime_ns": 188861098880,
+          "ns_per_call": 165.28886333668274
+        },
+        "post_rejit": {
+          "calls": 1128597574,
+          "runtime_ns": 194971039968,
+          "ns_per_call": 172.75514714866824
+        }
+      },
+      "all_programs_ratio": 0.956781120937831,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -1467,6 +1818,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "409f38a15683b684ba805be1d3a9be09b019ebce07a8fc2b3008f06654147bc0",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1830949459,
+          "runtime_ns": 816567596080,
+          "ns_per_call": 445.98041309451565
+        },
+        "post_rejit": {
+          "calls": 2091410588,
+          "runtime_ns": 673845066768,
+          "ns_per_call": 322.19644991488394
+        }
+      },
+      "all_programs_ratio": 1.384187855615207,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -1522,6 +1886,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "b547c3a715f4846fa623492ecff55ce2ec3a3f3a90a92f9828a80f12fd726923",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 5990937464,
+          "runtime_ns": 557242299488,
+          "ns_per_call": 93.01420734843444
+        },
+        "post_rejit": {
+          "calls": 5775796132,
+          "runtime_ns": 572944543296,
+          "ns_per_call": 99.19750112398877
+        }
+      },
+      "all_programs_ratio": 0.9376668393307033,
       "phases": {
         "baseline": {
           "programs": 23,
@@ -1577,6 +1954,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "e7f8483f7e29355e45e4527282190d0092f7a390a1852fa0e8ba8c003ef99419",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 217964992,
+          "runtime_ns": 57068612432,
+          "ns_per_call": 261.8246715142219
+        },
+        "post_rejit": {
+          "calls": 217695544,
+          "runtime_ns": 56053056064,
+          "ns_per_call": 257.4837088259372
+        }
+      },
+      "all_programs_ratio": 1.016859174151555,
       "phases": {
         "baseline": {
           "programs": 12,
@@ -1632,6 +2022,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "b30ca81af51585049c85aa2fa93d76e3ebcd2ed0ded363c63fed5562948a329a",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 591734436,
+          "runtime_ns": 588954846064,
+          "ns_per_call": 995.3026395509623
+        },
+        "post_rejit": {
+          "calls": 645451394,
+          "runtime_ns": 631718837616,
+          "ns_per_call": 978.7241045388462
+        }
+      },
+      "all_programs_ratio": 1.0169389258272408,
       "phases": {
         "baseline": {
           "programs": 72,
@@ -1687,6 +2090,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "76ed93dacdd3e5f7353893f2741377f5a8618d6049c9c92d70def4fbe96e7c37",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 3259902922,
+          "runtime_ns": 1085181047952,
+          "ns_per_call": 332.88753497181597
+        },
+        "post_rejit": {
+          "calls": 4005809173,
+          "runtime_ns": 869260105408,
+          "ns_per_call": 216.9998788926334
+        }
+      },
+      "all_programs_ratio": 1.5340447961103294,
       "phases": {
         "baseline": {
           "programs": 167,
@@ -1742,6 +2158,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "e87614c1c5da50c79fa419072f2e73372a0919b9030ddb3ae578364830a130c7",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1471415391,
+          "runtime_ns": 239490568224,
+          "ns_per_call": 162.76203829921744
+        },
+        "post_rejit": {
+          "calls": 1248956640,
+          "runtime_ns": 218101079376,
+          "ns_per_call": 174.62662224687
+        }
+      },
+      "all_programs_ratio": 0.9320574160171318,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -1797,6 +2226,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "8a545891d93a7e9dd83a9fb395fbe91d2ee5a63b75874aa3800910d3f5fafe17",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1817659930,
+          "runtime_ns": 812067246096,
+          "ns_per_call": 446.76522417259866
+        },
+        "post_rejit": {
+          "calls": 2101353850,
+          "runtime_ns": 678091410384,
+          "ns_per_call": 322.6926347430729
+        }
+      },
+      "all_programs_ratio": 1.38449154418511,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -1852,6 +2294,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "d18e05f42e015f9a11d42b09de59a0b9f0d9b46ec58532674cd4c76a0b2b538f",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 585517817,
+          "runtime_ns": 592726154848,
+          "ns_per_call": 1012.3110478258939
+        },
+        "post_rejit": {
+          "calls": 645684591,
+          "runtime_ns": 631623725104,
+          "ns_per_call": 978.2233212748297
+        }
+      },
+      "all_programs_ratio": 1.0348465690908297,
       "phases": {
         "baseline": {
           "programs": 60,
@@ -1907,6 +2362,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "8bdd96c72bae2e5312f730729b6c6a526fd265736b004ca610ccbf96ba6de79f",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 5916414839,
+          "runtime_ns": 551608674960,
+          "ns_per_call": 93.23360345253167
+        },
+        "post_rejit": {
+          "calls": 5578872238,
+          "runtime_ns": 543993849520,
+          "ns_per_call": 97.5096446580428
+        }
+      },
+      "all_programs_ratio": 0.9561475049928978,
       "phases": {
         "baseline": {
           "programs": 23,
@@ -1962,6 +2430,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "fa9b399a96230e746d1868814bb1d413bdf3e91015bdf7d8506b882f2ecd3996",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1823860636,
+          "runtime_ns": 821417509408,
+          "ns_per_call": 450.3729578864599
+        },
+        "post_rejit": {
+          "calls": 2113809337,
+          "runtime_ns": 679947434576,
+          "ns_per_call": 321.6692360442535
+        }
+      },
+      "all_programs_ratio": 1.4001120014613397,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -2017,6 +2498,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "aee7dbb3e9bc2142e567dc6c5740d2639e1b0a2dbf577439839016994faa005a",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1333356017,
+          "runtime_ns": 219363383456,
+          "ns_per_call": 164.51973865881612
+        },
+        "post_rejit": {
+          "calls": 1316855075,
+          "runtime_ns": 227087415504,
+          "ns_per_call": 172.44677855230196
+        }
+      },
+      "all_programs_ratio": 0.9540319630205117,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -2072,6 +2566,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "96597b692be6ed7aa5b56f0ce355dc0b9c7b2c9ea9873084f6476611ff0f79eb",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 217680160,
+          "runtime_ns": 55201074096,
+          "ns_per_call": 253.58798935098173
+        },
+        "post_rejit": {
+          "calls": 217715576,
+          "runtime_ns": 52339934208,
+          "ns_per_call": 240.40509718973897
+        }
+      },
+      "all_programs_ratio": 1.0548361591137072,
       "phases": {
         "baseline": {
           "programs": 12,
@@ -2127,6 +2634,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "c9863b8036bb47f222587e1aedc660c71175182503c96a850d8d8251da2f35c9",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 606742958,
+          "runtime_ns": 599728454352,
+          "ns_per_call": 988.4390851916571
+        },
+        "post_rejit": {
+          "calls": 584590651,
+          "runtime_ns": 566725251920,
+          "ns_per_call": 969.4394717920318
+        }
+      },
+      "all_programs_ratio": 1.0195985556112175,
       "phases": {
         "baseline": {
           "programs": 72,
@@ -2182,6 +2702,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "3ad52097997da94ffb9d28317444b7f80d89bfbbab1ce83b211fba23f1369990",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 5906696475,
+          "runtime_ns": 558743591808,
+          "ns_per_call": 94.59493884151209
+        },
+        "post_rejit": {
+          "calls": 5528094764,
+          "runtime_ns": 538753372496,
+          "ns_per_call": 97.45733304075465
+        }
+      },
+      "all_programs_ratio": 0.9706292578512736,
       "phases": {
         "baseline": {
           "programs": 23,
@@ -2237,6 +2770,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "4b0e3fea22a069618880ced77036e6e386392550fa5c898e96985687b9ee05fe",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1859206450,
+          "runtime_ns": 832561233952,
+          "ns_per_call": 447.8046179067419
+        },
+        "post_rejit": {
+          "calls": 2176939325,
+          "runtime_ns": 679531026064,
+          "ns_per_call": 312.14973162561614
+        }
+      },
+      "all_programs_ratio": 1.4345827419894326,
       "phases": {
         "baseline": {
           "programs": 287,
@@ -2292,6 +2838,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "7d3ed3975bb51d9e6977c8d1a42c2fff05a517d72a48c19605fe67f5bd6fb8bf",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 1153208119,
+          "runtime_ns": 189375787312,
+          "ns_per_call": 164.21648806653954
+        },
+        "post_rejit": {
+          "calls": 1447464272,
+          "runtime_ns": 239318654176,
+          "ns_per_call": 165.33648450287967
+        }
+      },
+      "all_programs_ratio": 0.9932259571158317,
       "phases": {
         "baseline": {
           "programs": 1,
@@ -2347,6 +2906,19 @@
       "app_status": "ok",
       "error": "",
       "app_sha256": "d2ccb75e3fc5a9e3b5b98bdff8ac620a5b1aa0b57db887be8c39ed798eac6c6d",
+      "all_programs_aggregate": {
+        "baseline": {
+          "calls": 3369605105,
+          "runtime_ns": 1126055616896,
+          "ns_per_call": 334.18029169800894
+        },
+        "post_rejit": {
+          "calls": 4176132687,
+          "runtime_ns": 848308370448,
+          "ns_per_call": 203.1325233244439
+        }
+      },
+      "all_programs_ratio": 1.6451343498758944,
       "phases": {
         "baseline": {
           "programs": 167,

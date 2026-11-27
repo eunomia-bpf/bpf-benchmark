@@ -1,5 +1,5 @@
 """Inventory available corpus measurements without mixing diagnostic and timing cohorts."""
-import collections,hashlib,importlib.util,json,os,statistics,subprocess,sys,traceback
+import math,collections,hashlib,importlib.util,json,os,statistics,subprocess,sys,traceback
 from pathlib import Path
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent;LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
 def now():return subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip()
@@ -37,6 +37,10 @@ try:
     row=dict(base,app_file=str(f))
     try:
      app=json.loads(f.read_text());row.update(app=app.get('app',f.stem.replace('__','/')),app_status=app.get('status'),error=app.get('error'),app_sha256=hashlib.sha256(f.read_bytes()).hexdigest())
+     row['all_programs_aggregate']={}
+     for ph in ['baseline','post_rejit']:
+      vs=list(((app.get(ph) or {}).get('bpf') or {}).values());vs=[v for v in vs if (v.get('run_cnt_delta') or 0)>0];calls=sum(v['run_cnt_delta'] for v in vs);ns=sum(v['run_time_ns_delta'] for v in vs);row['all_programs_aggregate'][ph]=dict(calls=calls,runtime_ns=ns,ns_per_call=ns/calls if calls else None)
+     ae=row['all_programs_aggregate']['baseline']['ns_per_call'];an=row['all_programs_aggregate']['post_rejit']['ns_per_call'];row['all_programs_ratio']=ae/an if ae is not None and an else None
      row['phases']={ph:None if app.get(ph) is None else dict(programs=len(app[ph]['bpf']),active=sum(v['run_cnt_delta']>0 for v in app[ph]['bpf'].values())) for ph in ['baseline','post_rejit']}
      try:
       a,b=ratio.ne.bpf_aggregate(app,'baseline'),ratio.ne.bpf_aggregate(app,'post_rejit');row.update(ebpf_ns=a[0],native_ns=b[0],per_call_ratio=a[0]/b[0] if a[0] and b[0] else None)
@@ -49,6 +53,10 @@ try:
     except Exception:row['inventory_error']=traceback.format_exc()
     rows.append(row)
   except Exception:rows.append(dict(base,inventory_error=traceback.format_exc()))
+ for row in rows:
+  for key,value in list(row.items()):
+   if isinstance(value,float) and not math.isfinite(value):row[key]=None
+ record['metric_definitions']=dict(ebpf_ns_native_ns_per_call_ratio='Existing may29 evaluator: sum elapsed/sum calls for programs with run_cnt_delta>=100',all_programs_aggregate='Same raw counters over every program with positive calls, matching coordinator timing-history scan; both variants retained',undefined='Non-finite aggregate values are JSON null, not numeric observations')
  summary=dict(metadata_paths=len(paths),directories_without_metadata=len(canonical_missing),rows=len(rows),cohorts=dict(collections.Counter((str(r.get('backend')),r.get('cohort'),str(r.get('stats'))) for r in rows)),inventory_errors=sum('inventory_error' in r for r in rows),missing_image=sum(not r.get('image') for r in rows),missing_commit=sum(not r.get('source_commit') for r in rows))
  # Tuple keys are formatted explicitly for JSON, preserving each cohort.
  summary['cohorts']={str(k):v for k,v in summary['cohorts'].items()}
