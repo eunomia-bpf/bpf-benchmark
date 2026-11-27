@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairLoads
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairLoads.decoded
+#print axioms Arm64KernelMemcpyPairLoads.decoded
+#check Arm64KernelMemcpyPairLoads.native_split
+#print axioms Arm64KernelMemcpyPairLoads.native_split
+#check Arm64KernelMemcpyPairLoads.native_single
+#print axioms Arm64KernelMemcpyPairLoads.native_single
