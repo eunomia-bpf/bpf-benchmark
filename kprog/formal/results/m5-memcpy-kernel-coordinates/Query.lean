@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.sp
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.sp
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates.observe

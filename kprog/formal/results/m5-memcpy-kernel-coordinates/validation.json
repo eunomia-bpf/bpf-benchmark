@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T03:02:11.247304+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyCoordinates"
+    ],
+    "exit": 0,
+    "seconds": 4.365235090255737,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 580,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-coordinates/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7024757862091064,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "native_steps": 13,
+    "source_SP": -32,
+    "original_SP_domain": "-32 + original stack origin",
+    "source_R0": -16,
+    "stack_tag": 4,
+    "state_replays": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCoordinates.lean",
+      "size_bytes": 3376,
+      "mtime_ns": 1795748351305266373
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
