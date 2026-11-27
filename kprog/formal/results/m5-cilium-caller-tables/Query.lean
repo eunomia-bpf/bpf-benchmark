@@ -1,0 +1,15 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.initializer_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.initializer_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.table_storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.table_storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.cell_storage
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.cell_storage
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.tables_separate
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.tables_separate
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.table_cell_separate
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.table_cell_separate
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.slot_writable
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.slot_writable
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerTables.initializer_store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerTables.initializer_store

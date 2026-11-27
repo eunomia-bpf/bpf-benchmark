@@ -1,0 +1,88 @@
+{
+  "scope": "actual caller separate pointer-array/cell allocation and original slot30 initializer statements independently;no full prologue reachability claim",
+  "source_sha256": "3b5914b5613d087092177cb5ceceb9962d56068ff6dac4cc35852a11dc5ed321",
+  "receipts": {
+    "stage3": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-tables/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 9.859700441360474,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerTables"
+      ],
+      "exit": 0,
+      "seconds": 9.07508635520935,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.909712314605713,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-tables/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3389484882354736,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 188,
+  "full_jobs": 1486,
+  "root_queries": [
+    "initializer_source",
+    "table_storage",
+    "cell_storage",
+    "tables_separate",
+    "table_cell_separate",
+    "slot_writable",
+    "initializer_store"
+  ],
+  "source_parts": {
+    "words": "s_trusted_arm64_arm64_sim_xdp_9294",
+    "tags": "s_trusted_arm64_arm64_sim_xdp_9292"
+  },
+  "slot": 30,
+  "byte_offset": 240,
+  "array_bytes": 248,
+  "axioms": "std Lean plus inherited CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
