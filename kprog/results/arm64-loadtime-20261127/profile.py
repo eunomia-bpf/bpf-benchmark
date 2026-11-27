@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import time
 import traceback
@@ -16,7 +17,8 @@ LANE = Path('/workspaces/.agent-state/kprog-lanes/perf')
 def now():
     return subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip()
 token = subprocess.check_output(['date', '-u', '+%Y%m%dT%H%M%SZ'], text=True).strip()
-OUT = HERE/('profile-'+token)
+mode = sys.argv[1] if len(sys.argv) > 1 else 'profile'
+OUT = HERE/(mode+'-'+token)
 OUT.mkdir()
 RAW = Path('/workspaces/kprog-raw/perf/arm64-loadtime-20261127')/token
 RAW.mkdir(parents=True)
@@ -42,6 +44,7 @@ try:
     source_run = ROOT/'kprog/results/arm64-checked-corpus-20261127'
     attribution = json.loads((source_run/'loadtime-attribution.json').read_text())
     specimen = max(attribution['per_request'], key=lambda row: row['host_frontend_wall_seconds'])
+    record['mode'] = mode
     record['specimen'] = specimen
     raw_source = Path('/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z')
     jobs = [json.loads(line) for line in (raw_source/'broker/jobs.jsonl').read_text().splitlines()]
@@ -67,6 +70,13 @@ try:
     trace = RAW/'frontend-trace.json'
     with Path('/workspaces/.agent-state/kprog-lanes/locks/timing').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_SH)
+        if mode == 'early-promote':
+            unoptimized = frontend.with_suffix('.unoptimized.bc')
+            promoted = frontend.with_suffix('.promoted.bc')
+            raw_command = [str(unoptimized) if arg == str(frontend) else arg for arg in command]
+            run([*raw_command, '-Xclang', '-disable-llvm-passes', '-ftime-report'], 'frontend-raw')
+            run(['/usr/lib/llvm-18/bin/opt', '-passes=mem2reg,simplifycfg', str(unoptimized), '-o', str(promoted), '-time-passes'], 'early-promote')
+            command = [str(promoted) if arg == str(source) else arg for arg in command]
         run([*command, '-ftime-report', '-ftime-trace='+str(trace)], 'frontend')
         record['frontend_byte_equal_original'] = frontend.read_bytes() == original_ir
         object_command = next(job['command'] for job in jobs if str(frontend) in job['command'] and '-emit-llvm' not in job['command'])
@@ -96,7 +106,7 @@ finally:
         with Path('/workspaces/.agent-state/kprog-lanes/locks/git').open('a') as lock, (OUT/'publication.log').open('a') as log:
             fcntl.flock(lock, fcntl.LOCK_EX)
             path = str(OUT.relative_to(ROOT))
-            for command in [['git', 'add', '-f', '--', path], ['git', 'commit', '--only', '-m', 'Record real ARM B frontend compiler profile', '--', path], ['git', 'push']]:
+            for command in [['git', 'add', '-f', '--', path], ['git', 'commit', '--only', '-m', 'Record real ARM B frontend '+mode+' profile', '--', path], ['git', 'push']]:
                 subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
     except Exception:
         record.update(publication_error=traceback.format_exc(), controller_status=1)
