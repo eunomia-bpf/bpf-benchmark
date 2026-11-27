@@ -1,0 +1,54 @@
+{
+  "confirmed_utc": "2026-11-27T02:19:34.299003+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyEntry"
+    ],
+    "exit": 0,
+    "seconds": 2.054682493209839,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 570,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-entry/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.073982000350952,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "original_native_inputs": "Code, post-BTI PC, count16, no-error, physical representation",
+    "actual_native_steps": 13,
+    "native_breakdown": "8 prefix +2 LDP +2 STP +RET",
+    "readable_permission": "derived from actual source loads",
+    "fresh_current_inputs": 0,
+    "source_call_executions": 1,
+    "native_return": "original input X30",
+    "retained": "all actual witnesses, source packet/trace/frees/caller,16byte observation"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyEntry.lean",
+      "size_bytes": 8064,
+      "mtime_ns": 1795745820103593697
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
