@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-27T14:18:57Z",
+  "pid": 1035266,
+  "log": "kprog/results/arm64-loadtime-20261127/launch-20261127T141857Z-input-recovery.log",
+  "source_revision": "72701b211e8c96494d9b591fc1daf0f3386c10c1",
+  "original_controller": "kprog/results/arm64-loadtime-20261127/cross-app-20261127T121315Z/controller.json",
+  "scope": "23 consolidated-archive missing-input cases only; actual frontend/B compilation on CPU18 under 48GiB AS, at most two compilers with active Cilium CPU16. Original input errors retained.",
+  "command": [
+    "prlimit",
+    "--as=51539607552",
+    "taskset",
+    "-c",
+    "18",
+    "python3",
+    "kprog/results/arm64-loadtime-20261127/cross_app.py",
+    "cross-app-20261127T121315Z"
+  ]
+}
