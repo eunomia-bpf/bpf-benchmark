@@ -11,5 +11,9 @@
   "canonical_publication": "FORMAL-owned publication pending or concurrent; current sources match exact reviewed plan",
   "validation_script": "kprog/results/arm64-loadtime-20261127/header_source_check.py",
   "validation_scope": "first input of each six apps plus slowest captured OTel/Cilium frontend; code/nonmetadata sections/relocs versus wholeELF/debug distinguished",
-  "validation_status": "not yet run"
+  "validation_status": "8/8 compiled; allocated B sections, code relocations, BTF types/function-info/CO-RE equal; whole ELF differs only debug/BTF strings/line metadata",
+  "validation_controller": "validation-controller.json",
+  "validation_summary": "validation-summary.json",
+  "archive_controller": "controller.json",
+  "archive_files_equal_raw": 70
 }

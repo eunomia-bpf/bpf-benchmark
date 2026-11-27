@@ -931,5 +931,18 @@
     "live_sources_modified": false,
     "header_declarations_changed": false,
     "full_patch_apply_check_returncode": 0
+  },
+  "completed_transition": {
+    "own_header_commit": "d8f43a799",
+    "canonical_header_commit": "c99b62d15",
+    "runtime_helper_removal_commit": "d7cdb25a4",
+    "result": "kprog/results/arm64-loadtime-20261127/header-source-20261127T151253Z/validation-summary.json",
+    "compiled": 8,
+    "code_and_relocations_equal": 8,
+    "btf_semantics_equal": 8,
+    "whole_ELF_equal": 0,
+    "working_direct_header_reproduces_regenerator": true,
+    "published_direct_header_includes_preexisting_OMP_delta": false,
+    "scope": "Common source cleanup validated on first input of each six apps plus OTel/Cilium stress inputs, no stock/native/900s/performance acceptance. Exact working sources including preserved OMP direct.h delta archived."
   }
 }

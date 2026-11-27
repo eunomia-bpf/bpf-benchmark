@@ -1,0 +1,164 @@
+{
+  "compiled": 8,
+  "metadata": [
+    {
+      "app": "bcc/set",
+      "identity": "replay-1",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "be803c9a5f2136baaa69682d7c17dbbaacac292f1b11e878918da1a5d114653c",
+      "current_btf_types_sha256": "be803c9a5f2136baaa69682d7c17dbbaacac292f1b11e878918da1a5d114653c"
+    },
+    {
+      "app": "katran/balancer",
+      "identity": "replay-24",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "a23bf5bfc9302adc1ff3f43a51f5cd2ae36d0880fde26546aaf3567ba3f74c2a",
+      "current_btf_types_sha256": "a23bf5bfc9302adc1ff3f43a51f5cd2ae36d0880fde26546aaf3567ba3f74c2a"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "identity": "replay-25",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "dc20cf117d4fb72b46b58f2a9e25bc838ebdbe45ca992726e2e83e07bc0af3bc",
+      "current_btf_types_sha256": "dc20cf117d4fb72b46b58f2a9e25bc838ebdbe45ca992726e2e83e07bc0af3bc"
+    },
+    {
+      "app": "tetragon/observer",
+      "identity": "replay-38",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "bacf47b7daf98d7b96bfd29e65baa35f01c5aa0d585efa5d4524a4ca3bf0195e",
+      "current_btf_types_sha256": "bacf47b7daf98d7b96bfd29e65baa35f01c5aa0d585efa5d4524a4ca3bf0195e"
+    },
+    {
+      "app": "cilium/agent",
+      "identity": "request-1",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "f3efb1c965626a676a687cee39553e0e2c56ac4f7ac9baef042e6a068eda23c7",
+      "current_btf_types_sha256": "f3efb1c965626a676a687cee39553e0e2c56ac4f7ac9baef042e6a068eda23c7"
+    },
+    {
+      "app": "tracee/monitor",
+      "identity": "request-1",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "9b07eb6f824048072eb693c63f882bac3144b8f53f3bb0ecbef4afe7b2174d96",
+      "current_btf_types_sha256": "9b07eb6f824048072eb693c63f882bac3144b8f53f3bb0ecbef4afe7b2174d96"
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "identity": "replay-33",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "6a62da799d86abcc140660b8cbb2c2eefb5e6cbb20b132e35ed3542ff65acfe6",
+      "current_btf_types_sha256": "6a62da799d86abcc140660b8cbb2c2eefb5e6cbb20b132e35ed3542ff65acfe6"
+    },
+    {
+      "app": "cilium/agent",
+      "identity": "request-16",
+      "changed_sections": [
+        ".BTF",
+        ".BTF.ext",
+        ".debug_abbrev",
+        ".debug_info",
+        ".debug_line",
+        ".debug_line_str",
+        ".debug_str",
+        ".debug_str_offsets"
+      ],
+      "btf_types_equal": true,
+      "btf_func_info_equal": true,
+      "btf_core_relocations_equal": true,
+      "baseline_btf_types_sha256": "cc20c610cde3848dd7808846a759b40c2b8426f2aa7875e3f19445b752c32882",
+      "current_btf_types_sha256": "cc20c610cde3848dd7808846a759b40c2b8426f2aa7875e3f19445b752c32882"
+    }
+  ],
+  "archived_files_equal_raw": 70,
+  "parts": [
+    {
+      "path": "evidence.tar.zst.part-aa",
+      "bytes": 19673243,
+      "sha256": "ab7f40db8c8272734face88b9fa723f015b1e8a95ee6bb0680b85428e82f11d1"
+    }
+  ]
+}
