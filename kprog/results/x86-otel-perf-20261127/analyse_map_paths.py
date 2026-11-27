@@ -32,5 +32,18 @@ for phase in ['baseline','post_rejit']:
       b=data[cpu*size:(cpu+1)*size];row['records'].append(dict(cpu=cpu,map_id=m['id'],pid=struct.unpack_from('<I',b,p['trace']+t['pid'])[0],stack_len=struct.unpack_from('<I',b,p['trace']+t['stack_len'])[0],pc=struct.unpack_from('<Q',b,p['state']+u['pc'])[0],error_metric=struct.unpack_from('<i',b,p['state']+u['error_metric'])[0],unwind_error=struct.unpack_from('<I',b,p['state']+u['unwind_error'])[0],tail_calls=b[p['tailCalls']]))
   rows.append(row)
  r['phases'][phase]=dict(window=[start,end],entry_id=entry_id,calls=entry['run_cnt_delta'],runtime_ns=entry['run_time_ns_delta'],ns_per_call=entry['run_time_ns_delta']/entry['run_cnt_delta'],snapshots=rows)
-r['diagnostic_ratio']=r['phases']['baseline']['ns_per_call']/r['phases']['post_rejit']['ns_per_call'];r['conclusion']='Known stress PIDs have initial mapping hits and native program-array slot1 points to installed native unwinder28. Native per-CPU records have zero stack frames and one requested tail call; native unwind attempt/frame counters remain zero. Actual native entry has an unconditional branch to its shared tail helper that the linker remaps past the inline expansion. Thus the earlier large ratio includes skipped unwinding, not an equal-work optimization gain.';r['limits']='Snapshots are non-atomic and sparse. The finish socket envelope includes program teardown; rows with entry_present=false remain explicitly recorded. No benchmark is excluded on counts or PMU noise; the causal defect is backed by actual branch targets and a populated-map host reproduction.'
+r['diagnostic_ratio']=r['phases']['baseline']['ns_per_call']/r['phases']['post_rejit']['ns_per_call']
+# Report only observations from this run. Historical branch/host proofs belong to
+# their captured image, and cannot be inferred for a repaired image from counters.
+for phase,v in r['phases'].items():
+ active=[row for row in v['snapshots'] if row['entry_present']]
+ summary=dict(active_snapshots=len(active),teardown_snapshots=len(v['snapshots'])-len(active),metric_samples={},record_samples=[])
+ for row in active:
+  for metric in row['metrics']:
+   for key,value in metric['values'].items():
+    if key in [5,6]:summary['metric_samples'].setdefault(labels[key],[]).append(dict(uptime=row['uptime'],map_id=metric['map_id'],value=value))
+  summary['record_samples'].append(dict(uptime=row['uptime'],stack_lengths=[x['stack_len'] for x in row['records']],tail_calls=[x['tail_calls'] for x in row['records']]))
+ v['observations']=summary
+r['conclusion']='Phase-matched observations are recorded for this captured image. Inspect active snapshot metrics, per-CPU stack lengths, program-array targets and actual code/helper paths together; the timing ratio alone does not establish restored work or an optimization gain.'
+r['limits']='Snapshots are non-atomic and sparse; counter values are cumulative per map, not an automatic arm delta. The finish socket envelope includes teardown; entry_present=false rows remain recorded and are omitted only from the active observation summary. No benchmark is excluded on counts or PMU noise. Historical causal branch/host proofs are specific to their captured code and are not inferred for this image.'
 (out/'map-path-analysis.json').write_text(json.dumps(r,indent=2)+'\n');print(json.dumps({phase:{k:v[k] for k in ['window','calls','runtime_ns','ns_per_call']} for phase,v in r['phases'].items()}));print(r['conclusion'])
