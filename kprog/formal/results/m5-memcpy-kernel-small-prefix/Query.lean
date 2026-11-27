@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpySmallPrefix
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpySmallPrefix.execute
+#print axioms Arm64KernelMemcpySmallPrefix.execute
+#check Arm64KernelMemcpySmallPrefix.Result.firstLoad
+#print axioms Arm64KernelMemcpySmallPrefix.Result.firstLoad

@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T00:55:37.714379+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpySmallPrefix"
+    ],
+    "exit": 0,
+    "seconds": 1.9013774394989014,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 79,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-small-prefix/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.481851577758789,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_native_steps": 8,
+    "initial_count": 16,
+    "initial_PC": "generic origin+4 after BTI",
+    "final_PC": "generic origin+36 at first LDP",
+    "fresh_later_count_error_fetch_premises": false,
+    "code": "one actual captured generic Code, same complete program"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpySmallPrefix.lean",
+      "size_bytes": 8897,
+      "mtime_ns": 1795740830962023324
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
