@@ -95,6 +95,13 @@ NativeLinkArgs build_native_link_args(
     {
         uint32_t cpu_offset = K_THREAD_INFO_CPU_OFFSET;
         add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
+        add_name_addr(out.helpers, "__native_arm64_bpf_map_max_entries_offset",
+                      K_BPF_MAP_MAX_ENTRIES_OFFSET);
+        add_name_addr(out.helpers, "__native_arm64_bpf_array_ptrs_offset", K_BPF_ARRAY_PTRS_OFFSET);
+        add_name_addr(out.helpers, "__native_arm64_bpf_prog_bpf_func_offset",
+                      K_BPF_PROG_BPF_FUNC_OFFSET);
+        // The same one-kernel ARM JIT entry offset as the ordinary loader.
+        add_name_addr(out.helpers, "__native_arm64_tail_call_offset", 28);
     }
 #endif
     if (companion.context_helpers) {

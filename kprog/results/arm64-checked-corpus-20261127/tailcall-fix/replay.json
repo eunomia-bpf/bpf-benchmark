@@ -1,0 +1,237 @@
+{
+  "utc": "2026-11-27T04:45:44Z",
+  "scope": "Actual archived loader proof objects/plans; offline kernel linking only, no runtime/install claim.",
+  "layout": {
+    "__native_arm64_bpf_map_max_entries_offset": 68,
+    "__native_arm64_bpf_array_ptrs_offset": 304,
+    "__native_arm64_bpf_prog_bpf_func_offset": 72,
+    "__native_arm64_tail_call_offset": 28
+  },
+  "cases": [
+    {
+      "request": 2,
+      "symbol": "perf_unwind_stop",
+      "commands": [
+        {
+          "name": "before",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/17de05cbf50cd485.tmp.666.proof.o",
+            "--symbol",
+            "perf_unwind_stop",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/17de05cbf50cd485.tmp.666.link-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/before.bin"
+          ],
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_stop (4592 bytes), 1 reachable symbol(s) total\n  - perf_unwind_stop (vaddr 0x0, 4592 bytes) [entry]\nError: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset\n"
+        },
+        {
+          "name": "after",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/17de05cbf50cd485.tmp.666.proof.o",
+            "--symbol",
+            "perf_unwind_stop",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/after-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/after.bin"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_stop (4592 bytes), 1 reachable symbol(s) total\n  - perf_unwind_stop (vaddr 0x0, 4592 bytes) [entry]\nnative-link: wrote 18356 bytes -> /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/2/after.bin (0 relocs)\n"
+        }
+      ],
+      "bytes": 18356
+    },
+    {
+      "request": 7,
+      "symbol": "perf_unwind_python",
+      "commands": [
+        {
+          "name": "before",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/32c5d38b1d2cad89.tmp.703.proof.o",
+            "--symbol",
+            "perf_unwind_python",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/32c5d38b1d2cad89.tmp.703.link-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/before.bin"
+          ],
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_python (13324 bytes), 1 reachable symbol(s) total\n  - perf_unwind_python (vaddr 0x0, 13324 bytes) [entry]\nError: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset\n"
+        },
+        {
+          "name": "after",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/32c5d38b1d2cad89.tmp.703.proof.o",
+            "--symbol",
+            "perf_unwind_python",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/after-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/after.bin"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_python (13324 bytes), 1 reachable symbol(s) total\n  - perf_unwind_python (vaddr 0x0, 13324 bytes) [entry]\nnative-link: wrote 28084 bytes -> /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/7/after.bin (0 relocs)\n"
+        }
+      ],
+      "bytes": 28084
+    },
+    {
+      "request": 8,
+      "symbol": "perf_unwind_ruby",
+      "commands": [
+        {
+          "name": "before",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/cda95446c6a900b0.tmp.711.proof.o",
+            "--symbol",
+            "perf_unwind_ruby",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/cda95446c6a900b0.tmp.711.link-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/before.bin"
+          ],
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_ruby (17272 bytes), 1 reachable symbol(s) total\n  - perf_unwind_ruby (vaddr 0x0, 17272 bytes) [entry]\nError: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset\n"
+        },
+        {
+          "name": "after",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/cda95446c6a900b0.tmp.711.proof.o",
+            "--symbol",
+            "perf_unwind_ruby",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/after-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/after.bin"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=perf_unwind_ruby (17272 bytes), 1 reachable symbol(s) total\n  - perf_unwind_ruby (vaddr 0x0, 17272 bytes) [entry]\nnative-link: wrote 33388 bytes -> /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/8/after.bin (0 relocs)\n"
+        }
+      ],
+      "bytes": 33388
+    },
+    {
+      "request": 12,
+      "symbol": "native_tracer_entry",
+      "commands": [
+        {
+          "name": "before",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/bcf35e371ed8ce54.tmp.749.proof.o",
+            "--symbol",
+            "native_tracer_entry",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/bcf35e371ed8ce54.tmp.749.link-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/before.bin"
+          ],
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=native_tracer_entry (4340 bytes), 1 reachable symbol(s) total\n  - native_tracer_entry (vaddr 0x0, 4340 bytes) [entry]\nError: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset\n"
+        },
+        {
+          "name": "after",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/bcf35e371ed8ce54.tmp.749.proof.o",
+            "--symbol",
+            "native_tracer_entry",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/after-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/after.bin"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=native_tracer_entry (4340 bytes), 1 reachable symbol(s) total\n  - native_tracer_entry (vaddr 0x0, 4340 bytes) [entry]\nnative-link: wrote 18164 bytes -> /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/12/after.bin (0 relocs)\n"
+        }
+      ],
+      "bytes": 18164
+    },
+    {
+      "request": 13,
+      "symbol": "custom__generic",
+      "commands": [
+        {
+          "name": "before",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/f84207a73d02e14f.tmp.757.proof.o",
+            "--symbol",
+            "custom__generic",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/f84207a73d02e14f.tmp.757.link-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/before.bin"
+          ],
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=custom__generic (3816 bytes), 1 reachable symbol(s) total\n  - custom__generic (vaddr 0x0, 3816 bytes) [entry]\nError: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset\n"
+        },
+        {
+          "name": "after",
+          "command": [
+            "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+            "--input",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/f84207a73d02e14f.tmp.757.proof.o",
+            "--symbol",
+            "custom__generic",
+            "--mode",
+            "kernel",
+            "--link-plan",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/after-plan.json",
+            "--output",
+            "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/after.bin"
+          ],
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "native-link: arm64 entry=custom__generic (3816 bytes), 1 reachable symbol(s) total\n  - custom__generic (vaddr 0x0, 3816 bytes) [entry]\nnative-link: wrote 17452 bytes -> /workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/tailcall-fix/13/after.bin (0 relocs)\n"
+        }
+      ],
+      "bytes": 17452
+    }
+  ]
+}

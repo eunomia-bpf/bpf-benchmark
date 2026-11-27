@@ -536,3 +536,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - LANE PERF 2026-11-27T02:11:59Z: ARM Katran callback873822 audited: all33 published archive files byte-equal retained raw files. No own preprocessing cleanup or deletion in this guest/callback. Raw corpus/capture/service/generated proof/native records and archives stay; no kernel/image/base/build replacement.
 
 - LANE PERF 2026-11-27T04:43:50Z: ARM OTel callback880077 audited:69published archivefiles equal retainedraw; no own preprocessing cleanup/deletion. Complete service/corpus/capture/broker receipts and archives remain. No kernel/image/base replacement.
+
+- LANE PERF 2026-11-27T04:46:42Z: Canonical ARM loader products replaced in place only after tailcall-fix/loader-before.tar.gz archived and ordinary-byte-compared all4old products (shared/static/CLI/client). Build logs and old product evidence remain. No raw deletion/duplicate build/kernel/image/base/source tree; currentloader products refreshed for commonmetadatarepair.

@@ -16,3 +16,14 @@ ctx-operand:
 .PHONY: callback-audit
 callback-audit:
 	python3 callback_audit.py $(CHECK_TOKEN)
+
+.PHONY: tail-replay tail-build
+tail-replay:
+	python3 tailcall.py replay
+tail-build:
+	python3 tailcall.py capture
+	prlimit --as=51539607552 taskset -c 16-19 $(MAKE) -C ../arm64-checked-control-20261127 loader-build
+
+.PHONY: tail-smoke
+tail-smoke:
+	python3 tailcall.py startup

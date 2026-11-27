@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-27T04:46:42Z",
+  "command": [
+    "qemu-aarch64-static",
+    "-L",
+    "/workspaces/repository/.cache/qemu-arm64-root",
+    "-cpu",
+    "cortex-a57",
+    "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+    "abi"
+  ],
+  "returncode": 0,
+  "stdout": "64 24 16 24 40 48 56 8 12 16 3225439857 1075334771 48 56 16 16 3224391285 3224915574\n",
+  "stderr": ""
+}

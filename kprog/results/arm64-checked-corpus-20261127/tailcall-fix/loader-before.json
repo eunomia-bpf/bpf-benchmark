@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-27T04:45:45Z",
+  "files": [
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+      "bytes": 1055984
+    },
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so",
+      "bytes": 1191584
+    },
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/libnative_loader.a",
+      "bytes": 1288622
+    },
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-service-client",
+      "bytes": 1056344
+    }
+  ],
+  "note": "Archived products byte-compared before the one ARM loader build is replaced in place."
+}
