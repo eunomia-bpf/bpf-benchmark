@@ -1,0 +1,103 @@
+{
+  "scope": "SAMEactualFunctionEntry/context/CB/defaults thenall31GPRinitializers;actualoutsideABI/defaultidentifiers derive2ptr5CB9defaultand31GPRreaders onSAMEheap/trace/TempEnv;pointertable/native/global stillopen",
+  "source_sha256": "bedf30727e0b66061a79cfc45b3309eabc5414310854bd583e89c5cefd0027a9",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-gpr-entry/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 6.743282794952393,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerGPREntry"
+      ],
+      "exit": 0,
+      "seconds": 5.533373117446899,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.8233399391174316,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-gpr-entry/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.212392568588257,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 204,
+  "full_jobs": 1498,
+  "root_queries": [
+    "abi_outside",
+    "defaults_outside",
+    "abi_frame",
+    "defaults_frame",
+    "entry"
+  ],
+  "actual_sequence_commit": "83760d2044f0613ac588c1bf006dfd83cfc40a7a",
+  "store_witnesses_per_visit": 2,
+  "source_visits": 31,
+  "gpr_provider_visits": 30,
+  "context_calls": 2,
+  "default_assignments": 9,
+  "cb_zero_words": 5,
+  "zero_literal_visits": 1,
+  "whole31_composition_claimed": true,
+  "internal_returned_steps_per_provider": 9,
+  "internal_literal_zero_steps": 10,
+  "internal_preparation_steps_per_provider": 5,
+  "external_outcomes": "explicit actualCompCert trace/heap/value;current supplied access explicit",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
