@@ -1,0 +1,18 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py 20261127T021445Z
+Corpus/app ok ok mix {'direct-native': 2, 'failed': 10, 'checked-sim-c': 1}
+baseline programs 12 with calls 2 workloads [('otel_python3_int_loop_0', 0, 12.319486623999993), ('otel_python3_int_loop_1', 0, 12.323386384000003), ('otel_ruby_int_loop_0', 0, 32.18647129599999), ('otel_ruby_int_loop_1', 0, 32.191089584), ('otel_nodejs_int_loop_0', 0, 38.506575168), ('otel_nodejs_int_loop_1', 0, 38.566996832), ('otel_perl_int_loop_0', 0, 38.570245824), ('otel_perl_int_loop_1', 0, 38.573066303999994), ('otel_php_int_loop_0', 0, 38.57561215999999), ('otel_php_int_loop_1', 0, 38.577572288), ('otel_stress_ng_cpu', 0, 38.58088615999999)]
+post_rejit programs 12 with calls 2 workloads [('otel_python3_int_loop_0', 0, 12.177521375999277), ('otel_python3_int_loop_1', 0, 12.201014735999706), ('otel_ruby_int_loop_0', 0, 31.069494256000326), ('otel_ruby_int_loop_1', 0, 31.072613615999217), ('otel_nodejs_int_loop_0', 0, 39.35564243199951), ('otel_nodejs_int_loop_1', 0, 39.35798481599886), ('otel_perl_int_loop_0', 0, 39.36043091200008), ('otel_perl_int_loop_1', 0, 39.36207428799935), ('otel_php_int_loop_0', 0, 39.363939983999444), ('otel_php_int_loop_1', 0, 39.36618060799992), ('otel_stress_ng_cpu', 0, 39.36782534399936)]
+1 read_task_struct ["R7 invalid mem access 'scalar'"]
+2 perf_unwind_stop ["R6 invalid mem access 'scalar'", 'Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+3 perf_unwind_native ['Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+4 perf_unwind_hotspot ['Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+5 perf_unwind_perl ['Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+6 perf_unwind_php ['Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+7 perf_unwind_python ["R1 invalid mem access 'scalar'", 'Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+8 perf_unwind_ruby ["R1 invalid mem access 'scalar'", 'Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+9 perf_unwind_v8 ['Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+10 perf_go_labels ['R1 unbounded memory access, make sure to bounds check any such access']
+12 native_tracer_entry ["R7 invalid mem access 'scalar'", 'Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+13 custom__generic ["R1 invalid mem access 'scalar'", 'Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset']
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

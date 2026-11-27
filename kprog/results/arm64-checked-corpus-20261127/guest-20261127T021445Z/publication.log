@@ -1,0 +1,9 @@
+[master 83fe97101] Record actual ARM checked otelcol-ebpf-profiler/profiling corpus check
+ 5 files changed, 144 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T021445Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T021445Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T021445Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T021445Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T021445Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   5649aa173..83fe97101  master -> master

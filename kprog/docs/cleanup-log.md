@@ -534,3 +534,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - LANE PERF 2026-11-27T01:57:31Z: ARM BCC corpus860603 callback audited:259 archived files byte-equal retainedraw copies. No own preprocessing cleanup or deletion occurred inthisguest/callback; raw corpus/capture/service directories and diagnostics remain. Backend probes write evidence only; no image/kernel/base/build replacement.
 
 - LANE PERF 2026-11-27T02:11:59Z: ARM Katran callback873822 audited: all33 published archive files byte-equal retained raw files. No own preprocessing cleanup or deletion in this guest/callback. Raw corpus/capture/service/generated proof/native records and archives stay; no kernel/image/base/build replacement.
+
+- LANE PERF 2026-11-27T04:43:50Z: ARM OTel callback880077 audited:69published archivefiles equal retainedraw; no own preprocessing cleanup/deletion. Complete service/corpus/capture/broker receipts and archives remain. No kernel/image/base replacement.

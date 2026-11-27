@@ -1,0 +1,14 @@
+request	symbol	prog_type	native_id	source_prog_id	post_prog_id	post_uses_original	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	read_task_struct	17	25	20	25	False	True	False	direct-native	0	None	None	R7 invalid mem access 'scalar'
+2	perf_unwind_stop	7	None	26	26	True	True	False	failed	-5	0	0	R6 invalid mem access 'scalar'; Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+3	perf_unwind_native	7	None	31	31	True	False	False	failed	-5	0	0	Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+4	perf_unwind_hotspot	7	None	34	34	True	False	False	failed	-5	0	0	Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+5	perf_unwind_perl	7	None	37	37	True	False	False	failed	-5	0	0	Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+6	perf_unwind_php	7	None	40	40	True	False	False	failed	-5	0	0	Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+7	perf_unwind_python	7	None	43	43	True	True	False	failed	-5	0	0	R1 invalid mem access 'scalar'; Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+8	perf_unwind_ruby	7	None	48	48	True	True	False	failed	-5	0	0	R1 invalid mem access 'scalar'; Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+9	perf_unwind_v8	7	None	53	53	True	False	False	failed	-5	0	0	Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+10	perf_go_labels	7	61	56	61	False	True	False	direct-native	0	0	0	R1 unbounded memory access, make sure to bounds check any such access
+11	tracepoint__sched_process_free	5	68	62	68	False	True	True	checked-sim-c	0	21	1659968	
+12	native_tracer_entry	7	None	69	69	True	True	False	failed	-5	482234	13465431664	R7 invalid mem access 'scalar'; Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
+13	custom__generic	2	None	74	74	True	True	False	failed	-5	0	0	R1 invalid mem access 'scalar'; Error: arm64 bpf_tail_call needs __native_arm64_bpf_map_max_entries_offset
