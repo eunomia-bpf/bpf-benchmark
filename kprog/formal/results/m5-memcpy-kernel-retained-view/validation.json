@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-27T03:32:29.757971+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView"
+    ],
+    "exit": 0,
+    "seconds": 2.194898843765259,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 584,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-retained-view/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6717021465301514,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "register_relation": "existing Arm64Registers.Represents,31 GPRs/SP/32 vectors/NZCV",
+    "source_entry": "real post-release boundary",
+    "initial_relation": "same actual starting source/native binding",
+    "final_relation_premise": false,
+    "native_witness": "same13 actual prefix/load/store/RET steps",
+    "local_frees": 8,
+    "preserved_GPR_tags": "R19 through R30 retain their original tags and provenance"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyRetainedView.lean",
+      "size_bytes": 9314,
+      "mtime_ns": 1795749810955866702
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

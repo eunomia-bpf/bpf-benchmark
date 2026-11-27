@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.native_gpr
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.native_gpr
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.observe
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.complete
