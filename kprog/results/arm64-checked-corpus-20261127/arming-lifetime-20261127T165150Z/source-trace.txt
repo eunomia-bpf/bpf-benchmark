@@ -1,0 +1,278 @@
+kprog/libnativeloader/src/native_loader.cpp:3377
+std::vector<int> reopen_relocated_map_fds(const std::vector<uint32_t> &map_ids)
+{
+    std::vector<int> fds;
+    std::unordered_set<uint32_t> seen;
+    for (uint32_t id : map_ids) {
+        if (id == 0 || !seen.insert(id).second) {
+            continue;
+        }
+        int fd = bpf_map_get_fd_by_id(id);
+        if (fd < 0) {
+            for (int retained_fd : fds) {
+                close(retained_fd);
+            }
+            fail("bpf_map_get_fd_by_id(" + std::to_string(id) +
+                 ") for native relocation lifetime: " + std::strerror(errno));
+        }
+        fcntl(fd, F_SETFD, FD_CLOEXEC);
+        fds.push_back(fd);
+    }
+    return fds;
+}
+
+
+kprog/libnativeloader/src/native_loader_trusted.cpp:2266
+void bind_native_map_relocations(LinkedBlob &linked,
+    const std::vector<MapPatchSite> &patches, const CompanionLoad &companion)
+{
+    for (const auto &site : patches) {
+        const auto identity = companion.map_addr_ids.find(site.name);
+        const auto address = companion.map_addrs.find(site.name);
+        if (identity == companion.map_addr_ids.end() || address == companion.map_addrs.end())
+            fail("native map relocation lacks original map identity: " + site.name);
+        const auto map = std::find_if(companion.maps.begin(), companion.maps.end(),
+            [&](const MapMeta &m) { return m.kernel_id == identity->second; });
+        if (map == companion.maps.end())
+            fail("native map relocation has no original map layout: " + site.name);
+        uint32_t kind = NATIVE_LAB_RELOC_MAP_POINTER;
+        uint64_t offset = 0;
+        if (address->second != map->kernel_addr) {
+            kind = NATIVE_LAB_RELOC_MAP_VALUE;
+            if (!map->value_addr || address->second < map->value_addr ||
+                address->second - map->value_addr >= map->value_size)
+                fail("native map relocation exceeds original value: " + site.name);
+            offset = address->second - map->value_addr;
+        }
+        if (site.offset > std::numeric_limits<uint32_t>::max())
+            fail("native map relocation offset exceeds wire format");
+        if (site.offset > linked.blob.size() || sizeof(uint64_t) > linked.blob.size() - site.offset)
+            fail("native map literal exceeds linked bytes: " + site.name);
+        std::fill_n(linked.blob.begin() + site.offset, sizeof(uint64_t), 0);
+        append_u32_le(linked.relocs, static_cast<uint32_t>(site.offset));
+        append_u32_le(linked.relocs, kind);
+        append_u64_le(linked.relocs, identity->second | (offset << 32));
+    }
+}
+
+kprog/libnativeloader/src/native_loader_trusted.cpp:3043
+    }
+    // P retains its relocated maps; B's LDDW references retain B's maps.
+    std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
+    for (int fd : fd_array)
+        pins.push_back(std::make_unique<ScopedFd>(fd));
+    opts.fd_array = fd_array.data(); opts.fd_array_cnt = fd_array.size();
+    opts.prog_flags |= NATIVE_LAB_PROG_F_NATIVE_IMAGE;
+    native_lab_trusted_chunk image{};
+    image.request_id = options.trusted_request_id;
+    image.native_user = ptr_to_u64(linked.blob.data()); image.native_size = linked.blob.size();
+    image.relocs_user = ptr_to_u64(linked.relocs.data()); image.reloc_count = linked.relocs.size() / kRelocRecordBytes;
+    image.reserved = linked.callee_saved_mask;
+    image.load_sites_user = ptr_to_u64(linked.load_sites.data());
+    image.load_site_count = linked.load_sites.size();
+    // A prog array P names that its own program does not use can belong to
+    // programs of another type (OTel's uprobe custom__generic names
+    // perf_progs, owned by perf_event programs): process_fd_array adds every
+    // fd to used_maps, and bpf_check_tail_call then refuses this program
+    // with a bare -EINVAL after a clean verify, with no log line. Load again
+    // without those arrays, which the application itself holds.
+    const std::vector<uint32_t> original_ids = options.original_prog_fd >= 0
+        ? load_prog_map_ids(options.original_prog_fd) : std::vector<uint32_t>{};
+    const std::unordered_set<uint32_t> used(original_ids.begin(), original_ids.end());
+    const auto foreign_prog_array = [&](uint32_t id) {
+        if (used.count(id)) return false;
+        ScopedFd fd(bpf_map_get_fd_by_id(id));
+        if (fd.get() < 0) return false;
+        const bpf_map_info info = load_map_info(fd.get());
+        return info.type == BPF_MAP_TYPE_PROG_ARRAY;
+    };
+    // collect_relocated_map_ids already drops 0 and repeats, so these two
+    // vectors hold one entry per distinct relocated map, in one order.
+    std::vector<std::pair<int, uint32_t>> load_fds;
+    for (size_t i = 0; i < fd_array.size(); i++)
+        load_fds.emplace_back(fd_array[i], linked.relocated_map_ids[i]);
+    const auto arm_and_load = [&](const std::vector<std::pair<int, uint32_t>> &pairs) {
+        std::vector<int> fds;
+        for (const auto &pair : pairs) fds.push_back(pair.first);
+        opts.fd_array = fds.data(); opts.fd_array_cnt = fds.size();
+        if (ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_CHUNK, &image))
+            fail("arm kernel native image: " + std::string(std::strerror(errno)));
+        return bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
+            info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts);
+    };
+
+kprog/libnativeloader/src/native_loader_internal.hpp:13
+struct ScopedFd {
+    int fd = -1;
+
+    ScopedFd() = default;
+    explicit ScopedFd(int value) : fd(value) {}
+    ScopedFd(const ScopedFd &) = delete;
+    ScopedFd &operator=(const ScopedFd &) = delete;
+    ~ScopedFd()
+    {
+        if (fd >= 0) {
+            close(fd);
+        }
+    }
+
+    int get() const { return fd; }
+};
+
+kinsn/module/arm64/bpf_arm64_native_lab.c:85
+static int native_lab_store_chunk(void __user *argument)
+{
+    struct native_lab_trusted_chunk input;
+    struct native_lab_trusted_capsule *capsule;
+    struct native_blob *blob;
+    size_t i;
+    int err;
+    if (copy_from_user(&input, argument, sizeof(input)))
+        return -EFAULT;
+    capsule = native_lab_active_capsule(input.request_id);
+    if (IS_ERR(capsule))
+        return PTR_ERR(capsule);
+    blob = kzalloc(sizeof(*blob), GFP_KERNEL);
+    if (!blob) { err = -ENOMEM; goto out; }
+    blob->len = input.native_size;
+    blob->proof_len = input.proof_insns;
+    blob->reloc_count = input.reloc_count;
+    blob->capsule = capsule;
+    blob->load_site_count = input.load_site_count;
+    if (blob->load_site_count) {
+        blob->load_sites = vmemdup_user(u64_to_user_ptr(input.load_sites_user),
+            array_size(blob->load_site_count, sizeof(*blob->load_sites)));
+        if (IS_ERR(blob->load_sites)) {
+            err = PTR_ERR(blob->load_sites); blob->load_sites = NULL; goto fail;
+        }
+    }
+    blob->bytes = vmemdup_user(u64_to_user_ptr(input.native_user), blob->len);
+    if (IS_ERR(blob->bytes)) { err = PTR_ERR(blob->bytes); blob->bytes = NULL; goto fail; }
+    if (blob->reloc_count) {
+        blob->relocs = vmemdup_user(u64_to_user_ptr(input.relocs_user),
+            array_size(blob->reloc_count, sizeof(*blob->relocs)));
+        if (IS_ERR(blob->relocs)) { err = PTR_ERR(blob->relocs); blob->relocs = NULL; goto fail; }
+    }
+    blob->proof = vmemdup_user(u64_to_user_ptr(input.proof_user),
+        array_size(blob->proof_len, sizeof(*blob->proof)));
+    if (IS_ERR(blob->proof)) { err = PTR_ERR(blob->proof); blob->proof = NULL; goto fail; }
+    blob->maps = kcalloc(blob->reloc_count, sizeof(*blob->maps), GFP_KERNEL);
+    if (!blob->maps && blob->reloc_count) { err = -ENOMEM; goto fail; }
+    for (i = 0; i < blob->reloc_count; i++) {
+        u32 id = (u32)blob->relocs[i].target;
+        struct bpf_map *map;
+        if (blob->relocs[i].kind != NATIVE_LAB_RELOC_MAP_POINTER &&
+            blob->relocs[i].kind != NATIVE_LAB_RELOC_MAP_VALUE &&
+            blob->relocs[i].kind != NATIVE_LAB_RELOC_READONLY_DATA)
+            continue;
+        map = bpf_map_get_curr_or_next(&id);
+        if (!map || id != (u32)blob->relocs[i].target) {
+            if (map) bpf_map_put(map);
+            err = -ENOENT; goto fail;
+        }
+        blob->maps[blob->map_count++] = map;
+    }
+    mutex_lock(&blobs_lock);
+    err = xa_alloc(&blobs, &blob->id, blob, XA_LIMIT(1, U32_MAX), GFP_KERNEL);
+    if (!err) {
+        list_add_tail(&blob->list, &capsule->chunks);
+        capsule->release_chunks = native_lab_free_chunks;
+        input.chunk_id = blob->id;
+    }
+    mutex_unlock(&blobs_lock);
+    if (err) goto fail;
+    err = copy_to_user(argument, &input, sizeof(input)) ? -EFAULT : 0;
+    goto out;
+fail:
+    native_lab_free_blob(blob);
+out:
+    native_lab_trusted_put(capsule);
+    return err;
+
+kinsn/module/include/native_lab_trusted.h:350
+static struct native_lab_trusted_capsule *native_lab_active_capsule(u64 id)
+{
+	struct native_lab_trusted_capsule *capsule = ERR_PTR(-ENOENT);
+	mutex_lock(&native_lab_service_lock);
+	if (native_lab_service_active && !native_lab_service_active->abandoned &&
+	    native_lab_service_active->capsule->id == id) {
+		capsule = native_lab_service_active->capsule;
+		kref_get(&capsule->refs);
+	}
+	mutex_unlock(&native_lab_service_lock);
+	return capsule;
+}
+static int native_lab_trusted_context(void __user *argument)
+
+kinsn/module/include/native_lab_trusted.h:518
+static int native_lab_trusted_release(struct inode *inode, struct file *file)
+{
+	struct native_lab_trusted_file *owner = file->private_data;
+	struct native_lab_trusted_job *active = NULL, *job, *temporary;
+	mutex_lock(&native_lab_service_lock);
+	if (owner->service) {
+		native_lab_service_file = NULL;
+		list_for_each_entry_safe(job, temporary, &native_lab_service_pending, pending) {
+			list_del_init(&job->pending);
+			job->status = -ENOTCONN;
+			WRITE_ONCE(job->done, true);
+			wake_up_interruptible(&job->wait);
+		}
+		atomic_set(&native_lab_pending_count, 0);
+		active = native_lab_service_active;
+		native_lab_service_active = NULL;
+		if (active) {
+			active->status = -ENOTCONN;
+			WRITE_ONCE(active->done, true);
+			wake_up_interruptible(&active->wait);
+		}
+		wake_up_interruptible(&native_lab_service_wait);
+	} else if (owner->job) {
+		owner->job->abandoned = true;
+		if (!list_empty(&owner->job->pending)) {
+			list_del_init(&owner->job->pending);
+			atomic_dec(&native_lab_pending_count);
+		}
+	}
+	mutex_unlock(&native_lab_service_lock);
+	native_lab_job_put(active);
+	native_lab_job_put(owner->job);
+
+vendor/linux-framework/kernel/bpf/syscall.c:4854
+static int bpf_map_get_fd_by_id(const union bpf_attr *attr)
+{
+	struct bpf_map *map;
+	u32 id = attr->map_id;
+	int f_flags;
+	int fd;
+
+	if (CHECK_ATTR(BPF_MAP_GET_FD_BY_ID) ||
+	    attr->open_flags & ~BPF_OBJ_FLAG_MASK)
+		return -EINVAL;
+
+	if (!capable(CAP_SYS_ADMIN))
+		return -EPERM;
+
+	f_flags = bpf_get_file_flag(attr->open_flags);
+	if (f_flags < 0)
+		return f_flags;
+
+	spin_lock_bh(&map_idr_lock);
+	map = idr_find(&map_idr, id);
+	if (map)
+		map = __bpf_map_inc_not_zero(map, true);
+	else
+		map = ERR_PTR(-ENOENT);
+	spin_unlock_bh(&map_idr_lock);
+
+	if (IS_ERR(map))
+		return PTR_ERR(map);
+
+	fd = bpf_map_new_fd(map, f_flags);
+	if (fd < 0)
+		bpf_map_put_with_uref(map);
+
+	return fd;
+}
+
+static const struct bpf_map *bpf_map_from_imm(const struct bpf_prog *prog,

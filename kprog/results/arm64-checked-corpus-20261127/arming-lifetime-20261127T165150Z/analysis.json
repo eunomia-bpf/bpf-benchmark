@@ -1,0 +1,306 @@
+{
+  "utc": "2026-11-27T16:51:50Z",
+  "scope": "Read-only archive/source deduction. No kernel instrumentation, guest, compile, lifetime-policy change or install-success claim. Uploaded in-memory CHUNK wire was not captured.",
+  "cases": [
+    {
+      "app": "cilium/agent",
+      "request_id": 17,
+      "symbol": "tail_ipv4_ct_ingress",
+      "source_prog_id": 327,
+      "service_started": "1970-01-01T00:20:05.523181+00:00",
+      "service_finished": "1970-01-01T00:20:53.364744+00:00",
+      "service_status": -5,
+      "corpus_recorded_at": "1970-01-01T00:20:49.668684+00:00",
+      "corpus_status": "error",
+      "loader_binary_sha256": "07ccfed2feb3f2fe6d4b31bac83bf772522751b39b33c17950091d52c773a46d",
+      "native_artifacts": {
+        "request.native.o": {
+          "bytes": 1278232,
+          "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80"
+        },
+        "kernel.native.o": {
+          "bytes": 1278232,
+          "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80"
+        }
+      },
+      "stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+      "base_relocs": {
+        "name": "4af100ea0cb195ec.relocs.bin",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "runtime_map_sites": [
+        {
+          "name": "cilium_tail_call_buffer4",
+          "blob_offset": 4416,
+          "map_id": 171,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_security_label",
+          "blob_offset": 4424,
+          "map_id": 170,
+          "value_offset": "152",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_endpoint_id",
+          "blob_offset": 4432,
+          "map_id": 170,
+          "value_offset": "160",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "cilium_metrics",
+          "blob_offset": 4440,
+          "map_id": 115,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "cilium_ct4_global",
+          "blob_offset": 4448,
+          "map_id": 142,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_enable_ipv4_fragments",
+          "blob_offset": 4456,
+          "map_id": 170,
+          "value_offset": "201",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "cilium_ct_any4_global",
+          "blob_offset": 4464,
+          "map_id": 143,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "cilium_ipv4_frag_datagrams",
+          "blob_offset": 4472,
+          "map_id": 144,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_enable_extended_ip_protocols",
+          "blob_offset": 4480,
+          "map_id": 170,
+          "value_offset": "203",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_enable_jiffies",
+          "blob_offset": 4488,
+          "map_id": 170,
+          "value_offset": "6",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_kernel_hz",
+          "blob_offset": 4496,
+          "map_id": 170,
+          "value_offset": "8",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_trace_payload_len",
+          "blob_offset": 4504,
+          "map_id": 170,
+          "value_offset": "84",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "__config_enable_conntrack_accounting",
+          "blob_offset": 4512,
+          "map_id": 170,
+          "value_offset": "108",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "cilium_calls",
+          "blob_offset": 4520,
+          "map_id": 169,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        }
+      ],
+      "inferred_wire_map_ids": [
+        115,
+        142,
+        143,
+        144,
+        169,
+        170,
+        171
+      ],
+      "invocation_request_id": 17,
+      "capture_files": {
+        "error.json": {
+          "bytes": 3989,
+          "sha256": "67151517f32085feb131741fadee93deaa9d07cc3ba0f396ad7d9d1a335c6484"
+        },
+        "4af100ea0cb195ec.map-patches.tsv": {
+          "bytes": 411,
+          "sha256": "7dde1efcccaec632bcbc0fb04e21c37d90a302c3148c246a761619c18a3dbb77"
+        },
+        "4af100ea0cb195ec.relocs.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "kernel.entry": {
+          "bytes": 20,
+          "sha256": "28c0b07d734449f52381d2ad5cef236fc7db0f05a3d339a5c1aac83088aa241b"
+        },
+        "kernel.facts.json": {
+          "bytes": 2281,
+          "sha256": "b27bb02d0dc97ff821394dbd78528725b88edad37b2e4faf333edddd595b6e21"
+        },
+        "kernel.metadata.json": {
+          "bytes": 2256,
+          "sha256": "bdf4d2e79d4f9c4515abf78a81bfe00f59da3711f82918eed884265581f469d5"
+        },
+        "load-direct.stderr": {
+          "bytes": 74,
+          "sha256": "c48aec48a392efc77e4bd4889fc41c9e80a32bd07601f6bbae92cf56099d6845"
+        },
+        "source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d"
+        }
+      },
+      "finished_after_corpus_record_seconds": 3.69606
+    },
+    {
+      "app": "tracee/monitor",
+      "request_id": 11,
+      "symbol": "trace_ptrace",
+      "source_prog_id": 260,
+      "service_started": "1970-01-01T00:14:57.913459+00:00",
+      "service_finished": "1970-01-01T00:15:32.979122+00:00",
+      "service_status": -5,
+      "corpus_recorded_at": "1970-01-01T00:15:17.339127+00:00",
+      "corpus_status": "completed",
+      "loader_binary_sha256": "07ccfed2feb3f2fe6d4b31bac83bf772522751b39b33c17950091d52c773a46d",
+      "native_artifacts": {
+        "request.native.o": {
+          "bytes": 12818640,
+          "sha256": "e6811a4a4c4e783e7dfbed0f882e6ddab5739955d1c772f545cec1d3f1e1ef7a"
+        },
+        "kernel.native.o": {
+          "bytes": 12818640,
+          "sha256": "e6811a4a4c4e783e7dfbed0f882e6ddab5739955d1c772f545cec1d3f1e1ef7a"
+        }
+      },
+      "stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+      "base_relocs": {
+        "name": "7a3566bddfc53cef.relocs.bin",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "runtime_map_sites": [
+        {
+          "name": "task_info_map",
+          "blob_offset": 1640,
+          "map_id": 376,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "kconfig_map",
+          "blob_offset": 1648,
+          "map_id": 400,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "generic_sys_enter_tails",
+          "blob_offset": 1656,
+          "map_id": 384,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "scratch_map",
+          "blob_offset": 1664,
+          "map_id": 419,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        },
+        {
+          "name": "config_map",
+          "blob_offset": 1672,
+          "map_id": 377,
+          "value_offset": "null",
+          "in_captured_source_maps": true
+        }
+      ],
+      "inferred_wire_map_ids": [
+        376,
+        377,
+        384,
+        400,
+        419
+      ],
+      "invocation_request_id": 11,
+      "capture_files": {
+        "error.json": {
+          "bytes": 3151,
+          "sha256": "64742c7c6bd10105c254fab94c45a1a36e3948bf5eefa09e2a1cdb599e414d39"
+        },
+        "7a3566bddfc53cef.map-patches.tsv": {
+          "bytes": 98,
+          "sha256": "5be231a3266b88fdbd6c1afab4d6525bcbfc8cbf60efe42cf623c54b7e36318b"
+        },
+        "7a3566bddfc53cef.relocs.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "kernel.entry": {
+          "bytes": 12,
+          "sha256": "73a149b169d7341dfbce0b7631a71028fd872162769c623afc7c033e0aa019ff"
+        },
+        "kernel.facts.json": {
+          "bytes": 973,
+          "sha256": "f6fa499deb841eefa7c90f2f3a5fc63dcc3308922460d37c134dfcb34ec771ab"
+        },
+        "kernel.metadata.json": {
+          "bytes": 918,
+          "sha256": "3b3b2dd68fbcd7bcbbb3151b338e6b9d060f2ca9a5a09dbb9358e67f7627bec9"
+        },
+        "load-direct.stderr": {
+          "bytes": 74,
+          "sha256": "c48aec48a392efc77e4bd4889fc41c9e80a32bd07601f6bbae92cf56099d6845"
+        },
+        "source-identities.json": {
+          "bytes": 2119,
+          "sha256": "2b1824f0feb5203be4b9d58c0894a86e2a6c0c5cc2ae9096d4e4680e4bb47b5d"
+        }
+      },
+      "finished_after_corpus_record_seconds": 15.639995
+    }
+  ],
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader.cpp": "8409eba58ece8705db7fe4b80cfba4fba414433fe05bc089e71fdcc21f46e46c",
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": "1ed3f76733b384e1251c62aff4df48b34921a196e39dc4dcfcd85a42e50dec67",
+    "kprog/libnativeloader/src/native_loader_internal.hpp": "31204bdfd23a7b4b02c9392eb08a8f358f3c779068716d697a6c3bbe96ec998c",
+    "kinsn/module/arm64/bpf_arm64_native_lab.c": "e5650fd7528f7aad0136b8131b61bbf9e1877564a5eb3d200fd790f1acee7007",
+    "kinsn/module/include/native_lab_trusted.h": "66021241597fd86e91e5bbd4889d1c6fdc886103a799f80d2b3c3e87c7b1a01e",
+    "kinsn/module/include/native_lab_trusted_wire.h": "2a476b9b47f02497c515f65874b6061ad60540cc1e9177d546e0520d8ca1227a",
+    "vendor/linux-framework/kernel/bpf/syscall.c": "df4d48544144fe49d94cb42067fda80ddd3fc90916a2ee4eadf64d68a5b574cf"
+  },
+  "deduction": [
+    "Empty cached .relocs.bin is NOT an empty CHUNK relocation list: bind_native_map_relocations appends a runtime map relocation for each map-patches.tsv site.",
+    "Every appended low32 map ID comes from the same companion.map_addr_ids mapping collected into linked.relocated_map_ids. Captured CLI bindings agree with kernel metadata and source map IDs in both cases.",
+    "Before CHUNK ioctl, reopen_relocated_map_fds opens these IDs; failure would report bpf_map_get_fd_by_id(...) for native relocation lifetime, not the captured arm kernel native image error. The opened FDs remain in ScopedFd pins through ioctl, with no exec between FD_CLOEXEC and ioctl.",
+    "The kernel increments a map user/reference count when reopening by ID; an open FD keeps that ID live. With empty base relocations, every map ID reaching the CHUNK map-lookup branch is therefore already pinned under this code path.",
+    "Consequently the map-disappearance ENOENT branch is inconsistent with the captured loader path and its FD invariant. The remaining ENOENT path is native_lab_active_capsule rejecting an absent, abandoned or mismatched active request.",
+    "Both CLI request IDs match service request IDs. Exact kernel active-job state and which rejection predicate fired were not traced. Timeout/process teardown remains an inference rather than a directly observed signal or branch."
+  ],
+  "limits": "This strengthens the earlier two-branch diagnosis using source/capture invariants, not a new runtime kernel trace. Actual in-memory image.relocs was not archived, and module source equality to guest-start Git does not independently prove module build provenance. No wrong-map-ID fix or kernel lifetime extension is justified by these captures.",
+  "controller_status": 0
+}
