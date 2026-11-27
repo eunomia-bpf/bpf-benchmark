@@ -1,0 +1,17 @@
+{
+  "queued_utc": "2026-11-27T17:00:13Z",
+  "pipeline_pid": 1081298,
+  "collector_pid": 1081299,
+  "dependency_pid": 1070395,
+  "source_sha256": "674a23cbd3e14c4c76e1967ceaf15c8c2f3b9aea25cb75e6524957e3ecdac0a2",
+  "sequence": [
+    "pidfd wait exact existing compile+stock pipeline",
+    "count all145 before/after and original117/28 control groups, preserve prep failures and fixture-before disagreements",
+    "archive stable full RAW in48MBparts and verifyeveryfile SHA-size-fileset",
+    "private-index publish only completed artifacts preserving peer index and live stage2 queue controller",
+    "after collector exits, existing raw_dedup checks Git blobs and everyfile before deleting completed duplicate",
+    "private-index publish actual cleanup receipt"
+  ],
+  "scope": "Finite metadata/evidence continuation onCPU19. No new compiler/guest/header/flags/framework/kernel changes. Native/stage2 acceptance stays in queued Tetragon child.",
+  "transfer_error": "Initial split transfer dropped one opening quote; AST/SyntaxError preserved in scalar-collection-transfer-error.log, corrected and AST checked before this launch. Original sweep/stage2 were untouched."
+}
