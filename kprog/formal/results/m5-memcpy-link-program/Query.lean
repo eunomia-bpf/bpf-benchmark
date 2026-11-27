@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.linkable
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.linkable
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.linked_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.linked_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.entry_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.entry_binding
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.writer_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.writer_binding
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.abi
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkProgram.abi
