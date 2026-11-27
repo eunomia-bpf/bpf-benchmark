@@ -1,0 +1,6 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.target
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.target
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyEntryCode.complete
