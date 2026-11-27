@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-27T14:33:24Z",
+  "controller_status": 0,
+  "corpus_status": "error",
+  "app_status": "error",
+  "load_timeout_seconds": 900,
+  "post_workload_present": false,
+  "requests": 17,
+  "native_installs": 16,
+  "checked_installs": 3,
+  "direct_installs": 13,
+  "failed_installs": 1,
+  "B_generated": 17,
+  "B_stock_accepted": 3,
+  "B_stock_refused": 14,
+  "broker_failures": 0,
+  "archived_files_equal_raw": 126,
+  "guest_started_utc": "2026-11-27T14:07:06Z",
+  "ended_utc": "2026-11-27T14:28:29Z",
+  "guest_start_revision": "e494b016ff328fbbda8d1a320190b3da8feee33d",
+  "guest_source_archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T120527Z/guest-start-source.tar.gz",
+  "producer_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
+  "failed_request": {
+    "request_id": 17,
+    "symbol": "tail_ipv4_ct_ingress",
+    "status": -5,
+    "native_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+    "native_command_receipts": 0
+  },
+  "interpretation": "The common qualifier producer increases completed requests compared with the initial partial run, but actual startup still times out at the unchanged 900 s limit. No post phase or full-app acceptance; the final native install error is observed, its cause remains open. This is not a timing/performance result."
+}

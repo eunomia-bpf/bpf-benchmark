@@ -1,0 +1,4 @@
+Corpus/app error error mix {'checked-sim-c': 3, 'direct-native': 13, 'failed': 1}
+baseline programs 56 with calls 2 workloads [('cilium_endpoint_pktgen_forward', 0, 10.587186287999998), ('cilium_endpoint_pktgen_reverse', 0, 10.618046272000015)]
+post_rejit absent; app status error error cilium/agent loadtime rejit timed out after 900.0s; cilium-agent output tail:
+All 126 archived files equal retained raw copies; 17 requests: {'checked-sim-c': 3, 'direct-native': 13, 'failed': 1}
