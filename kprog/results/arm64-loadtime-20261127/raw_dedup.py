@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 
 ROOT=Path('/workspaces/repository')
@@ -41,6 +42,9 @@ def safe_path(path):
     resolved=path.resolve()
     if not resolved.is_relative_to(BASE) or resolved==BASE or path.is_symlink():raise ValueError('Raw target outside intended root or symlink')
     return resolved
+requested=[(ROOT/p).resolve() for p in sys.argv[1:]]
+for p in requested:
+    if not p.is_relative_to(ROOT/'kprog/results') or p.name!='controller.json':raise ValueError('Expected a repository result controller: '+str(p))
 save()
 copies=[(BASE/'20261113-tetragon-manifest-native/full-initial.tar.gz',sorted((ROOT/'kprog/results/perf_20261113').glob('tetragon-manifest-native-initial.tar.gz.part*'))),
         (BASE/'20261113-tetragon-public-data/full-compiler.tar.gz',sorted((ROOT/'kprog/results/perf_20261113').glob('tetragon-public-data.tar.gz.part*'))),
@@ -48,6 +52,7 @@ copies=[(BASE/'20261113-tetragon-manifest-native/full-initial.tar.gz',sorted((RO
         (BASE/'20261113-core/core-host-full.tar.gz',sorted((ROOT/'kprog/results/perf_20261113').glob('core-host.tar.gz.part*')))]
 for p in HERE.glob('early-promote-*/controller.json'):
     r=json.loads(p.read_text());raw=Path(r['raw']);copies.append((raw/'canonical-stages.tar.gz',sorted(p.parent.glob('canonical-stages.tar.gz.part-*'))))
+if requested:copies=[]
 for path,parts in copies:
     row=dict(raw=str(path),kind='archive-file-copy')
     try:
@@ -64,10 +69,12 @@ for path,parts in copies:
     except Exception as error:row.update(status='retained',reason=str(error))
     if row not in record['actions']:record['actions'].append(row)
     save()
-for controller in sorted(HERE.glob('*/controller.json')):
+for controller in requested or sorted(HERE.glob('*/controller.json')):
     r=json.loads(controller.read_text());raw=Path(r.get('raw','/'))
-    if raw.parent!=PROFILE_BASE or not re.fullmatch(r'\d{8}T\d{6}Z',raw.name) or r.get('controller_status') is None:continue
-    row=dict(raw=str(raw),kind='completed-profile-directory',controller=str(controller.relative_to(ROOT)))
+    if r.get('controller_status') is None:continue
+    if not requested and (raw.parent!=PROFILE_BASE or not re.fullmatch(r'\d{8}T\d{6}Z',raw.name)):continue
+    if requested and (not r.get('ended_utc') or Path('/proc/'+str(r.get('pid',0))).exists()):raise ValueError('Selected run is not demonstrably finished: '+str(controller))
+    row=dict(raw=str(raw),kind='completed-run-directory',controller=str(controller.relative_to(ROOT)))
     try:
         raw=safe_path(raw)
         if not raw.exists():row['status']='already-absent'
