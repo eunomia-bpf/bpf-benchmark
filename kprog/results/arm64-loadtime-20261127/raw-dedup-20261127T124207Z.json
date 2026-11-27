@@ -1,0 +1,901 @@
+{
+  "utc": "2026-11-27T12:42:07Z",
+  "git_revision": "88949904cce6ab05ff6e2ad56cf87b09c257b1f9",
+  "authority": "Coordinator 2026-11-27T12:19Z: remove verified raw duplicates after SHA256 match against committed Git archives; preserve archive parts.",
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-manifest-native/full-initial.tar.gz",
+      "kind": "archive-file-copy",
+      "archives": [
+        {
+          "path": "kprog/results/perf_20261113/tetragon-manifest-native-initial.tar.gz.part000",
+          "git_blob": "1bb72be4db7eec39b2ce269167293892fd9b74a1",
+          "bytes": 41943040,
+          "sha256": "d7ce528258d8b249b6f6b37d7276e90d3449cffdef52964d652b4031d8927ef1"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-manifest-native-initial.tar.gz.part001",
+          "git_blob": "2c6f3e4fe1dee4a85564adb838dfe4d78a83b2a3",
+          "bytes": 41943040,
+          "sha256": "ad12e6fdd695aadf2dc6a149a805028de99c3385a0459098be6ad6cd047ad8dc"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-manifest-native-initial.tar.gz.part002",
+          "git_blob": "ec38701347ce2591ac54632a31e125a1454fbee7",
+          "bytes": 10833566,
+          "sha256": "7f3d1f3a94c914263b1363b3f0aeb4a49e002bcb0112df8168b18025da365485"
+        }
+      ],
+      "raw_sha256": "f91dc684456b1e52c409abdad6ea4285f6b61021586c2852671705b7ecba9855",
+      "archive_stream_sha256": "f91dc684456b1e52c409abdad6ea4285f6b61021586c2852671705b7ecba9855",
+      "allocated_bytes": 94724096,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261113-tetragon-public-data/full-compiler.tar.gz",
+      "kind": "archive-file-copy",
+      "archives": [
+        {
+          "path": "kprog/results/perf_20261113/tetragon-public-data.tar.gz.part000",
+          "git_blob": "dc63ea36c5ff260b3cb4c6fe2f8e43ca647fc929",
+          "bytes": 41943040,
+          "sha256": "70c55bd011a3a1bd880c1931a2889ca4db0389154d54acf59261330eaa9ef4e4"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-public-data.tar.gz.part001",
+          "git_blob": "39fff37db897527520f3541de2c3c68c3e43ae43",
+          "bytes": 41943040,
+          "sha256": "ebc4c67a5aae46c35a3966df396d2d03d1f83a31e0ae7d1e82f7291cb9669692"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-public-data.tar.gz.part002",
+          "git_blob": "ad3c20d0da345b447560f0885832abb55b476921",
+          "bytes": 16576346,
+          "sha256": "cdcaae7a8dc98160f0ebb1368a9834c78e3ddb91e39d399ba7e2da321682ce48"
+        }
+      ],
+      "raw_sha256": "cb1fb472ec4279bb59124c6f92ba905c67aa74690d2c06ec6c6b06974db14f59",
+      "archive_stream_sha256": "cb1fb472ec4279bb59124c6f92ba905c67aa74690d2c06ec6c6b06974db14f59",
+      "allocated_bytes": 100466688,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261114-tetragon-native-frame/full-host-evidence.tar.gz",
+      "kind": "archive-file-copy",
+      "archives": [
+        {
+          "path": "kprog/results/perf_20261113/tetragon-native-frame-host.tar.gz.part000",
+          "git_blob": "f34ed5f5131cddab604e478b57a838718a0aa858",
+          "bytes": 41943040,
+          "sha256": "32c8f1554f3cb915ef0528ae197929156de73ca777b9d46c23891cd8c5a6b37c"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-native-frame-host.tar.gz.part001",
+          "git_blob": "ae4fc78109f8588beb0fa2d940be707368a52850",
+          "bytes": 41943040,
+          "sha256": "2d25fbd8cdd6a104326aed700f69f8a1d335cae3399562cb89c756b5c9571b70"
+        },
+        {
+          "path": "kprog/results/perf_20261113/tetragon-native-frame-host.tar.gz.part002",
+          "git_blob": "702f242eea6cf63837615c01dbcc3441bd56fe20",
+          "bytes": 16652732,
+          "sha256": "edb4444a4ea01d931591dc997bef60cf21ca4227acdbf8e8884435bb89fdb514"
+        }
+      ],
+      "raw_sha256": "44cc650576b00bfa4f0c5ce796ac6ed1fbf641c47b506273975743e2a63e827b",
+      "archive_stream_sha256": "44cc650576b00bfa4f0c5ce796ac6ed1fbf641c47b506273975743e2a63e827b",
+      "allocated_bytes": 100544512,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261113-core/core-host-full.tar.gz",
+      "kind": "archive-file-copy",
+      "archives": [
+        {
+          "path": "kprog/results/perf_20261113/core-host.tar.gz.part-000",
+          "git_blob": "7965abe38ee1ca1439c60b5e456923537ec8eacd",
+          "bytes": 41943040,
+          "sha256": "f32e3c1fc4e0a04381907d48441bd8841a1206e9f80f2ac75b37fc8c0f9d11e8"
+        },
+        {
+          "path": "kprog/results/perf_20261113/core-host.tar.gz.part-001",
+          "git_blob": "875e9616e2e4209743c88cbc7c90444736f0a2ef",
+          "bytes": 31126441,
+          "sha256": "b9390e409c4f2c3484f5a059ced48ae10c7d2922036d0c0ccde51491f92ab47e"
+        }
+      ],
+      "raw_sha256": "d511cd137dc210f2b62aaeca33232ebb9b54303a5c14e0d4c713ec2d670997b4",
+      "archive_stream_sha256": "d511cd137dc210f2b62aaeca33232ebb9b54303a5c14e0d4c713ec2d670997b4",
+      "allocated_bytes": 73072640,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T112826Z/canonical-stages.tar.gz",
+      "kind": "archive-file-copy",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/canonical-stages.tar.gz.part-aa",
+          "git_blob": "7b5fab3881c13d9e89d83842e36ab525a97a2b33",
+          "bytes": 48000000,
+          "sha256": "16756b0b156f3e2e7d6c3e6d0d112fdc9695fd791d9e2d5c0bcaad7e8e3e9de5"
+        },
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/canonical-stages.tar.gz.part-ab",
+          "git_blob": "9d98250b593c4fef1de11e5700de3e1478b03038",
+          "bytes": 22157852,
+          "sha256": "004148d9d233bfeff9ceb322bbc4232706d7a6ceb21f3ff1e57631f77f017d78"
+        }
+      ],
+      "raw_sha256": "1bc47715a90991cdb80ea089b2107796206c6920322f8a18ca3e4d508329a187",
+      "archive_stream_sha256": "1bc47715a90991cdb80ea089b2107796206c6920322f8a18ca3e4d508329a187",
+      "allocated_bytes": 70164480,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T114622Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-20261127T114622Z/evidence.tar.zst.part-aa",
+          "git_blob": "e854f2465796c5533d59eda53f63ea51b50b2c20",
+          "bytes": 2942841,
+          "sha256": "8c508e9b924ed03a82f8895348a920780f12e8c1acf94e57a6b4b197f8ac82f6"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 38032,
+          "sha256": "7a60be6d8cb15c60dec2f8b0bcc471e7f630b44a01ca3bea575d689656b57681",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 8222720,
+          "sha256": "021555c9fe247f726265747336864c4dba47276896f13af84f400b2a17e82e56",
+          "allocated_bytes": 8228864
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "4b6de544bbf8836753246eb5cf008a8ef7af6935d303b2b3ef846d1577f6b13f",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 8286208,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115432Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request1-20261127T115432Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request1-20261127T115432Z/evidence.tar.zst.part-aa",
+          "git_blob": "69efac77c4ba0f601963bb3a2cb3c7d1e5910fc3",
+          "bytes": 288897,
+          "sha256": "b11721fef723aba0094b8655b6f68223b4ec22ef7ca4911c21b1d2cded2b5b70"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 33635,
+          "sha256": "d977f9a0abb3ff9d1e8c0328c4fc36de4040064fe30817dbbee4131119b52c91",
+          "allocated_bytes": 36864
+        },
+        "canonical-stages.tar": {
+          "bytes": 788480,
+          "sha256": "5d3703bfdf98d1d6344523d72dc43b3d3f083af1cd4ac493a273680080ea2462",
+          "allocated_bytes": 794624
+        },
+        "frontend.stderr": {
+          "bytes": 13423,
+          "sha256": "5348b119104ae588c1ce654cb30ac5b74889bab7568bfdfccc22bc6715cb5aac",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 847872,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T120215Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request10-20261127T120215Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request10-20261127T120215Z/evidence.tar.zst.part-aa",
+          "git_blob": "ffb3fb8eeb9ac1a089b96a7bb7aa686c8f8fe74a",
+          "bytes": 2943472,
+          "sha256": "b376cc3755dc8d4b7554f1d429628a21b38dc9ad7bcd89e30c833789b42e989c"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 38923,
+          "sha256": "495beb8650159cbe18499d837d3184e0ec3bc94892abfd326e605ec9a4fb904e",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 8222720,
+          "sha256": "7f253f1715dc3ce095d9276c446726004e05c6840d5d1ec6959db1a7c0f50bf3",
+          "allocated_bytes": 8228864
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "8c701a65f54db8aada87c76c25e13447f786f4aa15d907362d0a487b2b8f5e0e",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 8286208,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115439Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request2-20261127T115439Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request2-20261127T115439Z/evidence.tar.zst.part-aa",
+          "git_blob": "5416bc7d2387821ff060d0a3eb74fb0959bb611e",
+          "bytes": 1739355,
+          "sha256": "567ebab309a6b83039e37af17e1aa4698f6add4d263a424e877b807880ccbe05"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 38423,
+          "sha256": "667a03b57ea29a3393d5ded825a04e28786d3cb1b56f2a2cf8c21abb0050e4dd",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 4771840,
+          "sha256": "6f16e55cfa2672a1bce7ab36c232f606cdeef31df0bd0b5052d3dfe125bb1b30",
+          "allocated_bytes": 4775936
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "93e9b8298c4c0d84bc5e33a4be734e35898887ea46da0e08c9c84e86f89f6135",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 4833280,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115520Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request3-20261127T115520Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request3-20261127T115520Z/evidence.tar.zst.part-aa",
+          "git_blob": "9b3acf50570b2b5812f67d1f1136ee4a0d62b84c",
+          "bytes": 2455816,
+          "sha256": "c8e157b3736a4b18b48d7b1b81a4870952e5544135be63931c21e405458b9a3a"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 41939,
+          "sha256": "7e473c5f2e9d98b816af26fcd609f3339b3f8a70f87750c312991549305f1363",
+          "allocated_bytes": 45056
+        },
+        "canonical-stages.tar": {
+          "bytes": 6696960,
+          "sha256": "b5761f5061c8641fa2b65039094e01bceb9b942dcdb543e81f745a9a205fbe90",
+          "allocated_bytes": 6701056
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "44eee54bc911ad0e7877e66a61cd736580ecedfc341792575a4cb578342721fc",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 6762496,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115709Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request4-20261127T115709Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request4-20261127T115709Z/evidence.tar.zst.part-aa",
+          "git_blob": "47d75a187b5a83c22f8e0256b48a9bab966e4951",
+          "bytes": 1855441,
+          "sha256": "6d4683c8fe78a450cac4caa54df8ed1890d37d5591b72c865b5b856b08753837"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 38621,
+          "sha256": "d1df149f43210865680b54272b0af63f07cf9d6a4d04814109f6bb07032c62c8",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 5068800,
+          "sha256": "49c464755c35281731d49c97480300107d10dee0659ff772e0acefa9c1a4ec41",
+          "allocated_bytes": 5074944
+        },
+        "frontend.stderr": {
+          "bytes": 12815,
+          "sha256": "da68df57b703e794755392b8fbae50bbe47cc83d4a52d6a8eef4db8e7e11a811",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 5132288,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115753Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request5-20261127T115753Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request5-20261127T115753Z/evidence.tar.zst.part-aa",
+          "git_blob": "a971119c79f335bb7ba9f33a43d27d4be574783a",
+          "bytes": 2056538,
+          "sha256": "9f1dbc57e1e2cd22705995dbb36ecbc13ca3777a7adf88e9620dde2540ab0590"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 39363,
+          "sha256": "fd4bd97ae24cc980106243018dc820539a136c26e9f21aebec1c5a59937ef2c5",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 5498880,
+          "sha256": "36b56f103f52490fe8f44eb831cce93b6228888e1c7cc44e2ff00278536ead65",
+          "allocated_bytes": 5505024
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "8460e1743ca10584ddf0206622f4677a9d99e2a8b130565f08280b94f5e46951",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 5562368,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115849Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request6-20261127T115849Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request6-20261127T115849Z/evidence.tar.zst.part-aa",
+          "git_blob": "a60eac08a00db72bf24970102ae43502aa6351e7",
+          "bytes": 2138794,
+          "sha256": "3be8303efdc87a64199644e8324a5f97c20fc9dd4c8fe6da41a1d956e8e3ef24"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 43989,
+          "sha256": "d26e18f672e6198627a5d38b66d6ad0e955ba251639364e13f145c8b1c473ce2",
+          "allocated_bytes": 45056
+        },
+        "canonical-stages.tar": {
+          "bytes": 5744640,
+          "sha256": "cc9da55596d63df729b2075785f22916e3947045d155f1dbec5540bbe0ea26d2",
+          "allocated_bytes": 5750784
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "2a987db626162813bbe1ae6a2c03cb864b19481e83996dc512491a82da7b7053",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 5812224,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115945Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request7-20261127T115945Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request7-20261127T115945Z/evidence.tar.zst.part-aa",
+          "git_blob": "43e3dd5ddc0806a8a5ceabad7e666fa6e763ce44",
+          "bytes": 2052004,
+          "sha256": "5751cfce6f2388c503d01da1ce0ba34b2bc305dd7ba594f8240eef4f1bda7144"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 38755,
+          "sha256": "7f4d440dd6d641e66862e5c9fa030eed2c27612eb9cf449cc4be696e6a43cdfa",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 5509120,
+          "sha256": "63dcb06001cc4a2cd6ef503e2fb61f5ab5175c0e0c6f4305f39520da63aff6a9",
+          "allocated_bytes": 5513216
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "6b4af6ef3c631d2fb4566db8bd86a45c25858c85f0f10f18c86d1e24c225e04d",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 5570560,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T120038Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request8-20261127T120038Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request8-20261127T120038Z/evidence.tar.zst.part-aa",
+          "git_blob": "ce49d9e2a598d7187cdcd9ce182199c68d804ef4",
+          "bytes": 33930,
+          "sha256": "3a7e5510f6ba8d3b0ff0651dec2dbb2b6def74edc53815375f00151abfc0681c"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 21209,
+          "sha256": "b5293813fa6b6a50f16e16e30e3efe0926ad4039c0080f1c2588406dbf058c38",
+          "allocated_bytes": 24576
+        },
+        "canonical-stages.tar": {
+          "bytes": 133120,
+          "sha256": "93c406c9ada9cce4466e89aad84d402eeb2a0ab4a479f9d01ed9354a69062a27",
+          "allocated_bytes": 135168
+        },
+        "frontend.stderr": {
+          "bytes": 12298,
+          "sha256": "c8dee1dce2267406e93716e141b258eaa79be440d02a3804fec20dea14a57e7f",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 176128,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T120042Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-controls-request9-20261127T120042Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-controls-request9-20261127T120042Z/evidence.tar.zst.part-aa",
+          "git_blob": "857a9cb01bd821e31db65b1930c70e220adbc40e",
+          "bytes": 916902,
+          "sha256": "f71a25cdb2918ddd3018553cbad8293456b6ae162d96ae0da476e0019e9e1f56"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 37200,
+          "sha256": "5e6c609076f6b2c794b9dc9b9899153532195efce6443bc0cf61135ef9122f63",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 2426880,
+          "sha256": "65e85b79cee223c52e949be193c15b23da7689e6226fa81434fc0820b1b58951",
+          "allocated_bytes": 2433024
+        },
+        "frontend.stderr": {
+          "bytes": 13425,
+          "sha256": "0398d109e1e9bc080287bf1988df1a9366f056dd0d3e97fc3bdbd9729ffed729",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 2490368,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T113531Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/const-selectors-20261127T113531Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/const-selectors-20261127T113531Z/evidence.tar.zst.part-aa",
+          "git_blob": "8e5b343474217ada412da7e3c5553124b62ac37f",
+          "bytes": 3371691,
+          "sha256": "b441435c9fa45ea5935dd723e36af05e79f174136aa3c1a0caf404916743db1d"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 39999,
+          "sha256": "6c65c509fe0db5449f27923d1d0962342bc68cccf3da27b7572209c9b420aafb",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 9472000,
+          "sha256": "ef55cc4ffeba16240c2a86039912b7eb9392f94340e28c5b67311702e1b5eec7",
+          "allocated_bytes": 9478144
+        },
+        "frontend.stderr": {
+          "bytes": 13435,
+          "sha256": "50ac3cd6c29ae375eb33679dbc7002c8bcbdfd4d0980476f2af6a2641a27ed4a",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 9535488,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T114115Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/direct-cells-20261127T114115Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/direct-cells-20261127T114115Z/evidence.tar.zst.part-aa",
+          "git_blob": "7ad3d185da9e586d82773beeb26e5ab997606141",
+          "bytes": 3375913,
+          "sha256": "83cca681dc45bd7c7f886edb524b39d553afbfc0166ec5b556979a74c48ca4dd"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 39180,
+          "sha256": "b078218de725bfea42250dc6a622c5a57382604f0859cc1208cf0e2348069a95",
+          "allocated_bytes": 40960
+        },
+        "canonical-stages.tar": {
+          "bytes": 9482240,
+          "sha256": "4806243c419935ded4a4bb23a4a540551a4b35da19eafb7418f8e31953c35def",
+          "allocated_bytes": 9486336
+        },
+        "frontend.stderr": {
+          "bytes": 13435,
+          "sha256": "36e96340989b48deb0e5add2b53a43c05863b7b5b5f22a7eba247c1139b2066f",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 9543680,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T112826Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/evidence.tar.gz",
+          "git_blob": "2fa8df995195033f790c7bfbe922ca579c241c0c",
+          "bytes": 7333,
+          "sha256": "929fb8dbc9b658b662b1d5ed933dfe499dae61de4b458502cf8df6e16c505928"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "early-promote.stderr": {
+          "bytes": 2272,
+          "sha256": "df8348deed5ecbe309ddd5be86f52282fe4d79808c7a33bba76379f66d507691",
+          "allocated_bytes": 4096
+        },
+        "frontend-raw.stderr": {
+          "bytes": 1653,
+          "sha256": "dec206a4741ddbb33fcd43472c78227c8714b851b2a3a9e938947032bf235996",
+          "allocated_bytes": 4096
+        },
+        "early-promote.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 35239,
+          "sha256": "98a84fc0043970cdafc4d99db3a7760fbb4efe0f1abfbd81ffcb2271dd552b95",
+          "allocated_bytes": 36864
+        },
+        "frontend-raw.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stderr": {
+          "bytes": 13329,
+          "sha256": "36e38786cfa3b7682e8f318f654e5dc6474cf4fa3e95187824b1b7d3b4ebb669",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 61440,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T115014Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/inline-mod-20261127T115014Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/inline-mod-20261127T115014Z/evidence.tar.zst.part-aa",
+          "git_blob": "8e8294beee9e8f39183e9d5d04e466e7f1f76523",
+          "bytes": 2958424,
+          "sha256": "f32157aa715f7b54788e794f18072dab018c2f1a51369aeec15a342cf85c1a6f"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 41395,
+          "sha256": "4a1d50e37d5fe8849a722438415d1bfade1127dd220ba7d60cb0a65f910b2fb2",
+          "allocated_bytes": 45056
+        },
+        "canonical-stages.tar": {
+          "bytes": 8243200,
+          "sha256": "a52d482306ee4375ea190fa0dc13a10f5f691a248a6ee8b577fe6ba7270e7591",
+          "allocated_bytes": 8249344
+        },
+        "frontend.stderr": {
+          "bytes": 13427,
+          "sha256": "3dba26ebe809be38b42cde40d945301d9d7c1c638b6055777bfa657427850005",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 8310784,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/20261127T112230Z",
+      "kind": "completed-profile-directory",
+      "controller": "kprog/results/arm64-loadtime-20261127/profile-20261127T112230Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-loadtime-20261127/profile-20261127T112230Z/evidence.tar.gz",
+          "git_blob": "2743f1f0e63128829790c100ce0e791159b2bbf4",
+          "bytes": 7720,
+          "sha256": "e0cb004bd7902643967918214253dea632fbba2d97a45b38b86ca2cea3e8f520"
+        }
+      ],
+      "files": {
+        "object.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "object.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "frontend-trace.json": {
+          "bytes": 41128,
+          "sha256": "9c1191e3f4be63f8f45cc2a9ca93b1ef7d7eeaa1b8132ff711a21dcfdf69b63d",
+          "allocated_bytes": 45056
+        },
+        "frontend.stderr": {
+          "bytes": 13446,
+          "sha256": "62e82c093c39ec00551b97c1132edda48c11fd0453412a648014aba8dcf1d19a",
+          "allocated_bytes": 16384
+        }
+      },
+      "allocated_bytes": 61440,
+      "status": "removed"
+    }
+  ],
+  "free_before_bytes": 17926758400,
+  "ended_utc": "2026-11-27T12:42:10Z",
+  "free_after_bytes": 18447032320,
+  "removed_allocated_bytes": 520245248
+}
