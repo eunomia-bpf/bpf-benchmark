@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T03:33:39.266606+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 373.8065185546875,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1424,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-retained-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.4807016849517822,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22703,
+      "sha256": "a30d0096cb51a3fc36281a33c2cef94fd30eb1bc684f968f520c078d88b3e9be"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 12491,
+      "sha256": "71bd0b50640afd4afbc9ff8557166ea991cf7ccaac9f1ffb96e2ef4842825e11"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports a complete existing31-GPR/SP/32-vector/NZCV relation for the actual clobber/provider/helper-return/free execution from its real post-release boundary. Each supplied-step proof body occurs once and exposes the actual other-register frame; six complete old API types pass kernel compatibility checks. All18 GPR pairs,4 flag visits and64 vector halves retain actual R19 through R30 Option(Val,Val) reads and tags alongside exact native-selected maps and104 real stores. Actual helper return and eight local frees transport these same reads through genuine retained producer-local frames. The same final packet supplies every actual post-free vector pointer-table and flag/SP/R0 reader. Existing native field frames on the same13 prefix/load/store/RET witnesses preserve R0,R19 through R30 and SP. The initial source/native binding and actual source frames derive the complete final Registers.Represents relation, retaining original values,tags and provenance for the twelve preserved registers. The complete theorem executes the same source visits/free once and returns the derived full relation together with real Star,trace,packet,FreeResult,caller/frontier frame and target maps. Its initial relation is explicitly at the actual completed-release boundary; actual original copy/tag/release transport to that boundary and full original entry composition continue next. Native caller/BTI/live alternatives,global environment/code/input-output and universal O1/O2/O4 domains,recount then M6 follow. Local proofs use standard logic and existing external/assembly semantics; earlier mature MemoryProofs computation dependencies retain their recorded scope.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

@@ -385,3 +385,4 @@ import KProgFormal.ClightRefinement.Arm64KernelMemcpyReturn
 import KProgFormal.ClightRefinement.Arm64KernelMemcpyFrame
 import KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetEntry
 import KProgFormal.ClightRefinement.Arm64KernelMemcpyObservedEntry
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView

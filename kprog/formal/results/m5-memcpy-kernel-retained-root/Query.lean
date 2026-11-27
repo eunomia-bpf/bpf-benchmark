@@ -1,0 +1,10 @@
+import KProgFormal
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedRegisters.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedRegisters.iterations
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedClobber.complete
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.observe
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyRetainedView.complete

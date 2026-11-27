@@ -125,9 +125,13 @@ readers for all 32 vectors, R1 through R18 with tag0, the complete NZCV tuple,
 source R0=-16/tag4 and borrowed SP=-32. Its original stack-origin and physical
 SP=-32+stackOrigin contracts bind both R0 and SP through the existing
 provenance map. All reads use the exported C layout and real retained loads.
-The R19–R30 source/native frame, native caller/landing-pad/alternative feature
-binding, global provider evidence and whole-program observer continue on
-these same witnesses.
+From the actual completed-release boundary, the same provider/store/helper
+return and eight frees now retain the original R19–R30 values, tags and
+provenance. Together with the same native field frames and the initial
+source/native binding, they derive the complete existing 31-GPR/SP/SIMD/NZCV
+relation. The original copy/tag/release prefix binding to this boundary,
+native caller/landing-pad/alternative features, global provider evidence and
+whole-program observer continue on these same witnesses.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap
@@ -135,10 +139,10 @@ represents GPRs, six flag bytes, XMM0 and initialized cache bytes of the exact
 canonical PUSH step on its explicit successful-access domain. The proof binds
 the actual kind-1 stack origin, original byte-fold memory effects, real cache
 assignment observation and concrete byte53 decoding/one-byte fall-through.
-Input native memory remains arbitrary. Native ELF/code-storage binding,
-general source/guest trace simulation, platform/input-oracle correspondence,
-remaining operand/fault domains and all149 universal handler/dispatcher-step
-goals remain unfinished.
+Input native memory remains arbitrary. Migration continues with native
+ELF/code-storage binding, general source/guest trace simulation,
+platform/input-oracle correspondence, remaining operand/fault domains and
+the 149 universal handler/dispatcher-step goals.
 
 For the next original SUB RSP,32, the same source prefix includes actual
 allocation, both operand helpers/saves, arithmetic/result save, unconditional
