@@ -6,6 +6,7 @@ shim, loader and linker. Existing Make variables carry the runtime selection.
 import argparse
 import os
 import platform
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -41,8 +42,10 @@ if arm64:
     environment.update(
         BPFREJIT_NATIVE_LINK_BINARY=str(ROOT/'kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link'),
         BPFREJIT_NATIVE_LOADER_SO=str(ROOT/'runner/build-arm64-llvmbpf/native_loader/libnative_loader.so'))
-    command = ['make', '-C', str(ROOT/'kprog/test'), 'checked-corpus-arm64',
-        'SAMPLES=' + str(args.samples), 'WORKLOAD_DURATION=' + str(args.duration)]
+    # The enclosing Make target owns guest boot and runtime identity, as in
+    # one-image-arm64; this runtime root carries neither make nor Docker.
+    environment.update(SAMPLES=str(args.samples), WORKLOAD_DURATION=str(args.duration))
+    command = [sys.executable, '-m', 'corpus.driver']
 else:
     command = ['make', '-C', str(ROOT), '__runtime-vm-corpus',
         'PLATFORM=kvm', 'ARCH=x86', 'X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current',

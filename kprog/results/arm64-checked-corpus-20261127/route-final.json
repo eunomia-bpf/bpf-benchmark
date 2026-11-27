@@ -1,0 +1,100 @@
+{
+  "x86_64": {
+    "before": {
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository",
+        "__runtime-vm-corpus",
+        "PLATFORM=kvm",
+        "ARCH=x86",
+        "X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current",
+        "X86_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+        "RUNTIME_ENV_BASE_NAMES=TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF BPFREJIT_KEEP_ALL_WORKDIRS BPFREJIT_SHIM_DIR",
+        "SAMPLES=1",
+        "WORKLOAD_DURATION=10"
+      ],
+      "environment": {
+        "BPFREJIT_CORPUS_APPS": "bcc/set",
+        "BPFREJIT_CORPUS_BPF_STATS": "1",
+        "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+        "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1",
+        "BPFREJIT_SHIM_NATIVE_MANIFEST": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json",
+        "BPFREJIT_NATIVE_LINK_BINARY": "/usr/local/bin/native-link",
+        "BPFREJIT_NATIVE_LOADER_SO": "/usr/local/lib/bpfrejit/libnative_loader.so",
+        "SKIP_REJIT": "norejit"
+      }
+    },
+    "after": {
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository",
+        "__runtime-vm-corpus",
+        "PLATFORM=kvm",
+        "ARCH=x86",
+        "X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current",
+        "X86_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+        "RUNTIME_ENV_BASE_NAMES=TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF BPFREJIT_KEEP_ALL_WORKDIRS BPFREJIT_SHIM_DIR",
+        "SAMPLES=1",
+        "WORKLOAD_DURATION=10"
+      ],
+      "environment": {
+        "BPFREJIT_CORPUS_APPS": "bcc/set",
+        "BPFREJIT_CORPUS_BPF_STATS": "1",
+        "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+        "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1",
+        "BPFREJIT_SHIM_NATIVE_MANIFEST": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json",
+        "BPFREJIT_NATIVE_LINK_BINARY": "/usr/local/bin/native-link",
+        "BPFREJIT_NATIVE_LOADER_SO": "/usr/local/lib/bpfrejit/libnative_loader.so",
+        "SKIP_REJIT": "norejit"
+      }
+    }
+  },
+  "arm64": {
+    "before": {
+      "command": [
+        "make",
+        "-C",
+        "/workspaces/repository",
+        "__runtime-vm-corpus",
+        "PLATFORM=kvm",
+        "ARCH=x86",
+        "X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current",
+        "X86_RUNNER_RUNTIME_IMAGE_TAR=/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+        "RUNTIME_ENV_BASE_NAMES=TARGET RUN_TARGET_NAME RUN_TOKEN RUN_TARGET_ARCH RUN_EXECUTOR RUN_REMOTE_PYTHON_BIN RUN_RUNTIME_PYTHON_BIN RUN_BPFTOOL_BIN RUN_NATIVE_REPOS_CSV BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF BPFREJIT_KEEP_ALL_WORKDIRS BPFREJIT_SHIM_DIR",
+        "SAMPLES=1",
+        "WORKLOAD_DURATION=10"
+      ],
+      "environment": {
+        "BPFREJIT_CORPUS_APPS": "bcc/set",
+        "BPFREJIT_CORPUS_BPF_STATS": "1",
+        "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+        "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1",
+        "BPFREJIT_SHIM_NATIVE_MANIFEST": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json",
+        "BPFREJIT_NATIVE_LINK_BINARY": "/usr/local/bin/native-link",
+        "BPFREJIT_NATIVE_LOADER_SO": "/usr/local/lib/bpfrejit/libnative_loader.so",
+        "SKIP_REJIT": "norejit"
+      }
+    },
+    "after": {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "-m",
+        "corpus.driver"
+      ],
+      "environment": {
+        "BPFREJIT_CORPUS_APPS": "bcc/set",
+        "BPFREJIT_CORPUS_BPF_STATS": "1",
+        "BPFREJIT_SHIM_NATIVE_LOADER": "post",
+        "BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF": "1",
+        "BPFREJIT_SHIM_NATIVE_MANIFEST": "/opt/bpf-benchmark/native-bpf/arm64/bcc/manifest.json",
+        "BPFREJIT_NATIVE_LINK_BINARY": "/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+        "BPFREJIT_NATIVE_LOADER_SO": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/libnative_loader.so",
+        "SKIP_REJIT": "norejit"
+      }
+    }
+  },
+  "utc": "2026-11-27T01:21:51Z",
+  "scope": "Final route capture: unchanged x86 command/transport. ARM inside-guest corpus invocation uses parent Make runtime identity; no acceptance claim."
+}
