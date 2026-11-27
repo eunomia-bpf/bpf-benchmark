@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T02:30:10.167839+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64ClobberRegisterComplete"
+    ],
+    "exit": 0,
+    "seconds": 5.275791168212891,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 461,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-clobber-register-supplied/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.425166130065918,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "real_source_stores_per_pair": 2,
+    "supplied_outcome": "actual value/trace/heap/externalCall/cache frame",
+    "value_map": "exact existing updated map",
+    "old_step_type": "unchanged, kernel compatibility example",
+    "body_copies": 1
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64ClobberRegisterComplete.lean",
+      "size_bytes": 14747,
+      "mtime_ns": 1795746374315744173
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
