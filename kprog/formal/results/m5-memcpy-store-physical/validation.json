@@ -1,0 +1,62 @@
+{
+  "confirmed_utc": "2026-11-27T00:29:39.464630+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyStorePhysical",
+      "+KProgFormal.ClightRefinement.Arm64MemsetStorePhysical"
+    ],
+    "exit": 0,
+    "seconds": 3.2268848419189453,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 435,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-store-physical/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.5490450859069824,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "source_store_route_executions": 1,
+    "real_source_stores": [
+      "private Mint64 tag word8 zero",
+      "volatile Mint8 actual byte"
+    ],
+    "native_steps": 1,
+    "actual_word": "39000003",
+    "actual_indices": "80..95",
+    "physical_offsets": "-16..-1",
+    "shared_registers": "0..30; previous W1 interface retained"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyStorePhysical.lean",
+      "size_bytes": 7427,
+      "mtime_ns": 1795739287892971427
+    },
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemsetStackPhysical.lean",
+      "size_bytes": 13148,
+      "mtime_ns": 1795739188061582034
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

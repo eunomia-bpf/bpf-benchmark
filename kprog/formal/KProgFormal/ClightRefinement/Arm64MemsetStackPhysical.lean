@@ -34,17 +34,17 @@ private theorem cursor {m : CC.Mem} {stack : CC.Block} {origin : BitVec 64}
 /-- Pair the SAME actual private tag and guest-byte store effects with the
 mature native STRB. Native permission follows from the successful source
 store and mapped permission equality, without another source execution. -/
-theorem pair_stores {m tagged after : CC.Mem} {tags stack : CC.Block}
-    (i : Fin 160) (value : BitVec 8) (offset : Int) (tagValue : CC.Val)
+theorem pair_stores_register {m tagged after : CC.Mem} {tags stack : CC.Block}
+    (data : Fin 31) (i : Fin 160) (value : BitVec 8) (offset : Int) (tagValue : CC.Val)
     (tagStored : CC.Mem.store .Mint64 m tags offset tagValue = some tagged)
     (byteStored : CC.Mem.store .Mint8unsigned tagged stack (i.val : Int) (.Vint (value.setWidth 32)) = some after)
     (stackSeparate : tags ≠ stack)
     (origin : BitVec 64) (profile : MemoryProfile) (native : Reference.AArch64.State)
     (represented : Represents m stack origin profile native.machine)
     (base : Reference.AArch64.gpr native 0 = address origin i)
-    (byte : (Reference.AArch64.gpr native 1).setWidth 8 = value)
+    (byte : (Reference.AArch64.gpr native data).setWidth 8 = value)
     (noError : read_err native.machine = .None)
-    (fetched : fetch_inst (read_pc native.machine) native.machine = some Arm64MemsetByteNative.instruction.encoding) :
+    (fetched : fetch_inst (read_pc native.machine) native.machine = some (Arm64ByteStoreNative.instruction data).encoding) :
     ∃ profileAfter, ∃ nativeAfter : Reference.AArch64.State,
       Reference.AArch64.step native = ⟨nativeAfter,[.memory .write (address origin i) [value] true],none⟩ ∧
       Represents after stack origin profileAfter nativeAfter.machine ∧
@@ -73,7 +73,7 @@ theorem pair_stores {m tagged after : CC.Mem} {tags stack : CC.Block}
     otherBytes,history,program,exclusive,atomic,thread,fields⟩ := Arm64MemsetPhysicalByte.store taggedRep i value byteStored permitted
   have afterError : read_err written = .None := (fields .ERR).trans noError
   let nativeAfter : Reference.AArch64.State := {native with machine := write_pc (read_pc native.machine + 4#64) written}
-  have step := Arm64MemsetByteNative.reference_step native profile represented.profileRead
+  have step := Arm64ByteStoreNative.reference_step native data profile represented.profileRead
     (address origin i) value written base byte checked noError afterError history fetched
   refine ⟨profileAfter,nativeAfter,step,
     cursor mapped _,?_,rfl,?_,?_,?_,?_,?_,?_,?_,readable,writable,initialized,initializedOther⟩
@@ -87,6 +87,37 @@ theorem pair_stores {m tagged after : CC.Mem} {tags stack : CC.Block}
   · simpa [nativeAfter,write_pc,w,write_base_pc] using exclusive
   · simpa [nativeAfter,write_pc,w,write_base_pc] using atomic
   · simpa [nativeAfter,write_pc,w,write_base_pc] using thread
+
+/-- The original W1 interface is the same shared physical-store theorem. -/
+theorem pair_stores {m tagged after : CC.Mem} {tags stack : CC.Block}
+    (i : Fin 160) (value : BitVec 8) (offset : Int) (tagValue : CC.Val)
+    (tagStored : CC.Mem.store .Mint64 m tags offset tagValue = some tagged)
+    (byteStored : CC.Mem.store .Mint8unsigned tagged stack (i.val : Int) (.Vint (value.setWidth 32)) = some after)
+    (stackSeparate : tags ≠ stack)
+    (origin : BitVec 64) (profile : MemoryProfile) (native : Reference.AArch64.State)
+    (represented : Represents m stack origin profile native.machine)
+    (base : Reference.AArch64.gpr native 0 = address origin i)
+    (byte : (Reference.AArch64.gpr native 1).setWidth 8 = value)
+    (noError : read_err native.machine = .None)
+    (fetched : fetch_inst (read_pc native.machine) native.machine = some Arm64MemsetByteNative.instruction.encoding) :
+    ∃ profileAfter, ∃ nativeAfter : Reference.AArch64.State,
+      Reference.AArch64.step native = ⟨nativeAfter,[.memory .write (address origin i) [value] true],none⟩ ∧
+      Represents after stack origin profileAfter nativeAfter.machine ∧
+      read_pc nativeAfter.machine = read_pc native.machine + 4#64 ∧
+      nativeAfter.extraFlags = native.extraFlags ∧
+      (∀ field : StateField, field ≠ .PC → r field nativeAfter.machine = r field native.machine) ∧
+      (∀ a : BitVec 64, a ≠ address origin i → read_mem a nativeAfter.machine = read_mem a native.machine) ∧
+      read_memory_accesses nativeAfter.machine = read_memory_accesses native.machine ++
+        [.memory .write (address origin i) [value] true] ∧
+      nativeAfter.machine.program = native.machine.program ∧
+      nativeAfter.machine.exclusive = native.machine.exclusive ∧
+      nativeAfter.machine.atomicAccesses = native.machine.atomicAccesses ∧
+      nativeAfter.machine.threadPointerInputs = native.machine.threadPointerInputs ∧
+      profileAfter.readable = profile.readable ∧ profileAfter.writable = profile.writable ∧
+      profileAfter.initialized (address origin i) = true ∧
+      (∀ j : Fin 160, j ≠ i → profileAfter.initialized (address origin j) = profile.initialized (address origin j)) := by
+  exact pair_stores_register 1 i value offset tagValue tagStored byteStored stackSeparate
+    origin profile native represented base byte noError fetched
 
 
 /-- The actual original two-store stack arm pairs with one fetched imported
