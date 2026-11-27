@@ -37,6 +37,12 @@
 ## 五、待办（按顺序；做完在行首写 [x] 和提交号）
 
 0. **协调者：性能排查**（运营者 11-23：“性能是不是不够好? 为啥?”）。
+   - 协调者 2026-11-27T18:51Z（运营者 11-27：“性能? 你在干嘛?”）：11-27 一整天 perf 按协调者的排序做 arm64 验证路径（第二阶段、B 被拒、装载时间），性能这一项从 11-26 的 3e6b8b0a7 起停着，这是协调者排序的结果。从现在起 perf 先做性能，arm64 验证路径的条目（LL/SC 重试循环、unclassified 分类、编译以外的装载时间、两个 CHUNK ENOENT、Tracee 测量时机）排在性能之后。性能的顺序：
+     1. x86 OTel：每次调用 0.976x（30e401e37 完整计时），10 秒诊断值 eBPF 3326.1 / 原生 3463.1 ns，原生一侧更慢。在当前镜像上用宿主 PMU 采样原生和 eBPF 两边（kprog/results/profile-20261123/profile-host.sh），找原生多出来的时间，用头文件、统一编译参数或链接器修，10 秒检查。
+     2. x86 BCC 1.015x、Katran 1.042x：同样用采样找最大的差距，同样的手段。
+     3. Tetragon generic_tracepoint 原生比 eBPF 慢（第 2 项原话里的那一个）：时间在内核 ring-buffer 锁上，确认原生和 eBPF 两边拿锁的次数和路径一致。
+     4. arm64 3a/3b：BCC 0.971x、Katran 0.993x、Cilium 1.020x，同样的手段，arm64 一组编译参数；数字在 Spark 上按 K1–K4 测一次。
+     目标照原话：每次调用至少快 20%，吞吐至少好 30%，所有应用一组编译参数；改动只放在头文件、编译参数、链接器，冻结 benchmark 和 x86 完整计时保持原样，代码改动做 10 秒检查。
    - [x] Cilium 11-22 的 0.461x：x86 链接器丢了 jiffies_64 的 GOT 读，时钟读到旧寄存器（dcf4a1aef 修好，11-23 每次调用 1.205x）。
    - [x] Katran：05-29 和 8430daa81 的原生 142–146 ns 来自旧链接器按调用顺序配查找点，三处 LRU 连接表查找拿到 stats 的 PERCPU_ARRAY 内联形式，每个包都返回 NULL，LRU 查找没做（kprog/results/katran-callorder-20261123，5c8423561）。Katran 的 05-29 底线和 OTel 的一样作废；现在原生和 eBPF 都是 180 ns。
    - Cilium：05-29 的 1.319x 是每次调用（kprog/results/restore-529-20261121/x86-rotate-20261121.md 的“05-29 per call”列，出自 native_eval_20260529）；现在每次调用 1.248x（11-24）、1.105x（11-23），低于；stats 关吞吐 1.179x–1.190x。协调者 11-23 至 11-24 的报告把这一列当成 stats 关吞吐的底线，11-24 20:2xZ 更正。旧链接器按顺序配查找点的缺陷在 Cilium 上没有出现（kprog/results/katran-callorder-20261123/cilium-replay.out）。
