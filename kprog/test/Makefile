@@ -104,6 +104,19 @@ shim-multi-prog-smoke: multi-prog-tool
 		"$(MULTI_PROG_TOOL)" "$(OUTPUT_DIR)/multi_prog_smoke.bpf.o"
 	grep -q "BPF_PROG_LOAD" /tmp/native_loader_multi_prog_shim/shim.log
 
+# The ARM checked service already runs inside the one-image QEMU root.
+# Execute the frozen corpus there with the same functional-check inputs.
+.PHONY: checked-corpus-arm64
+checked-corpus-arm64: SAMPLES ?= 1
+checked-corpus-arm64: WORKLOAD_DURATION ?= 10
+checked-corpus-arm64:
+	cd "$(REPO_ROOT)" && env BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root \
+		TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm \
+		RUN_TOKEN="$${RUN_TOKEN:-$$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')}" \
+		RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool \
+		RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon SAMPLES="$(SAMPLES)" WORKLOAD_DURATION="$(WORKLOAD_DURATION)" \
+		python3 -m corpus.driver
+
 clean:
 	rm -rf $(OUTPUT_DIR)
 

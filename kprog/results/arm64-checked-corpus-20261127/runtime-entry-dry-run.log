@@ -1,0 +1,8 @@
+make: Entering directory '/workspaces/repository/kprog/test'
+cd "/workspaces/repository" && env BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 HOME=/root \
+	TARGET=arm64-qemu RUN_TARGET_NAME=arm64-qemu RUN_TARGET_ARCH=arm64 RUN_EXECUTOR=kvm \
+	RUN_TOKEN="${RUN_TOKEN:-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')}" \
+	RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_BIN=python3 RUN_BPFTOOL_BIN=bpftool \
+	RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon SAMPLES="1" WORKLOAD_DURATION="10" \
+	python3 -m corpus.driver
+make: Leaving directory '/workspaces/repository/kprog/test'
