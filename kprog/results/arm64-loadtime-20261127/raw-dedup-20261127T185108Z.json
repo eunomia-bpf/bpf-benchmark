@@ -1,0 +1,110 @@
+{
+  "utc": "2026-11-27T18:51:08Z",
+  "git_revision": "e0631e4fc0cd2f5376d06afaf82a5ef814a9c7b2",
+  "authority": "Coordinator 2026-11-27T12:19Z: remove verified raw duplicates after SHA256 match against committed Git archives; preserve archive parts.",
+  "actions": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184555Z",
+      "kind": "completed-run-directory",
+      "controller": "kprog/results/arm64-checked-corpus-20261127/kernel-catalogue-check-20261127T184555Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-checked-corpus-20261127/kernel-catalogue-check-20261127T184555Z/evidence.tar.gz",
+          "git_blob": "848766cacb54a37e443955119be5ffef95496f36",
+          "bytes": 740,
+          "sha256": "46c88c81fadafa9c30a2c1cbc2c819791829ac288fc06fadbf75d828888b1069"
+        }
+      ],
+      "files": {
+        "compile.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "compile.stderr": {
+          "bytes": 2428,
+          "sha256": "99beb8c50e90bf52394a05ffda9de6d0ab57d6e1fa009fb780c525b48b5e0ea5",
+          "allocated_bytes": 4096
+        }
+      },
+      "allocated_bytes": 4096,
+      "status": "removed"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/arm64-kernel-catalogue-20261127/20261127T184715Z",
+      "kind": "completed-run-directory",
+      "controller": "kprog/results/arm64-checked-corpus-20261127/kernel-catalogue-check-20261127T184715Z/controller.json",
+      "archives": [
+        {
+          "path": "kprog/results/arm64-checked-corpus-20261127/kernel-catalogue-check-20261127T184715Z/evidence.tar.gz",
+          "git_blob": "da3ed15323ab3d18d0d5c658541a44e7d371b1c8",
+          "bytes": 659760,
+          "sha256": "09aad8efe749e0235dbfe212fa32d9ccaaae7b599361d98596bfff2b393dd0f4"
+        }
+      ],
+      "files": {
+        "check.stdout": {
+          "bytes": 199,
+          "sha256": "0c8e38dd073c4464ba5319dcd86598434fc6ef9895d8f9c7c48632b0b8c154f4",
+          "allocated_bytes": 4096
+        },
+        "guest.log": {
+          "bytes": 1026,
+          "sha256": "28496cd70ef24f2e2d973286cdd55f790a242c438961978b6ef61fe905caff20",
+          "allocated_bytes": 4096
+        },
+        "link.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "check.o": {
+          "bytes": 812664,
+          "sha256": "fc3d86857704930c1fddf8ecc4658410e99c09ec739c4bd707807b664145dc01",
+          "allocated_bytes": 815104
+        },
+        "compile.stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "link.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "boot-symbols.txt": {
+          "bytes": 158,
+          "sha256": "d0304ea86063487d5cacb7cbc0183a8fef84d4adcff99ea71352b7d928f66358",
+          "allocated_bytes": 4096
+        },
+        "compile.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "check": {
+          "bytes": 1056976,
+          "sha256": "9b8173d616ca2aa7f10e3f0fe2879c4e3bcf26bea74d410582513a6185cc271a",
+          "allocated_bytes": 1007616
+        },
+        "check.stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "allocated_bytes": 0
+        },
+        "guest-status": {
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+          "allocated_bytes": 4096
+        }
+      },
+      "allocated_bytes": 1839104,
+      "status": "removed"
+    }
+  ],
+  "free_before_bytes": 15777841152,
+  "ended_utc": "2026-11-27T18:51:08Z",
+  "free_after_bytes": 15779688448,
+  "removed_allocated_bytes": 1843200
+}
