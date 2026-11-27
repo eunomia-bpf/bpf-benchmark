@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T02:48:06.829304+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyTargetContinuation"
+    ],
+    "exit": 0,
+    "seconds": 4.314544677734375,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 576,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-target-continuation/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6033177375793457,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 1,
+  "source_steps": {
+    "native_output": "RET of the same actual TwoStores witness",
+    "targeted_provider_words": 86,
+    "local_frees": 8,
+    "tag_transfers": "all16 actual iterations including0/8",
+    "copied_bytes": 16,
+    "source_prefix_replays": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyTargetContinuation.lean",
+      "size_bytes": 7201,
+      "mtime_ns": 1795747110292903362
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
