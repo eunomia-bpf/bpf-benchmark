@@ -24,3 +24,7 @@ layouts:
 .PHONY: smoke
 smoke:
 	python3 smoke.py
+.PHONY: guest
+# Host compiler jobs stay capped; the guest retains the ARM entry's 4vCPU/8GiB.
+guest:
+	python3 guest_controller.py
