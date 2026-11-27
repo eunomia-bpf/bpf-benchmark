@@ -41,7 +41,7 @@ export HOME=/root
 export PATH=/usr/lib/llvm-18/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export PYTHONPATH=/workspaces/repository:/run/host-python
 export CLANG=/workspaces/repository/kprog/stock-path/bin/clang
-export KPROG_ARM64_SYSROOT=/workspaces/repository/.cache/aarch64-sysroot
+export KPROG_ARM64_SYSROOT=/workspaces/repository/.cache/qemu-arm64-root
 export KPROG_TRUSTED_COMPILE_STATE=RAW_PATH/broker
 # /var/tmp is private in the guest, so use the retained native input in RAW.
 install -d /var/tmp/kprog-tmp/perf/arm64-checked-control
@@ -57,7 +57,7 @@ while :; do sleep 60; done
   init.write_text(body);init.chmod(0o755)
   (OUT/'init-script.txt').write_text(body)
   shutil.copyfile('/var/tmp/kprog-tmp/perf/arm64-checked-control/control.o',RAW/'control.o')
-  state=RAW/'broker';broker_cmd=['prlimit','--as=17179869184','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/aarch64-sysroot')]
+  state=RAW/'broker';broker_cmd=['prlimit','--as=17179869184','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/qemu-arm64-root')]
   record['broker_command']=broker_cmd;save()
   env=dict(os.environ,QEMU_LD_PREFIX=str(qroot))
   broker_log=(RAW/'broker.log').open('w')
