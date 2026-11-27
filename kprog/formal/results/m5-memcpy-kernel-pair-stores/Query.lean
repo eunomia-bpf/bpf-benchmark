@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairStores
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairStores.decoded
+#print axioms Arm64KernelMemcpyPairStores.decoded
+#check Arm64KernelMemcpyPairStores.execute_split
+#print axioms Arm64KernelMemcpyPairStores.execute_split
+#check Arm64KernelMemcpyPairStores.execute_single
+#print axioms Arm64KernelMemcpyPairStores.execute_single
+#check Arm64KernelMemcpyPairStores.native_split
+#print axioms Arm64KernelMemcpyPairStores.native_split
+#check Arm64KernelMemcpyPairStores.native_single
+#print axioms Arm64KernelMemcpyPairStores.native_single

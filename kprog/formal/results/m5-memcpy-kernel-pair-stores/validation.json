@@ -1,0 +1,70 @@
+{
+  "confirmed_utc": "2026-11-27T01:43:49.717042+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPairStores"
+    ],
+    "exit": 0,
+    "seconds": 1.8199951648712158,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 86,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-pair-stores/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.5744519233703613,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "captured_STPs": 2,
+    "operands": [
+      [
+        6,
+        7
+      ],
+      [
+        12,
+        13
+      ]
+    ],
+    "base_registers": [
+      0,
+      5
+    ],
+    "offsets": [
+      0,
+      -16
+    ],
+    "native_modes": [
+      "split write8/write8",
+      "single write16"
+    ],
+    "primitive_write_interface": "actual imported checked result"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPairStores.lean",
+      "size_bytes": 6705,
+      "mtime_ns": 1795743770717730529
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
