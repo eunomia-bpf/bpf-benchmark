@@ -42,19 +42,32 @@ def run(command, path):
                 user_seconds=usage.ru_utime, system_seconds=usage.ru_stime)
 try:
     save()
-    raw_base=Path('/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127')
-    completed=[('bcc/set',raw_base/'20261127T012418Z/bcc-set/service.tar.gz'),
-               ('katran/balancer',raw_base/'20261127T020053Z/katran/service.tar.gz'),
-               ('otelcol-ebpf-profiler/profiling',raw_base/'20261127T044717Z/otelcol-ebpf-profiler-profiling/service.tar.gz')]
-    for app, archive in completed:
-        with tarfile.open(archive) as outer:
-            members=[member for member in outer.getmembers() if '/requests/' in member.name and member.name.endswith('.tar.gz')]
-            for member in sorted(members, key=lambda m:int(Path(m.name).name.split('.')[0])):
-                record['inventory'].append(dict(app=app, archive=str(archive), member=member.name))
-    tetra=raw_base/'20261127T091129Z'
-    for archive in sorted(tetra.rglob('*.tar.gz')):
-        if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
-            record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
+    if len(sys.argv)>1:
+        previous=HERE/sys.argv[1]/'controller.json'
+        prior=json.loads(previous.read_text())
+        record['recovery_of']=str(previous.relative_to(ROOT))
+        record['scope']='Retry only input-file exceptions from the original captured compiler inventory, using the immutable completed service archive. Original exception receipts remain unchanged; compiler flags and qualifier profile must match the original replay.'
+        for row in prior['cases']:
+            if row['status']!='exception':continue
+            if 'FileNotFoundError:' not in row.get('exception',''):
+                raise RuntimeError('Recovery requires an actual missing original input archive.')
+            original=Path(row['archive'])
+            outer=original.parents[3]/'service.tar.gz'
+            record['inventory'].append(dict(index=row['index'],app=row['app'],archive=str(outer),member='service/requests/'+original.name,original_archive=str(original)))
+    else:
+        raw_base=Path('/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127')
+        completed=[('bcc/set',raw_base/'20261127T012418Z/bcc-set/service.tar.gz'),
+                   ('katran/balancer',raw_base/'20261127T020053Z/katran/service.tar.gz'),
+                   ('otelcol-ebpf-profiler/profiling',raw_base/'20261127T044717Z/otelcol-ebpf-profiler-profiling/service.tar.gz')]
+        for app, archive in completed:
+            with tarfile.open(archive) as outer:
+                members=[member for member in outer.getmembers() if '/requests/' in member.name and member.name.endswith('.tar.gz')]
+                for member in sorted(members, key=lambda m:int(Path(m.name).name.split('.')[0])):
+                    record['inventory'].append(dict(app=app, archive=str(archive), member=member.name))
+        tetra=raw_base/'20261127T091129Z'
+        for archive in sorted(tetra.rglob('*.tar.gz')):
+            if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
+                record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
     record['coverage_gaps']=['tracee/monitor has no completed ARM checked archive yet; its live stage2 remains queued.', 'Cilium all ten captured requests already compiled in corpus-20261127T115432Z; this job avoids repeating them.']
     overrides=_constant_decoder_overrides().encode()
     record['macro_profile_sha256']=hashlib.sha256(overrides).hexdigest()
@@ -65,11 +78,16 @@ try:
         for p in [ROOT/'kprog/arm64/trusted_specializer.py',*header_paths]:t.add(p,arcname=str(p.relative_to(ROOT)))
     flags=[str(x) for x in b_flags(sysroot=ROOT/'.cache/qemu-arm64-root')]
     record['common_flags']=flags
+    if 'recovery_of' in record:
+        assert flags==prior['common_flags']
+        assert record['macro_profile_sha256']==prior['macro_profile_sha256']
+        assert record['header_sha256']==prior['header_sha256']
     save()
     with (LANE.parent/'locks/timing').open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_SH)
-        for index,item in enumerate(record['inventory'],1):
-            row=dict(index=index,**item,started_utc=now(),commands=[])
+        for ordinal,item in enumerate(record['inventory'],1):
+            index=item.get('index',ordinal)
+            row=dict(item,index=index,started_utc=now(),commands=[])
             case=RAW/str(index)
             case.mkdir()
             try:

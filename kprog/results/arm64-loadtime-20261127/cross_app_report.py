@@ -13,13 +13,22 @@ OUT=HERE/sys.argv[1]
 record=json.loads((OUT/'controller.json').read_text())
 current={case['index']:case for case in record['cases']}
 rows=[]
-for index,item in enumerate(record['inventory'],1):
+consolidated={}
+for ordinal,item in enumerate(record['inventory'],1):
+    index=item.get('index',ordinal)
     if item['member']:
         with tarfile.open(item['archive']) as outer:
             data=outer.extractfile(item['member']).read()
         archive=tarfile.open(fileobj=io.BytesIO(data))
-    else:
+    elif Path(item['archive']).exists():
         archive=tarfile.open(item['archive'])
+    else:
+        original=Path(item['archive'])
+        outer_path=original.parents[3]/'service.tar.gz'
+        if outer_path not in consolidated:
+            with tarfile.open(outer_path) as outer:
+                consolidated[outer_path]={m.name:outer.extractfile(m).read() for m in outer if m.isfile() and '/requests/' in m.name and m.name.endswith('.tar.gz')}
+        archive=tarfile.open(fileobj=io.BytesIO(consolidated[outer_path]['service/requests/'+original.name]))
     with archive:
         files={Path(m.name).name:m for m in archive.getmembers() if m.isfile()}
         def load(name):

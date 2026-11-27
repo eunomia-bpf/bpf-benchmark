@@ -1,7 +1,7 @@
 {
-  "utc": "2026-11-27T13:36:41Z",
+  "utc": "2026-11-27T14:16:44Z",
   "controller": "controller.json",
-  "controller_status_at_snapshot": null,
+  "controller_status_at_snapshot": 1,
   "producer_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
   "macro_profile_sha256": "cfd18af86163d8ba848f680bdba9e116eac5334990926329f4fc16223e559597",
   "scope": "Point-in-time original/replay compiler receipt pairing. Completed app compilation does not establish stock verification, native installation or frozen startup. Timing pairs contain only original-success/replay-success inputs; original generation failures/recoveries stay separate.",
@@ -59,20 +59,20 @@
     },
     "tetragon/observer": {
       "inventory": 51,
-      "completed": 6,
-      "pending": 45,
+      "completed": 51,
+      "pending": 0,
       "replay_status_counts": {
-        "compiled": 6,
-        "pending": 45
+        "compiled": 28,
+        "exception": 23
       },
-      "completed_replay_frontend_seconds": 323.96682878097636,
-      "completed_replay_all_compiler_seconds": 342.8821524840314,
+      "completed_replay_frontend_seconds": 2080.857873144967,
+      "completed_replay_all_compiler_seconds": 2334.7497774390504,
       "original_generation_failures": 0,
       "recovered_generation_failures": 0,
-      "matched_successful_original_frontend_seconds": 523.1938357789477,
-      "matched_replay_frontend_seconds": 323.96682878097636,
-      "matched_replay_all_compiler_seconds": 342.8821524840314,
-      "completed_original_frontend_max_rss_kib": 11431564,
+      "matched_successful_original_frontend_seconds": 3487.010134287004,
+      "matched_replay_frontend_seconds": 2080.857873144967,
+      "matched_replay_all_compiler_seconds": 2334.7497774390504,
+      "completed_original_frontend_max_rss_kib": 11432956,
       "completed_replay_frontend_max_rss_kib": 4155948
     }
   },
@@ -3970,9 +3970,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/44/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/44/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 62.18616466000094,
+          "max_rss_kib": 1959816,
+          "user_seconds": 60.759095,
+          "system_seconds": 1.031152
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/44/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/44/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.184856399981072,
+          "max_rss_kib": 266188,
+          "user_seconds": 2.09409,
+          "system_seconds": 0.08964599999999999
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -3996,9 +4058,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/45/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/45/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 263.97278594601084,
+          "max_rss_kib": 2338464,
+          "user_seconds": 262.341703,
+          "system_seconds": 1.598805
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/45/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/45/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 81.70300292799948,
+          "max_rss_kib": 908584,
+          "user_seconds": 81.250696,
+          "system_seconds": 0.442946
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4022,9 +4146,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/46/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/46/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 272.7955440430087,
+          "max_rss_kib": 4154096,
+          "user_seconds": 262.213396,
+          "system_seconds": 10.5425
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/46/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/46/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 17.67914499901235,
+          "max_rss_kib": 909288,
+          "user_seconds": 17.236148,
+          "system_seconds": 0.440504
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4048,9 +4234,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/47/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/47/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 29.046585969015723,
+          "max_rss_kib": 828980,
+          "user_seconds": 28.548253,
+          "system_seconds": 0.49248899999999995
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/47/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/47/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.0779802770121023,
+          "max_rss_kib": 173220,
+          "user_seconds": 1.027553,
+          "system_seconds": 0.049949999999999994
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4074,9 +4322,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/48/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/48/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.240445475996239,
+          "max_rss_kib": 193240,
+          "user_seconds": 2.174852,
+          "system_seconds": 0.061951
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/48/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/48/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.12609333099680953,
+          "max_rss_kib": 90468,
+          "user_seconds": 0.10893399999999999,
+          "system_seconds": 0.01671
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4100,9 +4410,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/49/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/49/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.4502399530028924,
+          "max_rss_kib": 201944,
+          "user_seconds": 2.338864,
+          "system_seconds": 0.08939799999999999
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/49/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/49/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.1418639070179779,
+          "max_rss_kib": 91992,
+          "user_seconds": 0.122469,
+          "system_seconds": 0.018979
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4126,9 +4498,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/50/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/50/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 59.95423143400694,
+          "max_rss_kib": 1958352,
+          "user_seconds": 58.705229,
+          "system_seconds": 1.071536
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/50/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/50/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.202613831992494,
+          "max_rss_kib": 266676,
+          "user_seconds": 2.097987,
+          "system_seconds": 0.10396799999999999
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4152,9 +4586,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/51/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/51/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 4.243871994985966,
+          "max_rss_kib": 279432,
+          "user_seconds": 4.124531,
+          "system_seconds": 0.118626
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/51/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/51/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.17922777400235645,
+          "max_rss_kib": 100172,
+          "user_seconds": 0.15712299999999998,
+          "system_seconds": 0.021662999999999998
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4178,9 +4674,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/52/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/52/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 5.172474300983595,
+          "max_rss_kib": 301212,
+          "user_seconds": 5.015316,
+          "system_seconds": 0.14696199999999998
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/52/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/52/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.19025603699265048,
+          "max_rss_kib": 102280,
+          "user_seconds": 0.168088,
+          "system_seconds": 0.021736
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4204,9 +4762,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/53/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/53/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 264.8327054469846,
+          "max_rss_kib": 2336324,
+          "user_seconds": 262.963464,
+          "system_seconds": 1.6335579999999998
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/53/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/53/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 84.51053722700453,
+          "max_rss_kib": 906268,
+          "user_seconds": 84.011792,
+          "system_seconds": 0.453466
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4230,9 +4850,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/54/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/54/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 4.573216085002059,
+          "max_rss_kib": 279448,
+          "user_seconds": 4.471662,
+          "system_seconds": 0.100612
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/54/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/54/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.18040332800592296,
+          "max_rss_kib": 100304,
+          "user_seconds": 0.15605,
+          "system_seconds": 0.023918
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4256,9 +4938,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/55/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/55/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 297.2921720960003,
+          "max_rss_kib": 4155092,
+          "user_seconds": 286.365637,
+          "system_seconds": 10.146256
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/55/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/55/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 18.634604852006305,
+          "max_rss_kib": 908540,
+          "user_seconds": 18.181899,
+          "system_seconds": 0.437911
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4282,9 +5026,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/56/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/56/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 5.958007666020421,
+          "max_rss_kib": 299632,
+          "user_seconds": 5.804788,
+          "system_seconds": 0.145607
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/56/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/56/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.20852037600707263,
+          "max_rss_kib": 102296,
+          "user_seconds": 0.182146,
+          "system_seconds": 0.025931
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4308,9 +5114,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/57/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/57/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 32.539594269997906,
+          "max_rss_kib": 830840,
+          "user_seconds": 31.87059,
+          "system_seconds": 0.424909
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/57/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/57/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.242660704010632,
+          "max_rss_kib": 174540,
+          "user_seconds": 1.193056,
+          "system_seconds": 0.048976
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4334,9 +5202,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/58/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/58/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.4470989610126708,
+          "max_rss_kib": 195584,
+          "user_seconds": 2.369852,
+          "system_seconds": 0.073944
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/58/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/58/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.13087028000154532,
+          "max_rss_kib": 90972,
+          "user_seconds": 0.11444399999999999,
+          "system_seconds": 0.015976
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4360,9 +5290,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/59/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/59/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 58.19854589400347,
+          "max_rss_kib": 1960900,
+          "user_seconds": 57.228318,
+          "system_seconds": 0.9014179999999999
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/59/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/59/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.1319902050017845,
+          "max_rss_kib": 265928,
+          "user_seconds": 2.030508,
+          "system_seconds": 0.099947
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4386,9 +5378,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/60/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/60/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 18.357186017994536,
+          "max_rss_kib": 743028,
+          "user_seconds": 18.007952,
+          "system_seconds": 0.323466
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/60/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/60/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.543344335979782,
+          "max_rss_kib": 134736,
+          "user_seconds": 0.49893699999999996,
+          "system_seconds": 0.043939
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4412,9 +5466,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/61/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/61/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 31.274429643992335,
+          "max_rss_kib": 828536,
+          "user_seconds": 30.768087,
+          "system_seconds": 0.417602
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/61/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/61/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.163124025973957,
+          "max_rss_kib": 174824,
+          "user_seconds": 1.107626,
+          "system_seconds": 0.054952
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4438,9 +5554,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/62/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/62/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 60.13725922300364,
+          "max_rss_kib": 1959492,
+          "user_seconds": 59.207784,
+          "system_seconds": 0.9137869999999999
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/62/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/62/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.528863948013168,
+          "max_rss_kib": 266572,
+          "user_seconds": 2.417956,
+          "system_seconds": 0.11001699999999999
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4464,9 +5642,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/63/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/63/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 4.744994727981975,
+          "max_rss_kib": 275336,
+          "user_seconds": 4.637335,
+          "system_seconds": 0.105569
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/63/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/63/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.18537790898699313,
+          "max_rss_kib": 100268,
+          "user_seconds": 0.161099,
+          "system_seconds": 0.023618999999999998
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4490,9 +5730,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/64/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/64/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 2.411540753004374,
+          "max_rss_kib": 194068,
+          "user_seconds": 2.309666,
+          "system_seconds": 0.09147899999999999
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/64/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/64/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 0.1315171580063179,
+          "max_rss_kib": 90512,
+          "user_seconds": 0.10722999999999999,
+          "system_seconds": 0.022706999999999998
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4516,9 +5818,71 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/65/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/65/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 272.0619498019805,
+          "max_rss_kib": 4153432,
+          "user_seconds": 261.541504,
+          "system_seconds": 10.290432
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/65/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/65/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 17.899726757023018,
+          "max_rss_kib": 908076,
+          "user_seconds": 17.456564,
+          "system_seconds": 0.40609999999999996
+        }
+      ],
+      "original_and_current_flags_equal": true,
       "recovered_generation_failure": false
     },
     {
@@ -4542,7 +5906,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4568,7 +5932,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4594,7 +5958,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4620,7 +5984,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4646,7 +6010,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4672,7 +6036,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4698,7 +6062,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4724,7 +6088,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4750,7 +6114,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4776,7 +6140,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4802,7 +6166,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4828,7 +6192,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4854,7 +6218,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4880,7 +6244,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4906,7 +6270,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4932,7 +6296,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4958,7 +6322,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -4984,7 +6348,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -5010,7 +6374,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -5036,7 +6400,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -5062,7 +6426,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -5088,7 +6452,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false
@@ -5114,7 +6478,7 @@
         "failure_diagnostics": []
       },
       "original_generation_failed": false,
-      "replay_status": "pending",
+      "replay_status": "exception",
       "replay_commands": [],
       "original_and_current_flags_equal": null,
       "recovered_generation_failure": false

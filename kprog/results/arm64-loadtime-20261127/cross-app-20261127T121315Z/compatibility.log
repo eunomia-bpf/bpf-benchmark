@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-27T13:36:41Z",
+  "utc": "2026-11-27T14:16:44Z",
   "apps": {
     "bcc/set": {
       "inventory": 23,
@@ -54,20 +54,20 @@
     },
     "tetragon/observer": {
       "inventory": 51,
-      "completed": 6,
-      "pending": 45,
+      "completed": 51,
+      "pending": 0,
       "replay_status_counts": {
-        "compiled": 6,
-        "pending": 45
+        "compiled": 28,
+        "exception": 23
       },
-      "completed_replay_frontend_seconds": 323.96682878097636,
-      "completed_replay_all_compiler_seconds": 342.8821524840314,
+      "completed_replay_frontend_seconds": 2080.857873144967,
+      "completed_replay_all_compiler_seconds": 2334.7497774390504,
       "original_generation_failures": 0,
       "recovered_generation_failures": 0,
-      "matched_successful_original_frontend_seconds": 523.1938357789477,
-      "matched_replay_frontend_seconds": 323.96682878097636,
-      "matched_replay_all_compiler_seconds": 342.8821524840314,
-      "completed_original_frontend_max_rss_kib": 11431564,
+      "matched_successful_original_frontend_seconds": 3487.010134287004,
+      "matched_replay_frontend_seconds": 2080.857873144967,
+      "matched_replay_all_compiler_seconds": 2334.7497774390504,
+      "completed_original_frontend_max_rss_kib": 11432956,
       "completed_replay_frontend_max_rss_kib": 4155948
     }
   },

@@ -1,0 +1,368 @@
+{
+  "utc": "2026-11-27T14:18:12Z",
+  "original_controller": "controller.json",
+  "stable_archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/tetragon-observer/service.tar.gz",
+  "stable_archive_sha256": "e1c3e03bee87a057fcd3c610b6ed301cb9a73db09c15696ab82fbe0c4237b9e3",
+  "previously_compiled_sources_byte_hash_equal": 28,
+  "missing_input_exceptions_to_retry": 23,
+  "compiler_failures": 0,
+  "inputs": [
+    {
+      "index": 38,
+      "member": "service/requests/1.success.tar.gz",
+      "member_sha256": "b2009c6280a2a9d3ebb6023668a1ce86f9cfed478640cb9a375bd48a0e4b6cea",
+      "original_source_sha256": "9a2b15e8c2872bfc165cdcb37ef0275b71a50c5a410dc9d0373fd801be7692fe",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 39,
+      "member": "service/requests/10.success.tar.gz",
+      "member_sha256": "9bcbb49e7e05bf28d6c9ae539299a2cd5eacd36d1cb410b37fe8e19a0acd0fb7",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 40,
+      "member": "service/requests/11.success.tar.gz",
+      "member_sha256": "1292f954a1bf63b272a34f4b2abb12d9b82ba7e97c2ae03e7ab7248e59e95a8d",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 41,
+      "member": "service/requests/12.success.tar.gz",
+      "member_sha256": "9bf56c879ede5afa094af91fb3fb7eee78f06ad596a6c8fb94048edc50634b0c",
+      "original_source_sha256": "cb31657bcf37b86ab30fe82ed599302f57e9e9c8464317d1658679085b8ce63b",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 42,
+      "member": "service/requests/13.success.tar.gz",
+      "member_sha256": "435b8bf99342cc41c0a8133677e134956d24d85181a3d1fdb46131f272c1c1f3",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 43,
+      "member": "service/requests/14.success.tar.gz",
+      "member_sha256": "785d6cb922fca0683694668d2bbf6ed125567fc84e66ff59caa2cc4453622102",
+      "original_source_sha256": "c424ef1602e9bd063e72ec816182d4efbf9c9cde3e3137bdc992287e62256658",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 44,
+      "member": "service/requests/15.success.tar.gz",
+      "member_sha256": "b6bc244440ab0542fe04a55b7cc9b204952db7e296030a8cc7d3c37d2629effa",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 45,
+      "member": "service/requests/16.success.tar.gz",
+      "member_sha256": "b6b76796007d0b389e3fd181570d33a1317d3cf780ec2ef03b436a87da071b3e",
+      "original_source_sha256": "1bfa608745a0255f53c7ca29ec294cb48252b77d92c4920a1e3ce354987f1cfd",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 46,
+      "member": "service/requests/17.success.tar.gz",
+      "member_sha256": "6cbb18a6e5fee08a67c3577cf1c81960d23a81ecd021b810f2485c1a494637d9",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 47,
+      "member": "service/requests/18.success.tar.gz",
+      "member_sha256": "ef0d3962564d2c1ddcc883c7d2a57656a4734820cdc0acc5cf932308e1ead14f",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 48,
+      "member": "service/requests/19.success.tar.gz",
+      "member_sha256": "99b709257eed02b559fa96197087a6db89502a8db480504da9188b4c671375b4",
+      "original_source_sha256": "cb31657bcf37b86ab30fe82ed599302f57e9e9c8464317d1658679085b8ce63b",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 49,
+      "member": "service/requests/2.success.tar.gz",
+      "member_sha256": "300e6f5b682fe58426c04ec280c01e73fc2a9efd14d005715aaaea161cb256b1",
+      "original_source_sha256": "6555d4600108639365bdd339e65443696da2030b22d9c4038b9bb72ff1a1a03c",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 50,
+      "member": "service/requests/20.success.tar.gz",
+      "member_sha256": "4b478c1a3f9ce4cb5640703c12513579a9e317ee51cc7dd2053c1ddd0df07dff",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 51,
+      "member": "service/requests/21.success.tar.gz",
+      "member_sha256": "68caccc8291cea38a86089104579a3e78c48076d07a08509a50899af79d9c875",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 52,
+      "member": "service/requests/22.success.tar.gz",
+      "member_sha256": "354cb0dd4529695f9935a28b0771a9705fd97381cad93330573719bd4243c5f7",
+      "original_source_sha256": "c424ef1602e9bd063e72ec816182d4efbf9c9cde3e3137bdc992287e62256658",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 53,
+      "member": "service/requests/23.success.tar.gz",
+      "member_sha256": "00ba80c37a9f6b60e0b996fb850a1cd39243b69e85a65a70d753876d5e4116e6",
+      "original_source_sha256": "1bfa608745a0255f53c7ca29ec294cb48252b77d92c4920a1e3ce354987f1cfd",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 54,
+      "member": "service/requests/24.success.tar.gz",
+      "member_sha256": "5e4d03cfcaa56f4f49a4853a56fe82b52e9c9fb9b53212c306f5a62d8c33cbfd",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 55,
+      "member": "service/requests/25.success.tar.gz",
+      "member_sha256": "eece7563b1ce0248c639b032e735fcda699c9c98d62ce0667b25d42ff09dea27",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 56,
+      "member": "service/requests/26.success.tar.gz",
+      "member_sha256": "0bc164232da827b2d65132ecd13e5d4f92625752000a4bba6f65ca1d21d720ff",
+      "original_source_sha256": "c424ef1602e9bd063e72ec816182d4efbf9c9cde3e3137bdc992287e62256658",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 57,
+      "member": "service/requests/27.success.tar.gz",
+      "member_sha256": "8e419a2efea5f94b8d9d254afc80771f9b0a7252df0c0deb8b70e517fee06649",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 58,
+      "member": "service/requests/28.success.tar.gz",
+      "member_sha256": "c6ee0546f33513371ed12290f1472ed6d26159c8359ea2609bbb79745ec3e477",
+      "original_source_sha256": "cb31657bcf37b86ab30fe82ed599302f57e9e9c8464317d1658679085b8ce63b",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 59,
+      "member": "service/requests/29.success.tar.gz",
+      "member_sha256": "adc4673ffca47725b97e8d727c1007bf98e0be989248ea06dd1edfcc7196ee2f",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 60,
+      "member": "service/requests/3.success.tar.gz",
+      "member_sha256": "5d9523a05aea26ab8418072d0e3aa079741c44ba89c8bf0b184e5cee554fcdf2",
+      "original_source_sha256": "87f396660ca7e0003b57c752abe2f9fdd39c67e0d31e81c54654e624fc9d0ec9",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 61,
+      "member": "service/requests/30.success.tar.gz",
+      "member_sha256": "25bd78a337ef6150c8bf57195df5f3d5b647c49cadd818e56b4f2cf1c9545c2d",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 62,
+      "member": "service/requests/31.success.tar.gz",
+      "member_sha256": "33b6ef9adfe1e4f48d6733fba70a49dc6ee30109a1a1e90c4c81fe8edb025f6c",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 63,
+      "member": "service/requests/32.success.tar.gz",
+      "member_sha256": "1af20722922473e9d085c5280951c4ffc4dfd0e08fc4f1cbf837d1d15342e561",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 64,
+      "member": "service/requests/33.success.tar.gz",
+      "member_sha256": "f1e5708a7604652594ea39dfba4f57d6dbe05709d38066bd0141456956d8b723",
+      "original_source_sha256": "cb31657bcf37b86ab30fe82ed599302f57e9e9c8464317d1658679085b8ce63b",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 65,
+      "member": "service/requests/34.success.tar.gz",
+      "member_sha256": "4f0777f7cce06b02c8b0c867648320a519b5fa36c943332741da2c27c3787d5f",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "compiled"
+    },
+    {
+      "index": 66,
+      "member": "service/requests/35.success.tar.gz",
+      "member_sha256": "2678d59adc55546086497d4135eec84908d604ff3f6211fdf44ad72bc162741c",
+      "original_source_sha256": "c424ef1602e9bd063e72ec816182d4efbf9c9cde3e3137bdc992287e62256658",
+      "prior_status": "exception"
+    },
+    {
+      "index": 67,
+      "member": "service/requests/36.success.tar.gz",
+      "member_sha256": "3f3db6296f28e95da240bf897e40f84a79cffb2ba2b0ac878562692f2ddb9aab",
+      "original_source_sha256": "1bfa608745a0255f53c7ca29ec294cb48252b77d92c4920a1e3ce354987f1cfd",
+      "prior_status": "exception"
+    },
+    {
+      "index": 68,
+      "member": "service/requests/37.success.tar.gz",
+      "member_sha256": "93139111606e889314bdf2110bb692ae1b590d54ba5c07b4fdfe8468bcf4d580",
+      "original_source_sha256": "699559897570d665dfc923bb24d72ae8effcffd1ea7f2709111a3932b614ac82",
+      "prior_status": "exception"
+    },
+    {
+      "index": 69,
+      "member": "service/requests/38.success.tar.gz",
+      "member_sha256": "bcc69549d01d888880cdc738686c38602b18c16a9c010cf52c9643c09965a567",
+      "original_source_sha256": "f4240645ae85d57eeb8f697232e4052908f50c92d10fa57228ab8fc082f304da",
+      "prior_status": "exception"
+    },
+    {
+      "index": 70,
+      "member": "service/requests/39.success.tar.gz",
+      "member_sha256": "002f82a76fe855bd7d6648e840e5a584e7ebfcf76a7d70dc5b3f3f69f0278e45",
+      "original_source_sha256": "81f642cdf2e4eeb998776f206094beb92446bb8968d526fb00280d6b84917cc0",
+      "prior_status": "exception"
+    },
+    {
+      "index": 71,
+      "member": "service/requests/4.success.tar.gz",
+      "member_sha256": "8ff7ae235e9da7d10f4619bc9f66c6d5af8de4e9db436f0cef223e97e03453e3",
+      "original_source_sha256": "df387b0f4dff40378b3179f70c4830849bccf646a8f075186550128bf9b89d60",
+      "prior_status": "exception"
+    },
+    {
+      "index": 72,
+      "member": "service/requests/40.success.tar.gz",
+      "member_sha256": "d8aea72e4f4eaf1de4e3f777b9ed8e3e4e088a1a2984f6614e3eafc186af252f",
+      "original_source_sha256": "2ff656f330e72f07870164c92eea11a6dd284cae6c5b12b3cfb020616e33ad20",
+      "prior_status": "exception"
+    },
+    {
+      "index": 73,
+      "member": "service/requests/41.success.tar.gz",
+      "member_sha256": "19c76b64718119d050972ae299ea0999e02d9c30363d0eba3ca7f8cef31fff25",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "exception"
+    },
+    {
+      "index": 74,
+      "member": "service/requests/42.success.tar.gz",
+      "member_sha256": "718e66f38aba13a838aed469e71981909c54df8d595c02e1622b679ca22dbbf5",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "exception"
+    },
+    {
+      "index": 75,
+      "member": "service/requests/43.success.tar.gz",
+      "member_sha256": "0278feb7a5bb7da7011556f761bf28974b290dde28d3df2260a37aa9402a6e55",
+      "original_source_sha256": "1bfa608745a0255f53c7ca29ec294cb48252b77d92c4920a1e3ce354987f1cfd",
+      "prior_status": "exception"
+    },
+    {
+      "index": 76,
+      "member": "service/requests/44.success.tar.gz",
+      "member_sha256": "6bb310fbd204b3453853a880aaffcaa000e0912fb91b2c930f5baaa086b1cbd6",
+      "original_source_sha256": "c424ef1602e9bd063e72ec816182d4efbf9c9cde3e3137bdc992287e62256658",
+      "prior_status": "exception"
+    },
+    {
+      "index": 77,
+      "member": "service/requests/45.success.tar.gz",
+      "member_sha256": "900cf4976533cbc254aeb64c6c0e2b82f4f459fb91915e106ccca736627e8384",
+      "original_source_sha256": "cb31657bcf37b86ab30fe82ed599302f57e9e9c8464317d1658679085b8ce63b",
+      "prior_status": "exception"
+    },
+    {
+      "index": 78,
+      "member": "service/requests/46.success.tar.gz",
+      "member_sha256": "edb2866405d17884c4db96ce4a37af594f5093d4fa111fb5ad423617c2f650c7",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "exception"
+    },
+    {
+      "index": 79,
+      "member": "service/requests/47.success.tar.gz",
+      "member_sha256": "e72ebeab40551c06d82adb2d157ebed499a6672de9512d6b9f08c419fd9a82d4",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "exception"
+    },
+    {
+      "index": 80,
+      "member": "service/requests/48.success.tar.gz",
+      "member_sha256": "c9020b2e82b1c6ac8857b4b671ac10fe24c37f00c07094d57a587fd6d7fb106e",
+      "original_source_sha256": "785e6a08e40ca0b5356fe57dd1c6a20e79b6253ea2be7a0eb6d78a647f868155",
+      "prior_status": "exception"
+    },
+    {
+      "index": 81,
+      "member": "service/requests/49.success.tar.gz",
+      "member_sha256": "4728b5e7b16ef326f3320108177e98f72f74a778a3a2bf9e364318de2f257035",
+      "original_source_sha256": "461d109fed62a6ff28c5c720e0942ed2e2c2a5f7f7cdaa17cb0f99fe340ad5ac",
+      "prior_status": "exception"
+    },
+    {
+      "index": 82,
+      "member": "service/requests/5.success.tar.gz",
+      "member_sha256": "01fd559613fb6b98e77f0ae76cc688b7850c02e06c4cde34dff19ea65cc1aff7",
+      "original_source_sha256": "3912f3f108fb381b60ee3169677204d45c2767f725ee48091ae60c58b72088c5",
+      "prior_status": "exception"
+    },
+    {
+      "index": 83,
+      "member": "service/requests/50.success.tar.gz",
+      "member_sha256": "894397bfac4c8f7e974a2183690757a1509f526053a53291b2f41dcaa5d8628d",
+      "original_source_sha256": "1c27c2f94844d2543ecc0b9b5224f18cc4ed3a328a9a42636b1c95acbd237f2a",
+      "prior_status": "exception"
+    },
+    {
+      "index": 84,
+      "member": "service/requests/51.success.tar.gz",
+      "member_sha256": "93c678933de41c790779b5a356bc088238345ab9e4ca74f1ab737c130aa69408",
+      "original_source_sha256": "289ec8d2ee149cf8171a088dc6cd2dceff4509add8a8aa7255caf061b31ab3cc",
+      "prior_status": "exception"
+    },
+    {
+      "index": 85,
+      "member": "service/requests/6.success.tar.gz",
+      "member_sha256": "e5bcad51db4f386635dc4db7cb68a8396fada66106ee1ae0a59e76d93fa8ee16",
+      "original_source_sha256": "4449ec0fa9fa62601096b91ef1fca7ceea34084b094f92c35efa206a8633c30a",
+      "prior_status": "exception"
+    },
+    {
+      "index": 86,
+      "member": "service/requests/7.success.tar.gz",
+      "member_sha256": "2eefb672d33982b289645152c2c7b43e3db99598eef6f51091aaa661ba909712",
+      "original_source_sha256": "bce74de8248dc5e425a084772dde62c221b9852983929c965a01d92b085e5959",
+      "prior_status": "exception"
+    },
+    {
+      "index": 87,
+      "member": "service/requests/8.success.tar.gz",
+      "member_sha256": "b0bc59f7cc9652405f35ad9790f603f24450a0246d2dbabf46fc1a40e10d8c97",
+      "original_source_sha256": "7d756f473c568ed8397cbf676dd8d9bd1499a51614e0200b5787f13a638ecd26",
+      "prior_status": "exception"
+    },
+    {
+      "index": 88,
+      "member": "service/requests/9.success.tar.gz",
+      "member_sha256": "e84df9a3ad674cfb1a9dd8b55bec5a61902bf9b1d124efc2d4110ce78fcc8d9f",
+      "original_source_sha256": "1bfa608745a0255f53c7ca29ec294cb48252b77d92c4920a1e3ce354987f1cfd",
+      "prior_status": "exception"
+    }
+  ]
+}
