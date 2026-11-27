@@ -1,0 +1,56 @@
+{
+  "recorded_utc": "2026-11-27T00:08:35Z",
+  "files": [
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+      "bytes": 1055984,
+      "machine": "EM_AARCH64"
+    },
+    {
+      "path": "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-service-client",
+      "bytes": 1056344,
+      "machine": "EM_AARCH64"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+      "bytes": 2594904,
+      "machine": "EM_AARCH64"
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/verified-module/arm64/bpf_arm64_native_lab.ko",
+      "bytes": 871960,
+      "machine": "EM_AARCH64"
+    }
+  ],
+  "commands": [
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-L",
+        "/workspaces/repository/.cache/qemu-arm64-root",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-native-loader",
+        "abi"
+      ],
+      "returncode": 0,
+      "stdout": "64 24 16 24 40 48 56 8 12 16 3225439857 1075334771 48 56 16 16 3224391285 3224915574\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "qemu-aarch64-static",
+        "-L",
+        "/workspaces/repository/.cache/qemu-arm64-root",
+        "-cpu",
+        "cortex-a57",
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link",
+        "--help"
+      ],
+      "returncode": 0,
+      "stdout": "Extract one function (plus reachable subprograms) from a userspace x86-64 ELF and rewrite it for native_lab.\n\nUsage: native-link [OPTIONS] --input <INPUT> --symbol <SYMBOL> --output <OUTPUT>\n\nOptions:\n      --input <INPUT>\n          Input ELF object/shared library (e.g. *.native.so from micro/programs)\n      --symbol <SYMBOL>\n          Symbol name of the entry function to extract\n      --output <OUTPUT>\n          Output path for the raw native blob bytes\n      --output-relocs <OUTPUT_RELOCS>\n          Output path for the side-band relocations table consumed by the kernel module at splat time. Omit if the input has no external helper or map references\n      --output-map-patches <OUTPUT_MAP_PATCHES>\n          Output path for map literal patch sites. Each line is NAME<TAB>OFFSET, where OFFSET points at an 8-byte literal-pool slot that the runner must fill with the current kernel map pointer\n      --output-abi <OUTPUT_ABI>\n          Output path for native_lab ABI sideband metadata consumed by the runner\n      --link-plan <LINK_PLAN>\n          Versioned structured link plan containing helper/map/callsite facts. This is the stable loader/native-link boundary for kernel mode\n      --show\n          Print a human-readable disassembly of the rewritten blob to stderr\n      --preserve-entry-abi\n          Keep the compiler's entry-function saves in the verifier's proof input\n      --mode <MODE>\n          Link mode. `proof` applies canonical ABI/link edits but leaves verifier-after helper/map lowering symbolic and emits a relocatable proof object for the eBPF simulator generator [default: kernel] [possible values: kernel, proof]\n  -h, --help\n          Print help\n",
+      "stderr": ""
+    }
+  ],
+  "scope": "ARM executable startup/wire ABI and actual ARM-kernel-header context layout builds; no guest stock/native installation or timing result."
+}

@@ -1,0 +1,66 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'
+flock /workspaces/.agent-state/kprog-ck/../kprog-lanes/locks/image cmake --build /workspaces/repository/runner/build-arm64-llvmbpf --target native_loader_shared native_loader trusted-native-loader -j 2
+gmake[1]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[3]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[ 33%] Building CXX object native_loader/CMakeFiles/native_loader_shared.dir/src/native_loader_trusted.cpp.o
+[ 66%] Linking CXX shared library libnative_loader.so
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[100%] Built target native_loader_shared
+gmake[3]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[3]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[ 33%] Building CXX object native_loader/CMakeFiles/native_loader.dir/src/native_loader_trusted.cpp.o
+[ 66%] Linking CXX static library libnative_loader.a
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[100%] Built target native_loader
+gmake[3]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[3]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[ 60%] Built target native_loader
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[4]: Entering directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[ 80%] Building CXX object native_loader/CMakeFiles/trusted-native-loader.dir/workspaces/repository/kprog/trusted_loader.cpp.o
+[100%] Linking CXX executable trusted-native-loader
+gmake[4]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+[100%] Built target trusted-native-loader
+gmake[3]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[2]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+gmake[1]: Leaving directory '/workspaces/repository/runner/build-arm64-llvmbpf'
+aarch64-linux-gnu-g++ -std=gnu++20 -O2 -I/workspaces/repository/kprog/libnativeloader/include -I/workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/prefix/include -I/workspaces/repository/vendor/libbpf/include -I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/.cache/aarch64-sysroot/usr/include /workspaces/repository/kprog/test/trusted_service_client.cpp /workspaces/repository/runner/build-arm64-llvmbpf/native_loader/libnative_loader.a /workspaces/repository/runner/build-arm64-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -L/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/aarch64-sysroot/usr/lib/aarch64-linux-gnu -lelf -lz -lzstd -ldl -pthread -o /workspaces/repository/runner/build-arm64-llvmbpf/native_loader/trusted-service-client
+install -d /workspaces/.agent-state/kprog-ck/verified-compiler/arm64
+clang-18 -O2 -I/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+ /workspaces/repository/kprog/build/packet-public-layout.c -o /workspaces/.agent-state/kprog-ck/verified-compiler/arm64/public-layout
+/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/public-layout > /workspaces/.agent-state/kprog-ck/verified-compiler/arm64/public-layout.json
+clang-18 -O2 -I/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+ /workspaces/repository/kprog/build/packet-physical-layout.c -o /workspaces/.agent-state/kprog-ck/verified-compiler/arm64/physical-layout
+In file included from /workspaces/repository/kprog/build/packet-physical-layout.c:3:
+/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+/vmlinux.h:32055:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 32055 |         struct aes_enckey;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+/vmlinux.h:44934:3: warning: declaration does not declare anything [-Wmissing-declarations]
+ 44934 |                 struct ns_tree;
+       |                 ^
+/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+/vmlinux.h:58718:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 58718 |         struct __filename_head;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+/vmlinux.h:89026:2: warning: declaration does not declare anything [-Wmissing-declarations]
+ 89026 |         union pipe_index;
+       |         ^
+/workspaces/repository/vendor/bpf/targets/arm64/7.0.0-rc2+/vmlinux.h:98735:4: warning: declaration does not declare anything [-Wmissing-declarations]
+ 98735 |                         struct freelist_counters;
+       |                         ^
+5 warnings generated.
+/workspaces/.agent-state/kprog-ck/verified-compiler/arm64/physical-layout > /workspaces/.agent-state/kprog-ck/verified-compiler/arm64/physical-layout.json
+install -d /var/tmp/kprog-tmp/perf/arm64-checked-control
+clang-18 --target=aarch64-linux-gnu -O3 -mtune=neoverse-n1 -mgeneral-regs-only -mno-outline-atomics -ffixed-x26 -fPIC -fomit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -Xclang -fembed-bitcode=all -c /workspaces/repository/kprog/test/trusted_native.c -o /var/tmp/kprog-tmp/perf/arm64-checked-control/control.o
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'

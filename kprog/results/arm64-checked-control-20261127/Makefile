@@ -21,3 +21,6 @@ layouts:
 	$(BASE)/verified-compiler/arm64/public-layout > $(BASE)/verified-compiler/arm64/public-layout.json
 	clang-18 -O2 -I$(ROOT)/vendor/bpf/targets/arm64/7.0.0-rc2+ $(ROOT)/kprog/build/packet-physical-layout.c -o $(BASE)/verified-compiler/arm64/physical-layout
 	$(BASE)/verified-compiler/arm64/physical-layout > $(BASE)/verified-compiler/arm64/physical-layout.json
+.PHONY: smoke
+smoke:
+	python3 smoke.py

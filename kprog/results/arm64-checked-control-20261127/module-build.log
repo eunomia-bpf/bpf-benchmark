@@ -1,0 +1,19 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'
+make -C /workspaces/repository/kprog/stock-path/module KDIR=/workspaces/.agent-state/kprog-ck/build-arm64 MO=/workspaces/.agent-state/kprog-ck/verified-module/arm64 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+make[1]: Entering directory '/workspaces/repository/kprog/stock-path/module'
+install -d /workspaces/.agent-state/kprog-ck/verified-module/arm64
+make -C /workspaces/.agent-state/kprog-ck/build-arm64 M=/workspaces/repository/kprog/stock-path/module MO=/workspaces/.agent-state/kprog-ck/verified-module/arm64 modules
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-module/arm64'
+  GEN     Makefile
+  CC [M]  kprog_stock.o
+  LD [M]  bpf_arm64_native_lab.o
+  MODPOST Module.symvers
+  CC [M]  bpf_arm64_native_lab.mod.o
+  CC [M]  .module-common.o
+  LD [M]  bpf_arm64_native_lab.ko
+  BTF [M] bpf_arm64_native_lab.ko
+make[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-module/arm64'
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-arm64'
+make[1]: Leaving directory '/workspaces/repository/kprog/stock-path/module'
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-control-20261127'
