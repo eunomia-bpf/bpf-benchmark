@@ -1,0 +1,55 @@
+{
+  "confirmed_utc": "2026-11-27T01:05:24.694139+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyPairRead"
+    ],
+    "exit": 0,
+    "seconds": 2.02036190032959,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 82,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-pair-read/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.56884765625,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "original_permission": "native readable16 wrapping range",
+    "native_modes": [
+      "two read8 with actual middle state",
+      "one read16"
+    ],
+    "additional_successful_read_equations": 0,
+    "actual_instructions": 2,
+    "initialization": "actual profile range predicate",
+    "frame": "exact physical/program/environment, only real loaded GPRs and PC change"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyPairRead.lean",
+      "size_bytes": 10000,
+      "mtime_ns": 1795741420399996352
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairRead
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairRead.permitted_part
+#print axioms Arm64KernelMemcpyPairRead.permitted_part
+#check Arm64KernelMemcpyPairRead.execute
+#print axioms Arm64KernelMemcpyPairRead.execute
+#check Arm64KernelMemcpyPairRead.frame
+#print axioms Arm64KernelMemcpyPairRead.frame
