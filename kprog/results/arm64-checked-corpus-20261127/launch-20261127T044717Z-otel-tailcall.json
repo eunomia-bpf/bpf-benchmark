@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-27T04:47:17Z",
+  "pid": 925747,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "guest",
+    "CHECK_APP=otelcol-ebpf-profiler/profiling"
+  ],
+  "revision": "e3aa59fbe1dabd3a856ce12874e8b9db67bfeb48",
+  "scope": "Affected OTel ARM frozen baseline/post1x10s stats-on, same checked pipeline after common tail-call link metadata fix. Actual installation outcomes pending; full timing frozen.",
+  "compiler_address_space_bytes": 51539607552
+}
