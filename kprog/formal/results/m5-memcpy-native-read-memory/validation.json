@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T00:57:48.153748+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyReadMemory"
+    ],
+    "exit": 0,
+    "seconds": 1.6951866149902344,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 76,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-native-read-memory/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.4020767211914062,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "native_operator": "mature MemoryMode.read.checked",
+    "width": "arbitrary, including actual8/16byte modes",
+    "permission": "true native wrapping permitted range",
+    "initialization": "actual computed profile predicate",
+    "state": "same actual read-state append, complete frame"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyReadMemory.lean",
+      "size_bytes": 2871,
+      "mtime_ns": 1795740973361385963
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

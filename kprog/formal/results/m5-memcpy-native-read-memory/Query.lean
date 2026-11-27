@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyReadMemory
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyReadMemory.execute
+#print axioms Arm64KernelMemcpyReadMemory.execute
+#check Arm64KernelMemcpyReadMemory.bytes_same
+#print axioms Arm64KernelMemcpyReadMemory.bytes_same
