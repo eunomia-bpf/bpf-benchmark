@@ -27,7 +27,7 @@ try:
 set -eu
 mount -t proc proc /proc
 mount -t sysfs sysfs /sys
-mount -t devtmpfs devtmpfs /dev
+if ! mountpoint -q /dev; then mount -t devtmpfs devtmpfs /dev; fi
 mount -t tmpfs tmpfs /run
 mount -t tmpfs tmpfs /tmp
 mount -t tmpfs tmpfs /var/tmp
