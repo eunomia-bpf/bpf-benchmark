@@ -1,6 +1,6 @@
 .PHONY: guest
 guest:
-	python3 guest_controller.py
+	python3 guest_controller.py $(CHECK_APP)
 .PHONY: report
 report:
 	python3 report.py

@@ -4,16 +4,19 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shlex
+import sys
 import time
 import traceback
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent
 BASE=Path('/workspaces/.agent-state/kprog-ck');LANE=Path('/workspaces/.agent-state/kprog-lanes/perf')
+APP=sys.argv[1] if len(sys.argv)>1 else 'bcc/set'
 def now():return subprocess.check_output(['date','-u','+%Y-%m-%dT%H:%M:%SZ'],text=True).strip()
 token=subprocess.check_output(['date','-u','+%Y%m%dT%H%M%SZ'],text=True).strip()
 OUT=HERE/('guest-'+token);OUT.mkdir()
 RAW=Path('/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127')/token;RAW.mkdir(parents=True)
 record=dict(started_utc=now(),pid=os.getpid(),raw=str(RAW),revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
- scope='Frozen BCC/set corpus workload, baseline and registered checked native post phase; one10second functional sample withstats. Cortex-A57 fourCPUs/eightGiB matches current ARM entry. Diagnostic only, full timing frozen.')
+ app=APP, scope=f'Frozen {APP} corpus workload, baseline and registered checked native post phase; one10second functional sample withstats. Cortex-A57 fourCPUs/eightGiB matches current ARM entry. Diagnostic only, full timing frozen.')
 record['run_token']=os.urandom(4).hex()
 def save():(OUT/'controller.json').write_text(json.dumps(record,indent=2)+'\n')
 status=1;broker=None
@@ -51,12 +54,12 @@ export RUN_TOKEN=CORPUS_TOKEN RUN_REMOTE_PYTHON_BIN=python3 RUN_RUNTIME_PYTHON_B
 export RUN_NATIVE_REPOS_CSV=bcc,katran,tracee,tetragon ETCD_UNSUPPORTED_ARCH=arm64
 status=0
 cd /workspaces/repository
-python3 kprog/results/arm64-checked-corpus-20261127/guest.py RAW_PATH || status=$?
+python3 kprog/results/arm64-checked-corpus-20261127/guest.py RAW_PATH APP_ARG || status=$?
 printf '%s\\n' "$status" > RAW_PATH/guest-status
 sync
 echo o > /proc/sysrq-trigger
 while :; do sleep 60; done
-'''.replace('RAW_PATH',str(RAW)).replace('CORPUS_TOKEN',record['run_token'])
+'''.replace('RAW_PATH',str(RAW)).replace('CORPUS_TOKEN',record['run_token']).replace('APP_ARG',shlex.quote(APP))
   init.write_text(body);init.chmod(0o755)
   (OUT/'init-script.txt').write_text(body)
   state=RAW/'broker';broker_cmd=['prlimit','--as=17179869184','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/qemu-arm64-root')]
@@ -101,9 +104,9 @@ finally:
   with Path('/workspaces/.agent-state/kprog-lanes/locks/git').open('a') as lock,(OUT/'publication.log').open('a') as log:
    fcntl.flock(lock,fcntl.LOCK_EX)
    path=str(OUT.relative_to(ROOT))
-   for cmd in [['git','add','-f','--',path],['git','commit','--only','-m','Record actual ARM checked BCC corpus check','--',path],['git','push']]:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
+   for cmd in [['git','add','-f','--',path],['git','commit','--only','-m',f'Record actual ARM checked {APP} corpus check','--',path],['git','push']]:subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
  except Exception:record['publication_error']=traceback.format_exc();status=1;record['controller_status']=status;save()
- with (LANE/'resume-msg.md').open('a') as f:f.write(f'\nARM checked BCC corpus check ended status {status}. Read {OUT}/controller.json, publication.log and archived/raw per-case service/verifier/TEST_RUN records; record actual baseline/post workload and per-program stock/checked/direct outcomes, fix real within-design failures. Full timing stays frozen.\n')
+ with (LANE/'resume-msg.md').open('a') as f:f.write(f'\nARM checked {APP} corpus check ended status {status}. Read {OUT}/controller.json, publication.log and archived/raw per-case service/verifier/TEST_RUN records; record actual baseline/post workload and per-program stock/checked/direct outcomes, fix real within-design failures. Full timing stays frozen.\n')
  stop=LANE/'STOP'
  if stop.exists() and stop.read_text().startswith('PERF ARM checked corpus:'):stop.unlink()
 raise SystemExit(status)
