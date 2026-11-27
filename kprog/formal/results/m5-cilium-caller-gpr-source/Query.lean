@@ -1,0 +1,21 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.first_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.first_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.last_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.last_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.chain
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.chain
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.indices
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.indices
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.branches
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.branches
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.cell_names
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.cell_names
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.temporaries_distinct
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.temporaries_distinct
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.callee_lookup
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.callee_lookup
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.call_ready
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSource.call_ready
