@@ -41,8 +41,8 @@ noncomputable def temps (le : CC.TempEnv) : CC.TempEnv :=
 
 /-- Twelve original setup steps,using the actual preceding LR store. The
 original memory and continuation stay identical;pointer bits remain raw88. -/
-theorem execute {m after : CC.Mem} (lr : Arm64CiliumCallerLink.LRLocal m)
-    (stored : CC.Mem.store .Mint64 (allocation m).2 lr.block 0 (.Vlong token) = some after)
+theorem execute_stored {m before after : CC.Mem} (lr : Arm64CiliumCallerLink.LRLocal m)
+    (stored : CC.Mem.store .Mint64 before lr.block 0 (.Vlong token) = some after)
     (le : CC.TempEnv) (k : CC.Cont) :
     InternalRun ge 12
       (.State procedure Arm64CiliumCallerWriter.rest k (allocation m).1 le after)
@@ -88,6 +88,15 @@ theorem execute {m after : CC.Mem} (lr : Arm64CiliumCallerLink.LRLocal m)
     rfl
   rw [rest_source]
   exact (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial regStep (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial lrStep (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial ptrStep (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.step trivial tagStep (.step trivial (CC.doStep_sound _ _ _ _ rfl) (.refl _)))))))))))))
+
+/-- Preserve the original allocated-memory API by one delegation. -/
+theorem execute {m after : CC.Mem} (lr : Arm64CiliumCallerLink.LRLocal m)
+    (stored : CC.Mem.store .Mint64 (allocation m).2 lr.block 0 (.Vlong token) = some after)
+    (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun ge 12
+      (.State procedure Arm64CiliumCallerWriter.rest k (allocation m).1 le after)
+      (.State procedure guard k (allocation m).1 (temps le) after) :=
+  execute_stored lr stored le k
 
 /-- Same original site invocation:LR write,actual eagerSP read and all four
 setup assignments reach the real guards in20 steps on the same after-memory.

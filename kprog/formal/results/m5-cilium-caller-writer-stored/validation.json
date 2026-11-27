@@ -1,0 +1,94 @@
+{
+  "scope": "single original twelve-step writer setup from a real LR store on arbitrary preceding memory;old full types preserved",
+  "source_sha256": "4b8d0e4fe3395ba8bfabe4edc570558557c5fd962b9203d7bc3945e442e056e3",
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer-stored/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 32.19445824623108,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerWriterPrefix"
+      ],
+      "exit": 0,
+      "seconds": 37.16806697845459,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "compat1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer-stored/Compatibility.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.6130988597869873,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.6662278175354004,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer-stored/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2119410037994385,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 186,
+  "full_jobs": 1484,
+  "public_root_queries": [
+    "execute_stored",
+    "execute",
+    "begin_allocated"
+  ],
+  "exact_old_type_compatibility_checks": 2,
+  "axioms": "std Lean plus existing CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
