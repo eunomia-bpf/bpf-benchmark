@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyPairLoadValues
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyPairLoadValues.half
+#print axioms Arm64KernelMemcpyPairLoadValues.half
+#check Arm64KernelMemcpyPairLoadValues.values
+#print axioms Arm64KernelMemcpyPairLoadValues.values
+#check Arm64KernelMemcpyPairLoadValues.two_values
+#print axioms Arm64KernelMemcpyPairLoadValues.two_values
+#check Arm64KernelMemcpyTwoLoads.execute
+#print axioms Arm64KernelMemcpyTwoLoads.execute
+#check Arm64KernelMemcpyTwoLoads.continue_from_prefix
+#print axioms Arm64KernelMemcpyTwoLoads.continue_from_prefix

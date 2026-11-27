@@ -10,6 +10,8 @@ including the repeated first/tail16byte source interval. -/
 structure Result (s : Reference.AArch64.State) (profile : MemoryProfile) (origin : BitVec 64) where
   loaded : Reference.AArch64.State
   final : Reference.AArch64.State
+  loadedView : loaded = Arm64KernelMemcpyPairRead.after s 0 profile (Reference.AArch64.gpr s 1)
+  finalView : final = Arm64KernelMemcpyPairRead.after loaded 1 profile (Reference.AArch64.gpr s 1)
   firstLoad : Reference.AArch64.step s =
     ⟨loaded,Arm64KernelMemcpyPairRead.events s profile (Reference.AArch64.gpr s 1),none⟩
   secondLoad : Reference.AArch64.step (loaded) =
@@ -90,6 +92,8 @@ theorem execute (s : Reference.AArch64.State) (origin : BitVec 64) (profile : Me
   refine ⟨{
     loaded := loaded
     final := finished
+    loadedView := rfl
+    finalView := rfl
     firstLoad := by
       exact load0
     secondLoad := by
