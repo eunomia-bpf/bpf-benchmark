@@ -1,0 +1,77 @@
+{
+  "scope": "fifteen original control steps reach original table stores;same35step site invocation;no table store execution claim",
+  "source_sha256": "5f2b9b4cfb110d91bcf1cd7ec31259175b1f6f0cff6a384a3c4735f87fed28cb",
+  "receipts": {
+    "stage7": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer-guard/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.848555326461792,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerWriterGuard"
+      ],
+      "exit": 0,
+      "seconds": 2.2537715435028076,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.8236358165740967,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-writer-guard/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2345330715179443,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 187,
+  "full_jobs": 1485,
+  "root_queries": [
+    "execute",
+    "begin_allocated"
+  ],
+  "current_clight_identity": "validated canonical const transition before adoption",
+  "axioms": "std Lean plus inherited CompCert externalFunctionsSem/inlineAssemblySem",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

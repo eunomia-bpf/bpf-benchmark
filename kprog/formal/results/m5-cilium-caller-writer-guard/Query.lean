@@ -1,0 +1,5 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriterGuard.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriterGuard.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWriterGuard.begin_allocated
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWriterGuard.begin_allocated
