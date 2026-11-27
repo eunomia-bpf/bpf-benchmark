@@ -53,14 +53,18 @@ for index,item in enumerate(record['inventory'],1):
 apps={}
 for row in rows:
     artifact=OUT/('request-'+str(row['index'])+'-evidence.tar.zst')
+    if not artifact.exists() and row['app']=='otelcol-ebpf-profiler/profiling' and not row['original_generation_failed']:
+        artifact=OUT/'otel-original-success-evidence.tar.zst'
     if artifact.exists():
-        row['replay_artifact_archive']=dict(path=artifact.name,bytes=artifact.stat().st_size,sha256=hashlib.sha256(artifact.read_bytes()).hexdigest())
+        row['replay_artifact_archive']=dict(path=artifact.name,member_prefix=str(row['index'])+'/',bytes=artifact.stat().st_size,sha256=hashlib.sha256(artifact.read_bytes()).hexdigest())
 for app in sorted({r['app'] for r in rows}):
     app_rows=[r for r in rows if r['app']==app]
     completed=[r for r in app_rows if r['replay_status']!='pending']
     comparable=[r for r in completed if r['replay_status']=='compiled' and r['original']['frontend'] and r['original']['frontend']['returncode']==0]
     apps[app]=dict(inventory=len(app_rows),completed=len(completed),pending=len(app_rows)-len(completed),
                   replay_status_counts=dict(collections.Counter(r['replay_status'] for r in app_rows)),
+                  completed_replay_frontend_seconds=sum(c['wall_seconds'] for r in completed for c in r['replay_commands'] if '-emit-llvm' in c['command']),
+                  completed_replay_all_compiler_seconds=sum(c['wall_seconds'] for r in completed for c in r['replay_commands']),
                   original_generation_failures=sum(r['original_generation_failed'] for r in app_rows),
                   recovered_generation_failures=sum(r['recovered_generation_failure'] for r in app_rows),
                   matched_successful_original_frontend_seconds=sum(r['original']['frontend']['wall_seconds'] for r in comparable),
