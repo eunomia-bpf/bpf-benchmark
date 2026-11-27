@@ -1,0 +1,9 @@
+[master f8f911352] Record actual ARM checked cilium/agent corpus check
+ 5 files changed, 144 insertions(+)
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/archive.log
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/controller.json
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/evidence.tar.zst.part-aa
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/init-script.txt
+ create mode 100644 kprog/results/arm64-checked-corpus-20261127/guest-20261127T090610Z/publication.log
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   8f2282209..f8f911352  master -> master

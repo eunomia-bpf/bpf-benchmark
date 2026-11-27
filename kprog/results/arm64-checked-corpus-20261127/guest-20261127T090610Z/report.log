@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py 20261127T090610Z
+Corpus/app error error mix {'checked-sim-c': 2, 'direct-native': 8}
+baseline programs 100 with calls 4 workloads [('cilium_endpoint_pktgen_forward', 0, 10.514569199999983), ('cilium_endpoint_pktgen_reverse', 0, 10.546679519999998)]
+post_rejit absent; app status error error cilium/agent loadtime rejit timed out after 900.0s; cilium-agent output tail:
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

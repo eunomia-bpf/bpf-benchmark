@@ -1,0 +1,338 @@
+{
+  "utc": "2026-11-27T09:34:51Z",
+  "controller_status": 0,
+  "archived_files_equal_raw": 81,
+  "members": [
+    {
+      "member": "20261127T090610Z/cilium-agent/stderr",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T090610Z/cilium-agent/stdout",
+      "bytes": 31755
+    },
+    {
+      "member": "20261127T090610Z/cilium-agent/service.tar.gz",
+      "bytes": 30053833
+    },
+    {
+      "member": "20261127T090610Z/cilium-agent/corpus-paths.json",
+      "bytes": 157
+    },
+    {
+      "member": "20261127T090610Z/cilium-agent/corpus.tar.gz",
+      "bytes": 295237
+    },
+    {
+      "member": "20261127T090610Z/guest.log",
+      "bytes": 479
+    },
+    {
+      "member": "20261127T090610Z/broker.log",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T090610Z/cases.json",
+      "bytes": 502
+    },
+    {
+      "member": "20261127T090610Z/broker/95a3696672c84571809cf2071dfde80c.result.json",
+      "bytes": 1203
+    },
+    {
+      "member": "20261127T090610Z/broker/18175aa4bf8448e8ab4ec091386f7b97.result.json",
+      "bytes": 1061
+    },
+    {
+      "member": "20261127T090610Z/broker/05807fe785674fc0b9b7c031958888ac.request.json",
+      "bytes": 217
+    },
+    {
+      "member": "20261127T090610Z/broker/fa7b319b8c8545c7bcd2ef4353c19b61.result.json",
+      "bytes": 723
+    },
+    {
+      "member": "20261127T090610Z/broker/a4aab117750a47708830855bc2e86a89.result.json",
+      "bytes": 1176
+    },
+    {
+      "member": "20261127T090610Z/broker/d945c632f22a4536a2d76d0beb746ad1.result.json",
+      "bytes": 1213
+    },
+    {
+      "member": "20261127T090610Z/broker/8c4e155a0ef14863968060f66a6e4ebe.result.json",
+      "bytes": 1060
+    },
+    {
+      "member": "20261127T090610Z/broker/d945c632f22a4536a2d76d0beb746ad1.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/ba2f3fcd312b46399c0a83141735132e.result.json",
+      "bytes": 1333
+    },
+    {
+      "member": "20261127T090610Z/broker/8c4e155a0ef14863968060f66a6e4ebe.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/541cec969eba4f879923a5ed39404c5c.result.json",
+      "bytes": 1203
+    },
+    {
+      "member": "20261127T090610Z/broker/ee56801d9ba7420bbc35e10d4b583296.result.json",
+      "bytes": 1018
+    },
+    {
+      "member": "20261127T090610Z/broker/ce8e19a586a149e4897dc4070d00e0dc.result.json",
+      "bytes": 1051
+    },
+    {
+      "member": "20261127T090610Z/broker/fa7b319b8c8545c7bcd2ef4353c19b61.request.json",
+      "bytes": 224
+    },
+    {
+      "member": "20261127T090610Z/broker/jobs.jsonl",
+      "bytes": 37034
+    },
+    {
+      "member": "20261127T090610Z/broker/a5f6935a8c5b40e2b70c2fe494a7b6bd.request.json",
+      "bytes": 568
+    },
+    {
+      "member": "20261127T090610Z/broker/ffc01f28af334d36ba9dbc45a5b62dcb.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/60c5d42df7104b5bb2ba7b2f435d5a36.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/541cec969eba4f879923a5ed39404c5c.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/dcebb51867a445e4a4c847a0812b579c.result.json",
+      "bytes": 1050
+    },
+    {
+      "member": "20261127T090610Z/broker/95a3696672c84571809cf2071dfde80c.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/18175aa4bf8448e8ab4ec091386f7b97.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/eb8881706ad44eca9e41a5d8f7c3807e.request.json",
+      "bytes": 217
+    },
+    {
+      "member": "20261127T090610Z/broker/0ca57976b2974867b8e0e1f386fe34f9.result.json",
+      "bytes": 1355
+    },
+    {
+      "member": "20261127T090610Z/broker/eb8881706ad44eca9e41a5d8f7c3807e.result.json",
+      "bytes": 543
+    },
+    {
+      "member": "20261127T090610Z/broker/ee56801d9ba7420bbc35e10d4b583296.request.json",
+      "bytes": 771
+    },
+    {
+      "member": "20261127T090610Z/broker/4f00d420aea44f81b8d7deee1d4a79e3.result.json",
+      "bytes": 1050
+    },
+    {
+      "member": "20261127T090610Z/broker/8dcc91a30f364ca1830a59a061b9af84.result.json",
+      "bytes": 1048
+    },
+    {
+      "member": "20261127T090610Z/broker/a4aab117750a47708830855bc2e86a89.request.json",
+      "bytes": 808
+    },
+    {
+      "member": "20261127T090610Z/broker/3a72a9ecab0f4fcaa5cc9cab1550c532.result.json",
+      "bytes": 1219
+    },
+    {
+      "member": "20261127T090610Z/broker/STOP",
+      "bytes": 22
+    },
+    {
+      "member": "20261127T090610Z/broker/21b042d90f594db7b0442fd12040943e.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/a193198b700749dd862708d3d4124412.request.json",
+      "bytes": 790
+    },
+    {
+      "member": "20261127T090610Z/broker/1028020be3db45829fa92f9b2c8e7db6.result.json",
+      "bytes": 1401
+    },
+    {
+      "member": "20261127T090610Z/broker/07d7a95504bf4a0d82cf6219bbccd342.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/4f00d420aea44f81b8d7deee1d4a79e3.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/05807fe785674fc0b9b7c031958888ac.result.json",
+      "bytes": 710
+    },
+    {
+      "member": "20261127T090610Z/broker/ffc01f28af334d36ba9dbc45a5b62dcb.result.json",
+      "bytes": 1050
+    },
+    {
+      "member": "20261127T090610Z/broker/e9162187e34f4bd481c44776b2472f99.result.json",
+      "bytes": 1051
+    },
+    {
+      "member": "20261127T090610Z/broker/17c877a124df409fb05b437b0470521b.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/ce8e19a586a149e4897dc4070d00e0dc.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/cf7803548f5d46ecb6cdc0651f807762.result.json",
+      "bytes": 1215
+    },
+    {
+      "member": "20261127T090610Z/broker/07d7a95504bf4a0d82cf6219bbccd342.result.json",
+      "bytes": 1213
+    },
+    {
+      "member": "20261127T090610Z/broker/e9162187e34f4bd481c44776b2472f99.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/dcebb51867a445e4a4c847a0812b579c.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/60c5d42df7104b5bb2ba7b2f435d5a36.result.json",
+      "bytes": 1215
+    },
+    {
+      "member": "20261127T090610Z/broker/3a72a9ecab0f4fcaa5cc9cab1550c532.request.json",
+      "bytes": 586
+    },
+    {
+      "member": "20261127T090610Z/broker/53bf450833cb4be09dec8f2eb73e5ea6.result.json",
+      "bytes": 1224
+    },
+    {
+      "member": "20261127T090610Z/broker/024959d8d51c464f94f31cda24e368a0.result.json",
+      "bytes": 1201
+    },
+    {
+      "member": "20261127T090610Z/broker/bc33d093da88464793b1de25ee760029.result.json",
+      "bytes": 1048
+    },
+    {
+      "member": "20261127T090610Z/broker/b14488e4f2b944869f0933539bd092e1.result.json",
+      "bytes": 578
+    },
+    {
+      "member": "20261127T090610Z/broker/89b7123f195846a5ade050a35a2a5cfb.request.json",
+      "bytes": 790
+    },
+    {
+      "member": "20261127T090610Z/broker/ba2f3fcd312b46399c0a83141735132e.request.json",
+      "bytes": 586
+    },
+    {
+      "member": "20261127T090610Z/broker/cf7803548f5d46ecb6cdc0651f807762.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/0ca57976b2974867b8e0e1f386fe34f9.request.json",
+      "bytes": 960
+    },
+    {
+      "member": "20261127T090610Z/broker/21b042d90f594db7b0442fd12040943e.result.json",
+      "bytes": 1061
+    },
+    {
+      "member": "20261127T090610Z/broker/a193198b700749dd862708d3d4124412.result.json",
+      "bytes": 1072
+    },
+    {
+      "member": "20261127T090610Z/broker/17c877a124df409fb05b437b0470521b.result.json",
+      "bytes": 1203
+    },
+    {
+      "member": "20261127T090610Z/broker/bc33d093da88464793b1de25ee760029.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/79bfbbf92d604564804147077f610261.result.json",
+      "bytes": 1402
+    },
+    {
+      "member": "20261127T090610Z/broker/f00c529d50614ed8a3d68db9460704f1.result.json",
+      "bytes": 1203
+    },
+    {
+      "member": "20261127T090610Z/broker/owner.lock",
+      "bytes": 0
+    },
+    {
+      "member": "20261127T090610Z/broker/8dcc91a30f364ca1830a59a061b9af84.request.json",
+      "bytes": 802
+    },
+    {
+      "member": "20261127T090610Z/broker/53bf450833cb4be09dec8f2eb73e5ea6.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/79bfbbf92d604564804147077f610261.request.json",
+      "bytes": 969
+    },
+    {
+      "member": "20261127T090610Z/broker/024959d8d51c464f94f31cda24e368a0.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/1028020be3db45829fa92f9b2c8e7db6.request.json",
+      "bytes": 969
+    },
+    {
+      "member": "20261127T090610Z/broker/89b7123f195846a5ade050a35a2a5cfb.result.json",
+      "bytes": 1084
+    },
+    {
+      "member": "20261127T090610Z/broker/b14488e4f2b944869f0933539bd092e1.request.json",
+      "bytes": 224
+    },
+    {
+      "member": "20261127T090610Z/broker/ready.json",
+      "bytes": 251
+    },
+    {
+      "member": "20261127T090610Z/broker/f00c529d50614ed8a3d68db9460704f1.request.json",
+      "bytes": 471
+    },
+    {
+      "member": "20261127T090610Z/broker/a5f6935a8c5b40e2b70c2fe494a7b6bd.result.json",
+      "bytes": 1248
+    },
+    {
+      "member": "20261127T090610Z/guest-status",
+      "bytes": 2
+    }
+  ],
+  "requests": 10,
+  "execution_paths": {
+    "checked-sim-c": 2,
+    "direct-native": 8
+  },
+  "cleanup": "No own deletion or preprocessing cleanup in this guest/callback; retained raw directories and archives.",
+  "test_run": "Frozen corpus workload and attachment receipts; phase presence is recorded above. No separate TEST_RUN oracle."
+}

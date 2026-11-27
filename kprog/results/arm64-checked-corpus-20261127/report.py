@@ -13,7 +13,11 @@ paths=json.loads((case/'corpus-paths.json').read_text());run=next(Path(x) for x 
 corpus=json.loads((run/'details/result.json').read_text());app=json.loads((run/'details/apps'/(app_name.replace('/','__')+'.json')).read_text())
 report=dict(utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip(),controller_status=controller['controller_status'],revision=controller['revision'],corpus_status=corpus['status'],app_status=app['status'],app_error=app['error'],samples=corpus['samples'],requested_workload_seconds=corpus['workload_seconds'],warmups=corpus['warmups'],bpf_stats=corpus['bpf_stats'],workload=app['selected_workload'],phases={},requests=[])
 for phase in ['baseline','post_rejit']:
- data=app[phase];report['phases'][phase]=dict(programs=data['bpf'],workloads=data['workloads'],installed_programs=len(data['bpf']),programs_with_calls=sum(x['run_cnt_delta']>0 for x in data['bpf'].values()))
+ data=app[phase]
+ if data is None:
+  report['phases'][phase]=None
+  continue
+ report['phases'][phase]=dict(programs=data['bpf'],workloads=data['workloads'],installed_programs=len(data['bpf']),programs_with_calls=sum(x['run_cnt_delta']>0 for x in data['bpf'].values()))
 with tarfile.open(case/'service.tar.gz') as outer:
  receipts=[json.loads(x) for x in outer.extractfile('service/service.log').read().decode().splitlines() if '"request_id"' in x]
  for receipt in receipts:
@@ -43,19 +47,23 @@ with tarfile.open(case/'service.tar.gz') as outer:
   if 'load-direct.stderr' in row:row['diagnostics'] += [line for line in row['load-direct.stderr'].splitlines() if line.startswith('Error:')]
   post_id=receipt['prog_id'] if row['status']==0 else receipt['source_prog_id']
   row['post_prog_id']=post_id
-  row['post_counters']=app['post_rejit']['bpf'].get(str(post_id))
+  row['post_counters']=(app['post_rejit'] or {}).get('bpf',{}).get(str(post_id))
   row['post_uses_original']=row['status']!=0 and row['post_counters'] is not None
   report['requests'].append(row)
 report['counts']=dict(collections.Counter(x['execution_path'] for x in report['requests']))
 report['broker_failures']=[dict(path=str(path),**json.loads(path.read_text())) for path in sorted((raw/'broker').rglob('*.result.json')) if json.loads(path.read_text())['returncode']!=0]
-report['test_run']='Frozen corpus baseline/post workload and attachment, no separate TEST_RUN oracle.'
-report['scope']=f'One {app_name} functional sample per phase on ARM QEMU. Direct fallbacks are not checked proof coverage; no timing/performance claim.'
+report['test_run']='Frozen corpus workload and attachment receipts; phase presence is recorded above. No separate TEST_RUN oracle.'
+report['scope']=f'{app_name} ARM QEMU functional corpus requested one sample per phase; recorded phases show completed data. Direct fallbacks are not checked proof coverage; no timing/performance claim.'
 (destination/(prefix+'-outcome.json')).write_text(json.dumps(report,indent=2)+'\n')
 with (destination/(prefix+'-programs.tsv')).open('w') as f:
  f.write('request\tsymbol\tprog_type\tnative_id\tsource_prog_id\tpost_prog_id\tpost_uses_original\tb_generated\tb_stock_passed\texecution_path\tstatus\trun_cnt_delta\trun_time_ns_delta\tdiagnostics\n')
  for x in report['requests']:
   f.write('\t'.join(str(v) for v in [x['request_id'],x['symbol'],x['metadata']['prog_type'],x['prog_id'],x['source_prog_id'],x['post_prog_id'],x['post_uses_original'],x['b_generated'],x['b_stock_passed'],x['execution_path'],x['status'],x['post_counters']['run_cnt_delta'] if x['post_counters'] else None,x['post_counters']['run_time_ns_delta'] if x['post_counters'] else None,'; '.join(x.get('diagnostics',[]))])+'\n')
 print('Corpus/app',report['corpus_status'],report['app_status'],'mix',report['counts'])
-for phase,p in report['phases'].items():print(phase,'programs',p['installed_programs'],'with calls',p['programs_with_calls'],'workloads',[(x['workload_name'],x['returncode'],x['duration_s']) for w in p['workloads'] for x in ([w] if 'returncode' in w else w['components'])])
+for phase,p in report['phases'].items():
+ if p is None:
+  print(phase,'absent; app status',report['app_status'],'error',str(report['app_error']).splitlines()[0])
+ else:
+  print(phase,'programs',p['installed_programs'],'with calls',p['programs_with_calls'],'workloads',[(x['workload_name'],x['returncode'],x['duration_s']) for w in p['workloads'] for x in ([w] if 'returncode' in w else w['components'])])
 for row in report['requests']:
  if row.get('diagnostics'):print(row['request_id'],row['symbol'],row['diagnostics'])

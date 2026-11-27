@@ -1,0 +1,76 @@
+{
+  "utc": "2026-11-27T09:34:51Z",
+  "source_revision": "486bb679001f754c66ee3fcbd3316e1fe2fe5ec8",
+  "controller_status": 0,
+  "corpus_status": "error",
+  "app_status": "error",
+  "startup_error": "cilium/agent loadtime rejit timed out after 900.0s; cilium-agent output tail:",
+  "completed_requests": 10,
+  "install_outcomes": {
+    "checked-sim-c": 2,
+    "direct-native": 8
+  },
+  "B_generated": 10,
+  "B_stock_accepted": 2,
+  "stock_refusal_classes": {
+    "trusted sk_buff store: only read is supported": [
+      {
+        "request": 2,
+        "symbol": "cil_from_netdev"
+      },
+      {
+        "request": 6,
+        "symbol": "tail_handle_ipv4_from_netdev"
+      }
+    ],
+    "packet bounds: invalid access to packet": [
+      {
+        "request": 3,
+        "symbol": "tail_handle_ipv4_cont"
+      },
+      {
+        "request": 4,
+        "symbol": "cil_from_host"
+      },
+      {
+        "request": 5,
+        "symbol": "tail_ipv4_to_endpoint"
+      },
+      {
+        "request": 7,
+        "symbol": "tail_ipv4_policy"
+      },
+      {
+        "request": 9,
+        "symbol": "tail_nodeport_rev_dnat_ipv4"
+      },
+      {
+        "request": 10,
+        "symbol": "tail_handle_snat_fwd_ipv4"
+      }
+    ]
+  },
+  "baseline_programs": 100,
+  "baseline_programs_with_calls": 4,
+  "post_phase": null,
+  "service_summary": {
+    "started": "1970-01-01T00:00:15.022751+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "cilium/agent",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 2,
+      "endpoint": "/sys/kernel/debug/bpf_arm64_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "1970-01-01T00:19:50.780621+00:00"
+  },
+  "scope": "Ten completed native installations before frozen runner900s loadtime timeout; partial startup coverage. Baseline workload completed; post workload is absent. Runtime/benchmark timeout retained."
+}

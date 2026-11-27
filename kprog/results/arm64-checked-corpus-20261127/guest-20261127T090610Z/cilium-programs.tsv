@@ -1,0 +1,11 @@
+request	symbol	prog_type	native_id	source_prog_id	post_prog_id	post_uses_original	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	cil_xdp_entry	6	189	183	189	False	True	True	checked-sim-c	0	None	None	
+2	cil_from_netdev	3	196	190	196	False	True	False	direct-native	0	None	None	
+3	tail_handle_ipv4_cont	3	202	191	202	False	True	False	direct-native	0	None	None	
+4	cil_from_host	3	208	197	208	False	True	False	direct-native	0	None	None	
+5	tail_ipv4_to_endpoint	3	214	203	214	False	True	False	direct-native	0	None	None	
+6	tail_handle_ipv4_from_netdev	3	220	209	220	False	True	False	direct-native	0	None	None	
+7	tail_ipv4_policy	3	226	215	226	False	True	False	direct-native	0	None	None	
+8	cil_host_policy	3	233	221	233	False	True	True	checked-sim-c	0	None	None	
+9	tail_nodeport_rev_dnat_ipv4	3	239	227	239	False	True	False	direct-native	0	None	None	
+10	tail_handle_snat_fwd_ipv4	3	245	234	245	False	True	False	direct-native	0	None	None	

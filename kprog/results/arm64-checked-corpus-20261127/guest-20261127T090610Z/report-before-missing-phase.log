@@ -1,0 +1,9 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 report.py 20261127T090610Z
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/report.py", line 16, in <module>
+    data=app[phase];report['phases'][phase]=dict(programs=data['bpf'],workloads=data['workloads'],installed_programs=len(data['bpf']),programs_with_calls=sum(x['run_cnt_delta']>0 for x in data['bpf'].values()))
+                                                          ~~~~^^^^^^^
+TypeError: 'NoneType' object is not subscriptable
+make: *** [Makefile:6: report] Error 1
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
