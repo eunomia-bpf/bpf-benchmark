@@ -1,0 +1,18 @@
+{
+  "utc": "2026-11-27T15:23:11Z",
+  "pid": 1052560,
+  "source_revision": "d7cdb25a48202f7181c6b1e1b7f2ff3565b40633",
+  "command": [
+    "prlimit",
+    "--as=51539607552",
+    "taskset",
+    "-c",
+    "16",
+    "python3",
+    "kprog/results/arm64-loadtime-20261127/header_source_check.py"
+  ],
+  "result": "kprog/results/arm64-loadtime-20261127/header-source-20261127T151253Z/validation-controller.json",
+  "raw": "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/header-source-20261127T151253Z",
+  "log": "kprog/results/arm64-loadtime-20261127/header-source-20261127T151253Z/validation.log",
+  "scope": "Serial first input per six apps plus slowest captured OTel/Cilium frontends; unchanged common flags, allocated B sections and code relocs versus debug/wholeELF distinguished. No stock/native/startup/timing claim."
+}
