@@ -1,0 +1,10 @@
+{
+  "utc": "2026-11-27T01:57:31Z",
+  "scope": "Backend-only operand probe, no kernel load, model change or workload.",
+  "sizes": {
+    "register_operand": 64,
+    "memory_operand": 64
+  },
+  "function_code_equal": true,
+  "outcome": "Correct memory-operand syntax compiles; both variants still use modified ctx register +20 then load +0. Initial nested-parentheses syntax error retained. No production change adopted."
+}
