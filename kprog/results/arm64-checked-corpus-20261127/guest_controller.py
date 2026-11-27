@@ -1,11 +1,13 @@
 """Finite current-root ARM frozen-corpus check through the registered service."""
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
 import shlex
 import sys
+import tarfile
 import time
 import traceback
 ROOT=Path('/workspaces/repository');HERE=Path(__file__).resolve().parent
@@ -62,6 +64,17 @@ while :; do sleep 60; done
 '''.replace('RAW_PATH',str(RAW)).replace('CORPUS_TOKEN',record['run_token']).replace('APP_ARG',shlex.quote(APP))
   init.write_text(body);init.chmod(0o755)
   (OUT/'init-script.txt').write_text(body)
+  sources=[ROOT/'kprog/trusted_service.py',ROOT/'kprog/trusted_generation.py',ROOT/'kprog/trusted_compile.py',
+   ROOT/'kprog/arm64/trusted_specializer.py',ROOT/'kprog/arm64/arm64_sim_local_bpf.h',
+   ROOT/'kprog/arm64/arm64_sim_direct.h',ROOT/'kprog/arm64/micro-prog/generate_micro_sim_proofs.py',
+   *sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
+  source_archive=RAW/'guest-start-source.tar.gz'
+  with tarfile.open(source_archive,'w:gz') as archive:
+   for path in sources:archive.add(path,arcname=str(path.relative_to(ROOT)))
+  record.update(guest_start_revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+   guest_source_capture_utc=now(),guest_source_archive=str(source_archive),
+   guest_source_sha256={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest() for path in sources})
+  save()
   state=RAW/'broker';broker_cmd=['prlimit','--as=51539607552','taskset','-c','16','python3',str(ROOT/'kprog/trusted_compile.py'),'serve','--scope',str(RAW),'--state',str(state),'--clang',str(ROOT/'kprog/stock-path/bin/clang'),'--arm64-sysroot',str(ROOT/'.cache/qemu-arm64-root')]
   record['broker_command']=broker_cmd;save()
   env=dict(os.environ,QEMU_LD_PREFIX=str(qroot))
