@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-27T12:05:27Z",
+  "pid": 1005437,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "guest",
+    "CHECK_APP=cilium/agent"
+  ],
+  "revision": "ffb1d60770808a4b589680f32cf636806df7850b",
+  "intended_worker_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
+  "scope": "Full frozen ARM Cilium stage2 baseline/post after common readonly-decoder producer improvement. Existing 900s load limit, one10s stats-on functional workload, common flags and single image retained. Actual source snapshot/revision captured after imageEX at guest start; results pending.",
+  "compiler_address_space_bytes": 51539607552
+}
