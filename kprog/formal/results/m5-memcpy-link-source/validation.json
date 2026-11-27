@@ -1,0 +1,89 @@
+{
+  "confirmed_utc": "2026-11-27T09:46:36.829260+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyLinkSource"
+    ],
+    "exit": 0,
+    "seconds": 73.90061330795288,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 148,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-source/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.805506706237793,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 9,
+  "source_steps": {
+    "function_entry": 1,
+    "first_original_row": 6,
+    "actual_table_rows_syntactically_bound": 62,
+    "complete_LINK_call": "remaining"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkSource.lean",
+      "size_bytes": 12715,
+      "mtime_ns": 1795772586162517423
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 5.022597789764404,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1434,
+  "direct_final_stage": 14,
+  "direct_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-source/Proof.lean"
+    ],
+    "exit": 0,
+    "seconds": 71.60206913948059,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "b3356c04b29aaf7f76a700c74baeafcb3cda4fbc48387620085174c331ac12de",
+    "kprog/formal/README.md": "b104be410b46dcab941c5d5a4ba4bdb21916f0b5f14a12d06ff21813105c1a3d",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkSource.lean": "171983f803b0d0fed4162940f880e137aab10a9701e41ba7fc515c8de9fafbcf"
+  }
+}

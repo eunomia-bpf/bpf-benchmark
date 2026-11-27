@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkSource
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.entry_valid
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.enter
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.enter
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.allocation_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.allocation_frame
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.local_storage
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.local_storage
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.header_layout
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.header_layout
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.first_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.first_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.first_store
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.first_store
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.tables_source
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.tables_source
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.table_temporaries
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkSource.table_temporaries
