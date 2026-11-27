@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout
+#check KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.not_dense
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.not_dense
+#check KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.header_registers
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.header_registers
+#check KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.header_target_separate
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.header_target_separate
+#check KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.wrong_header_store_frame
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.wrong_header_store_frame
+#check KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.no_same_table
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout.no_same_table

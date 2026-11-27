@@ -186,6 +186,14 @@ labels, retaining trace, copied bytes, real free-lists and caller frames.
 An original R30/CODE9 reader also derives the actual RET continuation fetch.
 Old numeric APIs delegate once and retain their complete types. Actual loaded
 text and the generated caller's initial resource/code binding still follow.
+Original allocation rules out identifying the Addressing LINK's continuous
+arrays with the producer's pointer-table locals in the same heap. At offset8,
+the entry header contains the tag-table root; interpreting it as Addressing's
+register root preserves the real register cells rather than writing X30.
+A source-preserving inline LINK binding or a separate representation
+transformation must connect these two interfaces before composition.
+The five retained archives inspected here contain49 successful requests and
+no generated/native memcpy callsite; this is a bounded inventory.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

@@ -1,0 +1,105 @@
+{
+  "confirmed_utc": "2026-11-27T12:20:53.130722+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyCallerLayout"
+    ],
+    "exit": 0,
+    "seconds": 7.153170108795166,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 173,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-caller-layout/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6700026988983154,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_steps": {
+    "original_register_cells": 31,
+    "original_tag_cells": 31,
+    "source_protocol_obstruction": true,
+    "captured_archives": 5,
+    "captured_successful_requests": 49,
+    "captured_memcpy_requests": 0
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyCallerLayout.lean",
+      "size_bytes": 4175,
+      "mtime_ns": 1795781910136961533
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 3.8441452980041504,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1443,
+  "direct_final_stage": 3,
+  "direct_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-caller-layout/Proof.lean"
+    ],
+    "exit": 0,
+    "seconds": 3.01320481300354,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "artifact_check": {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "results/m5-memcpy-caller-layout/inspect_callers.py"
+    ],
+    "exit": 0,
+    "seconds": 10.37557864189148,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "artifact_sha256": "f6881edbdbeab159a88307033d11a77aaa40bb2888a11ded4fa5208a68b23181",
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyCallerLayout.lean": "b1837d3ca4c9a85778ea9fb67ea565451cb2d1a9c762f927a3f8f767ff2c9438",
+    "kprog/formal/KProgFormal.lean": "125e82891d3acfb14d8d38370044e3f40885b545f839c78e367bd417b6750e78",
+    "kprog/formal/README.md": "9183bdd6ef70ec5f74a959bfc5b7bf7141d6ba10643176d255d68b8c0a50ea01"
+  }
+}
