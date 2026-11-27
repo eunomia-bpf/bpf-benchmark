@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.Outcomes.provide
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.Outcomes.provide
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.next_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.next_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.visit
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.visit
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.run_from
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.run_from
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerGPRSequence.execute
