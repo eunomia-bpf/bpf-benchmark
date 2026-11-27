@@ -1,0 +1,66 @@
+{
+  "utc": "2026-11-27T18:28:35Z",
+  "index": 45,
+  "app": "cilium/agent",
+  "request": 6,
+  "symbol": "tail_handle_ipv4_from_netdev",
+  "previous_family": "unclassified",
+  "family": "BTF typed object write",
+  "basis": "Observed terminal B1392 u16 store through trusted_ptr_sk_buff(off134), SCHED_CLS type3 and EACCES. Source check_ptr_to_btf_access delegates nonallocated BTF writes to tc_cls_act_btf_struct_access; that callback returns silent EACCES when nfct provider is absent, and the current nfct provider rejects non-nf_conn types if present. Callback value/branch was not dynamically recorded.",
+  "limits": "Names the rejected access class, not a claimed dynamic callback-pointer observation. No fabricated only-read diagnostic; exact build-to-runtime callback registration is not independently traced. Source policy plus captured type/instruction/errno supports this classification. No repair or acceptance change.",
+  "kernel_revision": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "sources": {
+    "kernel/bpf/verifier.c:7358": {
+      "file_sha256": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+      "first_line": 7358,
+      "text": "static int check_ptr_to_btf_access(struct bpf_verifier_env *env,\n\t\t\t\t   struct bpf_reg_state *regs,\n\t\t\t\t   int regno, int off, int size,\n\t\t\t\t   enum bpf_access_type atype,\n\t\t\t\t   int value_regno)\n{\n\tstruct bpf_reg_state *reg = regs + regno;\n\tconst struct btf_type *t = btf_type_by_id(reg->btf, reg->btf_id);\n\tconst char *tname = btf_name_by_offset(reg->btf, t->name_off);\n\tconst char *field_name = NULL;\n\tenum bpf_type_flag flag = 0;\n\tu32 btf_id = 0;\n\tint ret;\n\n\tif (!env->allow_ptr_leaks) {\n\t\tverbose(env,\n\t\t\t\"'struct %s' access is allowed only to CAP_PERFMON and CAP_SYS_ADMIN\\n\",\n\t\t\ttname);\n\t\treturn -EPERM;\n\t}\n\tif (!env->prog->gpl_compatible && btf_is_kernel(reg->btf)) {\n\t\tverbose(env,\n\t\t\t\"Cannot access kernel 'struct %s' from non-GPL compatible program\\n\",\n\t\t\ttname);\n\t\treturn -EINVAL;\n\t}\n\tif (off < 0) {\n\t\tverbose(env,\n\t\t\t\"R%d is ptr_%s invalid negative access: off=%d\\n\",\n\t\t\tregno, tname, off);\n\t\treturn -EACCES;\n\t}\n\tif (!tnum_is_const(reg->var_off) || reg->var_off.value) {\n\t\tchar tn_buf[48];\n\n\t\ttnum_strn(tn_buf, sizeof(tn_buf), reg->var_off);\n\t\tverbose(env,\n\t\t\t\"R%d is ptr_%s invalid variable offset: off=%d, var_off=%s\\n\",\n\t\t\tregno, tname, off, tn_buf);\n\t\treturn -EACCES;\n\t}\n\n\tif (reg->type & MEM_USER) {\n\t\tverbose(env,\n\t\t\t\"R%d is ptr_%s access user memory: off=%d\\n\",\n\t\t\tregno, tname, off);\n\t\treturn -EACCES;\n\t}\n\n\tif (reg->type & MEM_PERCPU) {\n\t\tverbose(env,\n\t\t\t\"R%d is ptr_%s access percpu memory: off=%d\\n\",\n\t\t\tregno, tname, off);\n\t\treturn -EACCES;\n\t}\n\n\tif (env->ops->btf_struct_access && !type_is_alloc(reg->type) && atype == BPF_WRITE) {\n\t\tif (!btf_is_kernel(reg->btf)) {\n\t\t\tverifier_bug(env, \"reg->btf must be kernel btf\");\n\t\t\treturn -EFAULT;\n\t\t}\n\t\tret = env->ops->btf_struct_access(&env->log, reg, off, size);\n\t} else {\n\t\t/* Writes are permitted with default btf_struct_access for\n\t\t * program allocated objects (which always have ref_obj_id > 0),\n\t\t * but not for untrusted PTR_TO_BTF_ID | MEM_ALLOC.\n\t\t */\n\t\tif (atype != BPF_READ && !type_is_ptr_alloc_obj(reg->type)) {\n\t\t\tverbose(env, \"only read is supported\\n\");\n\t\t\treturn -EACCES;\n\t\t}\n\n\t\tif (type_is_alloc(reg->type) && !type_is_non_owning_ref(reg->type) &&\n\t\t    !(reg->type & MEM_RCU) && !reg->ref_obj_id) {\n\t\t\tverifier_bug(env, \"ref_obj_id for allocated object must be non-zero\");\n\t\t\treturn -EFAULT;\n\t\t}\n\n\t\tret = btf_struct_access(&env->log, reg, off, size, atype, &btf_id, &flag, &field_name);\n\t}\n\n\tif (ret < 0)\n\t\treturn ret;\n"
+    },
+    "net/core/filter.c:9201": {
+      "file_sha256": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+      "first_line": 9201,
+      "text": "static int tc_cls_act_btf_struct_access(struct bpf_verifier_log *log,\n\t\t\t\t\tconst struct bpf_reg_state *reg,\n\t\t\t\t\tint off, int size)\n{\n\tint ret = -EACCES;\n\n\tmutex_lock(&nf_conn_btf_access_lock);\n\tif (nfct_btf_struct_access)\n\t\tret = nfct_btf_struct_access(log, reg, off, size);\n\tmutex_unlock(&nf_conn_btf_access_lock);\n\n\treturn ret;\n}\n"
+    },
+    "net/core/filter.c:11217": {
+      "file_sha256": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542",
+      "first_line": 11217,
+      "text": "const struct bpf_verifier_ops tc_cls_act_verifier_ops = {\n\t.get_func_proto\t\t= tc_cls_act_func_proto,\n\t.is_valid_access\t= tc_cls_act_is_valid_access,\n\t.convert_ctx_access\t= tc_cls_act_convert_ctx_access,\n\t.gen_prologue\t\t= tc_cls_act_prologue,\n\t.gen_ld_abs\t\t= bpf_gen_ld_abs,\n\t.btf_struct_access\t= tc_cls_act_btf_struct_access,\n};\n"
+    },
+    "net/netfilter/nf_conntrack_bpf.c:235": {
+      "file_sha256": "becd29c5c81600f90479f49bb15bda124aa261639c8a4a0634230b8ac8f0f839",
+      "first_line": 235,
+      "text": "static int _nf_conntrack_btf_struct_access(struct bpf_verifier_log *log,\n\t\t\t\t\t   const struct bpf_reg_state *reg,\n\t\t\t\t\t   int off, int size)\n{\n\tconst struct btf_type *ncit, *nct, *t;\n\tsize_t end;\n\n\tncit = btf_type_by_id(reg->btf, btf_nf_conn_ids[1]);\n\tnct = btf_type_by_id(reg->btf, btf_nf_conn_ids[0]);\n\tt = btf_type_by_id(reg->btf, reg->btf_id);\n\tif (t != nct && t != ncit) {\n\t\tbpf_log(log, \"only read is supported\\n\");\n\t\treturn -EACCES;\n\t}\n\n\t/* `struct nf_conn` and `struct nf_conn___init` have the same layout\n\t * so we are safe to simply merge offset checks here\n\t */"
+    }
+  },
+  "evidence": {
+    "45/stock-after.verifier.log": {
+      "bytes": 22609,
+      "sha256": "0ac0f66705edddc87850425c7b7da5aee93fb27bc3529fd38132181fa61f44a4"
+    },
+    "45/kernel.metadata.json": {
+      "bytes": 3122,
+      "sha256": "ed28aedee30780fdded32c0cc2b760561b3be08ea09081e6bc66e7ff3a2d2242"
+    }
+  },
+  "load_context": {
+    "prog_type": 3,
+    "expected_attach_type": 0,
+    "prog_flags": 0,
+    "attach_btf_id": 0,
+    "attach_btf_obj_id": 0,
+    "attach_prog_id": 0,
+    "prog_ifindex": 0,
+    "gpl_compatible": 1,
+    "source_btf_id": 291,
+    "token_present": 0
+  },
+  "verifier_tail": [
+    "1386: (73) *(u8 *)(r10 -167) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-168=??????mm",
+    "1387: (72) *(u8 *)(r10 -166) = 0      ; R10=fp0 fp-168=?????0mm",
+    "1388: (bf) r2 = r4                    ; R2=trusted_ptr_sk_buff() R4=trusted_ptr_sk_buff()",
+    "1389: (07) r2 += 134                  ; R2=trusted_ptr_sk_buff(off=134)",
+    "1390: (72) *(u8 *)(r10 -165) = 0      ; R10=fp0 fp-168=????00mm",
+    "1391: (57) r1 &= 65531                ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=0xfffb,var_off=(0x0; 0xfffb))",
+    "1392: (6b) *(u16 *)(r2 +0) = r1",
+    "processed 1339 insns (limit 1000000) max_states_per_insn 0 total_states 11 peak_states 11 mark_read 0"
+  ]
+}

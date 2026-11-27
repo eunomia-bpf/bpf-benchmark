@@ -25,7 +25,7 @@
         "unbounded memory access": 1,
         "scalar memory access": 8,
         "packet bounds": 13,
-        "unclassified": 1,
+        "BTF typed object write": 1,
         "map value bounds": 12,
         "stack bounds": 26,
         "jump sequence complexity": 11
@@ -53,7 +53,7 @@
         "unbounded memory access": 1,
         "scalar memory access": 8,
         "packet bounds": 13,
-        "unclassified": 1,
+        "BTF typed object write": 1,
         "map value bounds": 12,
         "stack bounds": 26,
         "jump sequence complexity": 11
@@ -113,7 +113,7 @@
         },
         "after_families": {
           "packet bounds": 13,
-          "unclassified": 1
+          "BTF typed object write": 1
         },
         "fixture_before_disagreements": 0
       },
@@ -2222,7 +2222,7 @@
         "status": "refused",
         "returncode": 2,
         "errno": 13,
-        "family": "unclassified",
+        "family": "BTF typed object write",
         "diagnostics": [],
         "verifier_tail": [
           "1386: (73) *(u8 *)(r10 -167) = r2     ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff)) R10=fp0 fp-168=??????mm",
@@ -2235,7 +2235,9 @@
           "processed 1339 insns (limit 1000000) max_states_per_insn 0 total_states 11 peak_states 11 mark_read 0"
         ],
         "verifier_sha256": "0ac0f66705edddc87850425c7b7da5aee93fb27bc3529fd38132181fa61f44a4",
-        "preparation_error": null
+        "preparation_error": null,
+        "classification_basis": "Observed terminal B1392 u16 store through trusted_ptr_sk_buff(off134), SCHED_CLS type3 and EACCES. Source check_ptr_to_btf_access delegates nonallocated BTF writes to tc_cls_act_btf_struct_access; that callback returns silent EACCES when nfct provider is absent, and the current nfct provider rejects non-nf_conn types if present. Callback value/branch was not dynamically recorded.",
+        "classification_evidence": "kprog/results/arm64-scalar-memory-20261127/btf-write-20261127T182835Z/classification.json"
       },
       "before_matches_original": true
     },
@@ -7359,5 +7361,14 @@
       45
     ],
     "initial_controller_summary": "controller.json preserves the original experiment/classifier summary; this derived report retains it as initial_summary."
+  },
+  "btf_write_refinement": {
+    "utc": "2026-11-27T18:28:35Z",
+    "evidence": "kprog/results/arm64-scalar-memory-20261127/btf-write-20261127T182835Z/classification.json",
+    "previous_family": "unclassified",
+    "changed_indices": [
+      45
+    ],
+    "remaining_unclassified": []
   }
 }

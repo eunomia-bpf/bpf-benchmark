@@ -24,7 +24,7 @@
       "unbounded memory access": 1,
       "scalar memory access": 8,
       "packet bounds": 13,
-      "unclassified": 1,
+      "BTF typed object write": 1,
       "map value bounds": 12,
       "stack bounds": 26,
       "jump sequence complexity": 11
@@ -52,7 +52,7 @@
       "unbounded memory access": 1,
       "scalar memory access": 8,
       "packet bounds": 13,
-      "unclassified": 1,
+      "BTF typed object write": 1,
       "map value bounds": 12,
       "stack bounds": 26,
       "jump sequence complexity": 11
@@ -112,7 +112,7 @@
       },
       "after_families": {
         "packet bounds": 13,
-        "unclassified": 1
+        "BTF typed object write": 1
       },
       "fixture_before_disagreements": 0
     },
@@ -199,4 +199,4 @@
   }
 }
 
-145pairedloads:28beforeacceptances preserved,17newacceptances,100refusals,no preparationerrors or fixture-before disagreements. Classification refinement labels12explicit map-value bounds and11jump-sequence complexity diagnostics. All statuses are unchanged; initial_summary/initial_family preserve earlier labels, while controller.json and archived source snapshots retain the original experiment classifier. One Cilium typed store at physical sk_buff offset134 lacks a precise diagnostic and remains unclassified; no read-only cause is inferred. Fresh maps are verifier fixtures, not live binding/native/stage2 or startup/performance acceptance.
+145pairedloads:28beforeacceptances preserved,17newacceptances,100refusals,no preparation errors or fixture-before disagreements. All100 refusal access/diagnostic classes now named. The last Cilium BTF typed object write is classified from its terminal trusted sk_buff u16 store/type3/EACCES and kernel write policy, with no invented only-read log line or runtime callback-pointer observation. See kprog/results/arm64-scalar-memory-20261127/btf-write-20261127T182835Z/classification.json. Prior initial_summary/initial_family/classification_refinement and original controller/archive retain their exact earlier snapshots. Fresh maps do not establish native install/stage2/workload/performance acceptance.

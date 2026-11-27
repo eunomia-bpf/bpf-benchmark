@@ -43,7 +43,7 @@ index	app	request	symbol	original_stock_passed	original_family	before_status	bef
 42	cilium/agent	3	tail_ipv4_policy	False	packet bounds	refused	packet bounds	refused	packet bounds	True
 43	cilium/agent	4	tail_handle_ipv4_from_host	False	packet bounds	refused	packet bounds	refused	packet bounds	True
 44	cilium/agent	5	tail_handle_ipv4_cont	False	packet bounds	refused	packet bounds	refused	packet bounds	True
-45	cilium/agent	6	tail_handle_ipv4_from_netdev	False	read-only typed object store	refused	unclassified	refused	unclassified	True
+45	cilium/agent	6	tail_handle_ipv4_from_netdev	False	read-only typed object store	refused	unclassified	refused	BTF typed object write	True
 46	cilium/agent	7	tail_ipv4_ct_egress	False	packet bounds	refused	packet bounds	refused	packet bounds	True
 47	cilium/agent	8	cil_host_policy	True	None	accepted	None	accepted	None	True
 48	cilium/agent	9	tail_handle_ipv4	False	packet bounds	refused	packet bounds	refused	packet bounds	True
