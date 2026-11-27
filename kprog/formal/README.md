@@ -113,9 +113,15 @@ native witnesses. Final byte observations, initialized profile, original LR
 and caller frames remain. The native field frame retains every field outside
 the real scratch/NZCV destinations, final flags are the actual CMP16 flags,
 and outside physical bytes match the original input. The final source R0/tag4
-agrees with returned X0 through the existing provenance map. Exact native
-register/flag/vector provider outputs, native caller/landing-pad/alternative
-feature binding and whole-program observer are the next correspondence domains.
+agrees with returned X0 through the existing provenance map. The same complete
+source call now binds its eighteen selected GPR words/tag0, four NZCV bits and
+sixty-four vector halves to that actual native RET state. All eighty-six
+provider outcomes use genuine kind6 external calls and supplied-heap cache
+frames; these targeted environment premises remain explicit. The original
+release stage, all 104 targeted stores, eight frees and caller return preserve
+those exact maps. The existing single-step APIs retain their complete types.
+Native caller/landing-pad/alternative feature binding, global provider evidence
+and whole-program observer continue on these same witnesses.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

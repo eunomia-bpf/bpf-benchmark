@@ -1,0 +1,52 @@
+{
+  "confirmed_utc": "2026-11-27T02:54:02.903814+00:00",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 344.75735449790955,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1416,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-provider-root/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.2182648181915283,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 5,
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal.lean",
+      "size_bytes": 22570,
+      "sha256": "bc60a515b6512cd14c73c3117d232b13b4242b91a8bef93447296fb70750c5b6"
+    },
+    {
+      "path": "kprog/formal/README.md",
+      "size_bytes": 11739,
+      "sha256": "abe84f82f67bf028d7440e2ca518be7ba47a2fe95b58494230e516d4ce01b3ad"
+    }
+  ],
+  "make_check_owner": "V",
+  "scope": "The root exports one original post-BTI count16 native entry and the same complete original C caller-to-caller memcpy execution, with exact provider maps of that actual native RET state. Each of18 selected GPR words/tag0, four NZCV bits and64 vector halves is supplied by the actual targeted kind6 externalCall, genuine supplied heap and existing cache frame at the visited source state. The sole original provider/store proof body per stage now accepts that actual outcome; old interfaces delegate once and their full published types pass kernel compatibility checks. The same actual release trace,104 targeted stores,16 tag-transfer iterations including active0/8, eight real local frees and saved caller restoration retain those exact maps. One original Code/count/no-error/physical representation derives all13 actual native prefix/load/store/RET steps, with all16 final byte observations, initialized profile, original LR and caller/resource/frontier frame. Existing native field/NZCV/outside-memory/source R0 provenance proofs apply to the same witnesses. Actual targeted environment evidence remains explicit; final post-free vector pointer-table readback, original native caller/landing-pad/live alternatives, global evidence, universal O1/O2/O4 domains and recount continue before M6. Public logs retain existing external/assembly and named mature MemoryProofs computation dependencies. No local axiom or changed proof cap is introduced.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
