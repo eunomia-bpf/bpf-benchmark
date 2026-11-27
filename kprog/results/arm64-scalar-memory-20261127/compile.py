@@ -20,14 +20,15 @@ from arm64.trusted_specializer import b_flags
 
 def now():return subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip()
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
-run=json.loads((LANE/'scalar-run.json').read_text());OUT=Path(run['result']);RAW=Path(run['raw'])
+manifest=Path(sys.argv[sys.argv.index('--manifest')+1]) if '--manifest' in sys.argv else LANE/'scalar-run.json'
+run=json.loads(manifest.read_text());OUT=Path(run['result']);RAW=Path(run['raw'])
 prepared=json.loads((OUT/'prepare-controller.json').read_text());assert prepared['controller_status']==0
 pilot='--pilot' in sys.argv
 flags=list(map(str,b_flags(sysroot=ROOT/'.cache/qemu-arm64-root')))
 assert flags==json.loads((ROOT/'kprog/results/arm64-loadtime-20261127/cross-app-20261127T141857Z/controller.json').read_text())['common_flags']
 paths=[ROOT/'kprog/arm64/trusted_specializer.py',ROOT/'kprog/arm64/arm64_sim_local_bpf.h',ROOT/'kprog/arm64/arm64_sim_direct.h',*sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
 headers={str(p):sha(p) for p in paths}
-record=dict(started_utc=now(),pid=os.getpid(),source_revision=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),raw=str(RAW),result=str(OUT),common_flags=flags,source_sha256=headers,cases=[],scope='One general BPF-only ARM kernel/untyped read route. All145 captured generatedB inputs,117 originally refused and28 accepted controls; samearchitecture flags/48GiBAS/two compiler workers CPU16and18. ActualARMstock/native/stage2 acceptance remains separate. Pilot is request49/Tetragon1 scalar failure only, followed by the complete corpus with identical sources.',pilot=pilot)
+record=dict(started_utc=now(),pid=os.getpid(),source_revision=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),raw=str(RAW),result=str(OUT),common_flags=flags,source_sha256=headers,cases=[],scope='Compile all prepared captured B inputs with the same architecture flags/48GiBAS/two workers CPU16and18. Prepared baseline flags define the accepted controls; actual stock/native/stage2 acceptance remains separate.',pilot=pilot)
 receipt=OUT/('pilot-controller.json' if pilot else 'compile-controller.json')
 def save():receipt.write_text(json.dumps(record,indent=2)+'\n')
 def drift():return [p for p,h in headers.items() if sha(Path(p))!=h]

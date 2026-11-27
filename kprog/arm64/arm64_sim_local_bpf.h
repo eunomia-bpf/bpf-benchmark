@@ -1374,7 +1374,7 @@ arm64_sim_bpf_probe_load_into(__u64 *value, const void *base,
     return *(__u8 *)value;
 }
 #define ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG) \
-    ((TAG) != ARM64_SIM_TAG_STACK && (TAG) != ARM64_SIM_TAG_ABI && \
+    ((TAG) != ARM64_SIM_TAG_STACK && ((TAG) != ARM64_SIM_TAG_ABI || __a64_sim_abi_kind == ARM64_SIM_ABI_KIND_RAW) && \
      (TAG) != ARM64_SIM_TAG_PACKET && (TAG) != ARM64_SIM_TAG_PACKET_END && \
      (TAG) != ARM64_SIM_TAG_MAP_PTR && (TAG) != ARM64_SIM_TAG_MAP_VALUE)
 #define ARM64_SIM_L_KERNEL_LOAD_INTO(OUTPUT, BASE, OFF, WIDTH) \
@@ -1400,10 +1400,10 @@ arm64_sim_bpf_probe_load_into(__u64 *value, const void *base,
         void *__a64_mra_pointer; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_mra_pointer, (BASE)); \
         __s64 __a64_mra_ctx_off = (__s64)((__u64)(long)__a64_mra_pointer - \
             (__u64)(long)__a64_sim_helper_ctx + (__u64)(OFF)); \
-        if ((SOURCE) == KPROG_ARM64_MEM_SRC_NORMAL_LOAD && ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG)) { \
-            ARM64_SIM_L_KERNEL_LOAD_INTO((OUTPUT), __a64_mra_pointer, (OFF), (WIDTH)); \
-        } else if ((TAG) == ARM64_SIM_TAG_ABI && __builtin_constant_p(__a64_mra_ctx_off)) { \
+        if ((TAG) == ARM64_SIM_TAG_ABI && __builtin_constant_p(__a64_mra_ctx_off)) { \
             KPROG_ARM64_LOAD_BYTES_OFFSET_INTO((OUTPUT), __a64_sim_helper_ctx, __a64_mra_ctx_off, (WIDTH)); \
+        } else if (((SOURCE) == KPROG_ARM64_MEM_SRC_NORMAL_LOAD || (SOURCE) == KPROG_ARM64_MEM_SRC_ABI_PTR_LOAD) && ARM64_SIM_L_TAG_KERNEL_MEMORY(TAG)) { \
+            ARM64_SIM_L_KERNEL_LOAD_INTO((OUTPUT), __a64_mra_pointer, (OFF), (WIDTH)); \
         } else ARM64_SIM_L_MEM_READ_DISPATCH_INTO((OUTPUT), (BASE), (OFF), (WIDTH), (SOURCE)); \
     } while (0)
 #endif

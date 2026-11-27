@@ -8,7 +8,8 @@ import subprocess
 import sys
 import traceback
 ROOT=Path('/workspaces/repository');LANE=Path('/workspaces/.agent-state/kprog-lanes/perf');BASE=Path('/workspaces/.agent-state/kprog-ck')
-run=json.loads((LANE/'scalar-run.json').read_text());OUT=Path(run['result']);RAW=Path(run['raw']);pilot='--pilot' in sys.argv;mode='pilot' if pilot else 'all145'
+manifest=Path(sys.argv[sys.argv.index('--manifest')+1]) if '--manifest' in sys.argv else LANE/'scalar-run.json'
+run=json.loads(manifest.read_text());OUT=Path(run['result']);RAW=Path(run['raw']);pilot='--pilot' in sys.argv;mode='pilot' if pilot else 'all145'
 record=dict(pid=os.getpid(),mode=mode,started_utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip())
 def save():(OUT/(mode+'-stock-controller.json')).write_text(json.dumps(record,indent=2)+'\n')
 try:
