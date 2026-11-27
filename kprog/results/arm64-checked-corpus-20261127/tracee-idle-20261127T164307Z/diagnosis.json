@@ -1,0 +1,255 @@
+{
+  "utc": "2026-11-27T16:43:07Z",
+  "input_archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T140827Z/tracee-monitor/corpus.tar.gz",
+  "input_archive_sha256": "a56cf07656dc4fb6ab2a017f3fc8e346b8d342e26545f60b386bc34fae8e2af5",
+  "guest_start_revision": "96d6087d811dd5ea8e4848d17eb7737df664f3c5",
+  "scope": "Read-only archived guest timing diagnosis; no new guest, compiler, framework/settings/readiness or production change.",
+  "phases": {
+    "baseline": {
+      "measurement_start_request": {
+        "phase": "baseline",
+        "guest_seconds": 74.722608,
+        "line": 600,
+        "pid": 562,
+        "tid": 567,
+        "text": "socket: cmd=measure_start len=25"
+      },
+      "measurement_finish_request": {
+        "phase": "baseline",
+        "guest_seconds": 86.71132,
+        "line": 605,
+        "pid": 562,
+        "tid": 567,
+        "text": "socket: cmd=measure_finish len=26"
+      },
+      "socket_command_interval_seconds": 11.988712000000007,
+      "last_startup_program_query": {
+        "phase": "baseline",
+        "guest_seconds": 56.895237,
+        "line": 326,
+        "pid": 562,
+        "tid": 567,
+        "text": "socket: cmd=list_progs len=22"
+      },
+      "raw_tracepoint_open_count": 21,
+      "first_raw_tracepoint_open": {
+        "phase": "baseline",
+        "guest_seconds": 105.631288,
+        "line": 929,
+        "pid": 562,
+        "tid": 571,
+        "text": "BPF_RAW_TRACEPOINT_OPEN name=sched_process_fork prog_fd=126"
+      },
+      "syscall_raw_opens": [
+        {
+          "phase": "baseline",
+          "guest_seconds": 113.646663,
+          "line": 1099,
+          "pid": 562,
+          "tid": 577,
+          "text": "BPF_RAW_TRACEPOINT_OPEN name=sys_enter prog_fd=74"
+        },
+        {
+          "phase": "baseline",
+          "guest_seconds": 118.30947,
+          "line": 1155,
+          "pid": 562,
+          "tid": 574,
+          "text": "BPF_RAW_TRACEPOINT_OPEN name=sys_exit prog_fd=65"
+        },
+        {
+          "phase": "baseline",
+          "guest_seconds": 132.847601,
+          "line": 1474,
+          "pid": 562,
+          "tid": 574,
+          "text": "BPF_RAW_TRACEPOINT_OPEN name=sys_enter prog_fd=23"
+        },
+        {
+          "phase": "baseline",
+          "guest_seconds": 137.505093,
+          "line": 1530,
+          "pid": 562,
+          "tid": 573,
+          "text": "BPF_RAW_TRACEPOINT_OPEN name=sys_exit prog_fd=77"
+        }
+      ],
+      "observed_programs": 33,
+      "active_programs": 0,
+      "total_observed_calls": 0,
+      "workloads": [
+        {
+          "workload_name": "stress_ng_tracee_syscall_hot",
+          "command": [
+            "/usr/bin/stress-ng",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sigfd",
+            "1",
+            "--eventfd",
+            "1",
+            "--kill",
+            "1",
+            "--futex",
+            "1",
+            "--prctl",
+            "1",
+            "--timeout",
+            "10s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/4e8c87bd"
+          ],
+          "duration_s": 11.920440528,
+          "returncode": 0
+        }
+      ],
+      "all_raw_attachments_after_measurement_finish": true
+    },
+    "post_rejit": {
+      "measurement_start_request": {
+        "phase": "post_rejit",
+        "guest_seconds": 258.294188,
+        "line": 558,
+        "pid": 964,
+        "tid": 968,
+        "text": "socket: cmd=measure_start len=25"
+      },
+      "measurement_finish_request": {
+        "phase": "post_rejit",
+        "guest_seconds": 281.49814,
+        "line": 564,
+        "pid": 964,
+        "tid": 968,
+        "text": "socket: cmd=measure_finish len=26"
+      },
+      "socket_command_interval_seconds": 23.20395199999996,
+      "last_startup_program_query": {
+        "phase": "post_rejit",
+        "guest_seconds": 241.790136,
+        "line": 345,
+        "pid": 964,
+        "tid": 968,
+        "text": "socket: cmd=list_progs len=22"
+      },
+      "raw_tracepoint_open_count": 0,
+      "first_raw_tracepoint_open": null,
+      "syscall_raw_opens": [],
+      "observed_programs": 2,
+      "active_programs": 0,
+      "total_observed_calls": 0,
+      "workloads": [
+        {
+          "workload_name": "stress_ng_tracee_syscall_hot",
+          "command": [
+            "/usr/bin/stress-ng",
+            "--cap",
+            "1",
+            "--set",
+            "1",
+            "--sigfd",
+            "1",
+            "--eventfd",
+            "1",
+            "--kill",
+            "1",
+            "--futex",
+            "1",
+            "--prctl",
+            "1",
+            "--timeout",
+            "10s",
+            "--metrics-brief",
+            "--temp-path",
+            "/var/tmp/bpfrejit-runtime/4e8c87bd"
+          ],
+          "duration_s": 12.090297808000003,
+          "returncode": 0
+        }
+      ],
+      "all_raw_attachments_after_measurement_finish": null
+    }
+  },
+  "evidence_files": {
+    "tracee__monitor.json.gz": {
+      "original_member": "corpus/results/arm64_qemu_corpus_19700101_000031_197721/details/apps/tracee__monitor.json",
+      "original_bytes": 13183,
+      "original_sha256": "814ef03e2574477e976cc14fefb01774ba44abb9e3912ea2cc514153c2fd5f70",
+      "gzip_sha256": "dfcd208b3b63b632fcbab476cdea81dce2511eaeeb49baad8efc8b082c496806"
+    },
+    "result.json.gz": {
+      "original_member": "corpus/results/arm64_qemu_corpus_19700101_000031_197721/details/result.json",
+      "original_bytes": 1892,
+      "original_sha256": "0405a34df9469a78fd69cc238387e6dfa838ad8644232aa1972c00e714fa4808",
+      "gzip_sha256": "190928f15d8b8e1fb52839835a76c91081c9a9cce4fd782d84060a801eae374b"
+    },
+    "tracee__monitor.baseline.log.gz": {
+      "original_member": "corpus/results/arm64_qemu_corpus_19700101_000031_197721/details/shim-logs/tracee__monitor.baseline.log",
+      "original_bytes": 183490,
+      "original_sha256": "4f971a80fda7dc366b53e6bad3bed29bb5c75b277039ffbd202e75b5e53dd0e2",
+      "gzip_sha256": "e02c085cc2f24d958efff3d3f52702fa5a9a87111acacb54b7ca22614c1655f0"
+    },
+    "tracee__monitor.post_rejit.log.gz": {
+      "original_member": "corpus/results/arm64_qemu_corpus_19700101_000031_197721/details/shim-logs/tracee__monitor.post_rejit.log",
+      "original_bytes": 59735,
+      "original_sha256": "fc2be0f6836fb09cbdc4b11f340f02621ca0213370437d4850ae0cb0c01fba68",
+      "gzip_sha256": "6ce1ca82a95f2ccb3cf5c46452d9ca3a65411f627b9aba3452eb2ece1b44ce1a"
+    }
+  },
+  "frozen_sample": {
+    "samples": 1,
+    "warmups": 1,
+    "workload_seconds": 10.0,
+    "bpf_stats": true,
+    "app_status": "ok"
+  },
+  "framework_source": {
+    "runner/libs/app_runners/tracee.py": {
+      "sha256": "8df2380f096e84d29fd7d6694191d5c17d61722492414f45e2b5721fa03d9471",
+      "matches_current_working": true,
+      "functions": [
+        {
+          "name": "_tracee_collector_has_activity",
+          "line": 203,
+          "end_line": 205
+        },
+        {
+          "name": "__enter__",
+          "line": 87,
+          "end_line": 138
+        },
+        {
+          "name": "start",
+          "line": 287,
+          "end_line": 301
+        }
+      ]
+    },
+    "runner/libs/rejit.py": {
+      "sha256": "7147b74fc2c407f64f92f153d6a5bf0bd0edf3aa027078bde53dd97d00bf73ef",
+      "matches_current_working": true,
+      "functions": [
+        {
+          "name": "app_shim_has_programs",
+          "line": 304,
+          "end_line": 311
+        },
+        {
+          "name": "wait_for_app_shim_programs",
+          "line": 331,
+          "end_line": 383
+        },
+        {
+          "name": "measure_app_phase",
+          "line": 440,
+          "end_line": 478
+        }
+      ]
+    }
+  },
+  "diagnosis": "Baseline measured before all raw-tracepoint attachment, not merely a quiet attached filter. Startup readiness accepts healthz OR any output plus tracked programs; it then accepts a stable program-list gap and sleeps the unchanged5seconds. On slow guest init this precedes actual syscall attachment. Post phase also measured during loading and records no raw-tracepoint attachment before its later native failure. A successful stressor return does not establish exercised Tracee programs.",
+  "limits": "Socket timestamps mark command entry, not an independently instrumented internal stats boundary. Full logs and successful raw-open returns are preserved. Only startup ordering is established; exact healthz/output OR branch is not logged. No Spark-host startup-order equivalence or repair validated. Frozen framework/readiness/settle/workload/900s remain unchanged.",
+  "controller_status": 0
+}

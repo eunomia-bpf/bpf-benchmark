@@ -1,0 +1,181 @@
+runner/libs/app_runners/tracee.py:87
+    def __enter__(self) -> "TraceeAgentSession":
+        failures: list[str] = []
+        tracee_tmpdir = _tracee_runtime_dir()
+        tracee_tmpdir.mkdir(parents=True, exist_ok=True)
+        for command in self.commands:
+            self.collector = TraceeOutputCollector()
+            env = {
+                "HOME": os.environ.get("HOME", str(ROOT_DIR)),
+                "TMPDIR": str(tracee_tmpdir),
+                "TMP": str(tracee_tmpdir),
+                "TEMP": str(tracee_tmpdir),
+            }
+            env.update(tracee_native_loader_env())
+            proc = start_agent(
+                command[0],
+                command[1:],
+                env=env,
+            )
+            self.process = proc
+            self.command_used = command
+            self._start_io_threads()
+
+            def _health_check() -> bool:
+                return (
+                    _tracee_healthz_ready(TRACEE_HEALTH_HOST, TRACEE_HEALTH_PORT)
+                    or _tracee_collector_has_activity(self.collector)
+                ) and (skip_rejit_disables_shim() or app_shim_has_programs(int(proc.pid)))
+
+            try:
+                healthy = wait_healthy(proc, None, _health_check)
+            except Exception:
+                self.close()
+                raise
+            if healthy:
+                try:
+                    wait_for_app_shim_programs(
+                        app_pid=int(proc.pid),
+                        process=proc,
+                        snapshot=self.collector_snapshot,
+                        process_name="Tracee",
+                    )
+                except Exception:
+                    self.close()
+                    raise
+                self.programs = []
+                return self
+            snapshot = self.collector.snapshot()
+            failures.append(_format_launch_failure(command, proc, snapshot))
+            self.close()
+        if not failures:
+            failures.append("Tracee never became healthy")
+        raise RuntimeError(f"failed to launch Tracee: {' | '.join(failures)}")
+
+runner/libs/app_runners/tracee.py:203
+def _tracee_collector_has_activity(collector: TraceeOutputCollector) -> bool:
+    snapshot = collector.snapshot()
+    return bool(snapshot.get("stdout_tail") or snapshot.get("stderr_tail"))
+
+runner/libs/app_runners/tracee.py:287
+    def start(self) -> list[int]:
+        if self.session is not None:
+            raise RuntimeError("TraceeRunner is already running")
+
+        tracee_binary = self._resolve_binary()
+        commands = build_tracee_commands(tracee_binary, self.extra_args)
+        session = TraceeAgentSession(commands)
+        session.__enter__()
+        self.session = session
+        self.command_used = list(session.command_used or [])
+        self.tracee_binary = Path(tracee_binary).resolve()
+        self.programs = []
+        if DEFAULT_STARTUP_SETTLE_S > 0.0:
+            time.sleep(DEFAULT_STARTUP_SETTLE_S)
+        return []
+
+runner/libs/rejit.py:304
+def app_shim_has_programs(app_pid: int) -> bool:
+    if int(app_pid) <= 0:
+        return False
+    try:
+        resp = _shim_request(_shim_socket_for_pid(int(app_pid)), {"cmd": "has_programs"})
+    except RuntimeError:
+        return False
+    return str(resp.get("status") or "error") == "ok"
+
+runner/libs/rejit.py:331
+def wait_for_app_shim_programs(
+    *,
+    app_pid: int,
+    process: object | None = None,
+    snapshot: object | None = None,
+    process_name: str = "process",
+    stable_seconds_override: float | None = None,
+    min_programs: int = 1,
+) -> None:
+    if skip_rejit_disables_shim():
+        return
+    if stable_seconds_override is None:
+        stable_seconds = (
+            _LOADTIME_SHIM_PROGRAM_STABLE_SECONDS
+            if os.environ.get("BPFREJIT_SHIM_LOADTIME_PLAN", "").strip()
+            else _SHIM_PROGRAM_STABLE_SECONDS
+        )
+    else:
+        stable_seconds = max(0.0, float(stable_seconds_override))
+    stable_ids: tuple[int, ...] = ()
+    stable_since: float | None = None
+    while True:
+        poll = getattr(process, "poll", None)
+        if callable(poll) and poll() is not None:
+            detail = ""
+            if callable(snapshot):
+                snap = snapshot()
+                if isinstance(snap, Mapping):
+                    stderr_lines = [str(line) for line in list(snap.get("stderr_tail") or [])[-80:]]
+                    stdout_lines = [str(line) for line in list(snap.get("stdout_tail") or [])[-80:]]
+                    parts = []
+                    if stderr_lines:
+                        parts.append("stderr tail:\n" + "\n".join(stderr_lines))
+                    if stdout_lines:
+                        parts.append("stdout tail:\n" + "\n".join(stdout_lines))
+                    detail = "\n" + "\n".join(parts) if parts else ""
+            raise RuntimeError(f"{process_name} exited before BPF programs were tracked by shim{detail}")
+        try:
+            ids = _list_app_shim_program_ids(int(app_pid))
+        except RuntimeError:
+            ids = ()
+        if ids and len(ids) >= max(1, int(min_programs)) and stable_seconds <= 0.0:
+            return
+        if ids and len(ids) >= max(1, int(min_programs)) and ids == stable_ids:
+            if stable_since is not None and time.monotonic() - stable_since >= stable_seconds:
+                return
+        elif ids and len(ids) >= max(1, int(min_programs)):
+            stable_ids = ids
+            stable_since = time.monotonic()
+        else:
+            stable_ids = ()
+            stable_since = None
+        time.sleep(0.2)
+
+runner/libs/rejit.py:440
+def measure_app_phase(
+    *,
+    app_pid: int | None = None,
+    app_pids: Sequence[int] | None = None,
+    runner: object,
+    workload_seconds: float,
+    samples: int,
+    warmups: int = 0,
+) -> dict[str, object]:
+    if skip_rejit_disables_shim():
+        for _ in range(max(0, int(warmups))):
+            runner.run_workload(workload_seconds)
+        workloads = [
+            runner.run_workload(workload_seconds).to_dict()
+            for _ in range(samples)
+        ]
+        return {"workloads": workloads, "bpf": {}}
+
+    pids = _normalize_app_pids(app_pid=app_pid, app_pids=app_pids)
+    for _ in range(max(0, int(warmups))):
+        runner.run_workload(workload_seconds)
+    for pid in pids:
+        start = _shim_request(_shim_socket_for_pid(pid), {"cmd": "measure_start"})
+        if str(start.get("status") or "error") != "ok":
+            raise RuntimeError(str(start.get("error") or "measure_start failed"))
+    workloads: list[dict[str, object]] = []
+    for _ in range(samples):
+        workloads.append(runner.run_workload(workload_seconds).to_dict())
+    bpf: dict[str, object] = {}
+    for pid in pids:
+        finish = _shim_request(_shim_socket_for_pid(pid), {"cmd": "measure_finish"})
+        if str(finish.get("status") or "error") != "ok":
+            raise RuntimeError(str(finish.get("error") or "measure_finish failed"))
+        if isinstance(finish.get("bpf"), Mapping):
+            bpf.update(dict(finish["bpf"]))  # type: ignore[index]
+    return {
+        "workloads": workloads,
+        "bpf": bpf,
+    }
