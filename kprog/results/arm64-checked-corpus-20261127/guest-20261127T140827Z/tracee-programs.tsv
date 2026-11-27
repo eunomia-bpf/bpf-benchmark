@@ -1,0 +1,12 @@
+request	symbol	prog_type	native_id	source_prog_id	post_prog_id	post_uses_original	b_generated	b_stock_passed	execution_path	status	run_cnt_delta	run_time_ns_delta	diagnostics
+1	security_bpf_kprobe	2	198	192	198	False	True	True	checked-sim-c	0	None	None	
+2	lsm_bpf_check	29	208	202	208	False	True	True	checked-sim-c	0	None	None	
+3	tracepoint__raw_syscalls__sys_enter	17	217	212	217	False	True	False	direct-native	0	0	0	R0 invalid mem access 'scalar'
+4	sys_enter_init	17	223	218	223	False	True	False	direct-native	0	0	0	R1 invalid mem access 'scalar'
+5	sys_enter_submit	17	229	224	229	False	True	False	direct-native	0	None	None	R1 invalid mem access 'scalar'
+6	tracepoint__raw_syscalls__sys_exit	17	235	230	235	False	True	False	direct-native	0	None	None	R1 invalid mem access 'scalar'
+7	sys_exit_init	17	241	236	241	False	True	False	direct-native	0	None	None	R1 invalid mem access 'scalar'
+8	sys_exit_submit	17	247	242	247	False	True	False	direct-native	0	None	None	
+9	trace_sys_enter	17	253	248	253	False	True	False	direct-native	0	None	None	R1 invalid mem access 'scalar'
+10	trace_sys_exit	17	259	254	259	False	True	False	direct-native	0	None	None	R1 invalid mem access 'scalar'
+11	trace_ptrace	2	None	260	260	False	True	False	failed	-5	None	None	R6 invalid mem access 'scalar'

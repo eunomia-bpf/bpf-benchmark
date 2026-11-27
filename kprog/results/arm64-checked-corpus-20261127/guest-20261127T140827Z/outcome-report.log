@@ -1,0 +1,12 @@
+Corpus/app ok ok mix {'checked-sim-c': 2, 'direct-native': 8, 'failed': 1}
+baseline programs 33 with calls 0 workloads [('stress_ng_tracee_syscall_hot', 0, 11.920440528)]
+post_rejit programs 2 with calls 0 workloads [('stress_ng_tracee_syscall_hot', 0, 12.090297808000003)]
+3 tracepoint__raw_syscalls__sys_enter ["R0 invalid mem access 'scalar'"]
+4 sys_enter_init ["R1 invalid mem access 'scalar'"]
+5 sys_enter_submit ["R1 invalid mem access 'scalar'"]
+6 tracepoint__raw_syscalls__sys_exit ["R1 invalid mem access 'scalar'"]
+7 sys_exit_init ["R1 invalid mem access 'scalar'"]
+9 trace_sys_enter ["R1 invalid mem access 'scalar'"]
+10 trace_sys_exit ["R1 invalid mem access 'scalar'"]
+11 trace_ptrace ["R6 invalid mem access 'scalar'"]
+All 86 archived files equal retained raw copies; 11 requests: {'checked-sim-c': 2, 'direct-native': 8, 'failed': 1}

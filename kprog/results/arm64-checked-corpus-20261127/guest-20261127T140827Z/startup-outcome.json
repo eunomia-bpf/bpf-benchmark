@@ -1,0 +1,31 @@
+{
+  "utc": "2026-11-27T14:52:06Z",
+  "controller_status": 0,
+  "corpus_status": "ok",
+  "app_status": "ok",
+  "requests": 11,
+  "checked_installs": 2,
+  "direct_installs": 8,
+  "failed_installs": 1,
+  "B_generated": 11,
+  "B_stock_accepted": 2,
+  "B_stock_refused": 9,
+  "broker_failures": 0,
+  "baseline_observed_programs": 33,
+  "post_observed_programs": 2,
+  "baseline_programs_with_calls": 0,
+  "post_programs_with_calls": 0,
+  "baseline_workload_returncode": 0,
+  "post_workload_returncode": 0,
+  "archived_files_equal_raw": 86,
+  "archive_parts": 2,
+  "guest_start_revision": "96d6087d811dd5ea8e4848d17eb7737df664f3c5",
+  "producer_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
+  "failed_request": {
+    "request_id": 11,
+    "symbol": "trace_ptrace",
+    "status": -5,
+    "native_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n"
+  },
+  "scope": "Recorded frozen workload and per-request native outcomes. Both phases completed but neither has observed program calls; this is not hot-path execution/performance evidence or complete checked coverage. The final native arming ioctl error remains causally unproven."
+}
