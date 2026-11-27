@@ -1,0 +1,146 @@
+index	app	request	symbol	original_stock_passed	original_family	before_status	before_family	after_status	after_family	before_matches_original
+1	bcc/set	1	tracepoint__syscalls__sys_enter_openat	True	None	accepted	None	accepted	None	True
+2	bcc/set	10	fentry_vfs_write	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+3	bcc/set	11	tcp_v4_connect_ret	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+4	bcc/set	12	block_rq_insert	False	context layout	refused	context layout	refused	context layout	True
+5	bcc/set	13	sys_exit	False	infinite loop	refused	scalar memory access	refused	infinite loop	True
+6	bcc/set	14	sched_wakeup_new	True	None	accepted	None	accepted	None	True
+7	bcc/set	15	kprobe__cap_capable_exit	True	None	accepted	None	accepted	None	True
+8	bcc/set	16	fentry_vfs_fsync	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+9	bcc/set	17	tcp_v6_connect	True	None	accepted	None	accepted	None	True
+10	bcc/set	18	block_rq_issue	False	typed field layout	refused	typed field layout	refused	typed field layout	True
+11	bcc/set	19	sched_switch	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+12	bcc/set	2	fentry_vfs_read	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+13	bcc/set	20	fentry_vfs_open	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+14	bcc/set	21	tcp_v6_connect_ret	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+15	bcc/set	22	block_rq_complete	True	None	accepted	None	accepted	None	True
+16	bcc/set	23	fentry_vfs_create	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+17	bcc/set	3	tcp_v4_connect	True	None	accepted	None	accepted	None	True
+18	bcc/set	4	blk_account_io_merge_bio	True	None	accepted	None	accepted	None	True
+19	bcc/set	5	sys_enter	True	None	accepted	None	accepted	None	True
+20	bcc/set	6	sched_wakeup	True	None	accepted	None	accepted	None	True
+21	bcc/set	7	inet_sock_set_state	False	modified context pointer	refused	modified context pointer	refused	modified context pointer	True
+22	bcc/set	8	kprobe__cap_capable_entry	True	None	accepted	None	accepted	None	True
+23	bcc/set	9	tracepoint__syscalls__sys_exit_openat	True	None	accepted	None	accepted	None	True
+24	otelcol-ebpf-profiler/profiling	1	read_task_struct	False	scalar memory access	refused	scalar memory access	accepted	None	True
+25	otelcol-ebpf-profiler/profiling	10	perf_go_labels	False	unbounded memory access	refused	unbounded memory access	refused	unbounded memory access	True
+26	otelcol-ebpf-profiler/profiling	11	tracepoint__sched_process_free	True	None	accepted	None	accepted	None	True
+27	otelcol-ebpf-profiler/profiling	12	native_tracer_entry	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+28	otelcol-ebpf-profiler/profiling	13	custom__generic	False	scalar memory access	refused	scalar memory access	accepted	None	True
+29	otelcol-ebpf-profiler/profiling	2	perf_unwind_stop	False	scalar memory access	refused	scalar memory access	accepted	None	True
+30	otelcol-ebpf-profiler/profiling	7	perf_unwind_python	False	scalar memory access	refused	scalar memory access	accepted	None	True
+31	otelcol-ebpf-profiler/profiling	8	perf_unwind_ruby	False	scalar memory access	refused	scalar memory access	accepted	None	True
+32	cilium/agent	1	cil_xdp_entry	True	None	accepted	None	accepted	None	True
+33	cilium/agent	10	cil_from_netdev	False	read-only typed object store	refused	packet bounds	refused	packet bounds	True
+34	cilium/agent	11	tail_nodeport_rev_dnat_ipv4	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+35	cilium/agent	12	cil_from_host	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+36	cilium/agent	13	tail_drop_notify	True	None	accepted	None	accepted	None	True
+37	cilium/agent	14	cil_to_netdev	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+38	cilium/agent	15	cil_to_container	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+39	cilium/agent	16	tail_handle_snat_fwd_ipv4	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+40	cilium/agent	17	tail_ipv4_ct_ingress	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+41	cilium/agent	2	cil_to_host	False	read-only typed object store	refused	packet bounds	refused	packet bounds	True
+42	cilium/agent	3	tail_ipv4_policy	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+43	cilium/agent	4	tail_handle_ipv4_from_host	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+44	cilium/agent	5	tail_handle_ipv4_cont	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+45	cilium/agent	6	tail_handle_ipv4_from_netdev	False	read-only typed object store	refused	unclassified	refused	unclassified	True
+46	cilium/agent	7	tail_ipv4_ct_egress	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+47	cilium/agent	8	cil_host_policy	True	None	accepted	None	accepted	None	True
+48	cilium/agent	9	tail_handle_ipv4	False	packet bounds	refused	packet bounds	refused	packet bounds	True
+49	tetragon/observer	1	event_exit_disassociate_ctty	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+50	tetragon/observer	10	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+51	tetragon/observer	11	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+52	tetragon/observer	12	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+53	tetragon/observer	13	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+54	tetragon/observer	14	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+55	tetragon/observer	15	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+56	tetragon/observer	16	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+57	tetragon/observer	17	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+58	tetragon/observer	18	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+59	tetragon/observer	19	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+60	tetragon/observer	2	event_exit_acct_process	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+61	tetragon/observer	20	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+62	tetragon/observer	21	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+63	tetragon/observer	22	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+64	tetragon/observer	23	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+65	tetragon/observer	24	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+66	tetragon/observer	25	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+67	tetragon/observer	26	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+68	tetragon/observer	27	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+69	tetragon/observer	28	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+70	tetragon/observer	29	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+71	tetragon/observer	3	event_wake_up_new_task	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+72	tetragon/observer	30	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+73	tetragon/observer	31	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+74	tetragon/observer	32	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+75	tetragon/observer	33	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+76	tetragon/observer	34	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+77	tetragon/observer	35	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+78	tetragon/observer	36	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+79	tetragon/observer	37	generic_retkprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+80	tetragon/observer	38	generic_retkprobe_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+81	tetragon/observer	39	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+82	tetragon/observer	4	execve_rate	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+83	tetragon/observer	40	generic_retkprobe_output	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+84	tetragon/observer	41	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+85	tetragon/observer	42	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+86	tetragon/observer	43	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+87	tetragon/observer	44	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+88	tetragon/observer	45	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+89	tetragon/observer	46	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+90	tetragon/observer	47	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+91	tetragon/observer	48	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+92	tetragon/observer	49	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+93	tetragon/observer	5	execve_send	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+94	tetragon/observer	50	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+95	tetragon/observer	51	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+96	tetragon/observer	52	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+97	tetragon/observer	53	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+98	tetragon/observer	54	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+99	tetragon/observer	55	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+100	tetragon/observer	56	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+101	tetragon/observer	57	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+102	tetragon/observer	58	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+103	tetragon/observer	59	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+104	tetragon/observer	6	event_execve	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+105	tetragon/observer	60	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+106	tetragon/observer	61	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+107	tetragon/observer	62	generic_retkprobe_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+108	tetragon/observer	63	generic_retkprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+109	tetragon/observer	64	generic_retkprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+110	tetragon/observer	65	generic_retkprobe_output	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+111	tetragon/observer	66	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+112	tetragon/observer	67	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+113	tetragon/observer	68	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+114	tetragon/observer	69	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+115	tetragon/observer	7	tg_kp_bprm_committing_creds	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+116	tetragon/observer	70	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+117	tetragon/observer	71	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+118	tetragon/observer	72	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+119	tetragon/observer	73	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+120	tetragon/observer	74	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+121	tetragon/observer	75	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+122	tetragon/observer	76	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+123	tetragon/observer	77	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+124	tetragon/observer	78	generic_kprobe_process_event	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+125	tetragon/observer	79	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+126	tetragon/observer	8	execve_map_update	False	infinite loop	refused	infinite loop	refused	infinite loop	True
+127	tetragon/observer	80	generic_kprobe_event	False	scalar memory access	refused	scalar memory access	accepted	None	True
+128	tetragon/observer	81	generic_kprobe_process_filter	False	scalar memory access	refused	scalar memory access	refused	unclassified	True
+129	tetragon/observer	82	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+130	tetragon/observer	83	generic_kprobe_actions	False	scalar memory access	refused	unclassified	refused	unclassified	True
+131	tetragon/observer	84	generic_kprobe_output	False	scalar memory access	refused	scalar memory access	refused	infinite loop	True
+132	tetragon/observer	85	generic_kprobe_setup_event	True	None	accepted	None	accepted	None	True
+133	tetragon/observer	9	generic_kprobe_filter_arg	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+134	katran	1	balancer_ingress	True	None	accepted	None	accepted	None	True
+135	tracee/monitor	1	security_bpf_kprobe	True	None	accepted	None	accepted	None	True
+136	tracee/monitor	10	trace_sys_exit	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+137	tracee/monitor	11	trace_ptrace	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+138	tracee/monitor	2	lsm_bpf_check	True	None	accepted	None	accepted	None	True
+139	tracee/monitor	3	tracepoint__raw_syscalls__sys_enter	False	scalar memory access	refused	scalar memory access	accepted	None	True
+140	tracee/monitor	4	sys_enter_init	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+141	tracee/monitor	5	sys_enter_submit	False	scalar memory access	refused	scalar memory access	refused	stack bounds	True
+142	tracee/monitor	6	tracepoint__raw_syscalls__sys_exit	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+143	tracee/monitor	7	sys_exit_init	False	scalar memory access	refused	scalar memory access	refused	scalar memory access	True
+144	tracee/monitor	8	sys_exit_submit	False	stack bounds	refused	stack bounds	refused	stack bounds	True
+145	tracee/monitor	9	trace_sys_enter	False	scalar memory access	refused	scalar memory access	accepted	None	True
