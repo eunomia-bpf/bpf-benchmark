@@ -180,8 +180,12 @@ Eight archived generated LINK/helper sites now bind local tokens, ELF
 coordinates and fetched native BL return labels to that same complete LINK.
 The canonical CODE9 numeric comparison holds exactly at zero function origin;
 other placements retain an explicit fetched-code observation. These sites
-call BPF helpers. Loaded text, the generated memcpy caller and its complete
-code-aware register relation still follow.
+call BPF helpers. The same original C execution and actual alias16/native
+path now derive all31 GPR/SP/32-vector/NZCV observations with fetched code
+labels, retaining trace, copied bytes, real free-lists and caller frames.
+An original R30/CODE9 reader also derives the actual RET continuation fetch.
+Old numeric APIs delegate once and retain their complete types. Actual loaded
+text and the generated caller's initial resource/code binding still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

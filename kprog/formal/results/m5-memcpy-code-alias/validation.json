@@ -1,0 +1,146 @@
+{
+  "confirmed_utc": "2026-11-27T12:09:10.772784+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeAlias"
+    ],
+    "exit": 0,
+    "seconds": 2.632448434829712,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 603,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-code-alias/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7110779285430908,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 4,
+  "source_steps": {
+    "alias_control_steps": 3,
+    "native_helper_steps": 13,
+    "native_total": 16,
+    "copied_bytes": 16,
+    "returned_code": "derived from original CODE9 reader and same Kept/RET"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCodeAlias.lean",
+      "size_bytes": 17934,
+      "mtime_ns": 1795781034479246763
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 4.7661354541778564,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1442,
+  "old_full_type_examples": 3,
+  "batch_public_queries": 18,
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "1fc927879f9f7d265426616d58b979f56e78467cf84d6e70dadf1cd0faf28e84",
+    "kprog/formal/README.md": "d3a9331ef5275788595ec5937b791b1595c05e844e3ad24c13c69e692b16a24e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64CodeRegisters.lean": "1f528296ae93390fda79e2620e6ba3f81328cd3a13fe442ac8e7efcb90dd229e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCodeView.lean": "920d6b3c96d359ae1dd88d426f1e59ba79b5f4ef30a5c2a33ae4a4190a499074",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCodeEntry.lean": "b011eeee8c6897eba460fc9045e2b004449de38eea72ab396e120c144e3aa2c5",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyCodeAlias.lean": "34734fb4f2fee52cbe169599744cdfc962660c5f20b4893a94a6176d789a9cff",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyRetainedProgram.lean": "bb6af13c0ba4d150d72cb359f1f4c19f6e443ad3445f02cdaa070f84d542640c",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyRetainedEntry.lean": "ee084e0a125277eb6c4312ced697195145fd5c3c86053b18e6fca7ee68403ad9"
+  },
+  "direct_checks": {
+    "code-registers-stage5": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "KProgFormal/ClightRefinement/Arm64CodeRegisters.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7362148761749268,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-code-view-stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-memcpy-code-view/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.370826721191406,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-code-entry-stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-memcpy-code-entry/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 3.844219923019409,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "memcpy-code-alias-stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-memcpy-code-alias/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.1340692043304443,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  }
+}

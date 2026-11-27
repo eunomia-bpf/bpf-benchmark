@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.Arm64CodeRegisters
+
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.codeAt_unique
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.codeAt_unique
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.codeAt_transport
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.codeAt_transport
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.coordinate_unique
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.coordinate_unique
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.coordinate_transport
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.coordinate_transport
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.numeric
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.numeric
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.frame
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.frame
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.cursor
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.cursor
+#check KProgFormal.ClightRefinement.Arm64CodeRegisters.code_at
+#print axioms KProgFormal.ClightRefinement.Arm64CodeRegisters.code_at

@@ -1,0 +1,12 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.native_program
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.native_program
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.link_coordinate
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.link_coordinate
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.observe
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.observe
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.finish_copied
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.finish_copied
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.complete
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyCodeView.complete
