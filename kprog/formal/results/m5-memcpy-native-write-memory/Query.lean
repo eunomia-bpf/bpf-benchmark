@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyWriteMemory
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyWriteMemory.write_frame
+#print axioms Arm64KernelMemcpyWriteMemory.write_frame
+#check Arm64KernelMemcpyWriteMemory.initialized_inside
+#print axioms Arm64KernelMemcpyWriteMemory.initialized_inside
+#check Arm64KernelMemcpyWriteMemory.initialized_outside
+#print axioms Arm64KernelMemcpyWriteMemory.initialized_outside
+#check Arm64KernelMemcpyWriteMemory.execute
+#print axioms Arm64KernelMemcpyWriteMemory.execute
