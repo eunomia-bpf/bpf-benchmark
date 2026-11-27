@@ -1,0 +1,15 @@
+{
+  "utc": "2026-11-27T02:14:45Z",
+  "pid": 880075,
+  "command": [
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127",
+    "guest",
+    "CHECK_APP=otelcol-ebpf-profiler/profiling"
+  ],
+  "revision": "cc20bebfaaafd79332abcf0827b44630674b0c06",
+  "scope": "Frozen OTel profiling ARM baseline/post1x10s stats-on checked-corpus functional pipeline; full timing frozen.",
+  "source_working_diff": "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/launch-20261127T021445Z-otel-source-working.diff.gz",
+  "compiler_address_space_bytes": 51539607552
+}
