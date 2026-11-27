@@ -1,0 +1,17 @@
+make: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+tetragon_status=0; tracee_status=0; \
+make guest CHECK_APP=tetragon/observer || tetragon_status=$?; \
+printf 'TETRAGON_EXIT=%s\n' "$tetragon_status"; \
+make guest CHECK_APP=tracee/monitor || tracee_status=$?; \
+printf 'TRACEE_EXIT=%s\n' "$tracee_status"; \
+if [ "$tetragon_status" -ne 0 ]; then exit "$tetragon_status"; fi; \
+exit "$tracee_status"
+make[1]: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 guest_controller.py tetragon/observer
+make[1]: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+TETRAGON_EXIT=0
+make[1]: Entering directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+python3 guest_controller.py tracee/monitor
+make[1]: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'
+TRACEE_EXIT=0
+make: Leaving directory '/workspaces/repository/kprog/results/arm64-checked-corpus-20261127'

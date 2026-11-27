@@ -27,3 +27,13 @@ tail-build:
 .PHONY: tail-smoke
 tail-smoke:
 	python3 tailcall.py startup
+
+.PHONY: remaining-apps
+remaining-apps:
+	@tetragon_status=0; tracee_status=0; \
+	$(MAKE) guest CHECK_APP=tetragon/observer || tetragon_status=$$?; \
+	printf 'TETRAGON_EXIT=%s\n' "$$tetragon_status"; \
+	$(MAKE) guest CHECK_APP=tracee/monitor || tracee_status=$$?; \
+	printf 'TRACEE_EXIT=%s\n' "$$tracee_status"; \
+	if [ "$$tetragon_status" -ne 0 ]; then exit "$$tetragon_status"; fi; \
+	exit "$$tracee_status"
