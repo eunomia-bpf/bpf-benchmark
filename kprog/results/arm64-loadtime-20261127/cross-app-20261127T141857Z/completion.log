@@ -1,0 +1,30 @@
+{
+  "compiled_requests": 88,
+  "recovered_input_exceptions": 23,
+  "apps": {
+    "bcc/set": {
+      "requests": 23,
+      "frontend_seconds": 41.712914504052605,
+      "all_compiler_seconds": 44.062106382101774
+    },
+    "katran/balancer": {
+      "requests": 1,
+      "frontend_seconds": 58.500425186997745,
+      "all_compiler_seconds": 60.23158104397589
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "requests": 13,
+      "frontend_seconds": 4429.367698403046,
+      "all_compiler_seconds": 4486.482246426021
+    },
+    "tetragon/observer": {
+      "requests": 51,
+      "frontend_seconds": 4181.537507984933,
+      "all_compiler_seconds": 4806.698150366923
+    }
+  },
+  "archive_files_equal_raw": [
+    456,
+    162
+  ]
+}

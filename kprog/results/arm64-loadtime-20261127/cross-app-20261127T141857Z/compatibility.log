@@ -1,0 +1,23 @@
+{
+  "utc": "2026-11-27T15:11:38Z",
+  "apps": {
+    "tetragon/observer": {
+      "inventory": 23,
+      "completed": 23,
+      "pending": 0,
+      "replay_status_counts": {
+        "compiled": 23
+      },
+      "completed_replay_frontend_seconds": 2100.6796348399657,
+      "completed_replay_all_compiler_seconds": 2471.9483729278727,
+      "original_generation_failures": 0,
+      "recovered_generation_failures": 0,
+      "matched_successful_original_frontend_seconds": 3734.879442167032,
+      "matched_replay_frontend_seconds": 2100.6796348399657,
+      "matched_replay_all_compiler_seconds": 2471.9483729278727,
+      "completed_original_frontend_max_rss_kib": 11431768,
+      "completed_replay_frontend_max_rss_kib": 4155036
+    }
+  },
+  "original_generation_failures": []
+}
