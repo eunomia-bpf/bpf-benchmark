@@ -903,7 +903,7 @@
   "declaration_count": 93,
   "shared_header_changes_applied": false,
   "active_tetragon": "963637 / guest-20261127T091129Z still compiling; current shared headers retained.",
-  "publication_notes": "Apply header transition when the current Tetragon guest releases imageEX; include FORMAL-owned canonical changes before deleting the service helper. arm64_sim_direct.h contains pre-existing OMP WIP: commit only const deltas to HEAD and preserve peer staged/unstaged bytes. The patch is based on current working bytes; recheck hashes if owners change them. Regenerator literal included. Validate same B after transition at the two-compiler ceiling.",
+  "publication_notes": "Apply header transition when the current Tetragon guest releases imageEX; include FORMAL-owned canonical changes before deleting the service helper. arm64_sim_direct.h contains pre-existing OMP WIP: commit only const deltas to HEAD and preserve peer staged/unstaged bytes. The patch is based on current working bytes; recheck hashes if owners change them. Regenerator literal included. Validate same B after transition at the two-compiler ceiling. Updated boundary: all original guests have closed; preserve CPU18 input-recovery starting headers until its actual completion. Then coordinate FORMAL and own source cleanup. Refreshed replay recipe context retains 72701b211 stable-input recovery and original index handling.",
   "formal_handoff": {
     "utc": "2026-11-27T13:01:23Z",
     "resume_path": "/workspaces/.agent-state/kprog-lanes/formal/resume-msg.md",
@@ -911,5 +911,25 @@
     "headers": 23,
     "body_sha256": "09fbc39f7176a5f4ba18cbae8ccb63fbe04105648ec029b63ff6236adc806d42",
     "status": "Delivered to resume file; consumption and canonical header publication unverified."
+  },
+  "recipe_refresh": {
+    "utc": "2026-11-27T14:56:30Z",
+    "source_revision": "1f878a878d9df36cadfe149c6df0b5da3365fa33",
+    "reason": "72701b211 added captured-input recovery after original patch creation. Refresh only recipe context and remove its now-obsolete runtime macro-profile assertion together with the override helper.",
+    "files": [
+      {
+        "path": "kprog/results/arm64-loadtime-20261127/cross_app.py",
+        "before_sha256": "253d6aa42f3f900794da5f322572a43491809703d76513bf15cb48f14f42fd46",
+        "after_sha256": "32a95b69e152d04e818b5efb506fe3a0440548413e5a82680f26c2705b185bd1"
+      },
+      {
+        "path": "kprog/results/arm64-loadtime-20261127/cross_app_report.py",
+        "before_sha256": "3b97f78840902ba035f3534ddb810f999e0aeae0f8cea89b91858fa52ab1193b",
+        "after_sha256": "53d9ace2ea27580884fb1e59de387a3972791d7f7dcd94d65b672c5fb50337bc"
+      }
+    ],
+    "live_sources_modified": false,
+    "header_declarations_changed": false,
+    "full_patch_apply_check_returncode": 0
   }
 }

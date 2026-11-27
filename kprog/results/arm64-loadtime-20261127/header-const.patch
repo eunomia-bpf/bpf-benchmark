@@ -845,9 +845,9 @@
  
  def now():
      return subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip()
-@@ -56,9 +56,6 @@
-         if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
-             record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
+@@ -69,9 +69,6 @@
+             if archive.name.split('.')[0].isdigit() and any(part in archive.name for part in ['.success.', '.failure.']):
+                 record['inventory'].append(dict(app='tetragon/observer',archive=str(archive),member=None))
      record['coverage_gaps']=['tracee/monitor has no completed ARM checked archive yet; its live stage2 remains queued.', 'Cilium all ten captured requests already compiled in corpus-20261127T115432Z; this job avoids repeating them.']
 -    overrides=_constant_decoder_overrides().encode()
 -    record['macro_profile_sha256']=hashlib.sha256(overrides).hexdigest()
@@ -855,7 +855,15 @@
      header_paths=[ROOT/'kprog/arm64/arm64_sim_local_bpf.h',ROOT/'kprog/arm64/arm64_sim_direct.h',*sorted((ROOT/'kprog/formal/generated').glob('arm64*.h'))]
      record['header_sha256']={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in header_paths}
      with tarfile.open(RAW/'source-headers.tar','w') as t:
-@@ -93,7 +90,6 @@
+@@ -80,7 +77,6 @@
+     record['common_flags']=flags
+     if 'recovery_of' in record:
+         assert flags==prior['common_flags']
+-        assert record['macro_profile_sha256']==prior['macro_profile_sha256']
+         assert record['header_sha256']==prior['header_sha256']
+     save()
+     with (LANE.parent/'locks/timing').open('a') as lock:
+@@ -111,7 +107,6 @@
                          marker=('#include '+json.dumps(str(ROOT/'kprog/arm64/arm64_sim_local_bpf.h'))).encode()
                          if source.count(marker)!=1 or b'#undef ARM64_SIM_L_READ_REG_RAW_INTO' in source:
                              raise RuntimeError('Archived input is not the original unqualified ARM producer source.')
@@ -865,7 +873,7 @@
                          row['source_sha256']=hashlib.sha256(source).hexdigest()
 --- a/kprog/results/arm64-loadtime-20261127/cross_app_report.py
 +++ b/kprog/results/arm64-loadtime-20261127/cross_app_report.py
-@@ -70,7 +70,7 @@
+@@ -83,7 +83,7 @@
                    completed_replay_frontend_max_rss_kib=max((c['max_rss_kib'] for r in completed for c in r['replay_commands'] if '-emit-llvm' in c['command']),default=0))
  result=dict(utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip(),
              controller='controller.json',controller_status_at_snapshot=record.get('controller_status'),
