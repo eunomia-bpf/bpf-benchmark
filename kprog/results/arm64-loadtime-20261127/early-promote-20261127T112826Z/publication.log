@@ -1,0 +1,9 @@
+[master 0468437ec] Record real ARM B frontend early-promote profile
+ 5 files changed, 3242 insertions(+)
+ create mode 100644 kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/archive.log
+ create mode 100644 kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/controller.json
+ create mode 100644 kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/evidence.tar.gz
+ create mode 100644 kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/publication.log
+ create mode 100644 kprog/results/arm64-loadtime-20261127/early-promote-20261127T112826Z/trace-totals.json
+To https://github.com/eunomia-bpf/bpf-benchmark.git
+   d745c7c79..0468437ec  master -> master

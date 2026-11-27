@@ -63,7 +63,29 @@ try:
     source.parent.mkdir(parents=True, exist_ok=True)
     if source.exists() and source.read_bytes() != original_source:
         raise RuntimeError('canonical archived source path contains different data: '+str(source))
-    source.write_bytes(original_source)
+    source_bytes = original_source
+    if mode == 'const-selectors':
+        header = ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
+        lines = header.read_text().splitlines(keepends=True)
+        macros = []
+        index = 0
+        while index < len(lines):
+            block = lines[index]
+            index += 1
+            if not block.startswith('#define '):
+                continue
+            while block.rstrip().endswith('\\') and index < len(lines):
+                block += lines[index]
+                index += 1
+            declaration = '__u64 __a64_l_reg = (REG);'
+            if declaration in block:
+                name = block.split('(', 1)[0].removeprefix('#define ')
+                macros.append((name, block.replace(declaration, 'const '+declaration)))
+        marker = ('#include '+json.dumps(str(header))).encode()
+        overrides = '\n'.join('#undef '+name+'\n'+body for name, body in macros).encode()
+        source_bytes = source_bytes.replace(marker, marker+b'\n'+overrides)
+        record['constant_selector_macros'] = [name for name, _ in macros]
+    source.write_bytes(source_bytes)
     record['restored_source'] = str(source)
     record['canonical_outputs_before'] = [str(p) for p in [frontend, frontend.with_name('trusted_arm64.bpf.o')] if p.exists()]
     # The retained original request archive owns the prior canonical products.
@@ -96,12 +118,35 @@ except Exception:
 finally:
     record['ended_utc'] = now()
     save()
-    try:
-        with (OUT/'archive.log').open('wb') as log, (OUT/'evidence.tar.gz').open('wb') as output:
-            result = subprocess.run(['tar', '-C', str(RAW.parent), '-czf', '-', RAW.name], stdout=output, stderr=log)
-        record['archive_returncode'] = result.returncode
+    if 'restored_source' in record:
+        source_path = Path(record['restored_source'])
+        produced = [source_path]
+        for command in record.get('commands', []):
+            arguments = command['command']
+            if '-o' in arguments:
+                path = Path(arguments[arguments.index('-o')+1])
+                if path.exists() and path not in produced:
+                    produced.append(path)
+        with tarfile.open(RAW/'canonical-stages.tar', 'w') as archive:
+            for path in produced:
+                archive.add(path, arcname=path.name)
+        record['canonical_stages'] = [dict(path=str(path), bytes=path.stat().st_size) for path in produced]
         save()
-        if result.returncode:
+    try:
+        with (OUT/'archive.log').open('wb') as log:
+            commands = [['tar', '-C', str(RAW.parent), '-cf', '-', RAW.name],
+                        ['zstd', '-T1', '-3', '-c'],
+                        ['split', '-b', '48000000', '-', str(OUT/'evidence.tar.zst.part-')]]
+            first = subprocess.Popen(commands[0], stdout=subprocess.PIPE, stderr=log)
+            second = subprocess.Popen(commands[1], stdin=first.stdout, stdout=subprocess.PIPE, stderr=log)
+            first.stdout.close()
+            third = subprocess.Popen(commands[2], stdin=second.stdout, stderr=log)
+            second.stdout.close()
+            codes = [third.wait(), second.wait(), first.wait()][::-1]
+        record['archive_commands'] = commands
+        record['archive_returncodes'] = codes
+        save()
+        if any(codes):
             raise RuntimeError('profile archive failed')
         with Path('/workspaces/.agent-state/kprog-lanes/locks/git').open('a') as lock, (OUT/'publication.log').open('a') as log:
             fcntl.flock(lock, fcntl.LOCK_EX)

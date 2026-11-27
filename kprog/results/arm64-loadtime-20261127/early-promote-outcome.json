@@ -1,0 +1,34 @@
+{
+  "utc": "2026-11-27T11:34:47Z",
+  "source_control": "early-promote-20261127T112826Z",
+  "source_revision": "a5efe721e805b929a464d738a344c136eb6a63b9",
+  "controller_status": 0,
+  "stages": [
+    {
+      "wall_seconds": 29.848336641996866,
+      "max_rss_kib": 2299200,
+      "returncode": 0
+    },
+    {
+      "wall_seconds": 115.30804111101315,
+      "max_rss_kib": 7542144,
+      "returncode": 0
+    },
+    {
+      "wall_seconds": 23.232557584007736,
+      "max_rss_kib": 950100,
+      "returncode": 0
+    },
+    {
+      "wall_seconds": 2.267411581997294,
+      "max_rss_kib": 278000,
+      "returncode": 0
+    }
+  ],
+  "total_stage_seconds": 170.65634691901505,
+  "IR_byte_equal": false,
+  "B_code_equal": false,
+  "B_entire_object_equal": false,
+  "adoption": "Baseline production pipeline retained; early mem2reg moves the promotion cost and provides no observed loading acceleration.",
+  "next_control": "Immutable register selector temporaries become const in generated source macro overrides derived from the same canonical header; runtime headers and active Tetragon remain unchanged."
+}
