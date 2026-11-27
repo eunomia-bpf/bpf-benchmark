@@ -1,5 +1,5 @@
 {
-  "utc": "2026-11-27T12:20:58Z",
+  "utc": "2026-11-27T12:27:36Z",
   "controller": "controller.json",
   "controller_status_at_snapshot": null,
   "producer_sha256": "9cfa222f31e688d3175236791e2d913a66a379b9e823228ee4046aa9ced96855",
@@ -38,19 +38,19 @@
     },
     "otelcol-ebpf-profiler/profiling": {
       "inventory": 13,
-      "completed": 2,
-      "pending": 11,
+      "completed": 3,
+      "pending": 10,
       "replay_status_counts": {
-        "compiled": 2,
-        "pending": 11
+        "compiled": 3,
+        "pending": 10
       },
       "original_generation_failures": 5,
-      "recovered_generation_failures": 0,
+      "recovered_generation_failures": 1,
       "matched_successful_original_frontend_seconds": 125.8995512079855,
       "matched_replay_frontend_seconds": 69.7750955989759,
       "matched_replay_all_compiler_seconds": 71.00048524697195,
-      "completed_original_frontend_max_rss_kib": 5580700,
-      "completed_replay_frontend_max_rss_kib": 2062376
+      "completed_original_frontend_max_rss_kib": 49796848,
+      "completed_replay_frontend_max_rss_kib": 15405088
     },
     "tetragon/observer": {
       "inventory": 51,
@@ -2380,10 +2380,77 @@
         ]
       },
       "original_generation_failed": true,
-      "replay_status": "pending",
-      "replay_commands": [],
-      "original_and_current_flags_equal": null,
-      "recovered_generation_failure": false
+      "replay_status": "compiled",
+      "replay_commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-emit-llvm",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/27/trusted_arm64.bpf.c",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/27/trusted_arm64.bpf.frontend.bc"
+          ],
+          "returncode": 0,
+          "wall_seconds": 459.7636702830205,
+          "max_rss_kib": 15405088,
+          "user_seconds": 446.768412,
+          "system_seconds": 12.465976
+        },
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-w",
+            "-g",
+            "-O2",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_arm64",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "--sysroot=/workspaces/repository/.cache/qemu-arm64-root",
+            "-I",
+            "/workspaces/repository/.cache/qemu-arm64-root/usr/include/aarch64-linux-gnu",
+            "-c",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/27/trusted_arm64.bpf.frontend.bc",
+            "-o",
+            "/workspaces/kprog-raw/perf/arm64-loadtime-20261127/cross-app-20261127T121315Z/27/trusted_arm64.bpf.o"
+          ],
+          "returncode": 0,
+          "wall_seconds": 7.380384238000261,
+          "max_rss_kib": 568020,
+          "user_seconds": 7.116441,
+          "system_seconds": 0.260663
+        }
+      ],
+      "original_and_current_flags_equal": true,
+      "recovered_generation_failure": true,
+      "replay_artifact_archive": {
+        "path": "request-27-evidence.tar.zst",
+        "bytes": 8537588,
+        "sha256": "e818865e634fe699019c4aad0c9b98a33df4380e005de1818e4f0f792420eddb"
+      }
     },
     {
       "index": 28,

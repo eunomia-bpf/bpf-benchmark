@@ -1,6 +1,7 @@
 """Pair live compilation replay receipts with their original generation stages."""
 import collections
 import io
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -50,6 +51,10 @@ for index,item in enumerate(record['inventory'],1):
                      replay_commands=replay_commands,original_and_current_flags_equal=comparable_flags,
                      recovered_generation_failure=bool(old_failed and case and case['status']=='compiled')))
 apps={}
+for row in rows:
+    artifact=OUT/('request-'+str(row['index'])+'-evidence.tar.zst')
+    if artifact.exists():
+        row['replay_artifact_archive']=dict(path=artifact.name,bytes=artifact.stat().st_size,sha256=hashlib.sha256(artifact.read_bytes()).hexdigest())
 for app in sorted({r['app'] for r in rows}):
     app_rows=[r for r in rows if r['app']==app]
     completed=[r for r in app_rows if r['replay_status']!='pending']

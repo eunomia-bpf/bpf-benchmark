@@ -1,0 +1,178 @@
+{
+  "utc": "2026-11-27T12:27:36Z",
+  "apps": {
+    "bcc/set": {
+      "inventory": 23,
+      "completed": 23,
+      "pending": 0,
+      "replay_status_counts": {
+        "compiled": 23
+      },
+      "original_generation_failures": 0,
+      "recovered_generation_failures": 0,
+      "matched_successful_original_frontend_seconds": 63.71693169901846,
+      "matched_replay_frontend_seconds": 41.712914504052605,
+      "matched_replay_all_compiler_seconds": 44.062106382101774,
+      "completed_original_frontend_max_rss_kib": 759312,
+      "completed_replay_frontend_max_rss_kib": 369308
+    },
+    "katran/balancer": {
+      "inventory": 1,
+      "completed": 1,
+      "pending": 0,
+      "replay_status_counts": {
+        "compiled": 1
+      },
+      "original_generation_failures": 0,
+      "recovered_generation_failures": 0,
+      "matched_successful_original_frontend_seconds": 119.79352177502005,
+      "matched_replay_frontend_seconds": 58.500425186997745,
+      "matched_replay_all_compiler_seconds": 60.23158104397589,
+      "completed_original_frontend_max_rss_kib": 6717936,
+      "completed_replay_frontend_max_rss_kib": 2183064
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "inventory": 13,
+      "completed": 3,
+      "pending": 10,
+      "replay_status_counts": {
+        "compiled": 3,
+        "pending": 10
+      },
+      "original_generation_failures": 5,
+      "recovered_generation_failures": 1,
+      "matched_successful_original_frontend_seconds": 125.8995512079855,
+      "matched_replay_frontend_seconds": 69.7750955989759,
+      "matched_replay_all_compiler_seconds": 71.00048524697195,
+      "completed_original_frontend_max_rss_kib": 49796848,
+      "completed_replay_frontend_max_rss_kib": 15405088
+    },
+    "tetragon/observer": {
+      "inventory": 51,
+      "completed": 0,
+      "pending": 51,
+      "replay_status_counts": {
+        "pending": 51
+      },
+      "original_generation_failures": 0,
+      "recovered_generation_failures": 0,
+      "matched_successful_original_frontend_seconds": 0,
+      "matched_replay_frontend_seconds": 0,
+      "matched_replay_all_compiler_seconds": 0,
+      "completed_original_frontend_max_rss_kib": 0,
+      "completed_replay_frontend_max_rss_kib": 0
+    }
+  },
+  "original_generation_failures": [
+    {
+      "index": 27,
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "original": {
+        "frontend": {
+          "returncode": 1,
+          "wall_seconds": 806.3300141899963,
+          "max_rss_kib": 49796848
+        },
+        "object": null,
+        "B_object_archived": false,
+        "failure_diagnostics": [
+          "LLVM ERROR: out of memory",
+          "Allocation failed",
+          "#11 0x000072143322effa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)",
+          "#13 0x00007214335ea30e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)",
+          "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
+        ]
+      },
+      "replay_status": "compiled"
+    },
+    {
+      "index": 28,
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "original": {
+        "frontend": {
+          "returncode": 1,
+          "wall_seconds": 1118.313786151004,
+          "max_rss_kib": 49872488
+        },
+        "object": null,
+        "B_object_archived": false,
+        "failure_diagnostics": [
+          "LLVM ERROR: out of memory",
+          "Allocation failed",
+          "#11 0x00007bf15729bffa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)",
+          "#13 0x00007bf15765730e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)",
+          "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
+        ]
+      },
+      "replay_status": "pending"
+    },
+    {
+      "index": 29,
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "original": {
+        "frontend": {
+          "returncode": 1,
+          "wall_seconds": 1166.1151904879953,
+          "max_rss_kib": 49953948
+        },
+        "object": null,
+        "B_object_archived": false,
+        "failure_diagnostics": [
+          "LLVM ERROR: out of memory",
+          "Allocation failed",
+          "#11 0x00007b6927489ffa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)",
+          "#13 0x00007b692784530e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)",
+          "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
+        ]
+      },
+      "replay_status": "pending"
+    },
+    {
+      "index": 30,
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "original": {
+        "frontend": {
+          "returncode": 1,
+          "wall_seconds": 1263.6737540379982,
+          "max_rss_kib": 49943560
+        },
+        "object": null,
+        "B_object_archived": false,
+        "failure_diagnostics": [
+          "LLVM ERROR: out of memory",
+          "Allocation failed",
+          "#11 0x0000778b1afd4ffa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)",
+          "#13 0x0000778b1b39030e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)",
+          "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
+        ]
+      },
+      "replay_status": "pending"
+    },
+    {
+      "index": 33,
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "original": {
+        "frontend": {
+          "returncode": 1,
+          "wall_seconds": 1439.1252764569945,
+          "max_rss_kib": 49945564
+        },
+        "object": null,
+        "B_object_archived": false,
+        "failure_diagnostics": [
+          "LLVM ERROR: out of memory",
+          "Allocation failed",
+          "#11 0x0000795da04bcffa llvm::PromoteMemToReg(llvm::ArrayRef<llvm::AllocaInst*>, llvm::DominatorTree&, llvm::AssumptionCache*) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x19ffffa)",
+          "#13 0x0000795da087830e llvm::SROAPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0x1dbb30e)",
+          "clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)"
+        ]
+      },
+      "replay_status": "pending"
+    }
+  ]
+}
