@@ -1,0 +1,111 @@
+{
+  "started_utc": "2026-11-27T09:11:29Z",
+  "pid": 963637,
+  "raw": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z",
+  "revision": "62092f0d389e068ef030104fc234eb2da3c1a15a",
+  "app": "tetragon/observer",
+  "scope": "Frozen tetragon/observer corpus workload, baseline and registered checked native post phase; one10second functional sample withstats. Cortex-A57 fourCPUs/eightGiB matches current ARM entry. Diagnostic only, full timing frozen.",
+  "run_token": "abbf3c4b",
+  "broker_command": [
+    "prlimit",
+    "--as=51539607552",
+    "taskset",
+    "-c",
+    "16",
+    "python3",
+    "/workspaces/repository/kprog/trusted_compile.py",
+    "serve",
+    "--scope",
+    "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z",
+    "--state",
+    "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/broker",
+    "--clang",
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "--arm64-sysroot",
+    "/workspaces/repository/.cache/qemu-arm64-root"
+  ],
+  "guest_command": [
+    "taskset",
+    "-c",
+    "16-19",
+    "qemu-system-aarch64",
+    "-M",
+    "virt",
+    "-cpu",
+    "cortex-a57",
+    "-smp",
+    "4",
+    "-m",
+    "8G",
+    "-nographic",
+    "-no-reboot",
+    "-kernel",
+    "/workspaces/.agent-state/kprog-ck/build-arm64/arch/arm64/boot/Image",
+    "-fsdev",
+    "local,id=rootfs,path=/workspaces/repository/.cache/qemu-arm64-root,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=rootfs,mount_tag=/dev/root",
+    "-fsdev",
+    "local,id=workspace,path=/workspaces,security_model=none,multidevs=remap",
+    "-device",
+    "virtio-9p-device,fsdev=workspace,mount_tag=workspace",
+    "-fsdev",
+    "local,id=hostpython,path=/usr/lib/python3/dist-packages,security_model=none,multidevs=remap,readonly=on",
+    "-device",
+    "virtio-9p-device,fsdev=hostpython,mount_tag=hostpython",
+    "-append",
+    "console=ttyAMA0 root=/dev/root rootfstype=9p rootflags=trans=virtio,version=9p2000.L,access=any rw init=/qemu-perf-checked-init loglevel=4 panic=30 oops=panic raid=noautodetect"
+  ],
+  "guest_started_utc": "2026-11-27T09:26:20Z",
+  "qemu_returncode": 0,
+  "cases": [
+    {
+      "app": "tetragon/observer",
+      "command": [
+        "bash",
+        "/workspaces/repository/kprog/test/run_checked_otel.sh",
+        "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T091129Z/tetragon-observer",
+        "tetragon/observer",
+        "",
+        "",
+        "arm64"
+      ],
+      "returncode": 0,
+      "corpus_paths": [
+        "/workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000021_587749",
+        "/workspaces/repository/corpus/results/verified-captures-k_jm486w"
+      ]
+    }
+  ],
+  "broker_returncode": 0,
+  "controller_status": 0,
+  "ended_utc": "2026-11-27T14:07:06Z",
+  "archive_commands": [
+    [
+      "tar",
+      "-C",
+      "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127",
+      "-cf",
+      "-",
+      "20261127T091129Z"
+    ],
+    [
+      "zstd",
+      "-T1",
+      "-3",
+      "-c"
+    ],
+    [
+      "split",
+      "-b",
+      "48000000",
+      "-",
+      "/workspaces/repository/kprog/results/arm64-checked-corpus-20261127/guest-20261127T091129Z/evidence.tar.zst.part-"
+    ]
+  ],
+  "archive_returncodes": [
+    0,
+    0,
+    0
+  ]
+}
