@@ -176,7 +176,12 @@ The actual ordinary reg30 branch now reads the coordinate, writes the raw
 address and tag9, and frees all three writer locals. Its saved caller then
 breaks the original loop, frees both LINK locals and returns the same address:
 638 actual source transitions, derived from original read/write resources.
-Native BL/code-coordinate and global source/native binding still follow.
+Eight archived generated LINK/helper sites now bind local tokens, ELF
+coordinates and fetched native BL return labels to that same complete LINK.
+The canonical CODE9 numeric comparison holds exactly at zero function origin;
+other placements retain an explicit fetched-code observation. These sites
+call BPF helpers. Loaded text, the generated memcpy caller and its complete
+code-aware register relation still follow.
 
 The original producer's first PUSH executes initialization, dispatch, real
 stores/freeing and entry into the next source label. Its same final heap

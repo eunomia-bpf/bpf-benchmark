@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.Arm64MemcpyLinkCode
+
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.coordinates
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.coordinates
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.object_placement
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.object_placement
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.return_decodable
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.return_decodable
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.unrelocated_call
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.unrelocated_call
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.native_control
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.native_control
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.Observation.numeric_iff
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.Observation.numeric_iff
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.execute
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.execute
+#check KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.execute_object
+#print axioms KProgFormal.ClightRefinement.Arm64MemcpyLinkCode.execute_object

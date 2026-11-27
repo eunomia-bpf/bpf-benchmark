@@ -1,0 +1,190 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/arm64-checked-corpus-20261127/20261127T090610Z/cilium-agent/service.tar.gz",
+  "archive_sha256": "c93a211df6f32ccf524865057ae164a0ea918bc6e14ab7c694a07d28d83093dd",
+  "member": "service/requests/1.success.tar.gz",
+  "member_sha256": "6951ad71c8137b1a224c5f4d466ee396027f9e18b1ffe3422b31e7f0f98a368e",
+  "native_sha256": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230",
+  "source_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+  "native_member": "request/generated/request.native.o",
+  "source_member": "request/generated/trusted_arm64.bpf.c",
+  "symbol": "cil_xdp_entry",
+  "section": ".text",
+  "symbol_value": 18128,
+  "symbol_size": 812,
+  "source_identities": {
+    "kprog/arm64/arm64_sim_local_bpf.h": {
+      "captured_sha256": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+      "current_sha256": "6f411427574bb7b39da95af941aab521ae0d5ad52df8d95c6f02cfdd94327752",
+      "equal": true
+    },
+    "kprog/arm64/micro-prog/generate_micro_sim_proofs.py": {
+      "captured_sha256": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
+      "current_sha256": "ac4f78382db53902600994fb24c71e625c1306ed50fcf7e4dcfc361c9252775e",
+      "equal": true
+    }
+  },
+  "calls": [
+    {
+      "source_pc": 84,
+      "source_token": 88,
+      "object_pc": 18212,
+      "call_word": 2483027968,
+      "continuation_word": 3019898944,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 101,
+      "source_excerpt": [
+        "arm64_l_54:",
+        "\t/* 0x54: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0x58ULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_58:",
+        "\t/* 0x58: cbz x0, 60 <cil_xdp_entry+0x60> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0x58, 0x60, arm64_l_60);"
+      ]
+    },
+    {
+      "source_pc": 140,
+      "source_token": 144,
+      "object_pc": 18268,
+      "call_word": 2483027968,
+      "continuation_word": 3019898944,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 146,
+      "source_excerpt": [
+        "arm64_l_8c:",
+        "\t/* 0x8c: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0x90ULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_90:",
+        "\t/* 0x90: cbz x0, 98 <cil_xdp_entry+0x98> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0x90, 0x98, arm64_l_98);"
+      ]
+    },
+    {
+      "source_pc": 168,
+      "source_token": 172,
+      "object_pc": 18296,
+      "call_word": 2483027968,
+      "continuation_word": 3019898944,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 168,
+      "source_excerpt": [
+        "arm64_l_a8:",
+        "\t/* 0xa8: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0xacULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_ac:",
+        "\t/* 0xac: cbz x0, b4 <cil_xdp_entry+0xb4> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0xac, 0xb4, arm64_l_b4);"
+      ]
+    },
+    {
+      "source_pc": 244,
+      "source_token": 248,
+      "object_pc": 18372,
+      "call_word": 2483027968,
+      "continuation_word": 3036676288,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 229,
+      "source_excerpt": [
+        "arm64_l_f4:",
+        "\t/* 0xf4: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0xf8ULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_f8:",
+        "\t/* 0xf8: cbnz x0, 110 <cil_xdp_entry+0x110> */",
+        "\tARM64_SIM_A64_CBNZ(ARM64_X0, 0xf8, 0x110, arm64_l_110);"
+      ]
+    },
+    {
+      "source_pc": 264,
+      "source_token": 268,
+      "object_pc": 18392,
+      "call_word": 2483027968,
+      "continuation_word": 3019899040,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 245,
+      "source_excerpt": [
+        "arm64_l_108:",
+        "\t/* 0x108: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0x10cULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_10c:",
+        "\t/* 0x10c: cbz x0, 120 <cil_xdp_entry+0x120> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0x10c, 0x120, arm64_l_120);"
+      ]
+    },
+    {
+      "source_pc": 304,
+      "source_token": 308,
+      "object_pc": 18432,
+      "call_word": 2483027968,
+      "continuation_word": 3019899104,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 278,
+      "source_excerpt": [
+        "arm64_l_130:",
+        "\t/* 0x130: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0x134ULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_134:",
+        "\t/* 0x134: cbz x0, 150 <cil_xdp_entry+0x150> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0x134, 0x150, arm64_l_150);"
+      ]
+    },
+    {
+      "source_pc": 328,
+      "source_token": 332,
+      "object_pc": 18456,
+      "call_word": 2483027968,
+      "continuation_word": 872417056,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_xdp_adjust_meta",
+      "relocation_addend": 0,
+      "source_line": 298,
+      "source_excerpt": [
+        "arm64_l_148:",
+        "\t/* 0x148: bl 0 <bpf_xdp_adjust_meta> */",
+        "\tARM64_SIM_A64_LINK(0x14cULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_xdp_adjust_meta();",
+        "arm64_l_14c:",
+        "\t/* 0x14c: cbz w0, 230 <cil_xdp_entry+0x230> */",
+        "\tARM64_SIM_A64_CBZ_W(ARM64_X0, 0x14c, 0x230, arm64_l_230);"
+      ]
+    },
+    {
+      "source_pc": 388,
+      "source_token": 392,
+      "object_pc": 18516,
+      "call_word": 2483027968,
+      "continuation_word": 3036673728,
+      "relocation_type": 283,
+      "relocation_symbol": "bpf_map_lookup_elem",
+      "relocation_addend": 0,
+      "source_line": 347,
+      "source_excerpt": [
+        "arm64_l_184:",
+        "\t/* 0x184: bl 0 <bpf_map_lookup_elem> */",
+        "\tARM64_SIM_A64_LINK(0x188ULL);",
+        "\tARM64_SIM_BPF_CALL_bpf_map_lookup_elem();",
+        "arm64_l_188:",
+        "\t/* 0x188: cbz x0, 60 <cil_xdp_entry+0x60> */",
+        "\tARM64_SIM_A64_CBZ(ARM64_X0, 0x188, 0x60, arm64_l_60);"
+      ]
+    }
+  ],
+  "scope": "Eight actual Cilium LINK/helper sites in captured input P and generated source. The original CALL26 words are unrelocated;actual loaded symbol placement/patched BL fetch remain Code admission. This is not a captured memcpy caller or whole app acceptance. Canonical CODE9 stays raw;code coordinates are separate.",
+  "lean_source_sha256": "2a54bd1a2ae0973974caaae3845320b43ee44fd9932a145ef5b9e4b19e026d5b"
+}

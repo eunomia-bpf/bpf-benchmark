@@ -1,0 +1,107 @@
+{
+  "confirmed_utc": "2026-11-27T11:46:32.592826+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64MemcpyLinkCode"
+    ],
+    "exit": 0,
+    "seconds": 2.214515447616577,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 535,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-code/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.7885174751281738,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 8,
+  "source_steps": {
+    "actual_captured_CALL26_LINK_sites": 8,
+    "actual_ELF_symbol_value": 18128,
+    "actual_ELF_function_bytes": 812,
+    "actual_source_LINK_steps": 638,
+    "mature_native_BL_steps": 1,
+    "public_type_axiom_queries": 8,
+    "actual_loaded_code": "explicit Code admission",
+    "full_memcpy_caller_and_code_aware_register_relation": "remaining"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkCode.lean",
+      "size_bytes": 13085,
+      "mtime_ns": 1795779781805432983
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "full_build": {
+    "command": [
+      "flock",
+      "-x",
+      "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+      "lake",
+      "build"
+    ],
+    "exit": 0,
+    "seconds": 3.949242115020752,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "full_build_jobs": 1438,
+  "direct_final_stage": 4,
+  "direct_check": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-link-code/Proof.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1505091190338135,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "artifact_check": {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "results/m5-memcpy-link-code/inspect_artifact.py"
+    ],
+    "exit": 0,
+    "seconds": 0.3174266815185547,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "artifact_sha256": "12fa5a01a6c54011c7c808881639ea0606d462c57c84a91dc7703e9d08dca8ce",
+  "owned_source_sha256": {
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64MemcpyLinkCode.lean": "2a54bd1a2ae0973974caaae3845320b43ee44fd9932a145ef5b9e4b19e026d5b",
+    "kprog/formal/KProgFormal.lean": "13eac2651e992438310741c7d95ca227aad1debe54ad20a0e34d791e99cfd86d",
+    "kprog/formal/README.md": "13a31ae5d99723897bd6ecf96ae43accac4abf71dbf81a001d65b37d036475db"
+  }
+}
