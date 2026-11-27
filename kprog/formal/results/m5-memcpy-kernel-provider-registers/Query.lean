@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderRegisters
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpyProviderRegisters.iterations
+#print axioms Arm64KernelMemcpyProviderRegisters.iterations
+#check Arm64KernelMemcpyProviderRegisters.execute
+#print axioms Arm64KernelMemcpyProviderRegisters.execute
+#check Arm64KernelMemcpyProviderRegisters.original
+#print axioms Arm64KernelMemcpyProviderRegisters.original

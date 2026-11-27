@@ -1,0 +1,53 @@
+{
+  "confirmed_utc": "2026-11-27T02:40:38.340266+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderRegisters"
+    ],
+    "exit": 0,
+    "seconds": 639.1045427322388,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 572,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-provider-registers/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6342945098876953,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "native_state": "same returned physical state",
+    "actual_GPR_pairs": 18,
+    "actual_GPR_stores": 36,
+    "output_map": "exact declaration-selected native GPR words/tag0",
+    "provider_domain": "actual targeted kind6 externalCall and cache frame per visited heap",
+    "fresh_final_map_equalities": 0,
+    "trace": "real ordered release/provider trace"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyProviderRegisters.lean",
+      "size_bytes": 8061,
+      "mtime_ns": 1795746544625487635
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
