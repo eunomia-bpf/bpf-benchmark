@@ -1,0 +1,23 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.first_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.first_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.chain
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.chain
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.names
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.names
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.declared
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.declared
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.distinct
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.distinct
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.after_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.after_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.call_ready
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.call_ready
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.store
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.writeback
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.writeback
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerFlags.input_returns
