@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpySmallGates
+
+open KProgFormal.ClightRefinement
+#check Arm64KernelMemcpySmallGates.decoded
+#print axioms Arm64KernelMemcpySmallGates.decoded
+#check Arm64KernelMemcpySmallGates.execute
+#print axioms Arm64KernelMemcpySmallGates.execute

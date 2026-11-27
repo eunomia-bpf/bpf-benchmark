@@ -1,0 +1,61 @@
+{
+  "confirmed_utc": "2026-11-27T00:48:10.483111+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpySmallGates"
+    ],
+    "exit": 0,
+    "seconds": 4.470834732055664,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 78,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-small-gates/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1194164752960205,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 2,
+  "source_steps": {
+    "actual_compare_constants": [
+      128,
+      32,
+      16
+    ],
+    "actual_branches": [
+      "B.HI",
+      "B.HI",
+      "B.LO"
+    ],
+    "actual_count": 16,
+    "native_steps_per_comparison_and_branch": 2,
+    "flag_result": "imported AddWithCarry subtraction, genuine resulting NZCV",
+    "branch_result": "all fall through",
+    "current_scope": "each real pair on its live code/PC input"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpySmallGates.lean",
+      "size_bytes": 6872,
+      "mtime_ns": 1795740401399364338
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
