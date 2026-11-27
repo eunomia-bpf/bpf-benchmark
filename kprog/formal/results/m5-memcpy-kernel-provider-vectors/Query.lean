@@ -1,0 +1,8 @@
+import KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors
+
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.halves
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.halves
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.iterations
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.iterations
+#check KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.execute
+#print axioms KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors.execute

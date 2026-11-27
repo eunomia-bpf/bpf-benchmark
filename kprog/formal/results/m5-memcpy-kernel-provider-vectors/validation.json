@@ -1,0 +1,51 @@
+{
+  "confirmed_utc": "2026-11-27T02:45:42.556117+00:00",
+  "focused": {
+    "command": [
+      "lake",
+      "build",
+      "+KProgFormal.ClightRefinement.Arm64KernelMemcpyProviderVectors"
+    ],
+    "exit": 0,
+    "seconds": 5.0223777294158936,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "focused_jobs": 574,
+  "public_query": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-memcpy-kernel-provider-vectors/Query.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.6009421348571777,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "query_count": 3,
+  "source_steps": {
+    "actual_vector_half_pairs": 64,
+    "actual_stores": 64,
+    "vectors": 32,
+    "declarations": "actual low/high index table",
+    "last_pair": "real shorter V31.hi continuation"
+  },
+  "source_metadata": [
+    {
+      "path": "kprog/formal/KProgFormal/ClightRefinement/Arm64KernelMemcpyProviderVectors.lean",
+      "size_bytes": 6755,
+      "mtime_ns": 1795746828904051753
+    }
+  ],
+  "whole_confirmation_owner": "V",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
