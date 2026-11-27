@@ -903,5 +903,13 @@
   "declaration_count": 93,
   "shared_header_changes_applied": false,
   "active_tetragon": "963637 / guest-20261127T091129Z still compiling; current shared headers retained.",
-  "publication_notes": "Apply header transition when the current Tetragon guest releases imageEX; include FORMAL-owned canonical changes before deleting the service helper. arm64_sim_direct.h contains pre-existing OMP WIP: commit only const deltas to HEAD and preserve peer staged/unstaged bytes. The patch is based on current working bytes; recheck hashes if owners change them. Regenerator literal included. Validate same B after transition at the two-compiler ceiling."
+  "publication_notes": "Apply header transition when the current Tetragon guest releases imageEX; include FORMAL-owned canonical changes before deleting the service helper. arm64_sim_direct.h contains pre-existing OMP WIP: commit only const deltas to HEAD and preserve peer staged/unstaged bytes. The patch is based on current working bytes; recheck hashes if owners change them. Regenerator literal included. Validate same B after transition at the two-compiler ceiling.",
+  "formal_handoff": {
+    "utc": "2026-11-27T13:01:23Z",
+    "resume_path": "/workspaces/.agent-state/kprog-lanes/formal/resume-msg.md",
+    "declarations": 37,
+    "headers": 23,
+    "body_sha256": "09fbc39f7176a5f4ba18cbae8ccb63fbe04105648ec029b63ff6236adc806d42",
+    "status": "Delivered to resume file; consumption and canonical header publication unverified."
+  }
 }
