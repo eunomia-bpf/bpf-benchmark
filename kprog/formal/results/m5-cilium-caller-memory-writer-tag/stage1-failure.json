@@ -1,0 +1,25 @@
+{
+  "phase": "stage1",
+  "source_sha256": "d21f26aef72891cd8964923b83a91074883990814486ba304f22dc59a2c07b45",
+  "source_lines": 219,
+  "full_log_bytes": 7222,
+  "full_log_sha256": "4a5f6b514f973406abab359b5d35898f48267a690d50036a44ad57fe2faf8de5",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-tag/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 31.743903636932373,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "three temporary environment defs depend on exported noncomputable identifiers; follow-on realization/frame errors; address simp closes before rfl, and load-argument evaluation specialization was unused",
+  "repair": "mark exact environment definitions noncomputable, remove redundant rfl from address lemma, explicitly specialize pointer/address evaluation for load argument; preserve semantics and default budgets"
+}

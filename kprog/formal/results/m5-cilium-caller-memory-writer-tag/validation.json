@@ -1,0 +1,140 @@
+{
+  "scope": "exact original s80 volatile tag read-modify-write at index0/shift0/tag10 with current numeric tag-word",
+  "source_sha256": "1ea19e7cdc4ae2d8b4c3c639e72ffb2bfc3290c2afa0e87cc9638430d04a1660",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-tag/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 31.459142208099365,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterTag"
+      ],
+      "exit": 0,
+      "seconds": 31.62452459335327,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.4893412590026855,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-tag/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.143517017364502,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "prior_failed_phases": [
+    {
+      "phase": "stage1",
+      "source_sha256": "d21f26aef72891cd8964923b83a91074883990814486ba304f22dc59a2c07b45",
+      "source_lines": 219,
+      "full_log_bytes": 7222,
+      "full_log_sha256": "4a5f6b514f973406abab359b5d35898f48267a690d50036a44ad57fe2faf8de5",
+      "receipt": {
+        "command": [
+          "lake",
+          "env",
+          "lean",
+          "-j1",
+          "results/m5-cilium-caller-memory-writer-tag/Proof.lean"
+        ],
+        "exit": 1,
+        "seconds": 31.743903636932373,
+        "cpu": 17,
+        "workers": 1,
+        "nice": 0,
+        "address_space_bytes": 34359738368,
+        "timing_lock": "shared"
+      },
+      "diagnosis": "three temporary environment defs depend on exported noncomputable identifiers; follow-on realization/frame errors; address simp closes before rfl, and load-argument evaluation specialization was unused",
+      "repair": "mark exact environment definitions noncomputable, remove redundant rfl from address lemma, explicitly specialize pointer/address evaluation for load argument; preserve semantics and default budgets"
+    }
+  ],
+  "focused_jobs": 307,
+  "full_jobs": 1574,
+  "root_queries": [
+    "source",
+    "pointer_source",
+    "load_source",
+    "copy_source",
+    "store_source",
+    "pointer_step",
+    "load_builtin",
+    "store_arguments",
+    "writable",
+    "write",
+    "bound_frame",
+    "store_builtin",
+    "copy_step",
+    "advance",
+    "current_read"
+  ],
+  "actual_memory_writer_payload_commit": "6831b782337c80381d08ab41b56ec5bcb6b9177f",
+  "source": "exact original s80 pointer/load/copy/store AST and original expression types; no synthetic replacement handler",
+  "load": "imported EF_vload Mint64 VolatileLoadSem.nonvol consumes explicit CURRENT actual8Btagblock2 numeric word, same heap/E0, real t176 and tv temporary sets",
+  "store": "actual current795allocator/tagblock2 8B writable/aligned rights derive concrete Mint64 store/readback of (old & ~255)|10, other-block/caller/access/frontier frames",
+  "execution": "actual original s80 sequence/pointer/evaluation, imported load+store builtin Step2 and Star(E0), final exact pointer/t176/tv TempEnv; not InternalRun builtin",
+  "current_resource": "current supplied tagword framed through SAME real ReturnMemory cache/Word/Payload stores by actual allocation-name separation; no inference of old initialization after arbitrary provider",
+  "boundary": "s80 entry ti0/ts0/storetag10 and numeric current tagword remain explicit; original outer tag loop/shift setup and prior164prefix composition not proved here",
+  "open": "outer tag-loop/source setup and continuation, provider-outcome/whole-entry width composition, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
