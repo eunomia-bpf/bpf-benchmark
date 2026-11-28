@@ -1,0 +1,16 @@
+{
+  "pid": 1208926,
+  "started_utc": "2026-11-28T02:58:48Z",
+  "source_revision": "b30602bf4771cc5bee9bc2f905b36899e90a15b7",
+  "source_sha256": {
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+    "kprog/x86/perf_context_lto.cpp": "0ec62d6bbb2bc43c49baa9c6d371d677c6ec189216648b581dc05a38e5b9527b",
+    "kprog/x86/native_lab/native_link/src/main.rs": "1faf56423aa83f2d638a0534dde4064e2e98657f5e2974f44bd5a68382e4924b",
+    "kprog/x86/native_lab/native_link/src/x86.rs": "072aa4fafd051dac1f464a5d9b256418c2b777a83cfebe243fb58bf5e0721e79",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "739b4eac66c8d2969d338e0faa0f16aeced00589efe40d1ff5ff4848d7f12835"
+  },
+  "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128",
+  "script": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.sh",
+  "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.log",
+  "scope": "Validate allowed common LPM type/IR binding WIP against in-place compiler/native-link and integration/regression tests. 48GiB cap applies build only, no guest descendant. Image remainsc103; no measurement or performance claim. Source commit waits actual build/test receipt."
+}
