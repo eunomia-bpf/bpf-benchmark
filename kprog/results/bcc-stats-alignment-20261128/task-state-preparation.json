@@ -1,0 +1,10 @@
+{
+  "prepared_utc": "2026-11-28T12:42:12Z",
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "recipes": {
+    "task_state_pair.py": "b9d4e4c1142f0b8ec19d25fd12d893294be6c311a9308faa75abb8141be82c97",
+    "observe_tasks.py": "6afb5f099df318d05b8b2f54b116afc11a2433135287111191d7c9ff1e391367"
+  },
+  "preflight": "Both generated scripts bash-n0; no heavy observer or PMU command remains. Not executed.",
+  "reason": "Need actual worker wait/CPU states; previous PMUpair was confounded by recurring full-native-cache copying. All defaultBCCtools/workload/flags remain."
+}
