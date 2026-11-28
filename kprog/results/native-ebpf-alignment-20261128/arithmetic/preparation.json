@@ -1,0 +1,54 @@
+{
+  "prepared_utc": "2026-11-28T09:24:18Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "source_sha256": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/manifests.json": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193",
+    "vendor/linux-framework/kernel/bpf/verifier.c": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "vendor/bpf/Makefile": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+    "kprog/x86/perf_context_lto.cpp": "29e81dc22584c947461f6319f73cb8efa46a08f30af3ad8afa05a301bb1235f2",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c"
+  },
+  "kernel_identity": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "kernel_arithmetic_rules": [
+    {
+      "first_line": 23409,
+      "last_line": 23526,
+      "source": "23409: \t\t/* Make sdiv/smod divide-by-minus-one exceptions impossible. */\n23410: \t\tif ((insn->code == (BPF_ALU64 | BPF_MOD | BPF_K) ||\n23411: \t\t     insn->code == (BPF_ALU64 | BPF_DIV | BPF_K) ||\n23412: \t\t     insn->code == (BPF_ALU | BPF_MOD | BPF_K) ||\n23413: \t\t     insn->code == (BPF_ALU | BPF_DIV | BPF_K)) &&\n23414: \t\t    insn->off == 1 && insn->imm == -1) {\n23415: \t\t\tbool is64 = BPF_CLASS(insn->code) == BPF_ALU64;\n23416: \t\t\tbool isdiv = BPF_OP(insn->code) == BPF_DIV;\n23417: \t\t\tstruct bpf_insn *patch = insn_buf;\n23418: \n23419: \t\t\tif (isdiv)\n23420: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_ALU64 : BPF_ALU) |\n23421: \t\t\t\t\t\t\tBPF_NEG | BPF_K, insn->dst_reg,\n23422: \t\t\t\t\t\t\t0, 0, 0);\n23423: \t\t\telse\n23424: \t\t\t\t*patch++ = BPF_MOV32_IMM(insn->dst_reg, 0);\n23425: \n23426: \t\t\tcnt = patch - insn_buf;\n23427: \n23428: \t\t\tnew_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);\n23429: \t\t\tif (!new_prog)\n23430: \t\t\t\treturn -ENOMEM;\n23431: \n23432: \t\t\tdelta    += cnt - 1;\n23433: \t\t\tenv->prog = prog = new_prog;\n23434: \t\t\tinsn      = new_prog->insnsi + i + delta;\n23435: \t\t\tgoto next_insn;\n23436: \t\t}\n23437: \n23438: \t\t/* Make divide-by-zero and divide-by-minus-one exceptions impossible. */\n23439: \t\tif (insn->code == (BPF_ALU64 | BPF_MOD | BPF_X) ||\n23440: \t\t    insn->code == (BPF_ALU64 | BPF_DIV | BPF_X) ||\n23441: \t\t    insn->code == (BPF_ALU | BPF_MOD | BPF_X) ||\n23442: \t\t    insn->code == (BPF_ALU | BPF_DIV | BPF_X)) {\n23443: \t\t\tbool is64 = BPF_CLASS(insn->code) == BPF_ALU64;\n23444: \t\t\tbool isdiv = BPF_OP(insn->code) == BPF_DIV;\n23445: \t\t\tbool is_sdiv = isdiv && insn->off == 1;\n23446: \t\t\tbool is_smod = !isdiv && insn->off == 1;\n23447: \t\t\tstruct bpf_insn *patch = insn_buf;\n23448: \n23449: \t\t\tif (is_sdiv) {\n23450: \t\t\t\t/* [R,W]x sdiv 0 -> 0\n23451: \t\t\t\t * LLONG_MIN sdiv -1 -> LLONG_MIN\n23452: \t\t\t\t * INT_MIN sdiv -1 -> INT_MIN\n23453: \t\t\t\t */\n23454: \t\t\t\t*patch++ = BPF_MOV64_REG(BPF_REG_AX, insn->src_reg);\n23455: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_ALU64 : BPF_ALU) |\n23456: \t\t\t\t\t\t\tBPF_ADD | BPF_K, BPF_REG_AX,\n23457: \t\t\t\t\t\t\t0, 0, 1);\n23458: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23459: \t\t\t\t\t\t\tBPF_JGT | BPF_K, BPF_REG_AX,\n23460: \t\t\t\t\t\t\t0, 4, 1);\n23461: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23462: \t\t\t\t\t\t\tBPF_JEQ | BPF_K, BPF_REG_AX,\n23463: \t\t\t\t\t\t\t0, 1, 0);\n23464: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_ALU64 : BPF_ALU) |\n23465: \t\t\t\t\t\t\tBPF_MOV | BPF_K, insn->dst_reg,\n23466: \t\t\t\t\t\t\t0, 0, 0);\n23467: \t\t\t\t/* BPF_NEG(LLONG_MIN) == -LLONG_MIN == LLONG_MIN */\n23468: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_ALU64 : BPF_ALU) |\n23469: \t\t\t\t\t\t\tBPF_NEG | BPF_K, insn->dst_reg,\n23470: \t\t\t\t\t\t\t0, 0, 0);\n23471: \t\t\t\t*patch++ = BPF_JMP_IMM(BPF_JA, 0, 0, 1);\n23472: \t\t\t\t*patch++ = *insn;\n23473: \t\t\t\tcnt = patch - insn_buf;\n23474: \t\t\t} else if (is_smod) {\n23475: \t\t\t\t/* [R,W]x mod 0 -> [R,W]x */\n23476: \t\t\t\t/* [R,W]x mod -1 -> 0 */\n23477: \t\t\t\t*patch++ = BPF_MOV64_REG(BPF_REG_AX, insn->src_reg);\n23478: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_ALU64 : BPF_ALU) |\n23479: \t\t\t\t\t\t\tBPF_ADD | BPF_K, BPF_REG_AX,\n23480: \t\t\t\t\t\t\t0, 0, 1);\n23481: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23482: \t\t\t\t\t\t\tBPF_JGT | BPF_K, BPF_REG_AX,\n23483: \t\t\t\t\t\t\t0, 3, 1);\n23484: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23485: \t\t\t\t\t\t\tBPF_JEQ | BPF_K, BPF_REG_AX,\n23486: \t\t\t\t\t\t\t0, 3 + (is64 ? 0 : 1), 1);\n23487: \t\t\t\t*patch++ = BPF_MOV32_IMM(insn->dst_reg, 0);\n23488: \t\t\t\t*patch++ = BPF_JMP_IMM(BPF_JA, 0, 0, 1);\n23489: \t\t\t\t*patch++ = *insn;\n23490: \n23491: \t\t\t\tif (!is64) {\n23492: \t\t\t\t\t*patch++ = BPF_JMP_IMM(BPF_JA, 0, 0, 1);\n23493: \t\t\t\t\t*patch++ = BPF_MOV32_REG(insn->dst_reg, insn->dst_reg);\n23494: \t\t\t\t}\n23495: \t\t\t\tcnt = patch - insn_buf;\n23496: \t\t\t} else if (isdiv) {\n23497: \t\t\t\t/* [R,W]x div 0 -> 0 */\n23498: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23499: \t\t\t\t\t\t\tBPF_JNE | BPF_K, insn->src_reg,\n23500: \t\t\t\t\t\t\t0, 2, 0);\n23501: \t\t\t\t*patch++ = BPF_ALU32_REG(BPF_XOR, insn->dst_reg, insn->dst_reg);\n23502: \t\t\t\t*patch++ = BPF_JMP_IMM(BPF_JA, 0, 0, 1);\n23503: \t\t\t\t*patch++ = *insn;\n23504: \t\t\t\tcnt = patch - insn_buf;\n23505: \t\t\t} else {\n23506: \t\t\t\t/* [R,W]x mod 0 -> [R,W]x */\n23507: \t\t\t\t*patch++ = BPF_RAW_INSN((is64 ? BPF_JMP : BPF_JMP32) |\n23508: \t\t\t\t\t\t\tBPF_JEQ | BPF_K, insn->src_reg,\n23509: \t\t\t\t\t\t\t0, 1 + (is64 ? 0 : 1), 0);\n23510: \t\t\t\t*patch++ = *insn;\n23511: \n23512: \t\t\t\tif (!is64) {\n23513: \t\t\t\t\t*patch++ = BPF_JMP_IMM(BPF_JA, 0, 0, 1);\n23514: \t\t\t\t\t*patch++ = BPF_MOV32_REG(insn->dst_reg, insn->dst_reg);\n23515: \t\t\t\t}\n23516: \t\t\t\tcnt = patch - insn_buf;\n23517: \t\t\t}\n23518: \n23519: \t\t\tnew_prog = bpf_patch_insn_data(env, i + delta, insn_buf, cnt);\n23520: \t\t\tif (!new_prog)\n23521: \t\t\t\treturn -ENOMEM;\n23522: \n23523: \t\t\tdelta    += cnt - 1;\n23524: \t\t\tenv->prog = prog = new_prog;\n23525: \t\t\tinsn      = new_prog->insnsi + i + delta;\n23526: \t\t\tgoto next_insn;"
+    },
+    {
+      "first_line": 16543,
+      "last_line": 16558,
+      "source": "16543: \n16544: \t\t/* check src2 operand */\n16545: \t\terr = check_reg_arg(env, insn->dst_reg, SRC_OP);\n16546: \t\tif (err)\n16547: \t\t\treturn err;\n16548: \n16549: \t\tif ((opcode == BPF_MOD || opcode == BPF_DIV) &&\n16550: \t\t    BPF_SRC(insn->code) == BPF_K && insn->imm == 0) {\n16551: \t\t\tverbose(env, \"div by zero\\n\");\n16552: \t\t\treturn -EINVAL;\n16553: \t\t}\n16554: \n16555: \t\tif ((opcode == BPF_LSH || opcode == BPF_RSH ||\n16556: \t\t     opcode == BPF_ARSH) && BPF_SRC(insn->code) == BPF_K) {\n16557: \t\t\tint size = BPF_CLASS(insn->code) == BPF_ALU64 ? 64 : 32;\n16558: "
+    }
+  ],
+  "scope": "Read-only scalar sdiv/udiv/srem/urem census across114staged objects/sixapps/bothISAs and698program rows. Retained frontend plus defaultO3 analysis, no actualP replacement or livefrozen-values specialization. Original source/object/manifests unchanged.",
+  "resources": "Controller/readersCPU19; one subprocess at a time llvm-dis/opt CPU16 AS48GiB, no timingCPUs. No architecture/app codegen policy changes.",
+  "interpretation": "Constant/SSA-select/phi/cast finite divisor bitpatterns, dependency slices, comparison/CFG metadata and current source context are evidence for review. Variable divisor is not a bug or proof of zero reachability. No automatic guard/edge-safety verdict. Signedminus1 overflow, zero dividends,32bitzext and actual matching BPF operations need their own evidence. No hypotheticalguard or frozenapp modification.",
+  "preflight": [
+    {
+      "object": "x86/stage/bcc/runqlat.native.o",
+      "frontend_ops": 2,
+      "frontend_dynamic": 0,
+      "optimized_ops": 1,
+      "optimized_dynamic": 1,
+      "note": "Optimizer merged unit constants into a runtime choice, preserve finite-value evidence."
+    },
+    {
+      "object": "x86/stage/katran/balancer.native.o",
+      "frontend_ops": 1,
+      "frontend_dynamic": 0,
+      "optimized_ops": 2,
+      "optimized_dynamic": 0
+    },
+    {
+      "object": "x86/stage/cilium/bpf_host.native.o",
+      "frontend_ops": 7,
+      "frontend_dynamic": 3,
+      "optimized_ops": 46,
+      "optimized_dynamic": 2
+    }
+  ],
+  "next": "One detached job collected NEXTTURN. If actual candidates exist inspect source/guard/livevalues and matching eBPF ops, then witness before a general repair."
+}
