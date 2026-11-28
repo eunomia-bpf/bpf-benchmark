@@ -1,0 +1,134 @@
+{
+  "utc": "2026-11-28T13:52:18Z",
+  "same_chain_pid": 1481233,
+  "chain_status_at_collection": 0,
+  "chain_phase_at_collection": "finished",
+  "chain_source": {
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/check_all.py": "59b034605774a39ec8102a1a7418b238e473a2854e515eebda9b10838297e43d",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/observe_phases.py": "f8e9b973f021908f54a5da2161d74c32804d4ec85fb3c2fe7735120f06f48711",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/dump_all.py": "d57bac368f3927fb0f04a49596e0aafae8d091a6468f4094fad82ff88773fd5b",
+    "kprog/results/x86-otel-perf-20261127/observe_otel_maps.py": "3278c89f61f5e9c1b65bf9a2f2fba505a38c4146766dd87fb217f8cb62350cea",
+    "kprog/results/native-ebpf-alignment-20261128/observe-check.template.sh": "0361923346b416fba58fde08fa060a3a1ccf0edc28a7897c0de7988dce6672b3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83",
+    "corpus/driver.py": "dcfcf4f4eb5eed197c8dcb294428749d937bf871de407eeef2838b038d8285c9"
+  },
+  "new_cases": [
+    {
+      "app": "tracee/monitor",
+      "case": {
+        "app": "tracee/monitor",
+        "started_utc": "2026-11-28T13:42:25Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/tracee__monitor",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:47:27Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "93b08371ac8d8115762674bef49b3bec936f7304",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134353_627231",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134353_627231/details/apps/tracee__monitor.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": null
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/tracee__monitor/review.json",
+        "bytes": 1896771,
+        "sha256": "8bfe58985c8100f204574192d04b367ad094f49c9f9072720430e299e175cca3"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 169,
+        "failed": 0,
+        "feature_probes_skipped": 13
+      },
+      "active_programs": {
+        "baseline": 64,
+        "post_rejit": 66
+      },
+      "unwind_error": null
+    },
+    {
+      "app": "katran",
+      "case": {
+        "app": "katran",
+        "started_utc": "2026-11-28T13:47:27Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:49:56Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "93b08371ac8d8115762674bef49b3bec936f7304",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/details/apps/katran.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": null
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/katran/review.json",
+        "bytes": 92004,
+        "sha256": "08d017465efbfd2727b52dbb7d5f47154fcee2b0758f1ab5d8441139a0ce084e"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 1,
+        "failed": 0,
+        "feature_probes_skipped": 5
+      },
+      "active_programs": {
+        "baseline": 1,
+        "post_rejit": 1
+      },
+      "unwind_error": null
+    }
+  ],
+  "existing_cases": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/otelcol-ebpf-profiler__profiling/review.json",
+        "bytes": 473808,
+        "sha256": "9619aa4ff824a984b06e3ba0417f71564bf9aab06bc79519c50fbf28f90ccb22"
+      }
+    },
+    {
+      "app": "bcc/set",
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/bcc__set/review.json",
+        "bytes": 381722,
+        "sha256": "298435cf9cd3e5dfa1084dc04a39fd06ce7e9dd8e03115a8ede31ec17363afa1"
+      }
+    },
+    {
+      "app": "cilium/agent",
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/cilium__agent/review.json",
+        "bytes": 1110942,
+        "sha256": "516496be5bea52b892139266e5c115f2be0224fbb1061cc5967844e0dc38eb29"
+      }
+    },
+    {
+      "app": "tetragon/observer",
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/tetragon__observer/review.json",
+        "bytes": 4554712,
+        "sha256": "fb27b97eeae9540cda289fb985e4fbc2401e58a2d8393d2de308a36b659018e5"
+      }
+    }
+  ],
+  "skipped_active": [],
+  "errors": [],
+  "status": 0
+}

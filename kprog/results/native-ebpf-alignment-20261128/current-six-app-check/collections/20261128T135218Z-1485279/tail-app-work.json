@@ -1,0 +1,210 @@
+{
+  "same_chain_pid": 1481233,
+  "collection": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/all-six-collection.json",
+  "scope": "Existing closed Tracee/Katran only, no execution. Hook/worker engagement and packetentry matching do not prove emitted-event/fullpacketdelivery equivalence or performance acceptance.",
+  "apps": {
+    "tracee__monitor": {
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/tracee__monitor/review.json",
+        "sha256": "8bfe58985c8100f204574192d04b367ad094f49c9f9072720430e299e175cca3"
+      },
+      "phases": {
+        "baseline": {
+          "workers": 1,
+          "worker_returncodes": [
+            0
+          ],
+          "stress_status": [
+            {
+              "status": {
+                "passed": 7,
+                "failed": 0,
+                "skipped": 0,
+                "metrics untrustworthy": 0
+              },
+              "returncode": 0,
+              "duration_s": 10.035767535999994
+            }
+          ],
+          "pktgen": [],
+          "sys_enter": [
+            {
+              "bytes_jited": 8194,
+              "bytes_xlated": 13768,
+              "id": 24,
+              "name": "trace_sys_enter",
+              "run_cnt_delta": 21715488,
+              "run_time_ns_delta": 10288275305,
+              "type": "raw_tracepoint"
+            }
+          ],
+          "sys_exit": [
+            {
+              "bytes_jited": 8227,
+              "bytes_xlated": 13824,
+              "id": 25,
+              "name": "trace_sys_exit",
+              "run_cnt_delta": 21715523,
+              "run_time_ns_delta": 10271793058,
+              "type": "raw_tracepoint"
+            }
+          ]
+        },
+        "post_rejit": {
+          "workers": 1,
+          "worker_returncodes": [
+            0
+          ],
+          "stress_status": [
+            {
+              "status": {
+                "passed": 7,
+                "failed": 0,
+                "skipped": 0,
+                "metrics untrustworthy": 0
+              },
+              "returncode": 0,
+              "duration_s": 10.020404161000016
+            }
+          ],
+          "pktgen": [],
+          "sys_enter": [
+            {
+              "bytes_jited": 7098,
+              "bytes_xlated": 16,
+              "id": 215,
+              "name": "trace_sys_enter",
+              "run_cnt_delta": 47144556,
+              "run_time_ns_delta": 7367058446,
+              "type": "raw_tracepoint"
+            }
+          ],
+          "sys_exit": [
+            {
+              "bytes_jited": 7114,
+              "bytes_xlated": 16,
+              "id": 217,
+              "name": "trace_sys_exit",
+              "run_cnt_delta": 47144574,
+              "run_time_ns_delta": 7318059311,
+              "type": "raw_tracepoint"
+            }
+          ]
+        }
+      }
+    },
+    "katran": {
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/katran/review.json",
+        "sha256": "08d017465efbfd2727b52dbb7d5f47154fcee2b0758f1ab5d8441139a0ce084e"
+      },
+      "phases": {
+        "baseline": {
+          "workers": 4,
+          "worker_returncodes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stress_status": [],
+          "pktgen": [
+            {
+              "packets": 4716594,
+              "send_errors": 5567420,
+              "returncode": 0,
+              "duration_s": 10.040120462000004
+            },
+            {
+              "packets": 3079725,
+              "send_errors": 3890780,
+              "returncode": 0,
+              "duration_s": 10.040120462000004
+            },
+            {
+              "packets": 7362564,
+              "send_errors": 9061103,
+              "returncode": 0,
+              "duration_s": 10.040120462000004
+            },
+            {
+              "packets": 7633768,
+              "send_errors": 9429422,
+              "returncode": 0,
+              "duration_s": 10.040120462000004
+            }
+          ],
+          "sys_enter": [],
+          "sys_exit": [],
+          "balancer": {
+            "bytes_jited": 13641,
+            "bytes_xlated": 23840,
+            "id": 9,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 22792651,
+            "run_time_ns_delta": 4317930980,
+            "type": "xdp"
+          },
+          "sent_packets": 22792651,
+          "send_errors": 27948725,
+          "entry_equals_sum_sent": true
+        },
+        "post_rejit": {
+          "workers": 4,
+          "worker_returncodes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "stress_status": [],
+          "pktgen": [
+            {
+              "packets": 7288926,
+              "send_errors": 9084779,
+              "returncode": 0,
+              "duration_s": 10.06352437000001
+            },
+            {
+              "packets": 6823384,
+              "send_errors": 7830130,
+              "returncode": 0,
+              "duration_s": 10.06352437000001
+            },
+            {
+              "packets": 4739520,
+              "send_errors": 6331168,
+              "returncode": 0,
+              "duration_s": 10.06352437000001
+            },
+            {
+              "packets": 4041033,
+              "send_errors": 4389315,
+              "returncode": 0,
+              "duration_s": 10.06352437000001
+            }
+          ],
+          "sys_enter": [],
+          "sys_exit": [],
+          "balancer": {
+            "bytes_jited": 10117,
+            "bytes_xlated": 16,
+            "id": 16,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 22892863,
+            "run_time_ns_delta": 4172920383,
+            "type": "xdp"
+          },
+          "sent_packets": 22892863,
+          "send_errors": 27635392,
+          "entry_equals_sum_sent": true
+        }
+      }
+    }
+  },
+  "limits": [
+    "Katran senderrors are preserved, not rounded tozero or declared deliveredpackets.",
+    "Tracee entry/exit counters and all7passing stressors establish hookengagement, not known frontendfield_exists correctness or eventconsumer equality.",
+    "Rawparameters/stressorrows including futex durations remain in immutable case reviews; no benchmark/timing normalization or exclusion introduced."
+  ]
+}

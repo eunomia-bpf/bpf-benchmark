@@ -1,0 +1,2245 @@
+{
+  "collected_utc": "2026-11-28T13:52:19Z",
+  "scope": "Closedcase of SAME1481233 only. Guest/app completion, actual unbound native install events and observedwork evidence are separate. No automatic samework/performance verdict, new guest or source change.",
+  "controller_case": {
+    "app": "katran",
+    "started_utc": "2026-11-28T13:47:27Z",
+    "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran",
+    "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+    "returncode": 0,
+    "ended_utc": "2026-11-28T13:49:56Z",
+    "guest-exit.txt": "0",
+    "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+    "profile-source.txt": "93b08371ac8d8115762674bef49b3bec936f7304",
+    "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572",
+    "image_matches": true,
+    "app_status": "ok",
+    "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/details/apps/katran.json",
+    "observer_exists": true,
+    "phase_snapshot_counts": {
+      "baseline": 2,
+      "post_rejit": 2
+    },
+    "observer_exception": null
+  },
+  "image": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+  "kernel_sha256": "7e83c2f18c3c4b115c0bc45f2ad5828d6963b81adcb775e416999edfcb26dfa8",
+  "recipe_sources": {
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/check_all.py": "59b034605774a39ec8102a1a7418b238e473a2854e515eebda9b10838297e43d",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/observe_phases.py": "f8e9b973f021908f54a5da2161d74c32804d4ec85fb3c2fe7735120f06f48711",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/dump_all.py": "d57bac368f3927fb0f04a49596e0aafae8d091a6468f4094fad82ff88773fd5b",
+    "kprog/results/x86-otel-perf-20261127/observe_otel_maps.py": "3278c89f61f5e9c1b65bf9a2f2fba505a38c4146766dd87fb217f8cb62350cea",
+    "kprog/results/native-ebpf-alignment-20261128/observe-check.template.sh": "0361923346b416fba58fde08fa060a3a1ccf0edc28a7897c0de7988dce6672b3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83",
+    "corpus/driver.py": "dcfcf4f4eb5eed197c8dcb294428749d937bf871de407eeef2838b038d8285c9"
+  },
+  "reader": {
+    "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collect_closed.py",
+    "bytes": 15457,
+    "sha256": "26d10c35cc2bfa200c7c88ec8f79087c8e178e21fd7e1875041887a2cca35a04"
+  },
+  "frozen_parser": {
+    "path": "/workspaces/repository/kprog/docs/archive/native_eval_20260529.py",
+    "bytes": 18199,
+    "sha256": "8b3cd99572449d333000e6f05d1a73ad328a2e740721d369a48d87cad9599157"
+  },
+  "app_source": {
+    "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/details/apps/katran.json",
+    "bytes": 17187,
+    "sha256": "d526018d908426b204ae80aa01077325f196ce550d684d107b98515fac2ac874"
+  },
+  "metadata_source": {
+    "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/metadata.json",
+    "bytes": 985,
+    "sha256": "05894a95f1de4990bf8bccedb3452690ff72493153199002ab6fe50c2f849ace"
+  },
+  "observer_source": {
+    "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/observer.json",
+    "bytes": 5044,
+    "sha256": "d62cd7099acacd10da2a50ec7ed3e5466d0dc1332dd015bbaabc53ccec66b244"
+  },
+  "app_status": "ok",
+  "app_error": "",
+  "selected_workload": "xdp_pktgen",
+  "phases": {
+    "baseline": {
+      "programs": {
+        "9": {
+          "bytes_jited": 13641,
+          "bytes_xlated": 23840,
+          "id": 9,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 22792651,
+          "run_time_ns_delta": 4317930980,
+          "type": "xdp"
+        }
+      },
+      "active_programs": 1,
+      "workloads": [
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@0",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 0,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.040120462000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4716594  errors: 5567420\n     started: 99950060us  stopped: 109912690us idle: 0us\n     seq_num: 4716595  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60711\n     cur_queue_map: 0\n     flows: 5158429\nResult: OK: 9962629(c9962629+d0) usec, 4716594 (64byte,-1frags)\n  473428pps 242Mb/sec (242395136bps) errors: 5567420",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@1",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 1,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.040120462000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 3079725  errors: 3890780\n     started: 99950071us  stopped: 109912538us idle: 0us\n     seq_num: 3079726  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 23902\n     cur_queue_map: 0\n     flows: 3501720\nResult: OK: 9962466(c9962466+d0) usec, 3079725 (64byte,-1frags)\n  309132pps 158Mb/sec (158275584bps) errors: 3890780",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@2",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 2,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.040120462000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7362564  errors: 9061103\n     started: 99950028us  stopped: 109912538us idle: 0us\n     seq_num: 7362565  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 40168\n     cur_queue_map: 0\n     flows: 8228219\nResult: OK: 9962509(c9962509+d0) usec, 7362564 (64byte,-1frags)\n  739027pps 378Mb/sec (378381824bps) errors: 9061103",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@3",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 3,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.040120462000004,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7633768  errors: 9429422\n     started: 99950110us  stopped: 109912538us idle: 0us\n     seq_num: 7633769  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 24351\n     cur_queue_map: 0\n     flows: 8547971\nResult: OK: 9962428(c9962428+d0) usec, 7633768 (64byte,-1frags)\n  766255pps 392Mb/sec (392322560bps) errors: 9429422",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            }
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "threads": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.040120462000004,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "katran_kernel_pktgen_l2_udp"
+        }
+      ],
+      "workers": [
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 0,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.040120462000004,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4716594  errors: 5567420\n     started: 99950060us  stopped: 109912690us idle: 0us\n     seq_num: 4716595  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60711\n     cur_queue_map: 0\n     flows: 5158429\nResult: OK: 9962629(c9962629+d0) usec, 4716594 (64byte,-1frags)\n  473428pps 242Mb/sec (242395136bps) errors: 5567420",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@1",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 1,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.040120462000004,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 3079725  errors: 3890780\n     started: 99950071us  stopped: 109912538us idle: 0us\n     seq_num: 3079726  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 23902\n     cur_queue_map: 0\n     flows: 3501720\nResult: OK: 9962466(c9962466+d0) usec, 3079725 (64byte,-1frags)\n  309132pps 158Mb/sec (158275584bps) errors: 3890780",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@2",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 2,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.040120462000004,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7362564  errors: 9061103\n     started: 99950028us  stopped: 109912538us idle: 0us\n     seq_num: 7362565  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 40168\n     cur_queue_map: 0\n     flows: 8228219\nResult: OK: 9962509(c9962509+d0) usec, 7362564 (64byte,-1frags)\n  739027pps 378Mb/sec (378381824bps) errors: 9061103",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@3",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 3,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.040120462000004,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7633768  errors: 9429422\n     started: 99950110us  stopped: 109912538us idle: 0us\n     seq_num: 7633769  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 24351\n     cur_queue_map: 0\n     flows: 8547971\nResult: OK: 9962428(c9962428+d0) usec, 7633768 (64byte,-1frags)\n  766255pps 392Mb/sec (392322560bps) errors: 9429422",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        }
+      ],
+      "frozen_samples": [
+        {
+          "total": 2287842.0,
+          "by_stressor": {
+            "pps": 2287842.0
+          },
+          "errors": 27948725
+        }
+      ],
+      "window": {
+        "start": 99.125929,
+        "end": 109.956201,
+        "start_spread_s": 0.0,
+        "end_spread_s": 0.0
+      },
+      "shim_log": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/details/shim-logs/katran.baseline.log",
+        "bytes": 6515,
+        "sha256": "460da90de9aa9449b1dc7f63a98d773fc2f5468a8394c25c0d6b2295c017029c"
+      },
+      "observations": [
+        {
+          "started_monotonic": 100.34420559,
+          "path": "baseline-start",
+          "commands": [
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+                "/var/tmp/phase-observe/baseline-start/maps",
+                "all-maps"
+              ],
+              "returncode": 0,
+              "log": "baseline-start/maps.log"
+            },
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/dump_all.py",
+                "",
+                "/var/tmp/phase-observe/baseline-start/progs"
+              ],
+              "returncode": 0,
+              "log": "baseline-start/progs.log"
+            }
+          ],
+          "linkcache": [
+            {
+              "container": "71e05c520336",
+              "pid": 1802,
+              "source_exists": false
+            }
+          ],
+          "docker_ps_returncode": 0,
+          "ended_monotonic": 100.962138255,
+          "entire_snapshot_inside_window": true,
+          "map_snapshot": {
+            "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-start/maps/snapshot.json",
+            "bytes": 28291,
+            "sha256": "a8c6d819a24e279453306d2531cf4c51f8bb44be6009b8b539670a85f144bcfe"
+          },
+          "jit_files": [
+            {
+              "id": 3,
+              "program": {
+                "id": 3,
+                "type": 15,
+                "name": "",
+                "bytes_jited": 45,
+                "run_time_ns": 878,
+                "run_count": 3
+              },
+              "jit": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-start/progs/prog-3-.jited.bin",
+                "bytes": 45,
+                "sha256": "3d9892dd3c59801765f0770150726c169ade92b3c038514603e6d6767922ecca"
+              },
+              "expected_bytes": 45,
+              "size_matches": true,
+              "functions": [
+                {
+                  "address": 18446744072642107104,
+                  "bytes": 45
+                }
+              ],
+              "function_sizes_match": true,
+              "functions_file": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-start/progs/prog-3-.funcs.txt",
+                "bytes": 20,
+                "sha256": "9e93fa0db901bb714c8cc8662545a002acfae0a098a55019555295259988120f"
+              }
+            },
+            {
+              "id": 9,
+              "program": {
+                "id": 9,
+                "type": 6,
+                "name": "balancer_ingres",
+                "bytes_jited": 13641,
+                "run_time_ns": 4576437775,
+                "run_count": 25819403
+              },
+              "jit": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-start/progs/prog-9-balancer_ingres.jited.bin",
+                "bytes": 13641,
+                "sha256": "a06a8b2b8d22229f5011c4a3e7cb53281366b3b231e9a14637a0d56fdf7a63a3"
+              },
+              "expected_bytes": 13641,
+              "size_matches": true,
+              "functions": [
+                {
+                  "address": 18446744072642107240,
+                  "bytes": 12865
+                },
+                {
+                  "address": 18446744072642120168,
+                  "bytes": 510
+                },
+                {
+                  "address": 18446744072642120752,
+                  "bytes": 266
+                }
+              ],
+              "function_sizes_match": true,
+              "functions_file": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-start/progs/prog-9-balancer_ingres.funcs.txt",
+                "bytes": 65,
+                "sha256": "9aa6c961bcdabb30bd80b0016e5c09f61705c7abf256948db56916d4daa7160c"
+              }
+            }
+          ],
+          "link_cache_files": [],
+          "program_stats": [
+            {
+              "id": 3,
+              "type": 15,
+              "name": "",
+              "bytes_jited": 45,
+              "run_time_ns": 878,
+              "run_count": 3
+            },
+            {
+              "id": 9,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 13641,
+              "run_time_ns": 4576437775,
+              "run_count": 25819403
+            }
+          ],
+          "map_metadata": [
+            {
+              "id": 2,
+              "name": "katran_lru0",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 3,
+              "name": "stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 4,
+              "name": "ctl_array",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 8,
+              "max_entries": 16,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 5,
+              "name": "vip_map",
+              "type": 1,
+              "key_size": 20,
+              "value_size": 8,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 6,
+              "name": "fallback_cache",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1000,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 7,
+              "name": "lru_mapping",
+              "type": 12,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 128,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 8,
+              "name": "ch_rings",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 33554944,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 9,
+              "name": "reals",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 10,
+              "name": "reals_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 11,
+              "name": "lru_miss_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 12,
+              "name": "vip_miss_stats",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 13,
+              "name": "quic_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 104,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 14,
+              "name": "stable_rt_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 40,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 15,
+              "name": "decap_vip_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 16,
+              "name": "server_id_map",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 16777214,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 17,
+              "name": "tpr_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 32,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 18,
+              "name": "server_id_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 20,
+              "name": "vip_to_down_rea",
+              "type": 13,
+              "key_size": 20,
+              "value_size": 4,
+              "max_entries": 512,
+              "flags": 1,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            }
+          ],
+          "readonly_and_progarray_queries": []
+        },
+        {
+          "started_monotonic": 107.258143858,
+          "path": "baseline-late",
+          "commands": [
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+                "/var/tmp/phase-observe/baseline-late/maps",
+                "all-maps"
+              ],
+              "returncode": 0,
+              "log": "baseline-late/maps.log"
+            }
+          ],
+          "linkcache": [],
+          "ended_monotonic": 107.678513986,
+          "entire_snapshot_inside_window": true,
+          "map_snapshot": {
+            "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/baseline-late/maps/snapshot.json",
+            "bytes": 28291,
+            "sha256": "e9cb2b33316d3be9819b4b779fc921597415b499b9e90de80876f8eb0a385aa4"
+          },
+          "jit_files": [],
+          "link_cache_files": [],
+          "program_stats": [
+            {
+              "id": 3,
+              "type": 15,
+              "name": "",
+              "bytes_jited": 45,
+              "run_time_ns": 878,
+              "run_count": 3
+            },
+            {
+              "id": 9,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 13641,
+              "run_time_ns": 7596004851,
+              "run_count": 41682088
+            }
+          ],
+          "map_metadata": [
+            {
+              "id": 2,
+              "name": "katran_lru0",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 3,
+              "name": "stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 4,
+              "name": "ctl_array",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 8,
+              "max_entries": 16,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 5,
+              "name": "vip_map",
+              "type": 1,
+              "key_size": 20,
+              "value_size": 8,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 6,
+              "name": "fallback_cache",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1000,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 7,
+              "name": "lru_mapping",
+              "type": 12,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 128,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 8,
+              "name": "ch_rings",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 33554944,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 9,
+              "name": "reals",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 10,
+              "name": "reals_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 11,
+              "name": "lru_miss_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 12,
+              "name": "vip_miss_stats",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 13,
+              "name": "quic_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 104,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 14,
+              "name": "stable_rt_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 40,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 15,
+              "name": "decap_vip_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 16,
+              "name": "server_id_map",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 16777214,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 17,
+              "name": "tpr_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 32,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 18,
+              "name": "server_id_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 20,
+              "name": "vip_to_down_rea",
+              "type": 13,
+              "key_size": 20,
+              "value_size": 4,
+              "max_entries": 512,
+              "flags": 1,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            }
+          ],
+          "readonly_and_progarray_queries": []
+        }
+      ]
+    },
+    "post_rejit": {
+      "programs": {
+        "16": {
+          "bytes_jited": 10117,
+          "bytes_xlated": 16,
+          "id": 16,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 22892863,
+          "run_time_ns_delta": 4172920383,
+          "type": "xdp"
+        }
+      },
+      "active_programs": 1,
+      "workloads": [
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "components": [
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@0",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 0,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.06352437000001,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7288926  errors: 9084779\n     started: 131540257us  stopped: 141518990us idle: 0us\n     seq_num: 7288927  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 55740\n     cur_queue_map: 0\n     flows: 8203282\nResult: OK: 9978732(c9978732+d0) usec, 7288926 (64byte,-1frags)\n  730446pps 373Mb/sec (373988352bps) errors: 9084779",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@1",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 1,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.06352437000001,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 6823384  errors: 7830130\n     started: 131540073us  stopped: 141518989us idle: 0us\n     seq_num: 6823385  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 39433\n     cur_queue_map: 0\n     flows: 7343277\nResult: OK: 9978916(c9978916+d0) usec, 6823384 (64byte,-1frags)\n  683780pps 350Mb/sec (350095360bps) errors: 7830130",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@2",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 2,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.06352437000001,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4739520  errors: 6331168\n     started: 131540036us  stopped: 141519123us idle: 0us\n     seq_num: 4739521  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60977\n     cur_queue_map: 0\n     flows: 5551729\nResult: OK: 9979086(c9979086+d0) usec, 4739520 (64byte,-1frags)\n  474945pps 243Mb/sec (243171840bps) errors: 6331168",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            },
+            {
+              "command": [
+                "/usr/sbin/ip",
+                "netns",
+                "exec",
+                "katran-router",
+                "sh",
+                "-c",
+                "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+              ],
+              "config": {
+                "clone_skb": 0,
+                "dst_ip": "10.100.1.1",
+                "dst_port": 8080,
+                "iface": "rtlb0@3",
+                "namespace": "katran-router",
+                "pkt_size": 64,
+                "proto": 17,
+                "shared_skb": false,
+                "src_ip": "10.0.0.2",
+                "thread_id": 3,
+                "tool": "kernel_pktgen",
+                "xmit_mode": "start_xmit"
+              },
+              "duration_s": 10.06352437000001,
+              "returncode": 0,
+              "stderr": "",
+              "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4041033  errors: 4389315\n     started: 131540308us  stopped: 141518989us idle: 0us\n     seq_num: 4041034  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 41997\n     cur_queue_map: 0\n     flows: 4231476\nResult: OK: 9978680(c9978680+d0) usec, 4041033 (64byte,-1frags)\n  404966pps 207Mb/sec (207342592bps) errors: 4389315",
+              "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+            }
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "threads": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.06352437000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "",
+          "workload_name": "katran_kernel_pktgen_l2_udp"
+        }
+      ],
+      "workers": [
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@0",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 0,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.06352437000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 7288926  errors: 9084779\n     started: 131540257us  stopped: 141518990us idle: 0us\n     seq_num: 7288927  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 55740\n     cur_queue_map: 0\n     flows: 8203282\nResult: OK: 9978732(c9978732+d0) usec, 7288926 (64byte,-1frags)\n  730446pps 373Mb/sec (373988352bps) errors: 9084779",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@1",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 1,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.06352437000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@1\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 6823384  errors: 7830130\n     started: 131540073us  stopped: 141518989us idle: 0us\n     seq_num: 6823385  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 39433\n     cur_queue_map: 0\n     flows: 7343277\nResult: OK: 9978916(c9978916+d0) usec, 6823384 (64byte,-1frags)\n  683780pps 350Mb/sec (350095360bps) errors: 7830130",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@2",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 2,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.06352437000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@2\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4739520  errors: 6331168\n     started: 131540036us  stopped: 141519123us idle: 0us\n     seq_num: 4739521  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 60977\n     cur_queue_map: 0\n     flows: 5551729\nResult: OK: 9979086(c9979086+d0) usec, 4739520 (64byte,-1frags)\n  474945pps 243Mb/sec (243171840bps) errors: 6331168",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        },
+        {
+          "command": [
+            "/usr/sbin/ip",
+            "netns",
+            "exec",
+            "katran-router",
+            "sh",
+            "-c",
+            "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+          ],
+          "config": {
+            "clone_skb": 0,
+            "dst_ip": "10.100.1.1",
+            "dst_port": 8080,
+            "iface": "rtlb0@3",
+            "namespace": "katran-router",
+            "pkt_size": 64,
+            "proto": 17,
+            "shared_skb": false,
+            "src_ip": "10.0.0.2",
+            "thread_id": 3,
+            "tool": "kernel_pktgen",
+            "xmit_mode": "start_xmit"
+          },
+          "duration_s": 10.06352437000001,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@3\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 4041033  errors: 4389315\n     started: 131540308us  stopped: 141518989us idle: 0us\n     seq_num: 4041034  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 41997\n     cur_queue_map: 0\n     flows: 4231476\nResult: OK: 9978680(c9978680+d0) usec, 4041033 (64byte,-1frags)\n  404966pps 207Mb/sec (207342592bps) errors: 4389315",
+          "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+        }
+      ],
+      "frozen_samples": [
+        {
+          "total": 2294137.0,
+          "by_stressor": {
+            "pps": 2294137.0
+          },
+          "errors": 27635392
+        }
+      ],
+      "window": {
+        "start": 130.736049,
+        "end": 141.58607,
+        "start_spread_s": 0.0,
+        "end_spread_s": 0.0
+      },
+      "shim_log": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_134850_696572/details/shim-logs/katran.post_rejit.log",
+        "bytes": 7471,
+        "sha256": "22f82d63cdc41323ae68f2694fbe2294e4a532883c1ee5f2f1691c8da2738138"
+      },
+      "observations": [
+        {
+          "started_monotonic": 131.946273417,
+          "path": "post_rejit-start",
+          "commands": [
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+                "/var/tmp/phase-observe/post_rejit-start/maps",
+                "all-maps"
+              ],
+              "returncode": 0,
+              "log": "post_rejit-start/maps.log"
+            },
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/dump_all.py",
+                "",
+                "/var/tmp/phase-observe/post_rejit-start/progs"
+              ],
+              "returncode": 0,
+              "log": "post_rejit-start/progs.log"
+            }
+          ],
+          "linkcache": [
+            {
+              "container": "71e05c520336",
+              "pid": 1802,
+              "source_exists": true,
+              "copied_files": 7
+            }
+          ],
+          "docker_ps_returncode": 0,
+          "ended_monotonic": 132.650170876,
+          "entire_snapshot_inside_window": true,
+          "map_snapshot": {
+            "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/maps/snapshot.json",
+            "bytes": 28453,
+            "sha256": "faa5004243de782b4949baffd163e26578efd9415d0a0e1219406768b3d60cfd"
+          },
+          "jit_files": [
+            {
+              "id": 15,
+              "program": {
+                "id": 15,
+                "type": 6,
+                "name": "balancer_ingres",
+                "bytes_jited": 13641,
+                "run_time_ns": 0,
+                "run_count": 0
+              },
+              "jit": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-15-balancer_ingres.jited.bin",
+                "bytes": 13641,
+                "sha256": "a1d37e7267caf862a7731b2067e7cb3a29759803245ddea9547f64013c8a6744"
+              },
+              "expected_bytes": 13641,
+              "size_matches": true,
+              "functions": [
+                {
+                  "address": 18446744072642107232,
+                  "bytes": 12865
+                },
+                {
+                  "address": 18446744072642120156,
+                  "bytes": 510
+                },
+                {
+                  "address": 18446744072642120724,
+                  "bytes": 266
+                }
+              ],
+              "function_sizes_match": true,
+              "functions_file": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-15-balancer_ingres.funcs.txt",
+                "bytes": 65,
+                "sha256": "3165ea65d47fbe1126f1f0f3ee8853b8b34b2b8f6cec4b43434552041c8a7da9"
+              }
+            },
+            {
+              "id": 16,
+              "program": {
+                "id": 16,
+                "type": 6,
+                "name": "balancer_ingres",
+                "bytes_jited": 10117,
+                "run_time_ns": 4458053781,
+                "run_count": 25354239
+              },
+              "jit": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-16-balancer_ingres.jited.bin",
+                "bytes": 10117,
+                "sha256": "3aeaa139b56a7fd7aedc40ee42a6ca4c492aca02c5779a5f9e6447026ef5e354"
+              },
+              "expected_bytes": 10117,
+              "size_matches": true,
+              "functions": [
+                {
+                  "address": 18446744072642125132,
+                  "bytes": 10117
+                }
+              ],
+              "function_sizes_match": true,
+              "functions_file": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-16-balancer_ingres.funcs.txt",
+                "bytes": 23,
+                "sha256": "04955665f08a53dfcf78632e95cd3671a96153f217bcde5a747068b3311d5fac"
+              }
+            },
+            {
+              "id": 3,
+              "program": {
+                "id": 3,
+                "type": 15,
+                "name": "",
+                "bytes_jited": 45,
+                "run_time_ns": 2087,
+                "run_count": 5
+              },
+              "jit": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-3-.jited.bin",
+                "bytes": 45,
+                "sha256": "3d9892dd3c59801765f0770150726c169ade92b3c038514603e6d6767922ecca"
+              },
+              "expected_bytes": 45,
+              "size_matches": true,
+              "functions": [
+                {
+                  "address": 18446744072642107104,
+                  "bytes": 45
+                }
+              ],
+              "function_sizes_match": true,
+              "functions_file": {
+                "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/progs/prog-3-.funcs.txt",
+                "bytes": 20,
+                "sha256": "9e93fa0db901bb714c8cc8662545a002acfae0a098a55019555295259988120f"
+              }
+            }
+          ],
+          "link_cache_files": [
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.abi.tsv",
+              "bytes": 8235,
+              "sha256": "1896229618212c5224e3761668076d981a2352e35494f1a7b740528e76786034"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.blob.bin",
+              "bytes": 10085,
+              "sha256": "f877c54b6dd391b5dc06cb0a5b522f0f8d6205c918d533c31bd4dd5e5047ae20"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.map-patches.tsv",
+              "bytes": 886,
+              "sha256": "1297735cd4d77ab97bdc1864e088ddfe930c413ee8af229cb2f7ac0792f29ba4"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.proof.o",
+              "bytes": 381048,
+              "sha256": "c5aaf62b19975504100756c420319da5b48cd1523b30003a05c9fbb88b436d1b"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.relocs.bin",
+              "bytes": 448,
+              "sha256": "23fbfdcc64e979a52c07cdebccc15c1fdce02c858aefcb205545e64209584b0c"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.tmp.2781.2781.blob.frozen.proof.o",
+              "bytes": 272184,
+              "sha256": "731fb566538f36cca8b44d6851e0479eeed7e2656bfdd59bfcab893d8c61cf50"
+            },
+            {
+              "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-start/linkcache/71e05c520336/0f5e6206e04cbe64.tmp.2781.2781.link-plan.json",
+              "bytes": 28503,
+              "sha256": "f18310554ad60eaec3b9813b129c010b6e8c066c556f4fc647080efe3d9fa92b"
+            }
+          ],
+          "program_stats": [
+            {
+              "id": 3,
+              "type": 15,
+              "name": "",
+              "bytes_jited": 45,
+              "run_time_ns": 2087,
+              "run_count": 5
+            },
+            {
+              "id": 15,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 13641,
+              "run_time_ns": 0,
+              "run_count": 0
+            },
+            {
+              "id": 16,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 10117,
+              "run_time_ns": 4458053781,
+              "run_count": 25354239
+            }
+          ],
+          "map_metadata": [
+            {
+              "id": 21,
+              "name": "katran_lru0",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 22,
+              "name": "stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 23,
+              "name": "ctl_array",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 8,
+              "max_entries": 16,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 24,
+              "name": "vip_map",
+              "type": 1,
+              "key_size": 20,
+              "value_size": 8,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 25,
+              "name": "fallback_cache",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1000,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 26,
+              "name": "lru_mapping",
+              "type": 12,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 128,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 27,
+              "name": "ch_rings",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 33554944,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 28,
+              "name": "reals",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 29,
+              "name": "reals_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 30,
+              "name": "lru_miss_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 31,
+              "name": "vip_miss_stats",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 32,
+              "name": "quic_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 104,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 33,
+              "name": "stable_rt_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 40,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 34,
+              "name": "decap_vip_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 35,
+              "name": "server_id_map",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 16777214,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 36,
+              "name": "tpr_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 32,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 37,
+              "name": "server_id_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 39,
+              "name": "vip_to_down_rea",
+              "type": 13,
+              "key_size": 20,
+              "value_size": 4,
+              "max_entries": 512,
+              "flags": 1,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            }
+          ],
+          "readonly_and_progarray_queries": []
+        },
+        {
+          "started_monotonic": 138.788323252,
+          "path": "post_rejit-late",
+          "commands": [
+            {
+              "command": [
+                "python3",
+                "/workspaces/repository/kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+                "/var/tmp/phase-observe/post_rejit-late/maps",
+                "all-maps"
+              ],
+              "returncode": 0,
+              "log": "post_rejit-late/maps.log"
+            }
+          ],
+          "linkcache": [],
+          "ended_monotonic": 139.322524374,
+          "entire_snapshot_inside_window": true,
+          "map_snapshot": {
+            "path": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/katran/phase-observe/post_rejit-late/maps/snapshot.json",
+            "bytes": 28453,
+            "sha256": "93b8a6a18672f59de601504ab6c22d3623d17315b1c6a88886d67757cd6113fe"
+          },
+          "jit_files": [],
+          "link_cache_files": [],
+          "program_stats": [
+            {
+              "id": 3,
+              "type": 15,
+              "name": "",
+              "bytes_jited": 45,
+              "run_time_ns": 2087,
+              "run_count": 5
+            },
+            {
+              "id": 15,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 13641,
+              "run_time_ns": 0,
+              "run_count": 0
+            },
+            {
+              "id": 16,
+              "type": 6,
+              "name": "balancer_ingres",
+              "bytes_jited": 10117,
+              "run_time_ns": 7354953286,
+              "run_count": 41127263
+            }
+          ],
+          "map_metadata": [
+            {
+              "id": 21,
+              "name": "katran_lru0",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 22,
+              "name": "stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 1024,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 23,
+              "name": "ctl_array",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 8,
+              "max_entries": 16,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 24,
+              "name": "vip_map",
+              "type": 1,
+              "key_size": 20,
+              "value_size": 8,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 25,
+              "name": "fallback_cache",
+              "type": 9,
+              "key_size": 40,
+              "value_size": 16,
+              "max_entries": 1000,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 26,
+              "name": "lru_mapping",
+              "type": 12,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 128,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 27,
+              "name": "ch_rings",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 33554944,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 28,
+              "name": "reals",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 29,
+              "name": "reals_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 30,
+              "name": "lru_miss_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 4096,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 31,
+              "name": "vip_miss_stats",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 20,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 32,
+              "name": "quic_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 104,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 33,
+              "name": "stable_rt_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 40,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 34,
+              "name": "decap_vip_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 35,
+              "name": "server_id_map",
+              "type": 2,
+              "key_size": 4,
+              "value_size": 4,
+              "max_entries": 16777214,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 36,
+              "name": "tpr_stats_map",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 32,
+              "max_entries": 1,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 37,
+              "name": "server_id_stats",
+              "type": 6,
+              "key_size": 4,
+              "value_size": 16,
+              "max_entries": 512,
+              "flags": 0,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            },
+            {
+              "id": 39,
+              "name": "vip_to_down_rea",
+              "type": 13,
+              "key_size": 20,
+              "value_size": 4,
+              "max_entries": 512,
+              "flags": 1,
+              "observation": "Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict."
+            }
+          ],
+          "readonly_and_progarray_queries": []
+        }
+      ]
+    }
+  },
+  "native_requests": {
+    "requests": [
+      {
+        "line": 60,
+        "time": 115.810329,
+        "pid": 2781,
+        "tid": 2781,
+        "name": "balancer_ingres",
+        "status": "installed",
+        "execution_path": "direct_unbound_current_entry",
+        "original_fd": 19,
+        "native_fd": 50,
+        "original": {
+          "id": 15,
+          "name": "balancer_ingres",
+          "type": 6,
+          "tag": "90e1a12c30a4bce5",
+          "jited_len": 13641,
+          "xlated_len": 23840,
+          "line": 58
+        },
+        "native": {
+          "id": 16,
+          "name": "balancer_ingres",
+          "type": 6,
+          "tag": "59f4a931744dcdc6",
+          "jited_len": 10117,
+          "xlated_len": 16,
+          "line": 59
+        },
+        "post_counters": {
+          "bytes_jited": 10117,
+          "bytes_xlated": 16,
+          "id": 16,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 22892863,
+          "run_time_ns_delta": 4172920383,
+          "type": "xdp"
+        },
+        "text": "[115.810329 pid=2781 tid=2781] native-loader replaced prog=balancer_ingres original_fd=19 native_fd=50 manifest=/opt/bpf-benchmark/native-bpf/x86_64/katran/manifest.json source=/tmp/bpfrejit_2781_0325eddd38cf33c9.bpf"
+      }
+    ],
+    "success_id_associations_complete": true,
+    "terminal_counts_complete": true,
+    "counts": {
+      "checked": 0,
+      "direct_installed": 1,
+      "failed": 0,
+      "feature_probes_skipped": 5
+    },
+    "feature_probes": [
+      {
+        "line": 4,
+        "text": "[115.331138 pid=2781 tid=2781] native-loader skipped feature probe program name= insn_cnt=2"
+      },
+      {
+        "line": 7,
+        "text": "[115.331500 pid=2781 tid=2781] native-loader skipped feature probe program name=libbpf_nametest insn_cnt=2"
+      },
+      {
+        "line": 12,
+        "text": "[115.332244 pid=2781 tid=2781] native-loader skipped feature probe program name= insn_cnt=2"
+      },
+      {
+        "line": 15,
+        "text": "[115.332646 pid=2781 tid=2781] native-loader skipped feature probe program name=det_arg_ctx insn_cnt=4"
+      },
+      {
+        "line": 54,
+        "text": "[115.388941 pid=2781 tid=2781] native-loader skipped feature probe program name= insn_cnt=2"
+      }
+    ],
+    "unclassified_native_loader_lines": [],
+    "scope": "Counts TERMINAL shim replacement/failure events, not repeated jit-info or simultaneousprogram count. Frozen guestentry explicitly unsets REQUIRE_BOUND_PROOF; CAPI FdLoadOptions defaults trusted_service_fd=-1 and routes load_from_fd unbound. No checkedB/stock-verifier admission is claimed. Original/nativeIDs require actual samePID/TID/fd info rows; unknown associations stayNone."
+  },
+  "source_anchors": {
+    "kprog/perf/one-image/Makefile": {
+      "sha256": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83",
+      "lines": [
+        {
+          "line": 113,
+          "text": "\tenv -u BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF PATH=/usr/lib/llvm-18/bin:$$PATH \\"
+        },
+        {
+          "line": 114,
+          "text": "\t  BPFREJIT_CORPUS_APPS=$(APPS) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) \\"
+        },
+        {
+          "line": 115,
+          "text": "\t  BPFREJIT_SHIM_NATIVE_LOADER=$(NATIVE_LOADER_MODE) \\"
+        },
+        {
+          "line": 116,
+          "text": "\t  BPFREJIT_SHIM_NATIVE_MANIFEST=$(NATIVE_MANIFEST) \\"
+        },
+        {
+          "line": 117,
+          "text": "\t  BPFREJIT_BENCH_PASSES=$(BENCH_PASSES) \\"
+        },
+        {
+          "line": 118,
+          "text": "\t  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \\"
+        },
+        {
+          "line": 119,
+          "text": "\t  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=$(SKIP_REJIT_MODE) \\"
+        },
+        {
+          "line": 120,
+          "text": "\t  $(MAKE) -C $(ROOT) __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \\"
+        },
+        {
+          "line": 121,
+          "text": "\t  X86_RUNNER_RUNTIME_IMAGE=$(IMAGE) X86_RUNNER_RUNTIME_IMAGE_TAR=$(GUEST_IMAGE_TAR) \\"
+        },
+        {
+          "line": 122,
+          "text": "\t  SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION)"
+        },
+        {
+          "line": 123,
+          "text": ""
+        },
+        {
+          "line": 124,
+          "text": "# LOGS/progress.log names each run's start, end and artifact_run_dir; touch LOGS/STOP to stop"
+        },
+        {
+          "line": 125,
+          "text": "# after the current run."
+        }
+      ]
+    },
+    "kprog/libnativeloader/include/native_loader.hpp": {
+      "sha256": "a61287010bb3b5332fcfee018fcd246111c5bba765866b5a945e3e3e39719c32",
+      "lines": [
+        {
+          "line": 49,
+          "text": "    std::chrono::steady_clock::time_point started;"
+        },
+        {
+          "line": 50,
+          "text": "};"
+        },
+        {
+          "line": 51,
+          "text": ""
+        },
+        {
+          "line": 52,
+          "text": "class SimulatorVerificationError : public std::runtime_error {"
+        },
+        {
+          "line": 53,
+          "text": "public:"
+        },
+        {
+          "line": 54,
+          "text": "    using std::runtime_error::runtime_error;"
+        },
+        {
+          "line": 55,
+          "text": "};"
+        },
+        {
+          "line": 56,
+          "text": ""
+        },
+        {
+          "line": 57,
+          "text": "struct FdLoadOptions {"
+        },
+        {
+          "line": 58,
+          "text": "    int original_prog_fd = -1;"
+        },
+        {
+          "line": 59,
+          "text": "    int trusted_service_fd = -1;"
+        },
+        {
+          "line": 60,
+          "text": "    uint64_t trusted_request_id = 0;"
+        },
+        {
+          "line": 61,
+          "text": "    bool trusted_verify_only = false;"
+        }
+      ]
+    },
+    "kprog/libnativeloader/src/native_loader.cpp": {
+      "sha256": "8409eba58ece8705db7fe4b80cfba4fba414433fe05bc089e71fdcc21f46e46c",
+      "lines": [
+        {
+          "line": 3415,
+          "text": ""
+        },
+        {
+          "line": 3416,
+          "text": "LoadedProgram load_from_fd(const FdLoadOptions &options)"
+        },
+        {
+          "line": 3417,
+          "text": "{"
+        },
+        {
+          "line": 3418,
+          "text": "    if (options.trusted_service_fd >= 0 || internal::requires_bound_proof())"
+        },
+        {
+          "line": 3419,
+          "text": "        return internal::load_checked(options);"
+        },
+        {
+          "line": 3420,
+          "text": "    if (options.original_prog_fd < 0) {"
+        },
+        {
+          "line": 3421,
+          "text": "        fail(\"native_loader: missing original_prog_fd\");"
+        },
+        {
+          "line": 3603,
+          "text": "    try {"
+        },
+        {
+          "line": 3604,
+          "text": "        native_loader::FdLoadOptions options{};"
+        },
+        {
+          "line": 3605,
+          "text": "        options.original_prog_fd = original_prog_fd;"
+        },
+        {
+          "line": 3606,
+          "text": "        options.manifest_path = manifest_path;"
+        },
+        {
+          "line": 3607,
+          "text": "        options.source_bpf_path = source_bpf_path;"
+        },
+        {
+          "line": 3608,
+          "text": "        if (source_fd_array_count > 0) {"
+        }
+      ]
+    },
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": {
+      "sha256": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+      "lines": [
+        {
+          "line": 3283,
+          "text": "bool requires_bound_proof()"
+        },
+        {
+          "line": 3284,
+          "text": "{"
+        },
+        {
+          "line": 3285,
+          "text": "    const char *value = std::getenv(\"BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF\");"
+        },
+        {
+          "line": 3286,
+          "text": "    return value && (std::strcmp(value, \"1\") == 0 || std::strcmp(value, \"true\") == 0 ||"
+        },
+        {
+          "line": 3287,
+          "text": "                     std::strcmp(value, \"yes\") == 0 || std::strcmp(value, \"on\") == 0);"
+        },
+        {
+          "line": 3288,
+          "text": "}"
+        },
+        {
+          "line": 3289,
+          "text": ""
+        }
+      ]
+    },
+    "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/types.h": {
+      "sha256": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f",
+      "lines": [
+        {
+          "line": 15,
+          "text": "enum {"
+        },
+        {
+          "line": 16,
+          "text": "  // number of calls to interpreter unwinding in get_next_interpreter()"
+        },
+        {
+          "line": 17,
+          "text": "  metricID_UnwindCallInterpreter = 0,"
+        },
+        {
+          "line": 18,
+          "text": ""
+        },
+        {
+          "line": 19,
+          "text": "  // number of failures due to PC == 0 in unwind_next_frame()"
+        },
+        {
+          "line": 20,
+          "text": "  metricID_UnwindErrZeroPC,"
+        },
+        {
+          "line": 21,
+          "text": ""
+        },
+        {
+          "line": 22,
+          "text": "  // number of times MAX_STACK_LEN has been exceeded"
+        },
+        {
+          "line": 23,
+          "text": "  metricID_UnwindErrStackLengthExceeded,"
+        },
+        {
+          "line": 24,
+          "text": ""
+        },
+        {
+          "line": 25,
+          "text": "  // number of failures to read the TSD address"
+        },
+        {
+          "line": 26,
+          "text": "  metricID_UnwindErrBadTSDAddr,"
+        },
+        {
+          "line": 27,
+          "text": ""
+        },
+        {
+          "line": 28,
+          "text": "  // number of failures to read the TSD base in get_tls_base()"
+        },
+        {
+          "line": 29,
+          "text": "  metricID_UnwindErrBadTPBaseAddr,"
+        },
+        {
+          "line": 30,
+          "text": ""
+        },
+        {
+          "line": 31,
+          "text": "  // number of attempted unwinds"
+        },
+        {
+          "line": 32,
+          "text": "  metricID_UnwindNativeAttempts,"
+        },
+        {
+          "line": 33,
+          "text": ""
+        },
+        {
+          "line": 34,
+          "text": "  // number of unwound frames"
+        },
+        {
+          "line": 35,
+          "text": "  metricID_UnwindNativeFrames,"
+        },
+        {
+          "line": 36,
+          "text": ""
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Stats-on entry counters do not by themselves prove deeperwork/eventdelivery; inspect actualmaps/code/workload outputs.",
+    "Map observations retain allmetadata but query only selectedarray/progarray/RO entries; HASHcontents and largepercpuvalues remainunobserved except focusedOTelprobes.",
+    "Each snapshot captures data sequentially, can add seconds of work or cross the phase; exact spans/commanderrors and sourceSHA retained.",
+    "JIT subprograms have separate actual function VMAs; do not disassemble concatenated raw code as one contiguous addressrange.",
+    "Current host schedulingconfound is proven in previoussameimage diagnostics; short numbers are not speedupacceptance.",
+    "Direct-native admission is not checkedB/stock-verifier coverage; featureprobe skips are not failed native requests."
+  ]
+}
