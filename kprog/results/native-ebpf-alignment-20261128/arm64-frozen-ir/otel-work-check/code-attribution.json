@@ -1,0 +1,1039 @@
+{
+  "programs": [
+    {
+      "file": "observations/data/linkcache/00efe49bb1f84adc.proof.o",
+      "sha256": "d3d7e9981ffe6216850fc97df85449ea242f9548e865a37c5492fe4420016459",
+      "entry": [
+        "perf_go_labels"
+      ],
+      "trace_printk_call_relocations": 4,
+      "optimized": {
+        "file": "observations/data/linkcache/00efe49bb1f84adc.tmp.637.637.blob.frozen.proof.o",
+        "sha256": "c8dfb38bf73cb35bc6054edfc8e115a61b816bde7d18e951a386985af2b8087f",
+        "entry": [
+          "perf_go_labels"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/00efe49bb1f84adc.tmp.637.637.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/00efe49bb1f84adc.blob.bin",
+        "bytes": 1092,
+        "sha256": "fdd0e1a54e7e30122ade4f2534c6afaeab7dda3b160e98cb5682190c3cef55f4"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/48c0e83362b5450a.proof.o",
+      "sha256": "cea49143ef26b9b96abc4a6fdc0436c33d65bd9a21e2f3a8d5d0cc04a6f7987a",
+      "entry": [
+        "perf_unwind_ruby"
+      ],
+      "trace_printk_call_relocations": 53,
+      "optimized": {
+        "file": "observations/data/linkcache/48c0e83362b5450a.tmp.637.637.blob.frozen.proof.o",
+        "sha256": "23fb8cb6fb804d98afef0256e28f29f1f97786094ab61e36bdbafdec0276f6eb",
+        "entry": [
+          "perf_unwind_ruby"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/48c0e83362b5450a.tmp.637.637.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/48c0e83362b5450a.blob.bin",
+        "bytes": 15228,
+        "sha256": "35cf04132b7def4c07516555441e0a4e6d56a909a30b64e5e453cbf4b20dd686"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/4c56a3136991a534.proof.o",
+      "sha256": "e3d12334e0e3e2928c704d8e04c9bcfdc853ca36b767a93849d2578643c8e534",
+      "entry": [
+        "read_task_struct"
+      ],
+      "trace_printk_call_relocations": 1,
+      "optimized": {
+        "file": "observations/data/linkcache/4c56a3136991a534.tmp.637.646.blob.frozen.proof.o",
+        "sha256": "ad0d1e3d1719218f877d67b09e35db2f58fd708cf692a92c7365cf2644d51f60",
+        "entry": [
+          "read_task_struct"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/4c56a3136991a534.tmp.637.646.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/4c56a3136991a534.blob.bin",
+        "bytes": 388,
+        "sha256": "4b91c610e73299d8a6c5c880512a221bbbe34feb411d291559fdd44541c69c8a"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/4e923b6b8ca8b194.proof.o",
+      "sha256": "4a4252b48a378da03039b54ea311697ee76aadb35c1fa867e1ee1500d6d1f02b",
+      "entry": [
+        "native_tracer_entry"
+      ],
+      "trace_printk_call_relocations": 27,
+      "optimized": {
+        "file": "observations/data/linkcache/4e923b6b8ca8b194.tmp.637.646.blob.frozen.proof.o",
+        "sha256": "fe2d337b0f3a7f1e63152cb3949f004904f6b3a5541251d30efdab488e94a19c",
+        "entry": [
+          "native_tracer_entry"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/4e923b6b8ca8b194.tmp.637.646.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/4e923b6b8ca8b194.blob.bin",
+        "bytes": 2860,
+        "sha256": "745c2638884590d4c885e3001c3dc2953ba13317ae7f3c4688cb63fc1e984ba4"
+      },
+      "installed_readbacks": [
+        {
+          "file": "observations/data/progdump/325.91/prog-45-native_tracer_e.jited.bin",
+          "bytes": 2968,
+          "sha256": "a3ed9969f0106ddf1e03836e1e9411681135298a84eec38c6d1dfdfc834b0e70",
+          "blob_offset": 52,
+          "all_bytes_equal_except_documented_map_slots": true,
+          "changed_bytes": 46,
+          "map_slot_readbacks": [
+            {
+              "name": "per_cpu_records",
+              "offset": 2784,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965200384
+            },
+            {
+              "name": "metrics",
+              "offset": 2792,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601994070016
+            },
+            {
+              "name": "kernel_stackmap",
+              "offset": 2800,
+              "link_blob_u64": 0,
+              "installed_u64": 18446603338435588096
+            },
+            {
+              "name": "perf_progs",
+              "offset": 2808,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965189632
+            },
+            {
+              "name": "pid_page_to_mapping_info",
+              "offset": 2816,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601987893760
+            },
+            {
+              "name": "reported_pids",
+              "offset": 2824,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601995621376
+            },
+            {
+              "name": "pid_events",
+              "offset": 2832,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601981083648
+            },
+            {
+              "name": "inhibit_events",
+              "offset": 2840,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601981089792
+            },
+            {
+              "name": "report_events",
+              "offset": 2848,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601987895808
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "observations/data/linkcache/558f55384f8b8f5a.proof.o",
+      "sha256": "cf791d0b6643b384b9f7114efc885be46537566815c85833527dbd3fe7af924d",
+      "entry": [
+        "perf_unwind_hotspot"
+      ],
+      "trace_printk_call_relocations": 151,
+      "optimized": {
+        "file": "observations/data/linkcache/558f55384f8b8f5a.tmp.637.644.blob.frozen.proof.o",
+        "sha256": "7c2594c4d52ba700001e1222ba55875dee86d6d6a8560a559f8502d3b08eba22",
+        "entry": [
+          "perf_unwind_hotspot"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/558f55384f8b8f5a.tmp.637.644.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/558f55384f8b8f5a.blob.bin",
+        "bytes": 11788,
+        "sha256": "43eac925d3ead7f7a35e088e7f9c5eb4fc5d8cc35b0850199c50f0566a48e4da"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/6ce284013325b945.proof.o",
+      "sha256": "bf5e4a9448abf6f1fb79cf485aa6dfe79f9476e0b89d4e53e2db41e5f20c2305",
+      "entry": [
+        "perf_unwind_native"
+      ],
+      "trace_printk_call_relocations": 113,
+      "optimized": {
+        "file": "observations/data/linkcache/6ce284013325b945.tmp.637.644.blob.frozen.proof.o",
+        "sha256": "ea2606a18a5848867f5693fdce820faddcc1f44d02de72d2e002b951193f6b92",
+        "entry": [
+          "perf_unwind_native"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/6ce284013325b945.tmp.637.644.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/6ce284013325b945.blob.bin",
+        "bytes": 15276,
+        "sha256": "334a49b97dfdaf33d06f096cd2bba5f0e3bfc29df27b76f57c86bd187917078c"
+      },
+      "installed_readbacks": [
+        {
+          "file": "observations/data/progdump/153.00/prog-27-perf_unwind_nat.jited.bin",
+          "bytes": 15384,
+          "sha256": "9bf9c887dc429c89e537cf7499e5d71af660f15f91a16c910c3c6908ffd3773c",
+          "blob_offset": 52,
+          "all_bytes_equal_except_documented_map_slots": true,
+          "changed_bytes": 116,
+          "map_slot_readbacks": [
+            {
+              "name": "per_cpu_records",
+              "offset": 15088,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965200384
+            },
+            {
+              "name": "metrics",
+              "offset": 15096,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601994070016
+            },
+            {
+              "name": "stack_delta_page_to_info",
+              "offset": 15104,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462602168784896
+            },
+            {
+              "name": "exe_id_to_9_stack_deltas",
+              "offset": 15112,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601995668480
+            },
+            {
+              "name": "exe_id_to_17_stack_deltas",
+              "offset": 15120,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462602146955264
+            },
+            {
+              "name": "exe_id_to_13_stack_deltas",
+              "offset": 15128,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462602168783872
+            },
+            {
+              "name": "exe_id_to_21_stack_deltas",
+              "offset": 15136,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601997347840
+            },
+            {
+              "name": "exe_id_to_11_stack_deltas",
+              "offset": 15144,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601999195136
+            },
+            {
+              "name": "exe_id_to_19_stack_deltas",
+              "offset": 15152,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601981087744
+            },
+            {
+              "name": "exe_id_to_15_stack_deltas",
+              "offset": 15160,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462602168782848
+            },
+            {
+              "name": "exe_id_to_23_stack_deltas",
+              "offset": 15168,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601999199232
+            },
+            {
+              "name": "exe_id_to_8_stack_deltas",
+              "offset": 15176,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601997348864
+            },
+            {
+              "name": "exe_id_to_16_stack_deltas",
+              "offset": 15184,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601980396544
+            },
+            {
+              "name": "exe_id_to_12_stack_deltas",
+              "offset": 15192,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601986842624
+            },
+            {
+              "name": "exe_id_to_20_stack_deltas",
+              "offset": 15200,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601993614336
+            },
+            {
+              "name": "exe_id_to_10_stack_deltas",
+              "offset": 15208,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601986835456
+            },
+            {
+              "name": "exe_id_to_18_stack_deltas",
+              "offset": 15216,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601995673600
+            },
+            {
+              "name": "exe_id_to_14_stack_deltas",
+              "offset": 15224,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462602146962432
+            },
+            {
+              "name": "exe_id_to_22_stack_deltas",
+              "offset": 15232,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601993609216
+            },
+            {
+              "name": "unwind_info_array",
+              "offset": 15240,
+              "link_blob_u64": 0,
+              "installed_u64": 18446603338635038720
+            },
+            {
+              "name": "pid_page_to_mapping_info",
+              "offset": 15248,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601987893760
+            },
+            {
+              "name": "interpreter_offsets",
+              "offset": 15256,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601986837504
+            },
+            {
+              "name": "perf_progs",
+              "offset": 15264,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965189632
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "observations/data/linkcache/88c0345b58dec05f.proof.o",
+      "sha256": "306937f80a023ae3414f7952c4c472f28623640e5f99dbe86c0f915db4bb0bea",
+      "entry": [
+        "perf_unwind_perl"
+      ],
+      "trace_printk_call_relocations": 150,
+      "optimized": {
+        "file": "observations/data/linkcache/88c0345b58dec05f.tmp.637.644.blob.frozen.proof.o",
+        "sha256": "65f5f64afd78fdd58f9d6ba3fa56674bf1609b09ef51a7b43bba87cac29c909d",
+        "entry": [
+          "perf_unwind_perl"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/88c0345b58dec05f.tmp.637.644.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/88c0345b58dec05f.blob.bin",
+        "bytes": 13028,
+        "sha256": "67c672cccc2c4ed2362e027c0f3b42d2759d42f68b6a9179ac7f9120dfe9a58f"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/a532974817bcc394.proof.o",
+      "sha256": "15dab1ec68082acb0e0ce7a49d9dcd3bf54f2f9b03d5a474dc2ca344f48b346e",
+      "entry": [
+        "perf_unwind_python"
+      ],
+      "trace_printk_call_relocations": 79,
+      "optimized": {
+        "file": "observations/data/linkcache/a532974817bcc394.tmp.637.637.blob.frozen.proof.o",
+        "sha256": "c2552f72176dbc8daf5013c8f4875e880524d8bad1322ebf89befb4e8d363b82",
+        "entry": [
+          "perf_unwind_python"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/a532974817bcc394.tmp.637.637.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/a532974817bcc394.blob.bin",
+        "bytes": 8932,
+        "sha256": "9afe355e2339cdaa1ea8f8db0f4a6038c8ca5897c07e242f03284100c38992ec"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/b07f1342fc2cac17.proof.o",
+      "sha256": "e74974f0d56b711498d9baa50b00be4affc5b8b0f2342eb33a93b5a6a5cb9e48",
+      "entry": [
+        "custom__generic"
+      ],
+      "trace_printk_call_relocations": 24,
+      "optimized": {
+        "file": "observations/data/linkcache/b07f1342fc2cac17.tmp.637.724.blob.frozen.proof.o",
+        "sha256": "7a8c4a2482a8668b34c9ed1e22bfc8f0a7dda8930e93da2c89a05f646521ccc1",
+        "entry": [
+          "custom__generic"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/b07f1342fc2cac17.tmp.637.724.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/b07f1342fc2cac17.blob.bin",
+        "bytes": 2484,
+        "sha256": "8e08ffb3f21206fc153c8a3cfabc9ff2260c91ecf71e75f7919de09354ec0d5b"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/b4bb4b83eedc8ca3.proof.o",
+      "sha256": "3d664197198f7c99ad87b54aa05550f9ef4c26ee9359371659b6c87840f72d79",
+      "entry": [
+        "perf_unwind_php"
+      ],
+      "trace_printk_call_relocations": 134,
+      "optimized": {
+        "file": "observations/data/linkcache/b4bb4b83eedc8ca3.tmp.637.644.blob.frozen.proof.o",
+        "sha256": "c3ea970f214a11ed606191a15cac9956fdc5215cdd8b8691e4b290f914eb98e4",
+        "entry": [
+          "perf_unwind_php"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/b4bb4b83eedc8ca3.tmp.637.644.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/b4bb4b83eedc8ca3.blob.bin",
+        "bytes": 11420,
+        "sha256": "2d37205a33f6abbfecaf6179e05a898cdcce3addea749ba753d859afe492f6ba"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/c7fc3f3ed7336d20.proof.o",
+      "sha256": "10c2da80cb10b2dc932dc16361a6e69b9fd76f438f5efedcf8eae3f0249fcfc1",
+      "entry": [
+        "perf_unwind_stop"
+      ],
+      "trace_printk_call_relocations": 30,
+      "optimized": {
+        "file": "observations/data/linkcache/c7fc3f3ed7336d20.tmp.637.646.blob.frozen.proof.o",
+        "sha256": "824ab339037b2e7f287885c11cf565f360ec180033fd7ed7d3a752616ce0f19b",
+        "entry": [
+          "perf_unwind_stop"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/c7fc3f3ed7336d20.tmp.637.646.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/c7fc3f3ed7336d20.blob.bin",
+        "bytes": 2492,
+        "sha256": "5a13a17f167b60a142b599ed3d328ca041b239ca366558c5f82225acbbb0fc28"
+      },
+      "installed_readbacks": [
+        {
+          "file": "observations/data/progdump/133.67/prog-25-perf_unwind_sto.jited.bin",
+          "bytes": 2600,
+          "sha256": "4599ad17eed6907a1eaffeeddf2ad604e9eca9265a5e96e0707719bc5db8e0e1",
+          "blob_offset": 52,
+          "all_bytes_equal_except_documented_map_slots": true,
+          "changed_bytes": 50,
+          "map_slot_readbacks": [
+            {
+              "name": "per_cpu_records",
+              "offset": 2408,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965200384
+            },
+            {
+              "name": "apm_int_procs",
+              "offset": 2416,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601980406784
+            },
+            {
+              "name": "metrics",
+              "offset": 2424,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601994070016
+            },
+            {
+              "name": "reported_pids",
+              "offset": 2432,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601995621376
+            },
+            {
+              "name": "pid_events",
+              "offset": 2440,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601981083648
+            },
+            {
+              "name": "go_labels_procs",
+              "offset": 2448,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601997349888
+            },
+            {
+              "name": "inhibit_events",
+              "offset": 2456,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601981089792
+            },
+            {
+              "name": "report_events",
+              "offset": 2464,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601987895808
+            },
+            {
+              "name": "perf_progs",
+              "offset": 2472,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601965189632
+            },
+            {
+              "name": "trace_events",
+              "offset": 2480,
+              "link_blob_u64": 0,
+              "installed_u64": 18446462601998683648
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "observations/data/linkcache/d7149a987daa6059.proof.o",
+      "sha256": "9fe6b3ce0117702d12b572c805572e759b4e87cdbe86efe93918170d704e83c3",
+      "entry": [
+        "tracepoint__sched_process_free"
+      ],
+      "trace_printk_call_relocations": 4,
+      "optimized": {
+        "file": "observations/data/linkcache/d7149a987daa6059.tmp.637.646.blob.frozen.proof.o",
+        "sha256": "a2d55acf8f2041ddca8cab40d9545c6340579b6b875ed3dd737d0f344e510bf4",
+        "entry": [
+          "tracepoint__sched_process_free"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/d7149a987daa6059.tmp.637.646.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/d7149a987daa6059.blob.bin",
+        "bytes": 1068,
+        "sha256": "fa159feac383bd7d43899201aa841a8e08005be72f6f958c3e49f4c8bbd83160"
+      },
+      "installed_readbacks": []
+    },
+    {
+      "file": "observations/data/linkcache/f64fd3966b282f38.proof.o",
+      "sha256": "b85ef3ec2ffa7f1f76ec14fb334534194d28f76217d90e902c20f3b56dc49508",
+      "entry": [
+        "perf_unwind_v8"
+      ],
+      "trace_printk_call_relocations": 148,
+      "optimized": {
+        "file": "observations/data/linkcache/f64fd3966b282f38.tmp.637.637.blob.frozen.proof.o",
+        "sha256": "b656d49e46ebf865fb6ff84a2a97253bb3c4a9fcbcde8a1bc00311e5536e2058",
+        "entry": [
+          "perf_unwind_v8"
+        ],
+        "trace_printk_call_relocations": 0
+      },
+      "const_values": [
+        {
+          "name": "filter_error_frames",
+          "hex": "00"
+        },
+        {
+          "name": "filter_idle_frames",
+          "hex": "00"
+        },
+        {
+          "name": "inverse_pac_mask",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "off_cpu_threshold",
+          "hex": "00000000"
+        },
+        {
+          "name": "stack_ptregs_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "task_stack_offset",
+          "hex": "00000000"
+        },
+        {
+          "name": "tpbase_offset",
+          "hex": "0000000000000000"
+        },
+        {
+          "name": "with_debug_output",
+          "hex": "00000000"
+        }
+      ],
+      "plan": "observations/data/linkcache/f64fd3966b282f38.tmp.637.637.link-plan.json",
+      "blob": {
+        "file": "observations/data/linkcache/f64fd3966b282f38.blob.bin",
+        "bytes": 15924,
+        "sha256": "f7b9b72fd8f35e538b16a2bcc224147a57bd462f5c1c85adceb829eb2669622c"
+      },
+      "installed_readbacks": []
+    }
+  ],
+  "program_count": 13,
+  "all_optimized_debug_calls_zero": true,
+  "total_original_debug_call_relocations": 918,
+  "actual_readback_entries": [
+    "native_tracer_entry",
+    "perf_unwind_native",
+    "perf_unwind_stop"
+  ],
+  "limits": "Captured entry/unwind-native/stop match actual kernel bytes except exact documented 8-byte map slots (recorded separately); all other instruction/data bytes match. Map slot identity still needs live plan/map evidence. Only these three have kernel readback; other successful install logs plus compiled proof/blob retained separately. Relocation counts are ARM direct call sites, not executed calls. No dynamic unwind-work or complete app-configuration claim follows from eliminating debug calls."
+}

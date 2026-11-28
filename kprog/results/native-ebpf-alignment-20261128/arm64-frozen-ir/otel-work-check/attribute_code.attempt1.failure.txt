@@ -1,0 +1,1 @@
+First analysis assumed the entire pre-install blob would occur verbatim in kernel JIT readback; assertion actual_readback_entries failed. Investigation found only documented 8-byte map slots changed, at offset52 in all three native readbacks. Preserve this failed assumption; no compiler/guest work was repeated.

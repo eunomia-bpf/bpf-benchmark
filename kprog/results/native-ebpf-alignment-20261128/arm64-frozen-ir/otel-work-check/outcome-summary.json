@@ -1,0 +1,130 @@
+{
+  "native_install_events": 13,
+  "native_failed_events": 0,
+  "actual_installed_code_readbacks": [
+    "native_tracer_entry",
+    "perf_unwind_native",
+    "perf_unwind_stop"
+  ],
+  "optimized_debug_calls_all_zero": true,
+  "original_debug_call_relocations": 918,
+  "actual_loaded_const_values": [
+    {
+      "entry": "perf_go_labels",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_ruby",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "read_task_struct",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "native_tracer_entry",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_hotspot",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_native",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_perl",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_python",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "custom__generic",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_php",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_stop",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "tracepoint__sched_process_free",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    },
+    {
+      "entry": "perf_unwind_v8",
+      "with_debug_output": "00000000",
+      "inverse_pac_mask": "0000000000000000",
+      "stack_ptregs_offset": "00000000",
+      "task_stack_offset": "00000000"
+    }
+  ],
+  "source_sha256": {
+    "vendor/bpf/otel/support/ebpf/tracemgmt.h": "5db32bae74413904c7474c598981a45f7a9a11980ce393ac801f855e731706d9",
+    "vendor/bpf/otel/support/ebpf/types.h": "6a39f6fb9571cccf7a97275f14a4c506d1a32c0865c398eaa90976a8baf3470f",
+    "vendor/bpf/otel/support/ebpf/errors.h": "900072dc94ec0ded7d0685159fae050eead732f9e9709474ab37dff1b243415d",
+    "vendor/repos/opentelemetry-ebpf-profiler/tracer/systemconfig.go": "ba84e405b9b0698305fb5883866618863353321936a7a0310cc86f4c722623df"
+  },
+  "work_engagement_accepted": false,
+  "reason": "Both observed arms have zero native unwind attempts/frames, only zero/one stack slots and tail counts<=1; native loaded plans carry zero inverse_pac_mask and kernel stack offsets. Actual native frozen fold works on supplied facts; actual unwind engagement and live BPF/native constant parity remain unresolved.",
+  "phase_observations": {
+    "baseline": {
+      "active_snapshots": 3,
+      "entry_id": 16,
+      "entry_calls": 605918,
+      "all11_workers_return0": true,
+      "max_stack": 1,
+      "max_tail_calls": 1
+    },
+    "post_rejit": {
+      "active_snapshots": 2,
+      "entry_id": 45,
+      "entry_calls": 381187,
+      "all11_workers_return0": true,
+      "max_stack": 1,
+      "max_tail_calls": 1
+    }
+  }
+}
