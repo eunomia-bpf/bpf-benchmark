@@ -1,0 +1,25 @@
+{
+  "phase": "stage1",
+  "source_sha256": "4fc23cfcb22a6f240ea3d2efed947e7eec1b79e61f02c325e9d0e652a1d30360",
+  "source_lines": 154,
+  "full_log_bytes": 5250,
+  "full_log_sha256": "c6a6409469cccb727b21f479eeb60d26b14ad7db4dabe961608ff4d5ba785272",
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-tail/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 2.4278554916381836,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "diagnosis": "read_step change-expression match branch has ambiguous dotted .State constructor at81 because expected pair/state type is not determined yet",
+  "repair": "qualify only that constructor as CC.State.State; preserve exact theorem, source semantics, premises and default budgets"
+}
