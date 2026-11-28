@@ -1,0 +1,157 @@
+{
+  "scope": "original first twelve entry header pointer assignments: source, layout, allocated storage and real expression evaluation only",
+  "source_sha256": "51165346e25fb13eb59a1ffc695c7bbf2d98abbefd53a3ecbc8bbcf159801b10",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage4": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-source/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 36.410940647125244,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderSource"
+      ],
+      "exit": 0,
+      "seconds": 38.24241805076599,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.623565196990967,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-source/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2277591228485107,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stages": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-source/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 36.437384366989136,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-source/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 36.73450207710266,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "stage3": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-source/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 36.303677797317505,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "diagnostics": "initial unknown transitivity name and deep twelve-case unfolding; explicit integer bound and two original RHS forms avoid recursive whole-allocation reduction; caps unchanged",
+  "focused_jobs": 228,
+  "full_jobs": 1518,
+  "root_queries": [
+    "source",
+    "after_source",
+    "layout",
+    "declared",
+    "source_outside",
+    "header_storage",
+    "source_storage",
+    "source_modes",
+    "source_values",
+    "offsets",
+    "target_locations",
+    "modes"
+  ],
+  "actual_context_entry_commit": "3b45780fb083d58b3c6a3a3e8fe91773d059050b",
+  "actual_fields": 12,
+  "actual_field_offsets": "8*i in actual ge composite; first 96 bytes writable from actual allocation",
+  "actual_rhs": "two original arrays decay by By_reference; ten original address-of locals; actual allocated typed bindings",
+  "actual_lvalues": "actual header struct field evaluation returns actual allocated block and pointer offset; real Mint64 access modes and pointer casts",
+  "actual_stores_proved_here": 0,
+  "actual_execution_prefix_proved_here": false,
+  "endpoint": "after these twelve source assignments is original sequence s26/s9286; next vector_lo[0] NULL assignment remains open",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
