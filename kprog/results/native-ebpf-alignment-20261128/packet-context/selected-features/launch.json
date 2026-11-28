@@ -1,0 +1,22 @@
+{
+  "started_utc": "2026-11-28T08:52:20Z",
+  "launcher_pid": 1393442,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features",
+    "audit"
+  ],
+  "recipe_sha256": "fc26b2f91eee6aaac834daa0adc193939cb18039b11ca9b75c493c71e7c55406",
+  "preparation_commit": "1b7b2c2d833d33947ea3a53842b18cc71ae0f8f3",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/job.log",
+  "resume_entry": "COORDINATOR 2026-11-28T07:17Z",
+  "resources": "ControllerCPU19; serial subprocessCPU16 AS48GiB.",
+  "collection": "Collect SAME job next turn; do not rerun or claim a semantic verdict from preparation."
+}
