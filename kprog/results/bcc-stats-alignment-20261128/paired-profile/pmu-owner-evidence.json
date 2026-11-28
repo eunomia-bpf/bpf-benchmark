@@ -1,0 +1,24 @@
+{
+  "recorded_utc": "2026-11-28T12:15:27Z",
+  "cases": {
+    "0": {
+      "qemu_pid": 1455056,
+      "controller_pid": 1454977,
+      "observed_parent_chain": [
+        1455056,
+        1455039,
+        1455037,
+        1455036,
+        1454990,
+        1454977
+      ],
+      "evidence": "Direct host ps output in bcc-current-progress-check.sh invocation: same rawstats0 profile script, timeout/vng/kernel/virtfscommand and parent chain. Recorded after case0 ended; no PID inferred from sample popularity."
+    },
+    "1": {
+      "qemu_pid": 1455627,
+      "controller_pid": 1454977,
+      "evidence": "Actual controller descendant process tree recorded in process-observations.jsonl at2026-11-28T12:12:58Z; matched qemu-system-x86 child."
+    }
+  },
+  "scope": "Explicit own-QEMU attribution. Validate each PID has in-phase guest samples; retain other-PID counts instead of mixing other guests."
+}

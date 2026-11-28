@@ -1,0 +1,324 @@
+{
+  "profile_pid": 1454977,
+  "code_comparison": [
+    {
+      "phase": "baseline",
+      "name": "sys_enter",
+      "equal_shape": true,
+      "bytes_off": 108,
+      "bytes_on": 108,
+      "unresolved_high_literal_counts": [
+        5,
+        5
+      ]
+    },
+    {
+      "phase": "baseline",
+      "name": "sys_exit",
+      "equal_shape": true,
+      "bytes_off": 406,
+      "bytes_on": 406,
+      "unresolved_high_literal_counts": [
+        19,
+        19
+      ]
+    },
+    {
+      "phase": "baseline",
+      "name": "sched_switch",
+      "equal_shape": true,
+      "bytes_off": 935,
+      "bytes_on": 935,
+      "unresolved_high_literal_counts": [
+        24,
+        24
+      ]
+    },
+    {
+      "phase": "post_rejit",
+      "name": "sys_enter",
+      "equal_shape": true,
+      "bytes_off": 74,
+      "bytes_on": 74,
+      "unresolved_high_literal_counts": [
+        1,
+        1
+      ]
+    },
+    {
+      "phase": "post_rejit",
+      "name": "sys_exit",
+      "equal_shape": true,
+      "bytes_off": 272,
+      "bytes_on": 272,
+      "unresolved_high_literal_counts": [
+        6,
+        6
+      ]
+    },
+    {
+      "phase": "post_rejit",
+      "name": "sched_switch",
+      "equal_shape": true,
+      "bytes_off": 995,
+      "bytes_on": 995,
+      "unresolved_high_literal_counts": [
+        7,
+        7
+      ]
+    }
+  ],
+  "all_six_instruction_shapes_equal": true,
+  "readonly_maps": [
+    {
+      "stats": 0,
+      "phase": "baseline",
+      "map_count": 7,
+      "capable_my_pid": 2501,
+      "matched_actual_tool_pid": true,
+      "all_bytes_equal_after_only_own_pid_mask": true,
+      "original_snapshot": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats0/map-observe/119.34/snapshot.json",
+        "bytes": 26433,
+        "sha256": "c308e2f4fe4e1b6c7e1a5a2f5b11c62a9609a88e3428770a55326cd42df9b80b"
+      }
+    },
+    {
+      "stats": 0,
+      "phase": "post_rejit",
+      "map_count": 7,
+      "capable_my_pid": 3167,
+      "matched_actual_tool_pid": true,
+      "all_bytes_equal_after_only_own_pid_mask": true,
+      "original_snapshot": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats0/map-observe/166.52/snapshot.json",
+        "bytes": 30224,
+        "sha256": "1c85bd5ab495c7252614d4e6bcf02fe05859e4710954fde40621f85b126e59a3"
+      }
+    },
+    {
+      "stats": 1,
+      "phase": "baseline",
+      "map_count": 7,
+      "capable_my_pid": 2549,
+      "matched_actual_tool_pid": true,
+      "all_bytes_equal_after_only_own_pid_mask": true,
+      "original_snapshot": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats1/map-observe/136.16/snapshot.json",
+        "bytes": 26645,
+        "sha256": "8bb4246d564f1b6e3f5aca617e9d670e163f9e05d518ebbf80ef3e2bc7e8a6b3"
+      }
+    },
+    {
+      "stats": 1,
+      "phase": "post_rejit",
+      "map_count": 7,
+      "capable_my_pid": 3131,
+      "matched_actual_tool_pid": true,
+      "all_bytes_equal_after_only_own_pid_mask": true,
+      "original_snapshot": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats1/map-observe/180.58/snapshot.json",
+        "bytes": 30440,
+        "sha256": "0b75ae1177ef90190cd295814dfd6b1a819f0c713c283c17c4aebd0e883f82d8"
+      }
+    }
+  ],
+  "long_run_sockfd_cpu": {
+    "off": {
+      "ebpf_cpu_seconds_median": 275.31,
+      "native_cpu_seconds_median": 180.53,
+      "ebpf_wall_ops_median": 248266.73,
+      "native_wall_ops_median": 180728.58,
+      "ebpf_cpu_ops_median": 162290.13,
+      "native_cpu_ops_median": 180198.47,
+      "scope": "Separate reported medians; exact per-sample raw rows remain in case-review.json. CPU-time availability/execution and CPU-normalized operation rate are descriptive, not a cause proof."
+    },
+    "on": {
+      "ebpf_cpu_seconds_median": 271.93,
+      "native_cpu_seconds_median": 272.32,
+      "ebpf_wall_ops_median": 212594.21,
+      "native_wall_ops_median": 217226.7,
+      "ebpf_cpu_ops_median": 140649.33,
+      "native_cpu_ops_median": 143586.72,
+      "scope": "Separate reported medians; exact per-sample raw rows remain in case-review.json. CPU-time availability/execution and CPU-normalized operation rate are descriptive, not a cause proof."
+    }
+  },
+  "source_anchors": [
+    {
+      "path": "vendor/bpf/bcc/libbpf-tools/capable.bpf.c",
+      "sha256": "2146c2f3b30f3f70268b806a728e49be109dd8ed4430713aa88cb28070c64529",
+      "lines": [
+        {
+          "line": 14,
+          "text": ""
+        },
+        {
+          "line": 15,
+          "text": "extern int LINUX_KERNEL_VERSION __kconfig;"
+        },
+        {
+          "line": 16,
+          "text": ""
+        },
+        {
+          "line": 17,
+          "text": "const volatile pid_t my_pid = -1;"
+        },
+        {
+          "line": 18,
+          "text": "const volatile enum uniqueness unique_type = UNQ_OFF;"
+        },
+        {
+          "line": 19,
+          "text": "const volatile bool kernel_stack = false;"
+        },
+        {
+          "line": 20,
+          "text": "const volatile bool user_stack = false;"
+        },
+        {
+          "line": 21,
+          "text": "const volatile bool filter_cg = false;"
+        },
+        {
+          "line": 22,
+          "text": "const volatile pid_t targ_pid = -1;"
+        },
+        {
+          "line": 23,
+          "text": ""
+        },
+        {
+          "line": 24,
+          "text": "struct args_t {"
+        }
+      ]
+    },
+    {
+      "path": "vendor/bpf/bcc/libbpf-tools/capable.bpf.c",
+      "sha256": "2146c2f3b30f3f70268b806a728e49be109dd8ed4430713aa88cb28070c64529",
+      "lines": [
+        {
+          "line": 80,
+          "text": "\tif (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))"
+        },
+        {
+          "line": 81,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 82,
+          "text": ""
+        },
+        {
+          "line": 83,
+          "text": "\tpid_tgid = bpf_get_current_pid_tgid();"
+        },
+        {
+          "line": 84,
+          "text": "\tpid = pid_tgid >> 32;"
+        },
+        {
+          "line": 85,
+          "text": ""
+        },
+        {
+          "line": 86,
+          "text": "\tif (pid == my_pid)"
+        },
+        {
+          "line": 87,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 88,
+          "text": ""
+        },
+        {
+          "line": 89,
+          "text": "\tif (targ_pid != -1 && targ_pid != pid)"
+        },
+        {
+          "line": 90,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 91,
+          "text": ""
+        },
+        {
+          "line": 92,
+          "text": "\tstruct args_t args = {};"
+        },
+        {
+          "line": 93,
+          "text": "\targs.cap = cap;"
+        },
+        {
+          "line": 94,
+          "text": "\targs.cap_opt = cap_opt;"
+        }
+      ]
+    },
+    {
+      "path": "vendor/repos/bcc/libbpf-tools/capable.c",
+      "sha256": "293a0f7fd77ffc6e4dde0ddf7f79b28871d7580ba8d1e258872cf087d017f03c",
+      "lines": [
+        {
+          "line": 322,
+          "text": "\t}"
+        },
+        {
+          "line": 323,
+          "text": ""
+        },
+        {
+          "line": 324,
+          "text": "\tobj->rodata->targ_pid = env.pid;"
+        },
+        {
+          "line": 325,
+          "text": "\tobj->rodata->filter_cg = env.cg;"
+        },
+        {
+          "line": 326,
+          "text": "\tobj->rodata->user_stack = env.user_stack;"
+        },
+        {
+          "line": 327,
+          "text": "\tobj->rodata->kernel_stack = env.kernel_stack;"
+        },
+        {
+          "line": 328,
+          "text": "\tobj->rodata->unique_type = uniqueness_type;"
+        },
+        {
+          "line": 329,
+          "text": ""
+        },
+        {
+          "line": 330,
+          "text": "\tmy_pid = getpid();"
+        },
+        {
+          "line": 331,
+          "text": "\tobj->rodata->my_pid = my_pid;"
+        },
+        {
+          "line": 332,
+          "text": ""
+        },
+        {
+          "line": 333,
+          "text": "\tbpf_map__set_value_size(obj->maps.stackmap, env.perf_max_stack_depth * sizeof(unsigned long));"
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Three observed hot programs only; unknown high-address literals are unresolved, so shape equality does not establish bound-map equality.",
+    "Seven observed RO-map values agree except my_pid, verified against each actual capable tool PID and the loader getpid producer. HASH contents and dynamic execution remain unproved.",
+    "The short profile pair is disturbed by read-only observers and showed CPU-time variation; original full-run loss must not be causally explained by the short ratio alone.",
+    "Perf143 remains explicit; SAME1456924 is validating decoding/phase/ownQEMU next. No new native bug or fix is established by these facts."
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "prepared_utc": "2026-11-28T12:24:53Z",
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "recipes": {
+    "analyse_pair.py": "1b9e2decaef64c65c00515382e88581a1ea9deea963bd8888dae8ebb7120eed6",
+    "review_pair.py": "46da6baf79a2da128c502a2c17ff876bb819880be77e61dc342a21972d35d75f",
+    "review_pair.attempt1.py": "465ad51325c39d927e8dd9f52efc3c24ef79c9e8d15263616689c86768955d8f",
+    "summarize_review.py": "3b62fc43004cae5b89d50b6e0058aa5e32abceb6d57a1845925f7dcd817c5095",
+    "archive_pair.py": "afd26ea3e09234420aad4b9fef6ed1d0b8483e686dcc313dae1ed268964b4db7",
+    "normalize_pmu.py": "2324e7c119be9b2297bf211577fc8885c1e0d54cd4b75a03eaec6bfcb9d87528"
+  },
+  "pmu_analysis_pid": 1456924,
+  "archive_phase": "prepared-not-launched",
+  "scope": "PMU analysisCPU16/48GiB. ClosedrawarchivalCPU19/48GiB afterrecipepublication; perfileSHA/48MBparts kept. No profile rerun or productionchange.",
+  "normalization": "After collecting1456924, run normalize_pmu.py once on existing decoded JSON; no perf re-decode/rerun. Original rate-times-window field is nominal, not observed bogo count (native stats0 cleanup13s)."
+}

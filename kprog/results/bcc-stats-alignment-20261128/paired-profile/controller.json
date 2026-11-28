@@ -1,0 +1,85 @@
+{
+  "pid": 1454977,
+  "started_utc": "2026-11-28T12:09:53Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "image_expected": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+  "scope": "Latest coordinator11:20 BCC stats-off bug/alignment diagnosis. ONEstats0/stats1 pair on unchanged current image, each default-check1sample/10s/64G settings except intended stats switch. No full rotate, tuning, app/P/kernel/image/source change. Observers are external to frozen benchmark.",
+  "host_address_space_limit_bytes": [
+    -1,
+    -1
+  ],
+  "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile",
+  "cases": [
+    {
+      "stats": 0,
+      "started_utc": "2026-11-28T12:09:54Z",
+      "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats0",
+      "recipe_sha256": "68be63ef02026cbccfb64376f5a2322a8acc1b5737754ed25d6820718d789797",
+      "command": [
+        "bash",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats0/profile-host.sh",
+        "bcc/set",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats0"
+      ],
+      "profile_returncode": 0,
+      "ended_utc": "2026-11-28T12:12:53Z",
+      "guest-exit.txt": "0",
+      "perf-exit.txt": "143",
+      "profile-image.txt": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "profile-source.txt": "4153eb39d63f382f647b3f8125415515035f1838",
+      "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_121121_925247",
+      "image_matches": true
+    },
+    {
+      "stats": 1,
+      "started_utc": "2026-11-28T12:12:53Z",
+      "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats1",
+      "recipe_sha256": "a36b7ebee43dddb7fe0c893d55278539326804ca520bf9546c9029d2ac099e5e",
+      "command": [
+        "bash",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats1/profile-host.sh",
+        "bcc/set",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/paired-profile/stats1"
+      ],
+      "profile_returncode": 0,
+      "ended_utc": "2026-11-28T12:16:09Z",
+      "guest-exit.txt": "0",
+      "perf-exit.txt": "143",
+      "profile-image.txt": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "profile-source.txt": "4153eb39d63f382f647b3f8125415515035f1838",
+      "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_121438_266645",
+      "image_matches": true
+    }
+  ],
+  "source_sha256": {
+    "kprog/results/bcc-stats-alignment-20261128/profile_pair.py": "a0df4917b4e3f60bd27612c86f23bf7e4a499095d8b227a864e834c004711d48",
+    "kprog/results/profile-20261123/profile-host.sh": "016fac66a9bb66c29fcf6f291d31cb9d3589b7340c21ccffc2a47b15b66ffcb3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83",
+    "kprog/results/x86-otel-perf-20261127/observe_otel_maps.py": "3278c89f61f5e9c1b65bf9a2f2fba505a38c4146766dd87fb217f8cb62350cea",
+    "kprog/results/profile-20261123/dump-prog.py": "ac42618b5c6dea57ad24623d191c862ffa988d2bc39fb31e7e4f291fab0ecb0c"
+  },
+  "effective_recipe": {
+    "samples": 1,
+    "workload_seconds": 10,
+    "stats_modes": [
+      0,
+      1
+    ],
+    "guest_memory": "64G",
+    "guest_cpus": "0-7",
+    "host_pmu_cpu": 19,
+    "locks": [
+      "timingEX",
+      "imageSH",
+      "batchEX"
+    ],
+    "program_dump_names": [
+      "sys_enter",
+      "sys_exit",
+      "sched_switch"
+    ],
+    "scope": "Dump names select read-only observation only; every normal BCC program loads via the same manifest. SysRq loop removed,2sreadonly metadata polling and normal guest-mode PMU retained."
+  },
+  "ended_utc": "2026-11-28T12:16:09Z"
+}
