@@ -1,0 +1,1609 @@
+{
+  "replay_pid": 1447799,
+  "started_utc": "2026-11-28T11:46:50Z",
+  "ended_utc": "2026-11-28T11:46:50Z",
+  "status": 0,
+  "scope": "Actual11-26 retained proof/plan/blob replay with current common linker. Not11-23 installed bytes or a timing/guest run.",
+  "linker": {
+    "path": "kprog/x86/native_lab/native_link/target/release/native-link",
+    "bytes": 2762576,
+    "sha256": "bb2c9d6aece9a3e795806441d82baef3c6b9746a3680536ac97450371a21be0e"
+  },
+  "rows": [
+    {
+      "cache_key": "45ba49203d276b52",
+      "entry": "generic_kprobe_event",
+      "old_blob_bytes": 1413,
+      "replayed_blob_bytes": 1320,
+      "instruction_count": 292,
+      "normalized_internal_references": [],
+      "remaining_nonbranch_differences": 0,
+      "changed_direct_branch": {
+        "index": 82,
+        "old": {
+          "offset": 369,
+          "opcode": "jmp",
+          "operands": "0x18c",
+          "text": "171:\tjmp    0x18c"
+        },
+        "new": {
+          "offset": 361,
+          "opcode": "jmp",
+          "operands": "0x16e",
+          "text": "169:\tjmp    0x16e"
+        },
+        "old_target_index": 87,
+        "new_target_index": 84,
+        "old_target": [
+          {
+            "offset": 396,
+            "opcode": "add",
+            "operands": "$0xf88,%rax",
+            "text": "18c:\tadd    $0xf88,%rax"
+          },
+          {
+            "offset": 402,
+            "opcode": "test",
+            "operands": "%rax,%rax",
+            "text": "192:\ttest   %rax,%rax"
+          },
+          {
+            "offset": 405,
+            "opcode": "jns",
+            "operands": "0x500",
+            "text": "195:\tjns    0x500"
+          },
+          {
+            "offset": 411,
+            "opcode": "mov",
+            "operands": "(%rax),%rax",
+            "text": "19b:\tmov    (%rax),%rax"
+          }
+        ],
+        "new_target": [
+          {
+            "offset": 366,
+            "opcode": "mov",
+            "operands": "$0xffffffff932b0018,%rax",
+            "text": "16e:\tmov    $0xffffffff932b0018,%rax"
+          },
+          {
+            "offset": 373,
+            "opcode": "add",
+            "operands": "%gs:0xffffffff932b0028,%rax",
+            "text": "175:\tadd    %gs:0xffffffff932b0028,%rax"
+          },
+          {
+            "offset": 382,
+            "opcode": "mov",
+            "operands": "(%rax),%rax",
+            "text": "17e:\tmov    (%rax),%rax"
+          },
+          {
+            "offset": 385,
+            "opcode": "add",
+            "operands": "$0xf88,%rax",
+            "text": "181:\tadd    $0xf88,%rax"
+          }
+        ]
+      },
+      "unchanged_external_target_sequence": true,
+      "finding": "Old null-tg_conf branch skips current-task initialization; replay enters it. No assertion that this null array-map path was exercised."
+    },
+    {
+      "cache_key": "5be2ee6f95ee536b",
+      "entry": "generic_kprobe_event",
+      "old_blob_bytes": 1413,
+      "replayed_blob_bytes": 1320,
+      "instruction_count": 292,
+      "normalized_internal_references": [],
+      "remaining_nonbranch_differences": 0,
+      "changed_direct_branch": {
+        "index": 82,
+        "old": {
+          "offset": 369,
+          "opcode": "jmp",
+          "operands": "0x18c",
+          "text": "171:\tjmp    0x18c"
+        },
+        "new": {
+          "offset": 361,
+          "opcode": "jmp",
+          "operands": "0x16e",
+          "text": "169:\tjmp    0x16e"
+        },
+        "old_target_index": 87,
+        "new_target_index": 84,
+        "old_target": [
+          {
+            "offset": 396,
+            "opcode": "add",
+            "operands": "$0xf88,%rax",
+            "text": "18c:\tadd    $0xf88,%rax"
+          },
+          {
+            "offset": 402,
+            "opcode": "test",
+            "operands": "%rax,%rax",
+            "text": "192:\ttest   %rax,%rax"
+          },
+          {
+            "offset": 405,
+            "opcode": "jns",
+            "operands": "0x500",
+            "text": "195:\tjns    0x500"
+          },
+          {
+            "offset": 411,
+            "opcode": "mov",
+            "operands": "(%rax),%rax",
+            "text": "19b:\tmov    (%rax),%rax"
+          }
+        ],
+        "new_target": [
+          {
+            "offset": 366,
+            "opcode": "mov",
+            "operands": "$0xffffffff932b0018,%rax",
+            "text": "16e:\tmov    $0xffffffff932b0018,%rax"
+          },
+          {
+            "offset": 373,
+            "opcode": "add",
+            "operands": "%gs:0xffffffff932b0028,%rax",
+            "text": "175:\tadd    %gs:0xffffffff932b0028,%rax"
+          },
+          {
+            "offset": 382,
+            "opcode": "mov",
+            "operands": "(%rax),%rax",
+            "text": "17e:\tmov    (%rax),%rax"
+          },
+          {
+            "offset": 385,
+            "opcode": "add",
+            "operands": "$0xf88,%rax",
+            "text": "181:\tadd    $0xf88,%rax"
+          }
+        ]
+      },
+      "unchanged_external_target_sequence": true,
+      "finding": "Old null-tg_conf branch skips current-task initialization; replay enters it. No assertion that this null array-map path was exercised."
+    },
+    {
+      "cache_key": "a751a5ae32d71696",
+      "entry": "generic_kprobe_process_filter",
+      "old_blob_bytes": 13429,
+      "replayed_blob_bytes": 12323,
+      "instruction_count": 2974,
+      "normalized_internal_references": [
+        {
+          "instruction_index": 674,
+          "reason": "Same RIP-relative internal cwd_read_v61 target instruction index after branch shortening",
+          "target_instruction_index": 2746,
+          "old": {
+            "offset": 3352,
+            "opcode": "lea",
+            "operands": "0x2426(%rip),%rsi        # 0x3145",
+            "text": "d18:\tlea    0x2426(%rip),%rsi        # 0x3145"
+          },
+          "new": {
+            "offset": 2922,
+            "opcode": "lea",
+            "operands": "0x2182(%rip),%rsi        # 0x2cf3",
+            "text": "b6a:\tlea    0x2182(%rip),%rsi        # 0x2cf3"
+          }
+        }
+      ],
+      "remaining_nonbranch_differences": 0,
+      "changed_direct_branch": {
+        "index": 2742,
+        "old": {
+          "offset": 12594,
+          "opcode": "jmp",
+          "operands": "0x310a",
+          "text": "3132:\tjmp    0x310a"
+        },
+        "new": {
+          "offset": 11488,
+          "opcode": "jmp",
+          "operands": "0x2c5c",
+          "text": "2ce0:\tjmp    0x2c5c"
+        },
+        "old_target_index": 2734,
+        "new_target_index": 2711,
+        "old_target": [
+          {
+            "offset": 12554,
+            "opcode": "xor",
+            "operands": "%eax,%eax",
+            "text": "310a:\txor    %eax,%eax"
+          },
+          {
+            "offset": 12556,
+            "opcode": "add",
+            "operands": "$0xe8,%rsp",
+            "text": "310c:\tadd    $0xe8,%rsp"
+          },
+          {
+            "offset": 12563,
+            "opcode": "pop",
+            "operands": "%r12",
+            "text": "3113:\tpop    %r12"
+          },
+          {
+            "offset": 12565,
+            "opcode": "pop",
+            "operands": "%rbp",
+            "text": "3115:\tpop    %rbp"
+          }
+        ],
+        "new_target": [
+          {
+            "offset": 11356,
+            "opcode": "mov",
+            "operands": "%edx,%edx",
+            "text": "2c5c:\tmov    %edx,%edx"
+          },
+          {
+            "offset": 11358,
+            "opcode": "cmp",
+            "operands": "%edx,0x44(%rsi)",
+            "text": "2c5e:\tcmp    %edx,0x44(%rsi)"
+          },
+          {
+            "offset": 11364,
+            "opcode": "jbe",
+            "operands": "0x2cb8",
+            "text": "2c64:\tjbe    0x2cb8"
+          },
+          {
+            "offset": 11370,
+            "opcode": "mov",
+            "operands": "0xf0(%rsp),%rax",
+            "text": "2c6a:\tmov    0xf0(%rsp),%rax"
+          }
+        ]
+      },
+      "unchanged_external_target_sequence": true,
+      "finding": "PFILTER_CONTINUE=2 must tail-call index2. Old branch goes straight to return0, skipping the expanded tail-call block; current common linker re-enters the block with edx2."
+    },
+    {
+      "cache_key": "e700f906b8500cb3",
+      "entry": "generic_kprobe_process_filter",
+      "old_blob_bytes": 13429,
+      "replayed_blob_bytes": 12323,
+      "instruction_count": 2974,
+      "normalized_internal_references": [
+        {
+          "instruction_index": 674,
+          "reason": "Same RIP-relative internal cwd_read_v61 target instruction index after branch shortening",
+          "target_instruction_index": 2746,
+          "old": {
+            "offset": 3352,
+            "opcode": "lea",
+            "operands": "0x2426(%rip),%rsi        # 0x3145",
+            "text": "d18:\tlea    0x2426(%rip),%rsi        # 0x3145"
+          },
+          "new": {
+            "offset": 2922,
+            "opcode": "lea",
+            "operands": "0x2182(%rip),%rsi        # 0x2cf3",
+            "text": "b6a:\tlea    0x2182(%rip),%rsi        # 0x2cf3"
+          }
+        }
+      ],
+      "remaining_nonbranch_differences": 0,
+      "changed_direct_branch": {
+        "index": 2742,
+        "old": {
+          "offset": 12594,
+          "opcode": "jmp",
+          "operands": "0x310a",
+          "text": "3132:\tjmp    0x310a"
+        },
+        "new": {
+          "offset": 11488,
+          "opcode": "jmp",
+          "operands": "0x2c5c",
+          "text": "2ce0:\tjmp    0x2c5c"
+        },
+        "old_target_index": 2734,
+        "new_target_index": 2711,
+        "old_target": [
+          {
+            "offset": 12554,
+            "opcode": "xor",
+            "operands": "%eax,%eax",
+            "text": "310a:\txor    %eax,%eax"
+          },
+          {
+            "offset": 12556,
+            "opcode": "add",
+            "operands": "$0xe8,%rsp",
+            "text": "310c:\tadd    $0xe8,%rsp"
+          },
+          {
+            "offset": 12563,
+            "opcode": "pop",
+            "operands": "%r12",
+            "text": "3113:\tpop    %r12"
+          },
+          {
+            "offset": 12565,
+            "opcode": "pop",
+            "operands": "%rbp",
+            "text": "3115:\tpop    %rbp"
+          }
+        ],
+        "new_target": [
+          {
+            "offset": 11356,
+            "opcode": "mov",
+            "operands": "%edx,%edx",
+            "text": "2c5c:\tmov    %edx,%edx"
+          },
+          {
+            "offset": 11358,
+            "opcode": "cmp",
+            "operands": "%edx,0x44(%rsi)",
+            "text": "2c5e:\tcmp    %edx,0x44(%rsi)"
+          },
+          {
+            "offset": 11364,
+            "opcode": "jbe",
+            "operands": "0x2cb8",
+            "text": "2c64:\tjbe    0x2cb8"
+          },
+          {
+            "offset": 11370,
+            "opcode": "mov",
+            "operands": "0xf0(%rsp),%rax",
+            "text": "2c6a:\tmov    0xf0(%rsp),%rax"
+          }
+        ]
+      },
+      "unchanged_external_target_sequence": true,
+      "finding": "PFILTER_CONTINUE=2 must tail-call index2. Old branch goes straight to return0, skipping the expanded tail-call block; current common linker re-enters the block with edx2."
+    }
+  ],
+  "source_anchors": [
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/generic_calls.h",
+      "sha256": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+      "lines": [
+        {
+          "line": 30,
+          "text": "generic_start_process_filter(void *ctx, struct bpf_map_def *calls)"
+        },
+        {
+          "line": 31,
+          "text": "{"
+        },
+        {
+          "line": 32,
+          "text": "\tstruct msg_generic_kprobe *msg;"
+        },
+        {
+          "line": 33,
+          "text": "\tstruct event_config *config;"
+        },
+        {
+          "line": 34,
+          "text": "\tstruct task_struct *task;"
+        },
+        {
+          "line": 35,
+          "text": "\tint i, zero = 0;"
+        },
+        {
+          "line": 36,
+          "text": ""
+        },
+        {
+          "line": 37,
+          "text": "\tmsg = map_lookup_elem(&process_call_heap, &zero);"
+        },
+        {
+          "line": 38,
+          "text": "\tif (!msg)"
+        },
+        {
+          "line": 39,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 40,
+          "text": ""
+        },
+        {
+          "line": 41,
+          "text": "\t/* setup index, check policy filter, and setup function id */"
+        },
+        {
+          "line": 42,
+          "text": "\tmsg->idx = get_index(ctx);"
+        },
+        {
+          "line": 43,
+          "text": "\tconfig = map_lookup_elem(&config_map, &msg->idx);"
+        },
+        {
+          "line": 44,
+          "text": "\tif (!config)"
+        },
+        {
+          "line": 45,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 46,
+          "text": "\tif (!policy_filter_check(config->policy_id))"
+        },
+        {
+          "line": 47,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 48,
+          "text": "\tmsg->func_id = config->func_id;"
+        },
+        {
+          "line": 49,
+          "text": "\tmsg->retprobe_id = 0;"
+        },
+        {
+          "line": 50,
+          "text": ""
+        },
+        {
+          "line": 51,
+          "text": "\t/* Initialize selector index to 0 */"
+        },
+        {
+          "line": 52,
+          "text": "\tmsg->sel.curr = 0;"
+        },
+        {
+          "line": 53,
+          "text": "#pragma unroll"
+        },
+        {
+          "line": 54,
+          "text": "\tfor (i = 0; i < MAX_CONFIGURED_SELECTORS; i++)"
+        },
+        {
+          "line": 55,
+          "text": "\t\tmsg->sel.active[i] = 0;"
+        },
+        {
+          "line": 56,
+          "text": "\t/* Initialize accept field to reject */"
+        },
+        {
+          "line": 57,
+          "text": "\tmsg->sel.pass = false;"
+        },
+        {
+          "line": 58,
+          "text": "\tmsg->tailcall_index_process = 0;"
+        },
+        {
+          "line": 59,
+          "text": "\tmsg->tailcall_index_selector = 0;"
+        },
+        {
+          "line": 60,
+          "text": "\tgeneric_path_init(msg);"
+        },
+        {
+          "line": 61,
+          "text": "\ttask = (struct task_struct *)get_current_task();"
+        },
+        {
+          "line": 62,
+          "text": "\t/* Initialize namespaces to apply filters on them */"
+        },
+        {
+          "line": 63,
+          "text": "\tget_namespaces(&msg->ns, task);"
+        },
+        {
+          "line": 64,
+          "text": "\t/* Initialize capabilities to apply filters on them */"
+        },
+        {
+          "line": 65,
+          "text": "\tget_current_subj_caps(&msg->caps, task);"
+        },
+        {
+          "line": 66,
+          "text": "#ifdef __NS_CHANGES_FILTER"
+        },
+        {
+          "line": 67,
+          "text": "\tmsg->sel.match_ns = 0;"
+        },
+        {
+          "line": 68,
+          "text": "#endif"
+        },
+        {
+          "line": 69,
+          "text": "#ifdef __CAP_CHANGES_FILTER"
+        },
+        {
+          "line": 70,
+          "text": "\tmsg->sel.match_cap = 0;"
+        },
+        {
+          "line": 71,
+          "text": "#endif"
+        },
+        {
+          "line": 72,
+          "text": ""
+        },
+        {
+          "line": 73,
+          "text": "\tmsg->lsm.post = false;"
+        },
+        {
+          "line": 74,
+          "text": "\tmsg->common.flags = 0;"
+        },
+        {
+          "line": 75,
+          "text": ""
+        },
+        {
+          "line": 76,
+          "text": "\t/* Tail call into filters. */"
+        },
+        {
+          "line": 77,
+          "text": "\ttail_call(ctx, calls, TAIL_CALL_FILTER);"
+        },
+        {
+          "line": 78,
+          "text": "\treturn 0;"
+        }
+      ]
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/generic_calls.h",
+      "sha256": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+      "lines": [
+        {
+          "line": 1320,
+          "text": "FUNC_INLINE int generic_process_filter(void)"
+        },
+        {
+          "line": 1321,
+          "text": "{"
+        },
+        {
+          "line": 1322,
+          "text": "\tint selectors, pass, zero = 0;"
+        },
+        {
+          "line": 1323,
+          "text": "\tstruct execve_map_value *enter;"
+        },
+        {
+          "line": 1324,
+          "text": "\tstruct msg_generic_kprobe *msg;"
+        },
+        {
+          "line": 1325,
+          "text": "\tstruct msg_execve_key *current;"
+        },
+        {
+          "line": 1326,
+          "text": "\tstruct msg_selector_data *sel;"
+        },
+        {
+          "line": 1327,
+          "text": "\tbool walker = 0;"
+        },
+        {
+          "line": 1328,
+          "text": "\t__u32 ppid, *f;"
+        },
+        {
+          "line": 1329,
+          "text": ""
+        },
+        {
+          "line": 1330,
+          "text": "\tmsg = map_lookup_elem(&process_call_heap, &zero);"
+        },
+        {
+          "line": 1331,
+          "text": "\tif (!msg)"
+        },
+        {
+          "line": 1332,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 1333,
+          "text": ""
+        },
+        {
+          "line": 1334,
+          "text": "\tenter = event_find_curr(&ppid, &walker);"
+        },
+        {
+          "line": 1335,
+          "text": "\tif (!enter) {"
+        },
+        {
+          "line": 1336,
+          "text": "\t\tenter = event_find_curr_probe(msg);"
+        },
+        {
+          "line": 1337,
+          "text": "\t\tif (!enter)"
+        },
+        {
+          "line": 1338,
+          "text": "\t\t\treturn PFILTER_CURR_NOT_FOUND;"
+        },
+        {
+          "line": 1339,
+          "text": "\t\tmsg->common.flags |= MSG_COMMON_FLAG_PROCESS_NOT_FOUND;"
+        },
+        {
+          "line": 1340,
+          "text": "\t}"
+        },
+        {
+          "line": 1341,
+          "text": ""
+        },
+        {
+          "line": 1342,
+          "text": "\tf = map_lookup_elem(&filter_map, &msg->idx);"
+        },
+        {
+          "line": 1343,
+          "text": "\tif (!f)"
+        },
+        {
+          "line": 1344,
+          "text": "\t\treturn PFILTER_ERROR;"
+        },
+        {
+          "line": 1345,
+          "text": ""
+        },
+        {
+          "line": 1346,
+          "text": "\tsel = &msg->sel;"
+        },
+        {
+          "line": 1347,
+          "text": "\tcurrent = &msg->current;"
+        },
+        {
+          "line": 1348,
+          "text": ""
+        },
+        {
+          "line": 1349,
+          "text": "\tif (sel->curr > MAX_SELECTORS)"
+        },
+        {
+          "line": 1350,
+          "text": "\t\treturn process_filter_done(sel, enter, current);"
+        },
+        {
+          "line": 1351,
+          "text": ""
+        },
+        {
+          "line": 1352,
+          "text": "\tselectors = f[0];"
+        },
+        {
+          "line": 1353,
+          "text": "\t/* If no selectors accept process */"
+        },
+        {
+          "line": 1354,
+          "text": "\tif (!selectors) {"
+        },
+        {
+          "line": 1355,
+          "text": "\t\tsel->pass = true;"
+        },
+        {
+          "line": 1356,
+          "text": "\t\treturn process_filter_done(sel, enter, current);"
+        },
+        {
+          "line": 1357,
+          "text": "\t}"
+        },
+        {
+          "line": 1358,
+          "text": ""
+        },
+        {
+          "line": 1359,
+          "text": "\t/* If we get here with reference to uninitialized selector drop */"
+        },
+        {
+          "line": 1360,
+          "text": "\tif (selectors <= sel->curr)"
+        },
+        {
+          "line": 1361,
+          "text": "\t\treturn process_filter_done(sel, enter, current);"
+        },
+        {
+          "line": 1362,
+          "text": ""
+        },
+        {
+          "line": 1363,
+          "text": "\tpass = selector_process_filter(f, sel->curr, enter, msg);"
+        },
+        {
+          "line": 1364,
+          "text": "\tif (pass) {"
+        },
+        {
+          "line": 1365,
+          "text": "\t\t/* Verify lost that msg is not null here so recheck */"
+        },
+        {
+          "line": 1366,
+          "text": "\t\tint curr = sel->curr;"
+        },
+        {
+          "line": 1367,
+          "text": ""
+        },
+        {
+          "line": 1368,
+          "text": "\t\tcurr &= 0x1f;"
+        },
+        {
+          "line": 1369,
+          "text": "\t\tsel->active[curr] = true;"
+        },
+        {
+          "line": 1370,
+          "text": "\t\tsel->active[SELECTORS_ACTIVE] = true;"
+        },
+        {
+          "line": 1371,
+          "text": "\t\tsel->pass |= true;"
+        },
+        {
+          "line": 1372,
+          "text": "\t}"
+        },
+        {
+          "line": 1373,
+          "text": "\tsel->curr++;"
+        },
+        {
+          "line": 1374,
+          "text": "\tif (sel->curr > selectors)"
+        },
+        {
+          "line": 1375,
+          "text": "\t\treturn process_filter_done(sel, enter, current);"
+        },
+        {
+          "line": 1376,
+          "text": "\treturn PFILTER_CONTINUE; /* will iterate to the next selector */"
+        },
+        {
+          "line": 1377,
+          "text": "}"
+        },
+        {
+          "line": 1378,
+          "text": ""
+        },
+        {
+          "line": 1379,
+          "text": "FUNC_INLINE int filter_args(void *ctx, struct bpf_map_def *tailcalls,"
+        },
+        {
+          "line": 1380,
+          "text": "\t\t\t    struct msg_generic_kprobe *e, int selidx, bool is_entry,"
+        },
+        {
+          "line": 1381,
+          "text": "\t\t\t    int arg)"
+        },
+        {
+          "line": 1382,
+          "text": "{"
+        },
+        {
+          "line": 1383,
+          "text": "\t__u8 *f;"
+        },
+        {
+          "line": 1384,
+          "text": ""
+        },
+        {
+          "line": 1385,
+          "text": "\t/* No filters and no selectors so just accepts */"
+        },
+        {
+          "line": 1386,
+          "text": "\tf = map_lookup_elem(&filter_map, &e->idx);"
+        }
+      ]
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c",
+      "sha256": "7f7d5acc5612a1a3c193adffe73af928e6ac7deb2a4765c94bc85ac66e0e5db9",
+      "lines": [
+        {
+          "line": 120,
+          "text": "__attribute__((section(COMMON), used)) int"
+        },
+        {
+          "line": 121,
+          "text": "generic_kprobe_process_filter(void *ctx)"
+        },
+        {
+          "line": 122,
+          "text": "{"
+        },
+        {
+          "line": 123,
+          "text": "\tint ret;"
+        },
+        {
+          "line": 124,
+          "text": ""
+        },
+        {
+          "line": 125,
+          "text": "\tret = generic_process_filter();"
+        },
+        {
+          "line": 126,
+          "text": "\tif (ret == PFILTER_CONTINUE)"
+        },
+        {
+          "line": 127,
+          "text": "\t\ttail_call(ctx, &kprobe_calls, TAIL_CALL_FILTER);"
+        },
+        {
+          "line": 128,
+          "text": "\telse if (ret == PFILTER_ACCEPT)"
+        },
+        {
+          "line": 129,
+          "text": "\t\ttail_call(ctx, &kprobe_calls, TAIL_CALL_SETUP);"
+        },
+        {
+          "line": 130,
+          "text": "\t/* If filter does not accept drop it. Ideally we would"
+        },
+        {
+          "line": 131,
+          "text": "\t * log error codes for later review, TBD."
+        },
+        {
+          "line": 132,
+          "text": "\t */"
+        },
+        {
+          "line": 133,
+          "text": "\treturn PFILTER_REJECT;"
+        },
+        {
+          "line": 134,
+          "text": "}"
+        },
+        {
+          "line": 135,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/pfilter.h",
+      "sha256": "14ce4ebb6b55248c0b08cc297cfe067069dc116740c22326d44b08f3a935ec2e",
+      "lines": [
+        {
+          "line": 75,
+          "text": "\t\treturn 0;"
+        },
+        {
+          "line": 76,
+          "text": "\treturn 1;"
+        },
+        {
+          "line": 77,
+          "text": "}"
+        },
+        {
+          "line": 78,
+          "text": ""
+        },
+        {
+          "line": 79,
+          "text": "// generic_process_filter return value"
+        },
+        {
+          "line": 80,
+          "text": "enum {"
+        },
+        {
+          "line": 81,
+          "text": "\tPFILTER_ERROR = 3, // these should never happen"
+        },
+        {
+          "line": 82,
+          "text": "\tPFILTER_CONTINUE = 2, // filter check continue"
+        },
+        {
+          "line": 83,
+          "text": "\tPFILTER_ACCEPT = 1, // filter check passed"
+        },
+        {
+          "line": 84,
+          "text": "\tPFILTER_REJECT = 0, // filter check failed"
+        },
+        {
+          "line": 85,
+          "text": "\tPFILTER_CURR_NOT_FOUND = 0, // event_find_curr() failed"
+        },
+        {
+          "line": 86,
+          "text": "};"
+        },
+        {
+          "line": 87,
+          "text": ""
+        },
+        {
+          "line": 88,
+          "text": "FUNC_INLINE int"
+        }
+      ]
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/types/basic.h",
+      "sha256": "f86b33f98b51c79266b1139367c93d1e4f4dcee4d1e9b0a64756a73045ebb95c",
+      "lines": [
+        {
+          "line": 139,
+          "text": "};"
+        },
+        {
+          "line": 140,
+          "text": ""
+        },
+        {
+          "line": 141,
+          "text": "enum {"
+        },
+        {
+          "line": 142,
+          "text": "\tTAIL_CALL_SETUP = 0,"
+        },
+        {
+          "line": 143,
+          "text": "\tTAIL_CALL_PROCESS = 1,"
+        },
+        {
+          "line": 144,
+          "text": "\tTAIL_CALL_FILTER = 2,"
+        },
+        {
+          "line": 145,
+          "text": "\tTAIL_CALL_ARGS = 3,"
+        },
+        {
+          "line": 146,
+          "text": "\tTAIL_CALL_ACTIONS = 4,"
+        },
+        {
+          "line": 147,
+          "text": "\tTAIL_CALL_SEND = 5,"
+        },
+        {
+          "line": 148,
+          "text": "\tTAIL_CALL_PATH = 6,"
+        },
+        {
+          "line": 149,
+          "text": "\tTAIL_CALL_PROCESS_2 = 7,"
+        },
+        {
+          "line": 150,
+          "text": "\tTAIL_CALL_ARGS_2 = 8,"
+        },
+        {
+          "line": 151,
+          "text": "};"
+        }
+      ]
+    },
+    {
+      "path": "runner/libs/app_runners/tetragon.py",
+      "sha256": "6a57ef7dcb355ae5feefd23fcba0fb6515ff08eba46b2122620737497feea96d",
+      "lines": [
+        {
+          "line": 100,
+          "text": "DEFAULT_POLICY_DIR = ROOT_DIR / \"runner\" / \"assets\" / \"tetragon_policies\""
+        },
+        {
+          "line": 101,
+          "text": ""
+        },
+        {
+          "line": 102,
+          "text": ""
+        },
+        {
+          "line": 103,
+          "text": "def _free_loopback_address() -> str:"
+        },
+        {
+          "line": 104,
+          "text": "    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:"
+        },
+        {
+          "line": 105,
+          "text": "        sock.bind((\"127.0.0.1\", 0))"
+        },
+        {
+          "line": 106,
+          "text": "        return f\"127.0.0.1:{sock.getsockname()[1]}\""
+        },
+        {
+          "line": 107,
+          "text": ""
+        },
+        {
+          "line": 108,
+          "text": ""
+        },
+        {
+          "line": 109,
+          "text": "def resolve_tetragon_policy_dir() -> str:"
+        },
+        {
+          "line": 110,
+          "text": "    policy_dir = DEFAULT_POLICY_DIR.resolve()"
+        },
+        {
+          "line": 111,
+          "text": "    if not policy_dir.is_dir():"
+        },
+        {
+          "line": 112,
+          "text": "        raise RuntimeError(f\"missing upstream Tetragon policy dir: {policy_dir}\")"
+        },
+        {
+          "line": 113,
+          "text": "    if not any(policy_dir.rglob(\"*.yaml\")) and not any(policy_dir.rglob(\"*.yml\")):"
+        },
+        {
+          "line": 114,
+          "text": "        raise RuntimeError(f\"no upstream Tetragon policies found under {policy_dir}\")"
+        },
+        {
+          "line": 115,
+          "text": "    return str(policy_dir)"
+        }
+      ]
+    },
+    {
+      "path": "runner/libs/app_runners/tetragon.py",
+      "sha256": "6a57ef7dcb355ae5feefd23fcba0fb6515ff08eba46b2122620737497feea96d",
+      "lines": [
+        {
+          "line": 138,
+          "text": "        if resolved is None: raise RuntimeError(\"Tetragon binary not found; provide --tetragon-binary or prepare the upstream Tetragon container artifact\")"
+        },
+        {
+          "line": 139,
+          "text": "        return resolved"
+        },
+        {
+          "line": 140,
+          "text": ""
+        },
+        {
+          "line": 141,
+          "text": "    def start(self) -> list[int]:"
+        },
+        {
+          "line": 142,
+          "text": "        if self.session is not None: raise RuntimeError(\"TetragonRunner is already running\")"
+        },
+        {
+          "line": 143,
+          "text": "        tetragon_binary = self._resolve_binary()"
+        },
+        {
+          "line": 144,
+          "text": "        self.command = ["
+        },
+        {
+          "line": 145,
+          "text": "            tetragon_binary,"
+        },
+        {
+          "line": 146,
+          "text": "            \"--server-address\","
+        },
+        {
+          "line": 147,
+          "text": "            _free_loopback_address(),"
+        },
+        {
+          "line": 148,
+          "text": "            \"--health-server-address\","
+        },
+        {
+          "line": 149,
+          "text": "            _free_loopback_address(),"
+        },
+        {
+          "line": 150,
+          "text": "            \"--tracing-policy-dir\","
+        },
+        {
+          "line": 151,
+          "text": "            resolve_tetragon_policy_dir(),"
+        },
+        {
+          "line": 152,
+          "text": "        ]"
+        },
+        {
+          "line": 153,
+          "text": "        if tetragon_bpf_lib_dir := str((self.setup_result or {}).get(\"tetragon_bpf_lib_dir\") or \"\").strip():"
+        },
+        {
+          "line": 154,
+          "text": "            self.command.extend([\"--bpf-lib\", tetragon_bpf_lib_dir])"
+        }
+      ]
+    },
+    {
+      "path": "runner/assets/tetragon_policies/datagram-with-sock-tracking.yaml",
+      "sha256": "de9c2df4f4a0d92a894c063c92d9fb6d88872c8a265460134158f1e17a058070",
+      "lines": [
+        {
+          "line": 1,
+          "text": "apiVersion: cilium.io/v1alpha1"
+        },
+        {
+          "line": 2,
+          "text": "kind: TracingPolicy"
+        },
+        {
+          "line": 3,
+          "text": "metadata:"
+        },
+        {
+          "line": 4,
+          "text": "  name: \"datagram\""
+        },
+        {
+          "line": 5,
+          "text": "spec:"
+        },
+        {
+          "line": 6,
+          "text": "  kprobes:"
+        },
+        {
+          "line": 7,
+          "text": "  - call: \"sk_alloc\""
+        },
+        {
+          "line": 8,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 9,
+          "text": "    return: true"
+        },
+        {
+          "line": 10,
+          "text": "    args:"
+        },
+        {
+          "line": 11,
+          "text": "      - index: 1"
+        },
+        {
+          "line": 12,
+          "text": "        type: int"
+        },
+        {
+          "line": 13,
+          "text": "        label: \"family\""
+        },
+        {
+          "line": 14,
+          "text": "    returnArg:"
+        },
+        {
+          "line": 15,
+          "text": "      index: 0"
+        },
+        {
+          "line": 16,
+          "text": "      type: sock"
+        },
+        {
+          "line": 17,
+          "text": "    returnArgAction: TrackSock"
+        },
+        {
+          "line": 18,
+          "text": "    selectors:"
+        },
+        {
+          "line": 19,
+          "text": "      - matchArgs:"
+        },
+        {
+          "line": 20,
+          "text": "        - index: 1"
+        },
+        {
+          "line": 21,
+          "text": "          operator: \"Equal\""
+        },
+        {
+          "line": 22,
+          "text": "          values:"
+        },
+        {
+          "line": 23,
+          "text": "          - \"2\""
+        },
+        {
+          "line": 24,
+          "text": "  - call: \"__sk_free\""
+        },
+        {
+          "line": 25,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 26,
+          "text": "    args:"
+        },
+        {
+          "line": 27,
+          "text": "      - index: 0"
+        },
+        {
+          "line": 28,
+          "text": "        type: sock"
+        },
+        {
+          "line": 29,
+          "text": "    selectors:"
+        },
+        {
+          "line": 30,
+          "text": "      - matchActions:"
+        },
+        {
+          "line": 31,
+          "text": "        - action: UntrackSock"
+        },
+        {
+          "line": 32,
+          "text": "          argSock: 0"
+        },
+        {
+          "line": 33,
+          "text": "  - call: \"__cgroup_bpf_run_filter_skb\""
+        },
+        {
+          "line": 34,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 35,
+          "text": "    args:"
+        },
+        {
+          "line": 36,
+          "text": "      - index: 0"
+        },
+        {
+          "line": 37,
+          "text": "        type: sock"
+        },
+        {
+          "line": 38,
+          "text": "      - index: 1"
+        },
+        {
+          "line": 39,
+          "text": "        type: skb"
+        },
+        {
+          "line": 40,
+          "text": "      - index: 2"
+        },
+        {
+          "line": 41,
+          "text": "        type: int"
+        },
+        {
+          "line": 42,
+          "text": "        label: \"send\""
+        },
+        {
+          "line": 43,
+          "text": "    selectors:"
+        },
+        {
+          "line": 44,
+          "text": "      - matchArgs:"
+        },
+        {
+          "line": 45,
+          "text": "        - index: 1"
+        },
+        {
+          "line": 46,
+          "text": "          operator: \"DAddr\""
+        },
+        {
+          "line": 47,
+          "text": "          values:"
+        },
+        {
+          "line": 48,
+          "text": "          - \"127.0.0.1/32\""
+        },
+        {
+          "line": 49,
+          "text": "        - index: 1"
+        },
+        {
+          "line": 50,
+          "text": "          operator: \"Protocol\""
+        },
+        {
+          "line": 51,
+          "text": "          values:"
+        },
+        {
+          "line": 52,
+          "text": "          - \"IPPROTO_UDP\""
+        },
+        {
+          "line": 53,
+          "text": "        matchActions:"
+        },
+        {
+          "line": 54,
+          "text": "        - action: Post"
+        },
+        {
+          "line": 55,
+          "text": "          # rateLimit removed: the upstream sample sets 5 events/sec which"
+        },
+        {
+          "line": 56,
+          "text": "          # caps tetragon's `generic_kprobe_actions`/`output` tail invocations"
+        },
+        {
+          "line": 57,
+          "text": "          # at 5/s and starves the BPF measurement window. We benchmark at"
+        },
+        {
+          "line": 58,
+          "text": "          # full throughput instead."
+        }
+      ]
+    },
+    {
+      "path": "runner/assets/tetragon_policies/tcp-connect-with-selectors.yaml",
+      "sha256": "20b4356fa2cb6cacdc4b550e555cbcac7a5345230147e2e785b168c898136c68",
+      "lines": [
+        {
+          "line": 1,
+          "text": "apiVersion: cilium.io/v1alpha1"
+        },
+        {
+          "line": 2,
+          "text": "kind: TracingPolicy"
+        },
+        {
+          "line": 3,
+          "text": "metadata:"
+        },
+        {
+          "line": 4,
+          "text": "  name: \"connect\""
+        },
+        {
+          "line": 5,
+          "text": "spec:"
+        },
+        {
+          "line": 6,
+          "text": "  kprobes:"
+        },
+        {
+          "line": 7,
+          "text": "  - call: \"tcp_connect\""
+        },
+        {
+          "line": 8,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 9,
+          "text": "    args:"
+        },
+        {
+          "line": 10,
+          "text": "    - index: 0"
+        },
+        {
+          "line": 11,
+          "text": "      type: \"sock\""
+        },
+        {
+          "line": 12,
+          "text": "    selectors:"
+        },
+        {
+          "line": 13,
+          "text": "    - matchArgs:"
+        },
+        {
+          "line": 14,
+          "text": "      - index: 0"
+        },
+        {
+          "line": 15,
+          "text": "        operator: \"DAddr\""
+        },
+        {
+          "line": 16,
+          "text": "        values:"
+        },
+        {
+          "line": 17,
+          "text": "        - \"127.0.0.1/8\""
+        },
+        {
+          "line": 18,
+          "text": "        - \"192.168.0.0/16\""
+        },
+        {
+          "line": 19,
+          "text": "  - call: \"tcp_close\""
+        },
+        {
+          "line": 20,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 21,
+          "text": "    args:"
+        },
+        {
+          "line": 22,
+          "text": "    - index: 0"
+        },
+        {
+          "line": 23,
+          "text": "      type: \"sock\""
+        },
+        {
+          "line": 24,
+          "text": "    selectors:"
+        },
+        {
+          "line": 25,
+          "text": "    - matchArgs:"
+        },
+        {
+          "line": 26,
+          "text": "      - index: 0"
+        },
+        {
+          "line": 27,
+          "text": "        operator: \"DAddr\""
+        },
+        {
+          "line": 28,
+          "text": "        values:"
+        },
+        {
+          "line": 29,
+          "text": "        - \"127.0.0.1/8\""
+        },
+        {
+          "line": 30,
+          "text": "        - \"192.168.0.0/16\""
+        },
+        {
+          "line": 31,
+          "text": "  - call: \"tcp_sendmsg\""
+        },
+        {
+          "line": 32,
+          "text": "    syscall: false"
+        },
+        {
+          "line": 33,
+          "text": "    args:"
+        },
+        {
+          "line": 34,
+          "text": "    - index: 0"
+        },
+        {
+          "line": 35,
+          "text": "      type: \"sock\""
+        },
+        {
+          "line": 36,
+          "text": "    - index: 2"
+        },
+        {
+          "line": 37,
+          "text": "      type: int"
+        },
+        {
+          "line": 38,
+          "text": "    selectors:"
+        },
+        {
+          "line": 39,
+          "text": "    - matchArgs:"
+        },
+        {
+          "line": 40,
+          "text": "      - index: 0"
+        },
+        {
+          "line": 41,
+          "text": "        operator: \"DAddr\""
+        },
+        {
+          "line": 42,
+          "text": "        values:"
+        },
+        {
+          "line": 43,
+          "text": "        - \"127.0.0.1/8\""
+        },
+        {
+          "line": 44,
+          "text": "        - \"192.168.0.0/16\""
+        }
+      ]
+    }
+  ],
+  "conclusion": "Confirmed retained11-26 equal-work defect in selector continuation, already corrected by common expanded-call target preservation. Historical fast native numbers cannot be assumed equivalent work. No new performance patch justified by recovering the skipped path.",
+  "limits": [
+    "Exact11-23 installed native bytes/link plan remain unavailable; this is an11-26 retained-input witness, not a substitute capture.",
+    "The frozen runner recursively loads its policy directory; standard datagram/TCP policies have selectors. When a configured selector is processed from curr0, curr becomes1 and1>selectors is false for any selectors>=1, so CONTINUE is required. Other early errors/rejects remain possible.",
+    "Source and native-code evidence proves the skipped continuation path for admissible standard-policy inputs. It does not count actual historical branch hits or attribute exactly261.898ns to that branch.",
+    "The4replays preserve all nonbranch operations (one internal RIP target relocation normalized per filter) and external target sequences. No guest/timing/old linker export or production change occurred."
+  ]
+}

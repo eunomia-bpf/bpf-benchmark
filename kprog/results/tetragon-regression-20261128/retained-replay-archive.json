@@ -1,0 +1,119 @@
+{
+  "archive": "retained-replay-records.tar.zst",
+  "sha256": "5cfa87facd0888108fda7d2b22117aac38630bf7c08ff37e7f90942127ceb43c",
+  "bytes": 81298,
+  "members": [
+    {
+      "member": "replay-controller.json",
+      "bytes": 2309013,
+      "sha256": "e52fba2549bd744d272fa5ddf6bbab146533aadb79b3d071205d1eddb6996001"
+    },
+    {
+      "member": "replay-job.log",
+      "bytes": 449,
+      "sha256": "754c2379e65916d67acb9f028e0b24ac0dc85d3a43dda48b8ac1f58cb4f7c006"
+    },
+    {
+      "member": "replay/45ba49203d276b52.abi.tsv",
+      "bytes": 1184,
+      "sha256": "818d6e300ee988b3e8b423f91f10f459259a3ec36c29da5d3c06abd8e97f5844"
+    },
+    {
+      "member": "replay/45ba49203d276b52.blob.bin",
+      "bytes": 1320,
+      "sha256": "f7eda0a4784a8366d758b651cc0f4ec036ca3753b531e2efc72f665d3fdba467"
+    },
+    {
+      "member": "replay/45ba49203d276b52.log",
+      "bytes": 712,
+      "sha256": "baea0085957664ccf1a6eb2cf246737fa581271e3f985dad695c8f1abe0d26c4"
+    },
+    {
+      "member": "replay/45ba49203d276b52.map-patches.tsv",
+      "bytes": 137,
+      "sha256": "78449c0b6d4d4c0326845a29b83db38e279c46bbcfeb8f6fdfc4797dfb428308"
+    },
+    {
+      "member": "replay/45ba49203d276b52.relocs.bin",
+      "bytes": 112,
+      "sha256": "c4690f5e7bae6a9f9663f67e1d1affb8517c239e92333445c7aee04e62f91668"
+    },
+    {
+      "member": "replay/5be2ee6f95ee536b.abi.tsv",
+      "bytes": 1184,
+      "sha256": "818d6e300ee988b3e8b423f91f10f459259a3ec36c29da5d3c06abd8e97f5844"
+    },
+    {
+      "member": "replay/5be2ee6f95ee536b.blob.bin",
+      "bytes": 1320,
+      "sha256": "f7eda0a4784a8366d758b651cc0f4ec036ca3753b531e2efc72f665d3fdba467"
+    },
+    {
+      "member": "replay/5be2ee6f95ee536b.log",
+      "bytes": 712,
+      "sha256": "9af86c3e03f54982e7f58108354ee15e897977ad99c7e59b70398c6857ea9a63"
+    },
+    {
+      "member": "replay/5be2ee6f95ee536b.map-patches.tsv",
+      "bytes": 137,
+      "sha256": "78449c0b6d4d4c0326845a29b83db38e279c46bbcfeb8f6fdfc4797dfb428308"
+    },
+    {
+      "member": "replay/5be2ee6f95ee536b.relocs.bin",
+      "bytes": 112,
+      "sha256": "c4690f5e7bae6a9f9663f67e1d1affb8517c239e92333445c7aee04e62f91668"
+    },
+    {
+      "member": "replay/a751a5ae32d71696.abi.tsv",
+      "bytes": 8650,
+      "sha256": "9be043e735f413ebfe4b01c9baeb8ed3d03057cba2022a6b524499323b38565b"
+    },
+    {
+      "member": "replay/a751a5ae32d71696.blob.bin",
+      "bytes": 12323,
+      "sha256": "2fa4ff17d6545ccfcd166a7fc0253efffbb534c8245315a7bc3c1a2a535dfc07"
+    },
+    {
+      "member": "replay/a751a5ae32d71696.log",
+      "bytes": 780,
+      "sha256": "4a23edf8c37bb42db37027709539be3eab78093b0678a6e9288149793d376fa4"
+    },
+    {
+      "member": "replay/a751a5ae32d71696.map-patches.tsv",
+      "bytes": 1202,
+      "sha256": "bcb36f68c5958bc694d8a991a753a479cc1c9f888a29793dde59ed6f019881bf"
+    },
+    {
+      "member": "replay/a751a5ae32d71696.relocs.bin",
+      "bytes": 1392,
+      "sha256": "529537cae125ded6546061476a3b27805500d8d2b3e768d6fdc733adb6d981b3"
+    },
+    {
+      "member": "replay/e700f906b8500cb3.abi.tsv",
+      "bytes": 8650,
+      "sha256": "9be043e735f413ebfe4b01c9baeb8ed3d03057cba2022a6b524499323b38565b"
+    },
+    {
+      "member": "replay/e700f906b8500cb3.blob.bin",
+      "bytes": 12323,
+      "sha256": "2fa4ff17d6545ccfcd166a7fc0253efffbb534c8245315a7bc3c1a2a535dfc07"
+    },
+    {
+      "member": "replay/e700f906b8500cb3.log",
+      "bytes": 780,
+      "sha256": "4445f2bc786425d9edf81e75358f993305590b7ba74aa0a524d3530695856e77"
+    },
+    {
+      "member": "replay/e700f906b8500cb3.map-patches.tsv",
+      "bytes": 1202,
+      "sha256": "bcb36f68c5958bc694d8a991a753a479cc1c9f888a29793dde59ed6f019881bf"
+    },
+    {
+      "member": "replay/e700f906b8500cb3.relocs.bin",
+      "bytes": 1392,
+      "sha256": "529537cae125ded6546061476a3b27805500d8d2b3e768d6fdc733adb6d981b3"
+    }
+  ],
+  "logical_bytes": 2365086,
+  "scope": "Complete original SAME1447799 controller/log/new replay outputs, including exact old/new decoded code and full proof disassembly in controller. Original11-26inputs and prior archives are outside this archive and preserved."
+}
