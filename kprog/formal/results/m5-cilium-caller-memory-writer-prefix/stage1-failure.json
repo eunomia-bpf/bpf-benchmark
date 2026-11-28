@@ -1,0 +1,26 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-prefix/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 5.2387635707855225,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "09359c7aa457679cc385b6530628a026211774f543ac151d2a0ead167da27ce0",
+  "source_lines": 229,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-prefix/Proof.lean:136:41: error: Tactic `assumption` failed",
+    "results/m5-cilium-caller-memory-writer-prefix/Proof.lean:136:41: error: Tactic `assumption` failed"
+  ],
+  "cause": "generic constant evaluation kept Int.repr4 in t159, blocking cast helper expecting canonical4#32; original execute path remains unresolved",
+  "repair": "use exact original Int.repr4/0/1 expression lemmas returning canonical4#32/0#32/1#32; same AST/29-55counts/memory/settings"
+}

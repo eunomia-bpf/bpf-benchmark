@@ -1,0 +1,132 @@
+{
+  "scope": "original memory writer offset copy, STACK32 tag reader and arm selection to original ABI guard",
+  "source_sha256": "ba37a0957f7d59fe6ceb6bd8cb76e9d99f6652c24596b13ec4c013340baa4676",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-prefix/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.6948482990264893,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterPrefix"
+      ],
+      "exit": 0,
+      "seconds": 3.4103875160217285,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 6.204819917678833,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-prefix/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.219119071960449,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 299,
+  "full_jobs": 1566,
+  "root_queries": [
+    "source",
+    "body_source",
+    "tag_source",
+    "arm_source",
+    "execute",
+    "temp_frame",
+    "values",
+    "offset_zero",
+    "advance"
+  ],
+  "actual_store_tag_commit": "3d4466800af2f4c928ab9d0f7eba8e6c4f159763",
+  "source": "exact original StoreTag.after writer sequence/loop/body, full original other-register/tag and arm alternatives, original ABI guard/rest/continuation retained",
+  "execution": "29 actual internal steps copy effective0 offset, choose register32 STACK tag4 and arm0; whole heap unchanged, seven actual temporary names assigned once",
+  "offset": "actual earlier MemOffset store_off0 follows through original R30 word/tag, Kcall return, materialization and store-tag temporary frames; no offset-success oracle and no second preindex adjustment",
+  "composition": "accepted actual store-tag26 plus writer29 =55 internal steps from original post-materialization Sskip to original ABI guard under the SAME cache heap and explicit supplied slot/tag resources",
+  "open": "actual provider outcome composition and ABI guard/SP/addressing/real data stores, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-prefix/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 5.2387635707855225,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "09359c7aa457679cc385b6530628a026211774f543ac151d2a0ead167da27ce0",
+    "source_lines": 229,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-prefix/Proof.lean:136:41: error: Tactic `assumption` failed",
+      "results/m5-cilium-caller-memory-writer-prefix/Proof.lean:136:41: error: Tactic `assumption` failed"
+    ],
+    "cause": "generic constant evaluation kept Int.repr4 in t159, blocking cast helper expecting canonical4#32; original execute path remains unresolved",
+    "repair": "use exact original Int.repr4/0/1 expression lemmas returning canonical4#32/0#32/1#32; same AST/29-55counts/memory/settings"
+  },
+  "proof_repair": "exact original constant-expression lemmas normalize4/0/1 before temp/cast rewrites; unchanged source, trace, heap, counts and proof budgets"
+}
