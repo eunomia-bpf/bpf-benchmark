@@ -1,0 +1,10 @@
+{
+  "pid": 1339263,
+  "started_utc": "2026-11-28T06:52:48Z",
+  "preparation_commit": "c9f188e20edbb26f3bfe05a6f8ebf3436d7a1f76",
+  "script": "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/audit_plans.py",
+  "script_sha256": "bd2956e677ed0cef6a7f8f9511a37f96497d97d9f2ff84e447ea34f52ce74832",
+  "result": "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit",
+  "log": "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/resume-job.log",
+  "scope": "One corrected failed offline analysis stage on CPU19; explicit captured-proof parse gaps retained; collect SAME full results next turn; current app/kernel/image products and ARM activation preparation retained."
+}
