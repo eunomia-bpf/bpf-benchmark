@@ -1,0 +1,85 @@
+{
+  "scope": "Restored header baseline against actual libbpf, after fixing the diagnostic builtin selector and x86 --cflags CLI. No production header change.",
+  "cases": [
+    {
+      "arch": "x86",
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 2904,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 96,
+        "login_address": 112,
+        "ancestor_address": 8,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1
+      },
+      "mismatches": {
+        "thread_address": {
+          "expected": 2904,
+          "actual": 96
+        },
+        "login_address": {
+          "expected": 3552,
+          "actual": 112
+        },
+        "ancestor_address": {
+          "expected": 2304,
+          "actual": 8
+        }
+      }
+    },
+    {
+      "arch": "arm64",
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 2360,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 96,
+        "login_address": 112,
+        "ancestor_address": 8,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1
+      },
+      "mismatches": {
+        "thread_address": {
+          "expected": 2360,
+          "actual": 96
+        },
+        "login_address": {
+          "expected": 3008,
+          "actual": 112
+        },
+        "ancestor_address": {
+          "expected": 2288,
+          "actual": 8
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Initial1560675 never reached either architecture because the fixture used relocation8 as builtin TYPE_EXISTS flag; corrected selector0.",
+    "The corrected run completedARM; only x86 generator CLI was completed separately using the same BPF object/oracle and unchanged historical files.",
+    "Source enum7 resolves target1; allfive metadata queries correct onbotharches. Three address computations still use96/112/8.",
+    "This is offline diagnosis; no producer/flags/image/app/kernel changes."
+  ]
+}

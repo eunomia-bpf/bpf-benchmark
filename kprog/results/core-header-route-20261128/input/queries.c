@@ -3,7 +3,7 @@
 #define SEC(s) __attribute__((section(s), used))
 #define bpf_core_field_exists(x) __builtin_preserve_field_info(x, 2)
 #define bpf_core_field_offset(x) __builtin_preserve_field_info(x, 0)
-#define bpf_core_type_exists(t) __builtin_preserve_type_info(*(typeof(t) *)0, 8)
+#define bpf_core_type_exists(t) __builtin_preserve_type_info(*(typeof(t) *)0, 0)
 #define bpf_core_enum_value_exists(t, v) __builtin_preserve_enum_value(*(typeof(t) *)v, 0)
 #define bpf_core_enum_value(t, v) __builtin_preserve_enum_value(*(typeof(t) *)v, 1)
 #define _(p) __builtin_preserve_access_index(p)
