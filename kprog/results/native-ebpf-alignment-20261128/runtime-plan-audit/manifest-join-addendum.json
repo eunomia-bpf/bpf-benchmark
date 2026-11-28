@@ -1,0 +1,111 @@
+{
+  "scope": "Addendum to retained324-plan report. Full proof entries match corrected static manifest candidates; original source-object/program-to-map identity and semantic equality remain separate.",
+  "original_report_sha256": "a2653369e9ce17c3c12bebc32ddd1f4e646a4de27080346a822e0892e97eb51b",
+  "verified_census_outputs": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": {
+      "bytes": 1452962,
+      "sha256": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7"
+    },
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": {
+      "bytes": 16962771,
+      "sha256": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3"
+    },
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/manifests.json": {
+      "bytes": 2107,
+      "sha256": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193"
+    },
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/summary.json": {
+      "bytes": 1827,
+      "sha256": "6b8ec15f8b4ca140b820b25d943f90af5fd2da7898ce82fa201e9cd6d5e0c838"
+    },
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.tsv": {
+      "bytes": 182156,
+      "sha256": "03291164bfd6a4d8d453a7cde3332e385b32f38561b03471433ce173d8a9de85"
+    },
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/README.md": {
+      "bytes": 2818,
+      "sha256": "4a509cd9ed0e82052c193ff3111b1265297ccdc3bfdc32e324cbbf0164030ba9"
+    }
+  },
+  "updates": [
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "cache_key": "308e67abdfb2ee47",
+      "entry": "trace_vfs_write",
+      "proof": {
+        "architecture": "x86",
+        "app": "tracee",
+        "member": "tracee__monitor/linkcache/native_kernel_link_cache/308e67abdfb2ee47.proof.o",
+        "bytes": 896656,
+        "sha256": "53dfa55866f1509bec5820efd470df44659a0268d937ebfd552aa0923c293f7c"
+      },
+      "old_candidates": [
+        {
+          "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+          "symbol_resolution": "exact",
+          "manifest_symbol": null
+        }
+      ],
+      "corrected_candidates": [
+        {
+          "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+          "symbol_resolution": "ambiguous-prefix",
+          "manifest_symbol": null
+        }
+      ]
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "cache_key": "8264eb4786c466b0",
+      "entry": "trace_vfs_writev",
+      "proof": {
+        "architecture": "x86",
+        "app": "tracee",
+        "member": "tracee__monitor/linkcache/native_kernel_link_cache/8264eb4786c466b0.proof.o",
+        "bytes": 896656,
+        "sha256": "e4cb6c18395e331bf19d8cf3af95002c41ef5df049685604800ab92775e002f3"
+      },
+      "old_candidates": [],
+      "corrected_candidates": [
+        {
+          "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+          "symbol_resolution": "ambiguous-prefix",
+          "manifest_symbol": null
+        }
+      ]
+    }
+  ],
+  "complete_entry_plan_count": 322,
+  "captured_proof_gaps": [
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "cache_key": "df863bd30e6ecfd4",
+      "source": {
+        "architecture": "x86",
+        "app": "tetragon",
+        "member": "tetragon__observer/linkcache/native_kernel_link_cache/df863bd30e6ecfd4.proof.o",
+        "bytes": 1353728,
+        "sha256": "b0e833404f342aadf865dd5d3d8775f01dc7c2340a56a716290cbb4cca272a9a"
+      },
+      "error": "String Table not found"
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "cache_key": "d33f953f92405628",
+      "source": {
+        "architecture": "x86",
+        "app": "tracee",
+        "member": "tracee__monitor/linkcache/native_kernel_link_cache/d33f953f92405628.proof.o",
+        "bytes": 603648,
+        "sha256": "96ffc43cb262a9ed2079fca8b21ef3b9c22e367b48076b8061f2816c2bdb2f52"
+      },
+      "error": "String Table not found"
+    }
+  ],
+  "remaining_complete_entries_without_candidates": [],
+  "prior_wrapper": "1344048 retained a guessed exactly-one-update assertion. This stage records every actual candidate update and missing match."
+}
