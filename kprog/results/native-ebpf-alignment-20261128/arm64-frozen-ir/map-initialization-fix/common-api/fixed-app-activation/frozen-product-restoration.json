@@ -1,0 +1,22 @@
+{
+  "utc": "2026-11-28T07:28:13Z",
+  "proposal_preservation_publication": {
+    "commit": "00353cf9ebb355c748d7cc7eaa5a4db11a704af2",
+    "remote": "00353cf9ebb355c748d7cc7eaa5a4db11a704af2\trefs/heads/master"
+  },
+  "proposal_archive_git_bytes_equal": true,
+  "original_archive_git_bytes_equal": true,
+  "arm_guest_processes_before": [],
+  "frozen_app_commit": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "canonical_build_product_after": {
+    "path": "vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler",
+    "bytes": 41836040,
+    "sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48"
+  },
+  "root_before_sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48",
+  "root_after_sha256": "2a87ed681e7fa40a65a35d1c54da58f65630a43c7cf212d07813e4522678ad48",
+  "activation_executed": false,
+  "images_modified": false,
+  "kernel_modified": false,
+  "scope": "Only our untracked canonical ARM collector build output restored from previously committed original bytes; proposal retained in committed archive. No source checkout or image/root mutation; no activation permission inferred."
+}
