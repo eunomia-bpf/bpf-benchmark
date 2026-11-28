@@ -1,0 +1,186 @@
+{
+  "scope": "original inline R30 word reader on the same SP-updated caller heap",
+  "source_sha256": "3bb24ed7b33801a6aba5cb90129ed1d8e8ab161532c2b2ad7285912b6768ccd7",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage4": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-r30-word/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 181.65418410301208,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word"
+      ],
+      "exit": 0,
+      "seconds": 180.80277609825134,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 196.7361752986908,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-r30-word/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.175917863845825,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "failed_stage1": {
+    "phase": "stage1",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-r30-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 3.4555435180664062,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "607e7ad21c9c37c5f2752d8e7c5e3cce5a10b1e20bdefa600d72c4ea4dfe8f83",
+    "root_errors": [
+      "six private definitions depend on noncomputable exported identifiers but lacked noncomputable; realization/evaluator errors cascaded",
+      "pointer offset annotated BitVec64 instead of actual Ptrofs type",
+      "field_value rfl unfolded full linked environment and hit default recursion depth; downstream rewrite/execution recursion errors retained"
+    ],
+    "repair": "mark six definitions noncomputable; use actual Ptrofs.repr240; prove linked used GprLayout by kernel decision and rewrite field through it",
+    "original_ast_or_step_count_changed": false,
+    "pointer_annotation_type_corrected": true,
+    "budgets_options_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage2": {
+    "phase": "stage2",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-r30-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 142.1874794960022,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "8b35a14876240091bd44985750001e54eaaf68c7b95581b9fb7deebbd6bfa032",
+    "root_errors": [
+      "single remaining error at word_value change comparing lvalOfField with unreduced typeof(Ederef) expanded actual linked cenv and reached recursion limit; used GprLayout and field-value proofs passed"
+    ],
+    "repair": "explicit kernel-rfl cell-type equation and rw before checked field_value; remove heavy definitional change",
+    "original_ast_or_step_count_changed": false,
+    "budgets_options_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "failed_stage3": {
+    "phase": "stage3",
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-r30-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 142.38940477371216,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "b1e1a60aa0712355651d88e6e364b76ac64a5c049e67e4d7c4b7ae7ba02b891f",
+    "root_errors": [
+      "single word_value rewrite error: after cell/type rewrites outer match some was not iota-reduced, so field_value expected concrete Vptr while target still bound arbitrary v"
+    ],
+    "repair": "rewrite evaluator/cell/type first, then simp only field_value so match-some reduction exposes the actual pointer before field rewrite",
+    "original_ast_or_step_count_changed": false,
+    "budgets_options_changed": false,
+    "focus_full_public_publish_started": false
+  },
+  "focused_jobs": 292,
+  "full_jobs": 1559,
+  "root_queries": [
+    "source",
+    "reader_source",
+    "pointer_value",
+    "word_value",
+    "execute",
+    "temp_frame",
+    "advance"
+  ],
+  "actual_sp_gpr_frame_commit": "aba7fba96a7fdd6a192899eefc5b9b802dba1102",
+  "source": "private extraction of exact original word loop and surrounding continuations; original SP/other branches retained and source equations kernel checked",
+  "reads": "actual word-table slot30 pointer and loaded union x cell on linked cenv; derives same updated-heap reads from accepted actual SP frame/CurrentGPR/slots",
+  "execution": "21 internal word-loop steps, same memory, actual pointer load and zero R30 data load, six assignments to five temporary names",
+  "composition": "accepted131 plus3 original numeric-loop exit/sequence and3 word-group entry plus21 reader and1 next continuation =159",
+  "open": "original R30 tag reader and RETURN materialization/provider, real data stores, linked whole-entry/provider transport, native whole-state refinement",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

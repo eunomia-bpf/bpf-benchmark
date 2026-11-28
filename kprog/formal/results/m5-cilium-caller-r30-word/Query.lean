@@ -1,0 +1,15 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.reader_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.reader_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.pointer_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.pointer_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.word_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.word_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.temp_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.temp_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.advance
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerR30Word.advance
