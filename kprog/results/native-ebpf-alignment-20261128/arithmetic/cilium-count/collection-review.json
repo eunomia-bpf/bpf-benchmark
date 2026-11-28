@@ -1,0 +1,60 @@
+{
+  "reviewed_utc": "2026-11-28T10:08:18Z",
+  "controller_sha256": "8e714e661bb907a559a1383209d031f7698ffe29214788104b33f2db1aee4adb",
+  "job_log_sha256": "22678cfb024a7988b270bb07569d5ff3426dd0eb3b46393566d3db85905944d0",
+  "consumed_job": {
+    "launcher_pid": 1412012,
+    "controller_pid": 1412014,
+    "started_utc": "2026-11-28T09:47:59Z",
+    "ended_utc": "2026-11-28T09:48:00Z",
+    "controller_status": 0
+  },
+  "coverage": {
+    "expected_snapshots": 75,
+    "verified_snapshots": 75,
+    "service_map_observations": 24,
+    "unique_map_ids": [
+      24,
+      113
+    ],
+    "query_count": 0,
+    "successful_value_candidates": 0,
+    "explicit_frontend_key_value_candidates": 0
+  },
+  "input_source_sha256_reverified": {
+    "vendor/bpf/cilium/bpf/lib/lb.h": "d73e0af5251087a4dd29ffd3870649e6579ad25b5b3dd65059e235eff0567d0b",
+    "vendor/bpf/cilium/bpf/bpf_sock.c": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+    "vendor/bpf/cilium/bpf/lib/ratelimit.h": "723d6f3d624f257edfb623ba3f53a8fd8e9a62e59e964d44d465bdc57734e46e",
+    "vendor/bpf/cilium/bpf/node_config.h": "8c65ab4e2cdd2372cd9d66e97a1102450809ab0c3a528234659f7ba17ae36f4e",
+    "vendor/linux-framework/kernel/bpf/hashtab.c": "dc977a5295b65f1c457127d09344343bb1fe7ab4264c3f0610e64b39ea5a9fc4",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/sources.json": "5eeeea385fb758398471fef38e80f67f45bfc1791e31b0be9f5e75da79c5c953",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+    "vendor/linux-framework/include/uapi/linux/bpf.h": "d0cbf6f3a30b085dfb341a583d570e7ce87159d38f1dc2f6adcb0fac0c0f6ed2"
+  },
+  "observer": {
+    "path": "kprog/results/x86-otel-perf-20261127/observe_otel_maps.py",
+    "sha256": "3278c89f61f5e9c1b65bf9a2f2fba505a38c4146766dd87fb217f8cb62350cea",
+    "first_line": 39,
+    "last_line": 43,
+    "source": " row=dict(id=mid,name=name,type=kind,key_size=ks,value_size=vs,max_entries=maximum,flags=flags,queries=[]);size=((vs+7)//8*8)*ncpu if kind in [5,6,10] else vs\n if all_maps:\n  row['observation']='Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict.'\n  if kind in [2,3,6,12,14] and size<=65536:\n   for key in range(min(maximum,8)):row['queries'].append(dict(key=key,**lookup(fd,struct.pack('<I',key),size)))",
+    "finding": "all-maps mode queries only types 2/3/6/12/14; Cilium service map type1 is metadata-only. Empty query lists do not mean an empty service map or count zero."
+  },
+  "archive_parts_reverified": [
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/evidence.tar.zst.part-aa",
+      "bytes": 48000000,
+      "sha256": "5d1f1388dc7cdd9577767c9eba0ef5d9677ac508c59b8cb72a769f180ddf7658",
+      "git_blob": "6d82b34b2c55f7bd1c030d684fa258b1c3b9a28e"
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/evidence.tar.zst.part-ab",
+      "bytes": 37642915,
+      "sha256": "627393ff866a6a6a42e42023c65ab3b64ec08930e66e9934e64856d6f7cdf579",
+      "git_blob": "544241464b3d4d82d14929382667befdeadee434"
+    }
+  ],
+  "conclusion": "Captured snapshots contain no service key/value observation. No admissible zero-divisor path, same-invocation update/reuse, original program-map binding or corresponding eBPF operation is established. No new arithmetic defect proven and no production guard added.",
+  "next": "Continue remaining native/eBPF alignment dimensions using existing IR and actual kernel rewrites. Keep Cilium runtime value/path gap explicit; do not replay the same archive or change frozen workload to force a path.",
+  "preserved": "OTel submodule and parent pin2689a430; fixed-app activation unexecuted. Workspace perf STOP; x86 rotate owner; kernel/image/root/flags/benchmark/paper unchanged."
+}
