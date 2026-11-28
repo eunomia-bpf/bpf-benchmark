@@ -1,0 +1,10 @@
+{
+  "pid": 1293153,
+  "stopped_utc": "2026-11-28T05:47:05Z",
+  "command": "python3 /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/constant-origin/run_reproduction.py ",
+  "wait_channel": "locks_lock_inode_wait",
+  "children_before_stop": "",
+  "reproduction_output_not_created": true,
+  "signal": "SIGTERM",
+  "reason": "New coordinator05:43Z x86 rotate timingEX; ARM work16-19 must continue outside timing lock. This own witness had not spawned any compiler or reproduced anything; release obsolete shared-lock wait and resume same input under existing CPU/AS bounds."
+}
