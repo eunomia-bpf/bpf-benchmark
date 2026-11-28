@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.stored_prefix
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.stored_prefix
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.next_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.next_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.visit
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.visit
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.run_from
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.run_from
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorSequence.execute
