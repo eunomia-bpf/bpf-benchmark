@@ -45,7 +45,7 @@ try:
  entry=d['entry_counters']; ebpf=entry['baseline']; native=entry['post_rejit']
  md=f'# Current-image OTel PMU observation\n\nBoth corpus phases succeeded. Entry: eBPF{ebpf['ns_per_call']:.2f}ns, native{native['ns_per_call']:.2f}ns, diagnostic ratio{d['entry_per_call_speedup']:.5f}x. This does not replace full timing.\n\n| Group | eBPF sampled periods / entry | Native | Native / eBPF |\n|---|---:|---:|---:|\n'
  for name,g in groups.items():md+=f'| {name} | {g["baseline"]["sampled_period_per_entry"]:.2f} | {g["post_rejit"]["sampled_period_per_entry"]:.2f} | {g["native_over_ebpf"]:.3f} |\n'
- md+='\n'+diagnosis['interpretation']+'\n\n'+diagnosis['limits']+'\n\nThe native unwind blob has '+str(len(direct))+' direct relocations to the boot trie_lookup_elem address. Both phase PMU samples resolve to that same kernel implementation. Dynamic call counts/path lengths remain unmeasured. No production change follows solely from a flat sample difference. Historical and current-image profiles must be distinguished.\n'
+ md+='\n'+diagnosis['interpretation']+'\n\n'+diagnosis['limits']+'\n\nThe native unwind blob has '+str(len(direct))+' direct relocations to the boot trie_lookup_elem address. An inlined native trie body may have no samples at the external kernel symbol; inspect the installed code and work records before interpretation. Dynamic call counts/path lengths remain unmeasured. No production change follows solely from a flat sample difference. Historical and current-image profiles must be distinguished.\n'
  (out/'README.md').write_text(md)
  sources={str(p.relative_to(ROOT)):dict(bytes=p.stat().st_size,sha256=sha(p)) for p in run.rglob('*') if p.is_file()}
  with tarfile.open(raw/'corpus-source.tar.gz','w:gz') as t:

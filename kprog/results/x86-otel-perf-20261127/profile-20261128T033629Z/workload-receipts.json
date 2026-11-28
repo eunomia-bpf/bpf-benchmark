@@ -1,0 +1,334 @@
+{
+  "baseline": [
+    {
+      "config": {
+        "language": "python3",
+        "loop": "integer_lcg",
+        "tool": "python3",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.094129465999998,
+      "returncode": 0,
+      "stderr": "python3 int_loop ops=18463443 elapsed_s=10.000017 worker=0 sink=4015831812",
+      "stdout": "",
+      "workload_name": "otel_python3_int_loop_0",
+      "command_sha256": "c7a8629c8e4e169275d9ac3b78fa06228c2fb91e497aee88a6b83b06655201d0"
+    },
+    {
+      "config": {
+        "language": "python3",
+        "loop": "integer_lcg",
+        "tool": "python3",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.150449459,
+      "returncode": 0,
+      "stderr": "python3 int_loop ops=19447487 elapsed_s=10.000017 worker=1 sink=304723085",
+      "stdout": "",
+      "workload_name": "otel_python3_int_loop_1",
+      "command_sha256": "9af726ea95d35ec98ff8c629f1d4a5fed285490f18618d37e91a4c727c52a1bd"
+    },
+    {
+      "config": {
+        "language": "ruby",
+        "loop": "integer_lcg",
+        "tool": "ruby",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.150731382000004,
+      "returncode": 0,
+      "stderr": "ruby int_loop ops=47465610 elapsed_s=10.000016 worker=0 sink=358144351",
+      "stdout": "",
+      "workload_name": "otel_ruby_int_loop_0",
+      "command_sha256": "ad82d7f075958ea615f7e676319801ba1b401c8ccb4efe78d25589a1079a7ef9"
+    },
+    {
+      "config": {
+        "language": "ruby",
+        "loop": "integer_lcg",
+        "tool": "ruby",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.150910670000002,
+      "returncode": 0,
+      "stderr": "ruby int_loop ops=52424597 elapsed_s=10.000063 worker=1 sink=1409012447",
+      "stdout": "",
+      "workload_name": "otel_ruby_int_loop_1",
+      "command_sha256": "8f9671ed1794a67d43df01fefc853646af31257dd80db4682ae370c764e10c12"
+    },
+    {
+      "config": {
+        "language": "nodejs",
+        "loop": "integer_lcg",
+        "tool": "nodejs",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916099703,
+      "returncode": 0,
+      "stderr": "nodejs int_loop ops=10466750 elapsed_s=10.000361 worker=0 sink=2567618560",
+      "stdout": "",
+      "workload_name": "otel_nodejs_int_loop_0",
+      "command_sha256": "f66e354b91ca4f58861425d42a522bce94f12bac9e19839f085cccc3b05b3715"
+    },
+    {
+      "config": {
+        "language": "nodejs",
+        "loop": "integer_lcg",
+        "tool": "nodejs",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916420656,
+      "returncode": 0,
+      "stderr": "nodejs int_loop ops=9394194 elapsed_s=10.000259 worker=1 sink=3585343488",
+      "stdout": "",
+      "workload_name": "otel_nodejs_int_loop_1",
+      "command_sha256": "eefc378e4bb7b437b2f55785be89b086268edb60fde8f4692db82d88f292a747"
+    },
+    {
+      "config": {
+        "language": "perl",
+        "loop": "integer_lcg",
+        "tool": "perl",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916618755000002,
+      "returncode": 0,
+      "stderr": "perl int_loop ops=22280627 elapsed_s=10.000001 worker=0 sink=733845412",
+      "stdout": "",
+      "workload_name": "otel_perl_int_loop_0",
+      "command_sha256": "ff9ad667a99321e4627165b8c8ca0e3fe5b02c91969b30c1ead6bbfd8b73885d"
+    },
+    {
+      "config": {
+        "language": "perl",
+        "loop": "integer_lcg",
+        "tool": "perl",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916721018999993,
+      "returncode": 0,
+      "stderr": "perl int_loop ops=23966822 elapsed_s=10.000001 worker=1 sink=2218179996",
+      "stdout": "",
+      "workload_name": "otel_perl_int_loop_1",
+      "command_sha256": "a358e294d72988ddc26b9a4d66163e2fabb38a9015af5b226bc58d399acd0dfb"
+    },
+    {
+      "config": {
+        "language": "php",
+        "loop": "integer_lcg",
+        "tool": "php",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916850541999992,
+      "returncode": 0,
+      "stderr": "php int_loop ops=92202488 elapsed_s=10.000008 worker=0 sink=4058376905",
+      "stdout": "",
+      "workload_name": "otel_php_int_loop_0",
+      "command_sha256": "5199572e4b734c14315d7a55b1c286243a9f27037714d3b25c8717b61ef1edc8"
+    },
+    {
+      "config": {
+        "language": "php",
+        "loop": "integer_lcg",
+        "tool": "php",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.916967976999999,
+      "returncode": 0,
+      "stderr": "php int_loop ops=78999199 elapsed_s=10.000001 worker=1 sink=2574887853",
+      "stdout": "",
+      "workload_name": "otel_php_int_loop_1",
+      "command_sha256": "d702e47212b768c5d25e0686e80983b4243f7d028e8dca6e49664fddf0914199"
+    },
+    {
+      "config": {
+        "stressors": [
+          "cpu"
+        ],
+        "tool": "stress-ng"
+      },
+      "duration_s": 10.917100233,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "stress-ng: info:  [3035] setting to a 10 secs run per stressor\nstress-ng: info:  [3035] dispatching hogs: 1 cpu\nstress-ng: info:  [3035] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3035] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3035]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3035] cpu                6606     10.00      6.37      0.04       660.57        1031.24\nstress-ng: info:  [3035] skipped: 0\nstress-ng: info:  [3035] passed: 1: cpu (1)\nstress-ng: info:  [3035] failed: 0\nstress-ng: info:  [3035] metrics untrustworthy: 0\nstress-ng: info:  [3035] successful run completed in 10.01 secs",
+      "workload_name": "otel_stress_ng_cpu",
+      "command_sha256": "edba98a3b3fbe56989ff10ed24569d2206f37060e738a9488bc66ae3dfd90ea4"
+    }
+  ],
+  "post_rejit": [
+    {
+      "config": {
+        "language": "python3",
+        "loop": "integer_lcg",
+        "tool": "python3",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.106581370000015,
+      "returncode": 0,
+      "stderr": "python3 int_loop ops=22987864 elapsed_s=10.000016 worker=0 sink=1478144361",
+      "stdout": "",
+      "workload_name": "otel_python3_int_loop_0",
+      "command_sha256": "c7a8629c8e4e169275d9ac3b78fa06228c2fb91e497aee88a6b83b06655201d0"
+    },
+    {
+      "config": {
+        "language": "python3",
+        "loop": "integer_lcg",
+        "tool": "python3",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.106800348000007,
+      "returncode": 0,
+      "stderr": "python3 int_loop ops=16016570 elapsed_s=10.000019 worker=1 sink=1779345272",
+      "stdout": "",
+      "workload_name": "otel_python3_int_loop_1",
+      "command_sha256": "9af726ea95d35ec98ff8c629f1d4a5fed285490f18618d37e91a4c727c52a1bd"
+    },
+    {
+      "config": {
+        "language": "ruby",
+        "loop": "integer_lcg",
+        "tool": "ruby",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.175071189000022,
+      "returncode": 0,
+      "stderr": "ruby int_loop ops=54539032 elapsed_s=10.000017 worker=0 sink=4025306281",
+      "stdout": "",
+      "workload_name": "otel_ruby_int_loop_0",
+      "command_sha256": "ad82d7f075958ea615f7e676319801ba1b401c8ccb4efe78d25589a1079a7ef9"
+    },
+    {
+      "config": {
+        "language": "ruby",
+        "loop": "integer_lcg",
+        "tool": "ruby",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.175299703000007,
+      "returncode": 0,
+      "stderr": "ruby int_loop ops=42046645 elapsed_s=10.000166 worker=1 sink=1017206719",
+      "stdout": "",
+      "workload_name": "otel_ruby_int_loop_1",
+      "command_sha256": "8f9671ed1794a67d43df01fefc853646af31257dd80db4682ae370c764e10c12"
+    },
+    {
+      "config": {
+        "language": "nodejs",
+        "loop": "integer_lcg",
+        "tool": "nodejs",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 10.855319678,
+      "returncode": 0,
+      "stderr": "nodejs int_loop ops=11133595 elapsed_s=10.001711 worker=0 sink=717953024",
+      "stdout": "",
+      "workload_name": "otel_nodejs_int_loop_0",
+      "command_sha256": "f66e354b91ca4f58861425d42a522bce94f12bac9e19839f085cccc3b05b3715"
+    },
+    {
+      "config": {
+        "language": "nodejs",
+        "loop": "integer_lcg",
+        "tool": "nodejs",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 11.15821917300002,
+      "returncode": 0,
+      "stderr": "nodejs int_loop ops=10746281 elapsed_s=10.000672 worker=1 sink=3410332672",
+      "stdout": "",
+      "workload_name": "otel_nodejs_int_loop_1",
+      "command_sha256": "eefc378e4bb7b437b2f55785be89b086268edb60fde8f4692db82d88f292a747"
+    },
+    {
+      "config": {
+        "language": "perl",
+        "loop": "integer_lcg",
+        "tool": "perl",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 11.158460047000005,
+      "returncode": 0,
+      "stderr": "perl int_loop ops=26083295 elapsed_s=10.000810 worker=0 sink=806465416",
+      "stdout": "",
+      "workload_name": "otel_perl_int_loop_0",
+      "command_sha256": "ff9ad667a99321e4627165b8c8ca0e3fe5b02c91969b30c1ead6bbfd8b73885d"
+    },
+    {
+      "config": {
+        "language": "perl",
+        "loop": "integer_lcg",
+        "tool": "perl",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 11.158639635000014,
+      "returncode": 0,
+      "stderr": "perl int_loop ops=24544170 elapsed_s=10.000001 worker=1 sink=1489414472",
+      "stdout": "",
+      "workload_name": "otel_perl_int_loop_1",
+      "command_sha256": "a358e294d72988ddc26b9a4d66163e2fabb38a9015af5b226bc58d399acd0dfb"
+    },
+    {
+      "config": {
+        "language": "php",
+        "loop": "integer_lcg",
+        "tool": "php",
+        "worker_index": 0,
+        "workers_per_language": 2
+      },
+      "duration_s": 11.15879999400002,
+      "returncode": 0,
+      "stderr": "php int_loop ops=83584523 elapsed_s=10.000001 worker=0 sink=1854121004",
+      "stdout": "",
+      "workload_name": "otel_php_int_loop_0",
+      "command_sha256": "5199572e4b734c14315d7a55b1c286243a9f27037714d3b25c8717b61ef1edc8"
+    },
+    {
+      "config": {
+        "language": "php",
+        "loop": "integer_lcg",
+        "tool": "php",
+        "worker_index": 1,
+        "workers_per_language": 2
+      },
+      "duration_s": 11.15892138700002,
+      "returncode": 0,
+      "stderr": "php int_loop ops=69461126 elapsed_s=10.001355 worker=1 sink=1652148732",
+      "stdout": "",
+      "workload_name": "otel_php_int_loop_1",
+      "command_sha256": "d702e47212b768c5d25e0686e80983b4243f7d028e8dca6e49664fddf0914199"
+    },
+    {
+      "config": {
+        "stressors": [
+          "cpu"
+        ],
+        "tool": "stress-ng"
+      },
+      "duration_s": 11.159049436000004,
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "stress-ng: info:  [3522] setting to a 10 secs run per stressor\nstress-ng: info:  [3522] dispatching hogs: 1 cpu\nstress-ng: info:  [3522] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [3522] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [3522]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [3522] cpu                6876     10.00      6.46      0.03       687.44        1059.28\nstress-ng: info:  [3522] skipped: 0\nstress-ng: info:  [3522] passed: 1: cpu (1)\nstress-ng: info:  [3522] failed: 0\nstress-ng: info:  [3522] metrics untrustworthy: 0\nstress-ng: info:  [3522] successful run completed in 10.02 secs",
+      "workload_name": "otel_stress_ng_cpu",
+      "command_sha256": "edba98a3b3fbe56989ff10ed24569d2206f37060e738a9488bc66ae3dfd90ea4"
+    }
+  ]
+}

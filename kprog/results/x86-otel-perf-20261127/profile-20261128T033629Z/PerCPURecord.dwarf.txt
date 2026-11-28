@@ -1,0 +1,1808 @@
+/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o:	file format elf64-x86-64
+
+0x000004c7: DW_TAG_typedef
+              DW_AT_type	(0x000004d1 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x000004d1: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x000004d9:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x000005a2 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x000004e3:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00000798 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x000004ef:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x00000855 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x000004fb:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x00000899 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x00000507:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x000008b6 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00000513:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x000008d3 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x0000051f:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x000008fb "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0000052b:   DW_TAG_member
+                DW_AT_type	(0x00000535 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00000535:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0000053b:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00000918 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00000546:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0000096a "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00000551:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x00000995 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000055c:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x000009d5 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00000567:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00000a16 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x00000572:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x00000a90 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000057c:     NULL
+
+0x0000057d:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00000088 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00000589:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00000641 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00000595:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00000641 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x000005a1:   NULL
+
+0x000020cd: DW_TAG_typedef
+              DW_AT_type	(0x000020d7 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x000020d7: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x000020df:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x000021a4 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x000020e9:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00002395 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x000020f4:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x00002445 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x000020ff:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x00002483 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0000210a:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0000249d "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00002115:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x000024b9 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00002121:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x000024e1 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0000212d:   DW_TAG_member
+                DW_AT_type	(0x00002137 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00002137:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0000213d:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x000024fe "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00002148:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x00002550 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00002153:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x0000257b "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000215e:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x000025bb "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00002169:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x000025fc "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x00002174:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0000267b "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000217e:     NULL
+
+0x0000217f:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00001e38 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x0000218b:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00002246 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00002197:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00002246 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x000021a3:   NULL
+
+0x000069e1: DW_TAG_typedef
+              DW_AT_type	(0x000069eb "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x000069eb: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x000069f3:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x00006ab3 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x000069fd:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00006cb4 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x00006a08:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x00006d64 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x00006a13:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x00006da2 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x00006a1e:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x00006dbc "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00006a29:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x00006dd6 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00006a34:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x00006dfa "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x00006a3f:   DW_TAG_member
+                DW_AT_type	(0x00006a49 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00006a49:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x00006a4f:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00006e14 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a59:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x00006e62 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a63:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x00006e8a "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a6d:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x00006ec8 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a78:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00006f08 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a83:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x00006f87 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x00006a8d:     NULL
+
+0x00006a8e:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00006b41 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00006a9a:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00006b5d "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00006aa6:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00006b5d "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x00006ab2:   NULL
+
+0x0000803f: DW_TAG_typedef
+              DW_AT_type	(0x00008049 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x00008049: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x00008051:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x00008119 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0000805b:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x000082ee "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x00008066:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x000083ae "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x00008072:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x000083f2 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0000807e:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0000840f "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0000808a:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x0000842c "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00008096:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x00008454 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x000080a2:   DW_TAG_member
+                DW_AT_type	(0x000080ac "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x000080ac:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x000080b2:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00008471 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080bd:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x000084c3 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080c8:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x000084ee "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080d3:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x0000852e "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080de:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x0000856f "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080e9:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x000085ee "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x000080f3:     NULL
+
+0x000080f4:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x0000800b "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00008100:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00007d6c "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0000810c:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00007d6c "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x00008118:   NULL
+
+0x0000e572: DW_TAG_typedef
+              DW_AT_type	(0x0000e57b "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x0000e57b: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x0000e582:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0000e63d "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0000e58c:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x0000e84c "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x0000e597:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x0000e9c8 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x0000e5a2:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x0000ea06 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0000e5ad:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0000ea21 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0000e5b8:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x0000ea3b "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x0000e5c3:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0000ea5f "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0000e5ce:   DW_TAG_member
+                DW_AT_type	(0x0000e5d8 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x0000e5d8:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0000e5de:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x0000ea79 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e5e8:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0000eac7 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e5f2:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x0000eaef "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e5fc:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x0000eb2b "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e606:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x0000eb68 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e610:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0000ebda "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0000e61a:     NULL
+
+0x0000e61b:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x0000e512 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x0000e626:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x0000e6e3 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0000e631:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x0000e6e3 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0000e63c:   NULL
+
+0x00012351: DW_TAG_typedef
+              DW_AT_type	(0x0001235b "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x0001235b: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x00012363:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0001242e "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0001236e:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00012621 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x0001237a:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x000126d5 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x00012386:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x00012719 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x00012392:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x00012736 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0001239e:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x00012753 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x000123aa:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0001277b "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x000123b6:   DW_TAG_member
+                DW_AT_type	(0x000123c0 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x000123c0:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x000123c6:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00012798 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x000123d1:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x000127ea "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x000123dc:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x00012815 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x000123e7:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x00012855 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x000123f2:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00012896 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x000123fd:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x00012910 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x00012408:     NULL
+
+0x00012409:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x000112b8 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00012415:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00011ca8 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00012421:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00011ca8 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0001242d:   NULL
+
+0x0001821b: DW_TAG_typedef
+              DW_AT_type	(0x00018225 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x00018225: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x0001822d:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x000182f7 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x00018237:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x000184ff "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x00018243:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x000185bc "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x0001824f:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x000185fa "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0001825b:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x00018617 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00018267:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x00018634 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00018273:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0001865c "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0001827f:   DW_TAG_member
+                DW_AT_type	(0x00018289 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00018289:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0001828f:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00018679 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001829a:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x000186cb "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x000182a5:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x000186f6 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x000182b0:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x00018736 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x000182bb:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00018777 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x000182c6:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x000187f2 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x000182d1:     NULL
+
+0x000182d2:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00017be0 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x000182de:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x0001839a "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x000182ea:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x0001839a "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x000182f6:   NULL
+
+0x00019f5e: DW_TAG_typedef
+              DW_AT_type	(0x00019f68 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x00019f68: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x00019f70:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0001a039 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x00019f7a:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x0001a21d "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x00019f86:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x0001a2df "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x00019f92:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x0001a323 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x00019f9e:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0001a340 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00019faa:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x0001a35d "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00019fb6:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0001a385 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x00019fc2:   DW_TAG_member
+                DW_AT_type	(0x00019fcc "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00019fcc:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x00019fd2:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x0001a3a2 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00019fdd:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0001a3f4 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00019fe8:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x0001a41f "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x00019ff3:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x0001a45f "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00019ffe:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x0001a4a0 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001a009:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0001a515 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001a013:     NULL
+
+0x0001a014:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00019c05 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x0001a020:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00019c4b "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0001a02c:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00019c4b "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0001a038:   NULL
+
+0x0001ff63: DW_TAG_typedef
+              DW_AT_type	(0x0001ff6d "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x0001ff6d: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x0001ff75:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0002003c "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0001ff7f:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00020219 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x0001ff8a:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x000202c9 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x0001ff95:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x00020309 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0001ffa1:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x00020326 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0001ffad:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x00020343 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x0001ffb9:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0002036b "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0001ffc5:   DW_TAG_member
+                DW_AT_type	(0x0001ffcf "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x0001ffcf:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0001ffd5:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00020388 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001ffe0:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x000203da "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001ffeb:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x00020405 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0001fff6:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x00020445 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00020001:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00020486 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002000c:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x00020505 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x00020016:     NULL
+
+0x00020017:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x0001ff44 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00020023:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x0001fcca "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0002002f:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x0001fcca "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0002003b:   NULL
+
+0x00024386: DW_TAG_typedef
+              DW_AT_type	(0x00024390 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x00024390: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x00024398:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x00024461 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x000243a2:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x00024644 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x000243ae:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x00024706 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x000243ba:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x0002474a "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x000243c6:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x00024767 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x000243d2:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x00024784 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x000243de:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x000247ac "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x000243ea:   DW_TAG_member
+                DW_AT_type	(0x000243f4 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x000243f4:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x000243fa:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x000247c9 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00024405:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0002481b "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00024410:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x00024846 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002441b:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x00024886 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00024426:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x000248c7 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x00024431:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0002493c "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002443b:     NULL
+
+0x0002443c:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00024367 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00024448:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00024053 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00024454:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00024053 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x00024460:   NULL
+
+0x00027f00: DW_TAG_typedef
+              DW_AT_type	(0x00027f0a "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x00027f0a: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x00027f12:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x00027fda "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x00027f1c:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x000281b7 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x00027f27:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x00028272 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x00027f33:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x000282b6 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x00027f3f:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x000282d3 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x00027f4b:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x000282f0 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x00027f57:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x00028318 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x00027f63:   DW_TAG_member
+                DW_AT_type	(0x00027f6d "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x00027f6d:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x00027f73:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x00028335 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027f7e:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x00028387 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027f89:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x000283b2 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027f94:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x000283f2 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027f9f:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x00028433 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027faa:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x000284a8 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x00027fb4:     NULL
+
+0x00027fb5:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x00027bd0 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x00027fc1:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x00027be8 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x00027fcd:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x00027be8 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x00027fd9:   NULL
+
+0x0002d123: DW_TAG_typedef
+              DW_AT_type	(0x0002d12d "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x0002d12d: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x0002d135:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0002d1fe "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0002d13f:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x0002d3ee "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x0002d14b:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x0002d4ab "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x0002d157:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x0002d4ef "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0002d163:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0002d50c "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0002d16f:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x0002d529 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x0002d17b:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0002d551 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0002d187:   DW_TAG_member
+                DW_AT_type	(0x0002d191 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x0002d191:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0002d197:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x0002d56e "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1a2:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0002d5c0 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1ad:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x0002d5eb "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1b8:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x0002d62b "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1c3:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x0002d66c "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1ce:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0002d6e6 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002d1d8:     NULL
+
+0x0002d1d9:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x0002d050 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x0002d1e5:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x0002d29c "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0002d1f1:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x0002d29c "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0002d1fd:   NULL
+
+0x0002ecf9: DW_TAG_typedef
+              DW_AT_type	(0x0002ed03 "PerCPURecord")
+              DW_AT_name	("PerCPURecord")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(789)
+
+0x0002ed03: DW_TAG_structure_type
+              DW_AT_name	("PerCPURecord")
+              DW_AT_byte_size	(0x1388)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(752)
+
+0x0002ed0b:   DW_TAG_member
+                DW_AT_name	("trace")
+                DW_AT_type	(0x0002edd3 "Trace")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(754)
+                DW_AT_data_member_location	(0x00)
+
+0x0002ed15:   DW_TAG_member
+                DW_AT_name	("state")
+                DW_AT_type	(0x0002efb8 "UnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(756)
+                DW_AT_data_member_location	(0x0ed0)
+
+0x0002ed20:   DW_TAG_member
+                DW_AT_name	("perlUnwindState")
+                DW_AT_type	(0x0002f072 "PerlUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(758)
+                DW_AT_data_member_location	(0x0f38)
+
+0x0002ed2c:   DW_TAG_member
+                DW_AT_name	("pythonUnwindState")
+                DW_AT_type	(0x0002f0b6 "PythonUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(760)
+                DW_AT_data_member_location	(0x0f58)
+
+0x0002ed38:   DW_TAG_member
+                DW_AT_name	("phpUnwindState")
+                DW_AT_type	(0x0002f0d3 "PHPUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(762)
+                DW_AT_data_member_location	(0x0f60)
+
+0x0002ed44:   DW_TAG_member
+                DW_AT_name	("rubyUnwindState")
+                DW_AT_type	(0x0002f0f0 "RubyUnwindState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(764)
+                DW_AT_data_member_location	(0x0f68)
+
+0x0002ed50:   DW_TAG_member
+                DW_AT_name	("customLabelsState")
+                DW_AT_type	(0x0002f118 "CustomLabelsState")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(766)
+                DW_AT_data_member_location	(0x0f78)
+
+0x0002ed5c:   DW_TAG_member
+                DW_AT_type	(0x0002ed66 "PerCPURecord::union ")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+                DW_AT_data_member_location	(0x0f80)
+
+0x0002ed66:   DW_TAG_union_type
+                DW_AT_byte_size	(0x0400)
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(767)
+
+0x0002ed6c:     DW_TAG_member
+                  DW_AT_name	("dotnetUnwindScratch")
+                  DW_AT_type	(0x0002f135 "DotnetUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(769)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002ed77:     DW_TAG_member
+                  DW_AT_name	("hotspotUnwindScratch")
+                  DW_AT_type	(0x0002f187 "HotspotUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(771)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002ed82:     DW_TAG_member
+                  DW_AT_name	("v8UnwindScratch")
+                  DW_AT_type	(0x0002f1b2 "V8UnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(773)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002ed8d:     DW_TAG_member
+                  DW_AT_name	("pythonUnwindScratch")
+                  DW_AT_type	(0x0002f1f2 "PythonUnwindScratchSpace")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(775)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002ed98:     DW_TAG_member
+                  DW_AT_name	("goMapBucket")
+                  DW_AT_type	(0x0002f233 "GoMapBucket")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(777)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002eda3:     DW_TAG_member
+                  DW_AT_name	("labels")
+                  DW_AT_type	(0x0002f2b2 "GoString[20]")
+                  DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                  DW_AT_decl_line	(779)
+                  DW_AT_data_member_location	(0x00)
+
+0x0002edad:     NULL
+
+0x0002edae:   DW_TAG_member
+                DW_AT_name	("unwindersDone")
+                DW_AT_type	(0x0002ea39 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(782)
+                DW_AT_data_member_location	(0x1380)
+
+0x0002edba:   DW_TAG_member
+                DW_AT_name	("tailCalls")
+                DW_AT_type	(0x0002ea51 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(785)
+                DW_AT_data_member_location	(0x1384)
+
+0x0002edc6:   DW_TAG_member
+                DW_AT_name	("ratelimitAction")
+                DW_AT_type	(0x0002ea51 "u8")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(788)
+                DW_AT_data_member_location	(0x1385)
+
+0x0002edd2:   NULL

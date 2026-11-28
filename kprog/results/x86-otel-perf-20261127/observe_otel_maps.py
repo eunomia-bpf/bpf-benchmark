@@ -1,6 +1,7 @@
 """Read-only guest snapshots of actual program-array targets, mapping hits and metrics."""
 import ctypes as C,errno,json,os,struct,sys
 from pathlib import Path
+all_maps=len(sys.argv)>2 and sys.argv[2]=='all-maps'
 out=Path(sys.argv[1]);out.mkdir(parents=True,exist_ok=True);libc=C.CDLL(None,use_errno=True)
 def bpf(cmd,attr):
  b=C.create_string_buffer(attr,128);rc=libc.syscall(321,cmd,b,128);return rc,b.raw,C.get_errno()
@@ -31,12 +32,16 @@ for p in Path('/proc').iterdir():
  except FileNotFoundError:pass
 r=dict(uptime=Path('/proc/uptime').read_text().split()[0],possible_cpus=possible,stress_pids=sorted(pids),programs=[],maps=[])
 for pid,fd in ids(11,13):
- i=info(fd,232);r['programs'].append(dict(id=pid,type=struct.unpack_from('<I',i)[0],name=i[64:80].split(b'\0')[0].decode(),bytes_jited=struct.unpack_from('<I',i,16)[0]))
+ i=info(fd,232);r['programs'].append(dict(id=pid,type=struct.unpack_from('<I',i)[0],name=i[64:80].split(b'\0')[0].decode(),bytes_jited=struct.unpack_from('<I',i,16)[0],run_time_ns=struct.unpack_from('<Q',i,192)[0],run_count=struct.unpack_from('<Q',i,200)[0]))
 for mid,fd in ids(12,14):
  i=info(fd,88);kind,_,ks,vs,maximum,flags=struct.unpack_from('<IIIIII',i);name=i[24:40].split(b'\0')[0].decode()
- if name not in ['perf_progs','metrics','per_cpu_records','pid_page_to_mapping_info'[:15]]:continue
+ if not all_maps and name not in ['perf_progs','metrics','per_cpu_records','pid_page_to_mapping_info'[:15]]:continue
  row=dict(id=mid,name=name,type=kind,key_size=ks,value_size=vs,max_entries=maximum,flags=flags,queries=[]);size=((vs+7)//8*8)*ncpu if kind in [5,6,10] else vs
- if name=='per_cpu_records':
+ if all_maps:
+  row['observation']='Metadata for every map; first8 array/prog-array entries only, not a complete map census or equality verdict.'
+  if kind in [2,3,6,12,14] and size<=65536:
+   for key in range(min(maximum,8)):row['queries'].append(dict(key=key,**lookup(fd,struct.pack('<I',key),size)))
+ elif name=='per_cpu_records':
   x=lookup(fd,struct.pack('<I',0),size)
   if x['returncode']==0:
    filename=str(mid)+'-percpu-record.bin';(out/filename).write_bytes(bytes.fromhex(x.pop('value')));x['file']=filename
