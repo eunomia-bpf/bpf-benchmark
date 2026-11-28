@@ -1,0 +1,16 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "lean",
+    "-j1",
+    "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z/cilium-caller-after-memory-writer-shape.lean"
+  ],
+  "exit": 0,
+  "seconds": 1.6700358390808105,
+  "cpu": 17,
+  "workers": 1,
+  "nice": 0,
+  "address_space_bytes": 34359738368,
+  "timing_lock": "shared"
+}

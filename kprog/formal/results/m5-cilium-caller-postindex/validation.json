@@ -1,0 +1,83 @@
+{
+  "scope": "actual original postindex loop after memory writer, both writer-call branches retained",
+  "source_sha256": "9718bc0975f7eabf3b3bbb32378873a188ee5ee3f5bfff3a0ae8291a114e4b8c",
+  "parent_commit": "635677319daee85e7c98865d34b4497be98211d5",
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-postindex/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.0172078609466553,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex"
+      ],
+      "exit": 0,
+      "seconds": 2.214243173599243,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.735022783279419,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-postindex/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.1795332431793213,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 311,
+  "full_jobs": 1578,
+  "root_queries": [
+    "source",
+    "condition_value",
+    "execute",
+    "temp_frame"
+  ],
+  "execution": "11 internal transitions evaluate original encoded flags&2=0, set t210=0 and signed l_pp__1=0, skip actual nonzero guarded call branches, exit original loop under arbitrary continuation",
+  "frames": "entire heap and Env unchanged; all temps except t210 and l_pp__1 unchanged",
+  "boundary": "local actual linked-world continuation proof; original whole-entry width/resources/provider/native/global/O1O2O4 remain open",
+  "resource_assignment": "CPU17/j1/nice0/32GiB/timing shared; default proof limits; full root uses formal-full-check exclusive nonblocking lock",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

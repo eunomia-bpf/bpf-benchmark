@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.condition_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.condition_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.temp_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerPostindex.temp_frame
