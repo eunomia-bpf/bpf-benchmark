@@ -1,0 +1,202 @@
+{
+  "pid": 1339263,
+  "started_utc": "2026-11-28T06:52:49Z",
+  "controller_status": 0,
+  "phase": "finished-manual-result-review-pending",
+  "proof_capture_gaps": 2,
+  "plans": 324,
+  "selected_verified_members": 1814,
+  "snapshots": 517,
+  "readonly_snapshot_values": 1769,
+  "constant_only_variation_groups": 13,
+  "duplicate_cache_key_plan_variants": 0,
+  "per_app": [
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "cache_plans": 13,
+      "unique_named_entries": 13,
+      "plans_with_constants": 13,
+      "plans_with_captured_proof": 13,
+      "plans_with_resolved_entry": 13,
+      "proof_capture_gaps": 0,
+      "plans_with_abi": 13,
+      "manifest_candidate_counts": {
+        "1": 13
+      },
+      "lookup_forms": {
+        "array": 427,
+        "hash": 180,
+        "percpu_array": 48,
+        "hash_of_maps": 384,
+        "call": 60,
+        "lpm_trie": 24,
+        "lru_hash": 12
+      },
+      "readonly_snapshot_values": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "cache_plans": 25,
+      "unique_named_entries": 25,
+      "plans_with_constants": 20,
+      "plans_with_captured_proof": 25,
+      "plans_with_resolved_entry": 25,
+      "proof_capture_gaps": 0,
+      "plans_with_abi": 25,
+      "manifest_candidate_counts": {
+        "1": 25
+      },
+      "lookup_forms": {
+        "array": 30,
+        "call": 28,
+        "hash": 42
+      },
+      "readonly_snapshot_values": 253
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "cache_plans": 64,
+      "unique_named_entries": 25,
+      "plans_with_constants": 62,
+      "plans_with_captured_proof": 64,
+      "plans_with_resolved_entry": 64,
+      "proof_capture_gaps": 0,
+      "plans_with_abi": 64,
+      "manifest_candidate_counts": {
+        "1": 20,
+        "6": 12,
+        "2": 19,
+        "8": 7,
+        "3": 3,
+        "4": 3
+      },
+      "lookup_forms": {
+        "array": 368,
+        "lpm_trie": 370,
+        "hash": 1088,
+        "lru_hash": 773,
+        "call": 538,
+        "hash_of_maps": 124,
+        "percpu_hash": 62,
+        "percpu_array": 316
+      },
+      "readonly_snapshot_values": 264
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "cache_plans": 1,
+      "unique_named_entries": 1,
+      "plans_with_constants": 0,
+      "plans_with_captured_proof": 1,
+      "plans_with_resolved_entry": 1,
+      "proof_capture_gaps": 0,
+      "plans_with_abi": 1,
+      "manifest_candidate_counts": {
+        "1": 1
+      },
+      "lookup_forms": {
+        "array": 5,
+        "percpu_array": 8,
+        "lru_hash": 2,
+        "array_of_maps": 1,
+        "hash": 3,
+        "hash_of_maps": 2
+      },
+      "readonly_snapshot_values": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "cache_plans": 14,
+      "unique_named_entries": 14,
+      "plans_with_constants": 14,
+      "plans_with_captured_proof": 14,
+      "plans_with_resolved_entry": 14,
+      "proof_capture_gaps": 0,
+      "plans_with_abi": 14,
+      "manifest_candidate_counts": {
+        "1": 14
+      },
+      "lookup_forms": {
+        "array": 457,
+        "hash": 195,
+        "percpu_array": 52,
+        "hash_of_maps": 416,
+        "call": 65,
+        "lpm_trie": 26,
+        "lru_hash": 13
+      },
+      "readonly_snapshot_values": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "cache_plans": 38,
+      "unique_named_entries": 32,
+      "plans_with_constants": 37,
+      "plans_with_captured_proof": 38,
+      "plans_with_resolved_entry": 37,
+      "proof_capture_gaps": 1,
+      "plans_with_abi": 38,
+      "manifest_candidate_counts": {
+        "1": 21,
+        "2": 16,
+        "0": 1
+      },
+      "lookup_forms": {
+        "array": 348,
+        "array_of_maps": 735,
+        "call": 470,
+        "hash": 1056,
+        "percpu_array": 725,
+        "lru_hash": 221,
+        "hash_of_maps": 120,
+        "percpu_hash": 6
+      },
+      "readonly_snapshot_values": 1175
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "cache_plans": 169,
+      "unique_named_entries": 168,
+      "plans_with_constants": 169,
+      "plans_with_captured_proof": 169,
+      "plans_with_resolved_entry": 168,
+      "proof_capture_gaps": 1,
+      "plans_with_abi": 169,
+      "manifest_candidate_counts": {
+        "1": 167,
+        "0": 2
+      },
+      "lookup_forms": {
+        "array": 2033,
+        "hash": 6833,
+        "hash_of_maps": 3356,
+        "lru_hash": 3841,
+        "percpu_array": 1837,
+        "call": 4372
+      },
+      "readonly_snapshot_values": 77
+    }
+  ],
+  "outputs": {
+    "runtime-plans.json": {
+      "bytes": 89511963,
+      "sha256": "a2653369e9ce17c3c12bebc32ddd1f4e646a4de27080346a822e0892e97eb51b"
+    },
+    "sources.json": {
+      "bytes": 475663,
+      "sha256": "5eeeea385fb758398471fef38e80f67f45bfc1791e31b0be9f5e75da79c5c953"
+    },
+    "programs.tsv": {
+      "bytes": 21356,
+      "sha256": "d838b492810682fc4bc0567e29e0ebf5cb8e1d66b9ea3fbd53bc4ad7585d974e"
+    }
+  },
+  "ended_utc": "2026-11-28T06:52:54Z"
+}
