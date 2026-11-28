@@ -1,0 +1,211 @@
+{
+  "prepared_utc": "2026-11-28T10:29:27Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "recipe_sha256": "0a20d68aa455eecaa0eee3f9046e88bd9c064bd8789f2cab88b3ad78f56736b6",
+  "layouts": {
+    "x86": {
+      "event_config": {
+        "size": 736,
+        "fields": {
+          "func_id": 0,
+          "arg": 4,
+          "arm": 24,
+          "off": 44,
+          "idx": 64,
+          "syscall": 84,
+          "argreturncopy": 88,
+          "argreturn": 92,
+          "argreturnaction": 96,
+          "policy_id": 100,
+          "flags": 104,
+          "pad": 108,
+          "btf_arg": 112,
+          "usdt_arg": 512,
+          "reg_arg": 704
+        }
+      },
+      "config_reg_arg": {
+        "size": 4,
+        "fields": {
+          "offset": 0,
+          "size": 2,
+          "pad": 3
+        }
+      }
+    },
+    "arm64": {
+      "event_config": {
+        "size": 736,
+        "fields": {
+          "func_id": 0,
+          "arg": 4,
+          "arm": 24,
+          "off": 44,
+          "idx": 64,
+          "syscall": 84,
+          "argreturncopy": 88,
+          "argreturn": 92,
+          "argreturnaction": 96,
+          "policy_id": 100,
+          "flags": 104,
+          "pad": 108,
+          "btf_arg": 112,
+          "usdt_arg": 512,
+          "reg_arg": 704
+        }
+      },
+      "config_reg_arg": {
+        "size": 4,
+        "fields": {
+          "offset": 0,
+          "size": 2,
+          "pad": 3
+        }
+      }
+    }
+  },
+  "source_sha256": {
+    "vendor/build/native-bpf/x86/stage/tetragon/bpf_generic_kprobe_v61.native.o": "27b77d98fab1817f40d54707de4997af2f95cbd1386b783ec66f44821aa5680d",
+    "vendor/build/native-bpf/arm64/stage/tetragon/bpf_generic_kprobe_v61.native.o": "2442ee2e5fc59051649df3e094c5a836c64793283d5e6a3b19dcf37ed8148976",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/sources.json": "5eeeea385fb758398471fef38e80f67f45bfc1791e31b0be9f5e75da79c5c953",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans.json": "a2653369e9ce17c3c12bebc32ddd1f4e646a4de27080346a822e0892e97eb51b",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans-archive.json": "10d0f98469f58c625348676a981f509f01de8163b2ffb7fd15c81c8bfae99286",
+    "vendor/repos/tetragon/pkg/sensors/tracing/args_linux.go": "3c33bb70a13b5b563a0dc1b53199e8282f4e9e7ff63288b9e8be34072005ef59",
+    "vendor/bpf/tetragon/bpf/process/types/basic.h": "f86b33f98b51c79266b1139367c93d1e4f4dcee4d1e9b0a64756a73045ebb95c",
+    "vendor/bpf/tetragon/bpf/process/generic_maps.h": "06f674e9c735aad7506f52712aef05ef276f2ac560362eab0eef4f4106ff4b54",
+    "vendor/bpf/tetragon/bpf/process/generic_calls.h": "e040cf15de5165697eaa542e0c5cd0007ccab76739ab4abddfe85a2f70f9e5f3",
+    "vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go": "bd6aef6a7a7b7bc4e6e419ee9e2b8bdbd446e1c3e60eba30e1e5be4e4697856d",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/runtime-plans.json.zst": "b05cb0793b5ff4df18e6f01df1762fdc1ee68c5f0c9b1989cbac183aeb2f1f4a"
+  },
+  "source_anchors": [
+    {
+      "path": "vendor/repos/tetragon/pkg/sensors/tracing/args_linux.go",
+      "first_line": 56,
+      "last_line": 62,
+      "excerpt": "56: const (\n57: \targReturnCopyBit  = 1 << 4\n58: \targMaxDataBit     = 1 << 5\n59: \targCurrentTaskBit = 1 << 6\n60: \targPtRegsBit      = 1 << 7\n61: \targPreloadBit     = 1 << 8\n62: )"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/types/basic.h",
+      "first_line": 557,
+      "last_line": 562,
+      "excerpt": "557: #define ARGM_INDEX_MASK\t  0xf\n558: #define ARGM_RETURN_COPY  BIT(4)\n559: #define ARGM_MAX_DATA\t  BIT(5)\n560: #define ARGM_CURRENT_TASK BIT(6)\n561: #define ARGM_PT_REGS\t  BIT(7)\n562: #define ARGM_PRELOAD\t  BIT(8)"
+    },
+    {
+      "path": "vendor/bpf/tetragon/bpf/process/generic_maps.h",
+      "first_line": 51,
+      "last_line": 56,
+      "excerpt": "51: struct {\n52: \t__uint(type, BPF_MAP_TYPE_ARRAY);\n53: \t__uint(max_entries, 1);\n54: \t__type(key, __u32);\n55: \t__type(value, struct event_config);\n56: } config_map SEC(\".maps\");"
+    },
+    {
+      "path": "vendor/repos/tetragon/pkg/api/tracingapi/client_kprobe.go",
+      "first_line": 677,
+      "last_line": 706,
+      "excerpt": "677: type ConfigRegArg struct {\n678: \tOffset uint16 `align:\"offset\"`\n679: \tSize   uint8  `align:\"size\"`\n680: \tPad    uint8  `align:\"pad\"`\n681: }\n682: \n683: const (\n684: \tEventConfigMaxArgs     = 5\n685: \tEventConfigMaxUsdtArgs = 8\n686: \tEventConfigMaxRegArgs  = 8\n687: \tMaxBTFArgDepth         = 10 // Artificial value for compilation, may be extended\n688: )\n689: \n690: type EventConfig struct {\n691: \tFuncId          uint32                                           `align:\"func_id\"`\n692: \tArgType         [EventConfigMaxArgs]int32                        `align:\"arg\"`\n693: \tArgMeta         [EventConfigMaxArgs]uint32                       `align:\"arm\"`\n694: \tArgTpCtxOff     [EventConfigMaxArgs]uint32                       `align:\"off\"`\n695: \tArgIndex        [EventConfigMaxArgs]int32                        `align:\"idx\"`\n696: \tSyscall         uint32                                           `align:\"syscall\"`\n697: \tArgReturnCopy   int32                                            `align:\"argreturncopy\"`\n698: \tArgReturn       int32                                            `align:\"argreturn\"`\n699: \tArgReturnAction int32                                            `align:\"argreturnaction\"`\n700: \tPolicyID        uint32                                           `align:\"policy_id\"`\n701: \tFlags           uint32                                           `align:\"flags\"`\n702: \tPad             uint32                                           `align:\"pad\"`\n703: \tBTFArg          [EventConfigMaxArgs][MaxBTFArgDepth]ConfigBTFArg `align:\"btf_arg\"`\n704: \tUsdtArg         [EventConfigMaxUsdtArgs]ConfigUsdtArg            `align:\"usdt_arg\"`\n705: \tRegArg          [EventConfigMaxRegArgs]ConfigRegArg              `align:\"reg_arg\"`\n706: }"
+    }
+  ],
+  "expected_snapshots": 85,
+  "validation": "Python compile(source), exact bothISA DWARF size/offset/array-count/element-size/unsigned type facts and make-n read passed. Runtime output pending.",
+  "scope": "Historical x86 config values, not original program-map identity or ARM workload proof.",
+  "decode_type_facts": {
+    "x86": {
+      "event_config.func_id": {
+        "offset": 0,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.arm": {
+        "offset": 24,
+        "kind": "DW_TAG_array_type",
+        "dimensions": [
+          5
+        ],
+        "element_size": 4,
+        "element_kind": "DW_TAG_base_type"
+      },
+      "event_config.syscall": {
+        "offset": 84,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.flags": {
+        "offset": 104,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.reg_arg": {
+        "offset": 704,
+        "kind": "DW_TAG_array_type",
+        "dimensions": [
+          8
+        ],
+        "element_size": 4,
+        "element_kind": "DW_TAG_structure_type"
+      },
+      "config_reg_arg.offset": {
+        "offset": 0,
+        "kind": "DW_TAG_base_type",
+        "size": 2,
+        "encoding": 7
+      },
+      "config_reg_arg.size": {
+        "offset": 2,
+        "kind": "DW_TAG_base_type",
+        "size": 1,
+        "encoding": 8
+      }
+    },
+    "arm64": {
+      "event_config.func_id": {
+        "offset": 0,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.arm": {
+        "offset": 24,
+        "kind": "DW_TAG_array_type",
+        "dimensions": [
+          5
+        ],
+        "element_size": 4,
+        "element_kind": "DW_TAG_base_type"
+      },
+      "event_config.syscall": {
+        "offset": 84,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.flags": {
+        "offset": 104,
+        "kind": "DW_TAG_base_type",
+        "size": 4,
+        "encoding": 7
+      },
+      "event_config.reg_arg": {
+        "offset": 704,
+        "kind": "DW_TAG_array_type",
+        "dimensions": [
+          8
+        ],
+        "element_size": 4,
+        "element_kind": "DW_TAG_structure_type"
+      },
+      "config_reg_arg.offset": {
+        "offset": 0,
+        "kind": "DW_TAG_base_type",
+        "size": 2,
+        "encoding": 7
+      },
+      "config_reg_arg.size": {
+        "offset": 2,
+        "kind": "DW_TAG_base_type",
+        "size": 1,
+        "encoding": 8
+      }
+    }
+  }
+}
