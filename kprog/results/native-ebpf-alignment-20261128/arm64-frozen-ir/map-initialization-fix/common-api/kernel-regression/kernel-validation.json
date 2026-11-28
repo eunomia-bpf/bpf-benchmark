@@ -1,0 +1,41 @@
+{
+  "collected_utc": "2026-11-28T06:26:41Z",
+  "worker": 1323010,
+  "actual_test_pass": "TestLoadAllMapsInitializesConfiguredVariables (0.91s)",
+  "protected_file_count": 128,
+  "protected_files_verified_current": true,
+  "images_equal": true,
+  "guest_controls_restored": true,
+  "product": {
+    "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/tracer.test",
+    "bytes": 25690504,
+    "sha256": "6ca970b643fcb4926a602f626732a8b64dbc4d0cc7ff13bcb1d8785f664a1e7b",
+    "elf_machine": 183
+  },
+  "receipts": {
+    "controller.json": {
+      "bytes": 46291,
+      "sha256": "a84a09d65aee077830162e2fba54e14177b73b23fcfb77105ec859e6f839667d"
+    },
+    "compile.log": {
+      "bytes": 997,
+      "sha256": "e7c5b9b68d8d67e1ef9ede3b85d2e190982e04b99e7890b0e373cc702ce3e7bb"
+    },
+    "guest.log": {
+      "bytes": 444,
+      "sha256": "41a918f6f5fb23eff397567da86c98d383f910b662a5a047a05033dcaa28edfb"
+    },
+    "job.log": {
+      "bytes": 205,
+      "sha256": "9ff148cdabcd1e78bd65c88ad169ee8ee6b07b117f3a836018863facce9ba37d"
+    },
+    "guest-status.txt": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "guest-state-before.tar.gz": {
+      "bytes": 802,
+      "sha256": "fa7aa5fea91ec703b1fb67fe5286148eb9fccf689d7dcc4b618a13b5dedcc988"
+    }
+  }
+}

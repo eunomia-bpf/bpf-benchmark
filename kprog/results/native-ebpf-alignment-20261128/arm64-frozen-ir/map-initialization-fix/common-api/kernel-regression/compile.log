@@ -1,0 +1,27 @@
+{
+	"Path": "github.com/cilium/ebpf",
+	"Version": "v0.20.0",
+	"Replace": {
+		"Path": "/workspaces/repository/vendor/repos/cilium-ebpf",
+		"Dir": "/workspaces/repository/vendor/repos/cilium-ebpf",
+		"GoMod": "/workspaces/repository/vendor/repos/cilium-ebpf/go.mod",
+		"GoVersion": "1.25.0"
+	},
+	"Indirect": true,
+	"Dir": "/workspaces/repository/vendor/repos/cilium-ebpf",
+	"GoMod": "/workspaces/repository/vendor/repos/cilium-ebpf/go.mod",
+	"GoVersion": "1.25.0"
+}
+{
+	"Path": "go.opentelemetry.io/ebpf-profiler",
+	"Version": "v0.0.0",
+	"Replace": {
+		"Path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler",
+		"Dir": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler",
+		"GoMod": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/go.mod",
+		"GoVersion": "1.24.0"
+	},
+	"Dir": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler",
+	"GoMod": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/go.mod",
+	"GoVersion": "1.24.0"
+}

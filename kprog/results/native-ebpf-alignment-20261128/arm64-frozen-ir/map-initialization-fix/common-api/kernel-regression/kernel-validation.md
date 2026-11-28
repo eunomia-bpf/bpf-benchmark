@@ -1,0 +1,5 @@
+# Configured data-section initialization on the actual ARM kernel
+
+Finite job 1323010 finished at 2026-11-28T06:23:12Z. The collector builder module resolved cilium/ebpf to the existing local replacement and ebpf-profiler to the existing source fork. Compilation, QEMU and guest statuses were zero. The guest printed the actual binary SHA256 6ca970b643fcb4926a602f626732a8b64dbc4d0cc7ff13bcb1d8785f664a1e7b, then executed TestLoadAllMapsInitializesConfiguredVariables and reported PASS in 0.91 seconds. The test reads the real kernel data-section map through loadAllMaps and compares configured variable bytes using the embedded BTF offsets and widths.
+
+All 128 protected files, including the successful app binary, collector module files, native artifacts, BPF inputs and kernels, match before/after and current hashes. Both image IDs match. The standard init and archived qemu-run/status controls retain their original bytes after execution. The test binary is the sole current support/tracer.test product, 25690504 bytes, AArch64 ELF183. Full affected profiler sampling and both-phase live global values follow activation of the already-built fixed collector.
