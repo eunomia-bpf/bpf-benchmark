@@ -1,0 +1,75 @@
+{
+  "revision": "87697b4d489e1a948bac199aefced7921eec4c1e",
+  "time_utc": "2026-11-28T05:18:31Z",
+  "rows": 698,
+  "objects": 114,
+  "per_app": [
+    {
+      "architecture": "arm64",
+      "app": "bcc",
+      "rows": 29
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "rows": 85
+    },
+    {
+      "architecture": "arm64",
+      "app": "katran",
+      "rows": 3
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "rows": 26
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "rows": 93
+    },
+    {
+      "architecture": "arm64",
+      "app": "tracee",
+      "rows": 113
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "rows": 29
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "rows": 85
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "rows": 3
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "rows": 26
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "rows": 93
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "rows": 113
+    }
+  ],
+  "symbol_resolution": {
+    "exact": 604,
+    "ambiguous-prefix": 94
+  },
+  "missing_ir": [],
+  "isa_mismatches": [],
+  "limitations": "Manifest rows are staged definitions, not workload loads/install events. Entry relocations exclude resolved local calls, transitive functions, runtime optimizer output and code patched after load; absence is not absence of execution. Native read-only object sections are only candidate globals: actual BPF map read-only+frozen flags and app-written values require load-time plan evidence. Static prefix candidates do not assert the loader selected them. No runtime equality or per-program semantic pass inferred."
+}

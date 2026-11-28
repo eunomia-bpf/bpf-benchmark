@@ -1,0 +1,275 @@
+{
+  "vendor/linux-framework/kernel/bpf/verifier.c": {
+    "sha256": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "matches": {
+      "static int do_misc_fixups": [
+        {
+          "line": 23357,
+          "text": "static int do_misc_fixups(struct bpf_verifier_env *env)"
+        }
+      ],
+      "map_gen_lookup": [
+        {
+          "line": 23874,
+          "text": "\t\t/* BPF_EMIT_CALL() assumptions in some of the map_gen_lookup"
+        },
+        {
+          "line": 23895,
+          "text": "\t\t\t    ops->map_gen_lookup) {"
+        },
+        {
+          "line": 23896,
+          "text": "\t\t\t\tcnt = ops->map_gen_lookup(map_ptr, insn_buf);"
+        }
+      ],
+      "Implement bpf_jiffies64 inline": [
+        {
+          "line": 23973,
+          "text": "\t\t/* Implement bpf_jiffies64 inline. */"
+        }
+      ],
+      "Implement bpf_get_smp_processor_id() inline": [
+        {
+          "line": 23999,
+          "text": "\t\t/* Implement bpf_get_smp_processor_id() inline. */"
+        }
+      ],
+      "Implement bpf_get_current_task()": [
+        {
+          "line": 24026,
+          "text": "\t\t/* Implement bpf_get_current_task() and bpf_get_current_task_btf() inline. */"
+        }
+      ],
+      "convert_ctx_access": [
+        {
+          "line": 8396,
+          "text": "\t\tif (!env->ops->convert_ctx_access) {"
+        },
+        {
+          "line": 22478,
+          "text": "static int convert_ctx_accesses(struct bpf_verifier_env *env)"
+        },
+        {
+          "line": 22551,
+          "text": "\t\tbpf_convert_ctx_access_t convert_ctx_access;"
+        },
+        {
+          "line": 22646,
+          "text": "\t\t\tif (!ops->convert_ctx_access)"
+        },
+        {
+          "line": 22648,
+          "text": "\t\t\tconvert_ctx_access = ops->convert_ctx_access;"
+        },
+        {
+          "line": 22652,
+          "text": "\t\t\tconvert_ctx_access = bpf_sock_convert_ctx_access;"
+        },
+        {
+          "line": 22655,
+          "text": "\t\t\tconvert_ctx_access = bpf_tcp_sock_convert_ctx_access;"
+        },
+        {
+          "line": 22658,
+          "text": "\t\t\tconvert_ctx_access = bpf_xdp_sock_convert_ctx_access;"
+        },
+        {
+          "line": 22702,
+          "text": "\t\t * convert_ctx_access changes. If conversion is successful,"
+        },
+        {
+          "line": 22727,
+          "text": "\t\tcnt = convert_ctx_access(type, insn, insn_buf, env->prog,"
+        },
+        {
+          "line": 26096,
+          "text": "\t\tret = convert_ctx_accesses(env);"
+        }
+      ]
+    }
+  },
+  "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": {
+    "sha256": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+    "matches": {
+      "Implement helper call to bpf_get_smp_processor_id": [
+        {
+          "line": 1594,
+          "text": "\t\t/* Implement helper call to bpf_get_smp_processor_id() inline */"
+        }
+      ],
+      "Implement helper call to bpf_get_current_task": [
+        {
+          "line": 1608,
+          "text": "\t\t/* Implement helper call to bpf_get_current_task/_btf() inline */"
+        }
+      ],
+      "case BPF_JMP | BPF_TAIL_CALL": [
+        {
+          "line": 1630,
+          "text": "\tcase BPF_JMP | BPF_TAIL_CALL:"
+        }
+      ]
+    }
+  },
+  "kprog/x86/native_lab/native_link/src/frozen_ir.rs": {
+    "sha256": "4ed02ca4227964e8ce08ed504657aac13dcbc258b69385ee175b93311f564a3c",
+    "matches": {
+      "pub(super) fn specialize": [
+        {
+          "line": 7,
+          "text": "pub(super) fn specialize("
+        }
+      ],
+      "section_by_name(\".llvmbc\")": [
+        {
+          "line": 24,
+          "text": "    let Some(section) = elf.section_by_name(\".llvmbc\") else {"
+        },
+        {
+          "line": 114,
+          "text": "        assert_eq!(elf.section_by_name(\".llvmbc\").unwrap().data()?,"
+        },
+        {
+          "line": 115,
+          "text": "            original.section_by_name(\".llvmbc\").unwrap().data()?);"
+        },
+        {
+          "line": 132,
+          "text": "            assert!(specialized.section_by_name(\".llvmbc\").is_none());"
+        }
+      ],
+      "--immutable-globals": [
+        {
+          "line": 50,
+          "text": "        .arg(\"--immutable-globals\").arg(&facts).arg(\"-o\").arg(&native);"
+        }
+      ]
+    }
+  },
+  "kprog/x86/native_lab/native_link/src/main.rs": {
+    "sha256": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "matches": {
+      "fn a64_fold_frozen_load": [
+        {
+          "line": 1294,
+          "text": "fn a64_fold_frozen_load("
+        }
+      ],
+      "fn build_arm64_get_smp_processor_id_inline": [
+        {
+          "line": 1436,
+          "text": "fn build_arm64_get_smp_processor_id_inline("
+        }
+      ],
+      "fn build_arm64_tail_call_inline": [
+        {
+          "line": 1457,
+          "text": "fn build_arm64_tail_call_inline(helper_addrs: &HashMap<String, u64>) -> Result<Vec<u32>> {"
+        }
+      ],
+      "build_arm64_get_smp_processor_id_inline(helper_addrs)": [
+        {
+          "line": 2312,
+          "text": "                                build_arm64_get_smp_processor_id_inline(helper_addrs)?"
+        }
+      ],
+      "reloc.target_name == \"bpf_get_current_task\"": [
+        {
+          "line": 2322,
+          "text": "                        if reloc.target_name == \"bpf_get_current_task\""
+        }
+      ]
+    }
+  },
+  "kprog/libnativeloader/src/native_loader_trusted.cpp": {
+    "sha256": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+    "matches": {
+      "if (immutable) {": [
+        {
+          "line": 340,
+          "text": "    if (immutable) {"
+        },
+        {
+          "line": 950,
+          "text": "    if (immutable) {"
+        }
+      ],
+      "load.immutable_globals[name]": [
+        {
+          "line": 1940,
+          "text": "                load.immutable_globals[name] = std::move(value);"
+        }
+      ],
+      "bind_original_source_maps(source_bpf_object": [
+        {
+          "line": 3202,
+          "text": "        bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &entry_symbols);"
+        },
+        {
+          "line": 3256,
+          "text": "            bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &optimized_symbols);"
+        }
+      ],
+      "const auto optimized = native_context_lto_object": [
+        {
+          "line": 3243,
+          "text": "    const auto optimized = native_context_lto_object(native_object_path, symbol_name, prog_info.type,"
+        }
+      ]
+    }
+  },
+  "kprog/libnativeloader/src/native_loader_link_schema.hpp": {
+    "sha256": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+    "matches": {
+      "BPF_MAP_TYPE_LPM_TRIE": [
+        {
+          "line": 211,
+          "text": "            {BPF_MAP_TYPE_LPM_TRIE, {\"trie_update_elem\", \"trie_delete_elem\"}},"
+        },
+        {
+          "line": 224,
+          "text": "        if (meta->type == BPF_MAP_TYPE_LPM_TRIE) link_site.kind = \"lpm_trie\";"
+        }
+      ]
+    }
+  },
+  "vendor/bpf/Makefile": {
+    "sha256": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+    "matches": {
+      "NATIVE_ARCH_CFLAGS :=": [
+        {
+          "line": 54,
+          "text": "NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only -mllvm -x86-cmov-converter-force-all) \\"
+        }
+      ],
+      "NATIVE_CFLAGS :=": [
+        {
+          "line": 56,
+          "text": "NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \\"
+        },
+        {
+          "line": 62,
+          "text": "KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \\"
+        }
+      ],
+      "CILIUM_AGENT_NODE_OPTIONS :=": [
+        {
+          "line": 88,
+          "text": "CILIUM_AGENT_NODE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 \\"
+        }
+      ]
+    }
+  },
+  "vendor/bpf/otel/support/ebpf/tracemgmt.h": {
+    "sha256": "5db32bae74413904c7474c598981a45f7a9a11980ce393ac801f855e731706d9",
+    "matches": {
+      "struct pt_regs *regs = origin == TRACE_SAMPLING": [
+        {
+          "line": 763,
+          "text": "  struct pt_regs *regs = origin == TRACE_SAMPLING ? *(struct pt_regs **)ctx : ctx;"
+        }
+      ]
+    }
+  },
+  "kernel_revision": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16"
+}

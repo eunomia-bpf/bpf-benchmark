@@ -1,0 +1,50 @@
+{
+  "vendor/build/native-bpf/x86/stage/bcc/manifest.json": {
+    "sha256": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "program_rows": 29
+  },
+  "vendor/build/native-bpf/x86/stage/cilium/manifest.json": {
+    "sha256": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05",
+    "program_rows": 85
+  },
+  "vendor/build/native-bpf/x86/stage/katran/manifest.json": {
+    "sha256": "c089a79823d0cca636878c64c290cbf3b36413927a05afc5c9e69066e3437f4e",
+    "program_rows": 3
+  },
+  "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/manifest.json": {
+    "sha256": "424f1992d9f053d884ea7b16ec1738dc8667d6c6b56ccc8b16941d9b6be99488",
+    "program_rows": 26
+  },
+  "vendor/build/native-bpf/x86/stage/tetragon/manifest.json": {
+    "sha256": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "program_rows": 93
+  },
+  "vendor/build/native-bpf/x86/stage/tracee/manifest.json": {
+    "sha256": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+    "program_rows": 113
+  },
+  "vendor/build/native-bpf/arm64/stage/bcc/manifest.json": {
+    "sha256": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "program_rows": 29
+  },
+  "vendor/build/native-bpf/arm64/stage/cilium/manifest.json": {
+    "sha256": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05",
+    "program_rows": 85
+  },
+  "vendor/build/native-bpf/arm64/stage/katran/manifest.json": {
+    "sha256": "c089a79823d0cca636878c64c290cbf3b36413927a05afc5c9e69066e3437f4e",
+    "program_rows": 3
+  },
+  "vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/manifest.json": {
+    "sha256": "424f1992d9f053d884ea7b16ec1738dc8667d6c6b56ccc8b16941d9b6be99488",
+    "program_rows": 26
+  },
+  "vendor/build/native-bpf/arm64/stage/tetragon/manifest.json": {
+    "sha256": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "program_rows": 93
+  },
+  "vendor/build/native-bpf/arm64/stage/tracee/manifest.json": {
+    "sha256": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+    "program_rows": 113
+  }
+}
