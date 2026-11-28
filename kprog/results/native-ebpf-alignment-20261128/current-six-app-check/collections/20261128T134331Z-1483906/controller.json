@@ -1,0 +1,183 @@
+{
+  "utc": "2026-11-28T13:43:31Z",
+  "same_chain_pid": 1481233,
+  "chain_status_at_collection": null,
+  "chain_phase_at_collection": "checks",
+  "chain_source": {
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/check_all.py": "59b034605774a39ec8102a1a7418b238e473a2854e515eebda9b10838297e43d",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/observe_phases.py": "f8e9b973f021908f54a5da2161d74c32804d4ec85fb3c2fe7735120f06f48711",
+    "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/dump_all.py": "d57bac368f3927fb0f04a49596e0aafae8d091a6468f4094fad82ff88773fd5b",
+    "kprog/results/x86-otel-perf-20261127/observe_otel_maps.py": "3278c89f61f5e9c1b65bf9a2f2fba505a38c4146766dd87fb217f8cb62350cea",
+    "kprog/results/native-ebpf-alignment-20261128/observe-check.template.sh": "0361923346b416fba58fde08fa060a3a1ccf0edc28a7897c0de7988dce6672b3",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83",
+    "corpus/driver.py": "dcfcf4f4eb5eed197c8dcb294428749d937bf871de407eeef2838b038d8285c9"
+  },
+  "new_cases": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "case": {
+        "app": "otelcol-ebpf-profiler/profiling",
+        "started_utc": "2026-11-28T13:30:13Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/otelcol-ebpf-profiler__profiling",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:32:25Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "d10c7aed9940d94bf668b8e0fcc472726d0c0c12",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133126_617085",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133126_617085/details/apps/otelcol-ebpf-profiler__profiling.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": null
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/otelcol-ebpf-profiler__profiling/review.json",
+        "bytes": 473808,
+        "sha256": "9619aa4ff824a984b06e3ba0417f71564bf9aab06bc79519c50fbf28f90ccb22"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 14,
+        "failed": 0,
+        "feature_probes_skipped": 2
+      },
+      "active_programs": {
+        "baseline": 2,
+        "post_rejit": 2
+      },
+      "unwind_error": null
+    },
+    {
+      "app": "bcc/set",
+      "case": {
+        "app": "bcc/set",
+        "started_utc": "2026-11-28T13:32:25Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/bcc__set",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:35:09Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "d10c7aed9940d94bf668b8e0fcc472726d0c0c12",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133340_086791",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133340_086791/details/apps/bcc__set.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": null
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/bcc__set/review.json",
+        "bytes": 381722,
+        "sha256": "298435cf9cd3e5dfa1084dc04a39fd06ce7e9dd8e03115a8ede31ec17363afa1"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 25,
+        "failed": 0,
+        "feature_probes_skipped": 52
+      },
+      "active_programs": {
+        "baseline": 17,
+        "post_rejit": 17
+      },
+      "unwind_error": null
+    },
+    {
+      "app": "cilium/agent",
+      "case": {
+        "app": "cilium/agent",
+        "started_utc": "2026-11-28T13:35:09Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/cilium__agent",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:38:03Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "d10c7aed9940d94bf668b8e0fcc472726d0c0c12",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133627_004089",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133627_004089/details/apps/cilium__agent.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": null
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/cilium__agent/review.json",
+        "bytes": 1110942,
+        "sha256": "516496be5bea52b892139266e5c115f2be0224fbb1061cc5967844e0dc38eb29"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 135,
+        "failed": 0,
+        "feature_probes_skipped": 33
+      },
+      "active_programs": {
+        "baseline": 6,
+        "post_rejit": 3
+      },
+      "unwind_error": null
+    },
+    {
+      "app": "tetragon/observer",
+      "case": {
+        "app": "tetragon/observer",
+        "started_utc": "2026-11-28T13:38:03Z",
+        "raw": "/workspaces/kprog-raw/perf/current-six-app-check-20261128/tetragon__observer",
+        "recipe_sha256": "b944499ee1f3e50ef7ce0003180205c809bba1ba0c5f72c79334061df83a3ec7",
+        "returncode": 0,
+        "ended_utc": "2026-11-28T13:42:25Z",
+        "guest-exit.txt": "0",
+        "profile-image.txt": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+        "profile-source.txt": "d10c7aed9940d94bf668b8e0fcc472726d0c0c12",
+        "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133918_615770",
+        "image_matches": true,
+        "app_status": "ok",
+        "app_json": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_133918_615770/details/apps/tetragon__observer.json",
+        "observer_exists": true,
+        "phase_snapshot_counts": {
+          "baseline": 2,
+          "post_rejit": 2
+        },
+        "observer_exception": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/observe_phases.py\", line 38, in <module>\n    with path.open() as f:f.seek(offsets.get(phase,0));text=buffers.get(phase,'')+f.read();offsets[phase]=f.tell()\n                                                                                  ^^^^^^^^\nOSError: [Errno 61] No data available\n"
+      },
+      "review": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/current-six-app-check/cases/tetragon__observer/review.json",
+        "bytes": 4554712,
+        "sha256": "fb27b97eeae9540cda289fb985e4fbc2401e58a2d8393d2de308a36b659018e5"
+      },
+      "native_counts": {
+        "checked": 0,
+        "direct_installed": 288,
+        "failed": 0,
+        "feature_probes_skipped": 19
+      },
+      "active_programs": {
+        "baseline": 33,
+        "post_rejit": 32
+      },
+      "unwind_error": null
+    }
+  ],
+  "existing_cases": [],
+  "skipped_active": [
+    "tracee/monitor"
+  ],
+  "errors": [],
+  "status": 0
+}
