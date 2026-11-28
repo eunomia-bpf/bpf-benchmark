@@ -1,0 +1,24 @@
+{
+  "pid": 1219516,
+  "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128",
+  "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/validation-controller.log",
+  "source": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/validate_after_build.py",
+  "dependency": {
+    "pid": 1219513,
+    "started_utc": "2026-11-28T03:16:35Z",
+    "source_revision": "1b118ef258f62292e1474763f51650e54fe51259",
+    "source_sha256": {
+      "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+      "kprog/x86/perf_context_lto.cpp": "60cde900535d356107f5bc317991a05e2a848aa41f651a2788e8239f9d5cb1e0",
+      "kprog/x86/native_lab/native_link/src/main.rs": "1faf56423aa83f2d638a0534dde4064e2e98657f5e2974f44bd5a68382e4924b",
+      "kprog/x86/native_lab/native_link/src/x86.rs": "072aa4fafd051dac1f464a5d9b256418c2b777a83cfebe243fb58bf5e0721e79",
+      "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "475f5e70ecb03e19314ea12a6c5db563b591289b04d4dd295f95c9ce9881ec62"
+    },
+    "result": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128",
+    "script": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.sh",
+    "script_sha256": "d3842cd40936df5818e075557e1f2129851eacf0be8b54ddf44d6e7456db4f96",
+    "log": "/workspaces/repository/kprog/results/x86-otel-perf-20261127/lpm-type-binding-20261128/build.log",
+    "scope": "Validate current source after normal map-helper plan fixture and production re-proof plan preservation; compiler unchanged so normal incremental make, Rust release/alltests; 48GiB/build-only/CPU16,18/max2. No guest/image/P/kernel change."
+  },
+  "purpose": "Same finite fresh-build dependency then existing independent LPM oracle and actual loader target; failed prior dependency receipt preserved, no successfulcheck repeated."
+}
