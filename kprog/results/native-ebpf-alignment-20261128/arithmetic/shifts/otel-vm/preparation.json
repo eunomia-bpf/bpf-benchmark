@@ -1,0 +1,49 @@
+{
+  "prepared_utc": "2026-11-28T11:01:28Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "recipe_sha256": "5eb3fb4aab460908d227bbf0d1ca149a7e59b0d0a683c296f72bddc4f428a052",
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "sha256": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8",
+      "architecture": "x86",
+      "shift_record": "x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "sha256": "8cc970400d4706efb3ae203e67c21cdf18b15700c388db78277abdb38d5335cc",
+      "architecture": "arm64",
+      "shift_record": "arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json"
+    }
+  ],
+  "source_sha256": {
+    "vendor/bpf/otel/support/ebpf/tracemgmt.h": "5db32bae74413904c7474c598981a45f7a9a11980ce393ac801f855e731706d9",
+    "vendor/bpf/otel/support/ebpf/dotnet_tracer.ebpf.c": "5626ba9ac1f37d21d19efb7b1d8a632adee4742ba7e517e5ba335de60a57b964",
+    "vendor/bpf/otel/support/ebpf/go_labels.ebpf.c": "6789f6ba9c89b1a85a8967e2822ffc954c363a8382329e636fef02eee4a9c5a3",
+    "vendor/bpf/otel/support/ebpf/hotspot_tracer.ebpf.c": "00a502aed7b3cc551df739362e74dc0f6dd696eb77e2902302cfa3f5c3d943c8",
+    "vendor/bpf/otel/support/ebpf/v8_tracer.ebpf.c": "442b4bc0e69f50a931c3c625ca07794f391560fa3c829a2b303855d329b4ab2b",
+    "vendor/repos/opentelemetry-ebpf-profiler/interpreter/hotspot/instance.go": "7e3269b9d6e9b12b071c2f267de0842f67dfdcedb477dbe1bd77700b0c75b338",
+    "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json": "7f9f28464175d9c65f5c5ee84273a373e775a7577d89ff6f3ae2905fc00277c2",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json": "e0aae099c1f44701df1aa3e34c28d7aa24af733c85fb3bdb58cd8b0060cd6aed"
+  },
+  "artifact_kind_observations": [
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.amd64.o",
+      "bytes": 49484,
+      "sha256": "700856e8a553ca0d1cd3d5aac29f7c93ce93165928e4c2edce311dfc539f1096",
+      "magic_hex": "4243c0de",
+      "classification": "LLVMbitcode",
+      "scope": "Current ignored build artifact in app source checkout, not installed traditional BPF object provenance."
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.arm64.o",
+      "bytes": 49324,
+      "sha256": "be3742b6d3c711ef9f829766e877d304eea971f729c1f6f561eb448ece346f8d",
+      "magic_hex": "4243c0de",
+      "classification": "LLVMbitcode",
+      "scope": "Current ignored build artifact in app source checkout, not installed traditional BPF object provenance."
+    }
+  ],
+  "scope": "Read-only frozen2689source and actual native objects. No app/root/image activation or workload feature changes."
+}

@@ -1,0 +1,780 @@
+{
+  "reviewed_utc": "2026-11-28T11:06:00Z",
+  "controller_pid": 1433911,
+  "started_utc": "2026-11-28T11:01:28Z",
+  "ended_utc": "2026-11-28T11:01:29Z",
+  "controller_status": 0,
+  "native_objects": 2,
+  "mem2reg_commands": 2,
+  "all_commands_exit_zero": true,
+  "original_review_sites": 42,
+  "sites_by_function": {
+    "pid_event_ratelimit": 12,
+    "unwinder_is_done": 14,
+    "dotnet_find_code_start": 2,
+    "get_go_custom_labels_from_map": 2,
+    "hotspot_find_codeblob": 4,
+    "unwinder_mark_done": 6,
+    "unwind_one_v8_frame": 2
+  },
+  "classification": [
+    {
+      "sites": 12,
+      "kind": "local-amount-bound",
+      "evidence": "Rate-limit attempt comes from token&15, then trunc/zext; all12shift counts0..15 are below64."
+    },
+    {
+      "sites": 2,
+      "kind": "local-amount-bound",
+      "evidence": "Dotnet unsigned divide32/remainder8 gives0..7, multiply4 then28-minus gives0..28, below32."
+    },
+    {
+      "sites": 6,
+      "kind": "recorded-literal-callers",
+      "evidence": "Ten recorded mark-done calls across both modules pass only3/4/5;6helper shift sites below32."
+    },
+    {
+      "sites": 14,
+      "kind": "standard-source-producer-bound-not-live-map-proof",
+      "evidence": "is_done reads uint16 OffsetRange.Program_index from interpreter_offsets. Five standard production interpreter callers pass named constants3..7. API type itself is uint16 and doesnot validate index range; arbitrary map updates/live values remain unproved."
+    },
+    {
+      "sites": 2,
+      "kind": "unresolved-process-input-range",
+      "evidence": "Go labels reads an unsigned-byte hmap bucket log from process memory; native consumer shifts i32 then truncates to i8. Comment about16buckets and loop cap16 do not establish input<32. Admissible actual process bytes and corresponding installed traditional BPF behavior remain to join."
+    },
+    {
+      "sites": 4,
+      "kind": "unresolved-VM-input-range",
+      "evidence": "Hotspot reads uint32 _log2_segment_size from process heap then stores uint8 Segment_shift; reviewed path doesnot establish<64. Actual VM invariant/live bytes and matching BPF behavior remain unproved."
+    },
+    {
+      "sites": 2,
+      "kind": "unresolved-VM-input-range",
+      "evidence": "V8 FieldShift is uint8 loaded from v8dbg metadata and copied to process data, with a version fallback0. Reviewed path doesnot establish every live value<32. VM metadata validity/live bytes and matching BPF behavior remain unproved."
+    }
+  ],
+  "unwinder_caller_records": [
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter",
+      "callee": "unwinder_is_done",
+      "line": 2045,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done(ptr noundef %0, i32 noundef %28) #8, !dbg !2806",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 2013,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !2791"
+        },
+        "%2": {
+          "line": 1999,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 2042,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !2803"
+        },
+        "%27": {
+          "line": 2043,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !2803, !tbaa !2799"
+        },
+        "%28": {
+          "line": 2044,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !2805"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.7",
+      "callee": "unwinder_is_done.10",
+      "line": 3070,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.10(ptr noundef %0, i32 noundef %28) #8, !dbg !3645",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 3038,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !3633"
+        },
+        "%2": {
+          "line": 3024,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 3067,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !3642"
+        },
+        "%27": {
+          "line": 3068,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !3642, !tbaa !2799"
+        },
+        "%28": {
+          "line": 3069,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !3644"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.25",
+      "callee": "unwinder_is_done.28",
+      "line": 5465,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.28(ptr noundef %0, i32 noundef %28) #8, !dbg !5435",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 5433,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !5423"
+        },
+        "%2": {
+          "line": 5419,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 5462,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !5432"
+        },
+        "%27": {
+          "line": 5463,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !5432, !tbaa !2799"
+        },
+        "%28": {
+          "line": 5464,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !5434"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.100",
+      "callee": "unwinder_is_done.103",
+      "line": 9755,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.103(ptr noundef %0, i32 noundef %28) #8, !dbg !8317",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 9723,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !8305"
+        },
+        "%2": {
+          "line": 9709,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 9752,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !8314"
+        },
+        "%27": {
+          "line": 9753,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !8314, !tbaa !2799"
+        },
+        "%28": {
+          "line": 9754,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !8316"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.147",
+      "callee": "unwinder_is_done.150",
+      "line": 12909,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.150(ptr noundef %0, i32 noundef %28) #8, !dbg !10428",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 12877,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !10416"
+        },
+        "%2": {
+          "line": 12863,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 12906,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !10425"
+        },
+        "%27": {
+          "line": 12907,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !10425, !tbaa !2799"
+        },
+        "%28": {
+          "line": 12908,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !10427"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "prepare_perl_stack",
+      "callee": "unwinder_mark_done",
+      "line": 14172,
+      "ir": "  call void @unwinder_mark_done(ptr noundef %0, i32 noundef 3) #8, !dbg !11356",
+      "unwinder_argument": "3",
+      "unwinder_integer": 3,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "caller": "walk_perl_stack",
+      "callee": "unwinder_mark_done",
+      "line": 14427,
+      "ir": "  call void @unwinder_mark_done(ptr noundef %0, i32 noundef 3) #8, !dbg !11515",
+      "unwinder_argument": "3",
+      "unwinder_integer": 3,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "caller": "walk_php_stack",
+      "callee": "unwinder_mark_done.189",
+      "line": 15734,
+      "ir": "  call void @unwinder_mark_done.189(ptr noundef %0, i32 noundef 5) #8, !dbg !12434",
+      "unwinder_argument": "5",
+      "unwinder_integer": 5,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "caller": "unwind_python",
+      "callee": "unwinder_mark_done.201",
+      "line": 16596,
+      "ir": "  call void @unwinder_mark_done.201(ptr noundef %8, i32 noundef 4) #8, !dbg !13129",
+      "unwinder_argument": "4",
+      "unwinder_integer": 4,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "caller": "walk_python_stack",
+      "callee": "unwinder_mark_done.201",
+      "line": 16992,
+      "ir": "  call void @unwinder_mark_done.201(ptr noundef %0, i32 noundef 4) #8, !dbg !13352",
+      "unwinder_argument": "4",
+      "unwinder_integer": 4,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.251",
+      "callee": "unwinder_is_done.254",
+      "line": 20725,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.254(ptr noundef %0, i32 noundef %28) #8, !dbg !16078",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 20693,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !16066"
+        },
+        "%2": {
+          "line": 20679,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 20722,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !16075"
+        },
+        "%27": {
+          "line": 20723,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !16075, !tbaa !2799"
+        },
+        "%28": {
+          "line": 20724,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !16077"
+        }
+      }
+    },
+    {
+      "architecture": "x86",
+      "caller": "get_next_interpreter.284",
+      "callee": "unwinder_is_done.287",
+      "line": 22727,
+      "ir": "  %29 = call zeroext i1 @unwinder_is_done.287(ptr noundef %0, i32 noundef %28) #8, !dbg !17498",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 22695,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2) #8, !dbg !17486"
+        },
+        "%2": {
+          "line": 22681,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 22724,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !17495"
+        },
+        "%27": {
+          "line": 22725,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !17495, !tbaa !2799"
+        },
+        "%28": {
+          "line": 22726,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !17497"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter",
+      "callee": "unwinder_is_done",
+      "line": 2049,
+      "ir": "  %29 = call i1 @unwinder_is_done(ptr noundef %0, i32 noundef %28), !dbg !2778",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 2017,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !2763"
+        },
+        "%2": {
+          "line": 2003,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 2046,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !2775"
+        },
+        "%27": {
+          "line": 2047,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !2775, !tbaa !2771"
+        },
+        "%28": {
+          "line": 2048,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !2777"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.7",
+      "callee": "unwinder_is_done.10",
+      "line": 3074,
+      "ir": "  %29 = call i1 @unwinder_is_done.10(ptr noundef %0, i32 noundef %28), !dbg !3606",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 3042,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !3594"
+        },
+        "%2": {
+          "line": 3028,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 3071,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !3603"
+        },
+        "%27": {
+          "line": 3072,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !3603, !tbaa !2771"
+        },
+        "%28": {
+          "line": 3073,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !3605"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.25",
+      "callee": "unwinder_is_done.28",
+      "line": 5470,
+      "ir": "  %29 = call i1 @unwinder_is_done.28(ptr noundef %0, i32 noundef %28), !dbg !5378",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 5438,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !5366"
+        },
+        "%2": {
+          "line": 5424,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 5467,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !5375"
+        },
+        "%27": {
+          "line": 5468,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !5375, !tbaa !2771"
+        },
+        "%28": {
+          "line": 5469,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !5377"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.100",
+      "callee": "unwinder_is_done.103",
+      "line": 9569,
+      "ir": "  %29 = call i1 @unwinder_is_done.103(ptr noundef %0, i32 noundef %28), !dbg !8156",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 9537,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !8144"
+        },
+        "%2": {
+          "line": 9523,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 9566,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !8153"
+        },
+        "%27": {
+          "line": 9567,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !8153, !tbaa !2771"
+        },
+        "%28": {
+          "line": 9568,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !8155"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.146",
+      "callee": "unwinder_is_done.149",
+      "line": 12766,
+      "ir": "  %29 = call i1 @unwinder_is_done.149(ptr noundef %0, i32 noundef %28), !dbg !10313",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 12734,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !10301"
+        },
+        "%2": {
+          "line": 12720,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 12763,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !10310"
+        },
+        "%27": {
+          "line": 12764,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !10310, !tbaa !2771"
+        },
+        "%28": {
+          "line": 12765,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !10312"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "prepare_perl_stack",
+      "callee": "unwinder_mark_done",
+      "line": 14040,
+      "ir": "  call void @unwinder_mark_done(ptr noundef %0, i32 noundef 3), !dbg !11241",
+      "unwinder_argument": "3",
+      "unwinder_integer": 3,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "caller": "walk_perl_stack",
+      "callee": "unwinder_mark_done",
+      "line": 14295,
+      "ir": "  call void @unwinder_mark_done(ptr noundef %0, i32 noundef 3), !dbg !11400",
+      "unwinder_argument": "3",
+      "unwinder_integer": 3,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "caller": "walk_php_stack",
+      "callee": "unwinder_mark_done.189",
+      "line": 15615,
+      "ir": "  call void @unwinder_mark_done.189(ptr noundef %0, i32 noundef 5), !dbg !12320",
+      "unwinder_argument": "5",
+      "unwinder_integer": 5,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "caller": "unwind_python",
+      "callee": "unwinder_mark_done.201",
+      "line": 16477,
+      "ir": "  call void @unwinder_mark_done.201(ptr noundef %8, i32 noundef 4), !dbg !13008",
+      "unwinder_argument": "4",
+      "unwinder_integer": 4,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "caller": "walk_python_stack",
+      "callee": "unwinder_mark_done.201",
+      "line": 16873,
+      "ir": "  call void @unwinder_mark_done.201(ptr noundef %0, i32 noundef 4), !dbg !13231",
+      "unwinder_argument": "4",
+      "unwinder_integer": 4,
+      "argument_definitions": {}
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.247",
+      "callee": "unwinder_is_done.250",
+      "line": 20609,
+      "ir": "  %29 = call i1 @unwinder_is_done.250(ptr noundef %0, i32 noundef %28), !dbg !15943",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 20577,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !15931"
+        },
+        "%2": {
+          "line": 20563,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 20606,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !15940"
+        },
+        "%27": {
+          "line": 20607,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !15940, !tbaa !2771"
+        },
+        "%28": {
+          "line": 20608,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !15942"
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "caller": "get_next_interpreter.281",
+      "callee": "unwinder_is_done.284",
+      "line": 22622,
+      "ir": "  %29 = call i1 @unwinder_is_done.284(ptr noundef %0, i32 noundef %28), !dbg !17363",
+      "unwinder_argument": "%28",
+      "unwinder_integer": null,
+      "argument_definitions": {
+        "%10": {
+          "line": 22590,
+          "ir": "  %10 = call ptr @bpf_map_lookup_elem(ptr noundef @interpreter_offsets, ptr noundef %2), !dbg !17351"
+        },
+        "%2": {
+          "line": 22576,
+          "ir": "  %2 = alloca i64, align 8"
+        },
+        "%26": {
+          "line": 22619,
+          "ir": "  %26 = getelementptr inbounds %struct.OffsetRange, ptr %10, i32 0, i32 4, !dbg !17360"
+        },
+        "%27": {
+          "line": 22620,
+          "ir": "  %27 = load i16, ptr %26, align 8, !dbg !17360, !tbaa !2771"
+        },
+        "%28": {
+          "line": 22621,
+          "ir": "  %28 = zext i16 %27 to i32, !dbg !17362"
+        }
+      }
+    }
+  ],
+  "standard_offset_producers": [
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go",
+      "sha256": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+      "line": 2187,
+      "index_constant": "ProgUnwindV8",
+      "excerpt": "2186: \tif d.snapshotRange.Start != 0 {\n2187: \t\tif err = ebpf.UpdateInterpreterOffsets(support.ProgUnwindV8, info.FileID(),\n2188: \t\t\t[]util.Range{d.snapshotRange}); err != nil {\n2189: \t\t\treturn nil, err\n2190: \t\t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/perl/data.go",
+      "sha256": "00f6065920b695ce089895ea252d623f61fde417a48b558962321f783d3d11ed",
+      "line": 286,
+      "index_constant": "ProgUnwindPerl",
+      "excerpt": "285: \n286: \tif err = ebpf.UpdateInterpreterOffsets(support.ProgUnwindPerl,\n287: \t\tinfo.FileID(), interpRanges); err != nil {\n288: \t\treturn nil, err\n289: \t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/php/php.go",
+      "sha256": "ec135b29f44609911e7180ebb7d874bcbdc1bec34b41506a8a92efcace14608a",
+      "line": 360,
+      "index_constant": "ProgUnwindPHP",
+      "excerpt": "359: \n360: \tif err = ebpf.UpdateInterpreterOffsets(support.ProgUnwindPHP,\n361: \t\tinfo.FileID(), interpRanges); err != nil {\n362: \t\treturn nil, err\n363: \t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/python/python.go",
+      "sha256": "7d73dbd97110fca981bf463d72599acb94e164cab754550e504e79b63d85d1c6",
+      "line": 837,
+      "index_constant": "ProgUnwindPython",
+      "excerpt": "836: \n837: \tif err := ebpf.UpdateInterpreterOffsets(support.ProgUnwindPython, info.FileID(),\n838: \t\tinterpRanges); err != nil {\n839: \t\treturn nil, err\n840: \t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/ruby/ruby.go",
+      "sha256": "729ff132a17d7363e95bee623436d61e3762187dd6d28be2c6c4baf7eacdd38f",
+      "line": 985,
+      "index_constant": "ProgUnwindRuby",
+      "excerpt": "984: \n985: \tif err = ebpf.UpdateInterpreterOffsets(support.ProgUnwindRuby, info.FileID(),\n986: \t\tinterpRanges); err != nil {\n987: \t\treturn nil, err\n988: \t}"
+    }
+  ],
+  "source_anchors": [
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/support/types.go",
+      "sha256": "8c7b9239ac896b39de86f7718c559752683ec06f218190345834b6d66ea2c1db",
+      "first_line": 30,
+      "last_line": 42,
+      "excerpt": "30: const (\n31: \tProgUnwindStop    = 0x0\n32: \tProgUnwindNative  = 0x1\n33: \tProgUnwindHotspot = 0x2\n34: \tProgUnwindPython  = 0x4\n35: \tProgUnwindPHP     = 0x5\n36: \tProgUnwindRuby    = 0x6\n37: \tProgUnwindPerl    = 0x3\n38: \tProgUnwindV8      = 0x7\n39: \tProgUnwindDotnet  = 0x8\n40: \tProgGoLabels      = 0x9\n41: )\n42: "
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/processmanager/ebpfapi/ebpf.go",
+      "sha256": "941d9a1eba2e9369c81af33d96557a3fc5888036a2718996f4cf17d44cda7895",
+      "first_line": 68,
+      "last_line": 86,
+      "excerpt": "68: func InterpreterOffsetKeyValue(ebpfProgIndex uint16, fileID host.FileID,\n69: \toffsetRanges []util.Range) (key uint64, value support.OffsetRange, err error) {\n70: \trLen := len(offsetRanges)\n71: \tif rLen < 1 || rLen > 2 {\n72: \t\treturn 0, support.OffsetRange{}, fmt.Errorf(\"invalid ranges %v\", offsetRanges)\n73: \t}\n74: \t//  The keys of this map are executable-id-and-offset-into-text entries, and\n75: \t//  the offset_range associated with them gives the precise area in that page\n76: \t//  where the main interpreter loop is located. This is required to unwind\n77: \t//  nicely from native code into interpreted code.\n78: \tkey = uint64(fileID)\n79: \tfirst := offsetRanges[0]\n80: \tvalue = support.OffsetRange{\n81: \t\tLower_offset1: first.Start,\n82: \t\tUpper_offset1: first.End,\n83: \t\tProgram_index: ebpfProgIndex,\n84: \t}\n85: \tif len(offsetRanges) == 2 {\n86: \t\t// Fields {lower,upper}_offset2 may be used to specify an optional second range"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/processmanager/ebpf/ebpf.go",
+      "sha256": "16f0ef053d8768d65440eed0adf74a37a0f66016d3f59be139490bfd7914044f",
+      "first_line": 122,
+      "last_line": 135,
+      "excerpt": "122: // UpdateInterpreterOffsets adds the given moduleRanges to the eBPF map interpreterOffsets.\n123: func (impl *ebpfMapsImpl) UpdateInterpreterOffsets(ebpfProgIndex uint16, fileID host.FileID,\n124: \toffsetRanges []util.Range,\n125: ) error {\n126: \tkey, value, err := ebpfapi.InterpreterOffsetKeyValue(ebpfProgIndex, fileID, offsetRanges)\n127: \tif err != nil {\n128: \t\treturn err\n129: \t}\n130: \tif err := impl.InterpreterOffsets.Update(unsafe.Pointer(&key), unsafe.Pointer(&value),\n131: \t\tcebpf.UpdateAny); err != nil {\n132: \t\tlog.Fatalf(\"Failed to place interpreter range in map: %v\", err)\n133: \t}\n134: \n135: \treturn nil"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/hotspot/instance.go",
+      "sha256": "7e3269b9d6e9b12b071c2f267de0842f67dfdcedb477dbe1bd77700b0c75b338",
+      "first_line": 645,
+      "last_line": 654,
+      "excerpt": "645: \t\t\t// JVM is not initialized yet. Retry later.\n646: \t\t\treturn nil, nil\n647: \t\t}\n648: \t\tif err := rm.Read(heapPtr, heap); err != nil {\n649: \t\t\treturn nil, fmt.Errorf(\"fail to read heap pointer %d: %v\", ndx, err)\n650: \t\t}\n651: \n652: \t\t// The segment shift is same for all heaps. So record it for the process only.\n653: \t\tinfo.segmentShift = npsr.Uint32(heap, vms.CodeHeap.Log2SegmentSize)\n654: "
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/hotspot/instance.go",
+      "sha256": "7e3269b9d6e9b12b071c2f267de0842f67dfdcedb477dbe1bd77700b0c75b338",
+      "first_line": 754,
+      "last_line": 770,
+      "excerpt": "754: \tprocInfo := support.HotspotProcInfo{\n755: \t\tNmethod_deopt_offset:   uint16(vms.Nmethod.DeoptimizeOffset),\n756: \t\tNmethod_compileid:      uint16(vms.Nmethod.CompileID),\n757: \t\tNmethod_orig_pc_offset: uint16(vms.Nmethod.OrigPcOffset),\n758: \t\tCodeblob_name:          uint8(vms.CodeBlob.Name),\n759: \t\tCodeblob_codestart:     uint8(vms.CodeBlob.CodeBegin),\n760: \t\tCodeblob_codeend:       uint8(vms.CodeBlob.CodeEnd),\n761: \t\tCodeblob_framecomplete: uint8(vms.CodeBlob.FrameCompleteOffset),\n762: \t\tCodeblob_framesize:     uint8(vms.CodeBlob.FrameSize),\n763: \t\tCmethod_size:           uint8(vms.ConstMethod.Sizeof),\n764: \t\tHeapblock_size:         uint8(vms.HeapBlock.Sizeof),\n765: \t\tMethod_constmethod:     uint8(vms.Method.ConstMethod),\n766: \t\tJvm_version:            uint8(vmd.version >> 24),\n767: \t\tSegment_shift:          uint8(heap.segmentShift),\n768: \t\tNmethod_uses_offsets:   vmd.nmethodUsesOffsets,\n769: \t\tNew_bcp_slot:           newBcpSlot,\n770: \t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go",
+      "sha256": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+      "first_line": 290,
+      "last_line": 298,
+      "excerpt": "290: \t\tCodeKind struct {\n291: \t\t\t// https://chromium.googlesource.com/v8/v8.git/+/refs/tags/9.2.230.1/src/objects/code.h#526\n292: \t\t\t// https://chromium.googlesource.com/v8/v8.git/+/refs/tags/9.5.2/tools/gen-postmortem-metadata.py#94\n293: \t\t\tFieldMask  uint32 `name:\"CodeKindFieldMask\" zero:\"\"`\n294: \t\t\tFieldShift uint8  `name:\"CodeKindFieldShift\" zero:\"\"`\n295: \t\t\t// https://chromium.googlesource.com/v8/v8.git/+/refs/tags/9.2.230.1/src/objects/code-kind.h#18\n296: \t\t\t// https://chromium.googlesource.com/v8/v8.git/+/refs/tags/9.5.2/tools/gen-postmortem-metadata.py#101\n297: \t\t\tBaseline uint8 `name:\"CodeKindBaseline\"`\n298: \t\t} `name:\"\"`"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go",
+      "sha256": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+      "first_line": 1878,
+      "last_line": 1900,
+      "excerpt": "1878: \n1879: \t\t\tfor _, n := range strings.Split(memberName, \",\") {\n1880: \t\t\t\ts := prefix + n\n1881: \t\t\t\tif memberVal.Kind() == reflect.Bool {\n1882: \t\t\t\t\ts = \"v8dbg_parent_\" + className + \"__\" + memberName\n1883: \t\t\t\t}\n1884: \t\t\t\taddr, err := ef.LookupSymbolAddress(libpf.SymbolName(s))\n1885: \t\t\t\tif err != nil {\n1886: \t\t\t\t\tlog.Debugf(\"V8: %s = not found\", s)\n1887: \t\t\t\t\tif classType.Name == \"FrameType\" {\n1888: \t\t\t\t\t\tmemberVal.SetUint(^uint64(0))\n1889: \t\t\t\t\t}\n1890: \t\t\t\t\tcontinue\n1891: \t\t\t\t}\n1892: \t\t\t\tif memberVal.Kind() == reflect.Bool {\n1893: \t\t\t\t\tlog.Debugf(\"V8: %s exists\", s)\n1894: \t\t\t\t\tmemberVal.SetBool(true)\n1895: \t\t\t\t} else {\n1896: \t\t\t\t\tval := rm.Uint32(libpf.Address(addr))\n1897: \t\t\t\t\tlog.Debugf(\"V8: %s = %#x\", s, val)\n1898: \t\t\t\t\tmemberVal.SetUint(uint64(val))\n1899: \t\t\t\t}\n1900: \t\t\t\tbreak"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go",
+      "sha256": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+      "first_line": 1794,
+      "last_line": 1803,
+      "excerpt": "1794: \t\tOff_Code_instruction_size:    uint8(vms.Code.InstructionSize),\n1795: \t\tOff_Code_flags:               uint8(vms.Code.Flags),\n1796: \n1797: \t\tCodekind_shift:    vms.CodeKind.FieldShift,\n1798: \t\tCodekind_mask:     uint8(vms.CodeKind.FieldMask),\n1799: \t\tCodekind_baseline: vms.CodeKind.Baseline,\n1800: \t}\n1801: \tif err := ebpf.UpdateProcData(libpf.V8, pid, unsafe.Pointer(&data)); err != nil {\n1802: \t\treturn nil, err\n1803: \t}"
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go",
+      "sha256": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+      "first_line": 2041,
+      "last_line": 2052,
+      "excerpt": "2041: \tif vms.CodeKind.Baseline == 0 {\n2042: \t\tif d.version >= v8Ver(9, 0, 240) {\n2043: \t\t\t// Back to V8 9.0.240, and metadata available after that\n2044: \t\t\tvms.CodeKind.FieldMask = 0xf\n2045: \t\t\tvms.CodeKind.FieldShift = 0\n2046: \t\t\tvms.CodeKind.Baseline = 11\n2047: \t\t} else {\n2048: \t\t\t// Leave mask and shift to zero, and set baseline to something\n2049: \t\t\t// so that the Baseline code is never triggered.\n2050: \t\t\tvms.CodeKind.Baseline = 0xff\n2051: \t\t}\n2052: \t}"
+    }
+  ],
+  "source_copy_comparisons": [
+    {
+      "native_copy": "vendor/bpf/otel/support/ebpf/tracemgmt.h",
+      "native_sha256": "5db32bae74413904c7474c598981a45f7a9a11980ce393ac801f855e731706d9",
+      "frozen_source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracemgmt.h",
+      "frozen_sha256": "692941f260c556f21b6eb0a4b2e508366a25776f282ed9d1421b13b9c380bdd8",
+      "whole_file_equal": false
+    },
+    {
+      "native_copy": "vendor/bpf/otel/support/ebpf/dotnet_tracer.ebpf.c",
+      "native_sha256": "5626ba9ac1f37d21d19efb7b1d8a632adee4742ba7e517e5ba335de60a57b964",
+      "frozen_source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/dotnet_tracer.ebpf.c",
+      "frozen_sha256": "5626ba9ac1f37d21d19efb7b1d8a632adee4742ba7e517e5ba335de60a57b964",
+      "whole_file_equal": true
+    },
+    {
+      "native_copy": "vendor/bpf/otel/support/ebpf/go_labels.ebpf.c",
+      "native_sha256": "6789f6ba9c89b1a85a8967e2822ffc954c363a8382329e636fef02eee4a9c5a3",
+      "frozen_source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.c",
+      "frozen_sha256": "6789f6ba9c89b1a85a8967e2822ffc954c363a8382329e636fef02eee4a9c5a3",
+      "whole_file_equal": true
+    },
+    {
+      "native_copy": "vendor/bpf/otel/support/ebpf/hotspot_tracer.ebpf.c",
+      "native_sha256": "00a502aed7b3cc551df739362e74dc0f6dd696eb77e2902302cfa3f5c3d943c8",
+      "frozen_source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/hotspot_tracer.ebpf.c",
+      "frozen_sha256": "00a502aed7b3cc551df739362e74dc0f6dd696eb77e2902302cfa3f5c3d943c8",
+      "whole_file_equal": true
+    },
+    {
+      "native_copy": "vendor/bpf/otel/support/ebpf/v8_tracer.ebpf.c",
+      "native_sha256": "442b4bc0e69f50a931c3c625ca07794f391560fa3c829a2b303855d329b4ab2b",
+      "frozen_source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/v8_tracer.ebpf.c",
+      "frozen_sha256": "442b4bc0e69f50a931c3c625ca07794f391560fa3c829a2b303855d329b4ab2b",
+      "whole_file_equal": true
+    }
+  ],
+  "tracemgmt_difference": "Known MICRO_NATIVE sampled-context adapter at oldsource755+, outside all reviewed shift helpers; first755lines equal. No source edit thisturn.",
+  "artifact_kind_observations": [
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.amd64.o",
+      "bytes": 49484,
+      "sha256": "700856e8a553ca0d1cd3d5aac29f7c93ce93165928e4c2edce311dfc539f1096",
+      "magic_hex": "4243c0de",
+      "classification": "LLVMbitcode",
+      "scope": "Current ignored build artifact in app source checkout, not installed traditional BPF object provenance."
+    },
+    {
+      "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.arm64.o",
+      "bytes": 49324,
+      "sha256": "be3742b6d3c711ef9f829766e877d304eea971f729c1f6f561eb448ece346f8d",
+      "magic_hex": "4243c0de",
+      "classification": "LLVMbitcode",
+      "scope": "Current ignored build artifact in app source checkout, not installed traditional BPF object provenance."
+    }
+  ],
+  "artifact_diagnostic": "llvm-objdump on current ignored go_labels.o returned1 because bytesare LLVMbitcode BCc0de, not an ELF. This isnot an installed-BPF or broken-loader result. No rebuild or app mutation used to repair the diagnostic assumption.",
+  "bounded_local_or_literal_sites": 20,
+  "standard_producer_only_sites": 14,
+  "unresolved_input_range_sites": 8,
+  "input_source_sha256_reverified": {
+    "vendor/bpf/otel/support/ebpf/tracemgmt.h": "5db32bae74413904c7474c598981a45f7a9a11980ce393ac801f855e731706d9",
+    "vendor/bpf/otel/support/ebpf/dotnet_tracer.ebpf.c": "5626ba9ac1f37d21d19efb7b1d8a632adee4742ba7e517e5ba335de60a57b964",
+    "vendor/bpf/otel/support/ebpf/go_labels.ebpf.c": "6789f6ba9c89b1a85a8967e2822ffc954c363a8382329e636fef02eee4a9c5a3",
+    "vendor/bpf/otel/support/ebpf/hotspot_tracer.ebpf.c": "00a502aed7b3cc551df739362e74dc0f6dd696eb77e2902302cfa3f5c3d943c8",
+    "vendor/bpf/otel/support/ebpf/v8_tracer.ebpf.c": "442b4bc0e69f50a931c3c625ca07794f391560fa3c829a2b303855d329b4ab2b",
+    "vendor/repos/opentelemetry-ebpf-profiler/interpreter/hotspot/instance.go": "7e3269b9d6e9b12b071c2f267de0842f67dfdcedb477dbe1bd77700b0c75b338",
+    "vendor/repos/opentelemetry-ebpf-profiler/interpreter/nodev8/v8.go": "721866a8a7c76b34a0cff0c993632d8cdca333c023e84b562b1559ceeec76566",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json": "7f9f28464175d9c65f5c5ee84273a373e775a7577d89ff6f3ae2905fc00277c2",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-otelcol-ebpf-profiler-otelcol-ebpf-profiler.native.json": "e0aae099c1f44701df1aa3e34c28d7aa24af733c85fb3bdb58cd8b0060cd6aed"
+  },
+  "native_object_sha256_reverified": {
+    "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o": "8aa998ca3be71c145f726173f903225ca0bcaf25bb6311edee2346a1568d80b8",
+    "vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o": "8cc970400d4706efb3ae203e67c21cdf18b15700c388db78277abdb38d5335cc"
+  },
+  "archive": {
+    "path": "otel-shift-records.tar.zst",
+    "bytes": 72902,
+    "sha256": "f2cef3d9aa6ac5b2d2afa8905da002136acf1f70ca7210cffe59ff3adb2ae1d0",
+    "raw_bytes": 743279,
+    "all_members_verified": true,
+    "raw_copies_preserved_at_publication": true
+  },
+  "conclusion": "No new confirmed native/eBPF semantic mismatch. Bounds under local/literal or standard producer assumptions are not arbitrary-map invariants, VM path exercise or full source-C/kernel/native equivalence. Keep8input-dependent sites explicit; no speculative common guard/mask or frozen app change.",
+  "next": "Tracee index controls and remaining probe/helper/attach/JIT dimensions can proceed independently. Revisit these8sites only with actual VM/process admissibility and traditional BPF artifact/installed evidence. No forced VM/workload, new benchmark setting or fixed-OTel activation."
+}
