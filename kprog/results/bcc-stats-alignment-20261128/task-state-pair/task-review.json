@@ -1,0 +1,2622 @@
+{
+  "scope": "Existing low-I/O pair1465233 only. Direct-process CPU deltas and sampled waits, no new guest. Snapshot intervals omit process startup/exit tails and are not a causal decomposition of the historical180s anomaly.",
+  "controller": {
+    "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/task-state-pair/controller.json",
+    "bytes": 3046,
+    "sha256": "c85aa5141461b79bc04276dc9a617e4975ce6d3b1115d1bdbefc16bd262dcc64"
+  },
+  "cases": [
+    {
+      "stats": 0,
+      "image": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "app_status": "ok",
+      "app": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/apps/bcc__set.json",
+        "bytes": 17733,
+        "sha256": "e4d4c35eaf5f1a666ca7cd88eb9b6ef606bd67b0ae84dcc4c8c7930246f4797e"
+      },
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/metadata.json",
+        "bytes": 986,
+        "sha256": "6500583929eb4048a715aa9ab588692451263457450ed4b1a5d96859e39b5f04"
+      },
+      "capture": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/bcc-task-states.jsonl",
+        "bytes": 17888288,
+        "sha256": "25e19fc67c71a76710f436eff248be12db2806968e98c99acd29df88013d5cae"
+      },
+      "capture_header": {
+        "kind": "header",
+        "observer_pid": 1390,
+        "clock_ticks": 100,
+        "boot_id": "8f972ea0-fa44-4532-a1e4-ef3f247566ce\n",
+        "scope": "All task stat/schedstat/wchan; extra stack/status/io for stress-ng and unchanged BCC tools. Read failures stay explicit; no scheduler/affinity/config writes."
+      },
+      "snapshots_total": 325,
+      "malformed_lines": [],
+      "phases": {
+        "baseline": {
+          "shim_log": {
+            "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.baseline.log",
+            "bytes": 62987,
+            "sha256": "7caa030fd09ce9da7136216a605b8b2a908ed6571f68b436dafe2eeffd6830bc"
+          },
+          "window": {
+            "start": 109.558023,
+            "end": 120.205344,
+            "span_s": 10.647320999999991,
+            "start_spread_s": 0.0032620000000065374,
+            "end_spread_s": 0.001406000000002905
+          },
+          "snapshots": 21,
+          "sampled_first": 109.620775184,
+          "sampled_last": 119.90078977,
+          "max_snapshot_gap_s": 0.5228093480000098,
+          "cpu_stat_delta_ticks": [
+            467,
+            0,
+            4600,
+            2599,
+            124,
+            0,
+            93,
+            70,
+            0,
+            0
+          ],
+          "cpu_stat_names": [
+            "user",
+            "nice",
+            "system",
+            "idle",
+            "iowait",
+            "irq",
+            "softirq",
+            "steal",
+            "guest",
+            "guest_nice"
+          ],
+          "cpu_stat_span_s": 10.280014586000007,
+          "observer_user_s": 0.07000000000000006,
+          "observer_system_s": 0.13,
+          "tasks": [
+            {
+              "pid": 1390,
+              "start_ticks": 391,
+              "comm": "python3",
+              "ppid": 1384,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.07,
+              "direct_system_s": 0.13,
+              "states": {
+                "R": 21
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {},
+              "read_errors": {},
+              "cpu_allowed": null,
+              "threads": null,
+              "first_processor": 5,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.209347855,
+                "runqueue_wait_s": 0.006255021,
+                "timeslices": 436
+              }
+            },
+            {
+              "pid": 1826,
+              "start_ticks": 8311,
+              "comm": "capable",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.39,
+              "direct_system_s": 9.5,
+              "states": {
+                "R": 20,
+                "S": 1
+              },
+              "wchan": {
+                "0": 20,
+                "ep_poll": 1
+              },
+              "sampled_stacks": {
+                "empty/running": 20,
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 9.886035269,
+                "runqueue_wait_s": 0.004008533,
+                "timeslices": 322
+              },
+              "voluntary_ctxt_switches_delta": 22,
+              "nonvoluntary_ctxt_switches_delta": 301
+            },
+            {
+              "pid": 1829,
+              "start_ticks": 8311,
+              "comm": "biosnoop",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "ep_poll": 21
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 4,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.001904498,
+                "runqueue_wait_s": 0.000655501,
+                "timeslices": 177
+              },
+              "voluntary_ctxt_switches_delta": 177,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1832,
+              "start_ticks": 8311,
+              "comm": "vfsstat",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 7,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.00019334,
+                "runqueue_wait_s": 8.3148e-05,
+                "timeslices": 10
+              },
+              "voluntary_ctxt_switches_delta": 10,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1835,
+              "start_ticks": 8311,
+              "comm": "opensnoop",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 1.19,
+              "direct_system_s": 5.18,
+              "states": {
+                "S": 1,
+                "R": 20
+              },
+              "wchan": {
+                "anon_pipe_write": 1,
+                "0": 20
+              },
+              "sampled_stacks": {
+                "anon_pipe_write+0x326/0x590; vfs_write+0x376/0x420; ksys_write+0xb4/0xe0; do_syscall_64+0xa8/0x8c0": 1,
+                "empty/running": 16,
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 4
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 3,
+              "last_processor": 4,
+              "sched_delta": {
+                "run_s": 6.380052006,
+                "runqueue_wait_s": 0.122847541,
+                "timeslices": 826023
+              },
+              "voluntary_ctxt_switches_delta": 820877,
+              "nonvoluntary_ctxt_switches_delta": 5148
+            },
+            {
+              "pid": 1838,
+              "start_ticks": 8311,
+              "comm": "syscount",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 5,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.000662841,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 10
+              },
+              "voluntary_ctxt_switches_delta": 10,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1841,
+              "start_ticks": 8311,
+              "comm": "tcpconnect",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.01,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "ep_poll": 21
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 0,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.000936372,
+                "runqueue_wait_s": 0.001286901,
+                "timeslices": 103
+              },
+              "voluntary_ctxt_switches_delta": 103,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1844,
+              "start_ticks": 8311,
+              "comm": "tcplife",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 20,
+                "R": 1
+              },
+              "wchan": {
+                "ep_poll": 20,
+                "0": 1
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 0,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.000835373,
+                "runqueue_wait_s": 0.006661592,
+                "timeslices": 103
+              },
+              "voluntary_ctxt_switches_delta": 103,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1847,
+              "start_ticks": 8311,
+              "comm": "runqlat",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 3,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1917,
+              "start_ticks": 10955,
+              "comm": "stress-ng",
+              "ppid": 1807,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "do_wait": 21
+              },
+              "sampled_stacks": {
+                "do_wait+0x55/0x120; kernel_wait4+0x9c/0x140; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 0,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1918,
+              "start_ticks": 10957,
+              "comm": "stress-ng-sysca",
+              "ppid": 1917,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "D": 2,
+                "S": 19
+              },
+              "wchan": {
+                "jbd2_log_wait_commit": 1,
+                "__skb_wait_for_more_packets": 19,
+                "__x64_sys_io_destroy": 1
+              },
+              "sampled_stacks": {
+                "jbd2_log_wait_commit+0xe2/0x170; ext4_sync_file+0x1ca/0x360; ovl_fsync+0xac/0xf0; do_fsync+0x50/0xc0": 1,
+                "__skb_wait_for_more_packets+0x125/0x180; __skb_recv_datagram+0x69/0xc0; skb_recv_datagram+0x39/0x60; unix_accept+0x63/0x170": 19,
+                "__x64_sys_io_destroy+0xb1/0x110; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 4,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.001199604,
+                "runqueue_wait_s": 8.0296e-05,
+                "timeslices": 10
+              },
+              "voluntary_ctxt_switches_delta": 9,
+              "nonvoluntary_ctxt_switches_delta": 1
+            },
+            {
+              "pid": 1919,
+              "start_ticks": 10957,
+              "comm": "stress-ng-cap",
+              "ppid": 1917,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.8,
+              "direct_system_s": 9.14,
+              "states": {
+                "R": 20,
+                "Z": 1
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "empty/running": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 2,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 9.94581891,
+                "runqueue_wait_s": 0.003781764,
+                "timeslices": 200
+              },
+              "voluntary_ctxt_switches_delta": 1,
+              "nonvoluntary_ctxt_switches_delta": 200
+            },
+            {
+              "pid": 1920,
+              "start_ticks": 10957,
+              "comm": "stress-ng-set",
+              "ppid": 1917,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.7,
+              "direct_system_s": 8.98,
+              "states": {
+                "R": 20,
+                "Z": 1
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "empty/running": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 0,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 9.677338267,
+                "runqueue_wait_s": 0.182669407,
+                "timeslices": 166
+              },
+              "voluntary_ctxt_switches_delta": 1,
+              "nonvoluntary_ctxt_switches_delta": 166
+            },
+            {
+              "pid": 1921,
+              "start_ticks": 10957,
+              "comm": "stress-ng-sockf",
+              "ppid": 1917,
+              "observations": 21,
+              "first": 109.620775184,
+              "last": 119.90078977,
+              "span_s": 10.280014586000007,
+              "direct_user_s": 0.38,
+              "direct_system_s": 9.16,
+              "states": {
+                "R": 19,
+                "S": 1,
+                "Z": 1
+              },
+              "wchan": {
+                "0": 20,
+                "sock_alloc_send_pskb": 1
+              },
+              "sampled_stacks": {
+                "empty/running": 20,
+                "sock_alloc_send_pskb+0x159/0x230; unix_stream_sendmsg+0x160/0x560; ____sys_sendmsg+0x2f1/0x310; ___sys_sendmsg+0x85/0xd0": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 6,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 9.55290351,
+                "runqueue_wait_s": 0.000328069,
+                "timeslices": 639
+              },
+              "voluntary_ctxt_switches_delta": 615,
+              "nonvoluntary_ctxt_switches_delta": 25
+            },
+            {
+              "pid": 1923,
+              "start_ticks": 10957,
+              "comm": "stress-ng-sockf",
+              "ppid": 1921,
+              "observations": 20,
+              "first": 109.620775184,
+              "last": 119.387899182,
+              "span_s": 9.767123998000002,
+              "direct_user_s": 0.22,
+              "direct_system_s": 5.24,
+              "states": {
+                "S": 4,
+                "R": 16
+              },
+              "wchan": {
+                "0": 18,
+                "unix_stream_read_generic": 2
+              },
+              "sampled_stacks": {
+                "unix_stream_read_generic+0x3b5/0xc40; unix_stream_recvmsg+0x86/0x90; sock_recvmsg+0x9a/0xa0; ____sys_recvmsg+0x80/0x1b0": 13,
+                "empty/running": 6,
+                "unix_stream_read_generic+0x325/0xc40; unix_stream_recvmsg+0x86/0x90; sock_recvmsg+0x9a/0xa0; ____sys_recvmsg+0x80/0x1b0": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 7,
+              "last_processor": 4,
+              "sched_delta": {
+                "run_s": 5.466834343,
+                "runqueue_wait_s": 0.076072899,
+                "timeslices": 1174331
+              },
+              "voluntary_ctxt_switches_delta": 1174205,
+              "nonvoluntary_ctxt_switches_delta": 124
+            },
+            {
+              "pid": 1935,
+              "start_ticks": 10964,
+              "comm": "stress-ng-sysca",
+              "ppid": 1918,
+              "observations": 19,
+              "first": 110.143584532,
+              "last": 119.387899182,
+              "span_s": 9.244314649999993,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "Z": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 5,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            }
+          ],
+          "parse_errors": {},
+          "workloads": [
+            {
+              "duration_s": 10.646667323000003,
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14719",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/389e7ec7"
+              ],
+              "rows": {
+                "syscall": {
+                  "bogo_ops": 514,
+                  "real_seconds": 10.63,
+                  "user_seconds": 0.02,
+                  "system_seconds": 0.01,
+                  "wall_ops_per_second": 48.35,
+                  "cpu_ops_per_second": 18700.43,
+                  "raw": "stress-ng: metrc: [1917] syscall             514     10.63      0.02      0.01        48.35       18700.43"
+                },
+                "cap": {
+                  "bogo_ops": 3868042,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.81,
+                  "system_seconds": 9.18,
+                  "wall_ops_per_second": 386803.65,
+                  "cpu_ops_per_second": 387029.95,
+                  "raw": "stress-ng: metrc: [1917] cap             3868042     10.00      0.81      9.18    386803.65      387029.95"
+                },
+                "set": {
+                  "bogo_ops": 292426,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.7,
+                  "system_seconds": 9.02,
+                  "wall_ops_per_second": 29242.51,
+                  "cpu_ops_per_second": 30068.6,
+                  "raw": "stress-ng: metrc: [1917] set              292426     10.00      0.70      9.02     29242.51       30068.60"
+                },
+                "sockfd": {
+                  "bogo_ops": 2441574,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.62,
+                  "system_seconds": 14.57,
+                  "wall_ops_per_second": 244140.15,
+                  "cpu_ops_per_second": 160671.56,
+                  "raw": "stress-ng: metrc: [1917] sockfd          2441574     10.00      0.62     14.57    244140.15      160671.56"
+                }
+              }
+            }
+          ]
+        },
+        "post_rejit": {
+          "shim_log": {
+            "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215/details/shim-logs/bcc__set.post_rejit.log",
+            "bytes": 83688,
+            "sha256": "103b5d05c446c3eed4970856182de34be9dc5c01135c9ce05ce11bb12d9b983a"
+          },
+          "window": {
+            "start": 153.545603,
+            "end": 163.564513,
+            "span_s": 10.018910000000005,
+            "start_spread_s": 0.005775999999997339,
+            "end_spread_s": 0.0028560000000084074
+          },
+          "snapshots": 19,
+          "sampled_first": 153.836723842,
+          "sampled_last": 163.133160744,
+          "max_snapshot_gap_s": 0.5251184429999967,
+          "cpu_stat_delta_ticks": [
+            488,
+            0,
+            3937,
+            2190,
+            154,
+            0,
+            68,
+            750,
+            0,
+            0
+          ],
+          "cpu_stat_names": [
+            "user",
+            "nice",
+            "system",
+            "idle",
+            "iowait",
+            "irq",
+            "softirq",
+            "steal",
+            "guest",
+            "guest_nice"
+          ],
+          "cpu_stat_span_s": 9.29643690200001,
+          "observer_user_s": 0.08000000000000007,
+          "observer_system_s": 0.1100000000000001,
+          "tasks": [
+            {
+              "pid": 1390,
+              "start_ticks": 391,
+              "comm": "python3",
+              "ppid": 1384,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.08,
+              "direct_system_s": 0.11,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {},
+              "read_errors": {},
+              "cpu_allowed": null,
+              "threads": null,
+              "first_processor": 7,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.203911679,
+                "runqueue_wait_s": 0.004073884,
+                "timeslices": 390
+              }
+            },
+            {
+              "pid": 1970,
+              "start_ticks": 12639,
+              "comm": "capable",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.33,
+              "direct_system_s": 8.79,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 3,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 9.119564316,
+                "runqueue_wait_s": 0.002627203,
+                "timeslices": 231
+              },
+              "voluntary_ctxt_switches_delta": 2,
+              "nonvoluntary_ctxt_switches_delta": 229
+            },
+            {
+              "pid": 1973,
+              "start_ticks": 12639,
+              "comm": "biosnoop",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "ep_poll": 19
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 5,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.002096289,
+                "runqueue_wait_s": 0.106758568,
+                "timeslices": 179
+              },
+              "voluntary_ctxt_switches_delta": 178,
+              "nonvoluntary_ctxt_switches_delta": 1
+            },
+            {
+              "pid": 1976,
+              "start_ticks": 12639,
+              "comm": "vfsstat",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 7,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.000204085,
+                "runqueue_wait_s": 0.001885747,
+                "timeslices": 9
+              },
+              "voluntary_ctxt_switches_delta": 9,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1979,
+              "start_ticks": 12639,
+              "comm": "opensnoop",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 1.14,
+              "direct_system_s": 3.69,
+              "states": {
+                "R": 18,
+                "S": 1
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 6,
+                "empty/running": 13
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 7,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 4.820036735,
+                "runqueue_wait_s": 0.178487052,
+                "timeslices": 385958
+              },
+              "voluntary_ctxt_switches_delta": 384622,
+              "nonvoluntary_ctxt_switches_delta": 1338
+            },
+            {
+              "pid": 1982,
+              "start_ticks": 12639,
+              "comm": "syscount",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 2,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.000711558,
+                "runqueue_wait_s": 1.9881e-05,
+                "timeslices": 10
+              },
+              "voluntary_ctxt_switches_delta": 10,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1985,
+              "start_ticks": 12639,
+              "comm": "tcpconnect",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "ep_poll": 19
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 5,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.001003429,
+                "runqueue_wait_s": 0.001288783,
+                "timeslices": 93
+              },
+              "voluntary_ctxt_switches_delta": 93,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1988,
+              "start_ticks": 12639,
+              "comm": "tcplife",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 18,
+                "R": 1
+              },
+              "wchan": {
+                "ep_poll": 18,
+                "0": 1
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 4,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 0.001021558,
+                "runqueue_wait_s": 0.006403995,
+                "timeslices": 93
+              },
+              "voluntary_ctxt_switches_delta": 93,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1991,
+              "start_ticks": 12639,
+              "comm": "runqlat",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 6,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2171,
+              "start_ticks": 15354,
+              "comm": "stress-ng",
+              "ppid": 1807,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "do_wait": 19
+              },
+              "sampled_stacks": {
+                "do_wait+0x55/0x120; kernel_wait4+0x9c/0x140; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 0,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2172,
+              "start_ticks": 15355,
+              "comm": "stress-ng-sysca",
+              "ppid": 2171,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.01,
+              "direct_system_s": 0.03,
+              "states": {
+                "D": 2,
+                "S": 17
+              },
+              "wchan": {
+                "__x64_sys_io_destroy": 2,
+                "syslog_print": 17
+              },
+              "sampled_stacks": {
+                "__x64_sys_io_destroy+0xb1/0x110; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 2,
+                "syslog_print+0xdb/0x310; __x64_sys_syslog+0x16/0x20; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 17
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 5,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.03846594,
+                "runqueue_wait_s": 0.001080882,
+                "timeslices": 218
+              },
+              "voluntary_ctxt_switches_delta": 109,
+              "nonvoluntary_ctxt_switches_delta": 109
+            },
+            {
+              "pid": 2173,
+              "start_ticks": 15355,
+              "comm": "stress-ng-cap",
+              "ppid": 2171,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.91,
+              "direct_system_s": 7.69,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 1,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 8.596188183,
+                "runqueue_wait_s": 0.008599642,
+                "timeslices": 229
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 229
+            },
+            {
+              "pid": 2174,
+              "start_ticks": 15355,
+              "comm": "stress-ng-set",
+              "ppid": 2171,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.69,
+              "direct_system_s": 7.79,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 17,
+                "preempt_schedule_notrace_thunk+0x16/0x30; perf_trace_sys_exit+0xf1/0x100; __traceiter_sys_exit+0x31/0x50; trace_syscall_exit+0x5e/0x80": 1,
+                "asm_sysvec_apic_timer_interrupt+0x16/0x20; __kmalloc_noprof+0x80/0x500; lsm_blob_alloc+0x2d/0x50; security_prepare_creds+0x26/0x120": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 2,
+              "last_processor": 4,
+              "sched_delta": {
+                "run_s": 8.479409895,
+                "runqueue_wait_s": 0.154641997,
+                "timeslices": 200
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 200
+            },
+            {
+              "pid": 2175,
+              "start_ticks": 15355,
+              "comm": "stress-ng-sockf",
+              "ppid": 2171,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.32,
+              "direct_system_s": 7.77,
+              "states": {
+                "R": 18,
+                "S": 1
+              },
+              "wchan": {
+                "0": 18,
+                "sock_alloc_send_pskb": 1
+              },
+              "sampled_stacks": {
+                "empty/running": 18,
+                "sock_alloc_send_pskb+0x159/0x230; unix_stream_sendmsg+0x160/0x560; ____sys_sendmsg+0x2f1/0x310; ___sys_sendmsg+0x85/0xd0": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 0,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 8.080755153,
+                "runqueue_wait_s": 0.001831161,
+                "timeslices": 642
+              },
+              "voluntary_ctxt_switches_delta": 598,
+              "nonvoluntary_ctxt_switches_delta": 44
+            },
+            {
+              "pid": 2176,
+              "start_ticks": 15356,
+              "comm": "stress-ng-sockf",
+              "ppid": 2175,
+              "observations": 19,
+              "first": 153.836723842,
+              "last": 163.133160744,
+              "span_s": 9.29643690200001,
+              "direct_user_s": 0.24,
+              "direct_system_s": 4.29,
+              "states": {
+                "R": 18,
+                "S": 1
+              },
+              "wchan": {
+                "0": 16,
+                "unix_stream_read_generic": 3
+              },
+              "sampled_stacks": {
+                "unix_stream_read_generic+0x3b5/0xc40; unix_stream_recvmsg+0x86/0x90; sock_recvmsg+0x9a/0xa0; ____sys_recvmsg+0x80/0x1b0": 7,
+                "empty/running": 12
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 6,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 4.534278637,
+                "runqueue_wait_s": 0.056306102,
+                "timeslices": 609385
+              },
+              "voluntary_ctxt_switches_delta": 609203,
+              "nonvoluntary_ctxt_switches_delta": 178
+            }
+          ],
+          "parse_errors": {},
+          "workloads": [
+            {
+              "duration_s": 10.017974167999995,
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15743",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/389e7ec7"
+              ],
+              "rows": {
+                "syscall": {
+                  "bogo_ops": 7774,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.02,
+                  "system_seconds": 0.03,
+                  "wall_ops_per_second": 777.36,
+                  "cpu_ops_per_second": 142762.7,
+                  "raw": "stress-ng: metrc: [2171] syscall            7774     10.00      0.02      0.03       777.36      142762.70"
+                },
+                "cap": {
+                  "bogo_ops": 3545784,
+                  "real_seconds": 10.0,
+                  "user_seconds": 1.0,
+                  "system_seconds": 8.26,
+                  "wall_ops_per_second": 354578.57,
+                  "cpu_ops_per_second": 382828.67,
+                  "raw": "stress-ng: metrc: [2171] cap             3545784     10.00      1.00      8.26    354578.57      382828.67"
+                },
+                "set": {
+                  "bogo_ops": 270655,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.74,
+                  "system_seconds": 8.39,
+                  "wall_ops_per_second": 27065.46,
+                  "cpu_ops_per_second": 29647.72,
+                  "raw": "stress-ng: metrc: [2171] set              270655     10.00      0.74      8.39     27065.46       29647.72"
+                },
+                "sockfd": {
+                  "bogo_ops": 2394614,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.6,
+                  "system_seconds": 13.0,
+                  "wall_ops_per_second": 239446.12,
+                  "cpu_ops_per_second": 176067.57,
+                  "raw": "stress-ng: metrc: [2171] sockfd          2394614     10.00      0.60     13.00    239446.12      176067.57"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "stats": 1,
+      "image": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "app_status": "ok",
+      "app": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/apps/bcc__set.json",
+        "bytes": 18081,
+        "sha256": "944ccbc378096e2472c7116b7b7ea07857d0869b0ae26a3b75fe32d1d63f146a"
+      },
+      "metadata": {
+        "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/metadata.json",
+        "bytes": 985,
+        "sha256": "52540e3707cc373784d81d3fba1364560eb8a473bd588b603eb2bac2d1884062"
+      },
+      "capture": {
+        "path": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/bcc-task-states.jsonl",
+        "bytes": 17519580,
+        "sha256": "eb8bd3ec7a2d6a07fa8aded301718b550065eb30274553c67d8046cad60994d9"
+      },
+      "capture_header": {
+        "kind": "header",
+        "observer_pid": 1388,
+        "clock_ticks": 100,
+        "boot_id": "a52af83c-d67d-4855-a744-f052b6aec721\n",
+        "scope": "All task stat/schedstat/wchan; extra stack/status/io for stress-ng and unchanged BCC tools. Read failures stay explicit; no scheduler/affinity/config writes."
+      },
+      "snapshots_total": 323,
+      "malformed_lines": [],
+      "phases": {
+        "baseline": {
+          "shim_log": {
+            "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.baseline.log",
+            "bytes": 62987,
+            "sha256": "746e70e2428aa891d54fdf9a79f7b6d53a4cdc26f709826fb631283d734f7474"
+          },
+          "window": {
+            "start": 108.800324,
+            "end": 118.817502,
+            "span_s": 10.017178000000001,
+            "start_spread_s": 0.003383999999996945,
+            "end_spread_s": 0.001866999999990071
+          },
+          "snapshots": 19,
+          "sampled_first": 109.125876658,
+          "sampled_last": 118.375190247,
+          "max_snapshot_gap_s": 0.5173819700000024,
+          "cpu_stat_delta_ticks": [
+            389,
+            0,
+            4354,
+            2164,
+            131,
+            0,
+            82,
+            72,
+            0,
+            0
+          ],
+          "cpu_stat_names": [
+            "user",
+            "nice",
+            "system",
+            "idle",
+            "iowait",
+            "irq",
+            "softirq",
+            "steal",
+            "guest",
+            "guest_nice"
+          ],
+          "cpu_stat_span_s": 9.24931358900001,
+          "observer_user_s": 0.06999999999999984,
+          "observer_system_s": 0.12,
+          "tasks": [
+            {
+              "pid": 1388,
+              "start_ticks": 484,
+              "comm": "python3",
+              "ppid": 1382,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.07,
+              "direct_system_s": 0.13,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {},
+              "read_errors": {},
+              "cpu_allowed": null,
+              "threads": null,
+              "first_processor": 7,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 0.199492516,
+                "runqueue_wait_s": 0.002584585,
+                "timeslices": 384
+              }
+            },
+            {
+              "pid": 1826,
+              "start_ticks": 8246,
+              "comm": "capable",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.37,
+              "direct_system_s": 8.8,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 0,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 9.177080877,
+                "runqueue_wait_s": 0.002115852,
+                "timeslices": 172
+              },
+              "voluntary_ctxt_switches_delta": 4,
+              "nonvoluntary_ctxt_switches_delta": 168
+            },
+            {
+              "pid": 1829,
+              "start_ticks": 8246,
+              "comm": "biosnoop",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "ep_poll": 19
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.001811314,
+                "runqueue_wait_s": 0.012177352,
+                "timeslices": 201
+              },
+              "voluntary_ctxt_switches_delta": 201,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1832,
+              "start_ticks": 8246,
+              "comm": "vfsstat",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.000188483,
+                "runqueue_wait_s": 2.198e-06,
+                "timeslices": 9
+              },
+              "voluntary_ctxt_switches_delta": 9,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1835,
+              "start_ticks": 8246,
+              "comm": "opensnoop",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 1.11,
+              "direct_system_s": 4.91,
+              "states": {
+                "R": 18,
+                "S": 1
+              },
+              "wchan": {
+                "0": 18,
+                "ep_poll": 1
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 4,
+                "empty/running": 14,
+                "exit_to_user_mode_loop+0x5d/0x4c0; do_syscall_64+0x1ce/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 3,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 6.022487994,
+                "runqueue_wait_s": 0.068181489,
+                "timeslices": 778342
+              },
+              "voluntary_ctxt_switches_delta": 775960,
+              "nonvoluntary_ctxt_switches_delta": 2381
+            },
+            {
+              "pid": 1838,
+              "start_ticks": 8246,
+              "comm": "syscount",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.000634624,
+                "runqueue_wait_s": 2.0665e-05,
+                "timeslices": 9
+              },
+              "voluntary_ctxt_switches_delta": 9,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1841,
+              "start_ticks": 8246,
+              "comm": "tcpconnect",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "ep_poll": 19
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 0.000880936,
+                "runqueue_wait_s": 0.0036713,
+                "timeslices": 92
+              },
+              "voluntary_ctxt_switches_delta": 92,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1844,
+              "start_ticks": 8246,
+              "comm": "tcplife",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 18,
+                "R": 1
+              },
+              "wchan": {
+                "ep_poll": 18,
+                "0": 1
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 0.000842818,
+                "runqueue_wait_s": 0.010019532,
+                "timeslices": 92
+              },
+              "voluntary_ctxt_switches_delta": 92,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1847,
+              "start_ticks": 8246,
+              "comm": "runqlat",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 19
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 6,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1957,
+              "start_ticks": 10880,
+              "comm": "stress-ng",
+              "ppid": 1806,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 19
+              },
+              "wchan": {
+                "do_wait": 19
+              },
+              "sampled_stacks": {
+                "do_wait+0x55/0x120; kernel_wait4+0x9c/0x140; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 2,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 1958,
+              "start_ticks": 10881,
+              "comm": "stress-ng-sysca",
+              "ppid": 1957,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.01,
+              "direct_system_s": 0.0,
+              "states": {
+                "D": 2,
+                "S": 17
+              },
+              "wchan": {
+                "__x64_sys_io_destroy": 2,
+                "syslog_print": 17
+              },
+              "sampled_stacks": {
+                "__x64_sys_io_destroy+0xb1/0x110; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 2,
+                "syslog_print+0xdb/0x310; __x64_sys_syslog+0x16/0x20; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 17
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 1,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.007851959,
+                "runqueue_wait_s": 0.011888523,
+                "timeslices": 78
+              },
+              "voluntary_ctxt_switches_delta": 75,
+              "nonvoluntary_ctxt_switches_delta": 3
+            },
+            {
+              "pid": 1959,
+              "start_ticks": 10881,
+              "comm": "stress-ng-cap",
+              "ppid": 1957,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.54,
+              "direct_system_s": 8.58,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 4,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 9.110241527,
+                "runqueue_wait_s": 0.003051489,
+                "timeslices": 175
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 175
+            },
+            {
+              "pid": 1960,
+              "start_ticks": 10881,
+              "comm": "stress-ng-set",
+              "ppid": 1957,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.48,
+              "direct_system_s": 8.62,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 1,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 9.097902857,
+                "runqueue_wait_s": 0.128742058,
+                "timeslices": 138
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 138
+            },
+            {
+              "pid": 1961,
+              "start_ticks": 10881,
+              "comm": "stress-ng-sockf",
+              "ppid": 1957,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.26,
+              "direct_system_s": 8.69,
+              "states": {
+                "R": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 2,
+              "last_processor": 4,
+              "sched_delta": {
+                "run_s": 8.947977315,
+                "runqueue_wait_s": 0.001513805,
+                "timeslices": 541
+              },
+              "voluntary_ctxt_switches_delta": 496,
+              "nonvoluntary_ctxt_switches_delta": 45
+            },
+            {
+              "pid": 1963,
+              "start_ticks": 10881,
+              "comm": "stress-ng-sockf",
+              "ppid": 1961,
+              "observations": 19,
+              "first": 109.125876658,
+              "last": 118.375190247,
+              "span_s": 9.24931358900001,
+              "direct_user_s": 0.31,
+              "direct_system_s": 4.73,
+              "states": {
+                "R": 17,
+                "S": 2
+              },
+              "wchan": {
+                "0": 16,
+                "unix_stream_read_generic": 3
+              },
+              "sampled_stacks": {
+                "unix_stream_read_generic+0x3b5/0xc40; unix_stream_recvmsg+0x86/0x90; sock_recvmsg+0x9a/0xa0; ____sys_recvmsg+0x80/0x1b0": 14,
+                "empty/running": 5
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 5,
+              "last_processor": 3,
+              "sched_delta": {
+                "run_s": 5.036006831,
+                "runqueue_wait_s": 0.043540985,
+                "timeslices": 1013057
+              },
+              "voluntary_ctxt_switches_delta": 1012798,
+              "nonvoluntary_ctxt_switches_delta": 255
+            }
+          ],
+          "parse_errors": {},
+          "workloads": [
+            {
+              "duration_s": 10.016510001,
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14718",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/116fd579"
+              ],
+              "rows": {
+                "syscall": {
+                  "bogo_ops": 514,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.02,
+                  "system_seconds": 0.0,
+                  "wall_ops_per_second": 51.4,
+                  "cpu_ops_per_second": 22597.38,
+                  "raw": "stress-ng: metrc: [1957] syscall             514     10.00      0.02      0.00        51.40       22597.38"
+                },
+                "cap": {
+                  "bogo_ops": 2853158,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.59,
+                  "system_seconds": 9.26,
+                  "wall_ops_per_second": 285315.96,
+                  "cpu_ops_per_second": 289591.18,
+                  "raw": "stress-ng: metrc: [1957] cap             2853158     10.00      0.59      9.26    285315.96      289591.18"
+                },
+                "set": {
+                  "bogo_ops": 223461,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.51,
+                  "system_seconds": 9.32,
+                  "wall_ops_per_second": 22346.05,
+                  "cpu_ops_per_second": 22724.24,
+                  "raw": "stress-ng: metrc: [1957] set              223461     10.00      0.51      9.32     22346.05       22724.24"
+                },
+                "sockfd": {
+                  "bogo_ops": 2145861,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.6,
+                  "system_seconds": 14.51,
+                  "wall_ops_per_second": 214570.64,
+                  "cpu_ops_per_second": 141943.84,
+                  "raw": "stress-ng: metrc: [1957] sockfd          2145861     10.00      0.60     14.51    214570.64      141943.84"
+                }
+              }
+            }
+          ]
+        },
+        "post_rejit": {
+          "shim_log": {
+            "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119/details/shim-logs/bcc__set.post_rejit.log",
+            "bytes": 83688,
+            "sha256": "a00fb22bd460ecdf312db03d3093949790fb7e928e2d27c5341d717e98d83a77"
+          },
+          "window": {
+            "start": 152.928978,
+            "end": 163.947197,
+            "span_s": 11.018218999999988,
+            "start_spread_s": 0.005144999999998845,
+            "end_spread_s": 0.0020630000000210202
+          },
+          "snapshots": 21,
+          "sampled_first": 153.351030114,
+          "sampled_last": 163.773438435,
+          "max_snapshot_gap_s": 0.5305899790000126,
+          "cpu_stat_delta_ticks": [
+            459,
+            0,
+            4096,
+            2871,
+            274,
+            0,
+            48,
+            741,
+            0,
+            0
+          ],
+          "cpu_stat_names": [
+            "user",
+            "nice",
+            "system",
+            "idle",
+            "iowait",
+            "irq",
+            "softirq",
+            "steal",
+            "guest",
+            "guest_nice"
+          ],
+          "cpu_stat_span_s": 10.422408321000006,
+          "observer_user_s": 0.16999999999999993,
+          "observer_system_s": 0.08000000000000007,
+          "tasks": [
+            {
+              "pid": 1388,
+              "start_ticks": 484,
+              "comm": "python3",
+              "ppid": 1382,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.17,
+              "direct_system_s": 0.09,
+              "states": {
+                "R": 21
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {},
+              "read_errors": {},
+              "cpu_allowed": null,
+              "threads": null,
+              "first_processor": 1,
+              "last_processor": 4,
+              "sched_delta": {
+                "run_s": 0.248790346,
+                "runqueue_wait_s": 0.002422798,
+                "timeslices": 412
+              }
+            },
+            {
+              "pid": 2009,
+              "start_ticks": 12504,
+              "comm": "capable",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.47,
+              "direct_system_s": 8.88,
+              "states": {
+                "R": 19,
+                "S": 2
+              },
+              "wchan": {
+                "0": 19,
+                "ep_poll": 2
+              },
+              "sampled_stacks": {
+                "empty/running": 20,
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 7,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 9.342679626,
+                "runqueue_wait_s": 0.005242773,
+                "timeslices": 275
+              },
+              "voluntary_ctxt_switches_delta": 36,
+              "nonvoluntary_ctxt_switches_delta": 240
+            },
+            {
+              "pid": 2012,
+              "start_ticks": 12504,
+              "comm": "biosnoop",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "ep_poll": 21
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 6,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.002964565,
+                "runqueue_wait_s": 0.097564449,
+                "timeslices": 220
+              },
+              "voluntary_ctxt_switches_delta": 220,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2015,
+              "start_ticks": 12504,
+              "comm": "vfsstat",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 6,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.000259272,
+                "runqueue_wait_s": 1.3898e-05,
+                "timeslices": 10
+              },
+              "voluntary_ctxt_switches_delta": 10,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2018,
+              "start_ticks": 12504,
+              "comm": "opensnoop",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.9,
+              "direct_system_s": 3.99,
+              "states": {
+                "R": 21
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "exit_to_user_mode_loop+0x5d/0x4c0; do_syscall_64+0x1ce/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 1,
+                "empty/running": 15,
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 5
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 4,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 4.897950442,
+                "runqueue_wait_s": 0.119858597,
+                "timeslices": 465718
+              },
+              "voluntary_ctxt_switches_delta": 464532,
+              "nonvoluntary_ctxt_switches_delta": 1189
+            },
+            {
+              "pid": 2021,
+              "start_ticks": 12504,
+              "comm": "syscount",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.01,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 3,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.000799701,
+                "runqueue_wait_s": 1.4798e-05,
+                "timeslices": 11
+              },
+              "voluntary_ctxt_switches_delta": 11,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2024,
+              "start_ticks": 12504,
+              "comm": "tcpconnect",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "ep_poll": 21
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 6,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 0.001287408,
+                "runqueue_wait_s": 0.003019859,
+                "timeslices": 104
+              },
+              "voluntary_ctxt_switches_delta": 104,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2031,
+              "start_ticks": 12504,
+              "comm": "tcplife",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "ep_poll": 21
+              },
+              "sampled_stacks": {
+                "ep_poll+0x40e/0x430; do_epoll_wait+0x50/0xa0; __x64_sys_epoll_wait+0x5c/0xf0; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 1,
+              "last_processor": 7,
+              "sched_delta": {
+                "run_s": 0.001476829,
+                "runqueue_wait_s": 0.100108418,
+                "timeslices": 104
+              },
+              "voluntary_ctxt_switches_delta": 104,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2038,
+              "start_ticks": 12504,
+              "comm": "runqlat",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "hrtimer_nanosleep": 21
+              },
+              "sampled_stacks": {
+                "hrtimer_nanosleep+0x76/0xf0; common_nsleep+0x3f/0x50; __x64_sys_clock_nanosleep+0xc8/0x130; do_syscall_64+0xa8/0x8c0": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "2",
+              "first_processor": 0,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2201,
+              "start_ticks": 15292,
+              "comm": "stress-ng",
+              "ppid": 1806,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 21
+              },
+              "wchan": {
+                "do_wait": 21
+              },
+              "sampled_stacks": {
+                "do_wait+0x55/0x120; kernel_wait4+0x9c/0x140; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 0,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            },
+            {
+              "pid": 2202,
+              "start_ticks": 15294,
+              "comm": "stress-ng-sysca",
+              "ppid": 2201,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.01,
+              "direct_system_s": 0.0,
+              "states": {
+                "S": 20,
+                "D": 1
+              },
+              "wchan": {
+                "__skb_wait_for_more_packets": 19,
+                "__x64_sys_io_destroy": 1,
+                "syslog_print": 1
+              },
+              "sampled_stacks": {
+                "__skb_wait_for_more_packets+0x125/0x180; __skb_recv_datagram+0x69/0xc0; skb_recv_datagram+0x39/0x60; unix_accept+0x63/0x170": 19,
+                "__x64_sys_io_destroy+0xb1/0x110; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 1,
+                "syslog_print+0xdb/0x310; __x64_sys_syslog+0x16/0x20; do_syscall_64+0xa8/0x8c0; entry_SYSCALL_64_after_hwframe+0x76/0x7e": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 1,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 0.011430252,
+                "runqueue_wait_s": 6.2136e-05,
+                "timeslices": 103
+              },
+              "voluntary_ctxt_switches_delta": 98,
+              "nonvoluntary_ctxt_switches_delta": 5
+            },
+            {
+              "pid": 2203,
+              "start_ticks": 15294,
+              "comm": "stress-ng-cap",
+              "ppid": 2201,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.76,
+              "direct_system_s": 8.41,
+              "states": {
+                "R": 19,
+                "Z": 2
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "empty/running": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 3,
+              "last_processor": 6,
+              "sched_delta": {
+                "run_s": 9.161851359,
+                "runqueue_wait_s": 0.003382788,
+                "timeslices": 162
+              },
+              "voluntary_ctxt_switches_delta": 1,
+              "nonvoluntary_ctxt_switches_delta": 162
+            },
+            {
+              "pid": 2204,
+              "start_ticks": 15294,
+              "comm": "stress-ng-set",
+              "ppid": 2201,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.65,
+              "direct_system_s": 8.38,
+              "states": {
+                "R": 19,
+                "Z": 2
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "empty/running": 20,
+                "preempt_schedule_notrace_thunk+0x16/0x30; perf_trace_sys_enter+0x15c/0x170; __traceiter_sys_enter+0x31/0x50; trace_syscall_enter+0x65/0x90": 1
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 6,
+              "last_processor": 5,
+              "sched_delta": {
+                "run_s": 9.031047168,
+                "runqueue_wait_s": 0.090539789,
+                "timeslices": 145
+              },
+              "voluntary_ctxt_switches_delta": 1,
+              "nonvoluntary_ctxt_switches_delta": 145
+            },
+            {
+              "pid": 2205,
+              "start_ticks": 15294,
+              "comm": "stress-ng-sockf",
+              "ppid": 2201,
+              "observations": 21,
+              "first": 153.351030114,
+              "last": 163.773438435,
+              "span_s": 10.422408321000006,
+              "direct_user_s": 0.36,
+              "direct_system_s": 8.18,
+              "states": {
+                "R": 19,
+                "Z": 2
+              },
+              "wchan": {
+                "0": 21
+              },
+              "sampled_stacks": {
+                "empty/running": 21
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 5,
+              "last_processor": 0,
+              "sched_delta": {
+                "run_s": 8.547256347,
+                "runqueue_wait_s": 0.001088068,
+                "timeslices": 564
+              },
+              "voluntary_ctxt_switches_delta": 519,
+              "nonvoluntary_ctxt_switches_delta": 46
+            },
+            {
+              "pid": 2208,
+              "start_ticks": 15294,
+              "comm": "stress-ng-sockf",
+              "ppid": 2205,
+              "observations": 19,
+              "first": 153.351030114,
+              "last": 162.729599991,
+              "span_s": 9.37856987699999,
+              "direct_user_s": 0.25,
+              "direct_system_s": 4.25,
+              "states": {
+                "R": 15,
+                "S": 4
+              },
+              "wchan": {
+                "0": 17,
+                "unix_stream_read_generic": 2
+              },
+              "sampled_stacks": {
+                "empty/running": 8,
+                "unix_stream_read_generic+0x3b5/0xc40; unix_stream_recvmsg+0x86/0x90; sock_recvmsg+0x9a/0xa0; ____sys_recvmsg+0x80/0x1b0": 11
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 4,
+              "last_processor": 1,
+              "sched_delta": {
+                "run_s": 4.496980138,
+                "runqueue_wait_s": 0.055467354,
+                "timeslices": 659002
+              },
+              "voluntary_ctxt_switches_delta": 658817,
+              "nonvoluntary_ctxt_switches_delta": 188
+            },
+            {
+              "pid": 2210,
+              "start_ticks": 15294,
+              "comm": "stress-ng-sysca",
+              "ppid": 2202,
+              "observations": 19,
+              "first": 153.351030114,
+              "last": 162.729599991,
+              "span_s": 9.37856987699999,
+              "direct_user_s": 0.0,
+              "direct_system_s": 0.0,
+              "states": {
+                "Z": 19
+              },
+              "wchan": {
+                "0": 19
+              },
+              "sampled_stacks": {
+                "empty/running": 19
+              },
+              "read_errors": {},
+              "cpu_allowed": "0-7",
+              "threads": "1",
+              "first_processor": 2,
+              "last_processor": 2,
+              "sched_delta": {
+                "run_s": 0.0,
+                "runqueue_wait_s": 0.0,
+                "timeslices": 0
+              },
+              "voluntary_ctxt_switches_delta": 0,
+              "nonvoluntary_ctxt_switches_delta": 0
+            }
+          ],
+          "parse_errors": {},
+          "workloads": [
+            {
+              "duration_s": 11.017188933,
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15742",
+                "--timeout",
+                "10s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/116fd579"
+              ],
+              "rows": {
+                "syscall": {
+                  "bogo_ops": 514,
+                  "real_seconds": 11.0,
+                  "user_seconds": 0.02,
+                  "system_seconds": 0.01,
+                  "wall_ops_per_second": 46.72,
+                  "cpu_ops_per_second": 16632.69,
+                  "raw": "stress-ng: metrc: [2201] syscall             514     11.00      0.02      0.01        46.72       16632.69"
+                },
+                "cap": {
+                  "bogo_ops": 2727717,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.8,
+                  "system_seconds": 8.75,
+                  "wall_ops_per_second": 272771.67,
+                  "cpu_ops_per_second": 285482.76,
+                  "raw": "stress-ng: metrc: [2201] cap             2727717     10.00      0.80      8.75    272771.67      285482.76"
+                },
+                "set": {
+                  "bogo_ops": 206735,
+                  "real_seconds": 10.0,
+                  "user_seconds": 0.66,
+                  "system_seconds": 8.74,
+                  "wall_ops_per_second": 20673.41,
+                  "cpu_ops_per_second": 21975.44,
+                  "raw": "stress-ng: metrc: [2201] set              206735     10.00      0.66      8.74     20673.41       21975.44"
+                },
+                "sockfd": {
+                  "bogo_ops": 2011262,
+                  "real_seconds": 10.01,
+                  "user_seconds": 0.65,
+                  "system_seconds": 13.06,
+                  "wall_ops_per_second": 200971.25,
+                  "cpu_ops_per_second": 146740.68,
+                  "raw": "stress-ng: metrc: [2201] sockfd          2011262     10.01      0.65     13.06    200971.25      146740.68"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "limits": [
+    "Main-process /proc entries only, not every thread; tool helper threads can be missed.",
+    "One0.5s snapshot enumerates tasks sequentially, so its timestamp is not an atomic per-task instant.",
+    "Wait/stack counts are sampled observations, not exact blocked durations.",
+    "CPU deltas cover only first-to-last observations of a PID/starttime identity, never child CPU counters; short-lived tasks and tails can be missed.",
+    "The observer adds syscalls/9p output and potential BPF work; its own CPU does not bound its kernel/tracing impact.",
+    "One10s pair cannot establish the cause of historical3x180s results or throughput acceptance."
+  ]
+}

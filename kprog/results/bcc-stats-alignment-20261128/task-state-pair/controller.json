@@ -1,0 +1,57 @@
+{
+  "pid": 1465233,
+  "started_utc": "2026-11-28T12:50:25Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair",
+  "cases": [
+    {
+      "stats": 0,
+      "started_utc": "2026-11-28T12:50:25Z",
+      "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0",
+      "recipe_sha256": "2a3abc5d6c4afc4bcb95a7a067a3a537a846ae9b2ffdcee1fb4b6437c8edb2e2",
+      "command": [
+        "bash",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0/observe.sh",
+        "bcc/set",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats0"
+      ],
+      "returncode": 0,
+      "ended_utc": "2026-11-28T12:53:16Z",
+      "guest-exit.txt": "0",
+      "profile-image.txt": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "profile-source.txt": "cafd02a939390eed2a43fcee383dfd0ec959b7bb",
+      "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125148_240215",
+      "image_matches": true,
+      "task_capture_exists": true
+    },
+    {
+      "stats": 1,
+      "started_utc": "2026-11-28T12:53:16Z",
+      "raw": "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1",
+      "recipe_sha256": "97c965d3f34a760f0027b1f17590ea1d37ce8a72ba9cf02ebf34ace9775d95a1",
+      "command": [
+        "bash",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1/observe.sh",
+        "bcc/set",
+        "/workspaces/kprog-raw/perf/bcc-stats-alignment-20261128/task-state-pair/stats1"
+      ],
+      "returncode": 0,
+      "ended_utc": "2026-11-28T12:56:07Z",
+      "guest-exit.txt": "0",
+      "profile-image.txt": "sha256:6b88c0ba4c2253a3eadc999048dc39789185f7516b86a70ec14d098418610e11",
+      "profile-source.txt": "cafd02a939390eed2a43fcee383dfd0ec959b7bb",
+      "run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261128_125438_541119",
+      "image_matches": true,
+      "task_capture_exists": true
+    }
+  ],
+  "scope": "Coordinator11:20 BCC alignment cause. Existing PMU/code pair had asymmetric recurring native-cache copies. This pair retains all normalBCCtools/workload/image/flags and1sample10s/64G, switches stats0/1 only, replaces heavy observers with read-only proc task accounting/wait snapshots; no PMU/cache/code/map dumping or source/kernel/image changes.",
+  "source_sha256": {
+    "kprog/results/bcc-stats-alignment-20261128/task_state_pair.py": "b9d4e4c1142f0b8ec19d25fd12d893294be6c311a9308faa75abb8141be82c97",
+    "kprog/results/native-ebpf-alignment-20261128/observe-check.template.sh": "0361923346b416fba58fde08fa060a3a1ccf0edc28a7897c0de7988dce6672b3",
+    "kprog/results/bcc-stats-alignment-20261128/observe_tasks.py": "6afb5f099df318d05b8b2f54b116afc11a2433135287111191d7c9ff1e391367",
+    "kprog/perf/one-image/Makefile": "454855be5166e5bc5da8f67db2dc1f66a20f266f765dd5e1cd974f3e1a845b83"
+  },
+  "ended_utc": "2026-11-28T12:56:07Z"
+}
