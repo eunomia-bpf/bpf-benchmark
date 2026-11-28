@@ -1,0 +1,364 @@
+{
+  "prepared_utc": "2026-11-28T09:46:15Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "source_sha256": {
+    "vendor/bpf/cilium/bpf/lib/lb.h": "d73e0af5251087a4dd29ffd3870649e6579ad25b5b3dd65059e235eff0567d0b",
+    "vendor/bpf/cilium/bpf/bpf_sock.c": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+    "vendor/bpf/cilium/bpf/lib/ratelimit.h": "723d6f3d624f257edfb623ba3f53a8fd8e9a62e59e964d44d465bdc57734e46e",
+    "vendor/bpf/cilium/bpf/node_config.h": "8c65ab4e2cdd2372cd9d66e97a1102450809ab0c3a528234659f7ba17ae36f4e",
+    "vendor/linux-framework/kernel/bpf/hashtab.c": "dc977a5295b65f1c457127d09344343bb1fe7ab4264c3f0610e64b39ea5a9fc4",
+    "kprog/results/native-ebpf-alignment-20261128/runtime-plan-audit/sources.json": "5eeeea385fb758398471fef38e80f67f45bfc1791e31b0be9f5e75da79c5c953",
+    "vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o": "f2299977fa0ffba5fab0075fb164701ba46fcbaa81c30dc5cd0bfc74a48b84fc",
+    "vendor/build/native-bpf/arm64/stage/cilium/bpf_sock.native.o": "10e17ce4f1e731aad12d60445ff284b6a203f7f6a68494e3940ee63886ce6f76",
+    "vendor/linux-framework/include/uapi/linux/bpf.h": "d0cbf6f3a30b085dfb341a583d570e7ce87159d38f1dc2f6adcb0fac0c0f6ed2"
+  },
+  "source_anchors": {
+    "vendor/bpf/cilium/bpf/lib/lb.h": [
+      {
+        "first_line": 275,
+        "last_line": 282,
+        "source": "275: struct {\n276: \t__uint(type, BPF_MAP_TYPE_HASH);\n277: \t__type(key, struct lb4_key);\n278: \t__type(value, struct lb4_service);\n279: \t__uint(pinning, LIBBPF_PIN_BY_NAME);\n280: \t__uint(max_entries, CILIUM_LB_SERVICE_MAP_MAX_ENTRIES);\n281: \t__uint(map_flags, CONDITIONAL_PREALLOC | BPF_F_RDONLY_PROG_COND);\n282: } cilium_lb4_services_v2 __section_maps_btf;"
+      },
+      {
+        "first_line": 558,
+        "last_line": 581,
+        "source": "558: bool __lb4_svc_is_l7_loadbalancer(const struct lb4_service *svc __maybe_unused)\n559: {\n560: #ifdef ENABLE_L7_LB\n561: \treturn svc->flags2 & SVC_FLAG_L7_LOADBALANCER;\n562: #else\n563: \treturn false;\n564: #endif\n565: }\n566: \n567: static __always_inline\n568: bool lb4_svc_is_l7_punt_proxy(const struct lb4_service *svc __maybe_unused)\n569: {\n570: \treturn !lb4_svc_is_hostport(svc) && (svc->flags2 & SVC_FLAG_L7_DELEGATE);\n571: }\n572: \n573: static __always_inline\n574: bool lb4_svc_is_l7_loadbalancer(const struct lb4_service *svc __maybe_unused)\n575: {\n576: #ifdef ENABLE_L7_LB\n577: \t/* Also test for l7_lb_proxy_port, since l7_lb_proxy_port == 0 is reserved. */\n578: \treturn __lb4_svc_is_l7_loadbalancer(svc) && svc->l7_lb_proxy_port > 0;\n579: #else\n580: \treturn false;\n581: #endif"
+      },
+      {
+        "first_line": 1891,
+        "last_line": 1901,
+        "source": "1891: lb4_select_backend_id_random(struct __ctx_buff *ctx,\n1892: \t\t\t     struct lb4_key *key,\n1893: \t\t\t     const struct ipv4_ct_tuple *tuple __maybe_unused,\n1894: \t\t\t     const struct lb4_service *svc)\n1895: {\n1896: \t/* Backend slot 0 is always reserved for the service frontend. */\n1897: \t__u16 slot = (get_prandom_u32() % svc->count) + 1;\n1898: \tconst struct lb4_service *be = lb4_lookup_backend_slot(ctx, key, slot);\n1899: \n1900: \treturn be ? be->backend_id : 0;\n1901: }"
+      },
+      {
+        "first_line": 2165,
+        "last_line": 2181,
+        "source": "2165: \tswitch (ret) {\n2166: \tcase CT_NEW:\n2167: \t\tif (unlikely(svc->count == 0))\n2168: \t\t\tgoto no_service;\n2169: \n2170: \t\tif (lb4_svc_is_affinity(svc)) {\n2171: \t\t\tbackend_id = lb4_affinity_backend_id_by_addr(svc, &client_id);\n2172: \t\t\tif (backend_id != 0) {\n2173: \t\t\t\tbackend = lb4_lookup_backend(ctx, backend_id);\n2174: \t\t\t\tif (backend == NULL)\n2175: \t\t\t\t\tbackend_id = 0;\n2176: \t\t\t}\n2177: \t\t}\n2178: \t\tif (backend_id == 0) {\n2179: \t\t\t/* No CT entry has been found, so select a svc endpoint */\n2180: \t\t\tbackend_id = lb4_select_backend_id(ctx, key, tuple, svc);\n2181: \t\t\tbackend = lb4_lookup_backend(ctx, backend_id);"
+      },
+      {
+        "first_line": 2221,
+        "last_line": 2228,
+        "source": "2221: \t\t\t\tbreak;\n2222: \n2223: \t\t\tif (unlikely(svc->count == 0))\n2224: \t\t\t\tgoto no_service;\n2225: \n2226: \t\t\tbackend_id = lb4_select_backend_id(ctx, key, tuple, svc);\n2227: \t\t\tbackend = lb4_lookup_backend(ctx, backend_id);\n2228: \t\t\tif (!backend)"
+      }
+    ],
+    "vendor/bpf/cilium/bpf/bpf_sock.c": [
+      {
+        "first_line": 324,
+        "last_line": 336,
+        "source": "324: \tsvc = lb4_lookup_service(&key, true);\n325: \tif (!svc)\n326: \t\tsvc = sock4_wildcard_lookup_full(&key, in_hostns);\n327: \tif (!svc)\n328: \t\treturn -ENXIO;\n329: \tif (svc->count == 0 && !lb4_svc_is_l7_loadbalancer(svc)) {\n330: \t\t/* Drop packet when service has no endpoints when this flag is enabled (default) */\n331: \t\tif (CONFIG(enable_no_service_endpoints_routable))\n332: \t\t\treturn -EHOSTUNREACH;\n333: \t\tif (handle_nonroutable_endpoints_v4(svc) != CTX_ACT_OK)\n334: \t\t\treturn -EHOSTUNREACH;\n335: \t\treturn 0;\n336: \t}"
+      },
+      {
+        "first_line": 363,
+        "last_line": 390,
+        "source": "363: #ifdef ENABLE_L7_LB\n364: \t/* Do not perform service translation at socker layer for\n365: \t * services with L7 load balancing as we need to postpone\n366: \t * policy enforcement to take place after l7 load balancer and\n367: \t * we can't currently do that from the socket layer.\n368: \t */\n369: \tif (lb4_svc_is_l7_loadbalancer(svc)) {\n370: \t\t/* TC level eBPF datapath does not handle node local traffic,\n371: \t\t * but we need to redirect for L7 LB also in that case.\n372: \t\t */\n373: \t\tif (in_hostns) {\n374: \t\t\t/* Use the L7 LB proxy port as a backend. Normally this\n375: \t\t\t * would cause policy enforcement to be done before the\n376: \t\t\t * L7 LB (which should not be done), but in this case\n377: \t\t\t * (node-local nodeport) there is no policy enforcement\n378: \t\t\t * anyway.\n379: \t\t\t */\n380: \t\t\tl7backend.address = bpf_htonl(INADDR_LOOPBACK);\n381: \t\t\tl7backend.port = (__be16)svc->l7_lb_proxy_port;\n382: \t\t\tl7backend.proto = 0;\n383: \t\t\tl7backend.flags = 0;\n384: \t\t\tbackend = &l7backend;\n385: \t\t\tgoto out;\n386: \t\t}\n387: \t\t/* Let the TC level eBPF datapath redirect to L7 LB. */\n388: \t\treturn 0;\n389: \t}\n390: #endif /* ENABLE_L7_LB */"
+      },
+      {
+        "first_line": 417,
+        "last_line": 423,
+        "source": "417: \tif (backend_id == 0) {\n418: \t\tbackend_from_affinity = false;\n419: \n420: \t\tkey.backend_slot = (sock_select_slot(ctx_full) % svc->count) + 1;\n421: \t\tbackend_slot = __lb4_lookup_backend_slot(&key);\n422: \t\tif (!backend_slot) {\n423: \t\t\tupdate_metrics(0, METRIC_EGRESS, REASON_LB_NO_BACKEND_SLOT);"
+      }
+    ],
+    "vendor/linux-framework/kernel/bpf/hashtab.c": [
+      {
+        "first_line": 1073,
+        "last_line": 1115,
+        "source": "1073: static struct htab_elem *alloc_htab_elem(struct bpf_htab *htab, void *key,\n1074: \t\t\t\t\t void *value, u32 key_size, u32 hash,\n1075: \t\t\t\t\t bool percpu, bool onallcpus,\n1076: \t\t\t\t\t struct htab_elem *old_elem, u64 map_flags)\n1077: {\n1078: \tu32 size = htab->map.value_size;\n1079: \tbool prealloc = htab_is_prealloc(htab);\n1080: \tstruct htab_elem *l_new, **pl_new;\n1081: \tvoid __percpu *pptr;\n1082: \n1083: \tif (prealloc) {\n1084: \t\tif (old_elem) {\n1085: \t\t\t/* if we're updating the existing element,\n1086: \t\t\t * use per-cpu extra elems to avoid freelist_pop/push\n1087: \t\t\t */\n1088: \t\t\tpl_new = this_cpu_ptr(htab->extra_elems);\n1089: \t\t\tl_new = *pl_new;\n1090: \t\t\t*pl_new = old_elem;\n1091: \t\t} else {\n1092: \t\t\tstruct pcpu_freelist_node *l;\n1093: \n1094: \t\t\tl = __pcpu_freelist_pop(&htab->freelist);\n1095: \t\t\tif (!l)\n1096: \t\t\t\treturn ERR_PTR(-E2BIG);\n1097: \t\t\tl_new = container_of(l, struct htab_elem, fnode);\n1098: \t\t\tbpf_map_inc_elem_count(&htab->map);\n1099: \t\t}\n1100: \t} else {\n1101: \t\tif (is_map_full(htab))\n1102: \t\t\tif (!old_elem)\n1103: \t\t\t\t/* when map is full and update() is replacing\n1104: \t\t\t\t * old element, it's ok to allocate, since\n1105: \t\t\t\t * old element will be freed immediately.\n1106: \t\t\t\t * Otherwise return an error\n1107: \t\t\t\t */\n1108: \t\t\t\treturn ERR_PTR(-E2BIG);\n1109: \t\tinc_elem_count(htab);\n1110: \t\tl_new = bpf_mem_cache_alloc(&htab->ma);\n1111: \t\tif (!l_new) {\n1112: \t\t\tl_new = ERR_PTR(-ENOMEM);\n1113: \t\t\tgoto dec_count;\n1114: \t\t}\n1115: \t}"
+      },
+      {
+        "first_line": 1167,
+        "last_line": 1205,
+        "source": "1167: static long htab_map_update_elem(struct bpf_map *map, void *key, void *value,\n1168: \t\t\t\t u64 map_flags)\n1169: {\n1170: \tstruct bpf_htab *htab = container_of(map, struct bpf_htab, map);\n1171: \tstruct htab_elem *l_new, *l_old;\n1172: \tstruct hlist_nulls_head *head;\n1173: \tunsigned long flags;\n1174: \tstruct bucket *b;\n1175: \tu32 key_size, hash;\n1176: \tint ret;\n1177: \n1178: \tif (unlikely((map_flags & ~BPF_F_LOCK) > BPF_EXIST))\n1179: \t\t/* unknown flags */\n1180: \t\treturn -EINVAL;\n1181: \n1182: \tWARN_ON_ONCE(!bpf_rcu_lock_held());\n1183: \n1184: \tkey_size = map->key_size;\n1185: \n1186: \thash = htab_map_hash(key, key_size, htab->hashrnd);\n1187: \n1188: \tb = __select_bucket(htab, hash);\n1189: \thead = &b->head;\n1190: \n1191: \tif (unlikely(map_flags & BPF_F_LOCK)) {\n1192: \t\tif (unlikely(!btf_record_has_field(map->record, BPF_SPIN_LOCK)))\n1193: \t\t\treturn -EINVAL;\n1194: \t\t/* find an element without taking the bucket lock */\n1195: \t\tl_old = lookup_nulls_elem_raw(head, hash, key, key_size,\n1196: \t\t\t\t\t      htab->n_buckets);\n1197: \t\tret = check_flags(htab, l_old, map_flags);\n1198: \t\tif (ret)\n1199: \t\t\treturn ret;\n1200: \t\tif (l_old) {\n1201: \t\t\t/* grab the element lock and update value in place */\n1202: \t\t\tcopy_map_value_locked(map,\n1203: \t\t\t\t\t      htab_elem_value(l_old, key_size),\n1204: \t\t\t\t\t      value, false);\n1205: \t\t\treturn 0;"
+      },
+      {
+        "first_line": 1237,
+        "last_line": 1260,
+        "source": "1237: \tl_new = alloc_htab_elem(htab, key, value, key_size, hash, false, false,\n1238: \t\t\t\tl_old, map_flags);\n1239: \tif (IS_ERR(l_new)) {\n1240: \t\t/* all pre-allocated elements are in use or memory exhausted */\n1241: \t\tret = PTR_ERR(l_new);\n1242: \t\tgoto err;\n1243: \t}\n1244: \n1245: \t/* add new element to the head of the list, so that\n1246: \t * concurrent search will find it before old elem\n1247: \t */\n1248: \thlist_nulls_add_head_rcu(&l_new->hash_node, head);\n1249: \tif (l_old) {\n1250: \t\thlist_nulls_del_rcu(&l_old->hash_node);\n1251: \n1252: \t\t/* l_old has already been stashed in htab->extra_elems, free\n1253: \t\t * its special fields before it is available for reuse.\n1254: \t\t */\n1255: \t\tif (htab_is_prealloc(htab))\n1256: \t\t\tcheck_and_free_fields(htab, l_old);\n1257: \t}\n1258: \thtab_unlock_bucket(b, flags);\n1259: \tif (l_old && !htab_is_prealloc(htab))\n1260: \t\tfree_htab_elem(htab, l_old);"
+      },
+      {
+        "first_line": 133,
+        "last_line": 137,
+        "source": "133: static inline bool htab_is_prealloc(const struct bpf_htab *htab)\n134: {\n135: \treturn !(htab->map.map_flags & BPF_F_NO_PREALLOC);\n136: }\n137: "
+      }
+    ],
+    "vendor/linux-framework/include/uapi/linux/bpf.h": [
+      {
+        "line": 1405,
+        "context": "/* flags for BPF_MAP_CREATE command */\nenum {\n\tBPF_F_NO_PREALLOC\t= (1U << 0),\n/* Instead of having one common LRU list in the\n * BPF_MAP_TYPE_LRU_[PERCPU_]HASH map, use a percpu LRU list"
+      },
+      {
+        "line": 1427,
+        "context": "\n/* Flags for accessing BPF object from program side. */\n\tBPF_F_RDONLY_PROG\t= (1U << 7),\n\tBPF_F_WRONLY_PROG\t= (1U << 8),\n"
+      }
+    ]
+  },
+  "actual_native_layouts": [
+    {
+      "architecture": "x86",
+      "type": "lb4_key",
+      "bytes": 12,
+      "members": [
+        {
+          "name": "address",
+          "offset": 0
+        },
+        {
+          "name": "dport",
+          "offset": 4
+        },
+        {
+          "name": "backend_slot",
+          "offset": 6
+        },
+        {
+          "name": "proto",
+          "offset": 8
+        },
+        {
+          "name": "scope",
+          "offset": 9
+        },
+        {
+          "name": "pad",
+          "offset": 10
+        }
+      ]
+    },
+    {
+      "architecture": "x86",
+      "type": "lb4_service",
+      "bytes": 12,
+      "members": [
+        {
+          "name": null,
+          "offset": 0
+        },
+        {
+          "name": "count",
+          "offset": 4
+        },
+        {
+          "name": "rev_nat_index",
+          "offset": 6
+        },
+        {
+          "name": "flags",
+          "offset": 8
+        },
+        {
+          "name": "flags2",
+          "offset": 9
+        },
+        {
+          "name": "qcount",
+          "offset": 10
+        }
+      ]
+    },
+    {
+      "architecture": "arm64",
+      "type": "lb4_key",
+      "bytes": 12,
+      "members": [
+        {
+          "name": "address",
+          "offset": 0
+        },
+        {
+          "name": "dport",
+          "offset": 4
+        },
+        {
+          "name": "backend_slot",
+          "offset": 6
+        },
+        {
+          "name": "proto",
+          "offset": 8
+        },
+        {
+          "name": "scope",
+          "offset": 9
+        },
+        {
+          "name": "pad",
+          "offset": 10
+        }
+      ]
+    },
+    {
+      "architecture": "arm64",
+      "type": "lb4_service",
+      "bytes": 12,
+      "members": [
+        {
+          "name": null,
+          "offset": 0
+        },
+        {
+          "name": "count",
+          "offset": 4
+        },
+        {
+          "name": "rev_nat_index",
+          "offset": 6
+        },
+        {
+          "name": "flags",
+          "offset": 8
+        },
+        {
+          "name": "flags2",
+          "offset": 9
+        },
+        {
+          "name": "qcount",
+          "offset": 10
+        }
+      ]
+    }
+  ],
+  "previous_macro_replay": [
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_overlay.native-macros.txt",
+      "sha256": "1d8dfe935d502e389f5aae104fc9870a24426ae48f47223b40afa8e6a645cd6a",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_overlay.native-macros.txt",
+      "sha256": "867cb4388562af9d07ab55d6d7c8202329aef0916c195b1fdd2a01e31714b146",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_sock.native-macros.txt",
+      "sha256": "3bb4d48e4a3ee0ee8aa01f38ce8b1b7a68289320270e28d5744b72fe6ca8f2d3",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_host.native-macros.txt",
+      "sha256": "105887aefc2710882d1e13d662b3be99da90991c646aab8ac66e623722c9f1c6",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_xdp.native-macros.txt",
+      "sha256": "0189f9a7f94bf288fee9409f0e6b97ce9a0f711e1476162ead1718ab5c9d3d2e",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_host.native-macros.txt",
+      "sha256": "a6caf41542703f07e13490543b4bd054f829c2461ff4e877c691b3a8a11849c3",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_wireguard.native-macros.txt",
+      "sha256": "e256ae5f8a78a2aa2d53620fe8d16116b4f1805db68ff9a0097f4e937ede15ba",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_wireguard.native-macros.txt",
+      "sha256": "b747dc1bb2499ba7bba4c622bfe2e50dd91dceec791fe37a17f590212cd5ac9a",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_lxc.native-macros.txt",
+      "sha256": "6ff5b19d73dafe00e2d99420b3b08bbf2c7c53429477f4f77972cdebbe13fc33",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/arm64-bpf_xdp.native-macros.txt",
+      "sha256": "76f7eaf228b74ee4f8fa9c6aae0da8fbce23b5afe23902aa88b826b7eb5f3dd2",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_lxc.native-macros.txt",
+      "sha256": "8139016f744e3ed8b057e9ea50a4ca85c0d4111b635f3b8bcac2e820e0348c94",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/selected-features/x86-bpf_sock.native-macros.txt",
+      "sha256": "275de75b01839f394bf266e4af72eff7a2f3ddc53d49c6c82a63b9dacc182e3f",
+      "relevant": [
+        "#define BPF_F_RDONLY_PROG_COND BPF_F_RDONLY_PROG",
+        "#define CONDITIONAL_PREALLOC BPF_F_NO_PREALLOC",
+        "#define CT_REPORT_INTERVAL 5",
+        "#define NSEC_PER_SEC (1000ULL * 1000ULL * 1000UL)"
+      ]
+    }
+  ],
+  "known_captured_map_candidates": [
+    {
+      "id": 24,
+      "type": 1,
+      "key_size": 12,
+      "value_size": 12,
+      "max_entries": 65536,
+      "flags": 128,
+      "name": "cilium_lb4_serv"
+    },
+    {
+      "id": 113,
+      "type": 1,
+      "key_size": 12,
+      "value_size": 12,
+      "max_entries": 65536,
+      "flags": 128,
+      "name": "cilium_lb4_serv"
+    }
+  ],
+  "scope": "Read ONLY existing x86Cilium snapshots from verified two-part034810 archive, query availability and candidate12byte service values/count4; no fresh guests or ARM live claim.",
+  "interpretation": "Packet CT_NEW/reselection count0 checks and socket count0/L7 earlyreturn branches exist. Flags128 is readonly-to-program, not userspace readonly; NO_PREALLOC mask1 (bit0) absent, actual map is preallocated. Normal hash updates insert new element; preallocated path exchanges old element into per-CPU extra pool for later reuse. Neither one-update immutability nor an admitted transientzero is established here; actual pointer/provenance/update/witness still required.",
+  "next": "One detached metadata reader; collect SAME next turn. Captured count0 is not automatically a frontend count or mid-invocation value; explicit key/shape/provenance retained."
+}
