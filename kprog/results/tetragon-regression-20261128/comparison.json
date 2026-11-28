@@ -1,0 +1,2780 @@
+{
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "scope": "Retained counters and actual install receipts. IDs matched only within each run; no identity pairing by ID, truncated name, load order or fd across runs.",
+  "cases": {
+    "old": {
+      "run": "corpus/results/x86_kvm_corpus_20261123_120320_002937",
+      "inputs": [
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261123_120320_002937/details/apps/tetragon__observer.json",
+          "bytes": 143382,
+          "sha256": "39ea3413c44062127bdfcf3aeacb14d9f4f3a938306144725430efe2da8be85c"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261123_120320_002937/details/shim-logs/tetragon__observer.post_rejit.log",
+          "bytes": 1324903,
+          "sha256": "36ccc953fae765fba8889f5b5b0f45a477e95f7d65f392e170d400c017c99124"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261123_120320_002937/metadata.json",
+          "bytes": 986,
+          "sha256": "02ed6405a2bbb23887b1074b9420963f93490de866fecf790fccc62d8d4472c5"
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "calls": 2899891268,
+          "run_time_ns": 2169026218439,
+          "ns_per_call": 747.968119485713,
+          "programs": 287,
+          "positive_programs": 32,
+          "retained_programs": 21,
+          "retained_rule": "run_cnt_delta>=100 (frozen05-29 parser)",
+          "buckets": {
+            "generic_kprobe_:jited=1879": {
+              "programs": 15,
+              "calls": 1147758630,
+              "run_time_ns": 1120657155938,
+              "call_fraction": 0.39579367773729923,
+              "ns_per_call": 976.3874796027454,
+              "aggregate_contribution_ns": 386.4479914486228,
+              "installed_bytes": [
+                1879
+              ],
+              "original_tags": []
+            },
+            "generic_retkpro:jited=15275": {
+              "programs": 5,
+              "calls": 418735785,
+              "run_time_ns": 21494220991,
+              "call_fraction": 0.14439706399364213,
+              "ns_per_call": 51.33122546715228,
+              "aggregate_contribution_ns": 7.41207824865246,
+              "installed_bytes": [
+                15275
+              ],
+              "original_tags": []
+            },
+            "generic_tracepo:jited=14942": {
+              "programs": 1,
+              "calls": 1333396853,
+              "run_time_ns": 1026874841510,
+              "call_fraction": 0.45980925826905866,
+              "ns_per_call": 770.1194428347732,
+              "aggregate_contribution_ns": 354.10804978843777,
+              "installed_bytes": [
+                14942
+              ],
+              "original_tags": []
+            }
+          },
+          "records": [
+            {
+              "program_id": "210",
+              "bytes_jited": 14942,
+              "bytes_xlated": 26568,
+              "id": 210,
+              "name": "generic_tracepo",
+              "run_cnt_delta": 1333396853,
+              "run_time_ns_delta": 1026874841510,
+              "type": "tracepoint",
+              "ns_per_call": 770.1194428347732,
+              "aggregate_contribution_ns": 354.10804978843777,
+              "call_fraction": 0.45980925826905866,
+              "bucket": "generic_tracepo:jited=14942"
+            },
+            {
+              "program_id": "151",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 151,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 57143435,
+              "run_time_ns_delta": 354879077060,
+              "type": "kprobe",
+              "ns_per_call": 6210.321046678416,
+              "aggregate_contribution_ns": 122.37668390399801,
+              "call_fraction": 0.019705371587746028,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "106",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 106,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 162296538,
+              "run_time_ns_delta": 161521336127,
+              "type": "kprobe",
+              "ns_per_call": 995.2235464628334,
+              "aggregate_contribution_ns": 55.69910082814871,
+              "call_fraction": 0.055966421841717136,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "103",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 103,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 162911962,
+              "run_time_ns_delta": 160852614036,
+              "type": "kprobe",
+              "ns_per_call": 987.3591359485315,
+              "aggregate_contribution_ns": 55.46849835750462,
+              "call_fraction": 0.05617864497118104,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "140",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 140,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 237810982,
+              "run_time_ns_delta": 138753996727,
+              "type": "kprobe",
+              "ns_per_call": 583.463368933063,
+              "aggregate_contribution_ns": 47.84799977093486,
+              "call_fraction": 0.0820068616448553,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "307",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 307,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 84736064,
+              "run_time_ns_delta": 79581473729,
+              "type": "kprobe",
+              "ns_per_call": 939.1688729960363,
+              "aggregate_contribution_ns": 27.44291643178947,
+              "call_fraction": 0.029220427998474872,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "133",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 133,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 195281125,
+              "run_time_ns_delta": 44007234391,
+              "type": "kprobe",
+              "ns_per_call": 225.35324082652636,
+              "aggregate_contribution_ns": 15.17547739689942,
+              "call_fraction": 0.06734084382918318,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "92",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 92,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260492,
+              "run_time_ns_delta": 43494852570,
+              "type": "kprobe",
+              "ns_per_call": 1054.1525430671065,
+              "aggregate_contribution_ns": 14.998787385568969,
+              "call_fraction": 0.014228289334605492,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "257",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 257,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260492,
+              "run_time_ns_delta": 43310433740,
+              "type": "kprobe",
+              "ns_per_call": 1049.6829204072505,
+              "aggregate_contribution_ns": 14.93519230114803,
+              "call_fraction": 0.014228289334605492,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "68",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 68,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260492,
+              "run_time_ns_delta": 40041272857,
+              "type": "kprobe",
+              "ns_per_call": 970.4506882031363,
+              "aggregate_contribution_ns": 13.807853176721245,
+              "call_fraction": 0.014228289334605492,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "81",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 81,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 18147880089,
+              "type": "kprobe",
+              "ns_per_call": 439.83711883843455,
+              "aggregate_contribution_ns": 6.2581243266807896,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "246",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 246,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 18143510086,
+              "type": "kprobe",
+              "ns_per_call": 439.73120621837046,
+              "aggregate_contribution_ns": 6.2566173725931575,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "61",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 61,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 17881506338,
+              "type": "kprobe",
+              "ns_per_call": 433.3812097956455,
+              "aggregate_contribution_ns": 6.1662678650474145,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "144",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 144,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 237810982,
+              "run_time_ns_delta": 12233638928,
+              "type": "kprobe",
+              "ns_per_call": 51.44269968154793,
+              "aggregate_contribution_ns": 4.218654355422543,
+              "call_fraction": 0.0820068616448553,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "154",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 154,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 57143435,
+              "run_time_ns_delta": 2905930590,
+              "type": "kprobe",
+              "ns_per_call": 50.85327107129629,
+              "aggregate_contribution_ns": 1.002082602912269,
+              "call_fraction": 0.019705371587746028,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "254",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 254,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 2244490169,
+              "type": "kprobe",
+              "ns_per_call": 54.39809412188755,
+              "aggregate_contribution_ns": 0.7739911471053128,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "88",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 88,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 2057191730,
+              "type": "kprobe",
+              "ns_per_call": 49.85867654976959,
+              "aggregate_contribution_ns": 0.7094030568321295,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "63",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 63,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41260456,
+              "run_time_ns_delta": 2052969574,
+              "type": "kprobe",
+              "ns_per_call": 49.75634719112169,
+              "aggregate_contribution_ns": 0.7079470863802056,
+              "call_fraction": 0.014228276920346932,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "228",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 228,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 15127,
+              "run_time_ns_delta": 40335161,
+              "type": "kprobe",
+              "ns_per_call": 2666.4349176968335,
+              "aggregate_contribution_ns": 0.01390919771547793,
+              "call_fraction": 5.216402479267026e-06,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "233",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 233,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 229,
+              "run_time_ns_delta": 1160985,
+              "type": "kprobe",
+              "ns_per_call": 5069.803493449782,
+              "aggregate_contribution_ns": 0.0004003546659874283,
+              "call_fraction": 7.896847806915774e-08,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "268",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 268,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 324,
+              "run_time_ns_delta": 472042,
+              "type": "kprobe",
+              "ns_per_call": 1456.9197530864199,
+              "aggregate_contribution_ns": 0.00016277920665817185,
+              "call_fraction": 1.1172832704981269e-07,
+              "bucket": "generic_kprobe_:jited=1879"
+            }
+          ]
+        },
+        "post_rejit": {
+          "calls": 4780991101,
+          "run_time_ns": 1520812772648,
+          "ns_per_call": 318.0957129014326,
+          "programs": 287,
+          "positive_programs": 32,
+          "retained_programs": 24,
+          "retained_rule": "run_cnt_delta>=100 (frozen05-29 parser)",
+          "buckets": {
+            "event_exit_acct:original_jited=1042": {
+              "programs": 1,
+              "calls": 130,
+              "run_time_ns": 174844,
+              "call_fraction": 2.719101484476911e-08,
+              "ns_per_call": 1344.9538461538461,
+              "aggregate_contribution_ns": 3.6570659996298536e-05,
+              "installed_bytes": [
+                890
+              ],
+              "original_tags": [
+                "4dfbb31db5fbfce9"
+              ]
+            },
+            "generic_kprobe_:original_jited=1879": {
+              "programs": 17,
+              "calls": 1962864752,
+              "run_time_ns": 108528488109,
+              "call_fraction": 0.41055603546081565,
+              "ns_per_call": 55.29086402841473,
+              "aggregate_contribution_ns": 22.699997932708975,
+              "installed_bytes": [
+                1329
+              ],
+              "original_tags": [
+                "93c5f592a9cdde6a"
+              ]
+            },
+            "generic_retkpro:original_jited=15275": {
+              "programs": 5,
+              "calls": 782499097,
+              "run_time_ns": 38078243207,
+              "call_fraction": 0.1636688043272725,
+              "ns_per_call": 48.66234779437707,
+              "aggregate_contribution_ns": 7.964508279263581,
+              "installed_bytes": [
+                19860
+              ],
+              "original_tags": [
+                "79ea0f5f5f05c31b"
+              ]
+            },
+            "generic_tracepo:original_jited=14942": {
+              "programs": 1,
+              "calls": 2035627122,
+              "run_time_ns": 1374205866488,
+              "call_fraction": 0.42577513302089703,
+              "ns_per_call": 675.077400785388,
+              "aggregate_contribution_ns": 287.4311701188,
+              "installed_bytes": [
+                13483
+              ],
+              "original_tags": [
+                "d9601a7cf35a5c65"
+              ]
+            }
+          },
+          "records": [
+            {
+              "program_id": "712",
+              "bytes_jited": 13483,
+              "bytes_xlated": 16,
+              "id": 712,
+              "name": "generic_tracepo",
+              "run_cnt_delta": 2035627122,
+              "run_time_ns_delta": 1374205866488,
+              "type": "tracepoint",
+              "ns_per_call": 675.077400785388,
+              "aggregate_contribution_ns": 287.4311701188,
+              "call_fraction": 0.42577513302089703,
+              "install_receipt": {
+                "native": {
+                  "id": 712,
+                  "fd": 1081,
+                  "type": 5,
+                  "name": "generic_tracepo",
+                  "tag": "acce632fa2867084",
+                  "jited": 13483,
+                  "xlated": 16,
+                  "line": 8217,
+                  "text": "[868.828355 pid=2025 tid=2036] native-loader jit-info native fd=1081 id=712 type=5 name=generic_tracepo tag=acce632fa2867084 jited_len=13483 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0a4d220 ksym1=0x0"
+                },
+                "original": {
+                  "id": 711,
+                  "fd": 1011,
+                  "type": 5,
+                  "name": "generic_tracepo",
+                  "tag": "d9601a7cf35a5c65",
+                  "jited": 14942,
+                  "xlated": 26568,
+                  "line": 8216,
+                  "text": "[868.828024 pid=2025 tid=2036] native-loader jit-info original fd=1011 id=711 type=5 name=generic_tracepo tag=d9601a7cf35a5c65 jited_len=14942 xlated_len=26568 nr_jited_ksyms=1 ksym0=0xffffffffc0a49798 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_tracepo:original_jited=14942"
+            },
+            {
+              "program_id": "554",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 554,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 337330709,
+              "run_time_ns_delta": 18194794160,
+              "type": "kprobe",
+              "ns_per_call": 53.937556452946595,
+              "aggregate_contribution_ns": 3.8056532161698327,
+              "call_fraction": 0.07055664858473452,
+              "install_receipt": {
+                "native": {
+                  "id": 554,
+                  "fd": 849,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 5529,
+                  "text": "[851.248076 pid=2025 tid=2036] native-loader jit-info native fd=849 id=554 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc05ffbfc ksym1=0x0"
+                },
+                "original": {
+                  "id": 553,
+                  "fd": 783,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 5528,
+                  "text": "[851.247767 pid=2025 tid=2036] native-loader jit-info original fd=783 id=553 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc05ff448 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "570",
+              "bytes_jited": 19860,
+              "bytes_xlated": 16,
+              "id": 570,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 337330709,
+              "run_time_ns_delta": 15836459433,
+              "type": "kprobe",
+              "ns_per_call": 46.946391213377495,
+              "aggregate_contribution_ns": 3.3123800271637442,
+              "call_fraction": 0.07055664858473452,
+              "install_receipt": {
+                "native": {
+                  "id": 570,
+                  "fd": 856,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19860,
+                  "xlated": 16,
+                  "line": 5683,
+                  "text": "[852.824562 pid=2025 tid=2039] native-loader jit-info native fd=856 id=570 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19860 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc08dfa60 ksym1=0x0"
+                },
+                "original": {
+                  "id": 569,
+                  "fd": 778,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "79ea0f5f5f05c31b",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 5682,
+                  "text": "[852.824195 pid=2025 tid=2039] native-loader jit-info original fd=778 id=569 type=2 name=generic_retkpro tag=79ea0f5f5f05c31b jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc08dbe58 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "550",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 550,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 246266551,
+              "run_time_ns_delta": 15803742905,
+              "type": "kprobe",
+              "ns_per_call": 64.17332293332845,
+              "aggregate_contribution_ns": 3.3055369840982265,
+              "call_fraction": 0.051509518800085294,
+              "install_receipt": {
+                "native": {
+                  "id": 550,
+                  "fd": 696,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 4695,
+                  "text": "[850.617302 pid=2025 tid=2039] native-loader jit-info native fd=696 id=550 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc05fe070 ksym1=0x0"
+                },
+                "original": {
+                  "id": 549,
+                  "fd": 620,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 4694,
+                  "text": "[850.617000 pid=2025 tid=2039] native-loader jit-info original fd=620 id=549 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc05fd8c8 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "508",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 508,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 269894275,
+              "run_time_ns_delta": 14703772683,
+              "type": "kprobe",
+              "ns_per_call": 54.47975020218565,
+              "aggregate_contribution_ns": 3.0754653945966424,
+              "call_fraction": 0.056451532600332276,
+              "install_receipt": {
+                "native": {
+                  "id": 508,
+                  "fd": 638,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 4142,
+                  "text": "[847.349659 pid=2025 tid=2073] native-loader jit-info native fd=638 id=508 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0596788 ksym1=0x0"
+                },
+                "original": {
+                  "id": 507,
+                  "fd": 562,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 4141,
+                  "text": "[847.349324 pid=2025 tid=2073] native-loader jit-info original fd=562 id=507 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0596008 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "488",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 488,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 272240504,
+              "run_time_ns_delta": 14083967993,
+              "type": "kprobe",
+              "ns_per_call": 51.73355098181864,
+              "aggregate_contribution_ns": 2.9458260213147383,
+              "call_fraction": 0.05694227373547249,
+              "install_receipt": {
+                "native": {
+                  "id": 488,
+                  "fd": 622,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 3984,
+                  "text": "[845.945558 pid=2025 tid=2073] native-loader jit-info native fd=622 id=488 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc055da10 ksym1=0x0"
+                },
+                "original": {
+                  "id": 487,
+                  "fd": 551,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3983,
+                  "text": "[845.944980 pid=2025 tid=2073] native-loader jit-info original fd=551 id=487 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc055d2a4 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "582",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 582,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 249774068,
+              "run_time_ns_delta": 13376491774,
+              "type": "kprobe",
+              "ns_per_call": 53.554365675783444,
+              "aggregate_contribution_ns": 2.7978491261366605,
+              "call_fraction": 0.052243156852510526,
+              "install_receipt": {
+                "native": {
+                  "id": 582,
+                  "fd": 872,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 5802,
+                  "text": "[853.999154 pid=2025 tid=2036] native-loader jit-info native fd=872 id=582 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0901bac ksym1=0x0"
+                },
+                "original": {
+                  "id": 581,
+                  "fd": 800,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 5801,
+                  "text": "[853.998870 pid=2025 tid=2036] native-loader jit-info original fd=800 id=581 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc090140c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "594",
+              "bytes_jited": 19860,
+              "bytes_xlated": 16,
+              "id": 594,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 249774068,
+              "run_time_ns_delta": 11854836274,
+              "type": "kprobe",
+              "ns_per_call": 47.46223804946797,
+              "aggregate_contribution_ns": 2.4795771469895485,
+              "call_fraction": 0.052243156852510526,
+              "install_receipt": {
+                "native": {
+                  "id": 594,
+                  "fd": 875,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19860,
+                  "xlated": 16,
+                  "line": 5946,
+                  "text": "[855.227508 pid=2025 tid=2041] native-loader jit-info native fd=875 id=594 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19860 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc091a920 ksym1=0x0"
+                },
+                "original": {
+                  "id": 593,
+                  "fd": 795,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "79ea0f5f5f05c31b",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 5945,
+                  "text": "[855.226934 pid=2025 tid=2041] native-loader jit-info original fd=795 id=593 type=2 name=generic_retkpro tag=79ea0f5f5f05c31b jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc0916d14 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "896",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 896,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 196551551,
+              "run_time_ns_delta": 10107875794,
+              "type": "kprobe",
+              "ns_per_call": 51.426080041464544,
+              "aggregate_contribution_ns": 2.114180005874895,
+              "call_fraction": 0.04111104723848763,
+              "install_receipt": {
+                "native": {
+                  "id": 896,
+                  "fd": 1491,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 11821,
+                  "text": "[963.287879 pid=2025 tid=2073] native-loader jit-info native fd=1491 id=896 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0c22434 ksym1=0x0"
+                },
+                "original": {
+                  "id": 895,
+                  "fd": 1445,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 11820,
+                  "text": "[963.287520 pid=2025 tid=2073] native-loader jit-info original fd=1445 id=895 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0c21c8c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "778",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 778,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3797201959,
+              "type": "kprobe",
+              "ns_per_call": 58.30059889663118,
+              "aggregate_contribution_ns": 0.794229037198118,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 778,
+                  "fd": 1331,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 10026,
+                  "text": "[893.613993 pid=2025 tid=2039] native-loader jit-info native fd=1331 id=778 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0af00d4 ksym1=0x0"
+                },
+                "original": {
+                  "id": 777,
+                  "fd": 1282,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10025,
+                  "text": "[893.613678 pid=2025 tid=2039] native-loader jit-info original fd=1282 id=777 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0aef954 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "446",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 446,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3775149626,
+              "type": "kprobe",
+              "ns_per_call": 57.96201689997949,
+              "aggregate_contribution_ns": 0.7896165347830042,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 446,
+                  "fd": 590,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 3563,
+                  "text": "[842.959046 pid=2025 tid=2032] native-loader jit-info native fd=590 id=446 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04f7690 ksym1=0x0"
+                },
+                "original": {
+                  "id": 445,
+                  "fd": 526,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3562,
+                  "text": "[842.958560 pid=2025 tid=2032] native-loader jit-info original fd=526 id=445 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc04f6f10 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "400",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 400,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3752042352,
+              "type": "kprobe",
+              "ns_per_call": 57.60723779483457,
+              "aggregate_contribution_ns": 0.78478337916488,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 400,
+                  "fd": 375,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 2182,
+                  "text": "[840.072332 pid=2025 tid=2036] native-loader jit-info native fd=375 id=400 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc048e1d4 ksym1=0x0"
+                },
+                "original": {
+                  "id": 399,
+                  "fd": 307,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 2181,
+                  "text": "[840.071818 pid=2025 tid=2036] native-loader jit-info original fd=307 id=399 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc048da54 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "802",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 802,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131518,
+              "run_time_ns_delta": 3691759063,
+              "type": "kprobe",
+              "ns_per_call": 56.68160633074758,
+              "aggregate_contribution_ns": 0.7721744268103377,
+              "call_fraction": 0.01362301594461805,
+              "install_receipt": {
+                "native": {
+                  "id": 802,
+                  "fd": 1349,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 10289,
+                  "text": "[907.006125 pid=2025 tid=2073] native-loader jit-info native fd=1349 id=802 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b2d950 ksym1=0x0"
+                },
+                "original": {
+                  "id": 801,
+                  "fd": 1298,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10288,
+                  "text": "[907.005794 pid=2025 tid=2073] native-loader jit-info original fd=1298 id=801 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0b2d1c8 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "430",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 430,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131518,
+              "run_time_ns_delta": 3664186519,
+              "type": "kprobe",
+              "ns_per_call": 56.25826990551641,
+              "aggregate_contribution_ns": 0.7664073079394758,
+              "call_fraction": 0.01362301594461805,
+              "install_receipt": {
+                "native": {
+                  "id": 430,
+                  "fd": 399,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 2466,
+                  "text": "[841.799311 pid=2025 tid=2036] native-loader jit-info native fd=399 id=430 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04d3df0 ksym1=0x0"
+                },
+                "original": {
+                  "id": 429,
+                  "fd": 323,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 2465,
+                  "text": "[841.798490 pid=2025 tid=2036] native-loader jit-info original fd=323 id=429 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc04d3658 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "468",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 468,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 65131518,
+              "run_time_ns_delta": 3567131538,
+              "type": "kprobe",
+              "ns_per_call": 54.76813142908784,
+              "aggregate_contribution_ns": 0.7461071277154004,
+              "call_fraction": 0.01362301594461805,
+              "install_receipt": {
+                "native": {
+                  "id": 468,
+                  "fd": 606,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 3826,
+                  "text": "[844.527923 pid=2025 tid=2035] native-loader jit-info native fd=606 id=468 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc052ff7c ksym1=0x0"
+                },
+                "original": {
+                  "id": 467,
+                  "fd": 542,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3825,
+                  "text": "[844.527351 pid=2025 tid=2035] native-loader jit-info original fd=542 id=467 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc052f7d0 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "792",
+              "bytes_jited": 19860,
+              "bytes_xlated": 16,
+              "id": 792,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3495620518,
+              "type": "kprobe",
+              "ns_per_call": 53.670247702184994,
+              "aggregate_contribution_ns": 0.7311497645893652,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 792,
+                  "fd": 1355,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19860,
+                  "xlated": 16,
+                  "line": 10173,
+                  "text": "[901.220539 pid=2025 tid=2073] native-loader jit-info native fd=1355 id=792 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19860 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b14c14 ksym1=0x0"
+                },
+                "original": {
+                  "id": 791,
+                  "fd": 1276,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "79ea0f5f5f05c31b",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 10172,
+                  "text": "[901.220205 pid=2025 tid=2073] native-loader jit-info original fd=1276 id=791 type=2 name=generic_retkpro tag=79ea0f5f5f05c31b jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc0b1100c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "414",
+              "bytes_jited": 19860,
+              "bytes_xlated": 16,
+              "id": 414,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3491588308,
+              "type": "kprobe",
+              "ns_per_call": 53.60833889132499,
+              "aggregate_contribution_ns": 0.730306380881925,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 414,
+                  "fd": 381,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19860,
+                  "xlated": 16,
+                  "line": 2332,
+                  "text": "[840.917299 pid=2025 tid=2036] native-loader jit-info native fd=381 id=414 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19860 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04a86ec ksym1=0x0"
+                },
+                "original": {
+                  "id": 413,
+                  "fd": 302,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "79ea0f5f5f05c31b",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 2331,
+                  "text": "[840.916794 pid=2025 tid=2036] native-loader jit-info original fd=302 id=413 type=2 name=generic_retkpro tag=79ea0f5f5f05c31b jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc04a4af8 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "464",
+              "bytes_jited": 19860,
+              "bytes_xlated": 16,
+              "id": 464,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 65131440,
+              "run_time_ns_delta": 3399738674,
+              "type": "kprobe",
+              "ns_per_call": 52.1981192800282,
+              "aggregate_contribution_ns": 0.7110949596389973,
+              "call_fraction": 0.013622999630009142,
+              "install_receipt": {
+                "native": {
+                  "id": 464,
+                  "fd": 600,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19860,
+                  "xlated": 16,
+                  "line": 3724,
+                  "text": "[844.218815 pid=2025 tid=2031] native-loader jit-info native fd=600 id=464 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19860 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc05200ec ksym1=0x0"
+                },
+                "original": {
+                  "id": 463,
+                  "fd": 521,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "79ea0f5f5f05c31b",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 3723,
+                  "text": "[844.218073 pid=2025 tid=2031] native-loader jit-info original fd=521 id=463 type=2 name=generic_retkpro tag=79ea0f5f5f05c31b jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc051c4f4 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "730",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 730,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 16971,
+              "run_time_ns_delta": 8527120,
+              "type": "kprobe",
+              "ns_per_call": 502.4524188321254,
+              "aggregate_contribution_ns": 0.0017835465115625196,
+              "call_fraction": 3.549682407158281e-06,
+              "install_receipt": {
+                "native": {
+                  "id": 730,
+                  "fd": 1135,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 8720,
+                  "text": "[874.142312 pid=2025 tid=2035] native-loader jit-info native fd=1135 id=730 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0a7b3e0 ksym1=0x0"
+                },
+                "original": {
+                  "id": 729,
+                  "fd": 1086,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 8719,
+                  "text": "[874.141707 pid=2025 tid=2035] native-loader jit-info original fd=1086 id=729 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0a7ac60 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "748",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 748,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 229,
+              "run_time_ns_delta": 1106099,
+              "type": "kprobe",
+              "ns_per_call": 4830.126637554585,
+              "aggregate_contribution_ns": 0.00023135349483680205,
+              "call_fraction": 4.789801845732404e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 748,
+                  "fd": 1143,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 8997,
+                  "text": "[879.350747 pid=2025 tid=2039] native-loader jit-info native fd=1143 id=748 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0aa602c ksym1=0x0"
+                },
+                "original": {
+                  "id": 747,
+                  "fd": 1078,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 8996,
+                  "text": "[879.350084 pid=2025 tid=2039] native-loader jit-info original fd=1078 id=747 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0aa589c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "820",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 820,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 700,
+              "run_time_ns_delta": 269507,
+              "type": "kprobe",
+              "ns_per_call": 385.01,
+              "aggregate_contribution_ns": 5.6370529521301445e-05,
+              "call_fraction": 1.4641315685644905e-07,
+              "install_receipt": {
+                "native": {
+                  "id": 820,
+                  "fd": 1361,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 10436,
+                  "text": "[917.345463 pid=2025 tid=2048] native-loader jit-info native fd=1361 id=820 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b60570 ksym1=0x0"
+                },
+                "original": {
+                  "id": 819,
+                  "fd": 1308,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10435,
+                  "text": "[917.345141 pid=2025 tid=2048] native-loader jit-info original fd=1308 id=819 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0b5fdd4 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "832",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 832,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 160,
+              "run_time_ns_delta": 239995,
+              "type": "kprobe",
+              "ns_per_call": 1499.96875,
+              "aggregate_contribution_ns": 5.019775082823355e-05,
+              "call_fraction": 3.3465864424331207e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 832,
+                  "fd": 1370,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 10568,
+                  "text": "[924.308203 pid=2025 tid=2032] native-loader jit-info native fd=1370 id=832 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b7a2dc ksym1=0x0"
+                },
+                "original": {
+                  "id": 831,
+                  "fd": 1318,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10567,
+                  "text": "[924.307094 pid=2025 tid=2032] native-loader jit-info original fd=1318 id=831 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0b79b4c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "882",
+              "bytes_jited": 1329,
+              "bytes_xlated": 16,
+              "id": 882,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 160,
+              "run_time_ns_delta": 229022,
+              "type": "kprobe",
+              "ns_per_call": 1431.3875,
+              "aggregate_contribution_ns": 4.7902620013682387e-05,
+              "call_fraction": 3.3465864424331207e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 882,
+                  "fd": 1483,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1329,
+                  "xlated": 16,
+                  "line": 11684,
+                  "text": "[954.554438 pid=2025 tid=2025] native-loader jit-info native fd=1483 id=882 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1329 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0bf8dfc ksym1=0x0"
+                },
+                "original": {
+                  "id": 881,
+                  "fd": 1435,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 11683,
+                  "text": "[954.554123 pid=2025 tid=2025] native-loader jit-info original fd=1435 id=881 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0bf8648 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "334",
+              "bytes_jited": 890,
+              "bytes_xlated": 16,
+              "id": 334,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 130,
+              "run_time_ns_delta": 174844,
+              "type": "kprobe",
+              "ns_per_call": 1344.9538461538461,
+              "aggregate_contribution_ns": 3.6570659996298536e-05,
+              "call_fraction": 2.719101484476911e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 334,
+                  "fd": 111,
+                  "type": 2,
+                  "name": "event_exit_acct",
+                  "tag": "59f4a931744dcdc6",
+                  "jited": 890,
+                  "xlated": 16,
+                  "line": 259,
+                  "text": "[837.283639 pid=2025 tid=2035] native-loader jit-info native fd=111 id=334 type=2 name=event_exit_acct tag=59f4a931744dcdc6 jited_len=890 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc040261c ksym1=0x0"
+                },
+                "original": {
+                  "id": 333,
+                  "fd": 71,
+                  "type": 2,
+                  "name": "event_exit_acct",
+                  "tag": "4dfbb31db5fbfce9",
+                  "jited": 1042,
+                  "xlated": 1840,
+                  "line": 258,
+                  "text": "[837.283244 pid=2025 tid=2035] native-loader jit-info original fd=71 id=333 type=2 name=event_exit_acct tag=4dfbb31db5fbfce9 jited_len=1042 xlated_len=1840 nr_jited_ksyms=1 ksym0=0xffffffffc04021e0 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "event_exit_acct:original_jited=1042"
+            }
+          ]
+        }
+      }
+    },
+    "current": {
+      "run": "corpus/results/x86_kvm_corpus_20261128_094333_560478",
+      "inputs": [
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_094333_560478/details/apps/tetragon__observer.json",
+          "bytes": 143360,
+          "sha256": "b7f89705afe6623a04cc8f8fa86ae7682496d86c7adf307f3e4aee83633e552b"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_094333_560478/details/shim-logs/tetragon__observer.post_rejit.log",
+          "bytes": 1325506,
+          "sha256": "73c827f6dca2942cf7f3c379be9402662fb06e466c2d362c720cbda69996e7a6"
+        },
+        {
+          "path": "corpus/results/x86_kvm_corpus_20261128_094333_560478/metadata.json",
+          "bytes": 987,
+          "sha256": "ef47ac46b49a5950b233b10bcef22d1567141bfa58ed18dfe0b354930de0e550"
+        }
+      ],
+      "phases": {
+        "baseline": {
+          "calls": 2925906609,
+          "run_time_ns": 2142278869442,
+          "ns_per_call": 732.1760929936777,
+          "programs": 287,
+          "positive_programs": 32,
+          "retained_programs": 21,
+          "retained_rule": "run_cnt_delta>=100 (frozen05-29 parser)",
+          "buckets": {
+            "generic_kprobe_:jited=1879": {
+              "programs": 15,
+              "calls": 1160471684,
+              "run_time_ns": 1113021286245,
+              "call_fraction": 0.3966195231352991,
+              "ns_per_call": 959.1111111031641,
+              "aggregate_contribution_ns": 380.40219151950384,
+              "installed_bytes": [
+                1879
+              ],
+              "original_tags": []
+            },
+            "generic_retkpro:jited=15275": {
+              "programs": 5,
+              "calls": 423446754,
+              "run_time_ns": 21094802204,
+              "call_fraction": 0.14472326379026954,
+              "ns_per_call": 49.816894343225975,
+              "aggregate_contribution_ns": 7.2096635412466785,
+              "installed_bytes": [
+                15275
+              ],
+              "original_tags": []
+            },
+            "generic_tracepo:jited=14942": {
+              "programs": 1,
+              "calls": 1341988171,
+              "run_time_ns": 1008162780993,
+              "call_fraction": 0.45865721307443136,
+              "ns_per_call": 751.2456538583007,
+              "aggregate_contribution_ns": 344.56423793292714,
+              "installed_bytes": [
+                14942
+              ],
+              "original_tags": []
+            }
+          },
+          "records": [
+            {
+              "program_id": "215",
+              "bytes_jited": 14942,
+              "bytes_xlated": 26568,
+              "id": 215,
+              "name": "generic_tracepo",
+              "run_cnt_delta": 1341988171,
+              "run_time_ns_delta": 1008162780993,
+              "type": "tracepoint",
+              "ns_per_call": 751.2456538583007,
+              "aggregate_contribution_ns": 344.56423793292714,
+              "call_fraction": 0.45865721307443136,
+              "bucket": "generic_tracepo:jited=14942"
+            },
+            {
+              "program_id": "145",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 145,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 57257423,
+              "run_time_ns_delta": 355167231463,
+              "type": "kprobe",
+              "ns_per_call": 6202.990160122994,
+              "aggregate_contribution_ns": 121.3870703769274,
+              "call_fraction": 0.019569121865980924,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "108",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 108,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 165316081,
+              "run_time_ns_delta": 157949917169,
+              "type": "kprobe",
+              "ns_per_call": 955.4419401522106,
+              "aggregate_contribution_ns": 53.983239479739666,
+              "call_fraction": 0.0565008057644399,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "102",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 102,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 165921482,
+              "run_time_ns_delta": 155871339753,
+              "type": "kprobe",
+              "ns_per_call": 939.4283240129207,
+              "aggregate_contribution_ns": 53.27283491330328,
+              "call_fraction": 0.0567077163329925,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "139",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 139,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 241600888,
+              "run_time_ns_delta": 139521350887,
+              "type": "kprobe",
+              "ns_per_call": 577.4869125770763,
+              "aggregate_contribution_ns": 47.68482714309355,
+              "call_fraction": 0.08257300053830939,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "307",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 307,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 85252174,
+              "run_time_ns_delta": 78896478873,
+              "type": "kprobe",
+              "ns_per_call": 925.4482926499916,
+              "aggregate_contribution_ns": 26.96479738290922,
+              "call_fraction": 0.029137011324205257,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "133",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 133,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 195930995,
+              "run_time_ns_delta": 44553572768,
+              "type": "kprobe",
+              "ns_per_call": 227.39420461780435,
+              "aggregate_contribution_ns": 15.227270969946396,
+              "call_fraction": 0.06696419988161009,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "93",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 93,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529517,
+              "run_time_ns_delta": 43334279383,
+              "type": "kprobe",
+              "ns_per_call": 1043.4573410280693,
+              "aggregate_contribution_ns": 14.810547694757267,
+              "call_fraction": 0.014193726099205103,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "261",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 261,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529517,
+              "run_time_ns_delta": 43284489112,
+              "type": "kprobe",
+              "ns_per_call": 1042.25842819217,
+              "aggregate_contribution_ns": 14.79353065434769,
+              "call_fraction": 0.014193726099205103,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "67",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 67,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529517,
+              "run_time_ns_delta": 39685003439,
+              "type": "kprobe",
+              "ns_per_call": 955.5854800574733,
+              "aggregate_contribution_ns": 13.563318568313196,
+              "call_fraction": 0.014193726099205103,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "247",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 247,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 18600623081,
+              "type": "kprobe",
+              "ns_per_call": 447.88961078035146,
+              "aggregate_contribution_ns": 6.357216947316448,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "83",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 83,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 18131633297,
+              "type": "kprobe",
+              "ns_per_call": 436.59667446843366,
+              "aggregate_contribution_ns": 6.196928241396238,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "56",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 56,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 17985148359,
+              "type": "kprobe",
+              "ns_per_call": 433.06942263497103,
+              "aggregate_contribution_ns": 6.14686343838803,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "143",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 143,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 241600888,
+              "run_time_ns_delta": 12049333568,
+              "type": "kprobe",
+              "ns_per_call": 49.8728860963458,
+              "aggregate_contribution_ns": 4.118153850480605,
+              "call_fraction": 0.08257300053830939,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "154",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 154,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 57257423,
+              "run_time_ns_delta": 2691640417,
+              "type": "kprobe",
+              "ns_per_call": 47.009457917796965,
+              "aggregate_contribution_ns": 0.9199338108470707,
+              "call_fraction": 0.019569121865980924,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "88",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 88,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 2167175784,
+              "type": "kprobe",
+              "ns_per_call": 52.18403244673344,
+              "aggregate_contribution_ns": 0.7406852212349612,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "251",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 251,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 2135078682,
+              "type": "kprobe",
+              "ns_per_call": 51.41115734145582,
+              "aggregate_contribution_ns": 0.7297152531911179,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "64",
+              "bytes_jited": 15275,
+              "bytes_xlated": 26384,
+              "id": 64,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 41529481,
+              "run_time_ns_delta": 2051573753,
+              "type": "kprobe",
+              "ns_per_call": 49.40041877720552,
+              "aggregate_contribution_ns": 0.7011754054929236,
+              "call_fraction": 0.014193713795326404,
+              "bucket": "generic_retkpro:jited=15275"
+            },
+            {
+              "program_id": "229",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 229,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 15101,
+              "run_time_ns_delta": 38720085,
+              "type": "kprobe",
+              "ns_per_call": 2564.0742334944707,
+              "aggregate_contribution_ns": 0.013233534139776777,
+              "call_fraction": 5.161135339572966e-06,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "234",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 234,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 229,
+              "run_time_ns_delta": 1058827,
+              "type": "kprobe",
+              "ns_per_call": 4623.698689956332,
+              "aggregate_contribution_ns": 0.0003618799714054715,
+              "call_fraction": 7.826633949819278e-08,
+              "bucket": "generic_kprobe_:jited=1879"
+            },
+            {
+              "program_id": "266",
+              "bytes_jited": 1879,
+              "bytes_xlated": 3304,
+              "id": 266,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 317,
+              "run_time_ns_delta": 439749,
+              "type": "kprobe",
+              "ns_per_call": 1387.2208201892745,
+              "aggregate_contribution_ns": 0.00015029495427070207,
+              "call_fraction": 1.083424874276293e-07,
+              "bucket": "generic_kprobe_:jited=1879"
+            }
+          ]
+        },
+        "post_rejit": {
+          "calls": 3400867287,
+          "run_time_ns": 1972483212456,
+          "ns_per_call": 579.9941738379279,
+          "programs": 287,
+          "positive_programs": 32,
+          "retained_programs": 24,
+          "retained_rule": "run_cnt_delta>=100 (frozen05-29 parser)",
+          "buckets": {
+            "event_exit_acct:original_jited=1042": {
+              "programs": 1,
+              "calls": 118,
+              "run_time_ns": 161510,
+              "call_fraction": 3.469703168102484e-08,
+              "ns_per_call": 1368.7288135593221,
+              "aggregate_contribution_ns": 4.749082700679934e-05,
+              "installed_bytes": [
+                904
+              ],
+              "original_tags": [
+                "4dfbb31db5fbfce9"
+              ]
+            },
+            "generic_kprobe_:original_jited=1879": {
+              "programs": 17,
+              "calls": 1362790852,
+              "run_time_ns": 924703181085,
+              "call_fraction": 0.40071862174961725,
+              "ns_per_call": 678.536387097057,
+              "aggregate_contribution_ns": 271.9021658444974,
+              "installed_bytes": [
+                1401
+              ],
+              "original_tags": [
+                "93c5f592a9cdde6a"
+              ]
+            },
+            "generic_retkpro:original_jited=15275": {
+              "programs": 5,
+              "calls": 509037359,
+              "run_time_ns": 25115990063,
+              "call_fraction": 0.14967868959362896,
+              "ns_per_call": 49.34017045888375,
+              "aggregate_contribution_ns": 7.385172058612,
+              "installed_bytes": [
+                19253
+              ],
+              "original_tags": [
+                "f5ade143c1fe9ba0"
+              ]
+            },
+            "generic_tracepo:original_jited=14942": {
+              "programs": 1,
+              "calls": 1529038958,
+              "run_time_ns": 1022663879798,
+              "call_fraction": 0.44960265395972215,
+              "ns_per_call": 668.8278767832415,
+              "aggregate_contribution_ns": 300.7067884439914,
+              "installed_bytes": [
+                13625
+              ],
+              "original_tags": [
+                "d9601a7cf35a5c65"
+              ]
+            }
+          },
+          "records": [
+            {
+              "program_id": "704",
+              "bytes_jited": 13625,
+              "bytes_xlated": 16,
+              "id": 704,
+              "name": "generic_tracepo",
+              "run_cnt_delta": 1529038958,
+              "run_time_ns_delta": 1022663879798,
+              "type": "tracepoint",
+              "ns_per_call": 668.8278767832415,
+              "aggregate_contribution_ns": 300.7067884439914,
+              "call_fraction": 0.44960265395972215,
+              "install_receipt": {
+                "native": {
+                  "id": 704,
+                  "fd": 1073,
+                  "type": 5,
+                  "name": "generic_tracepo",
+                  "tag": "acce632fa2867084",
+                  "jited": 13625,
+                  "xlated": 16,
+                  "line": 8206,
+                  "text": "[895.758821 pid=2016 tid=2024] native-loader jit-info native fd=1073 id=704 type=5 name=generic_tracepo tag=acce632fa2867084 jited_len=13625 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc09dd2ac ksym1=0x0"
+                },
+                "original": {
+                  "id": 703,
+                  "fd": 1011,
+                  "type": 5,
+                  "name": "generic_tracepo",
+                  "tag": "d9601a7cf35a5c65",
+                  "jited": 14942,
+                  "xlated": 26568,
+                  "line": 8205,
+                  "text": "[895.758535 pid=2016 tid=2024] native-loader jit-info original fd=1011 id=703 type=5 name=generic_tracepo tag=d9601a7cf35a5c65 jited_len=14942 xlated_len=26568 nr_jited_ksyms=1 ksym0=0xffffffffc09d9814 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_tracepo:original_jited=14942"
+            },
+            {
+              "program_id": "576",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 576,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 71250231,
+              "run_time_ns_delta": 337471852511,
+              "type": "kprobe",
+              "ns_per_call": 4736.431696775832,
+              "aggregate_contribution_ns": 99.231114898545,
+              "call_fraction": 0.020950606121079136,
+              "install_receipt": {
+                "native": {
+                  "id": 576,
+                  "fd": 865,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 5796,
+                  "text": "[880.977144 pid=2016 tid=2030] native-loader jit-info native fd=865 id=576 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc089fb94 ksym1=0x0"
+                },
+                "original": {
+                  "id": 575,
+                  "fd": 800,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 5795,
+                  "text": "[880.976849 pid=2016 tid=2030] native-loader jit-info original fd=800 id=575 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc089f418 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "508",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 508,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 175287309,
+              "run_time_ns_delta": 123696470369,
+              "type": "kprobe",
+              "ns_per_call": 705.6784149102317,
+              "aggregate_contribution_ns": 36.372036874780875,
+              "call_fraction": 0.05154194333605586,
+              "install_receipt": {
+                "native": {
+                  "id": 508,
+                  "fd": 638,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 4151,
+                  "text": "[874.723695 pid=2016 tid=2028] native-loader jit-info native fd=638 id=508 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc058c7c8 ksym1=0x0"
+                },
+                "original": {
+                  "id": 507,
+                  "fd": 562,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 4150,
+                  "text": "[874.723366 pid=2016 tid=2028] native-loader jit-info original fd=562 id=507 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc058c05c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "486",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 486,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 176479065,
+              "run_time_ns_delta": 122736802462,
+              "type": "kprobe",
+              "ns_per_call": 695.4751401363102,
+              "aggregate_contribution_ns": 36.089853588573746,
+              "call_fraction": 0.05189237041815799,
+              "install_receipt": {
+                "native": {
+                  "id": 486,
+                  "fd": 620,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 3987,
+                  "text": "[873.219325 pid=2016 tid=2033] native-loader jit-info native fd=620 id=486 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0553ab4 ksym1=0x0"
+                },
+                "original": {
+                  "id": 485,
+                  "fd": 540,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3986,
+                  "text": "[873.218767 pid=2016 tid=2033] native-loader jit-info original fd=540 id=485 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0553318 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "890",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 890,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 130630507,
+              "run_time_ns_delta": 96101924979,
+              "type": "kprobe",
+              "ns_per_call": 735.6775012669897,
+              "aggregate_contribution_ns": 28.258063861049454,
+              "call_fraction": 0.03841093932107913,
+              "install_receipt": {
+                "native": {
+                  "id": 890,
+                  "fd": 1488,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 11815,
+                  "text": "[992.832324 pid=2016 tid=2033] native-loader jit-info native fd=1488 id=890 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0bb2ce0 ksym1=0x0"
+                },
+                "original": {
+                  "id": 889,
+                  "fd": 1445,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 11814,
+                  "text": "[992.831958 pid=2016 tid=2033] native-loader jit-info original fd=1445 id=889 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0bb2560 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "554",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 554,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 291479201,
+              "run_time_ns_delta": 75190713367,
+              "type": "kprobe",
+              "ns_per_call": 257.9625342358476,
+              "aggregate_contribution_ns": 22.109275964522517,
+              "call_fraction": 0.0857073141648882,
+              "install_receipt": {
+                "native": {
+                  "id": 554,
+                  "fd": 849,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 5538,
+                  "text": "[878.780487 pid=2016 tid=2026] native-loader jit-info native fd=849 id=554 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc05f560c ksym1=0x0"
+                },
+                "original": {
+                  "id": 553,
+                  "fd": 783,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 5537,
+                  "text": "[878.780175 pid=2016 tid=2026] native-loader jit-info original fd=783 id=553 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc05f4e9c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "476",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 476,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769362,
+              "run_time_ns_delta": 41915861643,
+              "type": "kprobe",
+              "ns_per_call": 859.4711910112746,
+              "aggregate_contribution_ns": 12.325050672581567,
+              "call_fraction": 0.014340272020147194,
+              "install_receipt": {
+                "native": {
+                  "id": 476,
+                  "fd": 614,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 3857,
+                  "text": "[872.455928 pid=2016 tid=2022] native-loader jit-info native fd=614 id=476 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc053f820 ksym1=0x0"
+                },
+                "original": {
+                  "id": 475,
+                  "fd": 542,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3856,
+                  "text": "[872.455068 pid=2016 tid=2022] native-loader jit-info original fd=542 id=475 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc053f0a4 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "806",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 806,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769362,
+              "run_time_ns_delta": 40675178303,
+              "type": "kprobe",
+              "ns_per_call": 834.0313802546771,
+              "aggregate_contribution_ns": 11.960236866190892,
+              "call_fraction": 0.014340272020147194,
+              "install_receipt": {
+                "native": {
+                  "id": 806,
+                  "fd": 1351,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 10308,
+                  "text": "[941.660535 pid=2016 tid=2030] native-loader jit-info native fd=1351 id=806 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0ade228 ksym1=0x0"
+                },
+                "original": {
+                  "id": 805,
+                  "fd": 1298,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10307,
+                  "text": "[941.660228 pid=2016 tid=2030] native-loader jit-info original fd=1298 id=805 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0adda94 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "418",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 418,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769362,
+              "run_time_ns_delta": 39852486789,
+              "type": "kprobe",
+              "ns_per_call": 817.1623567476646,
+              "aggregate_contribution_ns": 11.718330480386076,
+              "call_fraction": 0.014340272020147194,
+              "install_receipt": {
+                "native": {
+                  "id": 418,
+                  "fd": 387,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 2443,
+                  "text": "[868.426333 pid=2016 tid=2022] native-loader jit-info native fd=387 id=418 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc04add50 ksym1=0x0"
+                },
+                "original": {
+                  "id": 417,
+                  "fd": 323,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 2442,
+                  "text": "[868.425537 pid=2016 tid=2022] native-loader jit-info original fd=323 id=417 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc04ad5cc ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "546",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 546,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 225030650,
+              "run_time_ns_delta": 14576196294,
+              "type": "kprobe",
+              "ns_per_call": 64.77427094486906,
+              "aggregate_contribution_ns": 4.286023259336906,
+              "call_fraction": 0.06616860671399671,
+              "install_receipt": {
+                "native": {
+                  "id": 546,
+                  "fd": 692,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 4694,
+                  "text": "[877.738597 pid=2016 tid=2022] native-loader jit-info native fd=692 id=546 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc05e2320 ksym1=0x0"
+                },
+                "original": {
+                  "id": 545,
+                  "fd": 620,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 4693,
+                  "text": "[877.738235 pid=2016 tid=2022] native-loader jit-info original fd=620 id=545 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc05e1b88 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "566",
+              "bytes_jited": 19253,
+              "bytes_xlated": 16,
+              "id": 566,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 291479201,
+              "run_time_ns_delta": 13894783068,
+              "type": "kprobe",
+              "ns_per_call": 47.66989555457166,
+              "aggregate_contribution_ns": 4.085658714503081,
+              "call_fraction": 0.0857073141648882,
+              "install_receipt": {
+                "native": {
+                  "id": 566,
+                  "fd": 850,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19253,
+                  "xlated": 16,
+                  "line": 5682,
+                  "text": "[879.934487 pid=2016 tid=2023] native-loader jit-info native fd=850 id=566 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19253 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0884a90 ksym1=0x0"
+                },
+                "original": {
+                  "id": 565,
+                  "fd": 778,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "f5ade143c1fe9ba0",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 5681,
+                  "text": "[879.933397 pid=2016 tid=2023] native-loader jit-info original fd=778 id=565 type=2 name=generic_retkpro tag=f5ade143c1fe9ba0 jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc0880e88 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "774",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 774,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 10890254911,
+              "type": "kprobe",
+              "ns_per_call": 223.30139865217282,
+              "aggregate_contribution_ns": 3.202199319164435,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 774,
+                  "fd": 1329,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 10025,
+                  "text": "[923.324947 pid=2016 tid=2028] native-loader jit-info native fd=1329 id=774 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0a87014 ksym1=0x0"
+                },
+                "original": {
+                  "id": 773,
+                  "fd": 1282,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10024,
+                  "text": "[923.324702 pid=2016 tid=2028] native-loader jit-info original fd=1282 id=773 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0a8688c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "402",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 402,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 10829302304,
+              "type": "kprobe",
+              "ns_per_call": 222.051583794226,
+              "aggregate_contribution_ns": 3.184276653604096,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 402,
+                  "fd": 377,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 2194,
+                  "text": "[865.743214 pid=2016 tid=2027] native-loader jit-info native fd=377 id=402 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc048c81c ksym1=0x0"
+                },
+                "original": {
+                  "id": 401,
+                  "fd": 306,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 2193,
+                  "text": "[865.742655 pid=2016 tid=2027] native-loader jit-info original fd=306 id=401 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc048c08c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "456",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 456,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 10737087595,
+              "type": "kprobe",
+              "ns_per_call": 220.16074894561248,
+              "aggregate_contribution_ns": 3.1571615969970663,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 456,
+                  "fd": 600,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 3599,
+                  "text": "[870.914212 pid=2016 tid=2023] native-loader jit-info native fd=600 id=456 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc050b34c ksym1=0x0"
+                },
+                "original": {
+                  "id": 455,
+                  "fd": 525,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 3598,
+                  "text": "[870.913480 pid=2016 tid=2023] native-loader jit-info original fd=525 id=455 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc050abcc ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "588",
+              "bytes_jited": 19253,
+              "bytes_xlated": 16,
+              "id": 588,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 71250231,
+              "run_time_ns_delta": 3660132796,
+              "type": "kprobe",
+              "ns_per_call": 51.37011830880941,
+              "aggregate_contribution_ns": 1.076235115081102,
+              "call_fraction": 0.020950606121079136,
+              "install_receipt": {
+                "native": {
+                  "id": 588,
+                  "fd": 867,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19253,
+                  "xlated": 16,
+                  "line": 5940,
+                  "text": "[882.164526 pid=2016 tid=2022] native-loader jit-info native fd=867 id=588 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19253 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc08bbe8c ksym1=0x0"
+                },
+                "original": {
+                  "id": 587,
+                  "fd": 795,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "f5ade143c1fe9ba0",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 5939,
+                  "text": "[882.163959 pid=2016 tid=2022] native-loader jit-info original fd=795 id=587 type=2 name=generic_retkpro tag=f5ade143c1fe9ba0 jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc08b829c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "786",
+              "bytes_jited": 19253,
+              "bytes_xlated": 16,
+              "id": 786,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 2620003931,
+              "type": "kprobe",
+              "ns_per_call": 53.722391904301944,
+              "aggregate_contribution_ns": 0.7703928762569205,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 786,
+                  "fd": 1348,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19253,
+                  "xlated": 16,
+                  "line": 10167,
+                  "text": "[930.499430 pid=2016 tid=2030] native-loader jit-info native fd=1348 id=786 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19253 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0aaaf54 ksym1=0x0"
+                },
+                "original": {
+                  "id": 785,
+                  "fd": 1277,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "f5ade143c1fe9ba0",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 10166,
+                  "text": "[930.499129 pid=2016 tid=2030] native-loader jit-info original fd=1277 id=785 type=2 name=generic_retkpro tag=f5ade143c1fe9ba0 jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc0aa7350 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "464",
+              "bytes_jited": 19253,
+              "bytes_xlated": 16,
+              "id": 464,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 2490798974,
+              "type": "kprobe",
+              "ns_per_call": 51.0730831556379,
+              "aggregate_contribution_ns": 0.7324011094232388,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 464,
+                  "fd": 599,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19253,
+                  "xlated": 16,
+                  "line": 3733,
+                  "text": "[871.560244 pid=2016 tid=2022] native-loader jit-info native fd=599 id=464 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19253 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0520ccc ksym1=0x0"
+                },
+                "original": {
+                  "id": 463,
+                  "fd": 521,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "f5ade143c1fe9ba0",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 3732,
+                  "text": "[871.559441 pid=2016 tid=2022] native-loader jit-info original fd=521 id=463 type=2 name=generic_retkpro tag=f5ade143c1fe9ba0 jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc051d0ec ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "414",
+              "bytes_jited": 19253,
+              "bytes_xlated": 16,
+              "id": 414,
+              "name": "generic_retkpro",
+              "run_cnt_delta": 48769309,
+              "run_time_ns_delta": 2450271294,
+              "type": "kprobe",
+              "ns_per_call": 50.24207527730196,
+              "aggregate_contribution_ns": 0.7204842433476587,
+              "call_fraction": 0.014340256435887202,
+              "install_receipt": {
+                "native": {
+                  "id": 414,
+                  "fd": 380,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "acce632fa2867084",
+                  "jited": 19253,
+                  "xlated": 16,
+                  "line": 2341,
+                  "text": "[867.839706 pid=2016 tid=2027] native-loader jit-info native fd=380 id=414 type=2 name=generic_retkpro tag=acce632fa2867084 jited_len=19253 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc049e150 ksym1=0x0"
+                },
+                "original": {
+                  "id": 413,
+                  "fd": 302,
+                  "type": 2,
+                  "name": "generic_retkpro",
+                  "tag": "f5ade143c1fe9ba0",
+                  "jited": 15275,
+                  "xlated": 26384,
+                  "line": 2340,
+                  "text": "[867.839052 pid=2016 tid=2027] native-loader jit-info original fd=302 id=413 type=2 name=generic_retkpro tag=f5ade143c1fe9ba0 jited_len=15275 xlated_len=26384 nr_jited_ksyms=1 ksym0=0xffffffffc049a54c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_retkpro:original_jited=15275"
+            },
+            {
+              "program_id": "736",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 736,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 16952,
+              "run_time_ns_delta": 26425816,
+              "type": "kprobe",
+              "ns_per_call": 1558.8612553091082,
+              "aggregate_contribution_ns": 0.007770316736855366,
+              "call_fraction": 4.984610856412992e-06,
+              "install_receipt": {
+                "native": {
+                  "id": 736,
+                  "fd": 1140,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 8744,
+                  "text": "[907.328981 pid=2016 tid=2026] native-loader jit-info native fd=1140 id=736 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0a28414 ksym1=0x0"
+                },
+                "original": {
+                  "id": 735,
+                  "fd": 1086,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 8743,
+                  "text": "[907.328660 pid=2016 tid=2026] native-loader jit-info original fd=1086 id=735 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0a27c8c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "744",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 744,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 229,
+              "run_time_ns_delta": 1117290,
+              "type": "kprobe",
+              "ns_per_call": 4878.995633187773,
+              "aggregate_contribution_ns": 0.00032853090277027325,
+              "call_fraction": 6.733576487249736e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 744,
+                  "fd": 1140,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 8996,
+                  "text": "[909.810226 pid=2016 tid=2024] native-loader jit-info native fd=1140 id=744 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0a41c08 ksym1=0x0"
+                },
+                "original": {
+                  "id": 743,
+                  "fd": 1078,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 8995,
+                  "text": "[909.809889 pid=2016 tid=2024] native-loader jit-info original fd=1078 id=743 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0a4149c ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "808",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 808,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 477,
+              "run_time_ns_delta": 574549,
+              "type": "kprobe",
+              "ns_per_call": 1204.5052410901467,
+              "aggregate_contribution_ns": 0.0001689419055533995,
+              "call_fraction": 1.4025833993092245e-07,
+              "install_receipt": {
+                "native": {
+                  "id": 808,
+                  "fd": 1353,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 10415,
+                  "text": "[942.954498 pid=2016 tid=2023] native-loader jit-info native fd=1353 id=808 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0adf308 ksym1=0x0"
+                },
+                "original": {
+                  "id": 807,
+                  "fd": 1308,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10414,
+                  "text": "[942.953988 pid=2016 tid=2023] native-loader jit-info original fd=1308 id=807 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0adeb94 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "880",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 880,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 109,
+              "run_time_ns_delta": 484948,
+              "type": "kprobe",
+              "ns_per_call": 4449.064220183486,
+              "aggregate_contribution_ns": 0.00014259539084448842,
+              "call_fraction": 3.2050647908743285e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 880,
+                  "fd": 1479,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 11688,
+                  "text": "[986.092018 pid=2016 tid=2026] native-loader jit-info native fd=1479 id=880 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b9a8f8 ksym1=0x0"
+                },
+                "original": {
+                  "id": 879,
+                  "fd": 1435,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 11687,
+                  "text": "[986.091713 pid=2016 tid=2026] native-loader jit-info original fd=1435 id=879 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0b9a150 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "826",
+              "bytes_jited": 1401,
+              "bytes_xlated": 16,
+              "id": 826,
+              "name": "generic_kprobe_",
+              "run_cnt_delta": 109,
+              "run_time_ns_delta": 446955,
+              "type": "kprobe",
+              "ns_per_call": 4100.504587155963,
+              "aggregate_contribution_ns": 0.00013142382877112254,
+              "call_fraction": 3.2050647908743285e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 826,
+                  "fd": 1366,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "acce632fa2867084",
+                  "jited": 1401,
+                  "xlated": 16,
+                  "line": 10562,
+                  "text": "[953.283884 pid=2016 tid=2033] native-loader jit-info native fd=1366 id=826 type=2 name=generic_kprobe_ tag=acce632fa2867084 jited_len=1401 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0b04b58 ksym1=0x0"
+                },
+                "original": {
+                  "id": 825,
+                  "fd": 1318,
+                  "type": 2,
+                  "name": "generic_kprobe_",
+                  "tag": "93c5f592a9cdde6a",
+                  "jited": 1879,
+                  "xlated": 3304,
+                  "line": 10561,
+                  "text": "[953.283533 pid=2016 tid=2033] native-loader jit-info original fd=1318 id=825 type=2 name=generic_kprobe_ tag=93c5f592a9cdde6a jited_len=1879 xlated_len=3304 nr_jited_ksyms=1 ksym0=0xffffffffc0b043e4 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "generic_kprobe_:original_jited=1879"
+            },
+            {
+              "program_id": "334",
+              "bytes_jited": 904,
+              "bytes_xlated": 16,
+              "id": 334,
+              "name": "event_exit_acct",
+              "run_cnt_delta": 118,
+              "run_time_ns_delta": 161510,
+              "type": "kprobe",
+              "ns_per_call": 1368.7288135593221,
+              "aggregate_contribution_ns": 4.749082700679934e-05,
+              "call_fraction": 3.469703168102484e-08,
+              "install_receipt": {
+                "native": {
+                  "id": 334,
+                  "fd": 111,
+                  "type": 2,
+                  "name": "event_exit_acct",
+                  "tag": "59f4a931744dcdc6",
+                  "jited": 904,
+                  "xlated": 16,
+                  "line": 260,
+                  "text": "[859.515454 pid=2016 tid=2028] native-loader jit-info native fd=111 id=334 type=2 name=event_exit_acct tag=59f4a931744dcdc6 jited_len=904 xlated_len=16 nr_jited_ksyms=1 ksym0=0xffffffffc0402608 ksym1=0x0"
+                },
+                "original": {
+                  "id": 333,
+                  "fd": 71,
+                  "type": 2,
+                  "name": "event_exit_acct",
+                  "tag": "4dfbb31db5fbfce9",
+                  "jited": 1042,
+                  "xlated": 1840,
+                  "line": 259,
+                  "text": "[859.515075 pid=2016 tid=2028] native-loader jit-info original fd=71 id=333 type=2 name=event_exit_acct tag=4dfbb31db5fbfce9 jited_len=1042 xlated_len=1840 nr_jited_ksyms=1 ksym0=0xffffffffc04021e8 ksym1=0x0"
+                },
+                "join": "Same loader thread adjacent original/native receipt; native ID/name/JIT length validated against per-run record"
+              },
+              "bucket": "event_exit_acct:original_jited=1042"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "causal_status": "OPEN: counters localize the increment; original installed native bytes/link plans for the11-23 run are not located, so skipped-work or call-target cause is not proven.",
+  "native_delta_ns": 261.89846093649527,
+  "bucket_deltas": [
+    {
+      "bucket": "generic_kprobe_:original_jited=1879",
+      "contribution_delta_ns": 249.20216791178842,
+      "symmetric_cost_term_ns": 252.81164904272484,
+      "symmetric_mix_term_ns": -3.6094811309363712
+    },
+    {
+      "bucket": "generic_tracepo:original_jited=14942",
+      "contribution_delta_ns": 13.275618325191374,
+      "symmetric_cost_term_ns": -2.7353472453406207,
+      "symmetric_mix_term_ns": 16.010965570532054
+    },
+    {
+      "bucket": "event_exit_acct:original_jited=1042",
+      "contribution_delta_ns": 1.0920167010500804e-05,
+      "symmetric_cost_term_ns": 7.356931444696664e-07,
+      "symmetric_mix_term_ns": 1.018447386603114e-05
+    },
+    {
+      "bucket": "generic_retkpro:original_jited=15275",
+      "contribution_delta_ns": -0.5793362206515802,
+      "symmetric_cost_term_ns": 0.10619701662297776,
+      "symmetric_mix_term_ns": -0.6855332372745567
+    }
+  ],
+  "limits": [
+    "Bucket contributions are exact accounting, not cause. Same original BPF tag does not prove same native body, attach target, map values or dynamic work.",
+    "Native generic_kprobe 1329->1401 bytes and original tag93c5f592a9cdde6a/JIT1879 are actual receipts, but neither code length nor source-history dates bind native instruction content.",
+    "Existing same-image03:56 check archive has canonical generic_kprobe_event blobs/plans; reuse them for current-body analysis. They are not an installed-code capture from either long run.",
+    "Do not restore historical short paths or change flags until equal-work and actual branch/helper/map/tail-call targets explain the difference. OTel2689 hold remains."
+  ]
+}

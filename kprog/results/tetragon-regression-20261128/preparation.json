@@ -1,0 +1,14 @@
+{
+  "prepared_utc": "2026-11-28T11:36:50Z",
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "recipes": {
+    "compare_runs.py": "26146bb2e7079d850527203330a4ab9bc5a7b431bcf0a01705a57642ad8ea2b2",
+    "inspect_current.py": "aaa979393d66403539ad1e248bc377340e1ff69423f82f688f6bee708b61ad50"
+  },
+  "resources": {
+    "cpu": 19,
+    "address_space_bytes": 51539607552,
+    "compiler_jobs": 0
+  },
+  "diagnostic": "Existing archive metadata/code decoding only. No timing, image build or guest. Collect the same detached inspection next turn; no rerun merely because current-code records are not yet reviewed."
+}
