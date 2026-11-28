@@ -1,0 +1,350 @@
+{
+  "controller_pid": 1604118,
+  "ended_utc": "2026-11-28T18:55:29.565815+00:00",
+  "architectures": [
+    {
+      "arch": "x86",
+      "returncode": 2,
+      "before_objects": 41,
+      "after_objects": 55,
+      "tables": 60,
+      "queries": 2619,
+      "zero_query_executable_comparisons": [
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/capable.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/opensnoop.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/bcc/vfsstat.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_host.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_overlay.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_sock.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_xdp.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/balancer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/katran/xdp_root.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/custom_trace.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/dotnet_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/go_labels.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/hotspot_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/native_stack_trace.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/off_cpu.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/perl_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/php_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/python_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/ruby_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/sched_monitor.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/system_config.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/uprobe.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/otel/v8_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        }
+      ],
+      "kernel_unchanged": true
+    },
+    {
+      "arch": "arm64",
+      "returncode": 2,
+      "before_objects": 41,
+      "after_objects": 55,
+      "tables": 60,
+      "queries": 2600,
+      "zero_query_executable_comparisons": [
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/capable.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/opensnoop.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/bcc/vfsstat.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_alignchecker.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_host.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_lxc.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_overlay.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_sock.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_wireguard.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/bpf_xdp.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/cilium/cilium_placeholders.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/balancer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/healthchecking_ipip.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/katran/xdp_root.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/custom_trace.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/dotnet_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/go_labels.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/hotspot_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/interpreter_dispatcher.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/native_stack_trace.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/off_cpu.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/perl_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/php_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/python_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/ruby_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/sched_monitor.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/system_config.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/uprobe.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/otel/v8_tracer.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/kprobe_check.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        },
+        {
+          "path": "/workspaces/repository/vendor/build/native-bpf/arm64/7.0.0-rc2+/native/tracee/lsm_support/lsm_check.native.o",
+          "query_count": 0,
+          "executable_sections_equal": true
+        }
+      ],
+      "kernel_unchanged": true
+    }
+  ],
+  "image_unchanged": true,
+  "all_architectures_build": false
+}

@@ -1,12 +1,15 @@
 """Archive the completed producer attempt before replacing its build metadata."""
 from pathlib import Path
-import hashlib,json,subprocess,tarfile
+import hashlib,json,subprocess,sys,tarfile
 ROOT=Path('/workspaces/repository');OUT=Path(__file__).resolve().parent
 def seal(p):
  b=p.read_bytes();return dict(path=str(p),bytes=len(b),sha256=hashlib.sha256(b).hexdigest())
-controller=OUT/'producer-regeneration-controller.json'
-r=json.loads(controller.read_text());assert r['status']=='complete' and r['pid']==1584215
-files=[controller,OUT/'producer-regeneration-job.log']
+name=sys.argv[1] if len(sys.argv)>1 else 'producer-regeneration'
+prefix='producer-failed' if name=='producer-regeneration' else name
+controller=OUT/(name+'-controller.json')
+r=json.loads(controller.read_text());assert r['status']=='complete'
+files=[controller,OUT/(name+'-job.log')]
+files.extend(p for p in OUT.glob('*-v310-oracle.*') if p.is_file())
 review=[]
 for c in r['architectures']:
  for stream in ['stdout','stderr']:
@@ -19,7 +22,7 @@ for c in r['architectures']:
  native=Path(c['native'])
  files.extend(p for p in native.rglob('*') if p.is_file() and any(q.startswith('core-answers-') for q in p.parts))
  review.append(dict(arch=c['arch'],returncode=c['build']['returncode'],before_objects=len(c['before_objects']),after_objects=len(c['after_objects']),tables=len(c['tables']),queries=sum(x.get('queries',0) for x in c['tables']),zero_query_executable_comparisons=c['zero_query_executable_comparisons'],kernel_unchanged=c['kernel_unchanged']))
-archive=OUT/'producer-failed-records.tar.zst';assert not archive.exists()
+archive=OUT/(prefix+'-records.tar.zst');assert not archive.exists()
 members=[dict(name=str(p.relative_to(ROOT)),**seal(p)) for p in sorted(set(files))]
 with archive.open('wb') as f:
  z=subprocess.Popen(['zstd','-q','-c'],stdin=subprocess.PIPE,stdout=f)
@@ -35,6 +38,6 @@ with tarfile.open(fileobj=z.stdout,mode='r|') as tar:
   assert len(b)==x['bytes'] and hashlib.sha256(b).hexdigest()==x['sha256'];seen.add(m.name)
 assert z.wait()==0 and seen==set(by)
 for x in members:assert seal(Path(x['path']))=={k:x[k] for k in ['path','bytes','sha256']}
-(OUT/'producer-failed-archive.json').write_text(json.dumps(dict(archive=seal(archive),members=members,every_member_and_original_verified=True),indent=2)+'\n')
-(OUT/'producer-failed-review.json').write_text(json.dumps(dict(controller_pid=r['pid'],ended_utc=r['ended_utc'],architectures=review,findings=['Tracee reused intermediate query text with different concrete types and deltas (88 vs 280 on x86).','Tetragon preserve_access_index wraps a scalar assignment, not just pointer addresses.'],image_unchanged=True,all_architectures_build=False),indent=2)+'\n')
+(OUT/(prefix+'-archive.json')).write_text(json.dumps(dict(archive=seal(archive),members=members,every_member_and_original_verified=True),indent=2)+'\n')
+(OUT/(prefix+'-review.json')).write_text(json.dumps(dict(controller_pid=r['pid'],ended_utc=r['ended_utc'],architectures=review,image_unchanged=True,all_architectures_build=r['all_architectures_build']),indent=2)+'\n')
 print(json.dumps(dict(archive=seal(archive),members=len(members),architectures=[{k:v for k,v in x.items() if k!='zero_query_executable_comparisons'} for x in review]),indent=2))
