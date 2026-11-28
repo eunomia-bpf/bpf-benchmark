@@ -1,0 +1,193 @@
+{
+  "utc": "2026-11-28T10:55:11Z",
+  "authorization": "COORDINATOR2026-11-27T12:19Z and15:18Z: remove verified raw duplicates only after every file matches committed archive; archive remains.",
+  "archive_commit": "7509763a8bf0beacc4f7769df4b322eda804086a",
+  "archive_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/cilium-prefix-records.tar.zst",
+  "archive_git_blob": "35f7cf6ba3b1447fa188aa142ba89cf55abe4808",
+  "archive_sha256": "897f69f083357a6f03155c5afd80318f45923968b2c9583034302ce86263dbe6",
+  "index_git_blob": "70fe211a4bc1ae2a573773d0d74c58240d712863",
+  "verified_files": [
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_host.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_host.native.json",
+      "bytes": 43549,
+      "sha256": "0e0bc488a23ba538b26042fd291db681e1adf01c8e16ad81d8f0ae98d99ce4a7",
+      "allocated_bytes": 45056,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_host.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_host.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_lxc.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_lxc.native.json",
+      "bytes": 57264,
+      "sha256": "3979ae277267be67aa0c854312484294a18c8bc7b7e8880da7f8b3c32f99846d",
+      "allocated_bytes": 57344,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_lxc.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_lxc.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_overlay.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_overlay.native.json",
+      "bytes": 32442,
+      "sha256": "1e7cf8368a9c9d1ffcb353f143b1dc378565e748b8b7b0945152929e4df97895",
+      "allocated_bytes": 32768,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_overlay.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_overlay.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_sock.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_sock.native.json",
+      "bytes": 97123,
+      "sha256": "28777b324feb0c3a017bebf398111ca061d36ccf172fa080f70b8f56a936430b",
+      "allocated_bytes": 98304,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_sock.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_sock.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_wireguard.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_wireguard.native.json",
+      "bytes": 36760,
+      "sha256": "72fb954531953a844f8c6fda8abb31949e745406da45806a251868e1a79b6be5",
+      "allocated_bytes": 36864,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_wireguard.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/arm64-bpf_wireguard.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/controller.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/controller.json",
+      "bytes": 70577,
+      "sha256": "bbd558eac7e04a0901e1e9a028ccd7c5b07cf7bfc4508dff8962054505af51fb",
+      "allocated_bytes": 73728,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/job.log",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/job.log",
+      "bytes": 270,
+      "sha256": "f939a9e239dd1cc01c8d2689a8119ca0f3eef51d0c96895463ae094b8d9f67b2",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_host.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_host.native.json",
+      "bytes": 43613,
+      "sha256": "0e1b01abcc7f1df4a9a6add521be7085baa4a13647902e4f8d8d3154fe848785",
+      "allocated_bytes": 45056,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_host.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_host.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_lxc.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_lxc.native.json",
+      "bytes": 57488,
+      "sha256": "049d31417a5b6f693f7bad6bddcd96d911cabafc5d78addc9dd4373e3ef7e942",
+      "allocated_bytes": 61440,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_lxc.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_lxc.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_overlay.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_overlay.native.json",
+      "bytes": 32470,
+      "sha256": "84d2c4fa39bc2baf7cf1348be772bca7de36a8dac726d8346b88ee1e2bdfdf4d",
+      "allocated_bytes": 32768,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_overlay.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_overlay.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_sock.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_sock.native.json",
+      "bytes": 97139,
+      "sha256": "394ee48075c766c076913d9ffb0acfa49312bcd31320e71bb0f7d5ad5fc51e1b",
+      "allocated_bytes": 98304,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_sock.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_sock.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_wireguard.native.json",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_wireguard.native.json",
+      "bytes": 36792,
+      "sha256": "f0016c35e326785b7f4e0e58db2c69b554270488745b7927eb8e9063ba3cd82b",
+      "allocated_bytes": 36864,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_wireguard.native.stderr",
+      "relative_path": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/x86-bpf_wireguard.native.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0,
+      "removed": true
+    }
+  ],
+  "logical_bytes": 605487,
+  "allocated_bytes_of_removed_copies": 622592,
+  "prior_lane_allocated_duplicate_bytes": 4882419712,
+  "status": "complete",
+  "cumulative_lane_allocated_duplicate_bytes": 4883042304,
+  "archive_preserved": true
+}
