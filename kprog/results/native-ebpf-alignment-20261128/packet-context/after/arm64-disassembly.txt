@@ -1,0 +1,17 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/after/arm64-accessors.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000000 <native_ifindex>:
+   0:	f9401008 	ldr	x8, [x0, #32]
+   4:	f9400108 	ldr	x8, [x8]
+   8:	b940e100 	ldr	w0, [x8, #224]
+   c:	d65f03c0 	ret
+
+0000000000000010 <native_ingress>:
+  10:	f9401008 	ldr	x8, [x0, #32]
+  14:	f9400108 	ldr	x8, [x8]
+  18:	b940e100 	ldr	w0, [x8, #224]
+  1c:	d65f03c0 	ret

@@ -1,0 +1,24 @@
+diff --git a/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h b/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h
+index aca075346..0f81288a3 100644
+--- a/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h
++++ b/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h
+@@ -542,11 +542,18 @@ ctx_get_protocol(const struct xdp_md *ctx)
+ static __always_inline __maybe_unused __u32
+ ctx_get_ifindex(const struct xdp_md *ctx)
+ {
++#ifdef MICRO_NATIVE
++	void *rxq = *(void * const *)((const char *)ctx + 32);
++	void *dev = *(void * const *)rxq;
++
++	return *(const __u32 *)((const char *)dev + 224);
++#else
+ 	return ctx->ingress_ifindex;
++#endif
+ }
+ 
+ static __always_inline __maybe_unused __u32
+ ctx_get_ingress_ifindex(const struct xdp_md *ctx)
+ {
+-	return ctx->ingress_ifindex;
++	return ctx_get_ifindex(ctx);
+ }

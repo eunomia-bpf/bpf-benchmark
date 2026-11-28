@@ -1,0 +1,17 @@
+{
+  "args": [
+    "clang-18",
+    "-target",
+    "bpf",
+    "-O2",
+    "-I/workspaces/repository/vendor/bpf/cilium/bpf/include",
+    "-I/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf",
+    "-I/workspaces/repository/vendor/bpf/cilium/bpf",
+    "-I/usr/include/x86_64-linux-gnu",
+    "-c",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c",
+    "-o",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/baseline-before.bpf.o"
+  ],
+  "returncode": 0
+}

@@ -1,0 +1,4 @@
+Normal git commit rejected the direct header patch (exit1):
+frozen: vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h adds lines (8). Operator 2026-11-16: only dead-code deletion here.
+Attempted commit title: Translate native XDP ifindex through the physical receive queue
+No commit was created; private index discarded by publisher finally clause. The validated proposal remains ifindex-fix.patch; own header edit was restored to HEAD after verifying both proposed and original hashes.

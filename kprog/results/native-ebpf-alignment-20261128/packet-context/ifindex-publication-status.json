@@ -1,0 +1,17 @@
+{
+  "utc": "2026-11-28T08:11:08Z",
+  "production_change_landed": false,
+  "normal_commit_rejected": true,
+  "reason": "Frozen app-header path permits only dead-code deletion; proposed change adds8 lines.",
+  "header_path": "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h",
+  "restored_header_sha256": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+  "proposed_header_sha256": "8b57d0c54b8f2b81f9083e9925fe78de9dc29b196c230848e127520e97e632c3",
+  "proposal_patch_sha256": "b5377c77f732c13002aec4dac8b08bbd2eea177aeb082e86eb70aab3f48c60fc",
+  "native_execution_both_isas": {
+    "before": 17,
+    "proposal_after": 34,
+    "kernel_derived_expected": 34
+  },
+  "baseline_fixture_text_equal": true,
+  "scope": "Validated header proposal is results only. No kernel/image/root/native-application-object rebuild or acceptance. Continue the allowed common context compiler/loader path; do not open this frozen header path or suppress hooks without operator authority."
+}
