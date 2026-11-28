@@ -1,0 +1,27 @@
+{
+  "pid": 1357849,
+  "started_utc": "2026-11-28T07:32:10Z",
+  "source_publication": {
+    "commit": "a93948e9347a87249e47262d174a588b777ecd39",
+    "remote": "a93948e9347a87249e47262d174a588b777ecd39\trefs/heads/master"
+  },
+  "source": {
+    "path": "kprog/results/native-ebpf-alignment-20261128/native-tail-code-audit/audit_tail_code.py",
+    "bytes": 10989,
+    "sha256": "16e916c2b903f2cbef96495dd9640c5730092e5d1c9649df5ee499db521b8a6a"
+  },
+  "command": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "python3",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/native-tail-code-audit/audit_tail_code.py"
+  ],
+  "stdin": "/dev/null",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/native-tail-code-audit/controller.json",
+  "log": "kprog/results/native-ebpf-alignment-20261128/native-tail-code-audit/job.log",
+  "collection": "Collect the SAME full controller/output/diagnostics/disassembly next turn. Do not infer alignment from process exit alone.",
+  "scope": "Existing archive/plan read-only metadata job; no guest/image/timing/product change."
+}
