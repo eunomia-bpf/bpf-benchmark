@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.field_names
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.field_names
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.borrowed_readback
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.borrowed_readback
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.flags_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.flags_readbacks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.native_flags
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView.native_flags
