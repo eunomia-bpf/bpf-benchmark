@@ -1,0 +1,29 @@
+{
+  "started_utc": "2026-11-28T08:38:29Z",
+  "launcher_pid": 1384508,
+  "command": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto",
+    "validate-core"
+  ],
+  "log": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/core-job.log",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/core-controller.json",
+  "preparation_commit": "624f0ae915535ff47b9573ab0afbcdb4d558d1b1",
+  "source_sha256": {
+    "kprog/x86/perf_context_lto.cpp": "29e81dc22584c947461f6319f73cb8efa46a08f30af3ad8afa05a301bb1235f2",
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": "8d6c667ea67c5197aaaa3edf125b3615edf3f14da444db9dbc79e8e5bd8e1d0b",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "e0ad2fb050be1579cd6a26211cbf67bcec54606512eff357be7c4c8718b6bd81",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "30fd9e723274180dd810e3e047c0ebe9e9cb4d0d68e216462154bc40aef9153a",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c",
+    "kprog/x86/native_lab/native_link/src/main.rs": "66371f179eb7ca8b2b941214bde1f4f98a7ee83d09c33258402b99fe9343f2a1"
+  },
+  "recipe_sha256": "51f5135a0a7dab28cfec8a54ab280550428c1c454b22101c8508163ee5c36ecd",
+  "resume_entry": "COORDINATOR 2026-11-28T07:17Z",
+  "policy": "Collect SAME job in a later turn. Metadata CPU19; each compile/test stage serialCPU16 AS48GiB, Rust tests1. No images/root/app/P/kernel/timing activation."
+}
