@@ -1,0 +1,13 @@
+# Actual caller GPR views after the SP store
+
+Accepted numeric-offset commit ce186bbc346a8a377c6f98ddb56183fa4082495b reaches the original continuation after 131 internal steps. Before the next original R30 word/tag read, this step transports the actual GPR observations and table slots across that SAME derived SP store.
+
+Actual allocated-local separation uses the original word/tag/table identifiers and SP scalar binding in the same795-local allocation. It preserves every differently named local read, all31 CurrentGPR word/tag observations and both31-slot pointer tables. The existing real header/table/cell consumer then reads R30word0 with RETURNtag10 in the updated memory. Pointer R0/tag1 is retained, while the borrowed SP is still -32. No old638 allocation, dense-array/table identification or successful-store oracle is introduced.
+
+This is a memory-frame proof. Original inline R30 word/tag execution, tag10 materialization using the actual numeric-return base, real data addressing/stores, linked whole-entry/provider/Senv transport and native whole-state refinement remain open. M5 is active, M6 has not begun and historical counts remain unchanged.
+
+Validation is pending until direct/focused/full/five public queries and normal private-index hooks commit/push plus cumulative owned audit pass. Raw sources/logs/receipts remain under /workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z. All new Lean uses existing shared timing flock/CPU17/j1/nice0/32GiB/unchanged proof budgets; full build also uses nonblocking exclusive formal-full-check. PERF12:11:17 recorded timingEX ownership for its paired BCC job. Shared timing availability is checked before launch, and every Lean phase takes the shared lock; no phase may bypass it.
+
+Publication uses formal-caller-sp-gpr-frame.index, base formal-caller-mem-offset-accepted-20261128.json, and output formal-caller-sp-gpr-frame-accepted-20261128.json. Peer staging is preserved byte for byte, and owned HEAD/index/work consistency is audited.
+
+First direct stage1 failed in 3.133979082107544 seconds only in the R30 specialization. All general block/local frames, CurrentGPR preservation, table-slot preservation and same-memory GPR readbacks passed. The simplifier retained Fin.ofNat30.val in a dependent bound test. Stage2 uses the explicit Fin31 index constructor and a kernel change to the exact R30 readback equality. Statements and memory premises are unchanged; no new assumption, budget or option. The immutable99-line stage1 source5c76c13ad353c03ec22cbb1d61b8c4370c3df25c835831c4f00a9e554d1ef0a1 and complete failed log/receipt are retained and included in publication metadata.
