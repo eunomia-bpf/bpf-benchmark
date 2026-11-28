@@ -1,0 +1,40 @@
+{
+  "prepared_utc": "2026-11-28T10:13:35Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "recipe_sha256": "8961ebe1d53197dd6190412024ad104518a5fe84dbacd5de556867d441694f32",
+  "source_sha256": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/manifests.json": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193",
+    "vendor/linux-framework/kernel/bpf/verifier.c": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "vendor/linux-framework/Documentation/bpf/standardization/instruction-set.rst": "b54e055155ef0daed8351b15d121d61805ddf973f9fe7b2ea6adda32c9d5f1fe",
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1"
+  },
+  "source_anchors": {
+    "vendor/linux-framework/Documentation/bpf/standardization/instruction-set.rst": {
+      "first_line": 426,
+      "last_line": 433,
+      "source": "426:   dst = (u32)(s32)(s8)src\n427: \n428: \n429: The ``NEG`` instruction is only defined when the source bit is clear\n430: (``K``).\n431: \n432: Shift operations use a mask of 0x3F (63) for 64-bit operations and 0x1F (31)\n433: for 32-bit operations."
+    },
+    "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c": {
+      "first_line": 1322,
+      "last_line": 1333,
+      "source": "1322: \tcase BPF_ALU | BPF_LSH | BPF_X:\n1323: \tcase BPF_ALU64 | BPF_LSH | BPF_X:\n1324: \t\temit(A64_LSLV(is64, dst, dst, src), ctx);\n1325: \t\tbreak;\n1326: \tcase BPF_ALU | BPF_RSH | BPF_X:\n1327: \tcase BPF_ALU64 | BPF_RSH | BPF_X:\n1328: \t\temit(A64_LSRV(is64, dst, dst, src), ctx);\n1329: \t\tbreak;\n1330: \tcase BPF_ALU | BPF_ARSH | BPF_X:\n1331: \tcase BPF_ALU64 | BPF_ARSH | BPF_X:\n1332: \t\temit(A64_ASRV(is64, dst, dst, src), ctx);\n1333: \t\tbreak;"
+    },
+    "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c": {
+      "first_line": 1992,
+      "last_line": 2058,
+      "source": "1992: \t\tcase BPF_ALU | BPF_LSH | BPF_X:\n1993: \t\tcase BPF_ALU | BPF_RSH | BPF_X:\n1994: \t\tcase BPF_ALU | BPF_ARSH | BPF_X:\n1995: \t\tcase BPF_ALU64 | BPF_LSH | BPF_X:\n1996: \t\tcase BPF_ALU64 | BPF_RSH | BPF_X:\n1997: \t\tcase BPF_ALU64 | BPF_ARSH | BPF_X:\n1998: \t\t\t/* BMI2 shifts aren't better when shift count is already in rcx */\n1999: \t\t\tif (boot_cpu_has(X86_FEATURE_BMI2) && src_reg != BPF_REG_4) {\n2000: \t\t\t\t/* shrx/sarx/shlx dst_reg, dst_reg, src_reg */\n2001: \t\t\t\tbool w = (BPF_CLASS(insn->code) == BPF_ALU64);\n2002: \t\t\t\tu8 op;\n2003: \n2004: \t\t\t\tswitch (BPF_OP(insn->code)) {\n2005: \t\t\t\tcase BPF_LSH:\n2006: \t\t\t\t\top = 1; /* prefix 0x66 */\n2007: \t\t\t\t\tbreak;\n2008: \t\t\t\tcase BPF_RSH:\n2009: \t\t\t\t\top = 3; /* prefix 0xf2 */\n2010: \t\t\t\t\tbreak;\n2011: \t\t\t\tcase BPF_ARSH:\n2012: \t\t\t\t\top = 2; /* prefix 0xf3 */\n2013: \t\t\t\t\tbreak;\n2014: \t\t\t\t}\n2015: \n2016: \t\t\t\temit_shiftx(&prog, dst_reg, src_reg, w, op);\n2017: \n2018: \t\t\t\tbreak;\n2019: \t\t\t}\n2020: \n2021: \t\t\tif (src_reg != BPF_REG_4) { /* common case */\n2022: \t\t\t\t/* Check for bad case when dst_reg == rcx */\n2023: \t\t\t\tif (dst_reg == BPF_REG_4) {\n2024: \t\t\t\t\t/* mov r11, dst_reg */\n2025: \t\t\t\t\tEMIT_mov(AUX_REG, dst_reg);\n2026: \t\t\t\t\tdst_reg = AUX_REG;\n2027: \t\t\t\t} else {\n2028: \t\t\t\t\tEMIT1(0x51); /* push rcx */\n2029: \t\t\t\t}\n2030: \t\t\t\t/* mov rcx, src_reg */\n2031: \t\t\t\tEMIT_mov(BPF_REG_4, src_reg);\n2032: \t\t\t}\n2033: \n2034: \t\t\t/* shl %rax, %cl | shr %rax, %cl | sar %rax, %cl */\n2035: \t\t\tmaybe_emit_1mod(&prog, dst_reg,\n2036: \t\t\t\t\tBPF_CLASS(insn->code) == BPF_ALU64);\n2037: \n2038: \t\t\tb3 = simple_alu_opcodes[BPF_OP(insn->code)];\n2039: \t\t\tEMIT2(0xD3, add_1reg(b3, dst_reg));\n2040: \n2041: \t\t\tif (src_reg != BPF_REG_4) {\n2042: \t\t\t\tif (insn->dst_reg == BPF_REG_4)\n2043: \t\t\t\t\t/* mov dst_reg, r11 */\n2044: \t\t\t\t\tEMIT_mov(insn->dst_reg, AUX_REG);\n2045: \t\t\t\telse\n2046: \t\t\t\t\tEMIT1(0x59); /* pop rcx */\n2047: \t\t\t}\n2048: \n2049: \t\t\tbreak;\n2050: \n2051: \t\tcase BPF_ALU | BPF_END | BPF_FROM_BE:\n2052: \t\tcase BPF_ALU64 | BPF_END | BPF_FROM_LE:\n2053: \t\t\tswitch (imm32) {\n2054: \t\t\tcase 16:\n2055: \t\t\t\t/* Emit 'ror %ax, 8' to swap lower 2 bytes */\n2056: \t\t\t\tEMIT1(0x66);\n2057: \t\t\t\tif (is_ereg(dst_reg))\n2058: \t\t\t\t\tEMIT1(0x41);"
+    },
+    "vendor/linux-framework/kernel/bpf/verifier.c": {
+      "first_line": 15968,
+      "last_line": 15975,
+      "source": "15968: \t/* Shift operators range is only computable if shift dimension operand\n15969: \t * is a constant. Shifts greater than 31 or 63 are undefined. This\n15970: \t * includes shifts by a negative number.\n15971: \t */\n15972: \tcase BPF_LSH:\n15973: \tcase BPF_RSH:\n15974: \tcase BPF_ARSH:\n15975: \t\treturn (src_is_const && src_reg->umax_value < insn_bitness);"
+    }
+  },
+  "objects": 114,
+  "program_rows": 698,
+  "scope": "Read-only frontend scalar-shift candidates, not actual input or native/eBPF semantic acceptance.",
+  "validation": "Python compile(source) and make -n audit passed; full run pending."
+}
