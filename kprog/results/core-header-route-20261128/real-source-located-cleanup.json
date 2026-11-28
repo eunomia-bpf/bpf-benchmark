@@ -1,0 +1,294 @@
+{
+  "archive_commit": "0349f5be437721844f5931b063ed8e9f844d66f6",
+  "archive": "real-source-located-records.tar.zst",
+  "archive_sha256": "30c026ed1f6780bd6e5e3de52c8c11846639e2230c662593315e5192b80541ca",
+  "all_archive_members_verified": true,
+  "all_originals_verified_before_delete": true,
+  "deleted_count": 47,
+  "logical_bytes": 44659135,
+  "allocated_file_bytes": 44756992,
+  "members": [
+    {
+      "path": "real-source-located-controller.json",
+      "bytes": 31861,
+      "sha256": "a292dbbf5cc565bc46ed68b19e15ce69dd520716c37e31bea39e2dffba219ef5",
+      "allocated_bytes": 32768
+    },
+    {
+      "path": "real-source-located-job.log",
+      "bytes": 31861,
+      "sha256": "a292dbbf5cc565bc46ed68b19e15ce69dd520716c37e31bea39e2dffba219ef5",
+      "allocated_bytes": 32768
+    },
+    {
+      "path": "real-source-located/arm64-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/arm64-bcc-generate.stdout",
+      "bytes": 138,
+      "sha256": "2bb6674de0f91dd6c127755e6fda7367544804c9d3202023c6d5042fee125967",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-bcc-native-ir.stderr",
+      "bytes": 7670,
+      "sha256": "559c9aece2a2f9ad7965f29022049dad177737ea4191836871eac682a1b25b4c",
+      "allocated_bytes": 8192
+    },
+    {
+      "path": "real-source-located/arm64-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/arm64-bcc-tmp/core-answers-zvmy94so/biosnoop.bpf.i",
+      "bytes": 2750577,
+      "sha256": "a12ab87a93b5a19e8bb010d7e9634dc46a458a5d85cd7df0af609bb9dfeec09c",
+      "allocated_bytes": 2752512
+    },
+    {
+      "path": "real-source-located/arm64-bcc-tmp/core-answers-zvmy94so/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-bcc.h",
+      "bytes": 2818,
+      "sha256": "4fdd990798d9cccfb61b32cdd845a746daa8949976f962810f615b4ef43e65e4",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-bcc.json",
+      "bytes": 3096,
+      "sha256": "0c7c4d199b9a9d8280460db5d400d5747196e0f53f5ee2b8aff647fbb22dc605",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-bcc.ll",
+      "bytes": 5384065,
+      "sha256": "4492d15233a5e8f5a6b926ec7c558a96ea3671cfc6ea9c0f654e68e01b3a56d4",
+      "allocated_bytes": 5390336
+    },
+    {
+      "path": "real-source-located/arm64-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/arm64-producer-flags.stdout",
+      "bytes": 401,
+      "sha256": "826ba0546ef565b9d7d86163eb8755f81498341b390cd39811eee5e12148de02",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-generate.stdout",
+      "bytes": 144,
+      "sha256": "e38aa1c758077f1d20028cd6c2e55c34da1e8e0a8ef5517db81b4fe0ae65d253",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-native-ir.stderr",
+      "bytes": 20849,
+      "sha256": "9b3c3706dbd7a51b67153e14477b5616f0ba2779242978ddc2a3a43d938d5a48",
+      "allocated_bytes": 24576
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-tmp/core-answers-dcuxc8zn/bpf_generic_kprobe.i",
+      "bytes": 2980955,
+      "sha256": "f690edaa35b40ec80bc16b23a439ef6dfb141dc883d67e5b395051f680bd6e89",
+      "allocated_bytes": 2981888
+    },
+    {
+      "path": "real-source-located/arm64-tetragon-tmp/core-answers-dcuxc8zn/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/arm64-tetragon.h",
+      "bytes": 11438,
+      "sha256": "0c424739b2cb5e2e904e757d3f75230e8800f2a6f303773bef45546e629bc943",
+      "allocated_bytes": 12288
+    },
+    {
+      "path": "real-source-located/arm64-tetragon.json",
+      "bytes": 26186,
+      "sha256": "65b9da3ac9852d7a4e5e0e565b93538430528d8b0d4234f24702b459da041a0d",
+      "allocated_bytes": 28672
+    },
+    {
+      "path": "real-source-located/arm64-tetragon.ll",
+      "bytes": 9456289,
+      "sha256": "01d337a5f75b3c829b0fc5c00b34acbdf3c68201fde0dd154a66d9f98cf673a4",
+      "allocated_bytes": 9457664
+    },
+    {
+      "path": "real-source-located/x86-bcc-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/x86-bcc-generate.stdout",
+      "bytes": 136,
+      "sha256": "943a5c716710a2b5fd2ae52df1d963a3f347362d7ecd1e9c90abc6beb7cfea0e",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-bcc-native-ir.stderr",
+      "bytes": 7860,
+      "sha256": "ebe91e784f518b312cfe710d8fb28a0cd57b36285e6186fed6b4c7762a77c88c",
+      "allocated_bytes": 8192
+    },
+    {
+      "path": "real-source-located/x86-bcc-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/x86-bcc-tmp/core-answers-70guq5qf/biosnoop.bpf.i",
+      "bytes": 2908692,
+      "sha256": "7cff3d949a94edde1afab61fb88b1295a6b4889928f474394664cad0fbaf2166",
+      "allocated_bytes": 2912256
+    },
+    {
+      "path": "real-source-located/x86-bcc-tmp/core-answers-70guq5qf/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-bcc.h",
+      "bytes": 2818,
+      "sha256": "4385ceb1c5dcfd251e360d1c0ce469a6d1dc4d3f2098e0628c802851731c3925",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-bcc.json",
+      "bytes": 3096,
+      "sha256": "22263bf5d7213752856d33a2acd1340590999707c7533758b4d3880b2fdea86b",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-bcc.ll",
+      "bytes": 5415944,
+      "sha256": "7d5da9c14f519e2a95e556f62a838644b1209e7b8c8d1f5c02599af78d3328cf",
+      "allocated_bytes": 5423104
+    },
+    {
+      "path": "real-source-located/x86-producer-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/x86-producer-flags.stdout",
+      "bytes": 409,
+      "sha256": "cbfbf285664e7568f1532c406d805b28d9afd4ba79781e999296f31d1e590e34",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-tetragon-generate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/x86-tetragon-generate.stdout",
+      "bytes": 142,
+      "sha256": "5147a7d30af07ac97d0de3b5279d8c0813283c1c65f09fd93543c49276e0cd2d",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-tetragon-native-ir.stderr",
+      "bytes": 21058,
+      "sha256": "4746e0c9bb2e6d0ecb6bd66dc843f3ac350617f7fcee00b3dcc11c02268f1855",
+      "allocated_bytes": 24576
+    },
+    {
+      "path": "real-source-located/x86-tetragon-native-ir.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "path": "real-source-located/x86-tetragon-tmp/core-answers-0k_t73b_/bpf_generic_kprobe.i",
+      "bytes": 3132355,
+      "sha256": "0bd2d04da4d9b9c67baddb8252db663cf5132e6c8ca32ce66c781640225aa9cd",
+      "allocated_bytes": 3133440
+    },
+    {
+      "path": "real-source-located/x86-tetragon-tmp/core-answers-0k_t73b_/scan.h",
+      "bytes": 294,
+      "sha256": "f53c6be153601181c2cfde7a4885e7044db99f0ceaa85b8d54dc7e40a71a0b04",
+      "allocated_bytes": 4096
+    },
+    {
+      "path": "real-source-located/x86-tetragon.h",
+      "bytes": 11439,
+      "sha256": "436525d842c35876b1737fa6caada744ed6494af3da605e0e7f2bcf43d49d3a1",
+      "allocated_bytes": 12288
+    },
+    {
+      "path": "real-source-located/x86-tetragon.json",
+      "bytes": 26187,
+      "sha256": "1b786f1f15d6062dc4eebb8507392540d8f62b4f6cfe598b7e0c6f1834073cb9",
+      "allocated_bytes": 28672
+    },
+    {
+      "path": "real-source-located/x86-tetragon.ll",
+      "bytes": 9515422,
+      "sha256": "3bd5fa0fbf11c4d82030ed9735509bbe7762a9cf552ea9783e817d23d0f1a86e",
+      "allocated_bytes": 9519104
+    },
+    {
+      "path": "real-source-type-preflight/copy_bpf_prog.json",
+      "bytes": 702747,
+      "sha256": "01705f9eeed7424f0a341f3ca7345c3930dfef5f934c65534c21a9dce7e462bd",
+      "allocated_bytes": 704512
+    },
+    {
+      "path": "real-source-type-preflight/get_disk.json",
+      "bytes": 590848,
+      "sha256": "ff03055e5b1b3a15e7916c1453ceb86e6796726ee9c9da2cc253ed6f148ab3f5",
+      "allocated_bytes": 593920
+    },
+    {
+      "path": "real-source-type-preflight/read_exe.json",
+      "bytes": 1084679,
+      "sha256": "7fa715b679983db4b8e8b520a04f394f6e39bcd76660731484beffc7bd98f583",
+      "allocated_bytes": 1085440
+    },
+    {
+      "path": "real-source-type-preflight/store_path.json",
+      "bytes": 524879,
+      "sha256": "6b3926de430e7a2abadecd517c98df6e1133d370ec7ec035a7a26c4f1b0d5453",
+      "allocated_bytes": 528384
+    },
+    {
+      "path": "real-source-type-preflight/type-review.json",
+      "bytes": 900,
+      "sha256": "c69f59f814c02a0fec561f96a7b2b625ee568ee698385dc31aabd40d174c73b0",
+      "allocated_bytes": 4096
+    }
+  ]
+}
