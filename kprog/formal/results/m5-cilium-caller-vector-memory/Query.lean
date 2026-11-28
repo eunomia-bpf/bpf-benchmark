@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.store
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.writeback
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.writeback
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.input_returns
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.named_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.named_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.stored_read
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorMemory.stored_read
