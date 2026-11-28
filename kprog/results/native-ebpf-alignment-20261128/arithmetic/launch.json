@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-11-28T09:25:30Z",
+  "launcher_pid": 1408083,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic",
+    "audit"
+  ],
+  "preparation_commit": "bc65d7cafe6969089a43ae692e2fe9601ece1014",
+  "recipe_sha256": "db3f2406949a5e5dee82db22e6523315579f0d157ca489b63b061902294a0af2",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/arithmetic/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/arithmetic/job.log",
+  "resume_entry": "COORDINATOR 2026-11-28T07:17Z",
+  "resources": "ControllerCPU19, serial LLVMreader/optimizerCPU16 AS48GiB; no timing CPUs.",
+  "scope": "Read-only114objects/sixapps/bothISAs divmod value/guard/callgraph metadata; no app/P/root/image/kernel/settings/flags/benchmark changes.",
+  "collection": "Collect SAME job NEXTTURN, preserve partial/failed cases, no equivalence or defect claim from metadata completion."
+}
