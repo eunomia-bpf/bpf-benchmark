@@ -1,0 +1,75 @@
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+In file included from /usr/include/stdio.h:28:
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:74:5: error: function-like macro '__GLIBC_USE' is not defined
+   74 | #if __GLIBC_USE (IEC_60559_BFP_EXT) || __GLIBC_USE (ISOC2X)
+      |     ^
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:80:5: error: function-like macro '__GLIBC_USE' is not defined
+   80 | #if __GLIBC_USE (IEC_60559_BFP_EXT) || defined __STDC_WANT_IEC_60559_EXT__
+      |     ^
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:97:5: error: function-like macro '__GLIBC_USE' is not defined
+   97 | #if __GLIBC_USE (IEC_60559_FUNCS_EXT) || __GLIBC_USE (ISOC2X)
+      |     ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+/usr/include/stdio.h:30:1: error: unknown type name '__BEGIN_DECLS'
+   30 | __BEGIN_DECLS
+      | ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+In file included from /usr/include/stdio.h:34:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/stddef.h:13:2: error: expected identifier
+   13 |         false   = 0,
+      |         ^
+/usr/lib/llvm-18/lib/clang/18/include/stdbool.h:22:15: note: expanded from macro 'false'
+   22 | #define false 0
+      |               ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+In file included from /usr/include/stdio.h:34:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/stddef.h:14:2: error: expected identifier
+   14 |         true    = 1,
+      |         ^
+/usr/lib/llvm-18/lib/clang/18/include/stdbool.h:21:14: note: expanded from macro 'true'
+   21 | #define true 1
+      |              ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+In file included from /usr/include/stdio.h:44:
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:95:3: error: unknown type name 'size_t'
+   95 |   size_t __pad5;
+      |   ^
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:98:67: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?
+   98 |   char _unused2[15 * sizeof (int) - 4 * sizeof (void *) - sizeof (size_t)];
+      |                                                                   ^
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:98:66: error: reference to overloaded function could not be resolved; did you mean to call it?
+   98 |   char _unused2[15 * sizeof (int) - 4 * sizeof (void *) - sizeof (size_t)];
+      |                                                                  ^~~~~~~~
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c:2:
+/usr/include/stdio.h:142:5: error: function-like macro '__GLIBC_USE' is not defined
+  142 | #if __GLIBC_USE (ISOC2X)
+      |     ^
+/usr/include/stdio.h:158:44: error: expected function body after function declarator
+  158 | extern int remove (const char *__filename) __THROW;
+      |                                            ^
+/usr/include/stdio.h:160:58: error: expected function body after function declarator
+  160 | extern int rename (const char *__old, const char *__new) __THROW;
+      |                                                          ^
+/usr/include/stdio.h:184:36: error: expected function body after function declarator
+  184 | extern int fclose (FILE *__stream) __nonnull ((1));
+      |                                    ^
+/usr/include/stdio.h:195:3: error: expected function body after function declarator
+  195 |   __attribute_malloc__ __attr_dealloc_fclose __wur;
+      |   ^
+/usr/include/stdio.h:211:38: error: expected function body after function declarator
+  211 | extern char *tmpnam (char[L_tmpnam]) __THROW __wur;
+      |                                      ^
+/usr/include/stdio.h:266:3: error: expected function body after function declarator
+  266 |   __attribute_malloc__ __attr_dealloc_fclose __wur;
+      |   ^
+/usr/include/stdio.h:273:36: error: expected function body after function declarator
+  273 |                       FILE *__restrict __stream) __wur __nonnull ((3));
+      |                                                  ^
+/usr/include/stdio.h:312:31: error: function-like macro '__GLIBC_USE' is not defined
+  312 | #if defined __USE_XOPEN2K8 || __GLIBC_USE (LIB_EXT2)
+      |                               ^
+/usr/include/stdio.h:334:72: error: expected function body after function declarator
+  334 | extern void setbuf (FILE *__restrict __stream, char *__restrict __buf) __THROW
+      |                                                                        ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.

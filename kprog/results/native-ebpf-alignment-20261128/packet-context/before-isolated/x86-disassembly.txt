@@ -1,0 +1,15 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/x86-accessors.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <native_ifindex>:
+   0:	8b 47 0c             	mov    0xc(%rdi),%eax
+   3:	c3                   	ret
+   4:	66 66 66 2e 0f 1f 84 	data16 data16 cs nopw 0x0(%rax,%rax,1)
+   b:	00 00 00 00 00 
+
+0000000000000010 <native_ingress>:
+  10:	8b 47 0c             	mov    0xc(%rdi),%eax
+  13:	c3                   	ret

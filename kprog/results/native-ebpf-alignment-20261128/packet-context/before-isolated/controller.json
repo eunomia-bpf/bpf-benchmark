@@ -1,0 +1,2277 @@
+{
+  "pid": 1366788,
+  "started_utc": "2026-11-28T08:04:35Z",
+  "controller_status": 0,
+  "cases": [
+    {
+      "architecture": "x86",
+      "compile_command": [
+        "clang-18",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf",
+        "-c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/x86-accessors.o"
+      ],
+      "compile_returncode": 0,
+      "driver_compile_command": [
+        "clang-18",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/x86-accessors.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/x86.elf"
+      ],
+      "driver_compile_returncode": 0,
+      "execute_command": [
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/x86.elf"
+      ],
+      "execute_returncode": 1,
+      "values": {
+        "ifindex": 17,
+        "ingress_ifindex": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    },
+    {
+      "architecture": "arm64",
+      "compile_command": [
+        "clang-18",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf",
+        "-c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_witness.c",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/arm64-accessors.o"
+      ],
+      "compile_returncode": 0,
+      "driver_compile_command": [
+        "clang-18",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/ifindex_driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/arm64-accessors.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/arm64.elf"
+      ],
+      "driver_compile_returncode": 0,
+      "execute_command": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/before-isolated/arm64.elf"
+      ],
+      "execute_returncode": 1,
+      "values": {
+        "ifindex": 17,
+        "ingress_ifindex": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    }
+  ],
+  "layouts": [
+    {
+      "architecture": "x86",
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de",
+      "types": {
+        "net_device": {
+          "id": 99964,
+          "kind": "STRUCT",
+          "name": "net_device",
+          "size": 2560,
+          "vlen": 186,
+          "members": [
+            {
+              "name": "__cacheline_group_begin__net_device_read_tx",
+              "type_id": 1820,
+              "bits_offset": 0
+            },
+            {
+              "name": "(anon)",
+              "type_id": 2316,
+              "bits_offset": 0
+            },
+            {
+              "name": "netdev_ops",
+              "type_id": 2322,
+              "bits_offset": 64
+            },
+            {
+              "name": "header_ops",
+              "type_id": 2323,
+              "bits_offset": 128
+            },
+            {
+              "name": "_tx",
+              "type_id": 2324,
+              "bits_offset": 192
+            },
+            {
+              "name": "gso_partial_features",
+              "type_id": 100138,
+              "bits_offset": 256
+            },
+            {
+              "name": "real_num_tx_queues",
+              "type_id": 122952,
+              "bits_offset": 320
+            },
+            {
+              "name": "gso_max_size",
+              "type_id": 122952,
+              "bits_offset": 352
+            },
+            {
+              "name": "gso_ipv4_max_size",
+              "type_id": 122952,
+              "bits_offset": 384
+            },
+            {
+              "name": "gso_max_segs",
+              "type_id": 122211,
+              "bits_offset": 416
+            },
+            {
+              "name": "num_tc",
+              "type_id": 110797,
+              "bits_offset": 432
+            },
+            {
+              "name": "mtu",
+              "type_id": 122952,
+              "bits_offset": 448
+            },
+            {
+              "name": "needed_headroom",
+              "type_id": 113518,
+              "bits_offset": 480
+            },
+            {
+              "name": "tc_to_txq",
+              "type_id": 2325,
+              "bits_offset": 496
+            },
+            {
+              "name": "xps_maps",
+              "type_id": 2326,
+              "bits_offset": 1024
+            },
+            {
+              "name": "nf_hooks_egress",
+              "type_id": 1877,
+              "bits_offset": 1152
+            },
+            {
+              "name": "tcx_egress",
+              "type_id": 2328,
+              "bits_offset": 1216
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_tx",
+              "type_id": 1820,
+              "bits_offset": 1280
+            },
+            {
+              "name": "__cacheline_group_begin__net_device_read_txrx",
+              "type_id": 1820,
+              "bits_offset": 1280
+            },
+            {
+              "name": "(anon)",
+              "type_id": 2317,
+              "bits_offset": 1280
+            },
+            {
+              "name": "state",
+              "type_id": 96745,
+              "bits_offset": 1344
+            },
+            {
+              "name": "flags",
+              "type_id": 122952,
+              "bits_offset": 1408
+            },
+            {
+              "name": "hard_header_len",
+              "type_id": 113518,
+              "bits_offset": 1440
+            },
+            {
+              "name": "features",
+              "type_id": 100138,
+              "bits_offset": 1472
+            },
+            {
+              "name": "ip6_ptr",
+              "type_id": 2329,
+              "bits_offset": 1536
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_txrx",
+              "type_id": 1820,
+              "bits_offset": 1600
+            },
+            {
+              "name": "__cacheline_group_begin__net_device_read_rx",
+              "type_id": 1820,
+              "bits_offset": 1600
+            },
+            {
+              "name": "xdp_prog",
+              "type_id": 1554,
+              "bits_offset": 1600
+            },
+            {
+              "name": "ptype_specific",
+              "type_id": 96515,
+              "bits_offset": 1664
+            },
+            {
+              "name": "ifindex",
+              "type_id": 91808,
+              "bits_offset": 1792
+            },
+            {
+              "name": "real_num_rx_queues",
+              "type_id": 122952,
+              "bits_offset": 1824
+            },
+            {
+              "name": "_rx",
+              "type_id": 2330,
+              "bits_offset": 1856
+            },
+            {
+              "name": "gro_max_size",
+              "type_id": 122952,
+              "bits_offset": 1920
+            },
+            {
+              "name": "gro_ipv4_max_size",
+              "type_id": 122952,
+              "bits_offset": 1952
+            },
+            {
+              "name": "rx_handler",
+              "type_id": 2331,
+              "bits_offset": 1984
+            },
+            {
+              "name": "rx_handler_data",
+              "type_id": 24,
+              "bits_offset": 2048
+            },
+            {
+              "name": "nd_net",
+              "type_id": 106818,
+              "bits_offset": 2112
+            },
+            {
+              "name": "tcx_ingress",
+              "type_id": 2328,
+              "bits_offset": 2176
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_rx",
+              "type_id": 1820,
+              "bits_offset": 2240
+            },
+            {
+              "name": "name",
+              "type_id": 52,
+              "bits_offset": 2240
+            },
+            {
+              "name": "name_node",
+              "type_id": 2332,
+              "bits_offset": 2368
+            },
+            {
+              "name": "ifalias",
+              "type_id": 2333,
+              "bits_offset": 2432
+            },
+            {
+              "name": "mem_end",
+              "type_id": 96745,
+              "bits_offset": 2496
+            },
+            {
+              "name": "mem_start",
+              "type_id": 96745,
+              "bits_offset": 2560
+            },
+            {
+              "name": "base_addr",
+              "type_id": 96745,
+              "bits_offset": 2624
+            },
+            {
+              "name": "dev_list",
+              "type_id": 96515,
+              "bits_offset": 2688
+            },
+            {
+              "name": "napi_list",
+              "type_id": 96515,
+              "bits_offset": 2816
+            },
+            {
+              "name": "unreg_list",
+              "type_id": 96515,
+              "bits_offset": 2944
+            },
+            {
+              "name": "close_list",
+              "type_id": 96515,
+              "bits_offset": 3072
+            },
+            {
+              "name": "ptype_all",
+              "type_id": 96515,
+              "bits_offset": 3200
+            },
+            {
+              "name": "adj_list",
+              "type_id": 2321,
+              "bits_offset": 3328
+            },
+            {
+              "name": "xdp_features",
+              "type_id": 125567,
+              "bits_offset": 3584
+            },
+            {
+              "name": "xdp_metadata_ops",
+              "type_id": 2335,
+              "bits_offset": 3648
+            },
+            {
+              "name": "xsk_tx_metadata_ops",
+              "type_id": 2337,
+              "bits_offset": 3712
+            },
+            {
+              "name": "gflags",
+              "type_id": 113518,
+              "bits_offset": 3776
+            },
+            {
+              "name": "needed_tailroom",
+              "type_id": 113518,
+              "bits_offset": 3792
+            },
+            {
+              "name": "hw_features",
+              "type_id": 100138,
+              "bits_offset": 3840
+            },
+            {
+              "name": "wanted_features",
+              "type_id": 100138,
+              "bits_offset": 3904
+            },
+            {
+              "name": "vlan_features",
+              "type_id": 100138,
+              "bits_offset": 3968
+            },
+            {
+              "name": "hw_enc_features",
+              "type_id": 100138,
+              "bits_offset": 4032
+            },
+            {
+              "name": "mpls_features",
+              "type_id": 100138,
+              "bits_offset": 4096
+            },
+            {
+              "name": "mangleid_features",
+              "type_id": 100138,
+              "bits_offset": 4160
+            },
+            {
+              "name": "min_mtu",
+              "type_id": 122952,
+              "bits_offset": 4224
+            },
+            {
+              "name": "max_mtu",
+              "type_id": 122952,
+              "bits_offset": 4256
+            },
+            {
+              "name": "type",
+              "type_id": 113518,
+              "bits_offset": 4288
+            },
+            {
+              "name": "min_header_len",
+              "type_id": 122951,
+              "bits_offset": 4304
+            },
+            {
+              "name": "name_assign_type",
+              "type_id": 122951,
+              "bits_offset": 4312
+            },
+            {
+              "name": "group",
+              "type_id": 91808,
+              "bits_offset": 4320
+            },
+            {
+              "name": "stats",
+              "type_id": 99973,
+              "bits_offset": 4352
+            },
+            {
+              "name": "core_stats",
+              "type_id": 2338,
+              "bits_offset": 5824
+            },
+            {
+              "name": "carrier_up_count",
+              "type_id": 68544,
+              "bits_offset": 5888
+            },
+            {
+              "name": "carrier_down_count",
+              "type_id": 68544,
+              "bits_offset": 5920
+            },
+            {
+              "name": "ethtool_ops",
+              "type_id": 2340,
+              "bits_offset": 5952
+            },
+            {
+              "name": "l3mdev_ops",
+              "type_id": 2342,
+              "bits_offset": 6016
+            },
+            {
+              "name": "ndisc_ops",
+              "type_id": 2344,
+              "bits_offset": 6080
+            },
+            {
+              "name": "xfrmdev_ops",
+              "type_id": 2345,
+              "bits_offset": 6144
+            },
+            {
+              "name": "tlsdev_ops",
+              "type_id": 2347,
+              "bits_offset": 6208
+            },
+            {
+              "name": "operstate",
+              "type_id": 122952,
+              "bits_offset": 6272
+            },
+            {
+              "name": "link_mode",
+              "type_id": 122951,
+              "bits_offset": 6304
+            },
+            {
+              "name": "if_port",
+              "type_id": 122951,
+              "bits_offset": 6312
+            },
+            {
+              "name": "dma",
+              "type_id": 122951,
+              "bits_offset": 6320
+            },
+            {
+              "name": "perm_addr",
+              "type_id": 2091,
+              "bits_offset": 6328
+            },
+            {
+              "name": "addr_assign_type",
+              "type_id": 122951,
+              "bits_offset": 6584
+            },
+            {
+              "name": "addr_len",
+              "type_id": 122951,
+              "bits_offset": 6592
+            },
+            {
+              "name": "upper_level",
+              "type_id": 122951,
+              "bits_offset": 6600
+            },
+            {
+              "name": "lower_level",
+              "type_id": 122951,
+              "bits_offset": 6608
+            },
+            {
+              "name": "threaded",
+              "type_id": 122221,
+              "bits_offset": 6616
+            },
+            {
+              "name": "neigh_priv_len",
+              "type_id": 113518,
+              "bits_offset": 6624
+            },
+            {
+              "name": "dev_id",
+              "type_id": 113518,
+              "bits_offset": 6640
+            },
+            {
+              "name": "dev_port",
+              "type_id": 113518,
+              "bits_offset": 6656
+            },
+            {
+              "name": "irq",
+              "type_id": 91808,
+              "bits_offset": 6688
+            },
+            {
+              "name": "priv_len",
+              "type_id": 122213,
+              "bits_offset": 6720
+            },
+            {
+              "name": "addr_list_lock",
+              "type_id": 114985,
+              "bits_offset": 6752
+            },
+            {
+              "name": "uc",
+              "type_id": 100154,
+              "bits_offset": 6784
+            },
+            {
+              "name": "mc",
+              "type_id": 100154,
+              "bits_offset": 7040
+            },
+            {
+              "name": "dev_addrs",
+              "type_id": 100154,
+              "bits_offset": 7296
+            },
+            {
+              "name": "queues_kset",
+              "type_id": 1045,
+              "bits_offset": 7552
+            },
+            {
+              "name": "promiscuity",
+              "type_id": 122952,
+              "bits_offset": 7616
+            },
+            {
+              "name": "allmulti",
+              "type_id": 122952,
+              "bits_offset": 7648
+            },
+            {
+              "name": "uc_promisc",
+              "type_id": 70325,
+              "bits_offset": 7680
+            },
+            {
+              "name": "ip_ptr",
+              "type_id": 2348,
+              "bits_offset": 7744
+            },
+            {
+              "name": "fib_nh_head",
+              "type_id": 89525,
+              "bits_offset": 7808
+            },
+            {
+              "name": "vlan_info",
+              "type_id": 2349,
+              "bits_offset": 7872
+            },
+            {
+              "name": "tipc_ptr",
+              "type_id": 2350,
+              "bits_offset": 7936
+            },
+            {
+              "name": "mpls_ptr",
+              "type_id": 2351,
+              "bits_offset": 8000
+            },
+            {
+              "name": "dev_addr",
+              "type_id": 39,
+              "bits_offset": 8064
+            },
+            {
+              "name": "num_rx_queues",
+              "type_id": 122952,
+              "bits_offset": 8128
+            },
+            {
+              "name": "xdp_zc_max_segs",
+              "type_id": 122952,
+              "bits_offset": 8160
+            },
+            {
+              "name": "ingress_queue",
+              "type_id": 2324,
+              "bits_offset": 8192
+            },
+            {
+              "name": "nf_hooks_ingress",
+              "type_id": 1877,
+              "bits_offset": 8256
+            },
+            {
+              "name": "broadcast",
+              "type_id": 2091,
+              "bits_offset": 8320
+            },
+            {
+              "name": "rx_cpu_rmap",
+              "type_id": 2352,
+              "bits_offset": 8576
+            },
+            {
+              "name": "index_hlist",
+              "type_id": 89526,
+              "bits_offset": 8640
+            },
+            {
+              "name": "num_tx_queues",
+              "type_id": 122952,
+              "bits_offset": 8768
+            },
+            {
+              "name": "qdisc",
+              "type_id": 2115,
+              "bits_offset": 8832
+            },
+            {
+              "name": "tx_queue_len",
+              "type_id": 122952,
+              "bits_offset": 8896
+            },
+            {
+              "name": "tx_global_lock",
+              "type_id": 114985,
+              "bits_offset": 8928
+            },
+            {
+              "name": "xdp_bulkq",
+              "type_id": 2353,
+              "bits_offset": 8960
+            },
+            {
+              "name": "qdisc_hash",
+              "type_id": 2354,
+              "bits_offset": 9024
+            },
+            {
+              "name": "watchdog_timer",
+              "type_id": 117626,
+              "bits_offset": 10048
+            },
+            {
+              "name": "watchdog_timeo",
+              "type_id": 91808,
+              "bits_offset": 10368
+            },
+            {
+              "name": "proto_down_reason",
+              "type_id": 122213,
+              "bits_offset": 10400
+            },
+            {
+              "name": "todo_list",
+              "type_id": 96515,
+              "bits_offset": 10432
+            },
+            {
+              "name": "pcpu_refcnt",
+              "type_id": 155,
+              "bits_offset": 10560
+            },
+            {
+              "name": "refcnt_tracker",
+              "type_id": 109368,
+              "bits_offset": 10624
+            },
+            {
+              "name": "link_watch_list",
+              "type_id": 96515,
+              "bits_offset": 10624
+            },
+            {
+              "name": "reg_state",
+              "type_id": 122221,
+              "bits_offset": 10752
+            },
+            {
+              "name": "dismantle",
+              "type_id": 70325,
+              "bits_offset": 10760
+            },
+            {
+              "name": "moving_ns",
+              "type_id": 70325,
+              "bits_offset": 10768
+            },
+            {
+              "name": "rtnl_link_initializing",
+              "type_id": 70325,
+              "bits_offset": 10776
+            },
+            {
+              "name": "needs_free_netdev",
+              "type_id": 70325,
+              "bits_offset": 10784
+            },
+            {
+              "name": "priv_destructor",
+              "type_id": 2158,
+              "bits_offset": 10816
+            },
+            {
+              "name": "ml_priv",
+              "type_id": 24,
+              "bits_offset": 10880
+            },
+            {
+              "name": "ml_priv_type",
+              "type_id": 100174,
+              "bits_offset": 10944
+            },
+            {
+              "name": "pcpu_stat_type",
+              "type_id": 100285,
+              "bits_offset": 10976,
+              "bitfield_size": 8
+            },
+            {
+              "name": "garp_port",
+              "type_id": 2355,
+              "bits_offset": 11008
+            },
+            {
+              "name": "mrp_port",
+              "type_id": 2356,
+              "bits_offset": 11072
+            },
+            {
+              "name": "dev",
+              "type_id": 80254,
+              "bits_offset": 11136
+            },
+            {
+              "name": "sysfs_groups",
+              "type_id": 2357,
+              "bits_offset": 17024
+            },
+            {
+              "name": "sysfs_rx_queue_group",
+              "type_id": 1052,
+              "bits_offset": 17344
+            },
+            {
+              "name": "rtnl_link_ops",
+              "type_id": 2359,
+              "bits_offset": 17408
+            },
+            {
+              "name": "stat_ops",
+              "type_id": 2361,
+              "bits_offset": 17472
+            },
+            {
+              "name": "queue_mgmt_ops",
+              "type_id": 2363,
+              "bits_offset": 17536
+            },
+            {
+              "name": "tso_max_size",
+              "type_id": 122952,
+              "bits_offset": 17600
+            },
+            {
+              "name": "tso_max_segs",
+              "type_id": 122211,
+              "bits_offset": 17632
+            },
+            {
+              "name": "dcbnl_ops",
+              "type_id": 2364,
+              "bits_offset": 17664
+            },
+            {
+              "name": "prio_tc_map",
+              "type_id": 46,
+              "bits_offset": 17728
+            },
+            {
+              "name": "priomap",
+              "type_id": 2365,
+              "bits_offset": 17856
+            },
+            {
+              "name": "link_topo",
+              "type_id": 2366,
+              "bits_offset": 17920
+            },
+            {
+              "name": "phydev",
+              "type_id": 2367,
+              "bits_offset": 17984
+            },
+            {
+              "name": "sfp_bus",
+              "type_id": 2368,
+              "bits_offset": 18048
+            },
+            {
+              "name": "qdisc_tx_busylock",
+              "type_id": 2369,
+              "bits_offset": 18112
+            },
+            {
+              "name": "proto_down",
+              "type_id": 70325,
+              "bits_offset": 18176
+            },
+            {
+              "name": "irq_affinity_auto",
+              "type_id": 70325,
+              "bits_offset": 18184
+            },
+            {
+              "name": "rx_cpu_rmap_auto",
+              "type_id": 70325,
+              "bits_offset": 18192
+            },
+            {
+              "name": "see_all_hwtstamp_requests",
+              "type_id": 96745,
+              "bits_offset": 18200,
+              "bitfield_size": 1
+            },
+            {
+              "name": "change_proto_down",
+              "type_id": 96745,
+              "bits_offset": 18201,
+              "bitfield_size": 1
+            },
+            {
+              "name": "netns_immutable",
+              "type_id": 96745,
+              "bits_offset": 18202,
+              "bitfield_size": 1
+            },
+            {
+              "name": "fcoe_mtu",
+              "type_id": 96745,
+              "bits_offset": 18203,
+              "bitfield_size": 1
+            },
+            {
+              "name": "net_notifier_list",
+              "type_id": 96515,
+              "bits_offset": 18240
+            },
+            {
+              "name": "udp_tunnel_nic_info",
+              "type_id": 2371,
+              "bits_offset": 18368
+            },
+            {
+              "name": "udp_tunnel_nic",
+              "type_id": 2372,
+              "bits_offset": 18432
+            },
+            {
+              "name": "cfg",
+              "type_id": 2373,
+              "bits_offset": 18496
+            },
+            {
+              "name": "cfg_pending",
+              "type_id": 2373,
+              "bits_offset": 18560
+            },
+            {
+              "name": "ethtool",
+              "type_id": 2374,
+              "bits_offset": 18624
+            },
+            {
+              "name": "xdp_state",
+              "type_id": 2375,
+              "bits_offset": 18688
+            },
+            {
+              "name": "dev_addr_shadow",
+              "type_id": 835,
+              "bits_offset": 19072
+            },
+            {
+              "name": "linkwatch_dev_tracker",
+              "type_id": 100316,
+              "bits_offset": 19328
+            },
+            {
+              "name": "watchdog_dev_tracker",
+              "type_id": 100316,
+              "bits_offset": 19328
+            },
+            {
+              "name": "dev_registered_tracker",
+              "type_id": 100316,
+              "bits_offset": 19328
+            },
+            {
+              "name": "offload_xstats_l3",
+              "type_id": 2376,
+              "bits_offset": 19328
+            },
+            {
+              "name": "devlink_port",
+              "type_id": 2377,
+              "bits_offset": 19392
+            },
+            {
+              "name": "page_pools",
+              "type_id": 89525,
+              "bits_offset": 19456
+            },
+            {
+              "name": "irq_moder",
+              "type_id": 2378,
+              "bits_offset": 19520
+            },
+            {
+              "name": "max_pacing_offload_horizon",
+              "type_id": 122218,
+              "bits_offset": 19584
+            },
+            {
+              "name": "napi_config",
+              "type_id": 2112,
+              "bits_offset": 19648
+            },
+            {
+              "name": "num_napi_configs",
+              "type_id": 122213,
+              "bits_offset": 19712
+            },
+            {
+              "name": "napi_defer_hard_irqs",
+              "type_id": 122213,
+              "bits_offset": 19744
+            },
+            {
+              "name": "gro_flush_timeout",
+              "type_id": 96745,
+              "bits_offset": 19776
+            },
+            {
+              "name": "up",
+              "type_id": 70325,
+              "bits_offset": 19840
+            },
+            {
+              "name": "request_ops_lock",
+              "type_id": 70325,
+              "bits_offset": 19848
+            },
+            {
+              "name": "lock",
+              "type_id": 99543,
+              "bits_offset": 19904
+            },
+            {
+              "name": "net_shaper_hierarchy",
+              "type_id": 2379,
+              "bits_offset": 20160
+            },
+            {
+              "name": "neighbours",
+              "type_id": 2380,
+              "bits_offset": 20224
+            },
+            {
+              "name": "hwprov",
+              "type_id": 2381,
+              "bits_offset": 20352
+            },
+            {
+              "name": "priv",
+              "type_id": 839,
+              "bits_offset": 20480
+            }
+          ]
+        },
+        "xdp_buff": {
+          "id": 125546,
+          "kind": "STRUCT",
+          "name": "xdp_buff",
+          "size": 56,
+          "vlen": 7,
+          "members": [
+            {
+              "name": "data",
+              "type_id": 24,
+              "bits_offset": 0
+            },
+            {
+              "name": "data_end",
+              "type_id": 24,
+              "bits_offset": 64
+            },
+            {
+              "name": "data_meta",
+              "type_id": 24,
+              "bits_offset": 128
+            },
+            {
+              "name": "data_hard_start",
+              "type_id": 24,
+              "bits_offset": 192
+            },
+            {
+              "name": "rxq",
+              "type_id": 7488,
+              "bits_offset": 256
+            },
+            {
+              "name": "txq",
+              "type_id": 7489,
+              "bits_offset": 320
+            },
+            {
+              "name": "(anon)",
+              "type_id": 7487,
+              "bits_offset": 384
+            }
+          ]
+        },
+        "xdp_rxq_info": {
+          "id": 125600,
+          "kind": "STRUCT",
+          "name": "xdp_rxq_info",
+          "size": 64,
+          "vlen": 5,
+          "members": [
+            {
+              "name": "dev",
+              "type_id": 850,
+              "bits_offset": 0
+            },
+            {
+              "name": "queue_index",
+              "type_id": 122213,
+              "bits_offset": 64
+            },
+            {
+              "name": "reg_state",
+              "type_id": 122213,
+              "bits_offset": 96
+            },
+            {
+              "name": "mem",
+              "type_id": 125579,
+              "bits_offset": 128
+            },
+            {
+              "name": "frag_size",
+              "type_id": 122213,
+              "bits_offset": 192
+            }
+          ]
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17",
+      "types": {
+        "net_device": {
+          "id": 97619,
+          "kind": "STRUCT",
+          "name": "net_device",
+          "size": 2624,
+          "vlen": 186,
+          "members": [
+            {
+              "name": "__cacheline_group_begin__net_device_read_tx",
+              "type_id": 1835,
+              "bits_offset": 0
+            },
+            {
+              "name": "(anon)",
+              "type_id": 2274,
+              "bits_offset": 0
+            },
+            {
+              "name": "netdev_ops",
+              "type_id": 2280,
+              "bits_offset": 64
+            },
+            {
+              "name": "header_ops",
+              "type_id": 2281,
+              "bits_offset": 128
+            },
+            {
+              "name": "_tx",
+              "type_id": 2282,
+              "bits_offset": 192
+            },
+            {
+              "name": "gso_partial_features",
+              "type_id": 97799,
+              "bits_offset": 256
+            },
+            {
+              "name": "real_num_tx_queues",
+              "type_id": 119901,
+              "bits_offset": 320
+            },
+            {
+              "name": "gso_max_size",
+              "type_id": 119901,
+              "bits_offset": 352
+            },
+            {
+              "name": "gso_ipv4_max_size",
+              "type_id": 119901,
+              "bits_offset": 384
+            },
+            {
+              "name": "gso_max_segs",
+              "type_id": 119248,
+              "bits_offset": 416
+            },
+            {
+              "name": "num_tc",
+              "type_id": 108236,
+              "bits_offset": 432
+            },
+            {
+              "name": "mtu",
+              "type_id": 119901,
+              "bits_offset": 448
+            },
+            {
+              "name": "needed_headroom",
+              "type_id": 110827,
+              "bits_offset": 480
+            },
+            {
+              "name": "tc_to_txq",
+              "type_id": 2283,
+              "bits_offset": 496
+            },
+            {
+              "name": "xps_maps",
+              "type_id": 2284,
+              "bits_offset": 1024
+            },
+            {
+              "name": "nf_hooks_egress",
+              "type_id": 1920,
+              "bits_offset": 1152
+            },
+            {
+              "name": "tcx_egress",
+              "type_id": 2286,
+              "bits_offset": 1216
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_tx",
+              "type_id": 1835,
+              "bits_offset": 1280
+            },
+            {
+              "name": "__cacheline_group_begin__net_device_read_txrx",
+              "type_id": 1835,
+              "bits_offset": 1280
+            },
+            {
+              "name": "(anon)",
+              "type_id": 2275,
+              "bits_offset": 1280
+            },
+            {
+              "name": "state",
+              "type_id": 94814,
+              "bits_offset": 1344
+            },
+            {
+              "name": "flags",
+              "type_id": 119901,
+              "bits_offset": 1408
+            },
+            {
+              "name": "hard_header_len",
+              "type_id": 110827,
+              "bits_offset": 1440
+            },
+            {
+              "name": "features",
+              "type_id": 97799,
+              "bits_offset": 1472
+            },
+            {
+              "name": "ip6_ptr",
+              "type_id": 2287,
+              "bits_offset": 1536
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_txrx",
+              "type_id": 1835,
+              "bits_offset": 1600
+            },
+            {
+              "name": "__cacheline_group_begin__net_device_read_rx",
+              "type_id": 1835,
+              "bits_offset": 1600
+            },
+            {
+              "name": "xdp_prog",
+              "type_id": 1428,
+              "bits_offset": 1600
+            },
+            {
+              "name": "ptype_specific",
+              "type_id": 94608,
+              "bits_offset": 1664
+            },
+            {
+              "name": "ifindex",
+              "type_id": 89656,
+              "bits_offset": 1792
+            },
+            {
+              "name": "real_num_rx_queues",
+              "type_id": 119901,
+              "bits_offset": 1824
+            },
+            {
+              "name": "_rx",
+              "type_id": 2288,
+              "bits_offset": 1856
+            },
+            {
+              "name": "gro_max_size",
+              "type_id": 119901,
+              "bits_offset": 1920
+            },
+            {
+              "name": "gro_ipv4_max_size",
+              "type_id": 119901,
+              "bits_offset": 1952
+            },
+            {
+              "name": "rx_handler",
+              "type_id": 2289,
+              "bits_offset": 1984
+            },
+            {
+              "name": "rx_handler_data",
+              "type_id": 45,
+              "bits_offset": 2048
+            },
+            {
+              "name": "nd_net",
+              "type_id": 104191,
+              "bits_offset": 2112
+            },
+            {
+              "name": "tcx_ingress",
+              "type_id": 2286,
+              "bits_offset": 2176
+            },
+            {
+              "name": "__cacheline_group_end__net_device_read_rx",
+              "type_id": 1835,
+              "bits_offset": 2240
+            },
+            {
+              "name": "name",
+              "type_id": 220,
+              "bits_offset": 2240
+            },
+            {
+              "name": "name_node",
+              "type_id": 2290,
+              "bits_offset": 2368
+            },
+            {
+              "name": "ifalias",
+              "type_id": 2291,
+              "bits_offset": 2432
+            },
+            {
+              "name": "mem_end",
+              "type_id": 94814,
+              "bits_offset": 2496
+            },
+            {
+              "name": "mem_start",
+              "type_id": 94814,
+              "bits_offset": 2560
+            },
+            {
+              "name": "base_addr",
+              "type_id": 94814,
+              "bits_offset": 2624
+            },
+            {
+              "name": "dev_list",
+              "type_id": 94608,
+              "bits_offset": 2688
+            },
+            {
+              "name": "napi_list",
+              "type_id": 94608,
+              "bits_offset": 2816
+            },
+            {
+              "name": "unreg_list",
+              "type_id": 94608,
+              "bits_offset": 2944
+            },
+            {
+              "name": "close_list",
+              "type_id": 94608,
+              "bits_offset": 3072
+            },
+            {
+              "name": "ptype_all",
+              "type_id": 94608,
+              "bits_offset": 3200
+            },
+            {
+              "name": "adj_list",
+              "type_id": 2279,
+              "bits_offset": 3328
+            },
+            {
+              "name": "xdp_features",
+              "type_id": 122456,
+              "bits_offset": 3584
+            },
+            {
+              "name": "xdp_metadata_ops",
+              "type_id": 2293,
+              "bits_offset": 3648
+            },
+            {
+              "name": "xsk_tx_metadata_ops",
+              "type_id": 2295,
+              "bits_offset": 3712
+            },
+            {
+              "name": "gflags",
+              "type_id": 110827,
+              "bits_offset": 3776
+            },
+            {
+              "name": "needed_tailroom",
+              "type_id": 110827,
+              "bits_offset": 3792
+            },
+            {
+              "name": "hw_features",
+              "type_id": 97799,
+              "bits_offset": 3840
+            },
+            {
+              "name": "wanted_features",
+              "type_id": 97799,
+              "bits_offset": 3904
+            },
+            {
+              "name": "vlan_features",
+              "type_id": 97799,
+              "bits_offset": 3968
+            },
+            {
+              "name": "hw_enc_features",
+              "type_id": 97799,
+              "bits_offset": 4032
+            },
+            {
+              "name": "mpls_features",
+              "type_id": 97799,
+              "bits_offset": 4096
+            },
+            {
+              "name": "mangleid_features",
+              "type_id": 97799,
+              "bits_offset": 4160
+            },
+            {
+              "name": "min_mtu",
+              "type_id": 119901,
+              "bits_offset": 4224
+            },
+            {
+              "name": "max_mtu",
+              "type_id": 119901,
+              "bits_offset": 4256
+            },
+            {
+              "name": "type",
+              "type_id": 110827,
+              "bits_offset": 4288
+            },
+            {
+              "name": "min_header_len",
+              "type_id": 119900,
+              "bits_offset": 4304
+            },
+            {
+              "name": "name_assign_type",
+              "type_id": 119900,
+              "bits_offset": 4312
+            },
+            {
+              "name": "group",
+              "type_id": 89656,
+              "bits_offset": 4320
+            },
+            {
+              "name": "stats",
+              "type_id": 97628,
+              "bits_offset": 4352
+            },
+            {
+              "name": "core_stats",
+              "type_id": 2296,
+              "bits_offset": 5824
+            },
+            {
+              "name": "carrier_up_count",
+              "type_id": 67289,
+              "bits_offset": 5888
+            },
+            {
+              "name": "carrier_down_count",
+              "type_id": 67289,
+              "bits_offset": 5920
+            },
+            {
+              "name": "ethtool_ops",
+              "type_id": 2298,
+              "bits_offset": 5952
+            },
+            {
+              "name": "l3mdev_ops",
+              "type_id": 2300,
+              "bits_offset": 6016
+            },
+            {
+              "name": "ndisc_ops",
+              "type_id": 2302,
+              "bits_offset": 6080
+            },
+            {
+              "name": "xfrmdev_ops",
+              "type_id": 2303,
+              "bits_offset": 6144
+            },
+            {
+              "name": "tlsdev_ops",
+              "type_id": 2305,
+              "bits_offset": 6208
+            },
+            {
+              "name": "operstate",
+              "type_id": 119901,
+              "bits_offset": 6272
+            },
+            {
+              "name": "link_mode",
+              "type_id": 119900,
+              "bits_offset": 6304
+            },
+            {
+              "name": "if_port",
+              "type_id": 119900,
+              "bits_offset": 6312
+            },
+            {
+              "name": "dma",
+              "type_id": 119900,
+              "bits_offset": 6320
+            },
+            {
+              "name": "perm_addr",
+              "type_id": 2049,
+              "bits_offset": 6328
+            },
+            {
+              "name": "addr_assign_type",
+              "type_id": 119900,
+              "bits_offset": 6584
+            },
+            {
+              "name": "addr_len",
+              "type_id": 119900,
+              "bits_offset": 6592
+            },
+            {
+              "name": "upper_level",
+              "type_id": 119900,
+              "bits_offset": 6600
+            },
+            {
+              "name": "lower_level",
+              "type_id": 119900,
+              "bits_offset": 6608
+            },
+            {
+              "name": "threaded",
+              "type_id": 119258,
+              "bits_offset": 6616
+            },
+            {
+              "name": "neigh_priv_len",
+              "type_id": 110827,
+              "bits_offset": 6624
+            },
+            {
+              "name": "dev_id",
+              "type_id": 110827,
+              "bits_offset": 6640
+            },
+            {
+              "name": "dev_port",
+              "type_id": 110827,
+              "bits_offset": 6656
+            },
+            {
+              "name": "irq",
+              "type_id": 89656,
+              "bits_offset": 6688
+            },
+            {
+              "name": "priv_len",
+              "type_id": 119250,
+              "bits_offset": 6720
+            },
+            {
+              "name": "addr_list_lock",
+              "type_id": 112129,
+              "bits_offset": 6752
+            },
+            {
+              "name": "uc",
+              "type_id": 97815,
+              "bits_offset": 6784
+            },
+            {
+              "name": "mc",
+              "type_id": 97815,
+              "bits_offset": 7040
+            },
+            {
+              "name": "dev_addrs",
+              "type_id": 97815,
+              "bits_offset": 7296
+            },
+            {
+              "name": "queues_kset",
+              "type_id": 920,
+              "bits_offset": 7552
+            },
+            {
+              "name": "promiscuity",
+              "type_id": 119901,
+              "bits_offset": 7616
+            },
+            {
+              "name": "allmulti",
+              "type_id": 119901,
+              "bits_offset": 7648
+            },
+            {
+              "name": "uc_promisc",
+              "type_id": 69016,
+              "bits_offset": 7680
+            },
+            {
+              "name": "ip_ptr",
+              "type_id": 2306,
+              "bits_offset": 7744
+            },
+            {
+              "name": "fib_nh_head",
+              "type_id": 87629,
+              "bits_offset": 7808
+            },
+            {
+              "name": "vlan_info",
+              "type_id": 2307,
+              "bits_offset": 7872
+            },
+            {
+              "name": "tipc_ptr",
+              "type_id": 2308,
+              "bits_offset": 7936
+            },
+            {
+              "name": "mpls_ptr",
+              "type_id": 2309,
+              "bits_offset": 8000
+            },
+            {
+              "name": "dev_addr",
+              "type_id": 604,
+              "bits_offset": 8064
+            },
+            {
+              "name": "num_rx_queues",
+              "type_id": 119901,
+              "bits_offset": 8128
+            },
+            {
+              "name": "xdp_zc_max_segs",
+              "type_id": 119901,
+              "bits_offset": 8160
+            },
+            {
+              "name": "ingress_queue",
+              "type_id": 2282,
+              "bits_offset": 8192
+            },
+            {
+              "name": "nf_hooks_ingress",
+              "type_id": 1920,
+              "bits_offset": 8256
+            },
+            {
+              "name": "broadcast",
+              "type_id": 2049,
+              "bits_offset": 8320
+            },
+            {
+              "name": "rx_cpu_rmap",
+              "type_id": 2310,
+              "bits_offset": 8576
+            },
+            {
+              "name": "index_hlist",
+              "type_id": 87630,
+              "bits_offset": 8640
+            },
+            {
+              "name": "num_tx_queues",
+              "type_id": 119901,
+              "bits_offset": 8768
+            },
+            {
+              "name": "qdisc",
+              "type_id": 2073,
+              "bits_offset": 8832
+            },
+            {
+              "name": "tx_queue_len",
+              "type_id": 119901,
+              "bits_offset": 8896
+            },
+            {
+              "name": "tx_global_lock",
+              "type_id": 112129,
+              "bits_offset": 8928
+            },
+            {
+              "name": "xdp_bulkq",
+              "type_id": 2311,
+              "bits_offset": 8960
+            },
+            {
+              "name": "qdisc_hash",
+              "type_id": 2312,
+              "bits_offset": 9024
+            },
+            {
+              "name": "watchdog_timer",
+              "type_id": 114659,
+              "bits_offset": 10048
+            },
+            {
+              "name": "watchdog_timeo",
+              "type_id": 89656,
+              "bits_offset": 10368
+            },
+            {
+              "name": "proto_down_reason",
+              "type_id": 119250,
+              "bits_offset": 10400
+            },
+            {
+              "name": "todo_list",
+              "type_id": 94608,
+              "bits_offset": 10432
+            },
+            {
+              "name": "pcpu_refcnt",
+              "type_id": 216,
+              "bits_offset": 10560
+            },
+            {
+              "name": "refcnt_tracker",
+              "type_id": 106624,
+              "bits_offset": 10624
+            },
+            {
+              "name": "link_watch_list",
+              "type_id": 94608,
+              "bits_offset": 10624
+            },
+            {
+              "name": "reg_state",
+              "type_id": 119258,
+              "bits_offset": 10752
+            },
+            {
+              "name": "dismantle",
+              "type_id": 69016,
+              "bits_offset": 10760
+            },
+            {
+              "name": "moving_ns",
+              "type_id": 69016,
+              "bits_offset": 10768
+            },
+            {
+              "name": "rtnl_link_initializing",
+              "type_id": 69016,
+              "bits_offset": 10776
+            },
+            {
+              "name": "needs_free_netdev",
+              "type_id": 69016,
+              "bits_offset": 10784
+            },
+            {
+              "name": "priv_destructor",
+              "type_id": 2116,
+              "bits_offset": 10816
+            },
+            {
+              "name": "ml_priv",
+              "type_id": 45,
+              "bits_offset": 10880
+            },
+            {
+              "name": "ml_priv_type",
+              "type_id": 97835,
+              "bits_offset": 10944
+            },
+            {
+              "name": "pcpu_stat_type",
+              "type_id": 97948,
+              "bits_offset": 10976,
+              "bitfield_size": 8
+            },
+            {
+              "name": "garp_port",
+              "type_id": 2313,
+              "bits_offset": 11008
+            },
+            {
+              "name": "mrp_port",
+              "type_id": 2314,
+              "bits_offset": 11072
+            },
+            {
+              "name": "dev",
+              "type_id": 78203,
+              "bits_offset": 11136
+            },
+            {
+              "name": "sysfs_groups",
+              "type_id": 2315,
+              "bits_offset": 17152
+            },
+            {
+              "name": "sysfs_rx_queue_group",
+              "type_id": 927,
+              "bits_offset": 17472
+            },
+            {
+              "name": "rtnl_link_ops",
+              "type_id": 2317,
+              "bits_offset": 17536
+            },
+            {
+              "name": "stat_ops",
+              "type_id": 2319,
+              "bits_offset": 17600
+            },
+            {
+              "name": "queue_mgmt_ops",
+              "type_id": 2321,
+              "bits_offset": 17664
+            },
+            {
+              "name": "tso_max_size",
+              "type_id": 119901,
+              "bits_offset": 17728
+            },
+            {
+              "name": "tso_max_segs",
+              "type_id": 119248,
+              "bits_offset": 17760
+            },
+            {
+              "name": "dcbnl_ops",
+              "type_id": 2322,
+              "bits_offset": 17792
+            },
+            {
+              "name": "prio_tc_map",
+              "type_id": 1813,
+              "bits_offset": 17856
+            },
+            {
+              "name": "priomap",
+              "type_id": 2323,
+              "bits_offset": 17984
+            },
+            {
+              "name": "link_topo",
+              "type_id": 2324,
+              "bits_offset": 18048
+            },
+            {
+              "name": "phydev",
+              "type_id": 2325,
+              "bits_offset": 18112
+            },
+            {
+              "name": "sfp_bus",
+              "type_id": 2326,
+              "bits_offset": 18176
+            },
+            {
+              "name": "qdisc_tx_busylock",
+              "type_id": 2327,
+              "bits_offset": 18240
+            },
+            {
+              "name": "proto_down",
+              "type_id": 69016,
+              "bits_offset": 18304
+            },
+            {
+              "name": "irq_affinity_auto",
+              "type_id": 69016,
+              "bits_offset": 18312
+            },
+            {
+              "name": "rx_cpu_rmap_auto",
+              "type_id": 69016,
+              "bits_offset": 18320
+            },
+            {
+              "name": "see_all_hwtstamp_requests",
+              "type_id": 94814,
+              "bits_offset": 18328,
+              "bitfield_size": 1
+            },
+            {
+              "name": "change_proto_down",
+              "type_id": 94814,
+              "bits_offset": 18329,
+              "bitfield_size": 1
+            },
+            {
+              "name": "netns_immutable",
+              "type_id": 94814,
+              "bits_offset": 18330,
+              "bitfield_size": 1
+            },
+            {
+              "name": "fcoe_mtu",
+              "type_id": 94814,
+              "bits_offset": 18331,
+              "bitfield_size": 1
+            },
+            {
+              "name": "net_notifier_list",
+              "type_id": 94608,
+              "bits_offset": 18368
+            },
+            {
+              "name": "udp_tunnel_nic_info",
+              "type_id": 2329,
+              "bits_offset": 18496
+            },
+            {
+              "name": "udp_tunnel_nic",
+              "type_id": 2330,
+              "bits_offset": 18560
+            },
+            {
+              "name": "cfg",
+              "type_id": 2331,
+              "bits_offset": 18624
+            },
+            {
+              "name": "cfg_pending",
+              "type_id": 2331,
+              "bits_offset": 18688
+            },
+            {
+              "name": "ethtool",
+              "type_id": 2332,
+              "bits_offset": 18752
+            },
+            {
+              "name": "xdp_state",
+              "type_id": 2333,
+              "bits_offset": 18816
+            },
+            {
+              "name": "dev_addr_shadow",
+              "type_id": 1464,
+              "bits_offset": 19200
+            },
+            {
+              "name": "linkwatch_dev_tracker",
+              "type_id": 97978,
+              "bits_offset": 19456
+            },
+            {
+              "name": "watchdog_dev_tracker",
+              "type_id": 97978,
+              "bits_offset": 19456
+            },
+            {
+              "name": "dev_registered_tracker",
+              "type_id": 97978,
+              "bits_offset": 19456
+            },
+            {
+              "name": "offload_xstats_l3",
+              "type_id": 2334,
+              "bits_offset": 19456
+            },
+            {
+              "name": "devlink_port",
+              "type_id": 2335,
+              "bits_offset": 19520
+            },
+            {
+              "name": "page_pools",
+              "type_id": 87629,
+              "bits_offset": 19584
+            },
+            {
+              "name": "irq_moder",
+              "type_id": 2336,
+              "bits_offset": 19648
+            },
+            {
+              "name": "max_pacing_offload_horizon",
+              "type_id": 119255,
+              "bits_offset": 19712
+            },
+            {
+              "name": "napi_config",
+              "type_id": 2070,
+              "bits_offset": 19776
+            },
+            {
+              "name": "num_napi_configs",
+              "type_id": 119250,
+              "bits_offset": 19840
+            },
+            {
+              "name": "napi_defer_hard_irqs",
+              "type_id": 119250,
+              "bits_offset": 19872
+            },
+            {
+              "name": "gro_flush_timeout",
+              "type_id": 94814,
+              "bits_offset": 19904
+            },
+            {
+              "name": "up",
+              "type_id": 69016,
+              "bits_offset": 19968
+            },
+            {
+              "name": "request_ops_lock",
+              "type_id": 69016,
+              "bits_offset": 19976
+            },
+            {
+              "name": "lock",
+              "type_id": 97307,
+              "bits_offset": 20032
+            },
+            {
+              "name": "net_shaper_hierarchy",
+              "type_id": 2337,
+              "bits_offset": 20288
+            },
+            {
+              "name": "neighbours",
+              "type_id": 2338,
+              "bits_offset": 20352
+            },
+            {
+              "name": "hwprov",
+              "type_id": 2339,
+              "bits_offset": 20480
+            },
+            {
+              "name": "priv",
+              "type_id": 1768,
+              "bits_offset": 20992
+            }
+          ]
+        },
+        "xdp_buff": {
+          "id": 122435,
+          "kind": "STRUCT",
+          "name": "xdp_buff",
+          "size": 56,
+          "vlen": 7,
+          "members": [
+            {
+              "name": "data",
+              "type_id": 45,
+              "bits_offset": 0
+            },
+            {
+              "name": "data_end",
+              "type_id": 45,
+              "bits_offset": 64
+            },
+            {
+              "name": "data_meta",
+              "type_id": 45,
+              "bits_offset": 128
+            },
+            {
+              "name": "data_hard_start",
+              "type_id": 45,
+              "bits_offset": 192
+            },
+            {
+              "name": "rxq",
+              "type_id": 4222,
+              "bits_offset": 256
+            },
+            {
+              "name": "txq",
+              "type_id": 4223,
+              "bits_offset": 320
+            },
+            {
+              "name": "(anon)",
+              "type_id": 4221,
+              "bits_offset": 384
+            }
+          ]
+        },
+        "xdp_rxq_info": {
+          "id": 122489,
+          "kind": "STRUCT",
+          "name": "xdp_rxq_info",
+          "size": 64,
+          "vlen": 5,
+          "members": [
+            {
+              "name": "dev",
+              "type_id": 166,
+              "bits_offset": 0
+            },
+            {
+              "name": "queue_index",
+              "type_id": 119250,
+              "bits_offset": 64
+            },
+            {
+              "name": "reg_state",
+              "type_id": 119250,
+              "bits_offset": 96
+            },
+            {
+              "name": "mem",
+              "type_id": 122468,
+              "bits_offset": 128
+            },
+            {
+              "name": "frag_size",
+              "type_id": 119250,
+              "bits_offset": 192
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "regression_passed": false,
+  "sources": {
+    "vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+    "vendor/bpf/cilium/bpf/include/linux/bpf.h": "34cf8b6c978854bb115dceaf330c9be0f1dcc7c34d557868e27e61ea13a357e5",
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/linux-framework/net/core/filter.c": "629e5372b2d239485e75fc5c3f5bee98be4bbe6201794d4480de68a4fcd6f542"
+  },
+  "scope": "Actual native header accessor execution against a physical context fixture whose pointer-chain offsets match both canonical kernel BTFs and xdp_convert_ctx_access. Not kernel execution, actual corpus path or timing acceptance.",
+  "ended_utc": "2026-11-28T08:04:36Z",
+  "files": {
+    "arm64-disassembly.txt": {
+      "bytes": 407,
+      "sha256": "87143583eb88e469e91ad9339dbdec5f82b4f5f02699375d56423b6a69908b10"
+    },
+    "x86-accessors.o": {
+      "bytes": 5064,
+      "sha256": "bb1001340dcf2eda54fb096b321535a3a152ff20a2cb4cd6cc0692d509e82947"
+    },
+    "x86-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86.elf": {
+      "bytes": 797776,
+      "sha256": "4eeb64773117091034c77c7f9e769ad8a484cbd9b2f7bfc60d3b2192320cfe3d"
+    },
+    "arm64.elf": {
+      "bytes": 645168,
+      "sha256": "eeb75d39b539150edd98703cc95b1d7a74bee955c5950ba24706185711787427"
+    },
+    "arm64-driver-compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-compile.log": {
+      "bytes": 4635,
+      "sha256": "349b1273159a01a0835f18f586bca215c40616c45e2bc086f974f359ab53748c"
+    },
+    "x86-driver-compile.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-stdout.txt": {
+      "bytes": 50,
+      "sha256": "9f92b769e9fd85bd2cf4e87944e884aa508c16ebb2f64f1975645a20ef191f2b"
+    },
+    "arm64-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-accessors.o": {
+      "bytes": 5600,
+      "sha256": "f8b987e4c848fd6ce64beb1f904191b1c2f12a36dc3f7de2356c55e34c43cd3e"
+    },
+    "x86-compile.log": {
+      "bytes": 4635,
+      "sha256": "349b1273159a01a0835f18f586bca215c40616c45e2bc086f974f359ab53748c"
+    },
+    "arm64-stdout.txt": {
+      "bytes": 50,
+      "sha256": "9f92b769e9fd85bd2cf4e87944e884aa508c16ebb2f64f1975645a20ef191f2b"
+    },
+    "x86-disassembly.txt": {
+      "bytes": 503,
+      "sha256": "a5daffc8a60f98bc1f85d51a8f53dac3e886def982441aa2db8300c56dc642a1"
+    }
+  }
+}
