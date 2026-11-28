@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-11-28T09:47:59Z",
+  "launcher_pid": 1412012,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/cilium-count",
+    "read"
+  ],
+  "preparation_commit": "cf563cbe5bc56e755b7c99cf3ba3adfd427dbc9d",
+  "recipe_sha256": "7d7fcd5adea71f6db59ce8443e45adb1e9a1ad6f1be944126c1b0bd2f2b7b26c",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/arithmetic/cilium-count/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/arithmetic/cilium-count/job.log",
+  "resume_entry": "COORDINATOR 2026-11-28T07:17Z",
+  "resources": "All metadata CPU19 AS48GiB, no timing/image locks or newguest.",
+  "scope": "Read only archived x86Cilium service map queries/candidates, actual query availability rather than inferred zero; no ARM/current-image runtime claim or production changes.",
+  "collection": "Collect SAME job NEXTTURN; preserve missing/failed queries/ambiguous key and IDs; no semantic conclusion from metadata status0."
+}
