@@ -1,0 +1,162 @@
+diff --git a/kprog/libnativeloader/src/native_loader_context_lto.hpp b/kprog/libnativeloader/src/native_loader_context_lto.hpp
+index dbcca8ea0..71d55b288 100644
+--- a/kprog/libnativeloader/src/native_loader_context_lto.hpp
++++ b/kprog/libnativeloader/src/native_loader_context_lto.hpp
+@@ -10,7 +10,8 @@ std::filesystem::path native_context_lto_object(
+     const std::string &function_bodies = {}, const std::string &immutable_globals = {},
+     const std::string &map_types = {})
+ {
+-    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && function_bodies.empty() &&
++    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && prog_type != BPF_PROG_TYPE_XDP &&
++        function_bodies.empty() &&
+         immutable_globals.empty() && map_types.empty()) return input;
+     Hash64 hash;
+     hash.add_string("perf-context-lto-v3");
+diff --git a/kprog/libnativeloader/src/native_loader_link_schema.hpp b/kprog/libnativeloader/src/native_loader_link_schema.hpp
+index c291d63eb..2f4ed26e2 100644
+--- a/kprog/libnativeloader/src/native_loader_link_schema.hpp
++++ b/kprog/libnativeloader/src/native_loader_link_schema.hpp
+@@ -86,6 +86,7 @@ NativeLinkArgs build_native_link_args(
+ {
+     NativeLinkArgs out{};
+     out.linker = native_link_binary(native_link_path);
++    add_name_addr(out.helpers, "__native_prog_type", companion.prog_type);
+     BpfArrayOffsets array_offsets{
+         K_BPF_ARRAY_VALUE_OFFSET,
+         K_BPF_ARRAY_PPTRS_OFFSET,
+diff --git a/kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp b/kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp
+index 032704f06..b1686db26 100644
+--- a/kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp
++++ b/kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp
+@@ -58,6 +58,7 @@ NativeLinkArgs build_native_link_args(
+ {
+     NativeLinkArgs out{};
+     out.linker = native_link_binary(native_link_path);
++    add_name_addr(out.helpers, "__native_prog_type", companion.prog_type);
+     BpfArrayOffsets array_offsets{
+         K_BPF_ARRAY_VALUE_OFFSET,
+         K_BPF_ARRAY_PPTRS_OFFSET,
+diff --git a/kprog/x86/native_lab/native_link/src/frozen_ir.rs b/kprog/x86/native_lab/native_link/src/frozen_ir.rs
+index fa35f7491..c873b5af7 100644
+--- a/kprog/x86/native_lab/native_link/src/frozen_ir.rs
++++ b/kprog/x86/native_lab/native_link/src/frozen_ir.rs
+@@ -11,13 +11,14 @@ pub(super) fn specialize(
+     lookups: &HashMap<String, LookupSiteSpec>,
+     compiler: &std::path::Path,
+     linker: &std::path::Path,
++    prog_type: u64,
+ ) -> Result<Option<Vec<u8>>> {
+     let map_types: HashMap<_, _> = lookups.iter()
+         .filter(|(_, site)| matches!(site.kind, LookupKind::LpmTrie))
+         .map(|(name, _)| (name, serde_json::json!({"type": 11, "inner_type": 0})))
+         .collect(); // BPF_MAP_TYPE_LPM_TRIE; shape is read from the live map.
+     if args.mode != LinkMode::Kernel
+-        || (values.is_empty() && map_types.is_empty())
++        || (values.is_empty() && map_types.is_empty() && prog_type != 6)
+     {
+         return Ok(None);
+     }
+@@ -46,7 +47,7 @@ pub(super) fn specialize(
+     }
+     command.arg(&ir)
+         .arg("--symbol").arg(&args.symbol)
+-        .args(["--kernel-btf", "/sys/kernel/btf/vmlinux", "--prog-type", "0"])
++        .args(["--kernel-btf", "/sys/kernel/btf/vmlinux", "--prog-type"]).arg(prog_type.to_string())
+         .arg("--immutable-globals").arg(&facts).arg("-o").arg(&native);
+     if !map_types.is_empty() {
+         let types = prefix.join("map-types.json");
+@@ -117,11 +118,11 @@ mod tests {
+             output_relocs: None, output_map_patches: None, output_abi: None,
+             link_plan: None, show: false, preserve_entry_abi: false, mode: LinkMode::Kernel };
+         let compiler = root.join("vendor/build/native-bpf/x86/stage/kprog-perf-context-lto");
+-        assert!(specialize(&args, &elf, &HashMap::new(), &HashMap::new(), &compiler, &linker)?.is_none());
++        assert!(specialize(&args, &elf, &HashMap::new(), &HashMap::new(), &compiler, &linker, 0)?.is_none());
+         for value in [0u8, 1] {
+             args.output = dir.join(format!("out-{value}.bin"));
+             let values = HashMap::from([("option".to_string(), vec![value, 0, 0, 0])]);
+-            let bytes = specialize(&args, &elf, &values, &HashMap::new(), &compiler, &linker)?.unwrap();
++            let bytes = specialize(&args, &elf, &values, &HashMap::new(), &compiler, &linker, 0)?.unwrap();
+             let specialized = object::File::parse(&*bytes)?;
+             let undefined: Vec<_> = specialized.symbols().filter(|s| s.is_undefined())
+                 .map(|s| s.name().map(str::to_string)).collect::<std::result::Result<_, _>>()?;
+@@ -167,9 +168,9 @@ mod tests {
+             elem_size: 0, index_mask: 0, value_offset: 0, percpu_base_addr: 0,
+             map_name: None,
+         })]);
+-        assert!(specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.is_none());
++        assert!(specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.is_none());
+         lookups.values_mut().next().unwrap().kind = LookupKind::LpmTrie;
+-        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.unwrap();
++        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.unwrap();
+         let elf = object::File::parse(&*data)?;
+         let undefined: Vec<_> = elf.symbols().filter(|s| s.is_undefined())
+             .map(|s| s.name().map(str::to_string)).collect::<std::result::Result<_, _>>()?;
+@@ -186,7 +187,7 @@ mod tests {
+             .arg(&args.input).arg("--link-plan").arg(&plan).status()?.success());
+         let data = fs::read(&args.input)?;
+         let elf = object::File::parse(&*data)?;
+-        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.unwrap();
++        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.unwrap();
+         let elf = object::File::parse(&*data)?;
+         let calls = elf.sections().flat_map(|s| s.relocations()).filter(|(_, r)| {
+             match r.target() {
+diff --git a/kprog/x86/native_lab/native_link/src/main.rs b/kprog/x86/native_lab/native_link/src/main.rs
+index 2e136412b..ea6e9cb19 100644
+--- a/kprog/x86/native_lab/native_link/src/main.rs
++++ b/kprog/x86/native_lab/native_link/src/main.rs
+@@ -441,6 +441,7 @@ fn main() -> Result<()> {
+             _ => "x86_64",
+         }).join("kprog-perf-context-lto"),
+         &std::env::current_exe()?,
++        helper_addrs.get("__native_prog_type").copied().unwrap_or(0),
+     )?;
+     let elf = match specialized.as_ref() {
+         Some(bytes) => object::File::parse(&**bytes).context("parse specialized proof")?,
+diff --git a/kprog/x86/perf_context_lto.cpp b/kprog/x86/perf_context_lto.cpp
+index 67e344e39..d10673b0c 100644
+--- a/kprog/x86/perf_context_lto.cpp
++++ b/kprog/x86/perf_context_lto.cpp
+@@ -520,6 +520,43 @@ int main(int argc, char **argv) {
+       F->removeParamAttr(0, Attribute::DereferenceableOrNull);
+       Converted = Loads.size();
+     }
++    if (ProgType == BPF_PROG_TYPE_XDP) {
++      std::unique_ptr<btf, decltype(&btf__free)> Types(
++        btf__parse(Kernel.c_str(), nullptr), btf__free);
++      if (!Types) { errs() << "cannot read boot kernel BTF\n"; return 1; }
++      const auto Public = native_lto::field(Types.get(), "xdp_md", "ingress_ifindex");
++      const auto Rxq = native_lto::offset(Types.get(), "xdp_buff", "rxq");
++      const auto Dev = native_lto::offset(Types.get(), "xdp_rxq_info", "dev");
++      const auto Index = native_lto::offset(Types.get(), "net_device", "ifindex");
++      const auto &DL = M->getDataLayout();
++      auto *Ctx = F->getArg(0);
++      for (auto &I : instructions(F)) {
++        auto *L = dyn_cast<LoadInst>(&I);
++        if (!L || !L->getType()->isIntegerTy(32)) continue;
++        auto *G = dyn_cast<GetElementPtrInst>(L->getPointerOperand()->stripPointerCasts());
++        auto *T = G ? dyn_cast<StructType>(G->getSourceElementType()) : nullptr;
++        // Public field identity matters: physical pointer bits and stack copies
++        // may use the same byte offset without naming this context field.
++        if (!T || !T->hasName() || T->getName() != "struct.xdp_md") continue;
++        int64_t Offset = 0;
++        if (GetPointerBaseWithConstantOffset(L->getPointerOperand(), Offset, DL) != Ctx ||
++            Offset != Public.offset) continue;
++        IRBuilder<> B(L);
++        auto *Queue = B.CreateLoad(PointerType::getUnqual(C),
++          B.CreateConstGEP1_64(B.getInt8Ty(), Ctx, Rxq));
++        auto *Device = B.CreateLoad(PointerType::getUnqual(C),
++          B.CreateConstGEP1_64(B.getInt8Ty(), Queue, Dev));
++        L->setOperand(0, B.CreateConstGEP1_64(B.getInt8Ty(), Device, Index));
++        L->setMetadata(LLVMContext::MD_tbaa, nullptr);
++        ++Converted;
++      }
++      if (Converted) {
++        F->setMemoryEffects(MemoryEffects::unknown());
++        F->removeParamAttr(0, Attribute::Dereferenceable);
++        F->removeParamAttr(0, Attribute::DereferenceableOrNull);
++      }
++      errs() << "XDP ifindex LTO converted loads: " << Converted << '\n';
++    }
+     unsigned LpmCount = 0;
+     auto Arrays = lowerMapLookups(*M, *F, MapTypes, LpmCount);
+     if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }
