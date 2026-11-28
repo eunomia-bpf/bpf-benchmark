@@ -1,0 +1,29 @@
+{
+  "parsed": 295,
+  "errors": [
+    {
+      "member": "tracee__monitor/linkcache/native_kernel_link_cache/d33f953f92405628.proof.o",
+      "bytes": 603648,
+      "sha256": "96ffc43cb262a9ed2079fca8b21ef3b9c22e367b48076b8061f2816c2bdb2f52",
+      "error": "String Table not found",
+      "preserved": "captured-tracee__monitor-d33f953f92405628.proof.o",
+      "readelf_returncode": 0,
+      "elf64_shoff": 1386192,
+      "elf64_shentsize": 64,
+      "elf64_shnum": 10,
+      "elf64_shstrndx": 9
+    },
+    {
+      "member": "tetragon__observer/linkcache/native_kernel_link_cache/df863bd30e6ecfd4.proof.o",
+      "bytes": 1353728,
+      "sha256": "b0e833404f342aadf865dd5d3d8775f01dc7c2340a56a716290cbb4cca272a9a",
+      "error": "String Table not found",
+      "preserved": "captured-tetragon__observer-df863bd30e6ecfd4.proof.o",
+      "readelf_returncode": 0,
+      "elf64_shoff": 1363720,
+      "elf64_shentsize": 64,
+      "elf64_shnum": 10,
+      "elf64_shstrndx": 9
+    }
+  ]
+}

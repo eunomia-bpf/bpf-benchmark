@@ -1,6 +1,7 @@
 """Join archived native plans with captured proof entries, globals and map metadata."""
 from pathlib import Path
 from elftools.elf.elffile import ELFFile
+from elftools.common.exceptions import ELFError
 import collections,hashlib,io,json,os,re,subprocess,tarfile,traceback
 ROOT=Path('/workspaces/repository');OUT=Path(__file__).resolve().parent;BASE=OUT.parent
 plans={};proofs={};patches={};abis={};snapshots=[];phases={};members=[];sources=[];duplicate_plan_variants=[]
@@ -15,10 +16,13 @@ def take(arch,group,rel,data,expected):
   if identity in plans and {k:v for k,v in plans[identity].items() if k!='origin'}!=value:duplicate_plan_variants.append(dict(identity=list(identity),first=plans[identity]['origin'],second=origin,second_plan=value))
   else:plans[identity]=dict(value,origin=origin)
  elif re.fullmatch(r'[0-9a-f]{16}\.proof\.o',Path(rel).name):
-  elf=ELFFile(io.BytesIO(data));symbols=elf.get_section_by_name('.symtab');entries=[]
-  for s in symbols.iter_symbols():
-   if isinstance(s['st_shndx'],int) and s['st_info']['type']=='STT_FUNC' and s['st_info']['bind'] in ['STB_GLOBAL','STB_WEAK'] and s['st_value']==0 and s['st_size']>0:entries.append(s.name)
-  proofs[identity]=dict(entries=sorted(set(entries)),origin=origin,elf_machine=elf['e_machine'])
+  try:
+   elf=ELFFile(io.BytesIO(data));symbols=elf.get_section_by_name('.symtab');entries=[]
+   for symbol in symbols.iter_symbols():
+    if isinstance(symbol['st_shndx'],int) and symbol['st_info']['type']=='STT_FUNC' and symbol['st_info']['bind'] in ['STB_GLOBAL','STB_WEAK'] and symbol['st_value']==0 and symbol['st_size']>0:entries.append(symbol.name)
+   proofs[identity]=dict(entries=sorted(set(entries)),origin=origin,elf_machine=elf['e_machine'])
+  except ELFError as error:
+   proofs[identity]=dict(entries=[],origin=origin,capture_error=str(error),scope='Captured ELF parse failure; plan retained, full entry identity remains unresolved.')
  elif rel.endswith('.abi.tsv'):abis[identity]=dict(origin=origin,lines=data.decode().splitlines())
  elif rel.endswith('.map-patches.tsv'):patches[identity]=dict(origin=origin,names=sorted({x.split('\t')[0] for x in data.decode().splitlines() if x}))
  elif rel.endswith('/snapshot.json'):
@@ -72,20 +76,20 @@ try:
    lookups.append(dict(name=name,form=item['kind'],plan_shape={k:v for k,v in item.items() if k not in ['name','map_name']},observed_kernel_name_candidates=candidates,identity_scope='Name/shape candidates across captured lifetime; original program-to-map ID binding remains separate.'))
   signature=sha(json.dumps({k:v for k,v in plan.items() if k not in ['origin','const_values']},sort_keys=True).encode());const=plan.get('const_values',[]);const_sig=sha(json.dumps(const,sort_keys=True).encode());groups[(arch,app,signature)].append(dict(cache_key=key,entry=entry,const_sha256=const_sig,const_values=const))
   abi=abis.get(identity);loads=[x for x in abi['lines'] if x.startswith('load_site\t')] if abi else []
-  rows.append(dict(architecture=arch,app=app,cache_key=key,entry=entry,entry_candidates=entries,proof_origin=proof['origin'] if proof else None,plan_origin=plan['origin'],manifest_candidates=manifest[(arch,app,entry)] if entry else [],observed_kernel_name_program_candidates=list(programs[(arch,app,entry[:15])].values()) if entry else [],constants=const,constants_sha256=const_sig,helper_bindings=plan.get('helpers',[]),lookup_sites=plan.get('lookup_sites',[]),lookup_maps=lookups,update_sites=plan.get('update_sites',[]),map_patch_names=patches.get(identity,{}).get('names',[]),abi_origin=abi['origin'] if abi else None,abi_load_site_count=len(loads),remaining='Original source-object/program-ID/map-ID binding, installed context/helper/tail paths and baseline/native useful work remain distinct checks.'))
+  rows.append(dict(architecture=arch,app=app,cache_key=key,entry=entry,entry_candidates=entries,proof_origin=proof['origin'] if proof else None,proof_capture_error=proof.get('capture_error') if proof else None,plan_origin=plan['origin'],manifest_candidates=manifest[(arch,app,entry)] if entry else [],observed_kernel_name_program_candidates=list(programs[(arch,app,entry[:15])].values()) if entry else [],constants=const,constants_sha256=const_sig,helper_bindings=plan.get('helpers',[]),lookup_sites=plan.get('lookup_sites',[]),lookup_maps=lookups,update_sites=plan.get('update_sites',[]),map_patch_names=patches.get(identity,{}).get('names',[]),abi_origin=abi['origin'] if abi else None,abi_load_site_count=len(loads),remaining='Original source-object/program-ID/map-ID binding, installed context/helper/tail paths and baseline/native useful work remain distinct checks.'))
  varied=[dict(architecture=a,app=b,other_plan_fields_sha256=s,variants=v) for (a,b,s),v in groups.items() if len({x['const_sha256'] for x in v})>1]
  summary=[]
  for arch,app in sorted({(x['architecture'],x['app']) for x in rows}):
   items=[x for x in rows if (x['architecture'],x['app'])==(arch,app)];entrynames={x['entry'] for x in items if x['entry']};variables=collections.defaultdict(set)
   for x in items:
    for v in x['constants']:variables[v['name']].add(v['hex'])
-  summary.append(dict(architecture=arch,app=app,cache_plans=len(items),unique_named_entries=len(entrynames),plans_with_constants=sum(bool(x['constants']) for x in items),plans_with_entry_proof=sum(bool(x['proof_origin']) for x in items),plans_with_abi=sum(bool(x['abi_origin']) for x in items),manifest_candidate_counts=dict(collections.Counter(len(x['manifest_candidates']) for x in items)),lookup_forms=dict(collections.Counter(y['form'] for x in items for y in x['lookup_maps'])),constant_value_variants={n:sorted(v) for n,v in sorted(variables.items())},readonly_snapshot_values=sum((x['architecture'],x['app'])==(arch,app) for x in readonly)))
- output=dict(scope='Captured native cache plans from x86 six-app checks and legacy ARM OTel. Plan coverage differs from install counts. Full symbol proof entry is joined by exact cache key; kernel names and map shapes remain candidates across snapshots.',per_app=summary,plans=rows,readonly_snapshot_values=readonly,constant_only_plan_variation_groups=varied,duplicate_cache_key_plan_variants=duplicate_plan_variants)
+  summary.append(dict(architecture=arch,app=app,cache_plans=len(items),unique_named_entries=len(entrynames),plans_with_constants=sum(bool(x['constants']) for x in items),plans_with_captured_proof=sum(bool(x['proof_origin']) for x in items),plans_with_resolved_entry=sum(bool(x['entry']) for x in items),proof_capture_gaps=sum(bool(x['proof_capture_error']) for x in items),plans_with_abi=sum(bool(x['abi_origin']) for x in items),manifest_candidate_counts=dict(collections.Counter(len(x['manifest_candidates']) for x in items)),lookup_forms=dict(collections.Counter(y['form'] for x in items for y in x['lookup_maps'])),constant_value_variants={n:sorted(v) for n,v in sorted(variables.items())},readonly_snapshot_values=sum((x['architecture'],x['app'])==(arch,app) for x in readonly)))
+ output=dict(scope='Captured native cache plans from x86 six-app checks and legacy ARM OTel. Plan coverage differs from install counts. Full symbol proof entry is joined by exact cache key; kernel names and map shapes remain candidates across snapshots.',per_app=summary,plans=rows,readonly_snapshot_values=readonly,constant_only_plan_variation_groups=varied,duplicate_cache_key_plan_variants=duplicate_plan_variants,proof_capture_gaps=[dict(architecture=x['architecture'],app=x['app'],cache_key=x['cache_key'],source=x['proof_origin'],error=x['proof_capture_error']) for x in rows if x['proof_capture_error']])
  (OUT/'runtime-plans.json').write_text(json.dumps(output,indent=2)+'\n');(OUT/'sources.json').write_text(json.dumps(dict(archives=sources,members=members),indent=2)+'\n')
- header=['architecture','app','cache_key','entry','constants','lookup_sites','abi_load_sites','manifest_candidates','observed_program_name_candidates'];lines=['\t'.join(header)]
- for x in rows:lines.append('\t'.join(map(str,[x['architecture'],x['app'],x['cache_key'],x['entry'] or '',len(x['constants']),len(x['lookup_sites']),x['abi_load_site_count'],len(x['manifest_candidates']),len(x['observed_kernel_name_program_candidates'])])))
+ header=['architecture','app','cache_key','entry','constants','lookup_sites','abi_load_sites','manifest_candidates','observed_program_name_candidates','proof_capture_error'];lines=['\t'.join(header)]
+ for x in rows:lines.append('\t'.join(map(str,[x['architecture'],x['app'],x['cache_key'],x['entry'] or '',len(x['constants']),len(x['lookup_sites']),x['abi_load_site_count'],len(x['manifest_candidates']),len(x['observed_kernel_name_program_candidates']),x['proof_capture_error'] or ''])))
  (OUT/'programs.tsv').write_text('\n'.join(lines)+'\n')
- r.update(controller_status=0,phase='finished-manual-result-review-pending',plans=len(rows),selected_verified_members=len(members),snapshots=len(snapshots),readonly_snapshot_values=len(readonly),constant_only_variation_groups=len(varied),duplicate_cache_key_plan_variants=len(duplicate_plan_variants),per_app=[{k:v for k,v in x.items() if k!='constant_value_variants'} for x in summary],outputs={n:dict(bytes=(OUT/n).stat().st_size,sha256=file_sha(OUT/n)) for n in ['runtime-plans.json','sources.json','programs.tsv']})
+ r.update(controller_status=0,phase='finished-manual-result-review-pending',proof_capture_gaps=sum(bool(x['proof_capture_error']) for x in rows),plans=len(rows),selected_verified_members=len(members),snapshots=len(snapshots),readonly_snapshot_values=len(readonly),constant_only_variation_groups=len(varied),duplicate_cache_key_plan_variants=len(duplicate_plan_variants),per_app=[{k:v for k,v in x.items() if k!='constant_value_variants'} for x in summary],outputs={n:dict(bytes=(OUT/n).stat().st_size,sha256=file_sha(OUT/n)) for n in ['runtime-plans.json','sources.json','programs.tsv']})
 except Exception:r.update(controller_status=1,phase='failed-receipts-retained',exception=traceback.format_exc())
 finally:r['ended_utc']=now();save();print(json.dumps({k:v for k,v in r.items() if k not in ['per_app','outputs']}),flush=True)
 raise SystemExit(r['controller_status'])
