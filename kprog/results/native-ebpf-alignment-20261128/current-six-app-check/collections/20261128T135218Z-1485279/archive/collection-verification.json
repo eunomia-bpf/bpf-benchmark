@@ -1,0 +1,27 @@
+{
+  "utc": "2026-11-28T14:00:54Z",
+  "same_archive_pid": 1486141,
+  "archive_controller_sha256": "bfcaf16241aa06fcbd9421a5ab30e31310a52a5b690e02cabab6a9afbba4a73d",
+  "verified_members": 6891,
+  "verified_sources": 6891,
+  "logical_bytes": 801002339,
+  "file_set_equal": true,
+  "parts": [
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-aa",
+      "bytes": 48000000,
+      "sha256": "f5f027c3d2a32597f027991c9e56e4a5c60926723e59aa722cf1d87ba8c615ea"
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-ab",
+      "bytes": 48000000,
+      "sha256": "7f7ffba5bffdba73c0c69f9b628b04e3fffe575583042935a415baf1b67ea5a8"
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/current-six-app-check/collections/20261128T135218Z-1485279/archive/evidence.tar.zst.part-ac",
+      "bytes": 28733473,
+      "sha256": "1a84e0c049d3854c6ccc5a748ab5727a2c6e92bf2422ed5e8eef910237aa22af"
+    }
+  ],
+  "all_originals_preserved": true
+}
