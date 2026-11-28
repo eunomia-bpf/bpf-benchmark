@@ -1,0 +1,2144 @@
+{
+  "pid": 1581613,
+  "status": "complete",
+  "ended_utc": "2026-11-28T17:51:38.468959+00:00",
+  "all_four_sources_compile": true,
+  "all_source_target_hashes_verified": true,
+  "cases": [
+    {
+      "arch": "x86",
+      "app": "bcc",
+      "queries": 17,
+      "unanswered_calls": 0,
+      "query_kinds": [
+        "access_delta",
+        "field_exists",
+        "type_exists"
+      ],
+      "query_rows": [
+        {
+          "kind": "access_delta",
+          "query": "&(((((struct bio___o *)bio)))->bi_disk)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((((struct task_struct___o *)task)))->state)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((b)))->bi_bdev)",
+          "answer": 8,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((disk)))->first_minor)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((disk)))->major)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((r)))->q)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((r)))->rq_disk)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((rq)))->q)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((t)))->__state)",
+          "answer": 24,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->bd_disk)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->disk)",
+          "answer": 96,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->elevator)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "b->bi_bdev",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "r->rq_disk",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "struct renamedata___x, old_mnt_userns",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "t->__state",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "struct trace_event_raw_block_rq_completion___x",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        }
+      ]
+    },
+    {
+      "arch": "x86",
+      "app": "tetragon",
+      "queries": 148,
+      "unanswered_calls": 0,
+      "query_kinds": [
+        "access_delta",
+        "enum_value",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists"
+      ],
+      "query_rows": [
+        {
+          "kind": "access_delta",
+          "query": "&((((ba)))->len)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((ba)))->type)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((task)))->mm)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((task)))->tgid)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((arg))->dentry)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((ba))->aux)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((cgrp))->kn)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((cgrp))->root)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->mod)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->name)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->sig_ok)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->taints)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((old_kn))->id.id)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((struct mount *)0)->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->d_inode)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->exe_file)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->hierarchy_id)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->name)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->taints)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t2->i_mode)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&address->sa_family",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&audit->loginuid",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->insn_cnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->prog_name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->prog_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->key_size",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->map_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->max_entries",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->value_size",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bprm->file",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgroups->dfl_cgrp",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgroups->subsys[subsys_idx]",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgrp->kn",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgrp->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_dport",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_family",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_num",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_rcv_saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_v6_daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_v6_rcv_saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->egid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->euid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->fsgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->fsuid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->gid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->securebits",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->sgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->suid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->uid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->user_ns",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_hash",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ext->offset[sec_path_id]",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&file->f_path",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&fs->pwd",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&fs->root",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&h->pprev",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&info->status",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->count",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->iter_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->kvec",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->ubuf",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->nexthdr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->protocol",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip6->daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip6->saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv4->sin_addr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv4->sin_port",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv6->sin6_addr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv6->sin6_port",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kiocb->ki_filp",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kn->id",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kn->name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kvec->iov_base",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kvec->iov_len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&mnt->mnt_mountpoint",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&mnt->mnt_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->group",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->ns.inum",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->owner",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.config",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.kprobe_func",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.probe_offset",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&parent->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&path->dentry",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&path->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&pid->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&pid->numbers",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&root->dentry",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&root->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_mark",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_priority",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_protocol",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->extensions",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->hash",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->head",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->mark",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->network_header",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->priority",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->transport_header",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sock->sk",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sp->len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sp->olen",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&subsys->cgroup",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&t->real_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->audit",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->cgroups",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->cred",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->fs",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->loginuid.val",
+          "answer": 3440,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->pids",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->real_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->tgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->thread_pid",
+          "answer": 2808,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&tcp->dest",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&tcp->source",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&udp->dest",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&udp->source",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&vfsmnt->mnt_root",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "(const void *)&common->skc_state",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "ip",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum iter_type, ITER_IOVEC",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum iter_type, ITER_UBUF",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum skb_ext_id, SKB_EXT_SEC_PATH",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum bpf_func_id, BPF_FUNC_get_current_cgroup_id",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum iter_type, ITER_IOVEC",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum iter_type, ITER_UBUF",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum skb_ext_id, SKB_EXT_SEC_PATH",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "((struct kernfs_node___old *)0)->id.id",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "iov_iter->iter_type",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "skb->active_extensions",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->audit",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->loginuid",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->thread_pid",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "pid->numbers[0]",
+          "answer": 16,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "sk->sk_protocol",
+          "answer": 2,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "task->pids",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "btf_bpf_ktime_get_boot_ns",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "struct load_info",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        }
+      ]
+    },
+    {
+      "arch": "arm64",
+      "app": "bcc",
+      "queries": 17,
+      "unanswered_calls": 0,
+      "query_kinds": [
+        "access_delta",
+        "field_exists",
+        "type_exists"
+      ],
+      "query_rows": [
+        {
+          "kind": "access_delta",
+          "query": "&(((((struct bio___o *)bio)))->bi_disk)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((((struct task_struct___o *)task)))->state)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((b)))->bi_bdev)",
+          "answer": 8,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((disk)))->first_minor)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((disk)))->major)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((r)))->q)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((r)))->rq_disk)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((rq)))->q)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((t)))->__state)",
+          "answer": 32,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->bd_disk)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->disk)",
+          "answer": 96,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->elevator)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "b->bi_bdev",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "r->rq_disk",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "struct renamedata___x, old_mnt_userns",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "t->__state",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "struct trace_event_raw_block_rq_completion___x",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/bcc/libbpf-tools/biosnoop.bpf.c"
+        }
+      ]
+    },
+    {
+      "arch": "arm64",
+      "app": "tetragon",
+      "queries": 148,
+      "unanswered_calls": 0,
+      "query_kinds": [
+        "access_delta",
+        "enum_value",
+        "enum_value_exists",
+        "field_exists",
+        "field_size",
+        "type_exists"
+      ],
+      "query_rows": [
+        {
+          "kind": "access_delta",
+          "query": "&((((ba)))->len)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((ba)))->type)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((task)))->mm)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((((task)))->tgid)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((arg))->dentry)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((ba))->aux)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((cgrp))->kn)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((cgrp))->root)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->mod)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->name)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->sig_ok)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((mod))->taints)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(((old_kn))->id.id)",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&((struct mount *)0)->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->d_inode)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->exe_file)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->hierarchy_id)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->name)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t1->taints)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&(__t2->i_mode)",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&address->sa_family",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&audit->loginuid",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->insn_cnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->prog_name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ba->prog_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->key_size",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->map_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->max_entries",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bpfmap->value_size",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&bprm->file",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgroups->dfl_cgrp",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgroups->subsys[subsys_idx]",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgrp->kn",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cgrp->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_dport",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_family",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_num",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_rcv_saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_v6_daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&common->skc_v6_rcv_saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->egid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->euid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->fsgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->fsuid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->gid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->securebits",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->sgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->suid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->uid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&cred->user_ns",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_hash",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&dentry->d_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ext->offset[sec_path_id]",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&file->f_path",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&fs->pwd",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&fs->root",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&h->pprev",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&info->flags",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->count",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->iter_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->kvec",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&iov_iter->ubuf",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->nexthdr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->protocol",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip->saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip6->daddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ip6->saddr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv4->sin_addr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv4->sin_port",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv6->sin6_addr",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ipv6->sin6_port",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kiocb->ki_filp",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kn->id",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kn->name",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kvec->iov_base",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&kvec->iov_len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&mnt->mnt_mountpoint",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&mnt->mnt_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->group",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->ns.inum",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&ns->owner",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.config",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.kprobe_func",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.probe_offset",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&p_event->attr.type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&parent->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&path->dentry",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&path->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&pid->level",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&pid->numbers",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&root->dentry",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&root->mnt",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_mark",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_priority",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_protocol",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sk->sk_type",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->extensions",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->hash",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->head",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->mark",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->network_header",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->priority",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&skb->transport_header",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sock->sk",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sp->len",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&sp->olen",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&subsys->cgroup",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&t->real_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->audit",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->cgroups",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->cred",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->fs",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->loginuid.val",
+          "answer": 2896,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->pids",
+          "answer": "(__kprog_core_unanswered(), 0)",
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->real_parent",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->tgid",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&task->thread_pid",
+          "answer": 2264,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&tcp->dest",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&tcp->source",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&udp->dest",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&udp->source",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "&vfsmnt->mnt_root",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "(const void *)&common->skc_state",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "access_delta",
+          "query": "ip",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum iter_type, ITER_IOVEC",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum iter_type, ITER_UBUF",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value",
+          "query": "enum skb_ext_id, SKB_EXT_SEC_PATH",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum bpf_func_id, BPF_FUNC_get_current_cgroup_id",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum iter_type, ITER_IOVEC",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum iter_type, ITER_UBUF",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "enum_value_exists",
+          "query": "enum skb_ext_id, SKB_EXT_SEC_PATH",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "((struct kernfs_node___old *)0)->id.id",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "iov_iter->iter_type",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "skb->active_extensions",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->audit",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->loginuid",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_exists",
+          "query": "task->thread_pid",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "pid->numbers[0]",
+          "answer": 16,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "sk->sk_protocol",
+          "answer": 2,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "field_size",
+          "query": "task->pids",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "btf_bpf_ktime_get_boot_ns",
+          "answer": 1,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        },
+        {
+          "kind": "type_exists",
+          "query": "struct load_info",
+          "answer": 0,
+          "tu": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_generic_kprobe.c"
+        }
+      ]
+    }
+  ],
+  "focused_cases": [
+    {
+      "arch": "x86",
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-canonical-fixture-baseline/x86-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-canonical-fixture-baseline/x86-dynamic.ll",
+          "bytes": 4198,
+          "sha256": "d0f578dbe71cf378531877cb38eb25fcc160dfb1801812e3d0033878e1c97ac0"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 2904,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304,
+        "queue_disk_address": 96
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 2904,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304,
+        "queue_disk_address": 96
+      },
+      "mismatches": {}
+    },
+    {
+      "arch": "arm64",
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-canonical-fixture-baseline/arm64-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/real-source-canonical-fixture-baseline/arm64-dynamic.ll",
+          "bytes": 4202,
+          "sha256": "29e99280cc8e842c56f9dbbb1dc0bc52502df7d936e8d1a535eac195b945dfb5"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 2360,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288,
+        "queue_disk_address": 96
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 2360,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288,
+        "queue_disk_address": 96
+      },
+      "mismatches": {}
+    }
+  ],
+  "limits": "Four existing affected translation units and ten focused queries, not all-producer coverage or machine/guest execution. Production not yet integrated."
+}

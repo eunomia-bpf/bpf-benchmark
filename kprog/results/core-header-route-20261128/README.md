@@ -49,3 +49,9 @@ The focused same-C/original-BPF/libbpf comparison now includes queue_disk_addres
 The canonical intermediate-type correction and full47-member archive are published in0349f5be4. The new same-C BPF fixture passes BPF syntax checking; five actual Clang intermediate types are recovered by the corrected scanner. Full same-source/table/IR checks plus both-kernel original-BPF/libbpf comparison launched as ONE detached real-source-canonical job1581613 at17:51:06Z; collect the SAME job next turn, no outcome read yet.
 
 After publication, all47 archive members and original size/SHA values were verified again before deleting only those exact closed duplicates; real-source-located-cleanup.json records each file. Read the committed archive for old failed IR/controller/AST, do not rerun that collector. Production Make/P/image remains unchanged pending real-source and oracle acceptance.
+
+## Actual source and qualified-intermediate result
+
+SAME1581613 completed17:51:38Z: all4 actual BCC/Tetragon cases generate tables and nativeIR successfully, with ZERO unresolved CO-RE calls (was4 per case). Query counts remain17/148 on both architectures. All input/tool/header/target/table/IR hashes reverified; real-source-canonical-review.json retains actual query rows.
+
+The same-C original-BPF/libbpf fixture matches all10 functions on BOTH actual kernelBTFs, including queue_disk_address96 and the existing thread/loginuid/ancestor/enum cases. Dynamic ancestor indices0/1/7/31 execute correctly in LLVM IR interpretation for each target; this is not ARM machine execution. These are affected-source and focused semantics checks, not all-app coverage. Complete raw outputs are archived in real-source-canonical-records.tar.zst with every-member/original SHA verification; producer integration follows.
