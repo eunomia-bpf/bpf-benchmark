@@ -461,3 +461,4 @@ import KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView
 import KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView
 import KProgFormal.ClightRefinement.Arm64CiliumCallerReaderEntry
 import KProgFormal.ClightRefinement.Arm64CiliumCallerWidthPrefix
+import KProgFormal.ClightRefinement.Arm64CiliumCallerWidthEntry

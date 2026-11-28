@@ -1,0 +1,5 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWidthEntry.temp_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWidthEntry.temp_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerWidthEntry.entry
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerWidthEntry.entry
