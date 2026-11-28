@@ -1,0 +1,267 @@
+{
+  "root": "/workspaces/repository/.cache/qemu-arm64-root",
+  "scope": "Read-only inventory and exact preservation of old exported-root framework result trees and root control scripts before later in-place activation. No root deletion/regeneration/guest executed. Rebuildable base files are not duplicated.",
+  "trees": [
+    {
+      "path": "/workspaces/repository/.cache/qemu-arm64-root/workspaces/repository/corpus/results",
+      "exists": true,
+      "files": 36,
+      "bytes": 2405093,
+      "host_matches": 36
+    },
+    {
+      "path": "/workspaces/repository/.cache/qemu-arm64-root/workspaces/repository/micro/results",
+      "exists": true,
+      "files": 0,
+      "bytes": 0,
+      "host_matches": 0
+    },
+    {
+      "path": "/workspaces/repository/.cache/qemu-arm64-root/workspaces/repository/tests/results",
+      "exists": true,
+      "files": 0,
+      "bytes": 0,
+      "host_matches": 0
+    }
+  ],
+  "symlinks_not_followed": [],
+  "files": {
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/metadata.json": {
+      "bytes": 973,
+      "sha256": "b578f6d31fea692dde80f4144ad40e9058e90382a12887204a6b1e7577d724c2",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/metadata.json": {
+      "bytes": 973,
+      "sha256": "4cad6966a5a03cd3f01dffec1518193a6956d1b9308218b5f137f9a9e9f47854",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/metadata.json": {
+      "bytes": 973,
+      "sha256": "568345099e24d21e975b149ed64b710623af65abfda04793e51fdc201736de79",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/metadata.json": {
+      "bytes": 973,
+      "sha256": "07579f64f5a601edde714d750e4991b409877078ac9b2bbdae24cbb7f19a7ff0",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/metadata.json": {
+      "bytes": 973,
+      "sha256": "48358f5308c9716b7c99fce1ef7a8a31a696fdd6dbb715e4d3dc4e1f83494fdd",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/metadata.json": {
+      "bytes": 973,
+      "sha256": "bc6da5b0544499bbfef838f6a8d29f259624596ec9346ca0d0dc10bb87dbe9d0",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/details/result.json": {
+      "bytes": 1892,
+      "sha256": "aa72d9ae29da435810c63c1e3bdcde4e4689b76b01f6f7d58541c6ac518d8800",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/details/progress.json": {
+      "bytes": 103,
+      "sha256": "f74c13c9d8e43abb8e3f7674abe30803694b073bab75b38576fad665d2fcd18e",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log": {
+      "bytes": 41084,
+      "sha256": "bec9f42aeb88840a63b9960528417c7af1bd6ae38afbb5472d61ff39c1f1e4b8",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/details/shim-logs/otelcol-ebpf-profiler__profiling.baseline.log": {
+      "bytes": 32008,
+      "sha256": "26bed4c7a1a771d908e3fe5fdb4690dbcae9e0caad13bf61a015e9d1e13044fd",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000018_131731/details/apps/otelcol-ebpf-profiler__profiling.json": {
+      "bytes": 29887,
+      "sha256": "7c573dca16529ccc7da0434dca5e2418d12735fe3482c320f00bbe02ce91613d",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/details/result.json": {
+      "bytes": 1892,
+      "sha256": "1017155f8f37800297b4acca31cc510bd694d21644d9b6945a206cef6191c726",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/details/progress.json": {
+      "bytes": 103,
+      "sha256": "6f1623d087459b6f9bcbbc812a9a34b896d44422a6d4308f39e4e2307a018172",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/details/shim-logs/bcc__set.baseline.log": {
+      "bytes": 54172,
+      "sha256": "191111600b26f0888ddacb0f72fcb85af07edbfba55106920411b8feab42bd92",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/details/shim-logs/bcc__set.post_rejit.log": {
+      "bytes": 72503,
+      "sha256": "d1a9e9806824fa19c85d7b281e762c552e4935f144b80d7686f7db70c8c9b907",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000016_265655/details/apps/bcc__set.json": {
+      "bytes": 17074,
+      "sha256": "8d7dc21b4fc3ce2e1718b189ad379d7bcdaf44b577a2ef410de648327301930d",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/details/result.json": {
+      "bytes": 1892,
+      "sha256": "c5a4b7972fea9ca56a59537f36761d593b06f12f6ca282bce5387f50fdfdd5f1",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/details/progress.json": {
+      "bytes": 103,
+      "sha256": "969b7fb78b6c6f672ad095af92f13c743f6fa687173ac00e8a4f8252201bfd5d",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/details/shim-logs/tetragon__observer.post_rejit.log": {
+      "bytes": 468020,
+      "sha256": "007768fdc1c36133af7c51dcac96a785839dce7c9925477afcdf839349afeb0a",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/details/shim-logs/tetragon__observer.baseline.log": {
+      "bytes": 873186,
+      "sha256": "7dc1fd493f6e43c067baecccdf675e2b399de82a74c5347dcfd3551de0586c6c",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000013_645548/details/apps/tetragon__observer.json": {
+      "bytes": 45106,
+      "sha256": "b9b002aa9e935d02fbb696e351dfc4ab30b92fc4c48115c2f838dd769565ed8f",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/details/result.json": {
+      "bytes": 1892,
+      "sha256": "dabfeae19c76c9c83d3a14f79ba882c27720c473cc62d2dbeea88aada3dcb744",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/details/progress.json": {
+      "bytes": 103,
+      "sha256": "11c8f3004d4bba874db35f7bd874af0cb0205f455be38a28d7afdcdb60ea7dd5",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/details/shim-logs/tracee__monitor.post_rejit.log": {
+      "bytes": 127699,
+      "sha256": "5a597fe97f4ca26f960f7de4ac3e87b0920a286a7d1dfb32c6fc6fac949f2800",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/details/shim-logs/tracee__monitor.baseline.log": {
+      "bytes": 182003,
+      "sha256": "9a1921cc764dc65f6979d0631c3b1f6c05d238d15b030e4b552f7e3c6fe4ad59",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_479689/details/apps/tracee__monitor.json": {
+      "bytes": 23021,
+      "sha256": "a325d4e8d556ebc0fcbc7eb6247b5f7e1d96df6ce35e199aa2d188f836f71494",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/details/result.json": {
+      "bytes": 1892,
+      "sha256": "4129a3dbc8399f574e5b16e11dc10833c1fc7141c29daa5e85d0fe1f5bb1f4ff",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/details/progress.json": {
+      "bytes": 103,
+      "sha256": "f153830cde6bcb2c2dbd329b84462b3cf4a54061adadce16a416b80b091f2d58",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/details/shim-logs/katran.baseline.log": {
+      "bytes": 6432,
+      "sha256": "096d079c1134a06ceb59b0c127dd15b1058cde78593cba1a456a32290cb67fe5",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/details/shim-logs/katran.post_rejit.log": {
+      "bytes": 7590,
+      "sha256": "cdd1de2263a3d63802fcd45ded8bf8bbab38a94cebfd2319e7d8ed4778e76609",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000014_044531/details/apps/katran.json": {
+      "bytes": 17088,
+      "sha256": "cfcbffdc563a4cb7362f2860538e290e6e503ed2059a159b76bfd13ea2192193",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/details/result.json": {
+      "bytes": 1892,
+      "sha256": "3b2bef21f7d3fd43bd1e43d67fb692029b0b1772cbd2ac885c6ea9aa6806953a",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/details/progress.json": {
+      "bytes": 103,
+      "sha256": "d1c6eacb2116d59276a5e92b286b8c476234dae625962e687263a5ab71ffc286",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/details/shim-logs/cilium__agent.post_rejit.log": {
+      "bytes": 210196,
+      "sha256": "7b5c93307d7f88047d38c44aa4e6dd09ec6a25ca719dc2999c9a0f377c28eb86",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/details/shim-logs/cilium__agent.baseline.log": {
+      "bytes": 136817,
+      "sha256": "18c347eb3b5bcfc218adc9b0b91b0ffe5af90c2cb74f652aa2ced9016005d2b7",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "workspaces/repository/corpus/results/arm64_qemu_corpus_19700101_000015_133937/details/apps/cilium__agent.json": {
+      "bytes": 43399,
+      "sha256": "e653aa98f29a3fcd32b4e60af9eb27c8f048d5aa2a1eda2a548a46a213e9a9f5",
+      "kind": "result",
+      "host_copy_matches": true
+    },
+    "qemu-init": {
+      "bytes": 1205,
+      "sha256": "db8c17a44d2635c18744bcc6e25f97a0c08cba8bdf268650b2330e58a3e7e964",
+      "kind": "root-control"
+    },
+    "qemu-run.sh": {
+      "bytes": 1126,
+      "sha256": "7595d1d20aea7fd36575044db04cd8a297a268630fec3c3f689185d82a323c30",
+      "kind": "root-control"
+    },
+    "qemu-status": {
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "kind": "root-control"
+    }
+  },
+  "archive": {
+    "path": "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/runtime-refresh/old-root-results.tar.gz",
+    "bytes": 277928,
+    "sha256": "ca495063a04b537a375ee528cb591695ba22eb08523094808e871b4585ff6e17"
+  },
+  "all_archive_members_sha_size_fileset_verified": true
+}
