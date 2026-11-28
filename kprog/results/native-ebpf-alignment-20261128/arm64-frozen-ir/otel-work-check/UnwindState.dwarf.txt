@@ -1,0 +1,1366 @@
+/workspaces/repository/vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o:	file format elf64-littleaarch64
+
+0x00000754: DW_TAG_typedef
+              DW_AT_type	(0x0000075e "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x0000075e: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x00000765:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x0000076f:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00000779:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00000784:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x0000078f:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0000079a:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x000007a5:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x000007b0:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x000007bb:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x000007c6:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x000003f3 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x000007d1:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x000007f2 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x000007dc:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x000007fa "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x000007e6:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x000007fa "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x000007f1:   NULL
+
+0x0000233e: DW_TAG_typedef
+              DW_AT_type	(0x00002347 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00002347: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0000234d:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00002357:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00002361:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0000236b:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00002375:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0000237f:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00002389:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00002393:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0000239d:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x000023a7:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x000022ca "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x000023b1:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x000023d0 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x000023bb:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x000023d8 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x000023c5:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x000023d8 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x000023cf:   NULL
+
+0x00006e6c: DW_TAG_typedef
+              DW_AT_type	(0x00006e75 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00006e75: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x00006e7b:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00006e85:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00006e8f:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00006e99:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00006ea3:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x00006ead:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00006eb7:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00006ec1:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00006ecb:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00006ed5:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x00006df4 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x00006edf:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x00006efe "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00006ee9:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x00006f06 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00006ef3:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x00006f06 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x00006efd:   NULL
+
+0x0000840c: DW_TAG_typedef
+              DW_AT_type	(0x00008416 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00008416: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0000841d:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00008428:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00008433:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0000843e:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00008449:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x00008454:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x0000845f:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0000846a:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00008475:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00008480:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0000813a "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0000848b:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x000084ac "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00008496:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x000084b4 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x000084a0:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x000084b4 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x000084ab:   NULL
+
+0x0000dc02: DW_TAG_typedef
+              DW_AT_type	(0x0000dc0b "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x0000dc0b: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0000dc11:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x0000dc1b:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x0000dc25:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0000dc2f:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x0000dc39:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0000dc43:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x0000dc4d:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0000dc57:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0000dc61:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x0000dc6b:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0000db74 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0000dc75:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x0000dc94 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x0000dc7f:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x0000d890 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x0000dc89:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x0000d890 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x0000dc93:   NULL
+
+0x000118ac: DW_TAG_typedef
+              DW_AT_type	(0x000118b6 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x000118b6: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x000118bd:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x000118c8:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x000118d3:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x000118de:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x000118e9:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x000118f4:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x000118ff:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0001190a:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00011915:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00011920:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x00010f7c "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0001192b:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x0001194d "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00011936:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x00010597 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00011941:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x00010597 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x0001194c:   NULL
+
+0x00017d04: DW_TAG_typedef
+              DW_AT_type	(0x00017d0e "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00017d0e: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x00017d15:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00017d1f:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00017d29:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00017d34:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00017d3f:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x00017d4a:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00017d55:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00017d60:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00017d6b:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00017d76:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x00017833 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x00017d81:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x00017da3 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00017d8c:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x00017dab "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00017d97:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x00017dab "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x00017da2:   NULL
+
+0x00019a06: DW_TAG_typedef
+              DW_AT_type	(0x00019a10 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00019a10: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x00019a17:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00019a22:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00019a2d:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00019a38:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00019a43:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x00019a4e:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00019a59:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00019a64:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00019a6f:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00019a7a:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0001998d "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x00019a85:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x00019aa7 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00019a90:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x00019aaf "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00019a9b:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x00019aaf "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x00019aa6:   NULL
+
+0x0001fd84: DW_TAG_typedef
+              DW_AT_type	(0x0001fd8d "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x0001fd8d: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0001fd93:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x0001fd9d:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x0001fda7:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0001fdb1:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x0001fdbb:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0001fdc5:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x0001fdcf:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0001fdd9:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0001fde3:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x0001fded:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0001fd10 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0001fdf7:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x0001fe16 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x0001fe01:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x0001fe1e "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x0001fe0b:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x0001fe1e "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x0001fe15:   NULL
+
+0x00024c18: DW_TAG_typedef
+              DW_AT_type	(0x00024c22 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00024c22: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x00024c29:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00024c34:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x00024c3f:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00024c4a:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00024c55:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x00024c60:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00024c6b:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00024c76:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x00024c81:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00024c8c:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x00024ba0 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x00024c97:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x00024cb9 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x00024ca2:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x00024cc1 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00024cad:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x00024cc1 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x00024cb8:   NULL
+
+0x00028809: DW_TAG_typedef
+              DW_AT_type	(0x00028813 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x00028813: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0002881a:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x00028824:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x0002882e:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x00028838:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x00028842:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0002884c:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x00028856:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x00028861:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0002886c:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x00028877:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x00028795 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x00028882:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x000288a3 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x0002888d:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x000288ab "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x00028897:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x000288ab "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x000288a2:   NULL
+
+0x0002da2f: DW_TAG_typedef
+              DW_AT_type	(0x0002da39 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x0002da39: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0002da40:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x0002da4a:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x0002da54:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0002da5f:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x0002da6a:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0002da75:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x0002da80:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0002da8b:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0002da96:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x0002daa1:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0002d61c "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0002daac:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x0002dacd "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x0002dab7:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x0002dad5 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x0002dac1:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x0002dad5 "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x0002dacc:   NULL
+
+0x0002f5de: DW_TAG_typedef
+              DW_AT_type	(0x0002f5e8 "UnwindState")
+              DW_AT_name	("UnwindState")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(644)
+
+0x0002f5e8: DW_TAG_structure_type
+              DW_AT_name	("UnwindState")
+              DW_AT_byte_size	(0x58)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(601)
+
+0x0002f5ef:   DW_TAG_member
+                DW_AT_name	("pc")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(603)
+                DW_AT_data_member_location	(0x00)
+
+0x0002f5f9:   DW_TAG_member
+                DW_AT_name	("sp")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(605)
+                DW_AT_data_member_location	(0x08)
+
+0x0002f603:   DW_TAG_member
+                DW_AT_name	("fp")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(607)
+                DW_AT_data_member_location	(0x10)
+
+0x0002f60d:   DW_TAG_member
+                DW_AT_name	("lr")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x18)
+
+0x0002f617:   DW_TAG_member
+                DW_AT_name	("r22")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x20)
+
+0x0002f621:   DW_TAG_member
+                DW_AT_name	("r28")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(614)
+                DW_AT_data_member_location	(0x28)
+
+0x0002f62b:   DW_TAG_member
+                DW_AT_name	("text_section_id")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(618)
+                DW_AT_data_member_location	(0x30)
+
+0x0002f635:   DW_TAG_member
+                DW_AT_name	("text_section_offset")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(620)
+                DW_AT_data_member_location	(0x38)
+
+0x0002f640:   DW_TAG_member
+                DW_AT_name	("text_section_bias")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(622)
+                DW_AT_data_member_location	(0x40)
+
+0x0002f64b:   DW_TAG_member
+                DW_AT_name	("error_metric")
+                DW_AT_type	(0x0002f56a "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(625)
+                DW_AT_data_member_location	(0x48)
+
+0x0002f656:   DW_TAG_member
+                DW_AT_name	("unwind_error")
+                DW_AT_type	(0x0002f677 "ErrorCode")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(627)
+                DW_AT_data_member_location	(0x4c)
+
+0x0002f661:   DW_TAG_member
+                DW_AT_name	("return_address")
+                DW_AT_type	(0x0002f67f "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(633)
+                DW_AT_data_member_location	(0x50)
+
+0x0002f66b:   DW_TAG_member
+                DW_AT_name	("lr_invalid")
+                DW_AT_type	(0x0002f67f "bool")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(642)
+                DW_AT_data_member_location	(0x51)
+
+0x0002f676:   NULL

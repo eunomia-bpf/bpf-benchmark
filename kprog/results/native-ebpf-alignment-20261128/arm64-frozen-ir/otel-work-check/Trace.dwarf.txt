@@ -1,0 +1,1275 @@
+/workspaces/repository/vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o:	file format elf64-littleaarch64
+
+0x00000573: DW_TAG_typedef
+              DW_AT_type	(0x0000057c "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0000057c: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00000583:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00000088 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0000058d:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00000088 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00000597:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x000005a1:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x00000601 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x000005ab:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x00000619 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x000005b5:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x00000649 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x000005bf:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00000687 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x000005c9:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x000003f3 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x000005d4:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00000088 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x000005df:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x000006e8 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x000005ea:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x00000099 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x000005f5:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x000006f1 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x00000600:   NULL
+
+0x0000214d: DW_TAG_typedef
+              DW_AT_type	(0x00002156 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00002156: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0000215d:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00001de1 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00002167:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00001de1 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00002171:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0000217b:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x000021e3 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00002185:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x000021fb "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0000218f:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x0000222b "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00002199:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00002269 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x000021a3:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x000022ca "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x000021ae:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00001de1 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x000021b9:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x000022d2 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x000021c4:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x000021db "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x000021cf:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x000022db "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x000021da:   NULL
+
+0x00006c6b: DW_TAG_typedef
+              DW_AT_type	(0x00006c74 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00006c74: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00006c7b:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00006cf9 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00006c85:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00006cf9 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00006c8f:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x00006c99:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x00006d09 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00006ca3:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x00006d25 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00006cad:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x00006d55 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00006cb7:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00006d93 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x00006cc1:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x00006df4 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00006ccc:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00006cf9 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x00006cd7:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x00006e00 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x00006ce2:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x00006d01 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x00006ced:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x00006e09 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x00006cf8:   NULL
+
+0x00008237: DW_TAG_typedef
+              DW_AT_type	(0x00008240 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00008240: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00008247:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00008129 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00008251:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00008129 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x0000825b:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x00008265:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x000082c5 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0000826f:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x000082d1 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00008279:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x00008301 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00008283:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0000833f "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0000828d:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0000813a "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00008298:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00008129 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x000082a3:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x000083a0 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x000082ae:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x00007e6f "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x000082b9:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x000083a9 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x000082c4:   NULL
+
+0x0000d9f3: DW_TAG_typedef
+              DW_AT_type	(0x0000d9fc "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0000d9fc: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0000da03:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0000d8c8 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0000da0d:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0000d8c8 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x0000da17:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0000da21:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x0000da8d "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0000da2b:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x0000daa5 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0000da35:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x0000dad5 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x0000da3f:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0000db13 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0000da49:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0000db74 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x0000da54:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0000d8c8 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x0000da5f:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x0000db7c "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0000da6a:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x0000da81 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x0000da75:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0000db9f "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x0000da80:   NULL
+
+0x000115d7: DW_TAG_typedef
+              DW_AT_type	(0x000115e1 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x000115e1: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x000115e9:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00010580 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x000115f4:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00010580 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x000115ff:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0001160a:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x00011673 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00011615:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x0001167f "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00011620:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x000116b3 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x0001162b:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x000116f7 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x00011636:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x00010f7c "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00011642:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00010580 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x0001164e:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x000115c9 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0001165a:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x000105ae "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x00011666:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0001175f "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x00011672:   NULL
+
+0x00017b10: DW_TAG_typedef
+              DW_AT_type	(0x00017b1a "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00017b1a: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00017b22:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0001742e "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00017b2c:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0001742e "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00017b36:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x00017b40:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x00017ba5 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00017b4a:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x00017bbd "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00017b54:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x00017bed "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00017b5e:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00017c2b "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x00017b68:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x00017833 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00017b74:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0001742e "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x00017b80:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x00017c90 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x00017b8c:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x000174d8 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x00017b98:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x00017c99 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x00017ba4:   NULL
+
+0x00019822: DW_TAG_typedef
+              DW_AT_type	(0x0001982c "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0001982c: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00019834:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x000193ee "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0001983e:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x000193ee "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00019848:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x00019852:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x000198b2 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0001985c:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x000198be "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00019866:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x000198ee "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00019870:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0001992c "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0001987a:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0001998d "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00019885:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x000193ee "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x00019890:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x00019995 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0001989b:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x000193e2 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x000198a6:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0001999e "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x000198b1:   NULL
+
+0x0001fba7: DW_TAG_typedef
+              DW_AT_type	(0x0001fbb0 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0001fbb0: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0001fbb7:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0001faaf "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0001fbc1:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0001faaf "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x0001fbcb:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0001fbd5:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x0001fc35 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0001fbdf:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x0001fc41 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0001fbe9:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x0001fc71 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x0001fbf3:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0001fcaf "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0001fbfd:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0001fd10 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x0001fc08:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0001faaf "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x0001fc13:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x0001fd18 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0001fc1e:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x0001f829 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x0001fc29:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0001fd21 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x0001fc34:   NULL
+
+0x00024a35: DW_TAG_typedef
+              DW_AT_type	(0x00024a3f "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00024a3f: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x00024a47:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0002493b "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00024a51:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0002493b "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00024a5b:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x00024a65:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x00024ac5 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00024a6f:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x00024ad1 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x00024a79:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x00024b01 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00024a83:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00024b3f "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x00024a8d:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x00024ba0 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x00024a98:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0002493b "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x00024aa3:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x00024ba8 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x00024aae:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x000245d5 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x00024ab9:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x00024bb1 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x00024ac4:   NULL
+
+0x0002862c: DW_TAG_typedef
+              DW_AT_type	(0x00028635 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x00028635: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0002863c:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x00028222 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x00028646:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x00028222 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x00028650:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0002865a:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x000286ba "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x00028664:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x000286c6 "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0002866e:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x000286f6 "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x00028678:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x00028734 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x00028682:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x00028795 "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x0002868d:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x00028222 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x00028698:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x0002879d "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x000286a3:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x0002822e "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x000286ae:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x000287a6 "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x000286b9:   NULL
+
+0x0002d778: DW_TAG_typedef
+              DW_AT_type	(0x0002d781 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0002d781: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0002d788:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0002d628 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0002d792:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0002d628 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x0002d79c:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0002d7a6:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x0002d806 "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0002d7b0:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x0002d81e "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0002d7ba:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x0002d84e "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x0002d7c4:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0002d88c "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0002d7ce:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0002d61c "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x0002d7d9:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0002d628 "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x0002d7e4:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x0002d76a "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0002d7ef:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x0002d610 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x0002d7fa:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0002d8ed "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x0002d805:   NULL
+
+0x0002f3f9: DW_TAG_typedef
+              DW_AT_type	(0x0002f402 "Trace")
+              DW_AT_name	("Trace")
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(598)
+
+0x0002f402: DW_TAG_structure_type
+              DW_AT_name	("Trace")
+              DW_AT_byte_size	(0x0ed0)
+              DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+              DW_AT_decl_line	(561)
+
+0x0002f409:   DW_TAG_member
+                DW_AT_name	("pid")
+                DW_AT_type	(0x0002f05f "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(564)
+                DW_AT_data_member_location	(0x00)
+
+0x0002f413:   DW_TAG_member
+                DW_AT_name	("tid")
+                DW_AT_type	(0x0002f05f "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(567)
+                DW_AT_data_member_location	(0x04)
+
+0x0002f41d:   DW_TAG_member
+                DW_AT_name	("ktime")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(569)
+                DW_AT_data_member_location	(0x08)
+
+0x0002f427:   DW_TAG_member
+                DW_AT_name	("comm")
+                DW_AT_type	(0x0002f48f "u8[16]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(571)
+                DW_AT_data_member_location	(0x10)
+
+0x0002f431:   DW_TAG_member
+                DW_AT_name	("apm_transaction_id")
+                DW_AT_type	(0x0002f49b "ApmSpanID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(573)
+                DW_AT_data_member_location	(0x20)
+
+0x0002f43b:   DW_TAG_member
+                DW_AT_name	("apm_trace_id")
+                DW_AT_type	(0x0002f4cb "ApmTraceID")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(575)
+                DW_AT_data_member_location	(0x28)
+
+0x0002f445:   DW_TAG_member
+                DW_AT_name	("custom_labels")
+                DW_AT_type	(0x0002f509 "CustomLabelsArray")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(577)
+                DW_AT_data_member_location	(0x38)
+
+0x0002f44f:   DW_TAG_member
+                DW_AT_name	("kernel_stack_id")
+                DW_AT_type	(0x0002f56a "s32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(579)
+                DW_AT_data_member_location	(0x02bc)
+
+0x0002f45a:   DW_TAG_member
+                DW_AT_name	("stack_len")
+                DW_AT_type	(0x0002f05f "u32")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(581)
+                DW_AT_data_member_location	(0x02c0)
+
+0x0002f465:   DW_TAG_member
+                DW_AT_name	("origin")
+                DW_AT_type	(0x0002f572 "TraceOrigin")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(584)
+                DW_AT_data_member_location	(0x02c4)
+
+0x0002f470:   DW_TAG_member
+                DW_AT_name	("context_value")
+                DW_AT_type	(0x0002f487 "u64")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(590)
+                DW_AT_data_member_location	(0x02c8)
+
+0x0002f47b:   DW_TAG_member
+                DW_AT_name	("frames")
+                DW_AT_type	(0x0002f57b "Frame[128]")
+                DW_AT_decl_file	("/workspaces/repository/vendor/bpf/otel/support/ebpf/types.h")
+                DW_AT_decl_line	(593)
+                DW_AT_data_member_location	(0x02d0)
+
+0x0002f486:   NULL

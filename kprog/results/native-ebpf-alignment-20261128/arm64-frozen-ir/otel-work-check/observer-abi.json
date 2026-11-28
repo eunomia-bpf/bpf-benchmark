@@ -1,0 +1,26 @@
+{
+  "source_object": "/workspaces/repository/vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+  "source_object_sha256": "8cc970400d4706efb3ae203e67c21cdf18b15700c388db78277abdb38d5335cc",
+  "arm_syscall_source": "/workspaces/repository/vendor/linux-framework/include/uapi/asm-generic/unistd.h",
+  "arm_syscall_source_sha256": "9ec1faddab5c363614b166ee7eed3f7723529e3a32312aad14fc6d0df5204354",
+  "arm_syscall_lines": [
+    "#define __NR_bpf 280",
+    "__SYSCALL(__NR_bpf, sys_bpf)"
+  ],
+  "x86_syscall_source": "/workspaces/repository/vendor/linux-framework/arch/x86/entry/syscalls/syscall_64.tbl",
+  "x86_syscall_lines": [
+    "321\tcommon\tbpf\t\t\tsys_bpf"
+  ],
+  "layouts": {
+    "PerCPURecord": {
+      "dwarf_file": "PerCPURecord.dwarf.txt"
+    },
+    "Trace": {
+      "dwarf_file": "Trace.dwarf.txt"
+    },
+    "UnwindState": {
+      "dwarf_file": "UnwindState.dwarf.txt"
+    }
+  },
+  "scope": "Only read-only result observers select syscall from actual running architecture. ARM record offsets/size come from actual P DWARF, no x86 layout assumptions. No workload/native flags/framework/production source changes."
+}
