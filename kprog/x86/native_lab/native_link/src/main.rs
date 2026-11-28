@@ -132,7 +132,7 @@ enum LinkMode {
 #[derive(Clone, Copy, Debug)]
 enum LookupKind {
     Call,
-    Lpm12,
+    LpmTrie,
     Hash,
     LruHash,
     PerCpuHash,
@@ -329,7 +329,7 @@ fn load_link_side_inputs(args: &Args) -> Result<LinkSideInputs> {
 fn parse_lookup_kind(s: &str) -> Result<LookupKind> {
     match s {
         "call" => Ok(LookupKind::Call),
-        "lpm12" => Ok(LookupKind::Lpm12),
+        "lpm12" | "lpm_trie" => Ok(LookupKind::LpmTrie),
         "hash" => Ok(LookupKind::Hash),
         "lru_hash" => Ok(LookupKind::LruHash),
         "percpu_hash" => Ok(LookupKind::PerCpuHash),
@@ -350,7 +350,7 @@ fn require_call_target(target: u64, context: &str) -> Result<u64> {
 
 fn resolve_lookup_site_target(spec: &LookupSiteSpec, context: &str) -> Result<u64> {
     match spec.kind {
-        LookupKind::Call | LookupKind::Lpm12 => require_call_target(spec.target_addr, context),
+        LookupKind::Call | LookupKind::LpmTrie => require_call_target(spec.target_addr, context),
         LookupKind::Hash
         | LookupKind::LruHash
         | LookupKind::PerCpuHash
@@ -435,7 +435,7 @@ fn main() -> Result<()> {
     // A proof retains frontend IR as non-allocated metadata. Frozen map
     // bytes are available only now, at the normal structured link boundary.
     let specialized = frozen_ir::specialize(
-        &args, &elf, &const_values,
+        &args, &elf, &const_values, &lookup_maps,
         std::path::Path::new("/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto"),
         &std::env::current_exe()?,
     )?;
@@ -1558,7 +1558,7 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
     if matches!(
         spec.kind,
         LookupKind::Call
-            | LookupKind::Lpm12
+            | LookupKind::LpmTrie
             | LookupKind::Array
             | LookupKind::PerCpuArray
             | LookupKind::ArrayOfMaps
@@ -1594,7 +1594,7 @@ fn build_arm64_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<u32>
             words.push(a64_add_shift64(X0, X0, X10, 0)?);
         }
         LookupKind::Call
-        | LookupKind::Lpm12
+        | LookupKind::LpmTrie
         | LookupKind::Array
         | LookupKind::PerCpuArray
         | LookupKind::ArrayOfMaps => {}
@@ -2361,7 +2361,7 @@ fn rewrite_arm64_pass(
                                     continue;
                                 }
                                 LookupKind::Call
-                                | LookupKind::Lpm12
+                                | LookupKind::LpmTrie
                                 | LookupKind::Hash
                                 | LookupKind::LruHash
                                 | LookupKind::PerCpuHash

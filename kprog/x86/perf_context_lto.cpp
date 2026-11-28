@@ -181,7 +181,19 @@ static Expected<unsigned> lowerMapLookups(Module &M, Function &Entry, StringRef 
   SmallPtrSet<const Value *, 32> Active;
   for (auto &Item : *Object) {
     auto *Fields = Item.second.getAsObject();
-    auto *Global = M.getNamedGlobal(Item.first);
+    const StringRef Name = Item.first;
+    auto *Global = M.getNamedGlobal(Name);
+    // Proof map aliases use the kernel's 15-byte name. Bind an unambiguous
+    // original frontend map symbol; an ambiguous alias stays a helper call.
+    if (Name.size() == BPF_OBJ_NAME_LEN - 1) {
+      Global = nullptr; // An exact 15-byte name can also collide with a longer map.
+      for (auto &G : M.globals()) {
+        if (G.getSection() != ".maps" ||
+            G.getName().take_front(BPF_OBJ_NAME_LEN - 1) != Name) continue;
+        if (Global) { Global = nullptr; break; }
+        Global = &G;
+      }
+    }
     if (!Fields || !Global) continue;
     auto Type = Fields->getInteger("type"), Inner = Fields->getInteger("inner_type");
     if (!Type || !Inner) continue;

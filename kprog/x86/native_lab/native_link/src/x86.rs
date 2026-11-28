@@ -1426,7 +1426,7 @@ pub(super) fn rewrite_x86(
                                 continue;
                             }
                             LookupKind::Call
-                            | LookupKind::Lpm12
+                            | LookupKind::LpmTrie
                             | LookupKind::Hash
                             | LookupKind::LruHash
                             | LookupKind::PerCpuHash
@@ -3842,7 +3842,7 @@ fn build_x86_lookup_call_postprocess(spec: &LookupSiteSpec) -> Result<Vec<Instru
     let mut body = Vec::new();
     match spec.kind {
         LookupKind::Call
-        | LookupKind::Lpm12
+        | LookupKind::LpmTrie
         | LookupKind::Array
         | LookupKind::PerCpuArray
         | LookupKind::ArrayOfMaps => {}
