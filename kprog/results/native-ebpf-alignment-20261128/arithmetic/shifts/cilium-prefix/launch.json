@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-11-28T10:44:35Z",
+  "launcher_pid": 1424689,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix",
+    "audit"
+  ],
+  "preparation_commit": "5957f3b392fef692b6357be762f0f655dfa8870b",
+  "recipe_sha256": "14e409df1e8f8683d613ec275cd37833fd9b0b5ca049a5a441bc7b33597caebf",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/cilium-prefix/job.log",
+  "resources": "MetadataCPU19; serial opt-mem2regCPU16, AS48GiB. No code generation/guest/timing/image locks.",
+  "scope": "10actual Cilium native objects/bothISAs with290existingreviewsites, directcall/prefix/guard/config facts only. No output/completion/bug/equality claim at launch.",
+  "collection": "Collect this SAME job NEXTTURN; preserve partial diagnostics, repair only failed component, no duplicate10object sweep."
+}
