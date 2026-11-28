@@ -1,0 +1,13 @@
+# Arithmetic census collection
+
+SAME1408083/controller1408085 ended2026-11-28T09:27:34Z status0. All228 LLVM commands succeeded for114actual objects, sixapps/bothISAs,698manifest rows. Original114objects/12stage manifests and7preparation source/inventory hashes remain equal. No unparsed scalar div/mod syntax; all current source excerpts remained unchanged during collection.
+
+The census finds271frontend and479derivedO3 scalar sites. All108signed sites across phases have finite positive denominators; no finite divisor0 or minus1 occurs. Variable/unknown finite sets remain candidates, not faults. Optimized finite-value facts classify335sites;144unknown-value sites comprise108Ruby size-of-value copies,12Tetragon interval sites and24Cilium service-count remainders. Two additional variable operands are BCC unit selects1000/1000000 and are finite nonzero. Frontend Cilium rate-settings sites remain part of source/caller review even where O3 eliminates or drops them.
+
+Whole-module unboundO3 removes62manifest candidate references to50unique internal Cilium entry roots across10objects. Targeted raw definition/native symbol checks confirm every50 still exists in frontend and nativeELF; no alias substitution or native missing-program claim is made. Thus O3 counts are derived-analysis coverage, not per-selected-entry compilation or installed-code equivalence. All frontend candidate roots resolve; ambiguous candidates remain separate.
+
+Existing records prove all12Tetragon optimized dynamic interval sites have a same-SSA zero early-exit: the guard dominates the operation, zero successor cannot reach it and nonzero successor can. BCC units are nonzero. Frozen OTel2689 Ruby producer sets size_of_value8 and copies it toprocdata; actual live bytes/branch remain separate. Cilium svc->count divisors have source caller checks requiring further path/value review, including updates and L7 conditions; no accepted zero-input witness exists here. This step confirms no new arithmetic defect and adds no production guard.
+
+All459raw records (55,363,901bytes) are preserved in place and in census-records.tar.zst,3,886,513bytes/SHA77daaef084a1391686830c911fd6784389cd10a94dc1536eccb7d6eaaef6f113. Every archive member was decompressed and SHA/size compared against its original file; census-archive.json indexes allmembers. No canonicalobject copies, output deletion or full census rerun.
+
+Next: actual Cilium divisor caller/map-value/edge and matching eBPF-operation evidence; Ruby liveprocdata/work only if reached. No full native/eBPF equality, timing or installed-code claim. Frozen app/root/image/kernel/benchmark remain unchanged.

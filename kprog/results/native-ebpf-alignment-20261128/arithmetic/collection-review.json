@@ -1,0 +1,1099 @@
+{
+  "reviewed_utc": "2026-11-28T09:34:24Z",
+  "job_launcher": 1408083,
+  "controller_pid": 1408085,
+  "ended_utc": "2026-11-28T09:27:34Z",
+  "objects": 114,
+  "commands": 228,
+  "program_rows": 698,
+  "phase_app_counts": [
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "phase": "frontend",
+      "scalar_sites": 6,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 6,
+      "unparsed": 0,
+      "signed_sites": 2,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "phase": "optimized",
+      "scalar_sites": 5,
+      "dynamic_operands": 1,
+      "finite_nonzero_sites": 5,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "frontend",
+      "scalar_sites": 38,
+      "dynamic_operands": 15,
+      "finite_nonzero_sites": 23,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "optimized",
+      "scalar_sites": 136,
+      "dynamic_operands": 12,
+      "finite_nonzero_sites": 124,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "phase": "frontend",
+      "scalar_sites": 1,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 1,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "phase": "optimized",
+      "scalar_sites": 2,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 2,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "frontend",
+      "scalar_sites": 6,
+      "dynamic_operands": 1,
+      "finite_nonzero_sites": 5,
+      "unparsed": 0,
+      "signed_sites": 1,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "optimized",
+      "scalar_sites": 54,
+      "dynamic_operands": 54,
+      "finite_nonzero_sites": 0,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "frontend",
+      "scalar_sites": 81,
+      "dynamic_operands": 6,
+      "finite_nonzero_sites": 75,
+      "unparsed": 0,
+      "signed_sites": 51,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "optimized",
+      "scalar_sites": 52,
+      "dynamic_operands": 6,
+      "finite_nonzero_sites": 46,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "phase": "frontend",
+      "scalar_sites": 3,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 3,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "phase": "optimized",
+      "scalar_sites": 1,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 1,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "bcc",
+      "phase": "frontend",
+      "scalar_sites": 6,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 6,
+      "unparsed": 0,
+      "signed_sites": 2,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "bcc",
+      "phase": "optimized",
+      "scalar_sites": 5,
+      "dynamic_operands": 1,
+      "finite_nonzero_sites": 5,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "frontend",
+      "scalar_sites": 38,
+      "dynamic_operands": 15,
+      "finite_nonzero_sites": 23,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "optimized",
+      "scalar_sites": 115,
+      "dynamic_operands": 12,
+      "finite_nonzero_sites": 103,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "katran",
+      "phase": "frontend",
+      "scalar_sites": 1,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 1,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "katran",
+      "phase": "optimized",
+      "scalar_sites": 2,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 2,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "frontend",
+      "scalar_sites": 7,
+      "dynamic_operands": 1,
+      "finite_nonzero_sites": 6,
+      "unparsed": 0,
+      "signed_sites": 1,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "optimized",
+      "scalar_sites": 54,
+      "dynamic_operands": 54,
+      "finite_nonzero_sites": 0,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "frontend",
+      "scalar_sites": 81,
+      "dynamic_operands": 6,
+      "finite_nonzero_sites": 75,
+      "unparsed": 0,
+      "signed_sites": 51,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "optimized",
+      "scalar_sites": 52,
+      "dynamic_operands": 6,
+      "finite_nonzero_sites": 46,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "tracee",
+      "phase": "frontend",
+      "scalar_sites": 3,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 3,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    {
+      "architecture": "arm64",
+      "app": "tracee",
+      "phase": "optimized",
+      "scalar_sites": 1,
+      "dynamic_operands": 0,
+      "finite_nonzero_sites": 1,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    }
+  ],
+  "unknown_finite_denominator_source_groups": [
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/ratelimit.h",
+      "line": 117,
+      "sites": 5
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/ratelimit.h",
+      "line": 118,
+      "sites": 5
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/lb.h",
+      "line": 1897,
+      "sites": 4
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/lb.h",
+      "line": 1897,
+      "sites": 8
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_sock.c",
+      "line": 420,
+      "sites": 1
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_sock.c",
+      "line": 420,
+      "sites": 4
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/otel/support/ebpf/ruby_tracer.ebpf.c",
+      "line": 194,
+      "sites": 1
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "optimized",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/otel/support/ebpf/ruby_tracer.ebpf.c",
+      "line": 194,
+      "sites": 54
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 94,
+      "sites": 2
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 112,
+      "sites": 2
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 140,
+      "sites": 2
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 94,
+      "sites": 2
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 112,
+      "sites": 2
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 140,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/ratelimit.h",
+      "line": 117,
+      "sites": 5
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/ratelimit.h",
+      "line": 118,
+      "sites": 5
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/lb.h",
+      "line": 1897,
+      "sites": 4
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/lib/lb.h",
+      "line": 1897,
+      "sites": 8
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "frontend",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_sock.c",
+      "line": 420,
+      "sites": 1
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/cilium/bpf/bpf_sock.c",
+      "line": 420,
+      "sites": 4
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/otel/support/ebpf/ruby_tracer.ebpf.c",
+      "line": 194,
+      "sites": 1
+    },
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "phase": "optimized",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/otel/support/ebpf/ruby_tracer.ebpf.c",
+      "line": 194,
+      "sites": 54
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 94,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 112,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "frontend",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 140,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 94,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "urem",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 112,
+      "sites": 2
+    },
+    {
+      "architecture": "arm64",
+      "app": "tetragon",
+      "phase": "optimized",
+      "opcode": "udiv",
+      "file": "/workspaces/repository/vendor/bpf/tetragon/bpf/process/bpf_rate.h",
+      "line": 140,
+      "sites": 2
+    }
+  ],
+  "missing_candidate_references": [
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_eg",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_in",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_ingress_policy_only"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_in",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_ingress"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_ipv4_polic",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_ipv",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_ipv4_cont"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_handle_nat",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_eg",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_in",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_ingress_policy_only"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_ipv4_ct_in",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_ct_ingress"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_ipv4_polic",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_n",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "architecture": "arm64",
+      "app": "cilium",
+      "program": "tail_nodeport_r",
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "phase": "optimized",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    }
+  ],
+  "interpretation": "Census metadata complete, not arithmetic equality.62 optimized candidate references/50unique internal roots across10Cilium objects are removed by whole-module unbound O3; all remain in frontend/nativeELFs. No alias or native disappearance claim. Guard/value review retains unresolved actualinput/map/branch/BPF-operation questions.",
+  "source_sha256": {
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/objects.json": "88fb43dfc6238b7b2e0fc8c157d620982126c24f57472232b71df46ba24e85f3",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/programs.json": "6a23a92783d8195bc5f43cc9f9a845ebbc298ca1eeec9e72e7da0fe58995bdc7",
+    "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/alignment-inventory/manifests.json": "45d3ca238a54b12e545dc8962600aa57e5a952045cb91ad51c4fabb316a10193",
+    "vendor/linux-framework/kernel/bpf/verifier.c": "ea961b4809639863b30aada6502d053c7e1062e64b26f854fa011e7610df1f48",
+    "vendor/bpf/Makefile": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+    "kprog/x86/perf_context_lto.cpp": "29e81dc22584c947461f6319f73cb8efa46a08f30af3ad8afa05a301bb1235f2",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c"
+  },
+  "current_source_changed": [],
+  "unchanged_stage_manifests": {
+    "vendor/build/native-bpf/x86/stage/bcc/manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "vendor/build/native-bpf/x86/stage/cilium/manifest.json": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05",
+    "vendor/build/native-bpf/x86/stage/katran/manifest.json": "c089a79823d0cca636878c64c290cbf3b36413927a05afc5c9e69066e3437f4e",
+    "vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/manifest.json": "424f1992d9f053d884ea7b16ec1738dc8667d6c6b56ccc8b16941d9b6be99488",
+    "vendor/build/native-bpf/x86/stage/tetragon/manifest.json": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "vendor/build/native-bpf/x86/stage/tracee/manifest.json": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2",
+    "vendor/build/native-bpf/arm64/stage/bcc/manifest.json": "e2ed376e4c431edb74859ef35a3b626f226d1f54b1332d514da8df2dc7d0cd6f",
+    "vendor/build/native-bpf/arm64/stage/cilium/manifest.json": "ee3de799819ac8fab9f5aa7eabe86a98b479d1d756804ae10c0fe6f2c8291f05",
+    "vendor/build/native-bpf/arm64/stage/katran/manifest.json": "c089a79823d0cca636878c64c290cbf3b36413927a05afc5c9e69066e3437f4e",
+    "vendor/build/native-bpf/arm64/stage/otelcol-ebpf-profiler/manifest.json": "424f1992d9f053d884ea7b16ec1738dc8667d6c6b56ccc8b16941d9b6be99488",
+    "vendor/build/native-bpf/arm64/stage/tetragon/manifest.json": "aae438b40af940934f2001f9911f95b55716fb00bbb5df23da6733aa39e29a62",
+    "vendor/build/native-bpf/arm64/stage/tracee/manifest.json": "2bc637d934823adeb63b006fc745f85ea36da1ce4539b8a1373862fec6af02d2"
+  },
+  "phase_totals": {
+    "frontend": {
+      "scalar_sites": 271,
+      "dynamic_operands": 44,
+      "finite_nonzero_sites": 227,
+      "unparsed": 0,
+      "signed_sites": 108,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    },
+    "optimized": {
+      "scalar_sites": 479,
+      "dynamic_operands": 146,
+      "finite_nonzero_sites": 335,
+      "unparsed": 0,
+      "signed_sites": 0,
+      "finite_zero_sites": 0,
+      "finite_minus_one_sites": 0
+    }
+  },
+  "known_guard_value_review": "guard-value-review.json",
+  "entry_retention_review": "entry-retention-review.json",
+  "verdict": "Census collected. No new confirmed arithmetic defect and no production change. BCC finite units and12Tetragon same-SSA zero gates reviewed; Ruby producer8 is source evidence only. Cilium backend-count and frontend rate-setting caller/livevalue/edge evidence, Ruby liveprocdata and matching BPF program/operation remain pending."
+}

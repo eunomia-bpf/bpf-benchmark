@@ -1,0 +1,497 @@
+{
+  "tetragon_guards": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 0,
+      "site_block": "22",
+      "ir": "  %25 = urem i64 %14, %19, !dbg !31753",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 391,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31738, !tbaa !31739"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 393,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31741"
+          },
+          "branch": {
+            "line": 394,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31743"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 1,
+      "site_block": "37",
+      "ir": "  %38 = urem i64 %14, %19, !dbg !31769",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 391,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31738, !tbaa !31739"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 393,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31741"
+          },
+          "branch": {
+            "line": 394,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31743"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 2,
+      "site_block": "45",
+      "ir": "  %52 = udiv i64 %51, %19, !dbg !31781",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 391,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31738, !tbaa !31739"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 393,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31741"
+          },
+          "branch": {
+            "line": 394,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31743"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 0,
+      "site_block": "370",
+      "ir": "  %373 = urem i64 %362, %367, !dbg !32532",
+      "same_ssa_denominator": "%367",
+      "denominator_definition": {
+        "line": 1475,
+        "block": "365",
+        "ir": "  %367 = load i64, ptr %366, align 8, !dbg !32517, !tbaa !32518"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "365",
+          "comparison": {
+            "line": 1477,
+            "ir": "  %.not46.i = icmp eq i64 %367, 0, !dbg !32520"
+          },
+          "branch": {
+            "line": 1478,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %368, !dbg !32522"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "368",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 1,
+      "site_block": "385",
+      "ir": "  %386 = urem i64 %362, %367, !dbg !32548",
+      "same_ssa_denominator": "%367",
+      "denominator_definition": {
+        "line": 1475,
+        "block": "365",
+        "ir": "  %367 = load i64, ptr %366, align 8, !dbg !32517, !tbaa !32518"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "365",
+          "comparison": {
+            "line": 1477,
+            "ir": "  %.not46.i = icmp eq i64 %367, 0, !dbg !32520"
+          },
+          "branch": {
+            "line": 1478,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %368, !dbg !32522"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "368",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 2,
+      "site_block": "393",
+      "ir": "  %400 = udiv i64 %399, %367, !dbg !32560",
+      "same_ssa_denominator": "%367",
+      "denominator_definition": {
+        "line": 1475,
+        "block": "365",
+        "ir": "  %367 = load i64, ptr %366, align 8, !dbg !32517, !tbaa !32518"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "365",
+          "comparison": {
+            "line": 1477,
+            "ir": "  %.not46.i = icmp eq i64 %367, 0, !dbg !32520"
+          },
+          "branch": {
+            "line": 1478,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %368, !dbg !32522"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "368",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 0,
+      "site_block": "22",
+      "ir": "  %25 = urem i64 %14, %19, !dbg !31641",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 393,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31626, !tbaa !31627"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 395,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31629"
+          },
+          "branch": {
+            "line": 396,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31631"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 1,
+      "site_block": "37",
+      "ir": "  %38 = urem i64 %14, %19, !dbg !31657",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 393,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31626, !tbaa !31627"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 395,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31629"
+          },
+          "branch": {
+            "line": 396,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31631"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_execve_event_v61.native.o",
+      "function": "execve_rate",
+      "site_index": 2,
+      "site_block": "45",
+      "ir": "  %52 = udiv i64 %51, %19, !dbg !31669",
+      "same_ssa_denominator": "%19",
+      "denominator_definition": {
+        "line": 393,
+        "block": "17",
+        "ir": "  %19 = load i64, ptr %18, align 8, !dbg !31626, !tbaa !31627"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "17",
+          "comparison": {
+            "line": 395,
+            "ir": "  %.not46.i = icmp eq i64 %19, 0, !dbg !31629"
+          },
+          "branch": {
+            "line": 396,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %20, !dbg !31631"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "20",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 0,
+      "site_block": "369",
+      "ir": "  %372 = urem i64 %361, %366, !dbg !32427",
+      "same_ssa_denominator": "%366",
+      "denominator_definition": {
+        "line": 1476,
+        "block": "364",
+        "ir": "  %366 = load i64, ptr %365, align 8, !dbg !32412, !tbaa !32413"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "364",
+          "comparison": {
+            "line": 1478,
+            "ir": "  %.not46.i = icmp eq i64 %366, 0, !dbg !32415"
+          },
+          "branch": {
+            "line": 1479,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %367, !dbg !32417"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "367",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 1,
+      "site_block": "384",
+      "ir": "  %385 = urem i64 %361, %366, !dbg !32443",
+      "same_ssa_denominator": "%366",
+      "denominator_definition": {
+        "line": 1476,
+        "block": "364",
+        "ir": "  %366 = load i64, ptr %365, align 8, !dbg !32412, !tbaa !32413"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "364",
+          "comparison": {
+            "line": 1478,
+            "ir": "  %.not46.i = icmp eq i64 %366, 0, !dbg !32415"
+          },
+          "branch": {
+            "line": 1479,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %367, !dbg !32417"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "367",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tetragon/bpf_fork_v511.native.o",
+      "function": "event_wake_up_new_task",
+      "site_index": 2,
+      "site_block": "392",
+      "ir": "  %399 = udiv i64 %398, %366, !dbg !32455",
+      "same_ssa_denominator": "%366",
+      "denominator_definition": {
+        "line": 1476,
+        "block": "364",
+        "ir": "  %366 = load i64, ptr %365, align 8, !dbg !32412, !tbaa !32413"
+      },
+      "guard_facts": [
+        {
+          "guard_block": "364",
+          "comparison": {
+            "line": 1478,
+            "ir": "  %.not46.i = icmp eq i64 %366, 0, !dbg !32415"
+          },
+          "branch": {
+            "line": 1479,
+            "ir": "  br i1 %.not46.i, label %cgroup_rate.exit.thread, label %367, !dbg !32417"
+          },
+          "zero_successor": "cgroup_rate.exit.thread",
+          "nonzero_successor": "367",
+          "guard_block_dominates_site": true,
+          "zero_successor_cannot_reach_site": true,
+          "nonzero_successor_reaches_site": true
+        }
+      ]
+    }
+  ],
+  "bcc_unit_choices": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/bcc/runqlat.native.o",
+      "site_index": 0,
+      "ir": "  %164 = udiv i64 %45, %.",
+      "definition": {
+        "line": 1093,
+        "block": "__native_read_kernel_str.exit",
+        "ir": "  %. = select i1 %.not33, i64 1000, i64 1000000"
+      },
+      "finite_bitpatterns": [
+        1000,
+        1000000
+      ]
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/bcc/runqlat.native.o",
+      "site_index": 0,
+      "ir": "  %164 = udiv i64 %45, %.",
+      "definition": {
+        "line": 1095,
+        "block": "__native_read_kernel_str.exit",
+        "ir": "  %. = select i1 %.not33, i64 1000, i64 1000000"
+      },
+      "finite_bitpatterns": [
+        1000,
+        1000000
+      ]
+    }
+  ],
+  "source": {
+    "vendor/bpf/tetragon/bpf/process/bpf_rate.h": {
+      "sha256": "f8be2a269f1a70b02be949dc13e3acae46e094cde1a768fb8c30e4627b5c7476",
+      "anchors": [
+        {
+          "line": 87,
+          "context": "\topt = map_lookup_elem(&cgroup_rate_options_map, &zero);\n\tif (!opt)\n\t\treturn true;\n\n\tinterval = opt->interval;\n\tif (!interval)\n\t\treturn true;\n\n\tval = map_lookup_elem(&cgroup_rate_map, &key);\n\tif (!val) {"
+        },
+        {
+          "line": 88,
+          "context": "\tif (!opt)\n\t\treturn true;\n\n\tinterval = opt->interval;\n\tif (!interval)\n\t\treturn true;\n\n\tval = map_lookup_elem(&cgroup_rate_map, &key);\n\tif (!val) {\n\t\tstruct cgroup_rate_value new_value = {"
+        }
+      ]
+    },
+    "vendor/bpf/cilium/bpf/lib/lb.h": {
+      "sha256": "d73e0af5251087a4dd29ffd3870649e6579ad25b5b3dd65059e235eff0567d0b",
+      "anchors": [
+        {
+          "line": 1112,
+          "context": "\t\t\t     const struct ipv6_ct_tuple *tuple __maybe_unused,\n\t\t\t     const struct lb6_service *svc)\n{\n\t/* Backend slot 0 is always reserved for the service frontend. */\n\t__u16 slot = (get_prandom_u32() % svc->count) + 1;\n\tconst struct lb6_service *be = lb6_lookup_backend_slot(ctx, key, slot);\n\n\treturn be ? be->backend_id : 0;\n}\n#endif  /* defined(LB_SELECTION_PER_SERVICE) || LB_SELECTION == LB_SELECTION_RANDOM */"
+        },
+        {
+          "line": 1897,
+          "context": "\t\t\t     const struct ipv4_ct_tuple *tuple __maybe_unused,\n\t\t\t     const struct lb4_service *svc)\n{\n\t/* Backend slot 0 is always reserved for the service frontend. */\n\t__u16 slot = (get_prandom_u32() % svc->count) + 1;\n\tconst struct lb4_service *be = lb4_lookup_backend_slot(ctx, key, slot);\n\n\treturn be ? be->backend_id : 0;\n}\n#endif /* LB_SELECTION_PER_SERVICE || LB_SELECTION == LB_SELECTION_RANDOM */"
+        },
+        {
+          "line": 2324,
+          "context": "\t/* Rate limit to 100 ICMPv6 replies per second, burstable to 1000 responses/s */\n\tstruct ratelimit_settings settings = {\n\t\t.bucket_size = 1000,\n\t\t.tokens_per_topup = 100,\n\t\t.topup_interval_ns = NSEC_PER_SEC,\n\t};\n\tint ret;\n\n\trkey.key.icmpv6.netdev_idx = ctx_get_ifindex(ctx);\n\tif (!ratelimit_check_and_take(&rkey, &settings)) {"
+        }
+      ]
+    },
+    "vendor/bpf/cilium/bpf/bpf_sock.c": {
+      "sha256": "4a1435ea4343e51dbb6c09a709375bf455204f7cb20446b7e93dc31367a515f5",
+      "anchors": [
+        {
+          "line": 329,
+          "context": "\tif (!svc)\n\t\tsvc = sock4_wildcard_lookup_full(&key, in_hostns);\n\tif (!svc)\n\t\treturn -ENXIO;\n\tif (svc->count == 0 && !lb4_svc_is_l7_loadbalancer(svc)) {\n\t\t/* Drop packet when service has no endpoints when this flag is enabled (default) */\n\t\tif (CONFIG(enable_no_service_endpoints_routable))\n\t\t\treturn -EHOSTUNREACH;\n\t\tif (handle_nonroutable_endpoints_v4(svc) != CTX_ACT_OK)\n\t\t\treturn -EHOSTUNREACH;"
+        },
+        {
+          "line": 420,
+          "context": "\n\tif (backend_id == 0) {\n\t\tbackend_from_affinity = false;\n\n\t\tkey.backend_slot = (sock_select_slot(ctx_full) % svc->count) + 1;\n\t\tbackend_slot = __lb4_lookup_backend_slot(&key);\n\t\tif (!backend_slot) {\n\t\t\tupdate_metrics(0, METRIC_EGRESS, REASON_LB_NO_BACKEND_SLOT);\n\t\t\treturn -EHOSTUNREACH;\n\t\t}"
+        },
+        {
+          "line": 610,
+          "context": "\t\t\tsvc = sock4_wildcard_lookup_full(&svc_key,\n\t\t\t\t\t\tctx_in_hostns(ctx_full, NULL));\n\t\t}\n\t\tif (!svc || svc->rev_nat_index != val->rev_nat_index ||\n\t\t    (svc->count == 0 && !lb4_svc_is_l7_loadbalancer(svc))) {\n\t\t\tmap_delete_elem(&cilium_lb4_reverse_sk, &key);\n\t\t\tupdate_metrics(0, METRIC_INGRESS, REASON_LB_REVNAT_STALE);\n\t\t\treturn -ENOENT;\n\t\t}\n"
+        },
+        {
+          "line": 1065,
+          "context": "\tif (!svc)\n\t\tsvc = sock6_wildcard_lookup_full(&key, in_hostns);\n\tif (!svc)\n\t\treturn sock6_xlate_v4_in_v6(ctx, udp_only, is_connect);\n\tif (svc->count == 0 && !lb6_svc_is_l7_loadbalancer(svc)) {\n\t\t/* Drop packet when service has no endpoints when this flag is enabled (default) */\n\t\tif (CONFIG(enable_no_service_endpoints_routable))\n\t\t\treturn -EHOSTUNREACH;\n\t\tif (handle_nonroutable_endpoints_v6(svc) != CTX_ACT_OK)\n\t\t\treturn -EHOSTUNREACH;"
+        },
+        {
+          "line": 1240,
+          "context": "\t\t\tsvc = sock6_wildcard_lookup_full(&svc_key,\n\t\t\t\t\t\tctx_in_hostns(ctx, NULL));\n\t\t}\n\t\tif (!svc || svc->rev_nat_index != val->rev_nat_index ||\n\t\t    (svc->count == 0 && !lb6_svc_is_l7_loadbalancer(svc))) {\n\t\t\tmap_delete_elem(&cilium_lb6_reverse_sk, &key);\n\t\t\tupdate_metrics(0, METRIC_INGRESS, REASON_LB_REVNAT_STALE);\n\t\t\treturn -ENOENT;\n\t\t}\n"
+        }
+      ]
+    },
+    "vendor/bpf/cilium/bpf/lib/ratelimit.h": {
+      "sha256": "723d6f3d624f257edfb623ba3f53a8fd8e9a62e59e964d44d465bdc57734e46e",
+      "anchors": [
+        {
+          "line": 117,
+          "context": "\n\t/* Topup the bucket if it has been at least more than 1 interval since we have done so */\n\tsince_last_topup = now - value->last_topup;\n\tif (since_last_topup > settings->topup_interval_ns) {\n\t\tinterval = since_last_topup / settings->topup_interval_ns;\n\t\tremainder = since_last_topup % settings->topup_interval_ns;\n\t\t/* Add tokens of every missed interval */\n\t\tvalue->tokens += interval * settings->tokens_per_topup;\n\t\tvalue->last_topup = now - remainder;\n\t\t/* Make sure to not overflow the bucket */"
+        },
+        {
+          "line": 118,
+          "context": "\t/* Topup the bucket if it has been at least more than 1 interval since we have done so */\n\tsince_last_topup = now - value->last_topup;\n\tif (since_last_topup > settings->topup_interval_ns) {\n\t\tinterval = since_last_topup / settings->topup_interval_ns;\n\t\tremainder = since_last_topup % settings->topup_interval_ns;\n\t\t/* Add tokens of every missed interval */\n\t\tvalue->tokens += interval * settings->tokens_per_topup;\n\t\tvalue->last_topup = now - remainder;\n\t\t/* Make sure to not overflow the bucket */\n\t\tif (value->tokens > settings->bucket_size)"
+        }
+      ]
+    },
+    "vendor/repos/opentelemetry-ebpf-profiler/interpreter/ruby/ruby.go": {
+      "sha256": "729ff132a17d7363e95bee623436d61e3762187dd6d28be2c6c4baf7eacdd38f",
+      "anchors": [
+        {
+          "line": 215,
+          "context": "\n\t\tIseq_size:    r.vmStructs.iseq_constant_body.size,\n\t\tIseq_encoded: r.vmStructs.iseq_constant_body.encoded,\n\n\t\tSize_of_value: r.vmStructs.size_of_value,\n\n\t\tRunning_ec: r.vmStructs.rb_ractor_struct.running_ec,\n\t}\n\n\tif err := ebpf.UpdateProcData(libpf.Ruby, pid, unsafe.Pointer(&cdata)); err != nil {"
+        },
+        {
+          "line": 220,
+          "context": "\n\t\tRunning_ec: r.vmStructs.rb_ractor_struct.running_ec,\n\t}\n\n\tif err := ebpf.UpdateProcData(libpf.Ruby, pid, unsafe.Pointer(&cdata)); err != nil {\n\t\treturn nil, err\n\t}\n\n\taddrToString, err := freelru.New[libpf.Address, libpf.String](addrToStringSize,\n\t\tlibpf.Address.Hash32)"
+        },
+        {
+          "line": 967,
+          "context": "\tvms.succ_index_table_struct.succ_part = 48\n\tvms.succ_index_table_struct.size_of_succ_dict_block = 80\n\tvms.size_of_immediate_table = 54\n\n\tvms.size_of_value = 8\n\n\tif version >= rubyVersion(3, 0, 0) {\n\t\tif version >= rubyVersion(3, 3, 0) {\n\t\t\tif runtime.GOARCH == \"amd64\" {\n\t\t\t\tvms.rb_ractor_struct.running_ec = 0x180"
+        }
+      ]
+    }
+  },
+  "reviewed_utc": "2026-11-28T09:33:40Z",
+  "ruby_app_pin": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "verdict": "BCC merged units are nonzero; all12 optimized Tetragon variable interval sites have a same-SSA zero early-exit gate in this CFG. Ruby producer sets8 and copies to procdata; actual live Ruby map contents/path remain separate. Cilium backend-count caller/live-value/edge evidence pending; no new defect or production fix.",
+  "scope": "Review only existing census records plus current source anchors. No LLVM rerun, no synthetic guard insertion; full native/eBPF operation/installed proof separate."
+}

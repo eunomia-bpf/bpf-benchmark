@@ -1,0 +1,951 @@
+{
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "sha256": "79db42e767775c7343bffe55ac498f062946bf3af34da452441bef696be98dc4",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !3825 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3016
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4173 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7248
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4474 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5456
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5407 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4406
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont_from_host": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont_from_host(ptr noundef %0) #3 section \"tc/tail\" !dbg !5601 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 886
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont_from_netdev": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont_from_netdev(ptr noundef %0) #3 section \"tc/tail\" !dbg !5671 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 223
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "sha256": "1373794b9611d99815dd255edd47fd54707b404ae3256097fe6e360f0804d263",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !3905 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2792
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4204 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6977
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4547 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5234
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont(ptr noundef %0) #3 section \"tc/tail\" !dbg !5128 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7815
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_egress": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_egress(ptr noundef %0) #3 section \"tc/tail\" !dbg !5544 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5240
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_policy": {
+          "frontend_definition": "define internal i32 @tail_ipv4_policy(ptr noundef %0) #3 section \"tc/tail\" !dbg !6401 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6438
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_ingress_policy_only": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_ingress_policy_only(ptr noundef %0) #3 section \"tc/tail\" !dbg !7152 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3851
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_ingress": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_ingress(ptr noundef %0) #3 section \"tc/tail\" !dbg !7181 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3851
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "sha256": "21e265e92c9b906094d22ac87da9c64af8bf1df8b7877734029c9f9ff8be4152",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4146 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3229
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4538 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7376
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4838 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5879
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5692 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2814
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "a9abda8fb5d5c2e6f0c8edf1935af9c7b42a7364f03cb343e49391fe1d3a53ab",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4094 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3360
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4486 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7506
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4786 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5850
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5640 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2784
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "sha256": "7db6ead1b5ccc7d2715bd9230935c6ea866676db35e160185200c6210aabf496",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !2962 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3620
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !3328 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7898
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !3623 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6078
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "sha256": "2329ee0c89d3744e58a0cf65b1ba01d93e08f1b8e33483864bd023bd88e64d38",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !3822 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2840
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4170 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6284
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4471 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4708
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5404 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4068
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont_from_host": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont_from_host(ptr noundef %0) #3 section \"tc/tail\" !dbg !5598 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 796
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont_from_netdev": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont_from_netdev(ptr noundef %0) #3 section \"tc/tail\" !dbg !5668 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 240
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "sha256": "e5959faa80f1d85b3035f507fd9e8cb8c586b4a91a25d36574a0789819a08f80",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !3902 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2668
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4201 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6064
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4544 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4540
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_ipv4_cont": {
+          "frontend_definition": "define internal i32 @tail_handle_ipv4_cont(ptr noundef %0) #3 section \"tc/tail\" !dbg !5125 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6540
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_egress": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_egress(ptr noundef %0) #3 section \"tc/tail\" !dbg !5541 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5060
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_policy": {
+          "frontend_definition": "define internal i32 @tail_ipv4_policy(ptr noundef %0) #3 section \"tc/tail\" !dbg !6398 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5520
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_ingress_policy_only": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_ingress_policy_only(ptr noundef %0) #3 section \"tc/tail\" !dbg !7149 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3836
+          },
+          "frontend_internal": true
+        },
+        "tail_ipv4_ct_ingress": {
+          "frontend_definition": "define internal i32 @tail_ipv4_ct_ingress(ptr noundef %0) #3 section \"tc/tail\" !dbg !7178 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3836
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "sha256": "86578195b5d0075c8104dc176dd30a6fb72652dd1b29d2e26bef95de054005e8",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4143 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2956
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4535 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6372
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4835 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4952
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5689 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2648
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "sha256": "bb8442d848b9c12bc54ad4e13c34773d1dafef47c84fbfec4af5515064517f2a",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4091 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3112
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4483 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 6472
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !4783 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 5052
+          },
+          "frontend_internal": true
+        },
+        "tail_handle_nat_fwd_ipv4": {
+          "frontend_definition": "define internal i32 @tail_handle_nat_fwd_ipv4(ptr noundef %0) #3 section \"tc/tail\" !dbg !5637 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 2628
+          },
+          "frontend_internal": true
+        }
+      }
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "sha256": "9328d114a9d031a38685c4eaca2ee5795da6b03a23f1df8b186ac2f1b1666230",
+      "candidates": {
+        "tail_nodeport_rev_dnat_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_rev_dnat_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !2959 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 3264
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_ingress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_ingress_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !3325 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 7064
+          },
+          "frontend_internal": true
+        },
+        "tail_nodeport_nat_egress_ipv4": {
+          "frontend_definition": "define internal i32 @tail_nodeport_nat_egress_ipv4(ptr noundef %0) #3 section \"xdp/tail\" !dbg !3620 {",
+          "native_symbol": {
+            "binding": "STB_LOCAL",
+            "type": "STT_FUNC",
+            "size": 4932
+          },
+          "frontend_internal": true
+        }
+      }
+    }
+  ],
+  "missing_candidate_references": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_eg",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_in",
+      "symbol": "tail_ipv4_ct_ingress_policy_only"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_in",
+      "symbol": "tail_ipv4_ct_ingress"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_polic",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_host"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont_from_netdev"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_handle_ipv",
+      "symbol": "tail_handle_ipv4_cont"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_handle_nat",
+      "symbol": "tail_handle_nat_fwd_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_eg",
+      "symbol": "tail_ipv4_ct_egress"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_in",
+      "symbol": "tail_ipv4_ct_ingress_policy_only"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_ct_in",
+      "symbol": "tail_ipv4_ct_ingress"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_ipv4_polic",
+      "symbol": "tail_ipv4_policy"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_ingress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_n",
+      "symbol": "tail_nodeport_nat_egress_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "program": "tail_nodeport_r",
+      "symbol": "tail_nodeport_rev_dnat_ipv4"
+    }
+  ],
+  "commands": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_host.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_lxc.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_overlay.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_wireguard.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/cilium/bpf_xdp.native.o",
+      "args": [
+        "llvm-dis-18",
+        "-o",
+        "-",
+        "-"
+      ],
+      "exit": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    }
+  ],
+  "controller_status": 0,
+  "reviewed_utc": "2026-11-28T09:32:08Z",
+  "scope": "Whole-module unbound defaultO3 analysis drops internal entry candidates. Original frontend and native ELF entries remain present; no alias substitution or actual missing native-program claim. Do not use this phase as per-selected-entry compilation proof."
+}
