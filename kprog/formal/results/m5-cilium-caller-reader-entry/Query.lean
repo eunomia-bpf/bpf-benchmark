@@ -1,0 +1,3 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReaderEntry.entry
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReaderEntry.entry
