@@ -1,0 +1,502 @@
+{
+  "pid": 1362955,
+  "started_utc": "2026-11-28T07:45:01Z",
+  "phase": "before-canonical",
+  "controller_status": 0,
+  "commands": [
+    {
+      "label": "assemble-fixture",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/fixture.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "input-relocations",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-dr",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-assemble-original",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.original.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.original.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-link-original",
+      "args": [
+        "aarch64-linux-gnu-ld",
+        "-T",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/layout.ld",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.original.elf",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.original.o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-execute-original",
+      "args": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.original.elf"
+      ],
+      "returncode": 34,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-proof",
+      "args": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o",
+        "--symbol",
+        "entry_reloc",
+        "--mode",
+        "proof",
+        "--output",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.proof.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-native-link",
+      "args": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.proof.o",
+        "--symbol",
+        "entry_reloc",
+        "--link-plan",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/plan.json",
+        "--output",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.blob.bin",
+        "--output-map-patches",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.map-patches.tsv",
+        "--output-relocs",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.relocs.tsv",
+        "--output-abi",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.abi.tsv",
+        "--show"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-disassemble-blob",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-D",
+        "-b",
+        "binary",
+        "-m",
+        "aarch64",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.blob.bin"
+      ],
+      "returncode": 0,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-assemble-native",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.native.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.native.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-link-native",
+      "args": [
+        "aarch64-linux-gnu-ld",
+        "-T",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/layout.ld",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.native.elf",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.native.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-execute-native",
+      "args": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.native.elf"
+      ],
+      "returncode": 17,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-assemble-original",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.original.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.original.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-link-original",
+      "args": [
+        "aarch64-linux-gnu-ld",
+        "-T",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/layout.ld",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.original.elf",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.original.o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-execute-original",
+      "args": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.original.elf"
+      ],
+      "returncode": 34,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-proof",
+      "args": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/fixture.o",
+        "--symbol",
+        "entry_local",
+        "--mode",
+        "proof",
+        "--output",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.proof.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-native-link",
+      "args": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.proof.o",
+        "--symbol",
+        "entry_local",
+        "--link-plan",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/plan.json",
+        "--output",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.blob.bin",
+        "--output-map-patches",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.map-patches.tsv",
+        "--output-relocs",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.relocs.tsv",
+        "--output-abi",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.abi.tsv",
+        "--show"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-disassemble-blob",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-D",
+        "-b",
+        "binary",
+        "-m",
+        "aarch64",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.blob.bin"
+      ],
+      "returncode": 0,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-assemble-native",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.native.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.native.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-link-native",
+      "args": [
+        "aarch64-linux-gnu-ld",
+        "-T",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/layout.ld",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.native.elf",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.native.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_local-execute-native",
+      "args": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.native.elf"
+      ],
+      "returncode": 17,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    }
+  ],
+  "cases": [
+    {
+      "entry": "entry_reloc",
+      "original_exit": 34,
+      "native_exit": 17,
+      "expected_live_value": 34,
+      "stale_frozen_value": 17,
+      "regression_passed": false
+    },
+    {
+      "entry": "entry_local",
+      "original_exit": 34,
+      "native_exit": 17,
+      "expected_live_value": 34,
+      "stale_frozen_value": 17,
+      "regression_passed": false
+    }
+  ],
+  "linker": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "bytes": 2762216,
+    "sha256": "7f985471c59853860e9b7a762074a6db26fb76d7f64f2d2ee5fd2a060e89707f"
+  },
+  "source": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/src/main.rs",
+    "sha256": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "git_head": "c781ca67c1c30f518ce46552defbfe9d900a89a8"
+  },
+  "regression_passed": false,
+  "scope": "Synthetic AAPCS correctness witness using actual current native-link kernel mode and actual AArch64 user execution. Not a corpus timing, kernel-installed or actual-app affected-program claim.",
+  "ended_utc": "2026-11-28T07:45:01Z",
+  "files": {
+    "assemble-fixture.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-assemble-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-assemble-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-disassemble-blob.log": {
+      "bytes": 778,
+      "sha256": "8e3e91d34948adaa2c143f1393233b4264b3e85bc2f25234940e1c90419a4267"
+    },
+    "entry_local-execute-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-execute-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-link-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-link-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_local-native-link.log": {
+      "bytes": 1274,
+      "sha256": "242dfa040ffa2c35d037ad2079654da56f679e89cc158fe46e15ad3862b25d0c"
+    },
+    "entry_local-proof.log": {
+      "bytes": 343,
+      "sha256": "46c167e32ff911a92c8196f97ea97367dbd529a4fb6384f910d7cd120f67d5ce"
+    },
+    "entry_local.abi.tsv": {
+      "bytes": 98,
+      "sha256": "1a7d775b684d522eefa6afa271421b54516c9d2a4b03990cea3dff73eb6e9e77"
+    },
+    "entry_local.blob.bin": {
+      "bytes": 76,
+      "sha256": "e26a67e2f2a295d9b53c322d216b4c5707b9b7b21d7b97ad4b509da73c727345"
+    },
+    "entry_local.map-patches.tsv": {
+      "bytes": 31,
+      "sha256": "4c5ba1851b3cdb90bc8fa95eddf9124a6ed64da2817d0744aaac44fa68b0d602"
+    },
+    "entry_local.native.elf": {
+      "bytes": 131872,
+      "sha256": "279bf0c163ccf53043e160eb3d28b33bdc0c99a4b79a66ae2fff03bdfaf6505d"
+    },
+    "entry_local.native.o": {
+      "bytes": 1008,
+      "sha256": "a6d6a5fa06aad4e67c6804510bf7742ded7f8229226182fec9f3801747390975"
+    },
+    "entry_local.native.s": {
+      "bytes": 348,
+      "sha256": "08d136316e81a3edaffe97ceb1fa3c3ab6f2d22eab3f2f6d9f72c3505355c0f9"
+    },
+    "entry_local.original.elf": {
+      "bytes": 132328,
+      "sha256": "4fe118500c7a87a70421f20a0b469fcda7b21b4fdff20f669dba60b8663e885f"
+    },
+    "entry_local.original.o": {
+      "bytes": 984,
+      "sha256": "f5ed99614dfc1e8d32198cc6825a65d457f2b62245b5c172e46577d51281eb68"
+    },
+    "entry_local.original.s": {
+      "bytes": 175,
+      "sha256": "b3cbc93cce24c1e9ede3558c5adbe2a9994fd882e52c2d3d84082aa5a4b45d3a"
+    },
+    "entry_local.proof.o": {
+      "bytes": 1096,
+      "sha256": "71aedd69bd74ee21b0b7634d31a760d225c9c4ceeb85ffac90d08cf04780ca11"
+    },
+    "entry_local.relocs.tsv": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-assemble-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-assemble-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-disassemble-blob.log": {
+      "bytes": 778,
+      "sha256": "b87902f1cf1f021a20cda65cc4bb39c1c502f6ff73de5bfbbd5e78694b3ec2b9"
+    },
+    "entry_reloc-execute-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-execute-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-link-native.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-link-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-native-link.log": {
+      "bytes": 1275,
+      "sha256": "fbfc68e2543e684fe3c374cf87a53b507195a10896a295ad440df0e0833d19f5"
+    },
+    "entry_reloc-proof.log": {
+      "bytes": 350,
+      "sha256": "567b074ba5f3039d301a851e7fc363758d52e6283aa3b7c480e0511d52e4af67"
+    },
+    "entry_reloc.abi.tsv": {
+      "bytes": 98,
+      "sha256": "1a7d775b684d522eefa6afa271421b54516c9d2a4b03990cea3dff73eb6e9e77"
+    },
+    "entry_reloc.blob.bin": {
+      "bytes": 76,
+      "sha256": "e26a67e2f2a295d9b53c322d216b4c5707b9b7b21d7b97ad4b509da73c727345"
+    },
+    "entry_reloc.map-patches.tsv": {
+      "bytes": 31,
+      "sha256": "4c5ba1851b3cdb90bc8fa95eddf9124a6ed64da2817d0744aaac44fa68b0d602"
+    },
+    "entry_reloc.native.elf": {
+      "bytes": 131872,
+      "sha256": "197121bdd46d26cf5276e67d5b747875b7d8289724269f8fb7ba90374d1beb7a"
+    },
+    "entry_reloc.native.o": {
+      "bytes": 1008,
+      "sha256": "a6d6a5fa06aad4e67c6804510bf7742ded7f8229226182fec9f3801747390975"
+    },
+    "entry_reloc.native.s": {
+      "bytes": 348,
+      "sha256": "e5677901c2f06d3a65ddb3242b8263eccab058a8c93b0edf8b7070616973f08e"
+    },
+    "entry_reloc.original.elf": {
+      "bytes": 132328,
+      "sha256": "1a135a493885e754dba0abe7e214cfb7436269e476eeed624ff059ebc6ea7f20"
+    },
+    "entry_reloc.original.o": {
+      "bytes": 984,
+      "sha256": "7f34b29ac3d6dc381d8db5dd7ef5e83959754b2c2963b170b21ea8b1768fa04c"
+    },
+    "entry_reloc.original.s": {
+      "bytes": 175,
+      "sha256": "6d6332b4fd852db973e4c88e5ddd27aaeea41cdfe34290009fadf0ebf344170e"
+    },
+    "entry_reloc.proof.o": {
+      "bytes": 1096,
+      "sha256": "fb454644c0b9c7133c624b1c6f77545e27a8e54b21bd736bad7a2f81cead45dd"
+    },
+    "entry_reloc.relocs.tsv": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fixture.o": {
+      "bytes": 1416,
+      "sha256": "2997ca89145bd4bdb6966c2b8b420bc8a3e1b3f8d6f6c243d75d7d511e261fae"
+    },
+    "input-relocations.log": {
+      "bytes": 1561,
+      "sha256": "691b57d83edb75298e727251fd989bdd3a6cfe6558a867fef4f6564b811910be"
+    },
+    "layout.ld": {
+      "bytes": 99,
+      "sha256": "000af6c367dec278ab566798cf69fd4beb2a23cf19ea063844fa47216e979e83"
+    },
+    "plan.json": {
+      "bytes": 254,
+      "sha256": "056aa50fd1f3fad5c82b66cebf78e7f67da7ac31687810679ece62767634452f"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+
+kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_local.proof.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000000 <entry_local>:
+   0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+   4:	910003fd 	mov	x29, sp
+   8:	90000000 	adrp	x0, 0 <frozen_word>
+			8: R_AARCH64_ADR_GOT_PAGE	frozen_word
+   c:	f9400000 	ldr	x0, [x0]
+			c: R_AARCH64_LD64_GOT_LO12_NC	frozen_word
+  10:	90000001 	adrp	x1, 0 <mutable_word>
+			10: R_AARCH64_ADR_GOT_PAGE	mutable_word
+  14:	f9400021 	ldr	x1, [x1]
+			14: R_AARCH64_LD64_GOT_LO12_NC	mutable_word
+  18:	94000005 	bl	2c <pick_local>
+  1c:	b9400002 	ldr	w2, [x0]
+  20:	2a0203e0 	mov	w0, w2
+  24:	a8c17bfd 	ldp	x29, x30, [sp], #16
+  28:	14000004 	b	38 <__native_link_arm64_ret_trampoline>
+
+000000000000002c <pick_local>:
+  2c:	aa0103e0 	mov	x0, x1
+  30:	d65f03c0 	ret
+  34:	d503201f 	nop
+
+0000000000000038 <__native_link_arm64_ret_trampoline>:
+  38:	aa0003e7 	mov	x7, x0

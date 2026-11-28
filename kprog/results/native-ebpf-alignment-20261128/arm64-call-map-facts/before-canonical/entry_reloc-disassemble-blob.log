@@ -1,0 +1,26 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before-canonical/entry_reloc.blob.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+   4:	910003fd 	mov	x29, sp
+   8:	58000180 	ldr	x0, 0x38
+   c:	d503201f 	nop
+  10:	58000181 	ldr	x1, 0x40
+  14:	d503201f 	nop
+  18:	94000005 	bl	0x2c
+  1c:	52800222 	mov	w2, #0x11                  	// #17
+  20:	2a0203e0 	mov	w0, w2
+  24:	a8c17bfd 	ldp	x29, x30, [sp], #16
+  28:	14000008 	b	0x48
+  2c:	aa0103e0 	mov	x0, x1
+  30:	d65f03c0 	ret
+  34:	d503201f 	nop
+  38:	00410000 	.inst	0x00410000 ; undefined
+  3c:	00000000 	udf	#0
+  40:	00410008 	.inst	0x00410008 ; undefined
+  44:	00000000 	udf	#0
+  48:	aa0003e7 	mov	x7, x0

@@ -1,0 +1,155 @@
+{
+  "pid": 1362848,
+  "started_utc": "2026-11-28T07:44:05Z",
+  "phase": "before",
+  "controller_status": 1,
+  "commands": [
+    {
+      "label": "assemble-fixture",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/fixture.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "input-relocations",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-dr",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-assemble-original",
+      "args": [
+        "aarch64-linux-gnu-as",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.original.s",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.original.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-link-original",
+      "args": [
+        "aarch64-linux-gnu-ld",
+        "-T",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/layout.ld",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.original.elf",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.original.o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/fixture.o"
+      ],
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-execute-original",
+      "args": [
+        "qemu-aarch64-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.original.elf"
+      ],
+      "returncode": 34,
+      "cpu": 19,
+      "address_space_bytes": 51539607552
+    },
+    {
+      "label": "entry_reloc-native-link",
+      "args": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/fixture.o",
+        "--symbol",
+        "entry_reloc",
+        "--link-plan",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/plan.json",
+        "--output",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.blob.bin",
+        "--output-map-patches",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.map-patches.tsv",
+        "--output-relocs",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.relocs.tsv",
+        "--output-abi",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/entry_reloc.abi.tsv",
+        "--show"
+      ],
+      "returncode": 1,
+      "cpu": 16,
+      "address_space_bytes": 51539607552
+    }
+  ],
+  "cases": [],
+  "linker": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "bytes": 2762216,
+    "sha256": "7f985471c59853860e9b7a762074a6db26fb76d7f64f2d2ee5fd2a060e89707f"
+  },
+  "source": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/src/main.rs",
+    "sha256": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "git_head": "c781ca67c1c30f518ce46552defbfe9d900a89a8"
+  },
+  "error": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/witness.py\", line 33, in <module>\n    run(entry+'-native-link',[linker,'--input',DEST/'fixture.o','--symbol',entry,'--link-plan',DEST/'plan.json','--output',str(prefix)+'.blob.bin','--output-map-patches',str(prefix)+'.map-patches.tsv','--output-relocs',str(prefix)+'.relocs.tsv','--output-abi',str(prefix)+'.abi.tsv','--show'],expected=0)\n  File \"/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/witness.py\", line 17, in run\n    if expected is not None:assert r.returncode==expected,(label,r.returncode)\n                                   ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: ('entry_reloc-native-link', 1)\n",
+  "ended_utc": "2026-11-28T07:44:05Z",
+  "files": {
+    "assemble-fixture.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-assemble-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-execute-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-link-original.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "entry_reloc-native-link.log": {
+      "bytes": 66,
+      "sha256": "43f327e2e53ffe65e527684556a8846b168136f288e0f82cf3a654e8dc6924a4"
+    },
+    "entry_reloc.original.elf": {
+      "bytes": 132328,
+      "sha256": "1a135a493885e754dba0abe7e214cfb7436269e476eeed624ff059ebc6ea7f20"
+    },
+    "entry_reloc.original.o": {
+      "bytes": 984,
+      "sha256": "7f34b29ac3d6dc381d8db5dd7ef5e83959754b2c2963b170b21ea8b1768fa04c"
+    },
+    "entry_reloc.original.s": {
+      "bytes": 175,
+      "sha256": "6d6332b4fd852db973e4c88e5ddd27aaeea41cdfe34290009fadf0ebf344170e"
+    },
+    "fixture.o": {
+      "bytes": 1416,
+      "sha256": "2997ca89145bd4bdb6966c2b8b420bc8a3e1b3f8d6f6c243d75d7d511e261fae"
+    },
+    "input-relocations.log": {
+      "bytes": 1551,
+      "sha256": "78172db329df9a97174a2be3231a359f0734f476a14586bc4bc98b31a6a282e4"
+    },
+    "layout.ld": {
+      "bytes": 99,
+      "sha256": "000af6c367dec278ab566798cf69fd4beb2a23cf19ea063844fa47216e979e83"
+    },
+    "plan.json": {
+      "bytes": 254,
+      "sha256": "056aa50fd1f3fad5c82b66cebf78e7f67da7ac31687810679ece62767634452f"
+    }
+  }
+}

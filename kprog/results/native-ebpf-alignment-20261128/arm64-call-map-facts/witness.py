@@ -2,7 +2,7 @@
 from pathlib import Path
 import hashlib,json,os,resource,subprocess,sys,traceback
 ROOT=Path('/workspaces/repository');OUT=Path(__file__).resolve().parent
-phase=sys.argv[1];assert phase in ['before','after'];DEST=OUT/phase
+phase=sys.argv[1];assert phase in ['before','before-canonical','after'];DEST=OUT/phase
 DEST.mkdir(exist_ok=False);os.sched_setaffinity(0,{19})
 def sha(p):return hashlib.file_digest(p.open('rb'),'sha256').hexdigest()
 def now():return subprocess.check_output(['date','-u','+%FT%TZ'],text=True).strip()
@@ -30,7 +30,8 @@ try:
   run(entry+'-assemble-original',['aarch64-linux-gnu-as',original,'-o',str(prefix)+'.original.o'],expected=0)
   run(entry+'-link-original',['aarch64-linux-gnu-ld','-T',DEST/'layout.ld','-o',str(prefix)+'.original.elf',str(prefix)+'.original.o',DEST/'fixture.o'],expected=0)
   original_exit=run(entry+'-execute-original',['qemu-aarch64-static',str(prefix)+'.original.elf'],cpu=19)
-  run(entry+'-native-link',[linker,'--input',DEST/'fixture.o','--symbol',entry,'--link-plan',DEST/'plan.json','--output',str(prefix)+'.blob.bin','--output-map-patches',str(prefix)+'.map-patches.tsv','--output-relocs',str(prefix)+'.relocs.tsv','--output-abi',str(prefix)+'.abi.tsv','--show'],expected=0)
+  run(entry+'-proof',[linker,'--input',DEST/'fixture.o','--symbol',entry,'--mode','proof','--output',str(prefix)+'.proof.o'],expected=0)
+  run(entry+'-native-link',[linker,'--input',str(prefix)+'.proof.o','--symbol',entry,'--link-plan',DEST/'plan.json','--output',str(prefix)+'.blob.bin','--output-map-patches',str(prefix)+'.map-patches.tsv','--output-relocs',str(prefix)+'.relocs.tsv','--output-abi',str(prefix)+'.abi.tsv','--show'],expected=0)
   run(entry+'-disassemble-blob',['aarch64-linux-gnu-objdump','-D','-b','binary','-m','aarch64',str(prefix)+'.blob.bin'],cpu=19,expected=0)
   native=Path(str(prefix)+'.native.s');native.write_text('.text\n.global _start\n_start:\n b linked_entry\n.balign 8\nlinked_entry:\n.incbin "'+str(prefix)+'.blob.bin"\n mov x0, x7\n mov x8, #93\n svc #0\n'+data)
   run(entry+'-assemble-native',['aarch64-linux-gnu-as',native,'-o',str(prefix)+'.native.o'],expected=0)

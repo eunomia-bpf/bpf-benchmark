@@ -1,0 +1,50 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-call-map-facts/before/fixture.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000000 <entry_reloc>:
+   0:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+   4:	910003fd 	mov	x29, sp
+   8:	90000000 	adrp	x0, 0 <frozen_word>
+			8: R_AARCH64_ADR_GOT_PAGE	frozen_word
+   c:	f9400000 	ldr	x0, [x0]
+			c: R_AARCH64_LD64_GOT_LO12_NC	frozen_word
+  10:	90000001 	adrp	x1, 0 <mutable_word>
+			10: R_AARCH64_ADR_GOT_PAGE	mutable_word
+  14:	f9400021 	ldr	x1, [x1]
+			14: R_AARCH64_LD64_GOT_LO12_NC	mutable_word
+  18:	94000000 	bl	0 <entry_reloc>
+			18: R_AARCH64_CALL26	pick_global
+  1c:	b9400002 	ldr	w2, [x0]
+  20:	2a0203e0 	mov	w0, w2
+  24:	a8c17bfd 	ldp	x29, x30, [sp], #16
+  28:	d65f03c0 	ret
+
+000000000000002c <entry_local>:
+  2c:	a9bf7bfd 	stp	x29, x30, [sp, #-16]!
+  30:	910003fd 	mov	x29, sp
+  34:	90000000 	adrp	x0, 0 <frozen_word>
+			34: R_AARCH64_ADR_GOT_PAGE	frozen_word
+  38:	f9400000 	ldr	x0, [x0]
+			38: R_AARCH64_LD64_GOT_LO12_NC	frozen_word
+  3c:	90000001 	adrp	x1, 0 <mutable_word>
+			3c: R_AARCH64_ADR_GOT_PAGE	mutable_word
+  40:	f9400021 	ldr	x1, [x1]
+			40: R_AARCH64_LD64_GOT_LO12_NC	mutable_word
+  44:	94000005 	bl	58 <pick_local>
+  48:	b9400002 	ldr	w2, [x0]
+  4c:	2a0203e0 	mov	w0, w2
+  50:	a8c17bfd 	ldp	x29, x30, [sp], #16
+  54:	d65f03c0 	ret
+
+0000000000000058 <pick_local>:
+  58:	aa0103e0 	mov	x0, x1
+  5c:	d65f03c0 	ret
+
+Disassembly of section .text.pick:
+
+0000000000000000 <pick_global>:
+   0:	aa0103e0 	mov	x0, x1
+   4:	d65f03c0 	ret
