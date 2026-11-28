@@ -1,0 +1,93 @@
+{
+  "scope": "same original whole function entry followed once by sixteen remaining mixed-width header assignments",
+  "source_sha256": "b2e2a966c1b602ca9fdfc69b6dc5a8f63c588ea69d1b18451733bb9a9ac2c5f2",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-entry/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.043012619018555,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailEntry"
+      ],
+      "exit": 0,
+      "seconds": 4.400625944137573,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.8149545192718506,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-header-tail-entry/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3730838298797607,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 240,
+  "full_jobs": 1530,
+  "root_queries": [
+    "entry"
+  ],
+  "actual_tail_sequence_commit": "94e480a9b9cc8387af23f20b7a757d790bfe87e8",
+  "composition": "same NullEntry.entry once, actual TailValues storage from same allocation, then TailSequence.execute once on same header, heap, trace and reached temps",
+  "actual_readbacks": "all16 typed tail RHS/cast values; all12 earlier fixed pointers and64 NULL vector pointers retained within same header by76field byte frame",
+  "preserves": "CurrentGPR R0 pointer/tag1 R30tag10; current defaults6one/7ctx/8ABIptr+other6; helper/scalars/tags/vector values/LR/flags/tables/ABI/CB/caller/access/frontier",
+  "table_resources": "both genuine TableInitialized original before/initialized/le/k/run/store retained, only current memory frame extended",
+  "endpoint": "original nested _i=0/vector-pointer loop; loop execution and intentional overwrite of64 NULL fields remain open",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}
