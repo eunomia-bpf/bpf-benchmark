@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.store
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.visit
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.visit
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.named_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderTailMemory.named_frame
