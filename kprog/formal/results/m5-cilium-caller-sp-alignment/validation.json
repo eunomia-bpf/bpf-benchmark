@@ -1,0 +1,119 @@
+{
+  "scope": "actual SP alignment guard derived from retained actual scalar binding and zero load",
+  "failed_attempts": {
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-alignment/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 32.72541308403015,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "failed_stage1_source_sha256": "b8cc1f9b559b143a8062a6b2599a3b521e54490519fbfbc44dde3224d8212376",
+  "repair": "stage1 sp_value retained tlong access-mode and zero pointer-offset matches; reduce the imported definitions by definitional equality, preserving actual binding/read premises",
+  "source_sha256": "b736e487fe2f6e8d1635769fc7e69336937f6621ad5edad31e961d219848aa89",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-alignment/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 74.7436625957489,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment"
+      ],
+      "exit": 0,
+      "seconds": 70.53721261024475,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.6187193393707275,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-sp-alignment/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.23854660987854,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "focused_jobs": 267,
+  "full_jobs": 1545,
+  "root_queries": [
+    "source",
+    "alignment_source",
+    "sp_value",
+    "alignment_execute",
+    "execute"
+  ],
+  "actual_operand_guard_commit": "7590d7b2683a8c06defbbcd1f04868b8b65635c3",
+  "source": "actual operand-guard successor peeled into SP group/alignment/tail/afterGroup; original unsupported branch retained",
+  "input": "actual EntryScalars.Locals binding and retained scalar readbacks derive original signed64 SP loadzero, no successful-reader oracle",
+  "execution": "11 actual alignment steps load SP/mask15/castboolzero and bypass unsupported branch; group entry+guard+skip15 reaches actual tail, whole memory unchanged",
+  "precheck_revision": "before any SP check, draft2 narrows evaluation to kernel-checked compare/SP/mask/temp/Bool equations and imported doStep; original draft1 retained, no invented failed check",
+  "whole_instruction_proved_here": false,
+  "native_whole_state_proved_here": false,
+  "native_global_universal_refinement_claimed": false,
+  "resource_assignment": "- COORDINATOR 2026-11-28T05:43Z: operator 05:40Z \"x86 \u91cd\u65b0\u6027\u80fd\u6d4b\u8bd5\u4e5f\u53ef\u4ee5? ...\": the coordinator started one x86 frozen-entry rotate (defaults, six apps, stats off then on) on the current image, kprog/results/x86-rotate-20261128/chain.sh; it holds the timing lock exclusive, the image lock shared and the batch lock for about six hours. Rebuild no x86 image and run no x86 timing until it ends; arm64 work on CPUs 16-19 and formal's builds outside the timing lock continue.",
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

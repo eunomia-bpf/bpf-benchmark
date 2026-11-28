@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.alignment_source
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.alignment_source
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.sp_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.sp_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.alignment_execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.alignment_execute
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerSPAlignment.execute
