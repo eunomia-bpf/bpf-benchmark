@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.store
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.store
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.visit
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.visit
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.named_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerHeaderVectorNullMemory.named_frame
