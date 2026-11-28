@@ -1,0 +1,123 @@
+{
+  "scope": "actual original numeric-return and valid stores after the original provider Returnstate",
+  "source_sha256": "cf16aa6b9abf750f47587986c1f9e92eef651c92d6fd0b78250690888fa40cdf",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-memory/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 67.33700895309448,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory"
+      ],
+      "exit": 0,
+      "seconds": 67.20535683631897,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.773437976837158,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-memory/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.3343639373779297,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 295,
+  "full_jobs": 1562,
+  "root_queries": [
+    "write",
+    "bound_frame",
+    "return_value",
+    "valid_value",
+    "execute"
+  ],
+  "actual_return_provider_commit": "00ac0f91c9af45bdffd9402566e23f29ea1a804b",
+  "resources": "actual original795allocation defaults local3 numeric-return and local5 RETURN-valid; current supplied access derives both writable stores and their original disjoint blocks",
+  "memory": "actual Mint64 supplied-to-middle scalar store followed by Mint8unsigned middle-to-after valid1 store; same-store readbacks, other-block/other-bound-local/caller/access/frontier frames",
+  "execution": "six original internal Returnstate/Kcall/skip/assign steps consume both SAME derived stores and reach original setBase with actual t157=base and original continuation",
+  "provider_boundary": "arbitrary scalar and full supplied heap retained at actual Returnstate; external execution/outcomes are not invented or assumed pure by this suffix",
+  "open": "actual linked externalCall relation/trace and complete supplied-memory outcome, remaining setBase/add/materialization/data stores, linked whole-entry/provider/Senv transport, native whole-state refinement",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "successful_provider_execution_assumed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-return-memory/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 68.5035400390625,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "cc51321c42fd2052334f479444fd5db4d56880dded6fa14647af919846d1277d",
+    "source_lines": 141,
+    "error": "execute final simp/trivial reaches default recursion512; no maxRecDepth increase"
+  },
+  "proof_repair": "replace whole interpreter/simp reduction by two explicit original Step.assign rules and original returnstate/skip_seq rules; same source/stores/six steps and unchanged budgets"
+}

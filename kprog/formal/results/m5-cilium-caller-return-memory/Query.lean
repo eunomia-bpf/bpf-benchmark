@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.write
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.write
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.bound_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.bound_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.return_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.return_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.valid_value
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.valid_value
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.execute
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerReturnMemory.execute

@@ -1,0 +1,21 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-return-memory/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 68.5035400390625,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "cc51321c42fd2052334f479444fd5db4d56880dded6fa14647af919846d1277d",
+  "source_lines": 141,
+  "error": "execute final simp/trivial reaches default recursion512; no maxRecDepth increase"
+}
