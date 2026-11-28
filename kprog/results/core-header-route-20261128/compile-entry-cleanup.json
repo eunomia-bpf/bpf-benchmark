@@ -1,0 +1,932 @@
+{
+  "commit": "430f519acde9a524b4ee4fb474c3391e59aecc5c",
+  "verified_git_archive_and_every_member": true,
+  "removed": [
+    {
+      "name": "compile-entry/arm64-absolute.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-absolute.ll",
+      "bytes": 44839,
+      "sha256": "67edae458a96ff7ff7e53a00d2c0d4eb8e212220611ad76766b860d7a3cac15d",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry/arm64-absolute.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-absolute.ll.core.h",
+      "bytes": 3958,
+      "sha256": "c76800ff64cb445a3446906af62d5e1b366a22282ed0c4199ea84befc9f7ec14",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-absolute.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-absolute.ll.core.json",
+      "bytes": 3881,
+      "sha256": "3a92e119faec25c082262b68f228de43f09e4ccd505ca789c59d2612034c055d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-absolute.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-absolute.stderr",
+      "bytes": 945,
+      "sha256": "56d8d74cbd3ef94a55e116971844a70dcca8a7f5065be81dc7480040c5ae545a",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-absolute.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-absolute.stdout",
+      "bytes": 145,
+      "sha256": "650fd76d5494cf4e42997ab5566be55f8bd1d6f3b3af08a861637077869cbdfd",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-dot-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-dot-relative.ll",
+      "bytes": 44701,
+      "sha256": "c56c24f4f9c1d68bd49a4989bceb8a1202c18207d8c5af3ac2614a220b614903",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry/arm64-dot-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-dot-relative.ll.core.h",
+      "bytes": 3838,
+      "sha256": "a949b36142a6e26f26ff89b0761b885cc2dada5c364384b6d36836142c6da262",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-dot-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-dot-relative.ll.core.json",
+      "bytes": 3761,
+      "sha256": "a48d419d749749ccd6f74394eb55e32b51568762cd0a5317cbc857c6e5c810e0",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-dot-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-dot-relative.stderr",
+      "bytes": 938,
+      "sha256": "d872214ecaa50119570e78f0778697261e5adaaf5fa871b2031621335e6cdd6d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-dot-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-dot-relative.stdout",
+      "bytes": 149,
+      "sha256": "5e0682450f8110caeac44932ae21bf16470dc576dc81583001738bedac472813",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/arm64-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-flags.stdout",
+      "bytes": 351,
+      "sha256": "001d406a78a33d90ac9981c2d909b5d6c6761919643212c47e530f5892295fab",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-live_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-live_poison.stderr",
+      "bytes": 66,
+      "sha256": "43f327e2e53ffe65e527684556a8846b168136f288e0f82cf3a654e8dc6924a4",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-live_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-live_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/arm64-poison-native.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison-native.stderr",
+      "bytes": 1453,
+      "sha256": "c00c89a556222994cdc00ef3d892d1c39e01b6c3229ffabdcb85661805d38bc8",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-poison-native.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison-native.stdout",
+      "bytes": 148,
+      "sha256": "33dcfb0890937f775c3dc6ff3b1e1c67cb2d1d597dabf6df9cc13188e931a12d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-poison-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/arm64-poison-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison-oracle.stdout",
+      "bytes": 1621,
+      "sha256": "1c541e6341eb083c0569fcddea8af7672dfeedbfe9701150f05bd2fded261c76",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-poison.native.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison.native.o",
+      "bytes": 10448,
+      "sha256": "f987ea850811073316bd912e37d566912736a3f0ca912b032ce013a84f63ea75",
+      "allocated_bytes": 12288
+    },
+    {
+      "name": "compile-entry/arm64-poison.native.o.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison.native.o.core.h",
+      "bytes": 1895,
+      "sha256": "539513f3d46ca79b8b7a8977a16944806a4902f9811207193d7ebcf6cd5fc3a6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-poison.native.o.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-poison.native.o.core.json",
+      "bytes": 849,
+      "sha256": "cf6bd5b2428d638be8a222b73ddf4e3c812b8c7f9e7de886edafbdace3244a44",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-relative.ll",
+      "bytes": 44423,
+      "sha256": "229225f4f946daa15e511484fd9bca383f66044d068badc01562c77109518c25",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry/arm64-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-relative.ll.core.h",
+      "bytes": 3822,
+      "sha256": "076ffd21526509c2c1be2034814f048099dd31dbd0db37d9481c7d5d715264e0",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-relative.ll.core.json",
+      "bytes": 3745,
+      "sha256": "5a0a5de6306ab7e71dedf10fbde8897421d8a45944dc62240fec53e3e18fb627",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-relative.stderr",
+      "bytes": 928,
+      "sha256": "c33854d6ef4dafb924efd60a2930c967bf90f1e53226c6bf3ad52e49f71c7ce3",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/arm64-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/arm64-relative.stdout",
+      "bytes": 145,
+      "sha256": "1cc5c14022650c77eddb2e79881d0fb44b20eac1f978942565bc864fe82105ee",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/poison-bpf.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/poison-bpf.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/poison-bpf.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/poison-bpf.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/poison.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/poison.bpf.o",
+      "bytes": 4544,
+      "sha256": "cd0f04a6ec69e5df3d3d17761e4837c66dac1d2e39a45d0f939bf55ba8c943ec",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry/x86-absolute.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-absolute.ll",
+      "bytes": 51291,
+      "sha256": "c975521e80310e31724bb43ad01ad7e8de70b3c6156d5aa228d1b8ad8771cb77",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry/x86-absolute.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-absolute.ll.core.h",
+      "bytes": 3958,
+      "sha256": "8a1d260d02c7ee2155326d43e88669f0c32c1f3a8d5fa73f247cc530b33b1d72",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-absolute.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-absolute.ll.core.json",
+      "bytes": 3881,
+      "sha256": "24c0518092e23b65119305dcdfc5da4f73aafb6630b6c63ca5712c3becf59b80",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-absolute.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-absolute.stderr",
+      "bytes": 941,
+      "sha256": "c7525b72f36b5ae498fce34f5ff6d465d725b9880ad188cb44719598093e486c",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-absolute.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-absolute.stdout",
+      "bytes": 143,
+      "sha256": "1162e33de08bdb09d6ce887d2adf0f70c2911270aa0a3d488dba7e7f9b0abc48",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-dot-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-dot-relative.ll",
+      "bytes": 51173,
+      "sha256": "3280c0ee190173c15c887f425abf939ecb1dbf5aefc01ac23b0a6fa07b48be7d",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry/x86-dot-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-dot-relative.ll.core.h",
+      "bytes": 3838,
+      "sha256": "27265511c8300c66bba83c6475307895bfd4c475e9c7963094c972ac2d08c5a1",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-dot-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-dot-relative.ll.core.json",
+      "bytes": 3761,
+      "sha256": "16be4ec1b181a4844e5e4bbfe68fc910685427c7054172a51309e2da499ff5d9",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-dot-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-dot-relative.stderr",
+      "bytes": 934,
+      "sha256": "cb320c54848dbc9a9477a5a02b9e7773049ec8534bbfc78455c28f212b947d31",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-dot-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-dot-relative.stdout",
+      "bytes": 147,
+      "sha256": "4d8962aa937d4fa6bf1bdf419cee3d166ac3b51a6cc9cef1ca42cb23378f1efe",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/x86-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-flags.stdout",
+      "bytes": 337,
+      "sha256": "a53979833a60381efaac9548cc12fa64db7057b734e779131d398d0f73b365c6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-live_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-live_poison.stderr",
+      "bytes": 66,
+      "sha256": "43f327e2e53ffe65e527684556a8846b168136f288e0f82cf3a654e8dc6924a4",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-live_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-live_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/x86-poison-native.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison-native.stderr",
+      "bytes": 1451,
+      "sha256": "fc4b746e8525b8362ee75fba6ce19164ae440d973b43330dfd8e24b9e1b8d339",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-poison-native.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison-native.stdout",
+      "bytes": 146,
+      "sha256": "b66ad1a1c064933ababf88332e03a0e21ac6c3506abe4963ab401097255113ed",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-poison-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry/x86-poison-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison-oracle.stdout",
+      "bytes": 1619,
+      "sha256": "a305210adbca8229a8a19545a881a89e3cb68a7d3ef0a715145725d132b56e1c",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-poison.native.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison.native.o",
+      "bytes": 14968,
+      "sha256": "e00018ae6e3d384bb4fe6549d2226a7b5a4a0989a48b73a8a1c9dc5243fc1a1c",
+      "allocated_bytes": 16384
+    },
+    {
+      "name": "compile-entry/x86-poison.native.o.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison.native.o.core.h",
+      "bytes": 1895,
+      "sha256": "539513f3d46ca79b8b7a8977a16944806a4902f9811207193d7ebcf6cd5fc3a6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-poison.native.o.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-poison.native.o.core.json",
+      "bytes": 849,
+      "sha256": "cf6bd5b2428d638be8a222b73ddf4e3c812b8c7f9e7de886edafbdace3244a44",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-relative.ll",
+      "bytes": 50893,
+      "sha256": "df47ebe850729bfab72c4cb43a151cfc0cbf6815ac22d1452e040593a045076c",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry/x86-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-relative.ll.core.h",
+      "bytes": 3822,
+      "sha256": "d7d5bb9fec4b8d317d01932efcc72ec1b9968dfcde37727a3c67fa9d96ea3ecd",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-relative.ll.core.json",
+      "bytes": 3745,
+      "sha256": "5e25fcd30e7b67fae731a1020f7092829d34fda5c34ea4965674bfbdaf5af76d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-relative.stderr",
+      "bytes": 924,
+      "sha256": "a8f9e5bff10fa83fb3b7c2fbae453f0ed8f0d983bf6e03407804c58cf2981f43",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry/x86-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry/x86-relative.stdout",
+      "bytes": 143,
+      "sha256": "25de30f6ade492032b60963327b82e6a9880ca0dfc19a4e120469c4f21471238",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-controller.json",
+      "bytes": 18358,
+      "sha256": "41ada3c593548f28a226438d7d6c7dd3ad3dd5bc36c6ec762905e531b273dc77",
+      "allocated_bytes": 20480
+    },
+    {
+      "name": "compile-entry-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-job.log",
+      "bytes": 12774,
+      "sha256": "29a8f4c4026aaded73fa878178548d7a629d09879d3a5ad2d2d30470db663d68",
+      "allocated_bytes": 16384
+    },
+    {
+      "name": "compile-entry-proof/arm64-absolute.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-absolute.ll",
+      "bytes": 44845,
+      "sha256": "26ebd787a951e7d302cefe00a597a22354c5de7686d58ec98c88d783200ef1a3",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry-proof/arm64-absolute.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-absolute.ll.core.h",
+      "bytes": 3958,
+      "sha256": "c76800ff64cb445a3446906af62d5e1b366a22282ed0c4199ea84befc9f7ec14",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-absolute.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-absolute.ll.core.json",
+      "bytes": 3881,
+      "sha256": "3a92e119faec25c082262b68f228de43f09e4ccd505ca789c59d2612034c055d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-absolute.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-absolute.stderr",
+      "bytes": 957,
+      "sha256": "8c4ae36ef6478197852eaeb69ba3b7dc921f197b309b774104337d61af161029",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-absolute.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-absolute.stdout",
+      "bytes": 151,
+      "sha256": "bb122c47de72906edcf2966ab0f97db33e8e64bdc79376c7454fe33aeb34a56d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison-proof.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison-proof.stderr",
+      "bytes": 287,
+      "sha256": "22b0f8f10ce09eab436d145d74708eb52d142c74ab34be8a73192b5409cd56ee",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison-proof.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison-proof.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison.bin",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison.bin",
+      "bytes": 12,
+      "sha256": "0f05a1fa0fd48402a94c04e50c35b560b79f4a3145da0ae3eeb17795de0e7cf8",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison.proof.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison.proof.o",
+      "bytes": 4832,
+      "sha256": "3009a4e6fe9ce75af3d48831c9bb6493606f45599fc8415a85363f8b7ebc9c71",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison.stderr",
+      "bytes": 269,
+      "sha256": "948c6d4dbecc32a2ac36664328b29f6d860ad4a1e4ba01db83d4d1d9cda08e60",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dead_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dead_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-dot-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dot-relative.ll",
+      "bytes": 44707,
+      "sha256": "f88ba0a8930e8966f7f7ebc3b905f6e567cd461495399b0f8f4600c8e2d95536",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry-proof/arm64-dot-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dot-relative.ll.core.h",
+      "bytes": 3838,
+      "sha256": "a949b36142a6e26f26ff89b0761b885cc2dada5c364384b6d36836142c6da262",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dot-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dot-relative.ll.core.json",
+      "bytes": 3761,
+      "sha256": "a48d419d749749ccd6f74394eb55e32b51568762cd0a5317cbc857c6e5c810e0",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dot-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dot-relative.stderr",
+      "bytes": 950,
+      "sha256": "86d002dcc45d02b57afd53f5d8060fd5db22b1547dceb16e1561aeecd77d5dba",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-dot-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-dot-relative.stdout",
+      "bytes": 155,
+      "sha256": "0d4a907c8940f689e362e29b15d55641260fabf21bb691b5334f253eb5d30ab8",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-flags.stdout",
+      "bytes": 351,
+      "sha256": "001d406a78a33d90ac9981c2d909b5d6c6761919643212c47e530f5892295fab",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-live_poison-proof.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-live_poison-proof.stderr",
+      "bytes": 289,
+      "sha256": "96f423654575f473fbdaaadaad1ea842d48a7d0b03267244fb813fdaf09af84d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-live_poison-proof.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-live_poison-proof.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-live_poison.proof.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-live_poison.proof.o",
+      "bytes": 4992,
+      "sha256": "342faba9a18650148befefca33d0ae8945d51cccc4f6bf8c327e2594766a6d4c",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry-proof/arm64-live_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-live_poison.stderr",
+      "bytes": 192,
+      "sha256": "345e6c93cd7ca5c075e47b561cab1dca7b61e3528e155dd1a3db1bf2e2320dba",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-live_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-live_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison-native.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison-native.stderr",
+      "bytes": 1459,
+      "sha256": "e10c8decb478bb80c743e62d97427c660db54ead4c62cc6e87bb2247dc9ab5d0",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison-native.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison-native.stdout",
+      "bytes": 154,
+      "sha256": "70ad3f12ad613569e08fec663ce100851c51aea5f0d27172a27d0bd398c335da",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison-oracle.stdout",
+      "bytes": 1627,
+      "sha256": "e75928f3129968000c6bd318fcacf427268caf579c68a2b2932bd2e28c4a0610",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison.native.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison.native.o",
+      "bytes": 10456,
+      "sha256": "1af38e3b27cf1a8fb3580f3bde56a561a45d095fe09a4e38d4649881f1bfcd45",
+      "allocated_bytes": 12288
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison.native.o.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison.native.o.core.h",
+      "bytes": 1895,
+      "sha256": "539513f3d46ca79b8b7a8977a16944806a4902f9811207193d7ebcf6cd5fc3a6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-poison.native.o.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-poison.native.o.core.json",
+      "bytes": 849,
+      "sha256": "cf6bd5b2428d638be8a222b73ddf4e3c812b8c7f9e7de886edafbdace3244a44",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-relative.ll",
+      "bytes": 44429,
+      "sha256": "f92d8072e8afa75c5aa55863e58427ed67ca4c57eb774d4931050384bd90ff1d",
+      "allocated_bytes": 45056
+    },
+    {
+      "name": "compile-entry-proof/arm64-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-relative.ll.core.h",
+      "bytes": 3822,
+      "sha256": "076ffd21526509c2c1be2034814f048099dd31dbd0db37d9481c7d5d715264e0",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-relative.ll.core.json",
+      "bytes": 3745,
+      "sha256": "5a0a5de6306ab7e71dedf10fbde8897421d8a45944dc62240fec53e3e18fb627",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-relative.stderr",
+      "bytes": 940,
+      "sha256": "c3d112de22beab2b89c17da32ccf4dd3b5bb5e3e83232b2bdff8a6b80d1a3f40",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/arm64-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/arm64-relative.stdout",
+      "bytes": 151,
+      "sha256": "2dee8cc4185fe435e852cffef21e5a262c489ecfb0ed01775f7488e17714914e",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/poison-bpf.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/poison-bpf.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/poison-bpf.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/poison-bpf.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/poison.bpf.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/poison.bpf.o",
+      "bytes": 4544,
+      "sha256": "cd0f04a6ec69e5df3d3d17761e4837c66dac1d2e39a45d0f939bf55ba8c943ec",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry-proof/x86-absolute.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-absolute.ll",
+      "bytes": 51297,
+      "sha256": "b0aca239ea8e340c585b25c1b96006590fcecb3650d0511235e121476b442a67",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry-proof/x86-absolute.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-absolute.ll.core.h",
+      "bytes": 3958,
+      "sha256": "8a1d260d02c7ee2155326d43e88669f0c32c1f3a8d5fa73f247cc530b33b1d72",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-absolute.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-absolute.ll.core.json",
+      "bytes": 3881,
+      "sha256": "24c0518092e23b65119305dcdfc5da4f73aafb6630b6c63ca5712c3becf59b80",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-absolute.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-absolute.stderr",
+      "bytes": 953,
+      "sha256": "22adcb4c8caa66c869004c045ac200e7d7a130bf61657fd90b497d23d205d267",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-absolute.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-absolute.stdout",
+      "bytes": 149,
+      "sha256": "0d16c167b02d0f61306eec52b45ae468d97b53d5a75ac72ead64c30f09992436",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison-proof.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison-proof.stderr",
+      "bytes": 279,
+      "sha256": "f627536dd6af6f60a7ef51df4bce4a0acf923fa398a9f5c71706f42e5fe78373",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison-proof.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison-proof.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison.bin",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison.bin",
+      "bytes": 5,
+      "sha256": "415721f4c727c6ce4d436c6953ccef0cc0f22d766e96e71153b16eda6d1b00b2",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison.proof.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison.proof.o",
+      "bytes": 7680,
+      "sha256": "dff4b49d6e75b87642af2e29df31764da627677860255ce6f15236d72ab05c83",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison.stderr",
+      "bytes": 262,
+      "sha256": "784465f34e90d3cb265433618601273b44f5e9e91d18ad174f8f7abecd9617c7",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dead_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dead_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-dot-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dot-relative.ll",
+      "bytes": 51179,
+      "sha256": "fcd7deaf30f374d0dd6b096141f3e931437ed71bb8d22bc7482c9d0f3ece7832",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry-proof/x86-dot-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dot-relative.ll.core.h",
+      "bytes": 3838,
+      "sha256": "27265511c8300c66bba83c6475307895bfd4c475e9c7963094c972ac2d08c5a1",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dot-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dot-relative.ll.core.json",
+      "bytes": 3761,
+      "sha256": "16be4ec1b181a4844e5e4bbfe68fc910685427c7054172a51309e2da499ff5d9",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dot-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dot-relative.stderr",
+      "bytes": 946,
+      "sha256": "68fe7e062c0d4d97cd799361ca73872d101253d64a91b0d5c1d4e33d638a81c8",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-dot-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-dot-relative.stdout",
+      "bytes": 153,
+      "sha256": "afd48bfd239320ce9240ad0df10410fdf471629de36b77d0cf4283448af31ccc",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-flags.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-flags.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-flags.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-flags.stdout",
+      "bytes": 337,
+      "sha256": "a53979833a60381efaac9548cc12fa64db7057b734e779131d398d0f73b365c6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-live_poison-proof.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-live_poison-proof.stderr",
+      "bytes": 281,
+      "sha256": "75e2393c8f2f23bddfe462e5a32f8f78186146366bdddf7748b16cb935324b0b",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-live_poison-proof.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-live_poison-proof.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-live_poison.proof.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-live_poison.proof.o",
+      "bytes": 8152,
+      "sha256": "2d93ea08be4349efee6072484cda954721c42d1523d001c9b135126693efd625",
+      "allocated_bytes": 8192
+    },
+    {
+      "name": "compile-entry-proof/x86-live_poison.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-live_poison.stderr",
+      "bytes": 184,
+      "sha256": "89c7f803e7ee22f67799a7a9fa6867eff356ff7e7240531c873d825c5f0e1daa",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-live_poison.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-live_poison.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-poison-native.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison-native.stderr",
+      "bytes": 1457,
+      "sha256": "eb40a39b8617df938c7220c3a099325dd5d41fe6cf25f0d6d4ae67e2849a56d5",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-poison-native.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison-native.stdout",
+      "bytes": 152,
+      "sha256": "296f785fb5c0c489318175fb31b5a51559e55deef65d90bee645d625980cf498",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-poison-oracle.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison-oracle.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "allocated_bytes": 0
+    },
+    {
+      "name": "compile-entry-proof/x86-poison-oracle.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison-oracle.stdout",
+      "bytes": 1625,
+      "sha256": "c16fbd46b92c0bd597964e1e570ddccd47447b0a3f655594cbaa1d4df2546b51",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-poison.native.o",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison.native.o",
+      "bytes": 14976,
+      "sha256": "ec91b73ced1686fa3e8f18fe2e3d2b47f4b8eff3196f5dceff0be53e4718c200",
+      "allocated_bytes": 16384
+    },
+    {
+      "name": "compile-entry-proof/x86-poison.native.o.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison.native.o.core.h",
+      "bytes": 1895,
+      "sha256": "539513f3d46ca79b8b7a8977a16944806a4902f9811207193d7ebcf6cd5fc3a6",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-poison.native.o.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-poison.native.o.core.json",
+      "bytes": 849,
+      "sha256": "cf6bd5b2428d638be8a222b73ddf4e3c812b8c7f9e7de886edafbdace3244a44",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-relative.ll",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-relative.ll",
+      "bytes": 50899,
+      "sha256": "2c7f74337e713713aa1609f230252186e00b6e85582210078ee917f3e45e7f61",
+      "allocated_bytes": 53248
+    },
+    {
+      "name": "compile-entry-proof/x86-relative.ll.core.h",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-relative.ll.core.h",
+      "bytes": 3822,
+      "sha256": "d7d5bb9fec4b8d317d01932efcc72ec1b9968dfcde37727a3c67fa9d96ea3ecd",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-relative.ll.core.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-relative.ll.core.json",
+      "bytes": 3745,
+      "sha256": "5e25fcd30e7b67fae731a1020f7092829d34fda5c34ea4965674bfbdaf5af76d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-relative.stderr",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-relative.stderr",
+      "bytes": 936,
+      "sha256": "fa0981ac42ac5e830764a40612e987696c383f27932dfde8e54bf21719f6b68d",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof/x86-relative.stdout",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof/x86-relative.stdout",
+      "bytes": 149,
+      "sha256": "23e00c9d5405b49d26bdeaa9cc169630bcb422e71be9766700463279c21d547a",
+      "allocated_bytes": 4096
+    },
+    {
+      "name": "compile-entry-proof-controller.json",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof-controller.json",
+      "bytes": 24489,
+      "sha256": "d06a345d032876d889798cc507e09f766570b6088ee29eb7e0cb6a13810f38e5",
+      "allocated_bytes": 24576
+    },
+    {
+      "name": "compile-entry-proof-job.log",
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/compile-entry-proof-job.log",
+      "bytes": 17381,
+      "sha256": "6dd96ad5d45822c61bbc0cfa186041aaf6c01a46e8a159f169fda070b1adef8a",
+      "allocated_bytes": 20480
+    }
+  ],
+  "logical_bytes": 865818,
+  "allocated_bytes": 1122304
+}
