@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-28T03:52:23Z",
+  "raw": "/workspaces/kprog-raw/perf/x86-otel-perf-20261127/20261128T033629Z",
+  "scope": "Only completed profile033629 after complete committed Git archive and all349 file SHA/size/fileset verification. Live five-app alignment RAW and all other inputs protected.",
+  "file_count": 349,
+  "logical_bytes": 124206879,
+  "freed_allocated_bytes": 125489152,
+  "cumulative_freed_allocated_bytes": 4100956160,
+  "archive_parts": [
+    {
+      "path": "kprog/results/x86-otel-perf-20261127/profile-20261128T033629Z/evidence.tar.zst.part-aa",
+      "bytes": 16536070,
+      "sha256": "aaabbb8cf4eb144fb675ce7a9ad38692db3a150b40a4f584da3e3f73e7f2c6a0"
+    }
+  ],
+  "git_verified_commit": "aeaca1a49f48f8eb8437af11b89bebfb309cb30b",
+  "all_file_bytes_sha_size_fileset_verified": true,
+  "raw_removed": true
+}
