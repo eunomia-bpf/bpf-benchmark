@@ -39,3 +39,10 @@ SEC("query/retprobe_value") long long retprobe_value(void)
 
 SEC("query/ancestor_index") long long ancestor_index(struct cgroup___new *c, unsigned i)
 { return (char *)_(&c->ancestors[i]) - (char *)c - (unsigned long)i * sizeof(void *); }
+
+/* Same typeof-qualified intermediate that BPF_CORE_READ emits. */
+SEC("query/queue_disk_address") long long queue_disk_address(struct request___x *r)
+{
+    typeof(r->q) const __t1 = (void *)r;
+    return (char *)_(&__t1->disk) - (char *)__t1;
+}

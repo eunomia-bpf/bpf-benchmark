@@ -1,0 +1,114 @@
+{
+  "pid": 1573389,
+  "status": "complete",
+  "ended_utc": "2026-11-28T17:42:45.484904+00:00",
+  "all_four_sources_compile": false,
+  "cases": [
+    {
+      "arch": "x86",
+      "app": "bcc",
+      "generator_exit": 0,
+      "native_ir_exit": 0,
+      "query_count": 17,
+      "unanswered_calls": 4,
+      "poisoned_queries": [
+        "&(((((struct bio___o *)bio)))->bi_disk)",
+        "&(((((struct task_struct___o *)task)))->state)",
+        "&((((r)))->rq_disk)",
+        "&(__t1->bd_disk)",
+        "&(__t1->disk)",
+        "&(__t1->elevator)"
+      ]
+    },
+    {
+      "arch": "x86",
+      "app": "tetragon",
+      "generator_exit": 0,
+      "native_ir_exit": 0,
+      "query_count": 148,
+      "unanswered_calls": 4,
+      "poisoned_queries": [
+        "&(((old_kn))->id.id)",
+        "&(__t1->d_inode)",
+        "&(__t1->exe_file)",
+        "&(__t1->hierarchy_id)",
+        "&(__t1->name)",
+        "&(__t1->taints)",
+        "&(__t2->i_mode)",
+        "&audit->loginuid",
+        "&task->audit",
+        "&task->pids"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "app": "bcc",
+      "generator_exit": 0,
+      "native_ir_exit": 0,
+      "query_count": 17,
+      "unanswered_calls": 4,
+      "poisoned_queries": [
+        "&(((((struct bio___o *)bio)))->bi_disk)",
+        "&(((((struct task_struct___o *)task)))->state)",
+        "&((((r)))->rq_disk)",
+        "&(__t1->bd_disk)",
+        "&(__t1->disk)",
+        "&(__t1->elevator)"
+      ]
+    },
+    {
+      "arch": "arm64",
+      "app": "tetragon",
+      "generator_exit": 0,
+      "native_ir_exit": 0,
+      "query_count": 148,
+      "unanswered_calls": 4,
+      "poisoned_queries": [
+        "&(((old_kn))->id.id)",
+        "&(__t1->d_inode)",
+        "&(__t1->exe_file)",
+        "&(__t1->hierarchy_id)",
+        "&(__t1->name)",
+        "&(__t1->taints)",
+        "&(__t2->i_mode)",
+        "&audit->loginuid",
+        "&task->audit",
+        "&task->pids"
+      ]
+    }
+  ],
+  "input_checks": [
+    {
+      "path": "vendor/bpf/Makefile",
+      "sha256": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+      "source_commit": "b5514371f"
+    },
+    {
+      "path": "vendor/bpf/core-answers.py",
+      "sha256": "72ba8f789ba51a8e8f7232c44add389c19f1c034fc4a25ee8faed4859b7aa173",
+      "source_commit": "b5514371f"
+    },
+    {
+      "path": "vendor/bpf/core-compat.h",
+      "sha256": "72ea7f82497033602ae2129efae038f1f65298c443b1622aec16a03c3b29e75c",
+      "source_commit": "b5514371f"
+    },
+    {
+      "path": "vendor/bpf/native_compat.h",
+      "sha256": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+      "source_commit": "b5514371f"
+    },
+    {
+      "path": "vendor/bpf/native-helpers.h",
+      "sha256": "5a7c6c823c5e20a326aa0033adcd4cfaee146cd704cfb7690e81f4eae6dd18ef",
+      "source_commit": "b5514371f"
+    },
+    {
+      "path": "kprog/results/core-header-route-20261128/check_app_sources.py",
+      "sha256": "24b0cc678b8911e6c0cfd6b980157df23672e37e2cf4d1eb61f1747600773ba4",
+      "source_commit": "b5514371f"
+    }
+  ],
+  "cause": "Clang typeof-qualified BPF_CORE_READ intermediates have desugaredQualType, but scanner used only qualType; valid target fields misclassified as absent. Constant pointer qualifiers also need removal before BTF lookup.",
+  "production_activated": false
+}

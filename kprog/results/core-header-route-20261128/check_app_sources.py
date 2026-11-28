@@ -12,7 +12,7 @@ def seal(p):
 NAME=sys.argv[1] if len(sys.argv)>1 else 'real-source'
 assert re.fullmatch(r'real-source(?:-[a-z0-9]+)*',NAME)
 D=OUT/NAME;D.mkdir(exist_ok=False)
-r=dict(pid=os.getpid(),started_utc=now(),status='running',scope='Readonly source-query/Clang-layout generation and diagnostic native IR for existing affected BCC/Tetragon units, both architectures. Flags read from unchanged producer Makefile; canonical P/stage/app/image/benchmark untouched.',inputs=[seal(p) for p in [V/'Makefile',V/'core-answers.py',V/'core-compat.h',V/'native_compat.h',V/'native-helpers.h',Path(__file__)]],cases=[])
+r=dict(pid=os.getpid(),started_utc=now(),status='running',scope='Readonly source-query/Clang-layout generation and diagnostic native IR for existing affected BCC/Tetragon units, both architectures. Flags read from unchanged producer Makefile; canonical P/stage/app/image/benchmark untouched.',inputs=[seal(p) for p in [V/'Makefile',V/'core-answers.py',V/'core-compat.h',V/'native_compat.h',V/'native-helpers.h',Path(__file__),OUT/'check_restored.py',OUT/'input/queries.c']],cases=[])
 def save():(OUT/(NAME+'-controller.json')).write_text(json.dumps(r,indent=2)+'\n')
 def run(args,stem,cwd=ROOT,env=None):
  with (D/(stem+'.stdout')).open('w') as stdout,(D/(stem+'.stderr')).open('w') as stderr:
@@ -49,6 +49,12 @@ try:
      for x in case['inputs']:assert seal(Path(x['path']))==x
     except Exception:case.update(status='failed',exception=traceback.format_exc())
     save()
+  # A real typeof-qualified intermediate guards the same shared type rule.
+  label=NAME+'-fixture'
+  r['focused_fixture']=run(['python3',str(OUT/'check_restored.py'),label],label,env=dict(os.environ,TMPDIR=str(D)))
+  focused=OUT/(label+'-controller.json')
+  assert json.loads(focused.read_text())['all_architectures_match']
+  r['focused_fixture_controller']=seal(focused)
   for x in r['inputs']:assert seal(Path(x['path']))==x
   r.update(status='complete',all_four_sources_compile=all(c['status']=='complete' for c in r['cases']))
 except Exception:r.update(status='failed',exception=traceback.format_exc())

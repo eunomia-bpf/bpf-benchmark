@@ -208,14 +208,16 @@ def _var_type(n: dict | None) -> str | None:
     """The declared type of the variable a field expression starts from."""
     while isinstance(n, dict):
         if n.get("kind") in ("CStyleCastExpr", "CallExpr"):
-            q = n.get("type", {}).get("qualType", "")
+            t = n.get("type", {})
+            q = t.get("desugaredQualType", t.get("qualType", ""))
             if "*" in q and ("struct " in q or "union " in q):
                 return q
         if n.get("kind") == "MemberExpr":
             n = (n.get("inner") or [None])[0]
             continue
         if n.get("kind") == "DeclRefExpr":
-            return (n.get("referencedDecl") or {}).get("type", {}).get("qualType")
+            t = n.get("type") or (n.get("referencedDecl") or {}).get("type", {})
+            return t.get("desugaredQualType", t.get("qualType"))
         inner = n.get("inner") or []
         n = inner[0] if inner and isinstance(inner[0], dict) else None
     return None
@@ -486,7 +488,8 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
         fp = None
         if ast_type and ast_type[0] and ast_type[1]:
             base, members = ast_type[:2]
-            base = re.sub(r"^(?:(?:const|volatile|struct|union|enum)\s+)+", "", base)
+            base = re.sub(r"\b(const|volatile|restrict)\b", "", base).strip()
+            base = re.sub(r"^(?:(?:struct|union|enum)\s+)+", "", base)
             base = re.sub(r"\s*(\*|\[.*\])+$", "", base.strip())
             fp = (split_flavor(base), members)
         if kind == "access_delta" and ast_type and not ast_type[1]:
