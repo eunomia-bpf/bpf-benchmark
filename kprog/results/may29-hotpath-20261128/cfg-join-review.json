@@ -1,0 +1,99 @@
+{
+  "pid": 1555792,
+  "ended_utc": "2026-11-28T16:19:25.530282+00:00",
+  "source": [
+    {
+      "path": "/workspaces/repository/kprog/x86/native_lab/native_link/src/x86.rs",
+      "bytes": 174467,
+      "sha256": "90ad4cd9488c24a5a6b2f95793247c5c80c211ca16fdab9dbd3a73b38d839684"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/may29-hotpath-20261128/validate_cfg_join.py",
+      "bytes": 4148,
+      "sha256": "04e0c9f47e775238dd110deda9ac7fd5301986e9d67390863ece9eb290a4ea82"
+    }
+  ],
+  "linker": {
+    "path": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "bytes": 2791768,
+    "sha256": "460e9cc747baa67b8d143affdbf38ad221df4ad87ec3444294e5ca1b73063c3b"
+  },
+  "tests": "16 passed; 0 failed",
+  "rows": [
+    {
+      "key": "45ba49203d276b52",
+      "entry": "generic_kprobe_event",
+      "before_bytes": 1320,
+      "after_bytes": 1338,
+      "generic_calls": [
+        2,
+        0
+      ],
+      "external_calls": [
+        7,
+        7
+      ],
+      "added_postprocess_instructions": 6,
+      "other_instructions_and_branch_targets_unchanged": true,
+      "changed_call_indices": [
+        3,
+        4
+      ],
+      "all_seven_calls_preserved": true,
+      "tail_index2_and_transfer_preserved": true
+    },
+    {
+      "key": "5be2ee6f95ee536b",
+      "entry": "generic_kprobe_event",
+      "before_bytes": 1320,
+      "after_bytes": 1338,
+      "generic_calls": [
+        2,
+        0
+      ],
+      "external_calls": [
+        7,
+        7
+      ],
+      "added_postprocess_instructions": 6,
+      "other_instructions_and_branch_targets_unchanged": true,
+      "changed_call_indices": [
+        3,
+        4
+      ],
+      "all_seven_calls_preserved": true,
+      "tail_index2_and_transfer_preserved": true
+    },
+    {
+      "key": "a751a5ae32d71696",
+      "entry": "generic_kprobe_process_filter",
+      "before_bytes": 12323,
+      "after_bytes": 12323,
+      "generic_calls": [
+        2,
+        2
+      ],
+      "external_calls": [
+        87,
+        87
+      ],
+      "byte_identical": true
+    },
+    {
+      "key": "e700f906b8500cb3",
+      "entry": "generic_kprobe_process_filter",
+      "before_bytes": 12323,
+      "after_bytes": 12323,
+      "generic_calls": [
+        2,
+        2
+      ],
+      "external_calls": [
+        87,
+        87
+      ],
+      "byte_identical": true
+    }
+  ],
+  "scope": "Offline real-input correctness review; no runtime image/guest/performance result. Historical May29 installed-byte and dynamic branch-hit gaps remain."
+}
