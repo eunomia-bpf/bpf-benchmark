@@ -1,0 +1,193 @@
+{
+  "utc": "2026-11-28T12:01:25Z",
+  "authorization": "COORDINATOR2026-11-27T12:19Z verified committed raw-duplicate cleanup",
+  "archive_commit": "aaba957ee9c80443ccc936d7ce22530de9b38466",
+  "archive_path": "kprog/results/tetragon-regression-20261128/retained-replay-records.tar.zst",
+  "archive_sha256": "5cfa87facd0888108fda7d2b22117aac38630bf7c08ff37e7f90942127ceb43c",
+  "archive_git_blob": "ef7533e67ab6cad28d8a5d2eb20c827c4c30e8d0",
+  "index_git_blob": "b3fb748464bbdb1245f8cf90bc5f1e3335c15370",
+  "verified_files": [
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay-controller.json",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay-controller.json",
+      "bytes": 2309013,
+      "sha256": "e52fba2549bd744d272fa5ddf6bbab146533aadb79b3d071205d1eddb6996001",
+      "allocated_bytes": 2310144,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay-job.log",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay-job.log",
+      "bytes": 449,
+      "sha256": "754c2379e65916d67acb9f028e0b24ac0dc85d3a43dda48b8ac1f58cb4f7c006",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.abi.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.abi.tsv",
+      "bytes": 1184,
+      "sha256": "818d6e300ee988b3e8b423f91f10f459259a3ec36c29da5d3c06abd8e97f5844",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.blob.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.blob.bin",
+      "bytes": 1320,
+      "sha256": "f7eda0a4784a8366d758b651cc0f4ec036ca3753b531e2efc72f665d3fdba467",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.log",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.log",
+      "bytes": 712,
+      "sha256": "baea0085957664ccf1a6eb2cf246737fa581271e3f985dad695c8f1abe0d26c4",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.map-patches.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.map-patches.tsv",
+      "bytes": 137,
+      "sha256": "78449c0b6d4d4c0326845a29b83db38e279c46bbcfeb8f6fdfc4797dfb428308",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.relocs.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/45ba49203d276b52.relocs.bin",
+      "bytes": 112,
+      "sha256": "c4690f5e7bae6a9f9663f67e1d1affb8517c239e92333445c7aee04e62f91668",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.abi.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.abi.tsv",
+      "bytes": 1184,
+      "sha256": "818d6e300ee988b3e8b423f91f10f459259a3ec36c29da5d3c06abd8e97f5844",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.blob.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.blob.bin",
+      "bytes": 1320,
+      "sha256": "f7eda0a4784a8366d758b651cc0f4ec036ca3753b531e2efc72f665d3fdba467",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.log",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.log",
+      "bytes": 712,
+      "sha256": "9af86c3e03f54982e7f58108354ee15e897977ad99c7e59b70398c6857ea9a63",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.map-patches.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.map-patches.tsv",
+      "bytes": 137,
+      "sha256": "78449c0b6d4d4c0326845a29b83db38e279c46bbcfeb8f6fdfc4797dfb428308",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.relocs.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/5be2ee6f95ee536b.relocs.bin",
+      "bytes": 112,
+      "sha256": "c4690f5e7bae6a9f9663f67e1d1affb8517c239e92333445c7aee04e62f91668",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.abi.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.abi.tsv",
+      "bytes": 8650,
+      "sha256": "9be043e735f413ebfe4b01c9baeb8ed3d03057cba2022a6b524499323b38565b",
+      "allocated_bytes": 12288,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.blob.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.blob.bin",
+      "bytes": 12323,
+      "sha256": "2fa4ff17d6545ccfcd166a7fc0253efffbb534c8245315a7bc3c1a2a535dfc07",
+      "allocated_bytes": 16384,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.log",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.log",
+      "bytes": 780,
+      "sha256": "4a23edf8c37bb42db37027709539be3eab78093b0678a6e9288149793d376fa4",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.map-patches.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.map-patches.tsv",
+      "bytes": 1202,
+      "sha256": "bcb36f68c5958bc694d8a991a753a479cc1c9f888a29793dde59ed6f019881bf",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.relocs.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/a751a5ae32d71696.relocs.bin",
+      "bytes": 1392,
+      "sha256": "529537cae125ded6546061476a3b27805500d8d2b3e768d6fdc733adb6d981b3",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.abi.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.abi.tsv",
+      "bytes": 8650,
+      "sha256": "9be043e735f413ebfe4b01c9baeb8ed3d03057cba2022a6b524499323b38565b",
+      "allocated_bytes": 12288,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.blob.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.blob.bin",
+      "bytes": 12323,
+      "sha256": "2fa4ff17d6545ccfcd166a7fc0253efffbb534c8245315a7bc3c1a2a535dfc07",
+      "allocated_bytes": 16384,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.log",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.log",
+      "bytes": 780,
+      "sha256": "4445f2bc786425d9edf81e75358f993305590b7ba74aa0a524d3530695856e77",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.map-patches.tsv",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.map-patches.tsv",
+      "bytes": 1202,
+      "sha256": "bcb36f68c5958bc694d8a991a753a479cc1c9f888a29793dde59ed6f019881bf",
+      "allocated_bytes": 4096,
+      "removed": true
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.relocs.bin",
+      "relative_path": "kprog/results/tetragon-regression-20261128/replay/e700f906b8500cb3.relocs.bin",
+      "bytes": 1392,
+      "sha256": "529537cae125ded6546061476a3b27805500d8d2b3e768d6fdc733adb6d981b3",
+      "allocated_bytes": 4096,
+      "removed": true
+    }
+  ],
+  "logical_bytes": 2365086,
+  "allocated_bytes_of_removed_copies": 2437120,
+  "prior_lane_allocated_duplicate_bytes": 4884164608,
+  "status": "complete",
+  "cumulative_lane_allocated_duplicate_bytes": 4886601728,
+  "archive_preserved": true
+}
