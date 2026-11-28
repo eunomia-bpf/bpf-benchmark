@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-28T08:31:56Z",
+  "sources_before": {
+    "kprog/x86/perf_context_lto.cpp": "9f3750399215f1626024694f7ead27d3e130c43f166a4cd7ea5f448d0008cefb",
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": "cbc907bf5622592456394212a8487f0c2261017e4f440b0a60f524ac30df5d63",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "8ed8b287f18be964921fabde04d2deef75d7dcea40e0993d5240f34927391548",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "fe37b5e916d31ca89204c2f96d816205d5fbc4d14b21e64a0fc5e9f84b6b27c4",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "4ed02ca4227964e8ce08ed504657aac13dcbc258b69385ee175b93311f564a3c",
+    "kprog/x86/native_lab/native_link/src/main.rs": "079f930e84aeeb096226c36eb02cfa1ef3badfb57de9c86ae692f5ed46b2ec6b"
+  },
+  "authority": "tools/freeze-check OPEN classes explicitly permit common LTO compiler, native-link, loader context-LTO/link-schema headers; trusted link-schema has existing live freeze-open row through2026-11-30. Frozen app header remains unchanged.",
+  "source_of_program_type": "CompanionLoad.prog_type from original loaded BPF prog_info, already consumed by contextual helper binding. Both schema builders can carry it in existing reserved native helper fact namespace and existing cache hash loops cover it.",
+  "design": "Translate only typed public xdp_md ingress_ifindex load rooted at selected entry ctx, via current BTF rxq/dev/ifindex. Physical byte-addressed pointer-bit reads and stack-local public structs remain independent negative controls. Carry actual kernel prog type to common frozen-IR pass, preserving existing architecture codegen flags and proof path. No app-name/entry-name selector or new user setting."
+}

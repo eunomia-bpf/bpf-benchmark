@@ -1,0 +1,12 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_local_copy.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <native_local_copy>:
+   0:	48 83 ec 04          	sub    $0x4,%rsp
+   4:	c7 04 24 33 00 00 00 	movl   $0x33,(%rsp)
+   b:	8b 04 24             	mov    (%rsp),%eax
+   e:	48 83 c4 04          	add    $0x4,%rsp
+  12:	c3                   	ret

@@ -1,0 +1,65 @@
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:8:9: warning: '__uint' macro redefined [-Wmacro-redefined]
+    8 | #define __uint(name, val) int(*(name))[val]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:16:9: note: previous definition is here
+   16 | #define __uint(name, val) int (*name)[val]
+      |         ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:9:9: warning: '__type' macro redefined [-Wmacro-redefined]
+    9 | #define __type(name, val) typeof(val) *(name)
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:19:9: note: previous definition is here
+   19 | #define __type(name, val) typeof(val) *name
+      |         ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:18:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../loader.h:10:9: warning: '__array' macro redefined [-Wmacro-redefined]
+   10 | #define __array(name, val) typeof(val) *(name)[]
+      |         ^
+/workspaces/repository/vendor/bpf/native_compat.h:22:9: note: previous definition is here
+   22 | #define __array(name, val) typeof(val) *name[]
+      |         ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:16:21: warning: function 'xdp_adjust_head' has internal linkage but is not defined [-Wundefined-internal]
+   16 | static int BPF_FUNC(xdp_adjust_head, struct xdp_md *xdp, int delta);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:343:8: note: used here
+  343 |         ret = xdp_adjust_head(ctx, -len_diff);
+      |               ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:17:21: warning: function 'xdp_adjust_tail' has internal linkage but is not defined [-Wundefined-internal]
+   17 | static int BPF_FUNC(xdp_adjust_tail, struct xdp_md *xdp, int delta);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:358:9: note: used here
+  358 |         return xdp_adjust_tail(ctx, len_diff);
+      |                ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:20:21: warning: function 'redirect' has internal linkage but is not defined [-Wundefined-internal]
+   20 | static int BPF_FUNC(redirect, int ifindex, __u32 flags);
+      |                     ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:437:9: note: used here
+  437 |         return redirect(ifindex, flags);
+      |                ^
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c:1:
+In file included from /workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/../ifindex_witness.c:1:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:15:
+In file included from /workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers_xdp.h:10:
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/../helpers.h:34:23: warning: function 'map_lookup_elem' has internal linkage but is not defined [-Wundefined-internal]
+   34 | static void *BPF_FUNC(map_lookup_elem, const void *map, const void *key);
+      |                       ^
+/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf/ctx/xdp.h:497:31: note: used here
+  497 |         __u32 zero = 0, *data_meta = map_lookup_elem(&cilium_xdp_scratch, &zero);
+      |                                      ^
+7 warnings generated.

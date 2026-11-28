@@ -1,0 +1,890 @@
+{
+  "pid": 1376593,
+  "started_utc": "2026-11-28T08:24:36Z",
+  "controller_status": 0,
+  "commands": [
+    {
+      "name": "x86-embed",
+      "args": [
+        "clang-18",
+        "-Xclang",
+        "-fembed-bitcode=all",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf",
+        "-c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-input.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ifindex-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-input.o",
+        "--symbol",
+        "native_ifindex",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ifindex.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ifindex-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=34",
+        "-DENTRY=native_ifindex",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ifindex.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ifindex.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ifindex-disassembly",
+      "args": [
+        "objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ifindex.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ingress-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-input.o",
+        "--symbol",
+        "native_ingress",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ingress.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ingress-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=34",
+        "-DENTRY=native_ingress",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ingress.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ingress.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_ingress-disassembly",
+      "args": [
+        "objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_ingress.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_physical_upper-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-input.o",
+        "--symbol",
+        "native_physical_upper",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_physical_upper.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_physical_upper-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=17",
+        "-DENTRY=native_physical_upper",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_physical_upper.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_physical_upper.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_physical_upper-disassembly",
+      "args": [
+        "objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_physical_upper.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_local_copy-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "--x86-cmov-converter-force-all",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-input.o",
+        "--symbol",
+        "native_local_copy",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_local_copy.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_local_copy-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=51",
+        "-DENTRY=native_local_copy",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "-march=native",
+        "-mno-red-zone",
+        "-mgeneral-regs-only",
+        "-mllvm",
+        "-x86-cmov-converter-force-all",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_local_copy.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_local_copy.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "x86-host-native_local_copy-disassembly",
+      "args": [
+        "objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/x86-host-native_local_copy.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-embed",
+      "args": [
+        "clang-18",
+        "-Xclang",
+        "-fembed-bitcode=all",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-include",
+        "/workspaces/repository/vendor/bpf/native_compat.h",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf/include/bpf",
+        "-I/workspaces/repository/vendor/bpf/cilium/bpf",
+        "-c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/accessors.c",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-input.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ifindex-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-input.o",
+        "--symbol",
+        "native_ifindex",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ifindex.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ifindex-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=34",
+        "-DENTRY=native_ifindex",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ifindex.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ifindex.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ifindex-disassembly",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ifindex.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ingress-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-input.o",
+        "--symbol",
+        "native_ingress",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ingress.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ingress-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=34",
+        "-DENTRY=native_ingress",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ingress.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ingress.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_ingress-disassembly",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_ingress.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_physical_upper-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-input.o",
+        "--symbol",
+        "native_physical_upper",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_physical_upper.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_physical_upper-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=17",
+        "-DENTRY=native_physical_upper",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_physical_upper.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_physical_upper.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_physical_upper-disassembly",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_physical_upper.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_local_copy-lto",
+      "args": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-input.o",
+        "--symbol",
+        "native_local_copy",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "--prog-type",
+        "6",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_local_copy.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_local_copy-driver",
+      "args": [
+        "clang-18",
+        "-DEXPECTED_VALUE=51",
+        "-DENTRY=native_local_copy",
+        "-O3",
+        "-g",
+        "-fPIC",
+        "-DMICRO_NATIVE",
+        "-fomit-frame-pointer",
+        "-fno-stack-protector",
+        "-fno-asynchronous-unwind-tables",
+        "-fno-unwind-tables",
+        "-fno-jump-tables",
+        "-fno-optimize-sibling-calls",
+        "-Wno-unknown-attributes",
+        "-mllvm",
+        "-switch-to-lookup=false",
+        "--target=aarch64-linux-gnu",
+        "-mtune=neoverse-n1",
+        "-mgeneral-regs-only",
+        "-mno-outline-atomics",
+        "-ffixed-x26",
+        "-static",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/driver.c",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_local_copy.o",
+        "-o",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_local_copy.elf"
+      ],
+      "returncode": 0
+    },
+    {
+      "name": "arm64-host-native_local_copy-disassembly",
+      "args": [
+        "aarch64-linux-gnu-objdump",
+        "-d",
+        "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/before-controls/arm64-host-native_local_copy.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "cases": [
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 1,
+      "values": {
+        "value": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 1,
+      "values": {
+        "value": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 1,
+      "values": {
+        "value": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 1,
+      "values": {
+        "value": 17,
+        "expected": 34
+      },
+      "regression_passed": false
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    }
+  ],
+  "compiler": {
+    "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+    "bytes": 63076320,
+    "sha256": "48d092f5d37cb4b461377e7aa8e43501de8848603422426a2c66fd59c05d83c8"
+  },
+  "header_sha256": "93bffd9691f1564c03d7b778ce57b20b80d4cecf3183e2c57ba23e97e9769911",
+  "btf": {
+    "x86": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+      "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+    },
+    "arm64": {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+      "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+    }
+  },
+  "regression_passed": false,
+  "scope": "Untouched actual-header embedded IR, canonical common compiler, actual canonical kernel BTF, actual host/ARM-user execution. No kernel/image/loader activation or frozen workload claim.",
+  "ended_utc": "2026-11-28T08:24:37Z",
+  "files": {
+    "x86-host-native_ifindex.o": {
+      "bytes": 4784,
+      "sha256": "d3d666587aafd6eaedfaab012738e6b7563f25d9f6eace96e10ba4e8c7b51e1a"
+    },
+    "arm64-embed.log": {
+      "bytes": 5650,
+      "sha256": "e5eafb79fc0f80fe5eb475cfe9b04b59bc8ab4f805f4cfb871cbbaac15007203"
+    },
+    "arm64-host-native_ifindex-stdout.txt": {
+      "bytes": 27,
+      "sha256": "54b010041036b0577722f2594944ef47a15a2338328ae5387ff4cf621e27b143"
+    },
+    "arm64-host-native_local_copy-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ingress.o": {
+      "bytes": 4792,
+      "sha256": "80d0ce918998a7ad12c58ecfe76373419d3bfc6a85e9cd46b7ed81c8e961b47a"
+    },
+    "arm64-host-native_local_copy-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_local_copy-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_physical_upper-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ingress-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_physical_upper.elf": {
+      "bytes": 644912,
+      "sha256": "f542cdbdaed3ffd8729e3dc0c90e50e32406eff9dbd329dfceb99fe848ac3b42"
+    },
+    "x86-host-native_ingress-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_physical_upper.o": {
+      "bytes": 5296,
+      "sha256": "3b4b4b1b73ba8e689f1df98752835061e41871a302ee805ccf31addf1f565d40"
+    },
+    "x86-host-native_physical_upper.o": {
+      "bytes": 4792,
+      "sha256": "1d117010e5e3ec780f0eb9d7a3feb215cae7228acd2a797e9ea079ab20ccc352"
+    },
+    "arm64-host-native_ifindex.o": {
+      "bytes": 5296,
+      "sha256": "99e67640332a0290aa5f24ab31579dce6ef8ba219213797e581a6dce0c03132a"
+    },
+    "arm64-host-native_physical_upper-disassembly.log": {
+      "bytes": 312,
+      "sha256": "f109b8cfaebfa8c8ccc104949e5fbe419dbdc9f651ea0550ef0b33bfd450c807"
+    },
+    "arm64-host-native_physical_upper-stdout.txt": {
+      "bytes": 27,
+      "sha256": "6712511697e69fe52f132aaf7cf67dd0777db62d9d3186379b326cd8d2bc0f5c"
+    },
+    "x86-host-native_physical_upper-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_local_copy-disassembly.log": {
+      "bytes": 458,
+      "sha256": "40021a1d0ee658c1e39f11c63f1826a1ab0549fe2d342da99efb461bdb02dc3f"
+    },
+    "arm64-host-native_local_copy-stdout.txt": {
+      "bytes": 27,
+      "sha256": "1cfa10545c17fe04ef46a44fb964ad3bce0597ee26e66502b649ad5fff5cf872"
+    },
+    "arm64-host-native_ingress-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-input.o": {
+      "bytes": 15440,
+      "sha256": "85a0bbe541020e7e9d74b995dcaafcff1d0502d8c9fae16a382822b1db483206"
+    },
+    "arm64-host-native_local_copy.o": {
+      "bytes": 5256,
+      "sha256": "a253b26e429e378d9ac569764b8e6b6cd6f434300c94397af4b93e39892e0c93"
+    },
+    "x86-host-native_physical_upper-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ingress-stdout.txt": {
+      "bytes": 27,
+      "sha256": "54b010041036b0577722f2594944ef47a15a2338328ae5387ff4cf621e27b143"
+    },
+    "x86-host-native_local_copy.o": {
+      "bytes": 4736,
+      "sha256": "cdb35c8057257ecd6db1f7ff97dbf355dba5734df9cb5548aed2eb4c3407e24a"
+    },
+    "arm64-host-native_local_copy-disassembly.log": {
+      "bytes": 461,
+      "sha256": "43cec48584cdd7599da7545400428e6579a4ff53bdab7f7da74e36c86521e684"
+    },
+    "arm64-host-native_ifindex.elf": {
+      "bytes": 644984,
+      "sha256": "c6ce161e8ad8d0641a0bee0db68286b908a39ea698caf4f89b5aa7e26170a9f5"
+    },
+    "arm64-host-native_local_copy.elf": {
+      "bytes": 644848,
+      "sha256": "455cb7b1189e58482db40d4c2e23e407a6c686112f9685bde15e465763baa4b3"
+    },
+    "x86-host-native_ifindex-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_local_copy-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ifindex.elf": {
+      "bytes": 797600,
+      "sha256": "577bddb972a603d50513858ba783888259c08603c7adcf2712f4a2869353e03e"
+    },
+    "x86-host-native_physical_upper-disassembly.log": {
+      "bytes": 331,
+      "sha256": "892887c4f28a71eef0ee552ffeb5dc7dff999b9a7ab6276611bbd63be7849ae1"
+    },
+    "x86-host-native_ingress-stdout.txt": {
+      "bytes": 27,
+      "sha256": "54b010041036b0577722f2594944ef47a15a2338328ae5387ff4cf621e27b143"
+    },
+    "arm64-host-native_ingress-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ifindex-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ingress-disassembly.log": {
+      "bytes": 298,
+      "sha256": "4cb93ec9c5be60ac4b0ea402b0d72a506f02337ff91ee5f0efed8c29cad5e891"
+    },
+    "x86-host-native_ifindex-disassembly.log": {
+      "bytes": 317,
+      "sha256": "9ce9311e233ed99745d8b7a14d4de2290f87b4b1c15979f444e0258d45b58831"
+    },
+    "x86-host-native_ifindex-stdout.txt": {
+      "bytes": 27,
+      "sha256": "54b010041036b0577722f2594944ef47a15a2338328ae5387ff4cf621e27b143"
+    },
+    "x86-host-native_ingress-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-embed.log": {
+      "bytes": 5650,
+      "sha256": "e5eafb79fc0f80fe5eb475cfe9b04b59bc8ab4f805f4cfb871cbbaac15007203"
+    },
+    "arm64-host-native_physical_upper-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_physical_upper-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_local_copy-stdout.txt": {
+      "bytes": 27,
+      "sha256": "1cfa10545c17fe04ef46a44fb964ad3bce0597ee26e66502b649ad5fff5cf872"
+    },
+    "x86-host-native_physical_upper.elf": {
+      "bytes": 797504,
+      "sha256": "2ad5079f329ddfa6150b6e9ac2d5b76778119d64d3991afc3379048b75d75f02"
+    },
+    "arm64-host-native_ifindex-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ifindex-disassembly.log": {
+      "bytes": 298,
+      "sha256": "b7db2dadf7cfe3e8d50a5eb097b0b18c07b03beab94d03319b81a10108b6589c"
+    },
+    "arm64-host-native_ifindex-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ingress-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_local_copy-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ingress.elf": {
+      "bytes": 797592,
+      "sha256": "c4e31e650631e4e8ae307b1c08081e1f6991bb849dfcd9dfa05d0a1b514d16a4"
+    },
+    "x86-host-native_local_copy-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_physical_upper-stdout.txt": {
+      "bytes": 27,
+      "sha256": "6712511697e69fe52f132aaf7cf67dd0777db62d9d3186379b326cd8d2bc0f5c"
+    },
+    "arm64-host-native_ifindex-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "x86-host-native_ingress-disassembly.log": {
+      "bytes": 317,
+      "sha256": "de0228b51bdc15c89782e1e8940768c6a1fe99e03c3eaccdf90da0fc6395c8b4"
+    },
+    "x86-host-native_local_copy.elf": {
+      "bytes": 797456,
+      "sha256": "df8b93e6ea6818d3203c11bf12d15a7ab174231a072bf7e0fbb6c839fdb7d79d"
+    },
+    "x86-host-native_ifindex-driver.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ingress.o": {
+      "bytes": 5304,
+      "sha256": "4a76d9a98988d9df8c55c684fe5703692d5fb19f75d1c757303dcf9be3866a04"
+    },
+    "arm64-host-native_physical_upper-lto.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "arm64-host-native_ingress.elf": {
+      "bytes": 644976,
+      "sha256": "84aa45f550430cbfcd70adfcacb470a4f0c7cafa0f8b82c6a8128a581d5acdc3"
+    },
+    "x86-input.o": {
+      "bytes": 19840,
+      "sha256": "a96734cc63f22790bf02e6fdaf0ca0bf38d4ca3520fd8f2966e6ce2575ca2140"
+    }
+  }
+}
