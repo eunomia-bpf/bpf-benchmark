@@ -1,0 +1,134 @@
+{
+  "pid": 1515381,
+  "started": "2026-11-28T14:34:56.619264+00:00",
+  "status": "complete",
+  "latest_resume": "COORDINATOR2026-11-28T14:21Z",
+  "cases": [
+    {
+      "arch": "x86",
+      "source": {
+        "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+        "size": 2419520,
+        "sha256": "8e9a95e69b663b96050c39f77c96e02c6b2f3bdbd1b38987d7b56039e09dba85"
+      },
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "size": 408901736,
+        "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+      },
+      "started": "2026-11-28T14:34:57.014758+00:00",
+      "returncode": 0,
+      "result": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/additional-originals/0000-x86-tracer.ebpf.amd64.json",
+        "size": 237,
+        "sha256": "06ce1cdae3fae454c88dbd01008952da142bbdb416cbef1a4f44a70f2d6fa64c"
+      },
+      "stderr": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/additional-originals/0000-x86-tracer.ebpf.amd64.stderr",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_unchanged": true,
+      "finished": "2026-11-28T14:34:57.030701+00:00",
+      "relocation_errors": 0,
+      "core_kind_counts": {},
+      "btf_ext_present": true
+    },
+    {
+      "arch": "arm64",
+      "source": {
+        "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+        "size": 2386696,
+        "sha256": "fe17ac5a0f0f59135de15e6f7b3313f83c8ec7fd50319e646d4bbc9b9c173f96"
+      },
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "size": 457575688,
+        "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+      },
+      "started": "2026-11-28T14:34:57.031148+00:00",
+      "returncode": 0,
+      "result": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/additional-originals/0001-arm64-tracer.ebpf.arm64.json",
+        "size": 239,
+        "sha256": "b939e512d83ae80921731a6c1cefc00fcfedc9ec9cf810f73acb1c445716c701"
+      },
+      "stderr": {
+        "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/additional-originals/0001-arm64-tracer.ebpf.arm64.stderr",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_unchanged": true,
+      "finished": "2026-11-28T14:34:57.046409+00:00",
+      "relocation_errors": 0,
+      "core_kind_counts": {},
+      "btf_ext_present": true
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/core-query",
+      "size": 415976,
+      "sha256": "ea80439eeb7fd89cca7fe9a66d47de73f6f793a6a47645d492f564a7ee21886d"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/core_query.cpp",
+      "size": 5216,
+      "sha256": "51d9edb8a614c03f3484b4c9419f01587bcacbd438c6242ec1697f6160b4964d"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/complete_original_sources.py",
+      "size": 4131,
+      "sha256": "aa3611a4fe94bd0618f445d4edac2e18818513452cf3dd8ae4307752fe5bf37d"
+    }
+  ],
+  "frozen_app_commit": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "inventory": [
+    {
+      "arch": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "size": 408901736,
+        "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+      },
+      "objects": [
+        {
+          "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+          "size": 2419520,
+          "sha256": "8e9a95e69b663b96050c39f77c96e02c6b2f3bdbd1b38987d7b56039e09dba85"
+        }
+      ],
+      "scope": "all retained arch-suffixed unit and linked EM_BPF outputs, including integration objects; not a live-loaded-program census"
+    },
+    {
+      "arch": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "size": 457575688,
+        "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+      },
+      "objects": [
+        {
+          "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+          "size": 2386696,
+          "sha256": "fe17ac5a0f0f59135de15e6f7b3313f83c8ec7fd50319e646d4bbc9b9c173f96"
+        }
+      ],
+      "scope": "all retained arch-suffixed unit and linked EM_BPF outputs, including integration objects; not a live-loaded-program census"
+    }
+  ],
+  "cilium_roots": [
+    "/workspaces/repository/vendor/repos/cilium/bpf",
+    "/workspaces/repository/vendor/build/x86/cilium",
+    "/workspaces/repository/vendor/build/arm64/cilium"
+  ],
+  "cilium_original_elf_paths": [],
+  "cilium_coverage": "No original EM_BPF ELF retained in these roots; no zero-relocation or complete Cilium coverage claim",
+  "inputs_unchanged": true,
+  "targets_unchanged": true,
+  "query_error_cases": 0,
+  "returncode": 0,
+  "finished": "2026-11-28T14:34:57.408336+00:00"
+}

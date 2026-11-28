@@ -1,0 +1,354 @@
+{
+  "collected": "2026-11-28T14:39:12.157886+00:00",
+  "same_launch_pid": 1515380,
+  "actual_process_pid": 1515381,
+  "status": 0,
+  "original_bpf_elfs": 2,
+  "source_target_tool_and_raw_hashes_reverified": true,
+  "both_linked_ELFs_have_BTF_ext_but_no_CORE": true,
+  "source_format_inventory": [
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/custom_trace.ebpf.amd64.o",
+        "size": 64436,
+        "sha256": "a0e44d3ad3738246a655ad92e43de50dc4e7bd6f8d45fbe71df67475c68325b5"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/custom_trace.ebpf.arm64.o",
+        "size": 62096,
+        "sha256": "21ca440f468d30283fd674f33ca1c97f9e074848f0061e22820dead543469343"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/dotnet_tracer.ebpf.amd64.o",
+        "size": 436580,
+        "sha256": "5da85f308d6077a4ae1b10bec70f23778783dca01dcd0ba10e83d95439402fc4"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/dotnet_tracer.ebpf.arm64.o",
+        "size": 436236,
+        "sha256": "c3979f410bc1f657014586f3efc970c93d86746d71f8fdca2d370f86709cc98d"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.amd64.o",
+        "size": 49484,
+        "sha256": "700856e8a553ca0d1cd3d5aac29f7c93ce93165928e4c2edce311dfc539f1096"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/go_labels.ebpf.arm64.o",
+        "size": 49324,
+        "sha256": "be3742b6d3c711ef9f829766e877d304eea971f729c1f6f561eb448ece346f8d"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/hotspot_tracer.ebpf.amd64.o",
+        "size": 313080,
+        "sha256": "be375da9db55492cefd762124b78b40e0f03688869640a38599b98c0db729816"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/hotspot_tracer.ebpf.arm64.o",
+        "size": 285820,
+        "sha256": "15ca91ccf5c9c6fddd0224f5a068cb961b6382092e59be2e120612463cc401ea"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/integration_test.ebpf.amd64.o",
+        "size": 52508,
+        "sha256": "5aa16cd18c35de7c66fe67662e5c71122d355fcc2522d440f1b0ad81e3147e89"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/integration_test.ebpf.arm64.o",
+        "size": 47784,
+        "sha256": "af39d134ed2317f0c4be5cda6eadabd2268f6601dd203d2b56e4c609b8d45bae"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/interpreter_dispatcher.ebpf.amd64.o",
+        "size": 91496,
+        "sha256": "5b4dd6ad5f9d4f4c1f3b15bc4d7a12482b0e6974aca9a24bf318126beb1fde6d"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/interpreter_dispatcher.ebpf.arm64.o",
+        "size": 90976,
+        "sha256": "fc291ca939a7c6ee5606b28c7568d1460eb0ac48e76d6da97c76e604cd1b68b5"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/native_stack_trace.ebpf.amd64.o",
+        "size": 357076,
+        "sha256": "5d5ee3a9e6d70f3cd204f221a786d904b14903aebb389d5b94a51e9b75cb19e1"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/native_stack_trace.ebpf.arm64.o",
+        "size": 363556,
+        "sha256": "4c6bdd7931d087480f93aa2fc9edde50a4139c8536322cb162dad59888143953"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/off_cpu.ebpf.amd64.o",
+        "size": 67516,
+        "sha256": "3a3d719254b161ae1cb6aab6ff4a93ab2117646d8737275eac983b79a328a122"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/off_cpu.ebpf.arm64.o",
+        "size": 64884,
+        "sha256": "4cc0dd0408cb9fec66418adfaa6dda48923e73db28fae996d9dd76890891d901"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/perl_tracer.ebpf.amd64.o",
+        "size": 287156,
+        "sha256": "81e5473908d556473c422422ede910588caf32940976c6118c3fd08d20e86ae6"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/perl_tracer.ebpf.arm64.o",
+        "size": 286984,
+        "sha256": "d4ea3fddb028d3cf8c06a9d7090d2941e55a5f70a832e63d528b8a6c8b2774be"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/php_tracer.ebpf.amd64.o",
+        "size": 278792,
+        "sha256": "959bf1b94a0aae99beb4c31186c5b7f3dd608a2d56f20dd398e23826aa25178b"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/php_tracer.ebpf.arm64.o",
+        "size": 277724,
+        "sha256": "90d21ca7389862863748f51b69975ff0177371c8d5a79f826d780b40c73fa8d6"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/python_tracer.ebpf.amd64.o",
+        "size": 205012,
+        "sha256": "5fb556b2dfce12f7b41a4d80da0390fae3837f721bc0e84b447df6d8dfae8947"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/python_tracer.ebpf.arm64.o",
+        "size": 204792,
+        "sha256": "826c9b23b6569f3ac6438b30d9d75ba98558897a759f9b5d3051fb2b7ffeef5f"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/ruby_tracer.ebpf.amd64.o",
+        "size": 235400,
+        "sha256": "fd40edad28ba325ccc328a98eb87fc66879be76f890de2ce2d106328b9dc7c79"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/ruby_tracer.ebpf.arm64.o",
+        "size": 235076,
+        "sha256": "194129a48543c72217fefd1a88d062ec1a5b155b24d503c786f1f01aa511f654"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/sched_monitor.ebpf.amd64.o",
+        "size": 26644,
+        "sha256": "040ac24a2e36afec2f420d235a23858dfcd7491912157b84adc8f4cbbd120502"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/sched_monitor.ebpf.arm64.o",
+        "size": 26536,
+        "sha256": "98447b88ff34de7d14075e1c16a7dafcf7cd384865a2bfc3d738370c62fa282c"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/system_config.ebpf.amd64.o",
+        "size": 8648,
+        "sha256": "20eb71e95cefd6388c26cd48eedabf3eec920a03f5f4869be8294856a7f580c6"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/system_config.ebpf.arm64.o",
+        "size": 8532,
+        "sha256": "b2d6e3f32df67cc8d43e5098ca4eeb505d54eda2ea817c1621d2eda432aef6a3"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64",
+        "size": 2419520,
+        "sha256": "8e9a95e69b663b96050c39f77c96e02c6b2f3bdbd1b38987d7b56039e09dba85"
+      },
+      "elf": true,
+      "machine": 247,
+      "queried": true
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.arm64",
+        "size": 2386696,
+        "sha256": "fe17ac5a0f0f59135de15e6f7b3313f83c8ec7fd50319e646d4bbc9b9c173f96"
+      },
+      "elf": true,
+      "machine": 247,
+      "queried": true
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/uprobe.ebpf.amd64.o",
+        "size": 63932,
+        "sha256": "1bf701bc9d3670cc61e3ee34960899653eeadf6f0d1933526f78f438f43008e0"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/uprobe.ebpf.arm64.o",
+        "size": 61508,
+        "sha256": "15c6c1a4b7a137f4fd0455b6b5d4e254093bf18844a1ddf7aebacd7cb899aa61"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/v8_tracer.ebpf.amd64.o",
+        "size": 344320,
+        "sha256": "bfeaa985315508829c14fa96690af7729764f21f46f52f0865c1991d92d27b26"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    },
+    {
+      "file": {
+        "path": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/v8_tracer.ebpf.arm64.o",
+        "size": 346088,
+        "sha256": "77fd8d56dbf84f3c4363d1907bad0fb714c4264237a263f4b495500183fba0e5"
+      },
+      "elf": false,
+      "machine": null,
+      "queried": false
+    }
+  ],
+  "cilium_gap": "No original EM_BPF ELF retained in these roots; no zero-relocation or complete Cilium coverage claim",
+  "scope": "all retained arch-suffixed source-directory outputs; EM_BPF only queried; non-BPF units not original BPF input",
+  "production_fix": false
+}
