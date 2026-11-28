@@ -1,0 +1,7 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.observers_outside
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.observers_outside
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.bound_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.bound_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.entry
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerVectorEntry.entry
