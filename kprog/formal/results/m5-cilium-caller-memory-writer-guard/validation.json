@@ -1,0 +1,135 @@
+{
+  "scope": "original memory writer ABI guard and arm0 SP branch selection on the same derived cache heap",
+  "source_sha256": "b2a6060c4da631cc3d482b432a12ece0049ca81e39e605b75856c3adb821225f",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-guard/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.9994449615478516,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterGuard"
+      ],
+      "exit": 0,
+      "seconds": 3.5218241214752197,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 4.6746439933776855,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-guard/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.8771939277648926,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 300,
+  "full_jobs": 1567,
+  "root_queries": [
+    "source",
+    "guard_source",
+    "branch_source",
+    "sp_source",
+    "resources",
+    "abi_value",
+    "execute",
+    "temp_frame",
+    "values",
+    "advance"
+  ],
+  "actual_memory_writer_prefix_commit": "f5ba4e2c4da01a828ff67b8d80feecec2dffaa79",
+  "source": "exact original ABI byte read/guard, complete original XDP and pointer alternatives, and original SP branch including addressing/data-store continuation retained",
+  "resources": "ABI1 is an explicit supplied-memory byte at actual allocated HeaderTailValues.block6; actual cache default3/5 have distinct names so their derived stores preserve this real load",
+  "execution": "nine actual internal steps read ABI1, compare tag4 with XDP tag1, set t209=0 and select arm0 SP branch; same complete heap, two temporary names updated",
+  "composition": "accepted actual store-tag26 + writer-prefix29 + guard9 =64 internal steps from original post-materialization Sskip to original SP-based writer preparation",
+  "provider_boundary": "supplied ABI1 byte and table-slot/tag-cell resources are explicit; no postmemory purity, provider existence or determinism inferred from access rights",
+  "open": "actual provider-outcome composition and SP/base/source/addressing/data stores, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-guard/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 3.3109512329101562,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "577cf7a1732cac00c678e6b8a98b2e7383eddf2dafa8d611600861a87a8160f9",
+    "source_lines": 179,
+    "log_bytes": 21280,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-guard/Proof.lean:135:96: error: Tactic `assumption` failed",
+      "results/m5-cilium-caller-memory-writer-guard/Proof.lean:135:96: error: Tactic `assumption` failed"
+    ],
+    "cause": "simp only left the original false-branch selector as if false = true then ...; no Bool.false_eq_true rewrite was supplied",
+    "repair": "add existing Bool.false_eq_true simplification only; same AST, memory, explicit ABI1 resource, 9/64 step counts and proof settings"
+  },
+  "proof_repair": "add Bool.false_eq_true to simplify false-branch selection; same source/heap/ABI1 resource/9-64counts/default settings"
+}

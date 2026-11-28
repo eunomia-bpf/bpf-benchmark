@@ -1,0 +1,27 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-guard/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 3.3109512329101562,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "577cf7a1732cac00c678e6b8a98b2e7383eddf2dafa8d611600861a87a8160f9",
+  "source_lines": 179,
+  "log_bytes": 21280,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-guard/Proof.lean:135:96: error: Tactic `assumption` failed",
+    "results/m5-cilium-caller-memory-writer-guard/Proof.lean:135:96: error: Tactic `assumption` failed"
+  ],
+  "cause": "simp only left the original false-branch selector as if false = true then ...; no Bool.false_eq_true rewrite was supplied",
+  "repair": "add existing Bool.false_eq_true simplification only; same AST, memory, explicit ABI1 resource, 9/64 step counts and proof settings"
+}
