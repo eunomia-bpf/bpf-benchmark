@@ -1,0 +1,646 @@
+{
+  "inspection_pid": 1444133,
+  "scope": "Decode existing same-image archived03:56 candidate entry objects/plans/blobs, NOT installed long-run bytes or old11-23 code. No compiler,guest,newP,image,root,app or benchmark change.",
+  "inspection_record": {
+    "path": "/workspaces/kprog-raw/perf/tetragon-regression-20261128/current-code-records.json",
+    "sha256": "12507093456de30e98c21f31e36263920ddbbcab5f1aae4794f594f31cb7acdf",
+    "bytes": 186680
+  },
+  "additional_join": "Read exactly4new fields from the existing archive: two reloc tables, initial kernel kallsyms and late module/BPF snapshot; no mem2reg/proof/blob inspection rerun or new guest.",
+  "additional_origins": [
+    {
+      "member": "tetragon__observer/kallsyms-bpf-272.08.txt",
+      "bytes": 219387,
+      "sha256": "4e91a7788061b83892d5bdc7e8305e370e09c345b534a44eb454d8eb9a6fd04a"
+    },
+    {
+      "member": "tetragon__observer/kallsyms.txt",
+      "bytes": 9270454,
+      "sha256": "216153e289fca5870ae937578085882c66048736c10c64418dd7b2b4a28759a3"
+    },
+    {
+      "member": "tetragon__observer/linkcache/native_kernel_link_cache/14c39eec84e8b216.relocs.bin",
+      "bytes": 112,
+      "sha256": "a01130b8391b17258edc0a0e423449bb29db896405a7faba774f2df46e85b825"
+    },
+    {
+      "member": "tetragon__observer/linkcache/native_kernel_link_cache/90f202a84992a835.relocs.bin",
+      "bytes": 112,
+      "sha256": "a01130b8391b17258edc0a0e423449bb29db896405a7faba774f2df46e85b825"
+    }
+  ],
+  "records": [
+    {
+      "cache_key": "14c39eec84e8b216",
+      "blob_bytes": 1355,
+      "blob_sha256": "34c212ca21ad07fd25ec83c26ee7b5b69c6d4b9ca5686a205e75352153b4617b",
+      "const_values": [
+        {
+          "name": "CONFIG_ITER_NUM",
+          "hex": "01"
+        },
+        {
+          "name": "PARENTS_MAP_ENABLED",
+          "hex": "00"
+        }
+      ],
+      "lookup_sites": [
+        {
+          "index": 0,
+          "kind": "percpu_array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 8,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 18446744072202420264,
+          "map_name": "process_call_he",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "kind": "array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 736,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 0,
+          "map_name": "config_map",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "kind": "hash_of_maps",
+          "target_addr": 18446744072641467008,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "policy_filter_m",
+          "target_hex": "0xffffffffc0565280",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "kind": "array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 48,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 0,
+          "map_name": "tg_conf_map",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "tg_cgtracker_ma",
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "kind": "hash_of_maps",
+          "target_addr": 18446744072641467008,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "policy_filter_m",
+          "target_hex": "0xffffffffc0565280",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        }
+      ],
+      "actual_sideband_calls": [
+        {
+          "offset": 176,
+          "offset_hex": "0xb0",
+          "kind": 1,
+          "target": "0xffffffffc0565280",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 270,
+          "offset_hex": "0x10e",
+          "kind": 1,
+          "target": "0xffffffffa34ba3b0",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_get_current_cgroup_id",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 309,
+          "offset_hex": "0x135",
+          "kind": 1,
+          "target": "0xffffffffc0565610",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 548,
+          "offset_hex": "0x224",
+          "kind": 1,
+          "target": "0xffffffffa34b8a20",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 1265,
+          "offset_hex": "0x4f1",
+          "kind": 1,
+          "target": "0xffffffffa34b8a20",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 1298,
+          "offset_hex": "0x512",
+          "kind": 1,
+          "target": "0xffffffffc0565280",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 1328,
+          "offset_hex": "0x530",
+          "kind": 1,
+          "target": "0xffffffffc0565610",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        }
+      ],
+      "map_literal_patch_sites": "process_call_heap\t20\nconfig_map\t99\npolicy_filter_maps\t163\ntg_conf_map\t215\ntg_cgtracker_map\t296\nkprobe_calls\t1129\npolicy_filter_maps\t1285\n",
+      "task_inline_blocks": [
+        {
+          "start": "0x16e",
+          "end": "0x181"
+        },
+        {
+          "start": "0x296",
+          "end": "0x2a9"
+        }
+      ],
+      "tail_call_block": {
+        "start": "0x479",
+        "end": "0x4d2",
+        "index": 2,
+        "target_bpf_func_offset": 72,
+        "target_entry_offset": 12
+      },
+      "scope": "Canonical blob plus target call relocs/plan; final bound map pointers and long-run installed bytes are not inferred from0 placeholders or length."
+    },
+    {
+      "cache_key": "90f202a84992a835",
+      "blob_bytes": 1355,
+      "blob_sha256": "34c212ca21ad07fd25ec83c26ee7b5b69c6d4b9ca5686a205e75352153b4617b",
+      "const_values": [
+        {
+          "name": "CONFIG_ITER_NUM",
+          "hex": "01"
+        },
+        {
+          "name": "PARENTS_MAP_ENABLED",
+          "hex": "00"
+        }
+      ],
+      "lookup_sites": [
+        {
+          "index": 0,
+          "kind": "percpu_array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 8,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 18446744072202420264,
+          "map_name": "process_call_he",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "kind": "array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 736,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 0,
+          "map_name": "config_map",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "kind": "hash_of_maps",
+          "target_addr": 18446744072641467008,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "policy_filter_m",
+          "target_hex": "0xffffffffc0565280",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "kind": "array",
+          "target_addr": 18446744072154221088,
+          "key_offset": 0,
+          "max_entries": 1,
+          "elem_size": 48,
+          "index_mask": 0,
+          "value_offset": 304,
+          "percpu_base_addr": 0,
+          "map_name": "tg_conf_map",
+          "target_hex": "0xffffffffa34b8a20",
+          "target_symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "tg_cgtracker_ma",
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "kind": "hash_of_maps",
+          "target_addr": 18446744072641467008,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "map_name": "policy_filter_m",
+          "target_hex": "0xffffffffc0565280",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "kind": "hash",
+          "target_addr": 18446744072641467920,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 0,
+          "percpu_base_addr": 0,
+          "target_hex": "0xffffffffc0565610",
+          "target_symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        }
+      ],
+      "actual_sideband_calls": [
+        {
+          "offset": 176,
+          "offset_hex": "0xb0",
+          "kind": 1,
+          "target": "0xffffffffc0565280",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 270,
+          "offset_hex": "0x10e",
+          "kind": 1,
+          "target": "0xffffffffa34ba3b0",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_get_current_cgroup_id",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 309,
+          "offset_hex": "0x135",
+          "kind": 1,
+          "target": "0xffffffffc0565610",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 548,
+          "offset_hex": "0x224",
+          "kind": 1,
+          "target": "0xffffffffa34b8a20",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 1265,
+          "offset_hex": "0x4f1",
+          "kind": 1,
+          "target": "0xffffffffa34b8a20",
+          "symbols": [
+            {
+              "type": "T",
+              "name": "bpf_map_lookup_elem",
+              "module": null
+            }
+          ]
+        },
+        {
+          "offset": 1298,
+          "offset_hex": "0x512",
+          "kind": 1,
+          "target": "0xffffffffc0565280",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k4",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        },
+        {
+          "offset": 1328,
+          "offset_hex": "0x530",
+          "kind": 1,
+          "target": "0xffffffffc0565610",
+          "symbols": [
+            {
+              "type": "t",
+              "name": "kprog_htab_elem_k8",
+              "module": "[bpf_x86_native_lab]"
+            }
+          ]
+        }
+      ],
+      "map_literal_patch_sites": "process_call_heap\t20\nconfig_map\t99\npolicy_filter_maps\t163\ntg_conf_map\t215\ntg_cgtracker_map\t296\nkprobe_calls\t1129\npolicy_filter_maps\t1285\n",
+      "task_inline_blocks": [
+        {
+          "start": "0x16e",
+          "end": "0x181"
+        },
+        {
+          "start": "0x296",
+          "end": "0x2a9"
+        }
+      ],
+      "tail_call_block": {
+        "start": "0x479",
+        "end": "0x4d2",
+        "index": 2,
+        "target_bpf_func_offset": 72,
+        "target_entry_offset": 12
+      },
+      "scope": "Canonical blob plus target call relocs/plan; final bound map pointers and long-run installed bytes are not inferred from0 placeholders or length."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "pid": 1444133,
+  "started_utc": "2026-11-28T11:39:26Z",
+  "controller_status": 0,
+  "phase": "complete",
+  "scope": "Decode existing same-image archived03:56 candidate entry objects/plans/blobs, NOT installed long-run bytes or old11-23 code. No compiler,guest,newP,image,root,app or benchmark change.",
+  "archive_manifest": {
+    "path": "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/collection-controller.json",
+    "sha256": "91b61f031162cc6c456cd4f7a6254ab0a0f14640be4d559c57df60edca8a0109"
+  },
+  "parts": [
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/evidence.tar.zst.part-aa",
+      "bytes": 48000000,
+      "sha256": "5d1f1388dc7cdd9577767c9eba0ef5d9677ac508c59b8cb72a769f180ddf7658"
+    },
+    {
+      "path": "kprog/results/native-ebpf-alignment-20261128/check-20261128T034810Z/evidence.tar.zst.part-ab",
+      "bytes": 37642915,
+      "sha256": "627393ff866a6a6a42e42023c65ab3b64ec08930e66e9934e64856d6f7cdf579"
+    }
+  ],
+  "verified_archive_members": 14,
+  "records": "/workspaces/kprog-raw/perf/tetragon-regression-20261128/current-code-records.json",
+  "records_sha256": "12507093456de30e98c21f31e36263920ddbbcab5f1aae4794f594f31cb7acdf",
+  "records_bytes": 186680,
+  "ended_utc": "2026-11-28T11:39:27Z"
+}

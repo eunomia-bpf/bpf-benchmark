@@ -1,0 +1,22 @@
+{
+  "archive": "current-code-records.tar.zst",
+  "bytes": 10897,
+  "sha256": "64772edb576736f489e65978879f64dbbf89e0837a56c71fd461da2b46b18940",
+  "members": [
+    {
+      "member": "current-code-records.json",
+      "original_path": "/workspaces/kprog-raw/perf/tetragon-regression-20261128/current-code-records.json",
+      "bytes": 186680,
+      "sha256": "12507093456de30e98c21f31e36263920ddbbcab5f1aae4794f594f31cb7acdf"
+    },
+    {
+      "member": "current-code-job.log",
+      "original_path": "/workspaces/kprog-raw/perf/tetragon-regression-20261128/current-code-job.log",
+      "bytes": 1196,
+      "sha256": "a5cee7f87255afae34474ef2afdddb52ae758b52563b5b8bd5ac8927b8ce07a3"
+    }
+  ],
+  "logical_bytes": 187876,
+  "original_captures_preserved": true,
+  "scope": "Only original completed1444133 raw records/log archived. Tracked controller/launch remain canonical metadata; no duplicate analysis copies created or deleted. Source check archive parts/native/old profile originals remain."
+}

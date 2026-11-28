@@ -1,0 +1,215 @@
+{
+  "scope": "Static target-name comparison; does not establish same called function bytes, frequency, map binding or equal work.",
+  "old_profile": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile",
+  "old_profile_image": "sha256:68655f5c6c0d3238e35914f01a54b0165c36af7ca3c2960b99ce0ffa4f9f839f",
+  "old_profile_source": "c3c019be288b03013ebcda1ad4a0d8b5ac128178",
+  "old_symbol_origins": [
+    {
+      "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/kallsyms.txt",
+      "bytes": 9270454,
+      "sha256": "33eb74ff3651429f278545885ccc3a0d91ed713a96c12c891e5ea1068f4953a6"
+    },
+    {
+      "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/kallsyms-bpf-411.78.txt",
+      "bytes": 219521,
+      "sha256": "a15449a8e8b763554c74a1b1c8aa175d4a17ab1f7ed3ae8ae2a2948f970fa98c"
+    }
+  ],
+  "current_record": {
+    "path": "kprog/results/tetragon-regression-20261128/current-review.json",
+    "bytes": 18084,
+    "sha256": "5913496110d0c7d101848645e86b1ccf575fd151f5ca5d82b3533b3c3f30ca81"
+  },
+  "old_records": [
+    {
+      "cache_key": "45ba49203d276b52",
+      "inputs": [
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/45ba49203d276b52.relocs.bin",
+          "bytes": 112,
+          "sha256": "18f202a850e54cd3642b73d76f3497b31c819011c017345ec90ec3e72e7fc238"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/45ba49203d276b52.blob.bin",
+          "bytes": 1413,
+          "sha256": "027cd0d2cacfe584e838d2dc64317f67af00c904ef2a2922321ac7dea8e84784"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/45ba49203d276b52.proof.o",
+          "bytes": 33536,
+          "sha256": "c40ed5d42901298e7b532890007b06e35ab4abfd95bb36510fbd84868c146843"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/45ba49203d276b52.tmp.3045.3053.link-plan.json",
+          "bytes": 35960,
+          "sha256": "0fd81545df5e1e6b7a07796a8ed2356504e52afb99a5c826beaf9661c252a01d"
+        }
+      ],
+      "calls": [
+        {
+          "offset": 176,
+          "target": "0xffffffffc0361280",
+          "symbols": [
+            "kprog_htab_elem_k4"
+          ]
+        },
+        {
+          "offset": 278,
+          "target": "0xffffffff904ba3b0",
+          "symbols": [
+            "bpf_get_current_cgroup_id"
+          ]
+        },
+        {
+          "offset": 317,
+          "target": "0xffffffffc0361610",
+          "symbols": [
+            "kprog_htab_elem_k8"
+          ]
+        },
+        {
+          "offset": 559,
+          "target": "0xffffffff904b8a20",
+          "symbols": [
+            "bpf_map_lookup_elem"
+          ]
+        },
+        {
+          "offset": 1311,
+          "target": "0xffffffff904b8a20",
+          "symbols": [
+            "bpf_map_lookup_elem"
+          ]
+        },
+        {
+          "offset": 1348,
+          "target": "0xffffffffc0361280",
+          "symbols": [
+            "kprog_htab_elem_k4"
+          ]
+        },
+        {
+          "offset": 1382,
+          "target": "0xffffffffc0361610",
+          "symbols": [
+            "kprog_htab_elem_k8"
+          ]
+        }
+      ],
+      "const_values": [
+        {
+          "name": "CONFIG_ITER_NUM",
+          "hex": "01"
+        },
+        {
+          "name": "PARENTS_MAP_ENABLED",
+          "hex": "00"
+        }
+      ],
+      "same_target_name_sequence_as_current": true,
+      "scope": "11-26 retained canonical link output, not a direct capture of11-23 installed bytes."
+    },
+    {
+      "cache_key": "5be2ee6f95ee536b",
+      "inputs": [
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/5be2ee6f95ee536b.relocs.bin",
+          "bytes": 112,
+          "sha256": "18f202a850e54cd3642b73d76f3497b31c819011c017345ec90ec3e72e7fc238"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/5be2ee6f95ee536b.blob.bin",
+          "bytes": 1413,
+          "sha256": "027cd0d2cacfe584e838d2dc64317f67af00c904ef2a2922321ac7dea8e84784"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/5be2ee6f95ee536b.proof.o",
+          "bytes": 33536,
+          "sha256": "c40ed5d42901298e7b532890007b06e35ab4abfd95bb36510fbd84868c146843"
+        },
+        {
+          "path": "kprog/results/cmov-branches-20261126/post-branch-profiles-20261126T145836Z/tetragon-profile/linkcache/native_kernel_link_cache/5be2ee6f95ee536b.tmp.3045.3052.link-plan.json",
+          "bytes": 35721,
+          "sha256": "c38d8cebb71ba63d1e9ab04c0739e8e15d6289f6c84020894bb05ec4bf68f7be"
+        }
+      ],
+      "calls": [
+        {
+          "offset": 176,
+          "target": "0xffffffffc0361280",
+          "symbols": [
+            "kprog_htab_elem_k4"
+          ]
+        },
+        {
+          "offset": 278,
+          "target": "0xffffffff904ba3b0",
+          "symbols": [
+            "bpf_get_current_cgroup_id"
+          ]
+        },
+        {
+          "offset": 317,
+          "target": "0xffffffffc0361610",
+          "symbols": [
+            "kprog_htab_elem_k8"
+          ]
+        },
+        {
+          "offset": 559,
+          "target": "0xffffffff904b8a20",
+          "symbols": [
+            "bpf_map_lookup_elem"
+          ]
+        },
+        {
+          "offset": 1311,
+          "target": "0xffffffff904b8a20",
+          "symbols": [
+            "bpf_map_lookup_elem"
+          ]
+        },
+        {
+          "offset": 1348,
+          "target": "0xffffffffc0361280",
+          "symbols": [
+            "kprog_htab_elem_k4"
+          ]
+        },
+        {
+          "offset": 1382,
+          "target": "0xffffffffc0361610",
+          "symbols": [
+            "kprog_htab_elem_k8"
+          ]
+        }
+      ],
+      "const_values": [
+        {
+          "name": "CONFIG_ITER_NUM",
+          "hex": "01"
+        },
+        {
+          "name": "PARENTS_MAP_ENABLED",
+          "hex": "00"
+        }
+      ],
+      "same_target_name_sequence_as_current": true,
+      "scope": "11-26 retained canonical link output, not a direct capture of11-23 installed bytes."
+    }
+  ],
+  "current_target_names": [
+    "kprog_htab_elem_k4",
+    "bpf_get_current_cgroup_id",
+    "kprog_htab_elem_k8",
+    "bpf_map_lookup_elem",
+    "bpf_map_lookup_elem",
+    "kprog_htab_elem_k4",
+    "kprog_htab_elem_k8"
+  ],
+  "interpretation": [
+    "Both11-26 and current candidate root entries have7external calls:2k4shared-C,2k8shared-C,2generic bpf_map_lookup_elem and1bpf_get_current_cgroup_id. No added root hash-call site is established.",
+    "Both have CONFIG_ITER_NUM1/PARENTS_MAP_ENABLED0. These two scalars do not prove all old/live map values or attach configuration.",
+    "The new remapping of direct branches is being replayed separately against exact old proof/plan inputs; no causal result from that pending replay is claimed here."
+  ]
+}

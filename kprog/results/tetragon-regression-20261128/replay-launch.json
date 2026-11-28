@@ -1,0 +1,15 @@
+{
+  "pid": 1447799,
+  "launch_recorded_utc": "2026-11-28T11:51:25Z",
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "recipe": "kprog/results/tetragon-regression-20261128/replay_retained.py",
+  "recipe_sha256": "8df89d32a44e1b1e324374bb16f4df5f7ec3f312925b85dc582dfa78eff97caa",
+  "controller": "kprog/results/tetragon-regression-20261128/replay-controller.json",
+  "log": "kprog/results/tetragon-regression-20261128/replay-job.log",
+  "outputs": "kprog/results/tetragon-regression-20261128/replay",
+  "cpu": 16,
+  "address_space_bytes": 51539607552,
+  "compiler_jobs": 0,
+  "command": "setsid nohup taskset -c16 python3 replay_retained.py; stdin/dev/null",
+  "scope": "ONE detached offline current-linker replay of4retained11-26inputs. No source build, historical linker export, app/flag selection, guest, image or timing. Collect SAME1447799 nextturn; no status0/causal acceptance claim in this publication."
+}
