@@ -1,0 +1,68 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/arm64/stage/"
+aarch64-linux-gnu-g++ $(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include "/workspaces/repository/kprog/x86/perf_context_lto.cpp" -o "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto" \
+	/workspaces/repository/.cache/qemu-arm64-root/usr/lib/llvm-18/lib/libLLVM.so.1 /workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu/libbpf.so.1 -Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/lib/aarch64-linux-gnu -lpthread -ldl -lz
+/workspaces/repository/kprog/x86/perf_context_lto.cpp: In function ‘llvm::Expected<llvm::Function*> importLpmLookup(llvm::Module&, llvm::Function&, btf*, uint64_t, unsigned int)’:
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: warning: redundant move in return statement [-Wredundant-move]
+   82 |   if (auto E = importC(M, Entry, Prefix, Code.str())) return std::move(E);
+      |                                                              ~~~~~~~~~^~~
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: note: remove ‘std::move’ call
+make: Leaving directory '/workspaces/repository/vendor/bpf'
+   Compiling utf8parse v0.2.2
+   Compiling serde_core v1.0.228
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle-parse v1.0.0
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling crc32fast v1.5.0
+   Compiling zmij v1.0.21
+   Compiling anstream v1.0.0
+   Compiling clap_lex v1.1.0
+   Compiling cfg-if v1.0.4
+   Compiling equivalent v1.0.2
+   Compiling hashbrown v0.17.1
+   Compiling foldhash v0.1.5
+   Compiling memchr v2.8.0
+   Compiling strsim v0.11.1
+   Compiling object v0.36.7
+   Compiling serde_json v1.0.150
+   Compiling clap_builder v4.6.0
+   Compiling serde v1.0.228
+   Compiling anyhow v1.0.102
+   Compiling hashbrown v0.15.5
+   Compiling indexmap v2.14.0
+   Compiling lazy_static v1.5.0
+   Compiling itoa v1.0.18
+   Compiling iced-x86 v1.21.0
+   Compiling clap v4.6.1
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: function `indirect_sites` is never used
+   --> src/x86_readonly_relocs.rs:209:15
+    |
+209 | pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    |               ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+
+warning: fields `target_offset` and `table_offset` are never read
+   --> src/x86_readonly_relocs.rs:335:43
+    |
+335 |     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    |     ------------ fields in this variant   ^^^^^^^^^^^^^       ^^^^^^^^^^^^
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+warning: `native-link` (bin "native-link") generated 4 warnings
+    Finished `release` profile [optimized] target(s) in 30.11s

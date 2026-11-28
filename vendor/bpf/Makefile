@@ -491,13 +491,23 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_$(BPF_ARCH).h native_com
 
 # The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.
 PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
+# The tool executes in the destination runtime; use that same base's LLVM18 on arm64.
+PERF_CONTEXT_CXX := clang++-18
+PERF_CONTEXT_LIBS = $$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native aarch64 object linker --system-libs) \
+	$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+ifeq ($(BPF_ARCH),arm64)
+PERF_CONTEXT_CXX := aarch64-linux-gnu-g++
+PERF_CONTEXT_LIBS := $(ROOT)/.cache/qemu-arm64-root/usr/lib/llvm-18/lib/libLLVM.so.1 \
+	$(ROOT)/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu/libbpf.so.1 \
+	-Wl,-rpath-link,$(ROOT)/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu \
+	-Wl,-rpath-link,$(ROOT)/.cache/qemu-arm64-root/lib/aarch64-linux-gnu -lpthread -ldl -lz
+endif
 $(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp \
-		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp $(ROOT)/vendor/bpf/native-lpm.h
+		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp $(ROOT)/vendor/bpf/native-lpm.h Makefile
 	install -d "$(dir $@)"
-	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	$(PERF_CONTEXT_CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
-		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native aarch64 object linker --system-libs) \
-		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+		$(PERF_CONTEXT_LIBS)
 
 
 # All P objects use the common flags above, including after a flag-only change.
