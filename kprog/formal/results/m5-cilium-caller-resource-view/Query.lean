@@ -1,0 +1,9 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.source_readback
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.source_readback
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.sp_lr_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.sp_lr_readbacks
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.default_values
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.default_values
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.base_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView.base_readbacks

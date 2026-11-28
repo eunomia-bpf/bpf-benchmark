@@ -1,0 +1,114 @@
+{
+  "scope": "actual caller SP/LR and numeric base/validity postconditions transported to allocation-independent borrowed readers",
+  "source_sha256": "1415384c0f8d41e6b4e6b770215fccae460f8e4d36a4f4fa1d647153c0a5c12c",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage2": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-resource-view/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.026116132736206,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView"
+      ],
+      "exit": 0,
+      "seconds": 2.301654815673828,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 3.9167377948760986,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-resource-view/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.411078929901123,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    },
+    "stage1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-resource-view/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 1.9696650505065918,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "none; coordinator 2026-11-28T05:43Z formal CPU17 exemption during x86 rotate"
+    }
+  },
+  "focused_jobs": 262,
+  "full_jobs": 1540,
+  "root_queries": [
+    "source_readback",
+    "sp_lr_readbacks",
+    "default_values",
+    "base_readbacks"
+  ],
+  "actual_scalar_view_commit": "c3dc5ccb1611782c81f8399433dba59936ea0646",
+  "binding": "actual Sources and retained local resources agree by SAME Env lookup uniqueness, including arbitrary local type annotation",
+  "sp_lr": "actual EntryScalars SPzero and LRLocal LRzero feed borrowed scalar reads",
+  "defaults": "actual numeric_sp/numeric_return defaults2/3 and validity defaults4/5 map to header fields2/3/6/7, remain zero after XDP/helper updates6/7/8",
+  "native_whole_state_proved_here": false,
+  "old_allocator_or_reader_success_oracle_used": false,
+  "stage1_diagnostic": "finite enumeration left terminal True; stage2 adds trivial for that goal, unchanged statement/source/caps",
+  "resource_assignment": "- COORDINATOR 2026-11-28T05:43Z: operator 05:40Z \"x86 \u91cd\u65b0\u6027\u80fd\u6d4b\u8bd5\u4e5f\u53ef\u4ee5? ...\": the coordinator started one x86 frozen-entry rotate (defaults, six apps, stats off then on) on the current image, kprog/results/x86-rotate-20261128/chain.sh; it holds the timing lock exclusive, the image lock shared and the batch lock for about six hours. Rebuild no x86 image and run no x86 timing until it ends; arm64 work on CPUs 16-19 and formal's builds outside the timing lock continue.",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z"
+}

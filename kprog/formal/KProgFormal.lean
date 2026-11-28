@@ -458,3 +458,4 @@ import KProgFormal.ClightRefinement.Arm64CiliumCallerVectorPointerLoopEntry
 import KProgFormal.ClightRefinement.Arm64CiliumCallerVectorView
 import KProgFormal.ClightRefinement.Arm64CiliumCallerGPRView
 import KProgFormal.ClightRefinement.Arm64CiliumCallerScalarView
+import KProgFormal.ClightRefinement.Arm64CiliumCallerResourceView
