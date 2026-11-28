@@ -1,0 +1,1156 @@
+{
+  "decoder_pid": 1456924,
+  "archive_pid": 1462073,
+  "source_record": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/analysis/controller.json",
+  "archive_files": 1395,
+  "archive_logical_bytes": 337733095,
+  "parts": [
+    {
+      "path": "kprog/results/bcc-stats-alignment-20261128/paired-profile/archive/evidence.tar.zst.part-aa",
+      "bytes": 48000000,
+      "sha256": "b9a6919e1e977bb46c07a447dde92b40f1589ae886cd08d9d9d1dcfd220ee8d0"
+    },
+    {
+      "path": "kprog/results/bcc-stats-alignment-20261128/paired-profile/archive/evidence.tar.zst.part-ab",
+      "bytes": 9600048,
+      "sha256": "6e720b787acb80efd3567ca29cd7f2630b9ef34d8cbe664cd38c30ca60262dda"
+    }
+  ],
+  "cases": [
+    {
+      "stats": 0,
+      "perf_exit": "143",
+      "report_returncode": 0,
+      "input": {
+        "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/analysis/stats0-pmu-normalized.json",
+        "sha256": "727afd52ad07d4c532b73a5f6eaee884391fffc68757f0650269ab2e01bfdd7a"
+      },
+      "phases": {
+        "baseline": {
+          "own_qemu": 1455056,
+          "duration": 10.016379999999998,
+          "own_sample_span": 10.015695571899414,
+          "sample_span_fraction": 0.9999316691159297,
+          "samples": 66980,
+          "observed_bogo_ops": 6626115,
+          "throughput": 662591.73,
+          "periods_per_observed_bogo": {
+            "all": 14597.124131712171,
+            "bpf_bodies": 316.41677000776474,
+            "htab_next_key": 1980.0264845991958,
+            "clocksource": 1092.5961129560835,
+            "scheduler_names": 92.0222401814638,
+            "ninep": 3.505682138025072
+          },
+          "top_symbols": [
+            {
+              "name": "htab_map_get_next_key",
+              "samples": 7186,
+              "period_sum": 13119883190,
+              "periods_per_second": 1309842796.4993343,
+              "nominal_rate_window_normalized_periods": 1976.8474872140864,
+              "periods_per_observed_total_bogo_op": 1980.0264845991958
+            },
+            {
+              "name": "[guest-user]",
+              "samples": 10822,
+              "period_sum": 9279893239,
+              "periods_per_second": 926471763.1519573,
+              "nominal_rate_window_normalized_periods": 1398.2543415565378,
+              "periods_per_observed_total_bogo_op": 1400.5028948335487
+            },
+            {
+              "name": "pvclock_clocksource_read_nowd",
+              "samples": 4469,
+              "period_sum": 7239667493,
+              "periods_per_second": 722782831.0227848,
+              "nominal_rate_window_normalized_periods": 1090.841914104157,
+              "periods_per_observed_total_bogo_op": 1092.5961129560835
+            },
+            {
+              "name": "entry_SYSCALL_64",
+              "samples": 1417,
+              "period_sum": 2438671716,
+              "periods_per_second": 243468370.40926966,
+              "nominal_rate_window_normalized_periods": 367.4485499679715,
+              "periods_per_observed_total_bogo_op": 368.03944936059816
+            },
+            {
+              "name": "clear_bhb_loop",
+              "samples": 1314,
+              "period_sum": 2268832779,
+              "periods_per_second": 226512250.83313537,
+              "nominal_rate_window_normalized_periods": 341.85795049560215,
+              "periods_per_observed_total_bogo_op": 342.40769727057256
+            },
+            {
+              "name": "htab_map_update_elem",
+              "samples": 1301,
+              "period_sum": 2228735702,
+              "periods_per_second": 222509100.29371893,
+              "nominal_rate_window_normalized_periods": 335.81629564516135,
+              "periods_per_observed_total_bogo_op": 336.35632674651737
+            },
+            {
+              "name": "trace_syscall_exit",
+              "samples": 1135,
+              "period_sum": 1951454499,
+              "periods_per_second": 194826324.3806645,
+              "nominal_rate_window_normalized_periods": 294.0367583227526,
+              "periods_per_observed_total_bogo_op": 294.50960313849066
+            },
+            {
+              "name": "_raw_spin_lock",
+              "samples": 1301,
+              "period_sum": 1944745362,
+              "periods_per_second": 194156507.84015787,
+              "nominal_rate_window_normalized_periods": 293.0258544581561,
+              "periods_per_observed_total_bogo_op": 293.49707362459
+            },
+            {
+              "name": "trace_syscall_enter",
+              "samples": 1027,
+              "period_sum": 1766563611,
+              "periods_per_second": 176367471.1822036,
+              "nominal_rate_window_normalized_periods": 266.17819570763976,
+              "periods_per_observed_total_bogo_op": 266.6062407609889
+            },
+            {
+              "name": "bpf_prog_9a38fb8da7b8b8f7_sys_exit",
+              "samples": 950,
+              "period_sum": 1634880747,
+              "periods_per_second": 163220719.16201267,
+              "nominal_rate_window_normalized_periods": 246.33678896356383,
+              "periods_per_observed_total_bogo_op": 246.7329267602509
+            },
+            {
+              "name": "__raw_callee_save___pv_queued_spin_unlock",
+              "samples": 1020,
+              "period_sum": 1463272422,
+              "periods_per_second": 146087950.1376745,
+              "nominal_rate_window_normalized_periods": 220.47958572871792,
+              "periods_per_observed_total_bogo_op": 220.83414217833527
+            },
+            {
+              "name": "do_syscall_64",
+              "samples": 666,
+              "period_sum": 1131011125,
+              "periods_per_second": 112916155.83673944,
+              "nominal_rate_window_normalized_periods": 170.41588466058798,
+              "periods_per_observed_total_bogo_op": 170.6899329395883
+            },
+            {
+              "name": "lookup_nulls_elem_raw",
+              "samples": 721,
+              "period_sum": 1096881632,
+              "periods_per_second": 109508787.80557449,
+              "nominal_rate_window_normalized_periods": 165.2733996628278,
+              "periods_per_observed_total_bogo_op": 165.53917823641757
+            },
+            {
+              "name": "asm_sysvec_irq_work",
+              "samples": 598,
+              "period_sum": 1047418388,
+              "periods_per_second": 104570552.23543838,
+              "nominal_rate_window_normalized_periods": 157.82049111213382,
+              "periods_per_observed_total_bogo_op": 158.07428455437312
+            },
+            {
+              "name": "trace_call_bpf",
+              "samples": 586,
+              "period_sum": 1001064013,
+              "periods_per_second": 99942695.16531922,
+              "nominal_rate_window_normalized_periods": 150.83601355139044,
+              "periods_per_observed_total_bogo_op": 151.078575153012
+            }
+          ]
+        },
+        "post_rejit": {
+          "own_qemu": 1455056,
+          "duration": 13.021792000000005,
+          "own_sample_span": 13.021281719207764,
+          "sample_span_fraction": 0.9999608133202986,
+          "samples": 66113,
+          "observed_bogo_ops": 5408315,
+          "throughput": 540806.8800000001,
+          "periods_per_observed_bogo": {
+            "all": 14782.797624583627,
+            "bpf_bodies": 307.3094350088706,
+            "htab_next_key": 2029.416443199037,
+            "clocksource": 1005.9818355624626,
+            "scheduler_names": 65.16651045658398,
+            "ninep": 12.077466086942051
+          },
+          "top_symbols": [
+            {
+              "name": "htab_map_get_next_key",
+              "samples": 6748,
+              "period_sum": 10975723391,
+              "periods_per_second": 842873499.361685,
+              "nominal_rate_window_normalized_periods": 1558.5480335636353,
+              "periods_per_observed_total_bogo_op": 2029.416443199037
+            },
+            {
+              "name": "[guest-user]",
+              "samples": 8752,
+              "period_sum": 8930000162,
+              "periods_per_second": 685773521.9545817,
+              "nominal_rate_window_normalized_periods": 1268.0562088163183,
+              "periods_per_observed_total_bogo_op": 1651.1612511475385
+            },
+            {
+              "name": "pvclock_clocksource_read_nowd",
+              "samples": 3997,
+              "period_sum": 5440666651,
+              "periods_per_second": 417812437.1054305,
+              "nominal_rate_window_normalized_periods": 772.5723406207968,
+              "periods_per_observed_total_bogo_op": 1005.9818355624626
+            },
+            {
+              "name": "entry_SYSCALL_64",
+              "samples": 1447,
+              "period_sum": 2202210251,
+              "periods_per_second": 169117295.91441786,
+              "nominal_rate_window_normalized_periods": 312.7129150324749,
+              "periods_per_observed_total_bogo_op": 407.18971639040996
+            },
+            {
+              "name": "clear_bhb_loop",
+              "samples": 1238,
+              "period_sum": 1874709018,
+              "periods_per_second": 143967052.92174834,
+              "nominal_rate_window_normalized_periods": 266.207879829022,
+              "periods_per_observed_total_bogo_op": 346.63458359951295
+            },
+            {
+              "name": "htab_map_update_elem",
+              "samples": 1263,
+              "period_sum": 1851810461,
+              "periods_per_second": 142208573.21327198,
+              "nominal_rate_window_normalized_periods": 262.9562945154691,
+              "periods_per_observed_total_bogo_op": 342.4006295861095
+            },
+            {
+              "name": "trace_syscall_enter",
+              "samples": 1149,
+              "period_sum": 1765041519,
+              "periods_per_second": 135545209.06185564,
+              "nominal_rate_window_normalized_periods": 250.63514181227802,
+              "periods_per_observed_total_bogo_op": 326.3570111947991
+            },
+            {
+              "name": "trace_syscall_exit",
+              "samples": 1071,
+              "period_sum": 1615940053,
+              "periods_per_second": 124095059.49718744,
+              "nominal_rate_window_normalized_periods": 229.46279732459655,
+              "periods_per_observed_total_bogo_op": 298.7880796514256
+            },
+            {
+              "name": "kprog_htab_elem_k4",
+              "samples": 1056,
+              "period_sum": 1448268284,
+              "periods_per_second": 111218815.65916577,
+              "nominal_rate_window_normalized_periods": 205.65347774267542,
+              "periods_per_observed_total_bogo_op": 267.78549030520594
+            },
+            {
+              "name": "bpf_prog_59f4a931744dcdc6_sys_exit",
+              "samples": 880,
+              "period_sum": 1326680399,
+              "periods_per_second": 101881553.55269071,
+              "nominal_rate_window_normalized_periods": 188.38805000537474,
+              "periods_per_observed_total_bogo_op": 245.3038328943488
+            },
+            {
+              "name": "_raw_spin_lock",
+              "samples": 1152,
+              "period_sum": 1310371747,
+              "periods_per_second": 100629141.2886951,
+              "nominal_rate_window_normalized_periods": 186.07222838713716,
+              "periods_per_observed_total_bogo_op": 242.28835543048066
+            },
+            {
+              "name": "__raw_callee_save___pv_queued_spin_unlock",
+              "samples": 1106,
+              "period_sum": 1147809064,
+              "periods_per_second": 88145246.36854893,
+              "nominal_rate_window_normalized_periods": 162.98839683501978,
+              "periods_per_observed_total_bogo_op": 212.23043850071602
+            },
+            {
+              "name": "native_apic_msr_write",
+              "samples": 686,
+              "period_sum": 1064591248,
+              "periods_per_second": 81754588.61576039,
+              "nominal_rate_window_normalized_periods": 151.17150250706936,
+              "periods_per_observed_total_bogo_op": 196.84342498541596
+            },
+            {
+              "name": "do_syscall_64",
+              "samples": 638,
+              "period_sum": 948537095,
+              "periods_per_second": 72842285.8389997,
+              "nominal_rate_window_normalized_periods": 134.69186235019734,
+              "periods_per_observed_total_bogo_op": 175.38495723714317
+            },
+            {
+              "name": "asm_sysvec_irq_work",
+              "samples": 598,
+              "period_sum": 930375399,
+              "periods_per_second": 71447570.27297008,
+              "nominal_rate_window_normalized_periods": 132.11290927543317,
+              "periods_per_observed_total_bogo_op": 172.02685106174474
+            }
+          ]
+        }
+      }
+    },
+    {
+      "stats": 1,
+      "perf_exit": "143",
+      "report_returncode": 0,
+      "input": {
+        "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/analysis/stats1-pmu-normalized.json",
+        "sha256": "c4d3597d69b169f1ebc32ab2e83628f882b86216a13496383bbd1c1d1f632722"
+      },
+      "phases": {
+        "baseline": {
+          "own_qemu": 1455627,
+          "duration": 10.188931999999994,
+          "own_sample_span": 10.188492059707642,
+          "sample_span_fraction": 0.9999568217461504,
+          "samples": 59618,
+          "observed_bogo_ops": 4241207,
+          "throughput": 424099.33999999997,
+          "periods_per_observed_bogo": {
+            "all": 19563.39777733084,
+            "bpf_bodies": 365.23019083954165,
+            "htab_next_key": 2817.5943093558035,
+            "clocksource": 3326.543242996628,
+            "scheduler_names": 74.37793840291219,
+            "ninep": 8.774952271841483
+          },
+          "top_symbols": [
+            {
+              "name": "pvclock_clocksource_read_nowd",
+              "samples": 9257,
+              "period_sum": 14108558488,
+              "periods_per_second": 1384694537.9555,
+              "nominal_rate_window_normalized_periods": 3265.024034122524,
+              "periods_per_observed_total_bogo_op": 3326.543242996628
+            },
+            {
+              "name": "htab_map_get_next_key",
+              "samples": 7144,
+              "period_sum": 11950000708,
+              "periods_per_second": 1172841344.7061975,
+              "nominal_rate_window_normalized_periods": 2765.4873141424778,
+              "periods_per_observed_total_bogo_op": 2817.5943093558035
+            },
+            {
+              "name": "[guest-user]",
+              "samples": 7717,
+              "period_sum": 8046336647,
+              "periods_per_second": 789713450.5363275,
+              "nominal_rate_window_normalized_periods": 1862.0954480531084,
+              "periods_per_observed_total_bogo_op": 1897.1808372003536
+            },
+            {
+              "name": "entry_SYSCALL_64",
+              "samples": 1180,
+              "period_sum": 1819305382,
+              "periods_per_second": 178557024.6224041,
+              "nominal_rate_window_normalized_periods": 421.0264147602873,
+              "periods_per_observed_total_bogo_op": 428.95934624270876
+            },
+            {
+              "name": "clear_bhb_loop",
+              "samples": 1075,
+              "period_sum": 1659080501,
+              "periods_per_second": 162831639.37103525,
+              "nominal_rate_window_normalized_periods": 383.94692944119,
+              "periods_per_observed_total_bogo_op": 391.1812135083244
+            },
+            {
+              "name": "htab_map_update_elem",
+              "samples": 1043,
+              "period_sum": 1577571348,
+              "periods_per_second": 154831865.40061322,
+              "nominal_rate_window_normalized_periods": 365.0839574534901,
+              "periods_per_observed_total_bogo_op": 371.9628275630027
+            },
+            {
+              "name": "trace_syscall_enter",
+              "samples": 871,
+              "period_sum": 1348201392,
+              "periods_per_second": 132320187.43475771,
+              "nominal_rate_window_normalized_periods": 312.0028138566726,
+              "periods_per_observed_total_bogo_op": 317.88153513846413
+            },
+            {
+              "name": "trace_syscall_exit",
+              "samples": 809,
+              "period_sum": 1248062168,
+              "periods_per_second": 122491951.85520923,
+              "nominal_rate_window_normalized_periods": 288.82844254180924,
+              "periods_per_observed_total_bogo_op": 294.2705149736856
+            },
+            {
+              "name": "trace_call_bpf",
+              "samples": 772,
+              "period_sum": 1173084969,
+              "periods_per_second": 115133261.17006186,
+              "nominal_rate_window_normalized_periods": 271.47710526986873,
+              "periods_per_observed_total_bogo_op": 276.5922457922945
+            },
+            {
+              "name": "_raw_spin_lock",
+              "samples": 908,
+              "period_sum": 1162404525,
+              "periods_per_second": 114085021.37417354,
+              "nominal_rate_window_normalized_periods": 269.0054206973619,
+              "periods_per_observed_total_bogo_op": 274.07399002218
+            },
+            {
+              "name": "bpf_prog_9a38fb8da7b8b8f7_sys_exit",
+              "samples": 739,
+              "period_sum": 1133621718,
+              "periods_per_second": 111260112.24728957,
+              "nominal_rate_window_normalized_periods": 262.3444597845627,
+              "periods_per_observed_total_bogo_op": 267.28752404681023
+            },
+            {
+              "name": "__raw_callee_save___pv_queued_spin_unlock",
+              "samples": 798,
+              "period_sum": 951459183,
+              "periods_per_second": 93381640.29360493,
+              "nominal_rate_window_normalized_periods": 220.18812925670886,
+              "periods_per_observed_total_bogo_op": 224.33688876774937
+            },
+            {
+              "name": "asm_sysvec_irq_work",
+              "samples": 552,
+              "period_sum": 883351063,
+              "periods_per_second": 86697120.26736468,
+              "nominal_rate_window_normalized_periods": 204.4264446800711,
+              "periods_per_observed_total_bogo_op": 208.27822433566672
+            },
+            {
+              "name": "lookup_nulls_elem_raw",
+              "samples": 598,
+              "period_sum": 835956883,
+              "periods_per_second": 82045584.65990356,
+              "nominal_rate_window_normalized_periods": 193.45841155966798,
+              "periods_per_observed_total_bogo_op": 197.10353279149072
+            },
+            {
+              "name": "do_syscall_64",
+              "samples": 531,
+              "period_sum": 812906832,
+              "periods_per_second": 79783320.96043044,
+              "nominal_rate_window_normalized_periods": 188.12413374760368,
+              "periods_per_observed_total_bogo_op": 191.6687471278813
+            }
+          ]
+        },
+        "post_rejit": {
+          "own_qemu": 1455627,
+          "duration": 10.124222000000003,
+          "own_sample_span": 10.122333288192749,
+          "sample_span_fraction": 0.9998134462275468,
+          "samples": 63438,
+          "observed_bogo_ops": 5110783,
+          "throughput": 511042.41,
+          "periods_per_observed_bogo": {
+            "all": 18734.68908951916,
+            "bpf_bodies": 320.29250586456124,
+            "htab_next_key": 2610.9298475399955,
+            "clocksource": 3318.4685395564634,
+            "scheduler_names": 93.92295016243108,
+            "ninep": 10.998960433264335
+          },
+          "top_symbols": [
+            {
+              "name": "pvclock_clocksource_read_nowd",
+              "samples": 10298,
+              "period_sum": 16959972598,
+              "periods_per_second": 1675187742.623581,
+              "nominal_rate_window_normalized_periods": 3277.9818462103385,
+              "periods_per_observed_total_bogo_op": 3318.4685395564634
+            },
+            {
+              "name": "htab_map_get_next_key",
+              "samples": 7426,
+              "period_sum": 13343895879,
+              "periods_per_second": 1318016918.1394873,
+              "nominal_rate_window_normalized_periods": 2579.075419864835,
+              "periods_per_observed_total_bogo_op": 2610.9298475399955
+            },
+            {
+              "name": "[guest-user]",
+              "samples": 6742,
+              "period_sum": 8237077572,
+              "periods_per_second": 813601042.3319439,
+              "nominal_rate_window_normalized_periods": 1592.0421209894182,
+              "periods_per_observed_total_bogo_op": 1611.705598144159
+            },
+            {
+              "name": "entry_SYSCALL_64",
+              "samples": 1280,
+              "period_sum": 2160874961,
+              "periods_per_second": 213436149.56289968,
+              "nominal_rate_window_normalized_periods": 417.648604864124,
+              "periods_per_observed_total_bogo_op": 422.8070260466938
+            },
+            {
+              "name": "htab_map_update_elem",
+              "samples": 1155,
+              "period_sum": 1905580026,
+              "periods_per_second": 188219897.390634,
+              "nominal_rate_window_normalized_periods": 368.30582688946305,
+              "periods_per_observed_total_bogo_op": 372.8548103098879
+            },
+            {
+              "name": "kprog_htab_elem_k4",
+              "samples": 1146,
+              "period_sum": 1816178465,
+              "periods_per_second": 179389435.0598001,
+              "nominal_rate_window_normalized_periods": 351.02651276985034,
+              "periods_per_observed_total_bogo_op": 355.36207759163324
+            },
+            {
+              "name": "clear_bhb_loop",
+              "samples": 1063,
+              "period_sum": 1779564220,
+              "periods_per_second": 175772935.44136027,
+              "nominal_rate_window_normalized_periods": 343.94980142912266,
+              "periods_per_observed_total_bogo_op": 348.1979610560652
+            },
+            {
+              "name": "_raw_spin_lock",
+              "samples": 1036,
+              "period_sum": 1516487887,
+              "periods_per_second": 149788091.0750475,
+              "nominal_rate_window_normalized_periods": 293.1030539618962,
+              "periods_per_observed_total_bogo_op": 296.7232001436962
+            },
+            {
+              "name": "trace_syscall_exit",
+              "samples": 875,
+              "period_sum": 1467977286,
+              "periods_per_second": 144996552.42644814,
+              "nominal_rate_window_normalized_periods": 283.72704415363125,
+              "periods_per_observed_total_bogo_op": 287.2313862670358
+            },
+            {
+              "name": "trace_syscall_enter",
+              "samples": 856,
+              "period_sum": 1449754035,
+              "periods_per_second": 143196586.85872352,
+              "nominal_rate_window_normalized_periods": 280.20489896078004,
+              "periods_per_observed_total_bogo_op": 283.66573869405136
+            },
+            {
+              "name": "trace_call_bpf",
+              "samples": 759,
+              "period_sum": 1275855431,
+              "periods_per_second": 126020096.26023605,
+              "nominal_rate_window_normalized_periods": 246.59420391398837,
+              "periods_per_observed_total_bogo_op": 249.63991447103115
+            },
+            {
+              "name": "bpf_prog_59f4a931744dcdc6_sys_exit",
+              "samples": 747,
+              "period_sum": 1269699255,
+              "periods_per_second": 125412032.15417437,
+              "nominal_rate_window_normalized_periods": 245.4043533376699,
+              "periods_per_observed_total_bogo_op": 248.43536792698887
+            },
+            {
+              "name": "__raw_callee_save___pv_queued_spin_unlock",
+              "samples": 825,
+              "period_sum": 1128762704,
+              "periods_per_second": 111491303.13420624,
+              "nominal_rate_window_normalized_periods": 218.16448293245608,
+              "periods_per_observed_total_bogo_op": 220.85905506064336
+            },
+            {
+              "name": "asm_sysvec_irq_work",
+              "samples": 543,
+              "period_sum": 936988919,
+              "periods_per_second": 92549226.89368129,
+              "nominal_rate_window_normalized_periods": 181.09891680747452,
+              "periods_per_observed_total_bogo_op": 183.33568828885907
+            },
+            {
+              "name": "do_syscall_64",
+              "samples": 538,
+              "period_sum": 901588746,
+              "periods_per_second": 89052644.83532658,
+              "nominal_rate_window_normalized_periods": 174.2568583208712,
+              "periods_per_observed_total_bogo_op": 176.40912282912421
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "source_anchors": [
+    {
+      "path": "vendor/linux-framework/include/linux/filter.h",
+      "sha256": "c854908814c2145d2a9626dfde62945041235f2d41be0e27b8cf9d2150a8e440",
+      "lines": [
+        {
+          "line": 700,
+          "text": "static __always_inline u32 __bpf_prog_run(const struct bpf_prog *prog,"
+        },
+        {
+          "line": 701,
+          "text": "\t\t\t\t\t  const void *ctx,"
+        },
+        {
+          "line": 702,
+          "text": "\t\t\t\t\t  bpf_dispatcher_fn dfunc)"
+        },
+        {
+          "line": 703,
+          "text": "{"
+        },
+        {
+          "line": 704,
+          "text": "\tu32 ret;"
+        },
+        {
+          "line": 705,
+          "text": ""
+        },
+        {
+          "line": 706,
+          "text": "\tcant_migrate();"
+        },
+        {
+          "line": 707,
+          "text": "\tif (static_branch_unlikely(&bpf_stats_enabled_key)) {"
+        },
+        {
+          "line": 708,
+          "text": "\t\tstruct bpf_prog_stats *stats;"
+        },
+        {
+          "line": 709,
+          "text": "\t\tu64 duration, start = sched_clock();"
+        },
+        {
+          "line": 710,
+          "text": "\t\tunsigned long flags;"
+        },
+        {
+          "line": 711,
+          "text": ""
+        },
+        {
+          "line": 712,
+          "text": "\t\tret = dfunc(ctx, prog->insnsi, prog->bpf_func);"
+        },
+        {
+          "line": 713,
+          "text": ""
+        },
+        {
+          "line": 714,
+          "text": "\t\tduration = sched_clock() - start;"
+        },
+        {
+          "line": 715,
+          "text": "\t\tif (likely(prog->stats)) {"
+        },
+        {
+          "line": 716,
+          "text": "\t\t\tstats = this_cpu_ptr(prog->stats);"
+        },
+        {
+          "line": 717,
+          "text": "\t\t\tflags = u64_stats_update_begin_irqsave(&stats->syncp);"
+        },
+        {
+          "line": 718,
+          "text": "\t\t\tu64_stats_inc(&stats->cnt);"
+        },
+        {
+          "line": 719,
+          "text": "\t\t\tu64_stats_add(&stats->nsecs, duration);"
+        },
+        {
+          "line": 720,
+          "text": "\t\t\tu64_stats_update_end_irqrestore(&stats->syncp, flags);"
+        },
+        {
+          "line": 721,
+          "text": "\t\t}"
+        },
+        {
+          "line": 722,
+          "text": "\t} else {"
+        },
+        {
+          "line": 723,
+          "text": "\t\tret = dfunc(ctx, prog->insnsi, prog->bpf_func);"
+        },
+        {
+          "line": 724,
+          "text": "\t}"
+        },
+        {
+          "line": 725,
+          "text": "\treturn ret;"
+        }
+      ]
+    },
+    {
+      "path": "vendor/repos/bcc/libbpf-tools/syscount.c",
+      "sha256": "c65c0b9f852017d6848dfc24a49e9b3a26f07ae18bf8d044e09977d6434e1bcd",
+      "lines": [
+        {
+          "line": 194,
+          "text": "static bool read_vals_batch(int fd, struct data_ext_t *vals, __u32 *count)"
+        },
+        {
+          "line": 195,
+          "text": "{"
+        },
+        {
+          "line": 196,
+          "text": "\tstruct data_t orig_vals[*count];"
+        },
+        {
+          "line": 197,
+          "text": "\tvoid *in = NULL, *out;"
+        },
+        {
+          "line": 198,
+          "text": "\t__u32 i, n, n_read = 0;"
+        },
+        {
+          "line": 199,
+          "text": "\t__u32 keys[*count];"
+        },
+        {
+          "line": 200,
+          "text": "\tint err = 0;"
+        },
+        {
+          "line": 201,
+          "text": ""
+        },
+        {
+          "line": 202,
+          "text": "\twhile (n_read < *count && !err) {"
+        },
+        {
+          "line": 203,
+          "text": "\t\tn = *count - n_read;"
+        },
+        {
+          "line": 204,
+          "text": "\t\terr = bpf_map_lookup_and_delete_batch(fd, &in, &out,"
+        },
+        {
+          "line": 205,
+          "text": "\t\t\t\tkeys + n_read, orig_vals + n_read, &n, NULL);"
+        },
+        {
+          "line": 206,
+          "text": "\t\tif (err && errno != ENOENT) {"
+        },
+        {
+          "line": 207,
+          "text": "\t\t\t/* we want to propagate EINVAL upper, so that"
+        },
+        {
+          "line": 208,
+          "text": "\t\t\t * the batch_map_ops flag is set to false */"
+        },
+        {
+          "line": 209,
+          "text": "\t\t\tif (errno != EINVAL)"
+        },
+        {
+          "line": 210,
+          "text": "\t\t\t\twarn(\"bpf_map_lookup_and_delete_batch: %s\\n\","
+        }
+      ]
+    },
+    {
+      "path": "vendor/repos/bcc/libbpf-tools/syscount.c",
+      "sha256": "c65c0b9f852017d6848dfc24a49e9b3a26f07ae18bf8d044e09977d6434e1bcd",
+      "lines": [
+        {
+          "line": 231,
+          "text": "\t__u32 keys[MAX_ENTRIES];"
+        },
+        {
+          "line": 232,
+          "text": "\tstruct data_t val;"
+        },
+        {
+          "line": 233,
+          "text": "\t__u32 key = -1;"
+        },
+        {
+          "line": 234,
+          "text": "\t__u32 next_key;"
+        },
+        {
+          "line": 235,
+          "text": "\tint i = 0, j;"
+        },
+        {
+          "line": 236,
+          "text": "\tint err;"
+        },
+        {
+          "line": 237,
+          "text": ""
+        },
+        {
+          "line": 238,
+          "text": "\tif (batch_map_ops) {"
+        },
+        {
+          "line": 239,
+          "text": "\t\tbool ok = read_vals_batch(fd, vals, count);"
+        },
+        {
+          "line": 240,
+          "text": "\t\tif (!ok && errno == EINVAL) {"
+        },
+        {
+          "line": 241,
+          "text": "\t\t\t/* fall back to a racy variant */"
+        },
+        {
+          "line": 242,
+          "text": "\t\t\tbatch_map_ops = false;"
+        },
+        {
+          "line": 243,
+          "text": "\t\t} else {"
+        },
+        {
+          "line": 244,
+          "text": "\t\t\treturn ok;"
+        },
+        {
+          "line": 245,
+          "text": "\t\t}"
+        },
+        {
+          "line": 246,
+          "text": "\t}"
+        },
+        {
+          "line": 247,
+          "text": ""
+        },
+        {
+          "line": 248,
+          "text": "\tif (!vals || !count || !*count)"
+        },
+        {
+          "line": 249,
+          "text": "\t\treturn true;"
+        },
+        {
+          "line": 250,
+          "text": ""
+        },
+        {
+          "line": 251,
+          "text": "\tfor (key = -1; i < *count; ) {"
+        },
+        {
+          "line": 252,
+          "text": "\t\terr = bpf_map_get_next_key(fd, &key, &next_key);"
+        },
+        {
+          "line": 253,
+          "text": "\t\tif (err && errno != ENOENT) {"
+        },
+        {
+          "line": 254,
+          "text": "\t\t\twarn(\"failed to get next key: %s\\n\", strerror(errno));"
+        },
+        {
+          "line": 255,
+          "text": "\t\t\treturn false;"
+        },
+        {
+          "line": 256,
+          "text": "\t\t} else if (err) {"
+        },
+        {
+          "line": 257,
+          "text": "\t\t\tbreak;"
+        },
+        {
+          "line": 258,
+          "text": "\t\t}"
+        },
+        {
+          "line": 259,
+          "text": "\t\tkey = keys[i++] = next_key;"
+        },
+        {
+          "line": 260,
+          "text": "\t}"
+        },
+        {
+          "line": 261,
+          "text": ""
+        },
+        {
+          "line": 262,
+          "text": "\tfor (j = 0; j < i; j++) {"
+        },
+        {
+          "line": 263,
+          "text": "\t\terr = bpf_map_lookup_elem(fd, &keys[j], &val);"
+        },
+        {
+          "line": 264,
+          "text": "\t\tif (err && errno != ENOENT) {"
+        },
+        {
+          "line": 265,
+          "text": "\t\t\twarn(\"failed to lookup element: %s\\n\", strerror(errno));"
+        },
+        {
+          "line": 266,
+          "text": "\t\t\treturn false;"
+        },
+        {
+          "line": 267,
+          "text": "\t\t}"
+        },
+        {
+          "line": 268,
+          "text": "\t\tvals[j].count = val.count;"
+        },
+        {
+          "line": 269,
+          "text": "\t\tvals[j].total_ns = val.total_ns;"
+        },
+        {
+          "line": 270,
+          "text": "\t\tvals[j].key = keys[j];"
+        },
+        {
+          "line": 271,
+          "text": "\t\tmemcpy(vals[j].comm, val.comm, TASK_COMM_LEN);"
+        },
+        {
+          "line": 272,
+          "text": "\t}"
+        },
+        {
+          "line": 273,
+          "text": ""
+        },
+        {
+          "line": 274,
+          "text": "\t/* There is a race here: system calls which are represented by keys"
+        },
+        {
+          "line": 275,
+          "text": "\t * above and happened between lookup and delete will be ignored.  This"
+        },
+        {
+          "line": 276,
+          "text": "\t * will be fixed in future by using bpf_map_lookup_and_delete_batch,"
+        },
+        {
+          "line": 277,
+          "text": "\t * but this function is too fresh to use it in bcc. */"
+        },
+        {
+          "line": 278,
+          "text": ""
+        },
+        {
+          "line": 279,
+          "text": "\tfor (j = 0; j < i; j++) {"
+        },
+        {
+          "line": 280,
+          "text": "\t\terr = bpf_map_delete_elem(fd, &keys[j]);"
+        },
+        {
+          "line": 281,
+          "text": "\t\tif (err) {"
+        },
+        {
+          "line": 282,
+          "text": "\t\t\twarn(\"failed to delete element: %s\\n\", strerror(errno));"
+        },
+        {
+          "line": 283,
+          "text": "\t\t\treturn false;"
+        },
+        {
+          "line": 284,
+          "text": "\t\t}"
+        },
+        {
+          "line": 285,
+          "text": "\t}"
+        },
+        {
+          "line": 286,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "path": "vendor/repos/bcc/libbpf-tools/runqlat.c",
+      "sha256": "21d035de67bfed6887df0d588c9529cdf962c3234b52d7b88e1d28f5674bec96",
+      "lines": [
+        {
+          "line": 147,
+          "text": "static int print_log2_hists(struct bpf_map *hists)"
+        },
+        {
+          "line": 148,
+          "text": "{"
+        },
+        {
+          "line": 149,
+          "text": "\tconst char *units = env.milliseconds ? \"msecs\" : \"usecs\";"
+        },
+        {
+          "line": 150,
+          "text": "\tint err, fd = bpf_map__fd(hists);"
+        },
+        {
+          "line": 151,
+          "text": "\t__u32 lookup_key = -2, next_key;"
+        },
+        {
+          "line": 152,
+          "text": "\tstruct hist hist;"
+        },
+        {
+          "line": 153,
+          "text": ""
+        },
+        {
+          "line": 154,
+          "text": "\twhile (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {"
+        },
+        {
+          "line": 155,
+          "text": "\t\terr = bpf_map_lookup_elem(fd, &next_key, &hist);"
+        },
+        {
+          "line": 156,
+          "text": "\t\tif (err < 0) {"
+        },
+        {
+          "line": 157,
+          "text": "\t\t\tfprintf(stderr, \"failed to lookup hist: %d\\n\", err);"
+        },
+        {
+          "line": 158,
+          "text": "\t\t\treturn -1;"
+        },
+        {
+          "line": 159,
+          "text": "\t\t}"
+        },
+        {
+          "line": 160,
+          "text": "\t\tif (env.per_process)"
+        },
+        {
+          "line": 161,
+          "text": "\t\t\tprintf(\"\\npid = %d %s\\n\", next_key, hist.comm);"
+        },
+        {
+          "line": 162,
+          "text": "\t\telse if (env.per_thread)"
+        },
+        {
+          "line": 163,
+          "text": "\t\t\tprintf(\"\\ntid = %d %s\\n\", next_key, hist.comm);"
+        },
+        {
+          "line": 164,
+          "text": "\t\telse if (env.per_pidns)"
+        },
+        {
+          "line": 165,
+          "text": "\t\t\tprintf(\"\\npidns = %u %s\\n\", next_key, hist.comm);"
+        },
+        {
+          "line": 166,
+          "text": "\t\tprint_log2_hist(hist.slots, MAX_SLOTS, units);"
+        },
+        {
+          "line": 167,
+          "text": "\t\tlookup_key = next_key;"
+        },
+        {
+          "line": 168,
+          "text": "\t}"
+        },
+        {
+          "line": 169,
+          "text": ""
+        },
+        {
+          "line": 170,
+          "text": "\tlookup_key = -2;"
+        },
+        {
+          "line": 171,
+          "text": "\twhile (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {"
+        },
+        {
+          "line": 172,
+          "text": "\t\terr = bpf_map_delete_elem(fd, &next_key);"
+        },
+        {
+          "line": 173,
+          "text": "\t\tif (err < 0) {"
+        },
+        {
+          "line": 174,
+          "text": "\t\t\tfprintf(stderr, \"failed to cleanup hist : %d\\n\", err);"
+        },
+        {
+          "line": 175,
+          "text": "\t\t\treturn -1;"
+        },
+        {
+          "line": 176,
+          "text": "\t\t}"
+        },
+        {
+          "line": 177,
+          "text": "\t\tlookup_key = next_key;"
+        },
+        {
+          "line": 178,
+          "text": "\t}"
+        }
+      ]
+    }
+  ],
+  "interpretation": [
+    "Both captured perf files decode0 with explicit ownQEMU and in-phase BPF samples; original perf exits143 remain and do not become clean0.",
+    "No broad increase in sampled native BPF-body periods per observed composite bogo op: off316.4->307.3,on365.2->320.3. This is sampled aggregate work with changing mixes/observers, not per-program latency or a causal speedup.",
+    "Hash get-next-key and clock reading are major symbols. BCC userspace pollers contain map iteration, but these samples alone do not identify the caller process or prove polling causes lost sockfd CPU time.",
+    "Existing short pair copies full native cache every2s, a baseline/native asymmetry. Do not tune code or explain the original full-run0.877x solely from these short profiles.",
+    "Next decisive evidence is low-I/O task CPU/wchan/stack sampling with every normal BCC tool retained, while avoiding recurring cache/code/map dumps or PMU collection. No app/kernel/benchmark change is justified yet."
+  ]
+}

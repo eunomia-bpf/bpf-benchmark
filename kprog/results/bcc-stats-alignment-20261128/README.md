@@ -44,3 +44,20 @@ SAME offline PMU reader1456924 is queued/running onCPU16/48GiB. analyse_pair.py 
 Prepared archive_pair.py to preserve EVERY closed rawprofile and originalcorpus file into48,000,000Bparts with SHA256 verification of each payload and original, CPU19/48GiB, after recipepublication. It does not delete raw/native/source or label capturedELFs/PMU valid simply because archival succeeds. Analysis outputs are reviewed/published separately. The archive controller/parts will be collected next turn, along with SAME1456924; no fullrawarchive-publication claim yet.
 
 No production fix, new profile, image rebuild or fulltiming this step. Continue BCCcause, then ordered ee7f45f55/6c8fdc70f currentimage plus six-app10s. Latest order11:20 and OTel2689HOLD/STOP remain.
+
+## PMU decoded and complete raw archive (2026-11-28T12:39:44Z)
+
+Consumed SAME1456924: both perf report decodes return0 with explicit own-QEMU PIDs and positive in-phase BPF samples. Sample spans cover0.9998-1.0000of each selected common window. Original perf exits143 remain explicit; this establishes readable in-phase data, not a clean capture termination or causal precision. Applied normalize_pmu.py once to existing decoded JSON; no perf decode/profile rerun. Normalized values use actual recorded summed bogo counts, retaining the original nominal rate-window values separately.
+
+| Stats | Phase | All sampled periods / composite bogo | BPF bodies | htab_get_next_key | clocksource |
+|---|---|---:|---:|---:|---:|
+| 0 | baseline | 14597.1 | 316.4 | 1980.0 | 1092.6 |
+| 0 | post_rejit | 14782.8 | 307.3 | 2029.4 | 1006.0 |
+| 1 | baseline | 19563.4 | 365.2 | 2817.6 | 3326.5 |
+| 1 | post_rejit | 18734.7 | 320.3 | 2610.9 | 3318.5 |
+
+The observed native BPF-body aggregate does not broadly increase in this sample. Hash-key iteration and clock reading are large kernel symbols. BCC syscount/runqlat userspace sources contain map traversal, but the PMU table alone identifies neither the calling process nor the blocker causing reduced sockfd CPU time. Composite bogo units, changing component mixes, period sampling/skid, whole-window cleanup and observers prohibit interpreting these numbers as exact per-program latency or causal speedup. review_pmu.py/paired-profile/pmu-review.json retain source anchors and actual window/sample counts.
+
+Consumed SAME1462073 archive0: **1395files,337733095logical bytes**, all decompressed payloads and original source SHA/size verified. Complete raw profile/code/maps/perf/guest logs and original corpus records are published in two parts:48000000B SHAb9a6919e1e977bb46c07a447dde92b40f1589ae886cd08d9d9d1dcfd220ee8d0;9600048B SHA6e720b787acb80efd3567ca29cd7f2630b9ef34d8cbe664cd38c30ca60262dda. The manifest is paired-profile/archive/controller.json. Read members directly from concatenated parts with zstd/tar; observations/stats0/... and observations/stats1/... retain raw capture names, corpus/results/... retains original measurement records. This archive also preserves partial sampled artifacts without pretending they passed ELF validation. All originals remain at publication. Analysis JSON/recipes are separate canonical records; no deletion is authorized merely by archive status before committed-Git verification.
+
+Next narrow diagnosis: one short stats0/stats1 pair with every normal BCC tool retained, recurring cache/code/map dumps and PMU removed, and only read-only task CPU/wchan/stack snapshots. Existing snapshots already supply the code/config comparison; task states should show why sockfd worker CPU availability differs without the known cache-copy asymmetry. No frozen workload, tool set, program selection, compile flags, kernel, app or image change is proposed. Cause remains open; the ordered current-image rebuild and six-app10s check follow diagnosis.

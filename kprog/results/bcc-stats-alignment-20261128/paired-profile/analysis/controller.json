@@ -1,0 +1,46 @@
+{
+  "pid": 1456924,
+  "started_utc": "2026-11-28T12:16:45Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "scope": "Offline analysis only of1454977. Stats0 disabled counters are never a denominator; ownQEMU from recorded process ancestry, phase-specific symbols and sample-period sums. No profile rerun or image/source change.",
+  "cases": [
+    {
+      "stats": 0,
+      "result": {
+        "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/analysis/stats0-pmu.json",
+        "bytes": 546097,
+        "sha256": "228bfc479a578f4d1d2cb50ffdeeb4ca2c9764a626c5704162cde965ddc0aa26"
+      },
+      "guest_exit": "0",
+      "perf_exit": "143",
+      "perf_report_returncode": 0,
+      "throughput_ratio": 0.816199260440513,
+      "sockfd_ratio": 0.8294361149747853
+    },
+    {
+      "stats": 1,
+      "result": {
+        "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/analysis/stats1-pmu.json",
+        "bytes": 518079,
+        "sha256": "5e1b6f971f8273b4bc020dcf7a206a136517b537a179b80bd5b35db7bdaf8c43"
+      },
+      "guest_exit": "0",
+      "perf_exit": "143",
+      "perf_report_returncode": 0,
+      "throughput_ratio": 1.2050063789299932,
+      "sockfd_ratio": 1.1607825751618053
+    }
+  ],
+  "owner_evidence": {
+    "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/pmu-owner-evidence.json",
+    "bytes": 901,
+    "sha256": "db68afd5580d14e43b96c83b1c524dc4b06812ecfb50a5dac7e12c4c2ce2fa94"
+  },
+  "profile_controller": {
+    "path": "/workspaces/repository/kprog/results/bcc-stats-alignment-20261128/paired-profile/controller.json",
+    "bytes": 3799,
+    "sha256": "801d96be132fa9f25dd66942753906455e9182f725ed9ca62f443432f5f41395"
+  },
+  "ended_utc": "2026-11-28T12:17:32Z"
+}
