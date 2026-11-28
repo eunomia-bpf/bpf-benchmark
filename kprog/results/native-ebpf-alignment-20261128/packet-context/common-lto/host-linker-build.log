@@ -1,0 +1,32 @@
+make[1]: Entering directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'
+cargo build --manifest-path ../../x86/native_lab/native_link/Cargo.toml --release -j 1
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: function `indirect_sites` is never used
+   --> src/x86_readonly_relocs.rs:209:15
+    |
+209 | pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    |               ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+
+warning: fields `target_offset` and `table_offset` are never read
+   --> src/x86_readonly_relocs.rs:335:43
+    |
+335 |     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    |     ------------ fields in this variant   ^^^^^^^^^^^^^       ^^^^^^^^^^^^
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+warning: `native-link` (bin "native-link") generated 4 warnings
+    Finished `release` profile [optimized] target(s) in 24.11s
+make[1]: Leaving directory '/workspaces/repository/kprog/results/arm64-common-flags-20261126'

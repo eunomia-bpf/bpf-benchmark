@@ -86,6 +86,7 @@ NativeLinkArgs build_native_link_args(
 {
     NativeLinkArgs out{};
     out.linker = native_link_binary(native_link_path);
+    add_name_addr(out.helpers, "__native_prog_type", companion.prog_type);
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
         K_BPF_ARRAY_PPTRS_OFFSET,

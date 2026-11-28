@@ -1,0 +1,11 @@
+make[1]: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/arm64/stage/"
+aarch64-linux-gnu-g++ $(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include "/workspaces/repository/kprog/x86/perf_context_lto.cpp" -o "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto" \
+	/workspaces/repository/.cache/qemu-arm64-root/usr/lib/llvm-18/lib/libLLVM.so.1 /workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu/libbpf.so.1 -Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/usr/lib/aarch64-linux-gnu -Wl,-rpath-link,/workspaces/repository/.cache/qemu-arm64-root/lib/aarch64-linux-gnu -lpthread -ldl -lz
+/workspaces/repository/kprog/x86/perf_context_lto.cpp: In function ‘llvm::Expected<llvm::Function*> importLpmLookup(llvm::Module&, llvm::Function&, btf*, uint64_t, unsigned int)’:
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: warning: redundant move in return statement [-Wredundant-move]
+   82 |   if (auto E = importC(M, Entry, Prefix, Code.str())) return std::move(E);
+      |                                                              ~~~~~~~~~^~~
+/workspaces/repository/kprog/x86/perf_context_lto.cpp:82:71: note: remove ‘std::move’ call
+make[1]: Leaving directory '/workspaces/repository/vendor/bpf'

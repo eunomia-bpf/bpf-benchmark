@@ -520,6 +520,43 @@ int main(int argc, char **argv) {
       F->removeParamAttr(0, Attribute::DereferenceableOrNull);
       Converted = Loads.size();
     }
+    if (ProgType == BPF_PROG_TYPE_XDP) {
+      std::unique_ptr<btf, decltype(&btf__free)> Types(
+        btf__parse(Kernel.c_str(), nullptr), btf__free);
+      if (!Types) { errs() << "cannot read boot kernel BTF\n"; return 1; }
+      const auto Public = native_lto::field(Types.get(), "xdp_md", "ingress_ifindex");
+      const auto Rxq = native_lto::offset(Types.get(), "xdp_buff", "rxq");
+      const auto Dev = native_lto::offset(Types.get(), "xdp_rxq_info", "dev");
+      const auto Index = native_lto::offset(Types.get(), "net_device", "ifindex");
+      const auto &DL = M->getDataLayout();
+      auto *Ctx = F->getArg(0);
+      for (auto &I : instructions(F)) {
+        auto *L = dyn_cast<LoadInst>(&I);
+        if (!L || !L->getType()->isIntegerTy(32)) continue;
+        auto *G = dyn_cast<GetElementPtrInst>(L->getPointerOperand()->stripPointerCasts());
+        auto *T = G ? dyn_cast<StructType>(G->getSourceElementType()) : nullptr;
+        // Public field identity matters: physical pointer bits and stack copies
+        // may use the same byte offset without naming this context field.
+        if (!T || !T->hasName() || T->getName() != "struct.xdp_md") continue;
+        int64_t Offset = 0;
+        if (GetPointerBaseWithConstantOffset(L->getPointerOperand(), Offset, DL) != Ctx ||
+            Offset != Public.offset) continue;
+        IRBuilder<> B(L);
+        auto *Queue = B.CreateLoad(PointerType::getUnqual(C),
+          B.CreateConstGEP1_64(B.getInt8Ty(), Ctx, Rxq));
+        auto *Device = B.CreateLoad(PointerType::getUnqual(C),
+          B.CreateConstGEP1_64(B.getInt8Ty(), Queue, Dev));
+        L->setOperand(0, B.CreateConstGEP1_64(B.getInt8Ty(), Device, Index));
+        L->setMetadata(LLVMContext::MD_tbaa, nullptr);
+        ++Converted;
+      }
+      if (Converted) {
+        F->setMemoryEffects(MemoryEffects::unknown());
+        F->removeParamAttr(0, Attribute::Dereferenceable);
+        F->removeParamAttr(0, Attribute::DereferenceableOrNull);
+      }
+      errs() << "XDP ifindex LTO converted loads: " << Converted << '\n';
+    }
     unsigned LpmCount = 0;
     auto Arrays = lowerMapLookups(*M, *F, MapTypes, LpmCount);
     if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }

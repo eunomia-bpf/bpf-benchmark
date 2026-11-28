@@ -1,0 +1,344 @@
+{
+  "reviewed_utc": "2026-11-28T08:43:02Z",
+  "job_launcher_pid": 1384508,
+  "controller_pid": 1384510,
+  "ended_utc": "2026-11-28T08:41:19Z",
+  "controller_status": 0,
+  "stages": [
+    {
+      "name": "x86-context-build",
+      "exit": 0
+    },
+    {
+      "name": "arm64-context-build",
+      "exit": 0
+    },
+    {
+      "name": "host-linker-build",
+      "exit": 0
+    },
+    {
+      "name": "existing-linker-tests",
+      "exit": 0
+    },
+    {
+      "name": "arm-linker-build",
+      "exit": 0
+    },
+    {
+      "name": "x86-loader-build",
+      "exit": 0
+    },
+    {
+      "name": "arm64-loader-build",
+      "exit": 0
+    },
+    {
+      "name": "actual-context-after",
+      "exit": 0
+    }
+  ],
+  "existing_tests_passed": 14,
+  "cases": [
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    }
+  ],
+  "source_sha256": {
+    "kprog/x86/perf_context_lto.cpp": "29e81dc22584c947461f6319f73cb8efa46a08f30af3ad8afa05a301bb1235f2",
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": "8d6c667ea67c5197aaaa3edf125b3615edf3f14da444db9dbc79e8e5bd8e1d0b",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "e0ad2fb050be1579cd6a26211cbf67bcec54606512eff357be7c4c8718b6bd81",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "30fd9e723274180dd810e3e047c0ebe9e9cb4d0d68e216462154bc40aef9153a",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c",
+    "kprog/x86/native_lab/native_link/src/main.rs": "66371f179eb7ca8b2b941214bde1f4f98a7ee83d09c33258402b99fe9343f2a1"
+  },
+  "source_anchors": {
+    "kprog/libnativeloader/src/native_loader.cpp": {
+      "sha256": "8409eba58ece8705db7fe4b80cfba4fba414433fe05bc089e71fdcc21f46e46c",
+      "matches": {
+        "out.prog_type = prog_info.type": [
+          {
+            "line": 2857,
+            "text": "    out.prog_type = prog_info.type;"
+          }
+        ],
+        "for (const auto &arg : link_args.helpers)": [
+          {
+            "line": 3018,
+            "text": "    for (const auto &arg : link_args.helpers) {"
+          }
+        ]
+      }
+    },
+    "kprog/libnativeloader/src/native_loader_trusted.cpp": {
+      "sha256": "835590d2649a63b71b1a9cb749f86dc0c063ded771e7c349932194c6286a9387",
+      "matches": {
+        "out.prog_type = prog_info.type": [
+          {
+            "line": 1990,
+            "text": "    out.prog_type = prog_info.type;"
+          }
+        ],
+        "companion.prog_type = info.type": [
+          {
+            "line": 2891,
+            "text": "    companion.prog_type = info.type;"
+          }
+        ],
+        "for (const auto &arg : link_args.helpers)": [
+          {
+            "line": 2142,
+            "text": "    for (const auto &arg : link_args.helpers) {"
+          }
+        ]
+      }
+    },
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": {
+      "sha256": "e0ad2fb050be1579cd6a26211cbf67bcec54606512eff357be7c4c8718b6bd81",
+      "matches": {
+        "\"__native_prog_type\", companion.prog_type": [
+          {
+            "line": 89,
+            "text": "    add_name_addr(out.helpers, \"__native_prog_type\", companion.prog_type);"
+          }
+        ]
+      }
+    },
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": {
+      "sha256": "30fd9e723274180dd810e3e047c0ebe9e9cb4d0d68e216462154bc40aef9153a",
+      "matches": {
+        "\"__native_prog_type\", companion.prog_type": [
+          {
+            "line": 61,
+            "text": "    add_name_addr(out.helpers, \"__native_prog_type\", companion.prog_type);"
+          }
+        ]
+      }
+    },
+    "kprog/x86/native_lab/native_link/src/main.rs": {
+      "sha256": "66371f179eb7ca8b2b941214bde1f4f98a7ee83d09c33258402b99fe9343f2a1",
+      "matches": {
+        "helper_addrs.get(\"__native_prog_type\")": [
+          {
+            "line": 444,
+            "text": "        helper_addrs.get(\"__native_prog_type\").copied().unwrap_or(0),"
+          }
+        ]
+      }
+    },
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": {
+      "sha256": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c",
+      "matches": {
+        "prog_type != 6": [
+          {
+            "line": 21,
+            "text": "        || (values.is_empty() && map_types.is_empty() && prog_type != 6)"
+          }
+        ],
+        "arg(prog_type.to_string())": [
+          {
+            "line": 50,
+            "text": "        .args([\"--kernel-btf\", \"/sys/kernel/btf/vmlinux\", \"--prog-type\"]).arg(prog_type.to_string())"
+          }
+        ]
+      }
+    },
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": {
+      "sha256": "8d6c667ea67c5197aaaa3edf125b3615edf3f14da444db9dbc79e8e5bd8e1d0b",
+      "matches": {
+        "prog_type != BPF_PROG_TYPE_XDP": [
+          {
+            "line": 13,
+            "text": "    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && prog_type != BPF_PROG_TYPE_XDP &&"
+          }
+        ],
+        "hash.add_u64(prog_type)": [
+          {
+            "line": 22,
+            "text": "    hash.add_u64(prog_type);"
+          }
+        ],
+        "std::to_string(prog_type)": [
+          {
+            "line": 47,
+            "text": "        \"--prog-type\", std::to_string(prog_type), \"-o\", temporary};"
+          }
+        ]
+      }
+    }
+  },
+  "products": {
+    "vendor/build/native-bpf/x86/stage/kprog-perf-context-lto": {
+      "bytes": 63086200,
+      "sha256": "5075689e48693c7b0057fada7c014c14df456bd3bb2f8a1a19b0a26fd3544a48"
+    },
+    "vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto": {
+      "bytes": 994752,
+      "sha256": "46a740e15d6eb5eb40f0fc716bf762cad6d4ed0a4d353f7ac98798bc5da6c70a"
+    },
+    "kprog/x86/native_lab/native_link/target/release/native-link": {
+      "bytes": 2762576,
+      "sha256": "bb2c9d6aece9a3e795806441d82baef3c6b9746a3680536ac97450371a21be0e"
+    },
+    "kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link": {
+      "bytes": 2686192,
+      "sha256": "a91bc881bdb390ff228fdc2b63a591f30d3db54a0918ad8dbf3970536ef182db"
+    },
+    "runner/build-llvmbpf/native_loader/libnative_loader.a": {
+      "bytes": 1360382,
+      "sha256": "af3cc3ff6345eba5f5cf7381cbc1f28a32e5549e227d5be6cc48fdfcf2d81824"
+    },
+    "runner/build-llvmbpf/native_loader/trusted-native-loader": {
+      "bytes": 1143016,
+      "sha256": "38458d513910af019ac10c627c255d01be2ecf90ff796c8d3d16ea5fe2c89770"
+    },
+    "runner/build-llvmbpf/native_loader/libnative_loader.so": {
+      "bytes": 1253944,
+      "sha256": "35d61b57ff110fcce9ee4e1a7a2f91ac050744d423a50331f2f3a865249790f9"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.a": {
+      "bytes": 1289784,
+      "sha256": "5209d6cbf07b08e64588fdb4c73db499baaf6ff3ff3e677cb37f4f50d0d09da2"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": {
+      "bytes": 1056176,
+      "sha256": "827828ccdfe96d82547fb5a297eb35d4d6fc4bb514a3b5ecf2346380bee19f92"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": {
+      "bytes": 1191520,
+      "sha256": "565f038d9f7886e665330b145cc785b26d11478a23adb8209ff782f0805a8cda"
+    }
+  },
+  "scope": "Canonical component builds and actual compiler/output execution on both ISAs, including ARM compiler under QEMU. Producer/consumer/cache flow statically anchored and loader targets built. NOT a kernel-installed or frozen workload result: /opt compiler paths absent in Workspace, no image/check/root activation; x86 owner preserved.",
+  "negative_controls": "physical data_end upper32 remains17, local public stack field remains51; only two entry-rooted public ifindex APIs convert, each34. Actual assembly chains32/0/224;1conversion/API0/control.",
+  "authority": "Newest resume COORDINATOR 2026-11-28T07:17Z; common open classes only, app header byte-identical, OTel2689 HOLD."
+}

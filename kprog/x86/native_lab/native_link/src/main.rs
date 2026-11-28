@@ -441,6 +441,7 @@ fn main() -> Result<()> {
             _ => "x86_64",
         }).join("kprog-perf-context-lto"),
         &std::env::current_exe()?,
+        helper_addrs.get("__native_prog_type").copied().unwrap_or(0),
     )?;
     let elf = match specialized.as_ref() {
         Some(bytes) => object::File::parse(&**bytes).context("parse specialized proof")?,

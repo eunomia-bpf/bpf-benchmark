@@ -1,0 +1,355 @@
+{
+  "pid": 1384510,
+  "started_utc": "2026-11-28T08:38:29Z",
+  "controller_status": 0,
+  "stages": [
+    {
+      "name": "x86-context-build",
+      "args": [
+        "make",
+        "-C",
+        "vendor/bpf",
+        "ARCH=x86",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "-j1"
+      ],
+      "started_utc": "2026-11-28T08:38:29Z",
+      "ended_utc": "2026-11-28T08:38:36Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/x86-context-build.log",
+        "bytes": 787,
+        "sha256": "4894379ef315f43077821e4eb50c80ddb69f8257b54a71ee69c745d872e93a7e"
+      }
+    },
+    {
+      "name": "arm64-context-build",
+      "args": [
+        "make",
+        "-C",
+        "vendor/bpf",
+        "ARCH=arm64",
+        "/workspaces/repository/vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto",
+        "-j1"
+      ],
+      "started_utc": "2026-11-28T08:38:36Z",
+      "ended_utc": "2026-11-28T08:38:42Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/arm64-context-build.log",
+        "bytes": 1509,
+        "sha256": "b01a4326cbef94be144a57a1feaa8a15d090393197e834d6e6334ed565009a63"
+      }
+    },
+    {
+      "name": "host-linker-build",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-build"
+      ],
+      "started_utc": "2026-11-28T08:38:42Z",
+      "ended_utc": "2026-11-28T08:39:06Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/host-linker-build.log",
+        "bytes": 1497,
+        "sha256": "f72c79d1fffd4d1927d24474e19cb26924d2dc2bd98d950f64c8858d872f525e"
+      }
+    },
+    {
+      "name": "existing-linker-tests",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-tests"
+      ],
+      "started_utc": "2026-11-28T08:39:06Z",
+      "ended_utc": "2026-11-28T08:39:28Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/existing-linker-tests.log",
+        "bytes": 3454,
+        "sha256": "48e8be1ac26a80b71a8e716df6aa782836cb9969e370832d50165324a41ee91d"
+      }
+    },
+    {
+      "name": "arm-linker-build",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/arm64-common-flags-20261126",
+        "native-link-arm-build"
+      ],
+      "started_utc": "2026-11-28T08:39:28Z",
+      "ended_utc": "2026-11-28T08:39:54Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/arm-linker-build.log",
+        "bytes": 1600,
+        "sha256": "74762c464198b1f545c121c3b895ffafd6ca761b360c326b8da28b1b36302748"
+      }
+    },
+    {
+      "name": "x86-loader-build",
+      "args": [
+        "make",
+        "-C",
+        "runner/build-llvmbpf",
+        "native_loader",
+        "native_loader_shared",
+        "trusted-native-loader",
+        "-j1"
+      ],
+      "started_utc": "2026-11-28T08:39:54Z",
+      "ended_utc": "2026-11-28T08:40:31Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/x86-loader-build.log",
+        "bytes": 2901,
+        "sha256": "4e59354ce3086672d5473a581fc26137d9935ba4a8ec8a97f97ab0b6e3a6da7f"
+      }
+    },
+    {
+      "name": "arm64-loader-build",
+      "args": [
+        "make",
+        "-C",
+        "runner/build-arm64-llvmbpf",
+        "native_loader",
+        "native_loader_shared",
+        "trusted-native-loader",
+        "-j1"
+      ],
+      "started_utc": "2026-11-28T08:40:31Z",
+      "ended_utc": "2026-11-28T08:41:12Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/arm64-loader-build.log",
+        "bytes": 2942,
+        "sha256": "43d38043178cbd0899f6a1d8b556d89d25414d5bc4a3075effc3453282a0548d"
+      }
+    },
+    {
+      "name": "actual-context-after",
+      "args": [
+        "make",
+        "-C",
+        "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto",
+        "after"
+      ],
+      "started_utc": "2026-11-28T08:41:12Z",
+      "ended_utc": "2026-11-28T08:41:19Z",
+      "returncode": 0,
+      "cpu": 16,
+      "address_space_bytes": 51539607552,
+      "log": {
+        "path": "kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/actual-context-after.log",
+        "bytes": 273,
+        "sha256": "6402de2dd143c7572677ee14a0955ba5818624b677d75f4be33232452fad90d4"
+      }
+    }
+  ],
+  "source_sha256": {
+    "kprog/x86/perf_context_lto.cpp": "29e81dc22584c947461f6319f73cb8efa46a08f30af3ad8afa05a301bb1235f2",
+    "kprog/libnativeloader/src/native_loader_context_lto.hpp": "8d6c667ea67c5197aaaa3edf125b3615edf3f14da444db9dbc79e8e5bd8e1d0b",
+    "kprog/libnativeloader/src/native_loader_link_schema.hpp": "e0ad2fb050be1579cd6a26211cbf67bcec54606512eff357be7c4c8718b6bd81",
+    "kprog/libnativeloader/src/native_loader_trusted_link_schema.hpp": "30fd9e723274180dd810e3e047c0ebe9e9cb4d0d68e216462154bc40aef9153a",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "9953329bb0f8b5becb0f322b303f851fc424676e051256695256dc3ced757e4c",
+    "kprog/x86/native_lab/native_link/src/main.rs": "66371f179eb7ca8b2b941214bde1f4f98a7ee83d09c33258402b99fe9343f2a1"
+  },
+  "context_cases": [
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "x86",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "host",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_ifindex",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_ingress",
+      "execute_returncode": 0,
+      "values": {
+        "value": 34,
+        "expected": 34
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_physical_upper",
+      "execute_returncode": 0,
+      "values": {
+        "value": 17,
+        "expected": 17
+      },
+      "regression_passed": true
+    },
+    {
+      "architecture": "arm64",
+      "tool": "arm-native",
+      "entry": "native_local_copy",
+      "execute_returncode": 0,
+      "values": {
+        "value": 51,
+        "expected": 51
+      },
+      "regression_passed": true
+    }
+  ],
+  "context_regression_passed": true,
+  "products": {
+    "vendor/build/native-bpf/x86/stage/kprog-perf-context-lto": {
+      "bytes": 63086200,
+      "sha256": "5075689e48693c7b0057fada7c014c14df456bd3bb2f8a1a19b0a26fd3544a48"
+    },
+    "vendor/build/native-bpf/arm64/stage/kprog-perf-context-lto": {
+      "bytes": 994752,
+      "sha256": "46a740e15d6eb5eb40f0fc716bf762cad6d4ed0a4d353f7ac98798bc5da6c70a"
+    },
+    "kprog/x86/native_lab/native_link/target/release/native-link": {
+      "bytes": 2762576,
+      "sha256": "bb2c9d6aece9a3e795806441d82baef3c6b9746a3680536ac97450371a21be0e"
+    },
+    "kprog/x86/native_lab/native_link/target/aarch64-unknown-linux-gnu/release/native-link": {
+      "bytes": 2686192,
+      "sha256": "a91bc881bdb390ff228fdc2b63a591f30d3db54a0918ad8dbf3970536ef182db"
+    },
+    "runner/build-llvmbpf/native_loader/libnative_loader.a": {
+      "bytes": 1360382,
+      "sha256": "af3cc3ff6345eba5f5cf7381cbc1f28a32e5549e227d5be6cc48fdfcf2d81824"
+    },
+    "runner/build-llvmbpf/native_loader/trusted-native-loader": {
+      "bytes": 1143016,
+      "sha256": "38458d513910af019ac10c627c255d01be2ecf90ff796c8d3d16ea5fe2c89770"
+    },
+    "runner/build-llvmbpf/native_loader/libnative_loader.so": {
+      "bytes": 1253944,
+      "sha256": "35d61b57ff110fcce9ee4e1a7a2f91ac050744d423a50331f2f3a865249790f9"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.a": {
+      "bytes": 1289784,
+      "sha256": "5209d6cbf07b08e64588fdb4c73db499baaf6ff3ff3e677cb37f4f50d0d09da2"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/trusted-native-loader": {
+      "bytes": 1056176,
+      "sha256": "827828ccdfe96d82547fb5a297eb35d4d6fc4bb514a3b5ecf2346380bee19f92"
+    },
+    "runner/build-arm64-llvmbpf/native_loader/libnative_loader.so": {
+      "bytes": 1191520,
+      "sha256": "565f038d9f7886e665330b145cc785b26d11478a23adb8209ff782f0805a8cda"
+    }
+  },
+  "ended_utc": "2026-11-28T08:41:19Z"
+}

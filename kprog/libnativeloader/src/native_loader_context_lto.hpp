@@ -10,7 +10,8 @@ std::filesystem::path native_context_lto_object(
     const std::string &function_bodies = {}, const std::string &immutable_globals = {},
     const std::string &map_types = {})
 {
-    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && function_bodies.empty() &&
+    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && prog_type != BPF_PROG_TYPE_XDP &&
+        function_bodies.empty() &&
         immutable_globals.empty() && map_types.empty()) return input;
     Hash64 hash;
     hash.add_string("perf-context-lto-v3");

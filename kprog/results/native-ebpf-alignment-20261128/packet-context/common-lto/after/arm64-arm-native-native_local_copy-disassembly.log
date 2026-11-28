@@ -1,0 +1,13 @@
+
+/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/packet-context/common-lto/after/arm64-arm-native-native_local_copy.o:     file format elf64-littleaarch64
+
+
+Disassembly of section .text:
+
+0000000000000000 <native_local_copy>:
+   0:	d10043ff 	sub	sp, sp, #0x10
+   4:	52800668 	mov	w8, #0x33                  	// #51
+   8:	b9000fe8 	str	w8, [sp, #12]
+   c:	b9400fe0 	ldr	w0, [sp, #12]
+  10:	910043ff 	add	sp, sp, #0x10
+  14:	d65f03c0 	ret

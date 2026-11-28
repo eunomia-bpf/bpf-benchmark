@@ -11,13 +11,14 @@ pub(super) fn specialize(
     lookups: &HashMap<String, LookupSiteSpec>,
     compiler: &std::path::Path,
     linker: &std::path::Path,
+    prog_type: u64,
 ) -> Result<Option<Vec<u8>>> {
     let map_types: HashMap<_, _> = lookups.iter()
         .filter(|(_, site)| matches!(site.kind, LookupKind::LpmTrie))
         .map(|(name, _)| (name, serde_json::json!({"type": 11, "inner_type": 0})))
         .collect(); // BPF_MAP_TYPE_LPM_TRIE; shape is read from the live map.
     if args.mode != LinkMode::Kernel
-        || (values.is_empty() && map_types.is_empty())
+        || (values.is_empty() && map_types.is_empty() && prog_type != 6)
     {
         return Ok(None);
     }
@@ -46,7 +47,7 @@ pub(super) fn specialize(
     }
     command.arg(&ir)
         .arg("--symbol").arg(&args.symbol)
-        .args(["--kernel-btf", "/sys/kernel/btf/vmlinux", "--prog-type", "0"])
+        .args(["--kernel-btf", "/sys/kernel/btf/vmlinux", "--prog-type"]).arg(prog_type.to_string())
         .arg("--immutable-globals").arg(&facts).arg("-o").arg(&native);
     if !map_types.is_empty() {
         let types = prefix.join("map-types.json");
@@ -117,11 +118,11 @@ mod tests {
             output_relocs: None, output_map_patches: None, output_abi: None,
             link_plan: None, show: false, preserve_entry_abi: false, mode: LinkMode::Kernel };
         let compiler = root.join("vendor/build/native-bpf/x86/stage/kprog-perf-context-lto");
-        assert!(specialize(&args, &elf, &HashMap::new(), &HashMap::new(), &compiler, &linker)?.is_none());
+        assert!(specialize(&args, &elf, &HashMap::new(), &HashMap::new(), &compiler, &linker, 0)?.is_none());
         for value in [0u8, 1] {
             args.output = dir.join(format!("out-{value}.bin"));
             let values = HashMap::from([("option".to_string(), vec![value, 0, 0, 0])]);
-            let bytes = specialize(&args, &elf, &values, &HashMap::new(), &compiler, &linker)?.unwrap();
+            let bytes = specialize(&args, &elf, &values, &HashMap::new(), &compiler, &linker, 0)?.unwrap();
             let specialized = object::File::parse(&*bytes)?;
             let undefined: Vec<_> = specialized.symbols().filter(|s| s.is_undefined())
                 .map(|s| s.name().map(str::to_string)).collect::<std::result::Result<_, _>>()?;
@@ -167,9 +168,9 @@ mod tests {
             elem_size: 0, index_mask: 0, value_offset: 0, percpu_base_addr: 0,
             map_name: None,
         })]);
-        assert!(specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.is_none());
+        assert!(specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.is_none());
         lookups.values_mut().next().unwrap().kind = LookupKind::LpmTrie;
-        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.unwrap();
+        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.unwrap();
         let elf = object::File::parse(&*data)?;
         let undefined: Vec<_> = elf.symbols().filter(|s| s.is_undefined())
             .map(|s| s.name().map(str::to_string)).collect::<std::result::Result<_, _>>()?;
@@ -186,7 +187,7 @@ mod tests {
             .arg(&args.input).arg("--link-plan").arg(&plan).status()?.success());
         let data = fs::read(&args.input)?;
         let elf = object::File::parse(&*data)?;
-        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker)?.unwrap();
+        let data = specialize(&args, &elf, &HashMap::new(), &lookups, &compiler, &linker, 0)?.unwrap();
         let elf = object::File::parse(&*data)?;
         let calls = elf.sections().flat_map(|s| s.relocations()).filter(|(_, r)| {
             match r.target() {
