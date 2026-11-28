@@ -1,0 +1,36 @@
+diff --git a/kprog/x86/native_lab/native_link/src/main.rs b/kprog/x86/native_lab/native_link/src/main.rs
+index d5d5b0e30..2e136412b 100644
+--- a/kprog/x86/native_lab/native_link/src/main.rs
++++ b/kprog/x86/native_lab/native_link/src/main.rs
+@@ -2287,6 +2287,7 @@ fn rewrite_arm64_pass(
+                                 },
+                             });
+                             blob.extend_from_slice(&insn.to_le_bytes());
++                            arm64_call_clobber_map_regs(&mut reg_map_names);
+                             continue;
+                         }
+                         if proof_mode {
+@@ -2314,6 +2315,7 @@ fn rewrite_arm64_pass(
+                                 for word in inline {
+                                     append_u32(&mut blob, word);
+                                 }
++                                arm64_call_clobber_map_regs(&mut reg_map_names);
+                                 continue;
+                             }
+                         }
+@@ -2323,6 +2325,7 @@ fn rewrite_arm64_pass(
+                             || reloc.target_name == "bpf_get_current_task_btf"
+                         {
+                             append_u32(&mut blob, a64_mrs_sp_el0(0)?);
++                            arm64_call_clobber_map_regs(&mut reg_map_names);
+                             continue;
+                         }
+                         let mut helper_addr = helper_addrs.get(&reloc.target_name).copied();
+@@ -2500,6 +2503,7 @@ fn rewrite_arm64_pass(
+                     },
+                 });
+                 blob.extend_from_slice(&insn.to_le_bytes());
++                arm64_call_clobber_map_regs(&mut reg_map_names);
+                 continue;
+             }
+ 

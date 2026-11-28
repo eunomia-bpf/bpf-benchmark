@@ -1,0 +1,14 @@
+{
+  "utc": "2026-11-28T07:46:59Z",
+  "before_publication": {
+    "commit": "55401c1c898ae67febb8e4c2c725da8043170730",
+    "remote": "55401c1c898ae67febb8e4c2c725da8043170730\trefs/heads/master"
+  },
+  "production_file": "kprog/x86/native_lab/native_link/src/main.rs",
+  "before_sha256": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+  "after_sha256": "079f930e84aeeb096226c36eb02cfa1ef3badfb57de9c86ae692f5ed46b2ec6b",
+  "patch_sha256": "f513c00cbb194fe0ec2a5abd54aea6ebc690c04e600f9d7b353ab619b367e4e9",
+  "change": "Four existing native-call branches now invoke the existing common AAPCS caller-saved/LR map-fact invalidation, retaining callee-saved facts. Internal CALL26, decoded BL and inline smp/current_task share this rule.",
+  "validation_state": "Source WIP; canonical host/ARM build, existing tests and unchanged executable witness pending. Do not commit production file until actual validation is collected.",
+  "source_diff_numstat": "4\t0\tkprog/x86/native_lab/native_link/src/main.rs"
+}
