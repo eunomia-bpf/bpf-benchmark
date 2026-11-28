@@ -36,3 +36,6 @@ SEC("query/retprobe_exists") long long retprobe_exists(void)
 { return bpf_core_enum_value_exists(enum perf_probe_config, PERF_PROBE_CONFIG_IS_RETPROBE); }
 SEC("query/retprobe_value") long long retprobe_value(void)
 { return bpf_core_enum_value(enum perf_probe_config, PERF_PROBE_CONFIG_IS_RETPROBE); }
+
+SEC("query/ancestor_index") long long ancestor_index(struct cgroup___new *c, unsigned i)
+{ return (char *)_(&c->ancestors[i]) - (char *)c - (unsigned long)i * sizeof(void *); }

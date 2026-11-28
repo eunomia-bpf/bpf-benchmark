@@ -1,0 +1,185 @@
+{
+  "scope": "Focused native-header correctness, not whole-app coverage or runtime-image acceptance. Same BPF oracle resolved by actual libbpf on both kernelBTFs; native scalar results and LLVM-interpreted dynamic address results agree.",
+  "source": [
+    {
+      "path": "/workspaces/repository/vendor/bpf/core-answers.py",
+      "bytes": 32198,
+      "sha256": "cf71b87b2f0c5d26b3aa7c1d965c1eefc43a7befe151a62a1a7ea424dddc8800"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/core-compat.h",
+      "bytes": 6678,
+      "sha256": "72ea7f82497033602ae2129efae038f1f65298c443b1622aec16a03c3b29e75c"
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/native-helpers.h",
+      "bytes": 15720,
+      "sha256": "5a7c6c823c5e20a326aa0033adcd4cfaee146cd704cfb7690e81f4eae6dd18ef"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/input/queries.c",
+      "bytes": 2364,
+      "sha256": "57b0f65dfa70e27422e9a4da3c89978199869da19da14812a2137b609bbee90d"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/core-header-route-20261128/check_restored.py",
+      "bytes": 5561,
+      "sha256": "350a7f0a6e94b5439a175bf0a997845e9a06d7fdfd35c5b96410048a9c2302fe"
+    },
+    {
+      "path": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/core-field-predicates/core-query",
+      "bytes": 415976,
+      "sha256": "ea80439eeb7fd89cca7fe9a66d47de73f6f793a6a47645d492f564a7ee21886d"
+    }
+  ],
+  "cases": [
+    {
+      "arch": "x86",
+      "status": "complete",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "bytes": 408901736,
+        "sha256": "ef8733dbbfb41c1d1ea13f5704d7b1b95a12c5ca0a262f687fd1ff9db725c0de"
+      },
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/x86-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/x86-dynamic.ll",
+          "bytes": 3944,
+          "sha256": "3e7ce4d8f3f179c7a602d7c76abf5aea4be17fe1f546f03411129ef906fef172"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 2904,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2904,
+        "thread_address": 2904,
+        "login_address": 3552,
+        "ancestor_address": 2304,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2304
+      },
+      "mismatches": {},
+      "oracle": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/oracle.bpf.o",
+        "bytes": 10288,
+        "sha256": "4000aa0cf9c19ee86cf82c31525ebe8bbbbbdd26497fd7b530bc7f7cb9670587"
+      },
+      "table": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/x86-answers.h",
+        "bytes": 2364,
+        "sha256": "c935aa4092c6e35295fd0221908c1a7c01b0e680a86f1b5d5e3053b76c2ab5b7"
+      },
+      "report": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/x86-answers.json",
+        "bytes": 1693,
+        "sha256": "2c39101dbe6c3ad8fea6384851acfdca6f391021b9e21ebbe1aa29353d7a510c"
+      },
+      "native_ir": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/x86-native.ll",
+        "bytes": 3380,
+        "sha256": "c88dc462666ecc9409e11d2cb2dbf9d8d160ec6f8b481914e217443509d4d02e"
+      },
+      "target_unchanged": true
+    },
+    {
+      "arch": "arm64",
+      "status": "complete",
+      "target": {
+        "path": "/workspaces/.agent-state/kprog-ck/build-arm64/vmlinux",
+        "bytes": 457575688,
+        "sha256": "8407e20d8c8c198e06fc84cb0c338fdcdbb957001352f4116058a3ff7befda17"
+      },
+      "dynamic_execution": {
+        "command": [
+          "lli-18",
+          "--force-interpreter",
+          "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/arm64-dynamic.ll"
+        ],
+        "indices": [
+          0,
+          1,
+          7,
+          31
+        ],
+        "all_four_returns_equal_oracle": true,
+        "harness": {
+          "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/arm64-dynamic.ll",
+          "bytes": 3948,
+          "sha256": "674088bb1a90b2df8b64fec92d56cd2f2cceb86c630703c7956476aa83be6d37"
+        }
+      },
+      "expected": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 2360,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288
+      },
+      "actual": {
+        "disk_exists": 0,
+        "thread_offset": 2360,
+        "thread_address": 2360,
+        "login_address": 3008,
+        "ancestor_address": 2288,
+        "pid_link_exists": 0,
+        "retprobe_exists": 1,
+        "retprobe_value": 1,
+        "ancestor_index": 2288
+      },
+      "mismatches": {},
+      "oracle": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/oracle.bpf.o",
+        "bytes": 10288,
+        "sha256": "4000aa0cf9c19ee86cf82c31525ebe8bbbbbdd26497fd7b530bc7f7cb9670587"
+      },
+      "table": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/arm64-answers.h",
+        "bytes": 2364,
+        "sha256": "b234f6d9fd22ebba5bcbebdde1e7075af744d0eb39c8a367e5de3248dc39ed1a"
+      },
+      "report": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/arm64-answers.json",
+        "bytes": 1693,
+        "sha256": "64c7d4ecd386bdb053df3dbb75137a37236a4e00ddabf9dd18a573523df07367"
+      },
+      "native_ir": {
+        "path": "/workspaces/repository/kprog/results/core-header-route-20261128/source-file-baseline/arm64-native.ll",
+        "bytes": 3384,
+        "sha256": "302177c09096b818becb842631a0af497472e974c5ab5e6b095168c96db85c06"
+      },
+      "target_unchanged": true
+    }
+  ],
+  "app_sources_rewritten": false,
+  "production_flags_changed": false,
+  "frontend_removed": "kprog/x86/native_lab/native_link/native_core_frontend.cpp",
+  "remaining": "Actual translation-unit coverage/producer integration/all-app P rebuild and ordered image/check pending."
+}

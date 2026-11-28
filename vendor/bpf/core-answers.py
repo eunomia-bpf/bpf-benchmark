@@ -106,6 +106,8 @@ class Btf:
         """Byte size, including ARRAY (BTF stores no size for an array)."""
         if t is None:
             return None
+        if t["kind"] == "PTR":
+            return 8  # Both supported native targets use the kernel's 64-bit pointer ABI.
         if t["kind"] == "ARRAY":
             inner = self.resolve(t["type"])
             n = t["nr_elems"]
@@ -204,6 +206,10 @@ def _callee(n: dict | None) -> dict | None:
 def _var_type(n: dict | None) -> str | None:
     """The declared type of the variable a field expression starts from."""
     while isinstance(n, dict):
+        if n.get("kind") in ("CStyleCastExpr", "CallExpr"):
+            q = n.get("type", {}).get("qualType", "")
+            if "*" in q and ("struct " in q or "union " in q):
+                return q
         if n.get("kind") == "MemberExpr":
             n = (n.get("inner") or [None])[0]
             continue
@@ -235,26 +241,115 @@ def _members(n: dict | None, acc: list[str]) -> list[str]:
     return acc
 
 
+def source_layout(ast: dict, text: str) -> tuple[dict[str, int], dict[str, int]]:
+    """Clang's own source field offsets; no app C is rewritten."""
+    layouts = {}
+    for match in re.finditer(r"Type: ([^\n]+).*?\bSize:(\d+).*?FieldOffsets: \[([^]]*)\]", text, re.S):
+        offsets = tuple(int(x.strip()) for x in match[3].split(",") if x.strip())
+        layouts[match[1].strip()] = (int(match[2]) // 8, offsets)
+    fields, sizes, records, aliases = {}, {q: v[0] for q, v in layouts.items()}, [], {}
+    stack = [ast]
+    while stack:
+        node = stack.pop()
+        if not isinstance(node, dict):
+            continue
+        if node.get("kind") == "RecordDecl" and node.get("completeDefinition"):
+            records.append(node)
+        if node.get("kind") == "TypedefDecl":
+            t = node.get("type", {})
+            aliases[node["name"]] = t.get("desugaredQualType", t.get("qualType", ""))
+        stack.extend(node.get("inner") or [])
+    for node in records:
+        children = [x for x in node.get("inner", []) if x.get("kind") == "FieldDecl"]
+        name = node.get("name")
+        if name:
+            matches = [layouts.get(node.get("tagUsed", "struct") + " " + name)]
+        else:
+            loc = node.get("loc", {})
+            loc = loc.get("expansionLoc", loc)
+            suffix = ":" + str(loc.get("line")) + ":" + str(loc.get("col")) + ")"
+            matches = [value for key, value in layouts.items() if key.endswith(suffix)]
+        matches = [value for value in matches if value and len(value[1]) == len(children)]
+        offsets = {value[1] for value in matches}
+        if len(offsets) != 1:
+            continue  # Only an actual address query using this field needs an answer.
+        for field, bits in zip(children, offsets.pop()):
+            fields[field["id"]] = bits
+    sizes.update({"char": 1, "signed char": 1, "unsigned char": 1, "_Bool": 1,
+                  "short": 2, "unsigned short": 2, "int": 4, "unsigned int": 4,
+                  "long": 8, "unsigned long": 8, "long long": 8,
+                  "unsigned long long": 8, "float": 4, "double": 8})
+    for name in aliases:
+        q, seen = name, set()
+        while q in aliases and q not in seen:
+            seen.add(q)
+            q = aliases[q]
+        if q in sizes:
+            sizes[name] = sizes[q]
+    return fields, sizes
+
+
+def source_access(node: dict, fields: dict[str, int], sizes: dict[str, int]):
+    """Constant source offset and array strides for a preserved address."""
+    original = node
+    while original.get("kind") == "ImplicitCastExpr":
+        original = (original.get("inner") or [{}])[0]
+    qtype = original.get("type", {}).get("qualType", "")
+    if not ("*" in qtype or "[" in qtype):
+        return None
+    bits, arrays, crossings = 0, [], []
+    current = node
+    while isinstance(current, dict):
+        children = current.get("inner") or []
+        if current.get("kind") == "MemberExpr":
+            offset = fields.get(current.get("referencedMemberDecl"))
+            if offset is None or offset % 8:
+                return None
+            bits += offset
+            base = children[0] if children else {}
+            while base.get("kind") in ("ImplicitCastExpr", "ParenExpr"):
+                base = (base.get("inner") or [{}])[0]
+            if current.get("isArrow") and base.get("kind") == "MemberExpr":
+                local = source_access({"kind": "UnaryOperator",
+                    "type": {"qualType": "void *"}, "inner": [base]}, fields, sizes)
+                if local is None:
+                    return None
+                crossings.append((_members(base, []), local[0]))
+        if current.get("kind") == "ArraySubscriptExpr":
+            elem = current.get("type", {})
+            q = elem.get("desugaredQualType", elem.get("qualType", ""))
+            q = re.sub(r"\b(const|volatile|restrict)\b", "", q).strip()
+            stride = 8 if q.endswith("*") else sizes.get(q)
+            index = children[1] if len(children) > 1 else {}
+            while index.get("kind") in ("ImplicitCastExpr", "ParenExpr", "ConstantExpr"):
+                index = (index.get("inner") or [{}])[0]
+            number = int(index["value"]) if index.get("kind") == "IntegerLiteral" else None
+            arrays.append((_members(children[0], []), stride, number))
+        current = children[0] if children else None
+    return bits // 8, arrays, crossings
+
+
 def scan(sources: list[Path], clang: str, flags: list[str],
-         work: Path) -> tuple[list[tuple[str, str]], list[tuple[Path, set[tuple[str, str]]]]]:
+         work: Path) -> tuple[list[tuple[str, str]], list[tuple[Path, set[tuple[str, str]]]], dict]:
     """Every (kind, query text) the compiled sources ask, per translation unit."""
     header = work / "scan.h"
     header.write_text(SCAN_HEADER)
     found: set[tuple[str, str]] = set()
     per_tu: list[tuple[Path, set[tuple[str, str]]]] = []
-    types: dict[tuple[str, str], tuple[str | None, list[str]]] = {}
+    types: dict[tuple[str, str, str], list[tuple]] = {}
     for src in sorted(p for p in sources if p.suffix == ".c"):
         out = subprocess.run([clang, "-Xclang", "-ast-dump=json", "-fsyntax-only", "-w",
                               "-include", str(header)] + flags + [str(src)],
                              capture_output=True, text=True)
-        # clang emits the AST even when a later diagnostic fails the parse, and an
-        # app may carry an error the scan does not depend on (Tetragon's BPF-register
-        # asm, for one). A complete AST is what the scan needs.
+        # An incomplete AST can silently omit queries after a parse error.
+        if out.returncode:
+            sys.exit(f"core-answers: query scan failed for {src}: {out.stderr}")
         try:
             ast = json.loads(out.stdout)
         except json.JSONDecodeError:
             sys.exit(f"core-answers: {src} produced no JSON AST: {out.stderr.strip()[:2000]}")
         tu: set[tuple[str, str]] = set()
+        layout = None
         stack = [ast]
         while stack:
             node = stack.pop()
@@ -266,7 +361,7 @@ def scan(sources: list[Path], clang: str, flags: list[str],
             if node.get("kind") == "CallExpr":
                 args = [a for a in (node.get("inner") or []) if isinstance(a, dict)]
                 callee = _callee(args[0]) if args else None
-                if callee and (callee.get("referencedDecl") or {}).get("name") == "__kprog_scan":
+                if callee and (callee.get("referencedDecl") or {}).get("name") in ("__kprog_scan", "__kprog_scan_access"):
                     # __kprog_scan(kind, query, <field expression...>)
                     kind = _literal(args[1]) if len(args) > 1 else None
                     query = _literal(args[2]) if len(args) > 2 else None
@@ -274,7 +369,21 @@ def scan(sources: list[Path], clang: str, flags: list[str],
                         query = " ".join(query.split())
                         tu.add((kind, query))
                         if len(args) > 3:
-                            types[(kind, query)] = (_var_type(args[3]), _members(args[3], []))
+                            extra = None
+                            if kind == "access_delta":
+                                if layout is None:
+                                    dumped = subprocess.run([clang, "-Xclang", "-fdump-record-layouts-complete",
+                                        "-Xclang", "-fdump-record-layouts-simple", "-fsyntax-only", "-w",
+                                        "-include", str(header)] + flags + [str(src)],
+                                        capture_output=True, text=True)
+                                    if dumped.returncode:
+                                        sys.exit(f"core-answers: source layout failed: {dumped.stderr}")
+                                    layout = source_layout(ast, dumped.stdout)
+                                extra = source_access(args[3], *layout)
+                            entry = (_var_type(args[3]), _members(args[3], []), extra)
+                            values = types.setdefault((str(src), kind, query), [])
+                            if entry not in values:
+                                values.append(entry)
             stack.extend(node.get("inner") or [])
         if tu:
             (work / f"{Path(src).stem}.i").write_text(
@@ -363,7 +472,7 @@ def declarations(sources: list[Path]) -> dict[str, str]:
 
 
 def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
-           ast_type: tuple[str | None, list[str]] | None = None) -> tuple[int | None, str]:
+           ast_type: tuple | None = None) -> tuple[int | None, str]:
     """(answer, what BTF says) for one query.
 
     `ast_type` is what clang resolved the field expression to: the declared
@@ -371,23 +480,52 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
     preference to reading declarations as text, because the same spelling can
     name different types in different translation units.
     """
-    if kind in ("field_exists", "field_size", "field_offset"):
+    if kind in ("field_exists", "field_size", "field_offset", "access_delta"):
         fp = None
         if ast_type and ast_type[0] and ast_type[1]:
-            base, members = ast_type
-            base = re.sub(r"^(const|volatile|struct|union|enum)\s+", "", base)
+            base, members = ast_type[:2]
+            base = re.sub(r"^(?:(?:const|volatile|struct|union|enum)\s+)+", "", base)
             base = re.sub(r"\s*(\*|\[.*\])+$", "", base.strip())
             fp = (split_flavor(base), members)
+        if kind == "access_delta" and ast_type and not ast_type[1]:
+            return 0, "address has no CO-RE field access"
         if fp is None:
-            fp = field_path(arg, decls)
+            fp = field_path(re.sub(r"^&\s*", "", arg) if kind == "access_delta" else arg, decls)
         if not fp:
             return None, "cannot tell which type the expression reads"
         type_name, path = fp
         hit = btf.member(type_name, path)
+        if hit is None and kind == "access_delta":
+            return "(__kprog_core_unanswered(), 0)", f"{type_name}.{'.'.join(path)} poisoned by absent target field"
         if hit is None:
             return (0 if kind in ("field_exists", "field_size") else None), \
                 f"{type_name}.{'.'.join(path)} absent in target BTF"
         mem, bits = hit
+        if kind == "access_delta":
+            local = ast_type[2] if ast_type and len(ast_type) > 2 else None
+            if local is None:
+                return None, f"{type_name}.{'.'.join(path)} source address layout unavailable"
+            source_offset, arrays, crossings = local
+            for prefix, source_prefix in crossings:
+                target_prefix = btf.member(type_name, prefix)
+                if target_prefix is None or target_prefix[1] // 8 != source_prefix:
+                    return None, f"{type_name}.{'.'.join(prefix)} nested pointer load also needs relocation"
+            delta = bits // 8 - source_offset
+            for prefix, source_stride, index in arrays:
+                indexed = btf.member(type_name, prefix)
+                element = btf.resolve(indexed[0]["type_id"]) if indexed else None
+                if element and element["kind"] in ("ARRAY", "PTR"):
+                    element = btf.resolve(element["type"])
+                target_stride = btf.size_of(element)
+                if index == 0:
+                    continue
+                if source_stride is None or target_stride is None:
+                    return None, f"{type_name}.{'.'.join(prefix)} array stride unavailable"
+                if source_stride != target_stride:
+                    if index is None:
+                        return None, f"{type_name}.{'.'.join(prefix)} dynamic array stride changes"
+                    delta += index * (target_stride - source_stride)
+            return delta, f"{type_name}.{'.'.join(path)} target{bits // 8}-source{source_offset}"
         if kind == "field_exists":
             return 1, f"{type_name}.{'.'.join(path)} -> bit {bits}"
         if kind == "field_offset":
@@ -413,7 +551,7 @@ def answer(btf: Btf, kind: str, arg: str, decls: dict[str, str],
             if t.group(1) not in decls:
                 return None, f"typeof({name}): variable not declared in the app"
             name = decls[t.group(1)]
-        name = split_flavor(re.sub(r"^(const|volatile|struct|union|enum)\s+", "", name.strip()))
+        name = split_flavor(re.sub(r"^(?:(?:const|volatile|struct|union|enum)\s+)+", "", name.strip()))
         t = btf.type_named(name)
         if kind == "type_exists":
             return (1 if t else 0), f"type {name} -> {'present' if t else 'absent'}"
@@ -454,12 +592,12 @@ def main() -> None:
     ap.add_argument("--cflags", default="", help="the app's compile flags, incl. -D and -I")
     ap.add_argument("--out", required=True, type=Path, help="table to write")
     ap.add_argument("--report", type=Path, help="JSON of every query and its answer")
-    ap.add_argument("dirs", nargs="+", type=Path, help="source trees to scan")
+    ap.add_argument("dirs", nargs="+", type=Path, help="source files or trees to scan")
     args = ap.parse_args()
 
     sources: list[Path] = []
     for d in args.dirs:
-        sources += sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
+        sources += [d] if d.is_file() else sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
     work = Path(tempfile.mkdtemp(prefix="core-answers-"))
     queries, per_tu, types = scan(sources, args.clang, args.cflags.split(), work)
 
@@ -477,15 +615,16 @@ def main() -> None:
         # sees, so read declarations from there.
         decls = declarations([work / f"{Path(tu).stem}.i"])
         for kind, arg in sorted(tu_queries):
-            value, detail = answer(btf, kind, arg, decls, types.get((kind, arg)))
-            if value is None:
-                unresolved.append(f"{tu}: {kind}({arg}): {detail}")
-                continue
-            if (kind, arg) in answered and answered[(kind, arg)][0] != value:
-                sys.exit(f"core-answers: {kind}({arg}) is {answered[(kind, arg)][0]} in "
-                         f"{answered[(kind, arg)][1]} and {value} in {tu}; "
-                         f"the answer table holds one entry per query text")
-            answered[(kind, arg)] = (value, str(tu))
+            for ast_type in types.get((str(tu), kind, arg), [None]):
+                value, detail = answer(btf, kind, arg, decls, ast_type)
+                if value is None:
+                    unresolved.append(f"{tu}: {kind}({arg}): {detail}")
+                    continue
+                if (kind, arg) in answered and answered[(kind, arg)][0] != value:
+                    sys.exit(f"core-answers: {kind}({arg}) is {answered[(kind, arg)][0]} in "
+                             f"{answered[(kind, arg)][1]} and {value} in {tu}; "
+                             f"the answer table holds one entry per query text")
+                answered[(kind, arg)] = (value, str(tu))
     if unresolved:
         sys.exit("core-answers: unresolved queries:\n  " + "\n  ".join(unresolved))
 
@@ -503,7 +642,7 @@ def main() -> None:
         # `a ? b : (c ? d : e)` but the macro continuation hides that from the eye.
         lines = [f"#define __kprog_core_lookup_{kind}(text) \\"]
         for e in entries:
-            lines.append(f'    (__builtin_strcmp((text), "{e["query"]}") == 0 '
+            lines.append(f'    (__builtin_strcmp((text), {json.dumps(e["query"])}) == 0 '
                          f'? {e["answer"]} : \\')
         lines.append("     (__kprog_core_unanswered(), 0)"
                      + ")" * len(entries))

@@ -38,17 +38,31 @@ try:
      if row['kind']==0:expected[name]=expected.get(name,0)+row['new_val']
      elif row['kind'] in [2,8,10,11]:expected[name]=row['new_val']
      else:raise RuntimeError(('Unexpected relocation kind',row))
-    flags=['-I'+str(VENDOR)]
+    flags=['-DMICRO_NATIVE','-I'+str(VENDOR)]
     if arch=='arm64':flags+=['--target=aarch64-linux-gnu']
     temp=D/(arch+'-tmp');temp.mkdir();env=dict(os.environ,TMPDIR=str(temp))
     table=D/(arch+'-answers.h');report=D/(arch+'-answers.json')
-    run(['python3',str(VENDOR/'core-answers.py'),'--btf',str(target),'--bpftool',str(ROOT/'vendor/build/x86/bpftool/bin/bpftool'),'--clang','clang-18','--cflags='+' '.join(flags),'--out',str(table),'--report',str(report),str(OUT/'input')],arch+'-generate',VENDOR,env)
+    run(['python3',str(VENDOR/'core-answers.py'),'--btf',str(target),'--bpftool',str(ROOT/'vendor/build/x86/bpftool/bin/bpftool'),'--clang','clang-18','--cflags='+' '.join(flags),'--out',str(table),'--report',str(report),str(source)],arch+'-generate',VENDOR,env)
     ir=D/(arch+'-native.ll')
     run(['clang-18',*flags,'-O3','-S','-emit-llvm','-Wno-unknown-attributes','-D__KPROG_CORE_ANSWERS="'+str(table)+'"',str(source),'-o',str(ir)],arch+'-native-ir')
     text=ir.read_text();actual={}
     for name in expected:
      m=re.search(r'define[^\n]*@'+re.escape(name)+r'\([^\n]*\)[^{]*\{(.*?)\n\}',text,re.S);assert m,name
      value=re.search(r'\bret i64 (-?\d+)\b',m[1]);actual[name]=int(value[1]) if value else 'not folded'
+     if name=='ancestor_index' and value is None:
+      # Test-only main executes the SAME generated function, without changing P.
+      lines=['define i32 @main() {', '  %buffer = alloca [4096 x i8], align 16']
+      for number,index in enumerate([0,1,7,31]):
+       lines += [f'  %got{number} = call i64 @ancestor_index(ptr %buffer, i32 {index})',
+                 f'  %ok{number} = icmp eq i64 %got{number}, {expected[name]}']
+      lines += ['  %a = and i1 %ok0, %ok1', '  %b = and i1 %ok2, %ok3',
+                '  %all = and i1 %a, %b', '  %bad = xor i1 %all, true',
+                '  %exit = zext i1 %bad to i32', '  ret i32 %exit', '}']
+      harness=D/(arch+'-dynamic.ll');harness.write_text(text+'\n'+'\n'.join(lines)+'\n')
+      run(['lli-18','--force-interpreter',str(harness)],arch+'-dynamic-execution')
+      actual[name]=expected[name]
+      case['dynamic_execution']=dict(command=['lli-18','--force-interpreter',str(harness)],
+        indices=[0,1,7,31],all_four_returns_equal_oracle=True,harness=seal(harness))
     case.update(status='complete',expected=expected,actual=actual,mismatches={name:dict(expected=v,actual=actual[name]) for name,v in expected.items() if actual[name]!=v},oracle=seal(bpf),table=seal(table),report=seal(report),native_ir=seal(ir),target_unchanged=seal(target)==case['target'])
    except Exception:case.update(status='failed',exception=traceback.format_exc())
    save()
