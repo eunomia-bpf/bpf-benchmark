@@ -1,0 +1,23 @@
+{
+  "started_utc": "2026-11-28T10:15:25Z",
+  "launcher_pid": 1417228,
+  "args": [
+    "setsid",
+    "nohup",
+    "taskset",
+    "-c",
+    "19",
+    "make",
+    "-C",
+    "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts",
+    "audit"
+  ],
+  "preparation_commit": "2603754352e5c1146ce9702e8432c5b65b25c25d",
+  "recipe_sha256": "8961ebe1d53197dd6190412024ad104518a5fe84dbacd5de556867d441694f32",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "controller": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/controller.json",
+  "job_log": "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/job.log",
+  "resources": "ControllerCPU19 and serialLLVMdisCPU16, AS48GiB; no guest/timing/image locks/compiles.",
+  "scope": "Frontend shift candidates for114actualobjects/698manifestrows. No result, completion, input-path or defect claim at launch.",
+  "collection": "Collect this same job NEXTTURN; preserve partial diagnostics and repair only failed component, no duplicate sweep."
+}
