@@ -1,0 +1,11 @@
+import KProgFormal
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.observers_outside
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.observers_outside
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.default_replaced
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.default_replaced
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.bound_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.bound_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.local_frame
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.local_frame
+#check KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.entry
+#print axioms KProgFormal.ClightRefinement.Arm64CiliumCallerScalarEntry.entry
