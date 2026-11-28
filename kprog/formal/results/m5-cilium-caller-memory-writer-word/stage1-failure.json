@@ -1,0 +1,28 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 34.694448471069336,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "8f7579adf12a586a62d2cbfb9668d74943a5445ba176e741408c50864699a94b",
+  "source_lines": 163,
+  "log_bytes": 1340,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:50:26: error: (deterministic) timeout at `\u00ababstract nested proofs\u00bb`, maximum number of heartbeats (200000) has been reached",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:55:88: error: Expected type must not contain free variables",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:66:12: error: maximum recursion depth has been reached"
+  ],
+  "cause": "linked composite Option.get proof reduction timed out at default200000 heartbeats, causing dependent layout/free-variable failure; broad target simplification hit default recursion512",
+  "repair": "reuse original checked composite term, kernel-reflexivity check of actual linked union lookup/field offset, explicit small field/shift/address evaluations; same AST/current795 allocation/store witness/default budgets"
+}

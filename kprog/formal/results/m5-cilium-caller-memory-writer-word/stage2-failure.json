@@ -1,0 +1,31 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 49.05606389045715,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "5a5eb2820bccf67a09f286e89c5576f33e9271474283a0a1f3fc39958f9ebe1b",
+  "source_lines": 224,
+  "log_bytes": 16306,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:51:2: error: original checked stack composite absent",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:58:16: error: (kernel) declaration type mismatch, '_private.results.\u00abm5-cilium-caller-memory-writer-word\u00bb.Proof.0.KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterWord.stack_lookup' has type",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:65:16: error: (kernel) declaration type mismatch, '_private.results.\u00abm5-cilium-caller-memory-writer-word\u00bb.Proof.0.KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterWord.field_offset' has type",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:97:2: error: maximum recursion depth has been reached",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:118:4: error: maximum recursion depth has been reached",
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:124:2: error: maximum recursion depth has been reached"
+  ],
+  "cause": "projection inferType was not a normalized Eq; unsafe argument indexing failed composite extraction and triggered cascading kernel certificate mismatches; change conversions at field/address/target still hit default recursion512",
+  "repair": "inspect guarded And/Eq/Option.some in compiled union_layout constant type directly; local expression equation rewrites replace change; same actual linked world/AST/rights/store/default limits"
+}

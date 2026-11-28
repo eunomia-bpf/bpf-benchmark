@@ -1,0 +1,26 @@
+{
+  "receipt": {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+    ],
+    "exit": 1,
+    "seconds": 48.48568415641785,
+    "cpu": 17,
+    "workers": 1,
+    "nice": 0,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "shared"
+  },
+  "source_sha256": "f55b778f66964f6df133dd0461f6067d22045392a23e834322d5dd0c2e3c7c44",
+  "source_lines": 217,
+  "log_bytes": 1262,
+  "errors": [
+    "results/m5-cilium-caller-memory-writer-word/Proof.lean:100:41: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern"
+  ],
+  "cause": "field_value rewrite did not expose the match-some branch and typeof Evar before applying fieldLoc; compiled composite extraction and linked lookup/offset certificates passed",
+  "repair": "separate first expression rewrites from simp only typeof/fieldLoc to reduce match-iota; same AST/actual795 rights/store/resources/default limits"
+}

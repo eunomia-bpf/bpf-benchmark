@@ -1,0 +1,195 @@
+{
+  "scope": "original aligned64 stack word assignment with real allocation rights and readback",
+  "source_sha256": "d9f4217c3689848fd8f1288f3b07e3992a5e8b6eb961ca425d231720233b9847",
+  "source_context": {
+    "time": "2026-11-27T16:31:58Z",
+    "captured_C_sha256": "686994ad0d609f7432652414399f07c2abb70a382e403959463ffef05fd6e16f",
+    "original_export_sha256": "c8e5655bbdb9bbb68852b9b7edb24a66e0128d2bf62080bad5d5144c28bcf601",
+    "packaged_parts_verified": 37,
+    "packaging_sha256": "e1a6bef819c649422d30ba1daf1db1cfe351966710b86b166aa291389a23f5f9",
+    "current_runtime_local_header_sha256": "d06f6aa29df3bc1bde893abcf15c690bced70797f7448db1ff23495c0aba1341",
+    "last_source_inspector_header_sha256": "a59f6ee1d1131c0c3353bd38ee5097d91ef16b236ae04a6ed2971617bfb36d92",
+    "scope": "Proof uses exact original captured C/Clight AST;current PERFscalarprobe header is beyond historical const-only inverse plan;no new current-header/Clight/runtime equivalence claim",
+    "runtime_header_observed_now_sha256": "0d98819cce788c790b40502d4791dca43333470ee903723ee111e0746a03cce9"
+  },
+  "receipts": {
+    "stage4": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+      ],
+      "exit": 0,
+      "seconds": 159.88828659057617,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "focus1": {
+      "command": [
+        "lake",
+        "build",
+        "+KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterWord"
+      ],
+      "exit": 0,
+      "seconds": 157.3332061767578,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "root1": {
+      "command": [
+        "flock",
+        "-n",
+        "-x",
+        "/workspaces/.agent-state/kprog-lanes/locks/formal-full-check",
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 7.877512454986572,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "public1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-word/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.2715322971343994,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    }
+  },
+  "focused_jobs": 303,
+  "full_jobs": 1570,
+  "root_queries": [
+    "source",
+    "fast_source",
+    "assignment_source",
+    "stack_layout",
+    "target",
+    "writable",
+    "write",
+    "bound_frame",
+    "cache_values",
+    "execute",
+    "advance"
+  ],
+  "actual_memory_writer_address_commit": "e0ff0958bdae71667b637cbf70e97a1ab6c77a36",
+  "source": "exact original mask/action/fast branch and aligned q[index>>3] assignment retained, including original tag/unmaterialization suffix and other branch",
+  "target": "actual linked composite union_q layout and actual allocated stack block0 derive original index0 address, with no successful-address premise",
+  "store": "actual current795-local allocation rights derive aligned Mint64 store at0 within real32-byte stack union, same-store readback and other-block/caller/access/frontier frames",
+  "execution": "one original assignment step consumes SAME derived store, no TempEnv change; original fast sequence entry+assignment+continuation =3 internal steps",
+  "cache": "actual numeric-return and valid cache default3/5 retain their same cached scalar/valid1 reads by allocation-name separation from stack",
+  "boundary": "index0 and stw_value temporary are explicit fast-entry invariants; accepted address95 is not yet composed through mask/action selection, so no95+3 or full-writer claim",
+  "open": "original width8 mask/action route, value unmaterialization/tag writes, actual provider-outcome composition/whole-entry width invariant, linked whole-entry/provider/Senv transport/native whole-state",
+  "old_allocator_or_successful_store_oracle_used": false,
+  "provider_success_existence_or_purity_claimed": false,
+  "native_whole_state_proved_here": false,
+  "resource_assignment": "existing run.py timingSH/CPU17/j1/nice0/32GiB/unchanged proof settings/fullEX-nformal-full-check; nonblocking shared timing preflight before launch",
+  "native_global_universal_refinement_claimed": false,
+  "raw": "/workspaces/kprog-raw/formal/m5-cneg/20261122T123023Z",
+  "failed_stage1": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 34.694448471069336,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "8f7579adf12a586a62d2cbfb9668d74943a5445ba176e741408c50864699a94b",
+    "source_lines": 163,
+    "log_bytes": 1340,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:50:26: error: (deterministic) timeout at `\u00ababstract nested proofs\u00bb`, maximum number of heartbeats (200000) has been reached",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:55:88: error: Expected type must not contain free variables",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:66:12: error: maximum recursion depth has been reached"
+    ],
+    "cause": "linked composite Option.get proof reduction timed out at default200000 heartbeats, causing dependent layout/free-variable failure; broad target simplification hit default recursion512",
+    "repair": "reuse original checked composite term, kernel-reflexivity check of actual linked union lookup/field offset, explicit small field/shift/address evaluations; same AST/current795 allocation/store witness/default budgets"
+  },
+  "proof_repair": "reduce match-some and typeof Evar before fieldLoc rewrite; compiled composite extraction/linked certificates retained; same AST/rights/store/default limits",
+  "failed_stage2": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 49.05606389045715,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "5a5eb2820bccf67a09f286e89c5576f33e9271474283a0a1f3fc39958f9ebe1b",
+    "source_lines": 224,
+    "log_bytes": 16306,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:51:2: error: original checked stack composite absent",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:58:16: error: (kernel) declaration type mismatch, '_private.results.\u00abm5-cilium-caller-memory-writer-word\u00bb.Proof.0.KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterWord.stack_lookup' has type",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:65:16: error: (kernel) declaration type mismatch, '_private.results.\u00abm5-cilium-caller-memory-writer-word\u00bb.Proof.0.KProgFormal.ClightRefinement.Arm64CiliumCallerMemoryWriterWord.field_offset' has type",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:97:2: error: maximum recursion depth has been reached",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:118:4: error: maximum recursion depth has been reached",
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:124:2: error: maximum recursion depth has been reached"
+    ],
+    "cause": "projection inferType was not a normalized Eq; unsafe argument indexing failed composite extraction and triggered cascading kernel certificate mismatches; change conversions at field/address/target still hit default recursion512",
+    "repair": "inspect guarded And/Eq/Option.some in compiled union_layout constant type directly; local expression equation rewrites replace change; same actual linked world/AST/rights/store/default limits"
+  },
+  "failed_stage3": {
+    "receipt": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "-j1",
+        "results/m5-cilium-caller-memory-writer-word/Proof.lean"
+      ],
+      "exit": 1,
+      "seconds": 48.48568415641785,
+      "cpu": 17,
+      "workers": 1,
+      "nice": 0,
+      "address_space_bytes": 34359738368,
+      "timing_lock": "shared"
+    },
+    "source_sha256": "f55b778f66964f6df133dd0461f6067d22045392a23e834322d5dd0c2e3c7c44",
+    "source_lines": 217,
+    "log_bytes": 1262,
+    "errors": [
+      "results/m5-cilium-caller-memory-writer-word/Proof.lean:100:41: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern"
+    ],
+    "cause": "field_value rewrite did not expose the match-some branch and typeof Evar before applying fieldLoc; compiled composite extraction and linked lookup/offset certificates passed",
+    "repair": "separate first expression rewrites from simp only typeof/fieldLoc to reduce match-iota; same AST/actual795 rights/store/resources/default limits"
+  }
+}
