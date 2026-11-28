@@ -1,0 +1,12 @@
+{
+  "utc": "2026-11-28T13:26:04Z",
+  "newest_resume": "COORDINATOR2026-11-28T11:20Z",
+  "image": "sha256:31f611e1374d1f6cd7660166b97816bbdff2d75013843a7066c6d704dd9db388",
+  "recipes": {
+    "check_all.py": "59b034605774a39ec8102a1a7418b238e473a2854e515eebda9b10838297e43d",
+    "observe_phases.py": "f8e9b973f021908f54a5da2161d74c32804d4ec85fb3c2fe7735120f06f48711",
+    "dump_all.py": "d57bac368f3927fb0f04a49596e0aafae8d091a6468f4094fad82ff88773fd5b"
+  },
+  "preflight": "Pythoncompile0/all3; generatedbash-n0. Driver_shim_log_path writes live artifact details/shim-logs before runnerstart. Dump_all only generalizes NAMEemptyfilter from existingdump-prog.py; no production changes. Notlaunched.",
+  "limits": "Snapshots readonly but perturbwork; partial/late/copy/dump errors explicit, no sameworkclaim fromcontroller0. Common1/8s schedule allapps, code/cacheonce perphase. NoPMU/timingacceptance/newcompilepolicy."
+}
