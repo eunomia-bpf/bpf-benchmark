@@ -1,0 +1,69 @@
+{
+  "archive": "tracee-index-records.tar.zst",
+  "sha256": "268eb6a7ba8fc156dabac77b487b56f5b8a5c0f0516b76aba8f127fb5ba3541a",
+  "bytes": 28152,
+  "members": [
+    {
+      "member": "controller.json",
+      "bytes": 2683,
+      "sha256": "83cf0303ac8cefe431a81b00f6da18e710065676f6245227e4102f4d7db6c9fb"
+    },
+    {
+      "member": "source-anchors.json",
+      "bytes": 71731,
+      "sha256": "29cafc992f53bbbdb3d6fe9d3891968aebc4526b5b94a2ebb9077e1178f43ddf"
+    },
+    {
+      "member": "x86-consumers.json",
+      "bytes": 117259,
+      "sha256": "3eff64da71b1c809d27137961cd220b0887f69f13b9c172af22f9fe0f730e436"
+    },
+    {
+      "member": "x86-btf-facts.json",
+      "bytes": 9802,
+      "sha256": "26f42924769ad8d62de691ad54eac0ca7f14428ce78bdf168831c736ce05dac5"
+    },
+    {
+      "member": "x86-btf-anonymous-addendum.json",
+      "bytes": 14298,
+      "sha256": "d905237211bec66ee2f91669f3150fd4d3fb57378ebce3d51be86fc301af64c1"
+    },
+    {
+      "member": "x86.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "x86-btf.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-consumers.json",
+      "bytes": 117045,
+      "sha256": "55b8f49348dc3d2eccbd5dd1229c7dd902d5a3707efbf755282be5c0554444a1"
+    },
+    {
+      "member": "arm64-btf-facts.json",
+      "bytes": 9805,
+      "sha256": "a35b9f9a304eb2f6d29ecd188267a4879312097fb687df23308a22df299148a9"
+    },
+    {
+      "member": "arm64-btf-anonymous-addendum.json",
+      "bytes": 14300,
+      "sha256": "13d42fca860bae4eb5a14f94b6416c53357da3a4c49bb704adb826534b1658b8"
+    },
+    {
+      "member": "arm64.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "arm64-btf.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "logical_bytes": 356923,
+  "scope": "Complete untruncated inspection/controller/source/BTF records; original native objects, source and prior114object census are not archive members and remain untouched."
+}

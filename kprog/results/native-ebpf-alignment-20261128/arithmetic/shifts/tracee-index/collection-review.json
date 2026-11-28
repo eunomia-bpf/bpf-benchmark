@@ -1,0 +1,125 @@
+{
+  "newest_resume": "COORDINATOR 2026-11-28T11:20Z",
+  "architectures": {
+    "x86": {
+      "original_sites": 10,
+      "locally_bounded_sites": 8,
+      "kernel_socket_state_input_sites": 1,
+      "signed_helper_id_lower_bound_open_sites": 1,
+      "native_perf_flag_ir": [
+        {
+          "line": 24462,
+          "ir": "  %21 = shl i32 1, 6, !dbg !17565"
+        },
+        {
+          "line": 24464,
+          "ir": "  %22 = shl i32 1, 7, !dbg !17566"
+        }
+      ],
+      "native_perf_masks": [
+        64,
+        128
+      ],
+      "expected_target_btf_masks": [
+        32,
+        64
+      ],
+      "btf_filter_exists": false,
+      "btf_module_exists": true,
+      "native_frontend_skc_state_byte_offset": 14,
+      "target_btf_skc_state_byte_offset": 18,
+      "offset_scope": "Frontend offset only; final loader relocation and installed read need checking before claiming wrong live field.",
+      "categories": {
+        "save_args_to_submit_buf": {
+          "sites": 2,
+          "bounds": "i=0..5 => DEC_ARG amount0..40; argument type<=TIMESPEC_T15 before1ULL<<type"
+        },
+        "get_num_fields": {
+          "sites": 1,
+          "bounds": "i=0..5 => amount0..40"
+        },
+        "send_bpf_perf_attach": {
+          "sites": 2,
+          "bounds": "Literal6/7 (<32), but semantically wrong masks against this target BTF"
+        },
+        "filter_file_fd": {
+          "sites": 2,
+          "bounds": "fd0..2 and fd+16 =>16..18"
+        },
+        "get_standard_fds_from_struct_file": {
+          "sites": 1,
+          "bounds": "i0..2"
+        },
+        "inet6_sk_own_impl": {
+          "sites": 1,
+          "status": "OPEN target socket-state producer/relocated field; expected TCP states1..13 are conditional on reading the right field"
+        },
+        "handle_bpf_helper_func_id": {
+          "sites": 1,
+          "status": "OPEN signed int from kprobe registers or insn->imm; only>=64 rejected locally, no lower-bound proof. Join verifier admissibility/corresponding BPF operations before divergence claim"
+        }
+      }
+    },
+    "arm64": {
+      "original_sites": 10,
+      "locally_bounded_sites": 8,
+      "kernel_socket_state_input_sites": 1,
+      "signed_helper_id_lower_bound_open_sites": 1,
+      "native_perf_flag_ir": [
+        {
+          "line": 24635,
+          "ir": "  %21 = shl i32 1, 6, !dbg !17406"
+        },
+        {
+          "line": 24637,
+          "ir": "  %22 = shl i32 1, 7, !dbg !17407"
+        }
+      ],
+      "native_perf_masks": [
+        64,
+        128
+      ],
+      "expected_target_btf_masks": [
+        32,
+        64
+      ],
+      "btf_filter_exists": false,
+      "btf_module_exists": true,
+      "native_frontend_skc_state_byte_offset": 14,
+      "target_btf_skc_state_byte_offset": 18,
+      "offset_scope": "Frontend offset only; final loader relocation and installed read need checking before claiming wrong live field.",
+      "categories": {
+        "save_args_to_submit_buf": {
+          "sites": 2,
+          "bounds": "i=0..5 => DEC_ARG amount0..40; argument type<=TIMESPEC_T15 before1ULL<<type"
+        },
+        "get_num_fields": {
+          "sites": 1,
+          "bounds": "i=0..5 => amount0..40"
+        },
+        "send_bpf_perf_attach": {
+          "sites": 2,
+          "bounds": "Literal6/7 (<32), but semantically wrong masks against this target BTF"
+        },
+        "filter_file_fd": {
+          "sites": 2,
+          "bounds": "fd0..2 and fd+16 =>16..18"
+        },
+        "get_standard_fds_from_struct_file": {
+          "sites": 1,
+          "bounds": "i0..2"
+        },
+        "inet6_sk_own_impl": {
+          "sites": 1,
+          "status": "OPEN target socket-state producer/relocated field; expected TCP states1..13 are conditional on reading the right field"
+        },
+        "handle_bpf_helper_func_id": {
+          "sites": 1,
+          "status": "OPEN signed int from kprobe registers or insn->imm; only>=64 rejected locally, no lower-bound proof. Join verifier admissibility/corresponding BPF operations before divergence claim"
+        }
+      }
+    }
+  },
+  "scope": "Read-only actual native frontend and target kernel BTF; no installed-code or runtime exercise claim.",
+  "fix_status": "Confirmed common field-existence folding defect; production fix NOT implemented or activated. New coordinator priority is Tetragon/BCC regression diagnosis."
+}

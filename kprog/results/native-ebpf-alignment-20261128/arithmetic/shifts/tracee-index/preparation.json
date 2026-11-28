@@ -1,0 +1,34 @@
+{
+  "prepared_utc": "2026-11-28T11:18:13Z",
+  "newest_resume": "COORDINATOR 2026-11-28T07:17Z",
+  "objects": [
+    {
+      "object": "vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "sha256": "eae759f89bfd9423a4421db7004b997379488e70835f09b3be630050125a8210",
+      "architecture": "x86",
+      "shift_record": "x86-tracee-tracee.native.json"
+    },
+    {
+      "object": "vendor/build/native-bpf/arm64/stage/tracee/tracee.native.o",
+      "sha256": "e6811a4a4c4e783e7dfbed0f882e6ddab5739955d1c772f545cec1d3f1e1ef7a",
+      "architecture": "arm64",
+      "shift_record": "arm64-tracee-tracee.native.json"
+    }
+  ],
+  "source_sha256": {
+    "vendor/bpf/native_compat.h": "906737856b4c533575095e11e090b125ed6bc95a676bd9087411234b44d74494",
+    "vendor/bpf/tracee/pkg/ebpf/c/types.h": "97e808389ae0025750016dc0ffeaec7cf2e0c6e947e302c00fd5f1b1d6965fea",
+    "vendor/bpf/tracee/pkg/ebpf/c/tracee.bpf.c": "3482f305df1d892e87aa90e121edf38e1200d04f1c237cb73994434a3195e3d1",
+    "vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h": "373a039ac7af6b60ad51e6a4b7517312506e8042e43d1e5128b3cfb6779090d3",
+    "vendor/bpf/tracee/pkg/ebpf/c/common/network.h": "67456726a4d5079f934f3f617f99c3c173b634db98985390392511c7884b4b76",
+    "vendor/bpf/tracee/pkg/ebpf/c/common/filesystem.h": "c6f04017207a8caec82317555be9f69346e5deb2f11114f599746c8d503a76c6",
+    "vendor/bpf/tracee/pkg/ebpf/c/capture_filtering.h": "7f10dba602b05a651dced5173e43d6dd20fb2da3a4d1dee6a65866e95d934eb2",
+    "vendor/linux-framework/include/net/tcp_states.h": "8a41dab66aa79bd0b185da5bbb9b4c72ad7f3efb11bf75d894a80f4273f9766c",
+    "vendor/linux-framework/include/linux/trace_events.h": "92207c5071041e110316de20ae1eb3c15c018c943d40fafedbc88793b560b036",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/x86-tracee-tracee.native.json": "f9f8e0ee00e0b6042b3fa85a5c4be6c65ab4f3346362f88cbbb2ec77655fe957",
+    "kprog/results/native-ebpf-alignment-20261128/arithmetic/shifts/arm64-tracee-tracee.native.json": "83cb8d6a7e269ed5a715f02fa5e692c6bc3c3bb5fbea2148a5ef9f42ac896fe0"
+  },
+  "original_inspection_recipe_sha256": "9421d13d00622645112d74e201e55ea70e763d01bdeaf5d8dc2e25c329943eb5",
+  "corrected_reader_sha256": "b4bce0665ac204215659a82767445b274e4439773b4e448f52f70327a620d3e7",
+  "reader_correction": "Initial BTF closure omitted named(anon) members. Native consumer records are unchanged; only the two BTF dumps are reread into addenda with full raw-BTF SHA equality."
+}
