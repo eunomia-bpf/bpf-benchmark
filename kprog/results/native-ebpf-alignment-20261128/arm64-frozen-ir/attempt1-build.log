@@ -1,0 +1,59 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/stage/"
+clang++-18 $(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include "/workspaces/repository/kprog/x86/perf_context_lto.cpp" -o "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto" \
+	$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native aarch64 object linker --system-libs) \
+	/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+make: Leaving directory '/workspaces/repository/vendor/bpf'
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: function `indirect_sites` is never used
+   --> src/x86_readonly_relocs.rs:209:15
+    |
+209 | pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    |               ^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `control_targets` is never used
+   --> src/x86_readonly_relocs.rs:238:15
+    |
+238 | pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    |               ^^^^^^^^^^^^^^^
+
+warning: fields `target_offset` and `table_offset` are never read
+   --> src/x86_readonly_relocs.rs:335:43
+    |
+335 |     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    |     ------------ fields in this variant   ^^^^^^^^^^^^^       ^^^^^^^^^^^^
+
+warning: field `target_offset` is never read
+   --> src/x86_readonly_relocs.rs:336:43
+    |
+336 |     AbsoluteCode { proof: ProofDataReloc, target_offset: u64 },
+    |     ------------ field in this variant    ^^^^^^^^^^^^^
+
+warning: `native-link` (bin "native-link") generated 4 warnings
+    Finished `release` profile [optimized] target(s) in 16.22s
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+error[E0382]: borrow of moved value: `proof`
+   --> src/frozen_ir.rs:108:77
+    |
+100 |         let proof = dir.join("input.proof.o");
+    |             ----- move occurs because `proof` has type `std::path::PathBuf`, which does not implement the `Copy` trait
+101 |         let linker = here.join("target/release/native-link");
+102 |         for target in ["x86_64-linux-gnu", "aarch64-linux-gnu"] {
+    |         ------------------------------------------------------- inside of this loop
+...
+108 |             .args(["--symbol", "entry", "--mode", "proof", "--output"]).arg(&proof).status()?;
+    |                                                                             ^^^^^^ value borrowed here after move
+...
+116 |         let mut args = Args { input: proof, symbol: "entry".into(), output: dir.join("out.bin"),
+    |                                      ----- value moved here, in previous iteration of loop
+    |
+help: consider cloning the value if the performance cost is acceptable
+    |
+116 |         let mut args = Args { input: proof.clone(), symbol: "entry".into(), output: dir.join("out.bin"),
+    |                                           ++++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `native-link` (bin "native-link" test) due to 1 previous error

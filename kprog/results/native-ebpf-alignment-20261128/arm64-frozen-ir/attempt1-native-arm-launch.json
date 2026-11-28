@@ -1,0 +1,8 @@
+{
+  "pid": 1240957,
+  "started_utc": "2026-11-28T04:06:23Z",
+  "result": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir",
+  "script": "kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/build_native_arm_tool.py",
+  "script_sha256": "3095e85ba5716329a0ad4193da8d835ed16de0dda48b6c03a3db373b734320e8",
+  "scope": "After same1238829 host validation, existing cross-g++ + canonical ARM base libLLVM18/libbpf,48GiB/max2/16,18/timingSH-imageEX. Reuse exact ARM scalar regression input via qemu-user; preserve old wrong-ISA tool before replacing stage only on successful ELF+execution checks. No P/kernel/image/fulltiming or new LLVM/base."
+}
