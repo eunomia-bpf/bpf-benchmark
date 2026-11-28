@@ -1,0 +1,106 @@
+diff --git a/tracer/map_variables_integration_test.go b/tracer/map_variables_integration_test.go
+new file mode 100644
+index 0000000..744a5f7
+--- /dev/null
++++ b/tracer/map_variables_integration_test.go
+@@ -0,0 +1,45 @@
++//go:build integration && linux
++
++// Copyright The OpenTelemetry Authors
++// SPDX-License-Identifier: Apache-2.0
++
++package tracer
++
++import (
++	"bytes"
++	"testing"
++
++	cebpf "github.com/cilium/ebpf"
++	"github.com/cilium/ebpf/btf"
++	"github.com/stretchr/testify/require"
++	"go.opentelemetry.io/ebpf-profiler/support"
++)
++
++func TestLoadAllMapsInitializesConfiguredVariables(t *testing.T) {
++	spec, err := support.LoadCollectionSpec()
++	require.NoError(t, err)
++	const section = ".rodata.var"
++	layout, ok := spec.Maps[section].Value.(*btf.Datasec)
++	require.True(t, ok)
++	input := &cebpf.CollectionSpec{Maps: map[string]*cebpf.MapSpec{section: spec.Maps[section]}, Variables: spec.Variables}
++	expected := make(map[uint32][]byte)
++	for _, field := range layout.Vars {
++		variable := input.Variables[field.Type.TypeName()]
++		require.NotNil(t, variable)
++		value := bytes.Repeat([]byte{0xa5}, int(field.Size))
++		require.NoError(t, variable.Set(value))
++		expected[field.Offset] = value
++	}
++	maps := make(map[string]*cebpf.Map)
++	require.NoError(t, loadAllMaps(input, &Config{}, maps))
++	t.Cleanup(func() {
++		for _, m := range maps {
++			m.Close()
++		}
++	})
++	data := make([]byte, maps[section].ValueSize())
++	require.NoError(t, maps[section].Lookup(uint32(0), &data))
++	for offset, value := range expected {
++		require.Equal(t, value, data[int(offset):int(offset)+len(value)])
++	}
++}
+diff --git a/tracer/systemconfig.go b/tracer/systemconfig.go
+index a1302d1..97f94b0 100644
+--- a/tracer/systemconfig.go
++++ b/tracer/systemconfig.go
+@@ -237,8 +237,9 @@ func determineStackLayout(coll *cebpf.CollectionSpec, maps map[string]*cebpf.Map
+ // prepareAnalysis creates a new CollectionSpec for the system analysis.
+ func prepareAnalysis(orig *cebpf.CollectionSpec) (*cebpf.CollectionSpec, map[string]*cebpf.Map, error) {
+ 	new := &cebpf.CollectionSpec{
+-		Maps:     make(map[string]*cebpf.MapSpec),
+-		Programs: make(map[string]*cebpf.ProgramSpec),
++		Maps:      make(map[string]*cebpf.MapSpec),
++		Programs:  make(map[string]*cebpf.ProgramSpec),
++		Variables: orig.Variables,
+ 	}
+ 	new.Maps["system_analysis"] = orig.Maps["system_analysis"].Copy()
+ 	new.Maps[".rodata.var"] = orig.Maps[".rodata.var"].Copy()
+diff --git a/tracer/tracer.go b/tracer/tracer.go
+index 9af0c75..7336daf 100644
+--- a/tracer/tracer.go
++++ b/tracer/tracer.go
+@@ -511,6 +511,7 @@ func loadAllMaps(coll *cebpf.CollectionSpec, cfg *Config,
+ 		adaption[mapName] = 1 << uint32(exeIDToStackDeltasSize+cfg.MapScaleFactor)
+ 	}
+ 
++	mapsToLoad := make(map[string]*cebpf.MapSpec, len(coll.Maps))
+ 	for mapName, mapSpec := range coll.Maps {
+ 		if mapName == "sched_times" && cfg.OffCPUThreshold == 0 {
+ 			// Off CPU Profiling is disabled. So do not load this map.
+@@ -520,13 +521,21 @@ func loadAllMaps(coll *cebpf.CollectionSpec, cfg *Config,
+ 			log.Debugf("Size of eBPF map %s: %v", mapName, newSize)
+ 			mapSpec.MaxEntries = newSize
+ 		}
+-		ebpfMap, err := cebpf.NewMap(mapSpec)
+-		if err != nil {
+-			return fmt.Errorf("failed to load %s: %v", mapName, err)
+-		}
+-		ebpfMaps[mapName] = ebpfMap
++		mapsToLoad[mapName] = mapSpec
+ 	}
+ 
++	// Variables are serialized into data-section maps by the collection loader.
++	mapsOnly := coll.Copy()
++	mapsOnly.Programs = nil
++	mapsOnly.Maps = mapsToLoad
++	loaded, err := cebpf.NewCollection(mapsOnly)
++	if err != nil {
++		return fmt.Errorf("failed to load maps: %v", err)
++	}
++	defer loaded.Close()
++	for mapName := range loaded.Maps {
++		ebpfMaps[mapName] = loaded.DetachMap(mapName)
++	}
+ 	return nil
+ }
+ 

@@ -1,0 +1,7 @@
+# Common API ARM build and source publication
+
+The finite job 1316789 completed at 2026-11-28T06:12:54Z. Both documented tracer integration-test-binary compilation and the canonical ARM collector build returned zero. All 125 protected files and both image IDs match their before-build values. The ARM app has 41923064 bytes, SHA256 689f501db2b006aa2e1c20c73f61c8f4ee163669abf1553b7c234860aaf3f840. The tracer test binary has 25507551 bytes, SHA256 f5af21c1f9d85a6343ef1e243fda31a5e1f9ff575bc168aeffffc187c1bf56b0. Both ELF machines are AArch64 (183).
+
+The application fork fix is published as 6cfd48e9705c263a89839d5e7b34c716d1cdfc27 on eunomia-bpf/opentelemetry-ebpf-profiler main, via a normal fast-forward push from the retained detached checkout. Its production change is 17 additions and 7 deletions; its kernel-map regression test is 45 lines. Collection loading serializes configured variables and transfers map ownership to the existing caller. The analysis collection retains variable metadata. Existing map sizes and off-CPU map selection apply as before.
+
+The integration binary uses the application module's declared cilium/ebpf v0.20.0. The collector build uses the canonical builder's local cilium-ebpf replacement at 88256f7a. Both builds cover the shared API; kernel map contents and useful profiling work require the following live checks. The existing ARM and x86 runtime images, kernels, BPF inputs and native program artifacts retain their build-time hashes. The full x86 rotate remains with its current owner.

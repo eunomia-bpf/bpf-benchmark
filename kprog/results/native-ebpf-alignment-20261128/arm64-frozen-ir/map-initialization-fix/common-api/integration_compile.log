@@ -1,0 +1,3 @@
+make: Entering directory '/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler'
+(go test -ldflags='-extldflags=-static' -trimpath -c -tags osusergo,netgo,static_build,integration -o ./support/tracer.test ./tracer) || exit ; 
+make: Leaving directory '/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler'

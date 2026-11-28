@@ -1,0 +1,46 @@
+{
+  "collected_utc": "2026-11-28T06:19:46Z",
+  "worker_pid": 1316789,
+  "ended_utc": "2026-11-28T06:12:54Z",
+  "returncodes": {
+    "controller_status": 0,
+    "integration_compile_returncode": 0,
+    "app_compile_returncode": 0
+  },
+  "protected_files_checked": 125,
+  "protected_before_after_equal": true,
+  "image_ids_before_after_equal": true,
+  "products": {
+    "app_compile_product": {
+      "path": "/workspaces/repository/vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler",
+      "bytes": 41923064,
+      "sha256": "689f501db2b006aa2e1c20c73f61c8f4ee163669abf1553b7c234860aaf3f840",
+      "elf_machine": 183
+    },
+    "integration_compile_product": {
+      "path": "/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler/support/tracer.test",
+      "bytes": 25507551,
+      "sha256": "f5af21c1f9d85a6343ef1e243fda31a5e1f9ff575bc168aeffffc187c1bf56b0",
+      "elf_machine": 183
+    }
+  },
+  "source_fork_commit": "6cfd48e9705c263a89839d5e7b34c716d1cdfc27",
+  "receipts": {
+    "controller.json": {
+      "bytes": 44363,
+      "sha256": "61672860a7c1e0ccba1b550efd54ff259167ee833aa51b9490d9c7ce3079380a"
+    },
+    "integration_compile.log": {
+      "bytes": 326,
+      "sha256": "fb5b9e5a51596fda345cab0a728a2b7a08a5c9fb0f3da62e20d3a0762baf96f0"
+    },
+    "app_compile.log": {
+      "bytes": 1658,
+      "sha256": "35d12876d415085c751453ce6414fad9177c4de0fd386fd05d9f0accaea0da75"
+    },
+    "job.log": {
+      "bytes": 173,
+      "sha256": "67c1139054f31c39bb1c6828ec373607ff70d68a1d50a53c3b9fa975ac8b3502"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "commit": "6cfd48e9705c263a89839d5e7b34c716d1cdfc27",
+  "parent": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "remote_main": "6cfd48e9705c263a89839d5e7b34c716d1cdfc27",
+  "source_sha256": {
+    "tracer/tracer.go": "2b3ea974ca952ac6d6a8843704bade27e37a71b8cb14ed26f920fa207d346888",
+    "tracer/systemconfig.go": "cea3a4218e0599191a8a3fce7f259390ae8f541c82ee6b41ce6924a4c9d74197",
+    "tracer/map_variables_integration_test.go": "20faebfa14701686a945429ea3a51d1508667de3d71750ec25f02e01782141e5"
+  },
+  "production_numstat": "3\t2\ttracer/systemconfig.go\n14\t5\ttracer/tracer.go\n",
+  "test_numstat": "45\t0\ttracer/map_variables_integration_test.go\n",
+  "validation": "Both ARM app and integration-test-binary compilation pass; actual kernel-map and full affected app work checks pending.",
+  "dependency_graphs": {
+    "app": "canonical builder local cilium-ebpf replacement88256f7a",
+    "integration_binary": "declared cilium/ebpf v0.20.0"
+  },
+  "utc": "2026-11-28T06:19:14Z"
+}
