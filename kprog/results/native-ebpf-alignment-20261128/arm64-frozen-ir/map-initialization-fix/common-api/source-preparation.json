@@ -1,0 +1,15 @@
+{
+  "base_revision": "2689a430a04318cb69f79f76adcba10dd40bb218",
+  "source_sha256": {
+    "tracer/tracer.go": "2b3ea974ca952ac6d6a8843704bade27e37a71b8cb14ed26f920fa207d346888",
+    "tracer/systemconfig.go": "cea3a4218e0599191a8a3fce7f259390ae8f541c82ee6b41ce6924a4c9d74197",
+    "tracer/map_variables_integration_test.go": "20faebfa14701686a945429ea3a51d1508667de3d71750ec25f02e01782141e5"
+  },
+  "reason": "Failed first integration compile used the declared cilium/ebpf0.20.0 release, whose VariableSpec exposes methods rather than the development replacement fields. Remove unnecessary production VariableSpec field access and decode actual test layout from stable BTF Datasec metadata. No dependency/config/version selector added. Production changed, so both app and test require one new compilation.",
+  "prior_app_product": {
+    "path": "/workspaces/repository/vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler",
+    "bytes": 41922904,
+    "sha256": "3e6dc162c1c4147c2c9312cce63e4bb90bcb5ac16e0845e787de232dc0c768cb",
+    "elf_machine": 183
+  }
+}

@@ -1,0 +1,13 @@
+make: Entering directory '/workspaces/repository/vendor'
+GOTOOLCHAIN=auto GOCACHE=/workspaces/repository/.cache/go-build GOMODCACHE=/workspaces/repository/.cache/go-mod GOOS=linux GOARCH="arm64" CGO_ENABLED=1 CC="aarch64-linux-gnu-gcc" "go" run "go.opentelemetry.io/collector/cmd/builder@v0.139.0" --config "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-arm64.yaml" --ldflags="-linkmode external"
+2026-11-28T06:01:07.813Z	INFO	internal/command.go:98	OpenTelemetry Collector Builder	{"version": "v0.139.0"}
+2026-11-28T06:01:07.820Z	INFO	internal/command.go:103	Using config file	{"path": "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-arm64.yaml"}
+2026-11-28T06:01:07.861Z	INFO	builder/config.go:161	Using go	{"go-executable": "/usr/local/go/bin/go"}
+2026-11-28T06:01:07.870Z	INFO	builder/main.go:106	Sources created	{"path": "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-build-arm64"}
+2026-11-28T06:01:09.602Z	INFO	builder/main.go:210	Getting go modules
+2026-11-28T06:01:09.656Z	INFO	builder/main.go:117	Compiling
+2026-11-28T06:01:09.656Z	INFO	builder/main.go:129	Using custom ldflags	{"ldflags": "-linkmode external"}
+2026-11-28T06:01:09.656Z	INFO	builder/main.go:138	Building with cgo enabled
+2026-11-28T06:01:48.201Z	INFO	builder/main.go:149	Compiled	{"binary": "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-build-arm64/otelcol-ebpf-profiler"}
+install -D -m 0755 "/workspaces/repository/vendor/build/otelcol-ebpf-profiler-build-arm64/otelcol-ebpf-profiler" "/workspaces/repository/vendor/build/arm64/otelcol-ebpf-profiler/bin/otelcol-ebpf-profiler"
+make: Leaving directory '/workspaces/repository/vendor'

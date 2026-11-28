@@ -1,0 +1,11 @@
+make: Entering directory '/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler'
+(go test -ldflags='-extldflags=-static' -trimpath -c -tags osusergo,netgo,static_build,integration -o ./support/tracer.test ./tracer) || exit ; 
+go: downloading github.com/cilium/ebpf v0.20.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20250804133106-a7a43d27e69b
+# go.opentelemetry.io/ebpf-profiler/tracer [go.opentelemetry.io/ebpf-profiler/tracer.test]
+tracer/tracer.go:532:26: variable.SectionName undefined (type *"github.com/cilium/ebpf".VariableSpec has no field or method SectionName)
+tracer/map_variables_integration_test.go:20:48: spec.Variables["inverse_pac_mask"].SectionName undefined (type *"github.com/cilium/ebpf".VariableSpec has no field or method SectionName)
+tracer/map_variables_integration_test.go:24:15: variable.SectionName undefined (type *"github.com/cilium/ebpf".VariableSpec has no field or method SectionName)
+tracer/map_variables_integration_test.go:29:12: cannot use variable.Offset (value of type func() uint64) as uint32 value in map index
+make: *** [Makefile:140: integration-test-binaries] Error 1
+make: Leaving directory '/workspaces/repository/vendor/repos/opentelemetry-ebpf-profiler'
