@@ -1,0 +1,72 @@
+{
+  "per_app": [
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 13,
+      "blobs_with_plan": 13,
+      "blobs_with_candidates": 10,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "canonical_blobs": 25,
+      "blobs_with_plan": 25,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "canonical_blobs": 64,
+      "blobs_with_plan": 64,
+      "blobs_with_candidates": 50,
+      "candidate_sites": 97,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "canonical_blobs": 1,
+      "blobs_with_plan": 1,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 14,
+      "blobs_with_plan": 14,
+      "blobs_with_candidates": 11,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "canonical_blobs": 38,
+      "blobs_with_plan": 38,
+      "blobs_with_candidates": 26,
+      "candidate_sites": 42,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "canonical_blobs": 169,
+      "blobs_with_plan": 169,
+      "blobs_with_candidates": 43,
+      "candidate_sites": 47,
+      "sites_with_diagnostics": 0
+    }
+  ],
+  "unique_instruction_variants": 30,
+  "plan_count": 324,
+  "canonical_blob_count": 324,
+  "missing_blob_plan_keys": [],
+  "interpretation": "Review full diagnostics and disassembly; structural observations are not dynamic tail-count, target, frame, or useful-work equality."
+}

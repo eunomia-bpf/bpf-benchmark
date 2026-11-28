@@ -1,0 +1,94 @@
+{
+  "pid": 1357849,
+  "started_utc": "2026-11-28T07:32:10Z",
+  "controller_status": 0,
+  "phase": "finished",
+  "per_app": [
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 13,
+      "blobs_with_plan": 13,
+      "blobs_with_candidates": 10,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "canonical_blobs": 25,
+      "blobs_with_plan": 25,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "canonical_blobs": 64,
+      "blobs_with_plan": 64,
+      "blobs_with_candidates": 50,
+      "candidate_sites": 97,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "canonical_blobs": 1,
+      "blobs_with_plan": 1,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 14,
+      "blobs_with_plan": 14,
+      "blobs_with_candidates": 11,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "canonical_blobs": 38,
+      "blobs_with_plan": 38,
+      "blobs_with_candidates": 26,
+      "candidate_sites": 42,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "canonical_blobs": 169,
+      "blobs_with_plan": 169,
+      "blobs_with_candidates": 43,
+      "candidate_sites": 47,
+      "sites_with_diagnostics": 0
+    }
+  ],
+  "outputs": {
+    "source-context.json": {
+      "bytes": 2450,
+      "sha256": "55b66a8842054a087f39297c510c7dbeeebb281a4177602956c431e1caf30101"
+    },
+    "source-fragments.txt": {
+      "bytes": 19865,
+      "sha256": "eed80a9c4628e4240e4cce97302c1611f12f3274753afaabd51c0f0f23ecdbe6"
+    },
+    "captured-tail-code.json": {
+      "bytes": 492193,
+      "sha256": "8f1f28dcbb294f36c230d2106c1b58130fff0492272cfc929561b6f237e7488e"
+    },
+    "summary.json": {
+      "bytes": 1873,
+      "sha256": "bbd23c85ca281eacdbb75301f87dd9339cdcec935a45d02e69c3b5f9e65fe74a"
+    },
+    "disassembly.txt": {
+      "bytes": 34620,
+      "sha256": "313752e3199687a86ff8a946fba4302fe0f97ec8980e0d9569f032202cd1bbb6"
+    }
+  },
+  "ended_utc": "2026-11-28T07:32:13Z"
+}

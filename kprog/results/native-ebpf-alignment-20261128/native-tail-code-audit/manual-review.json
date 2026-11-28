@@ -1,0 +1,604 @@
+{
+  "reviewed_utc": "2026-11-28T07:36:39Z",
+  "source_job": 1357849,
+  "outputs_verified": {
+    "source-context.json": {
+      "bytes": 2450,
+      "sha256": "55b66a8842054a087f39297c510c7dbeeebb281a4177602956c431e1caf30101"
+    },
+    "source-fragments.txt": {
+      "bytes": 19865,
+      "sha256": "eed80a9c4628e4240e4cce97302c1611f12f3274753afaabd51c0f0f23ecdbe6"
+    },
+    "captured-tail-code.json": {
+      "bytes": 492193,
+      "sha256": "8f1f28dcbb294f36c230d2106c1b58130fff0492272cfc929561b6f237e7488e"
+    },
+    "summary.json": {
+      "bytes": 1873,
+      "sha256": "bbd23c85ca281eacdbb75301f87dd9339cdcec935a45d02e69c3b5f9e65fe74a"
+    },
+    "disassembly.txt": {
+      "bytes": 34620,
+      "sha256": "313752e3199687a86ff8a946fba4302fe0f97ec8980e0d9569f032202cd1bbb6"
+    }
+  },
+  "canonical_blobs": 324,
+  "plan_count": 324,
+  "missing_blob_plan_keys": [],
+  "candidate_sites": 208,
+  "sites_by_architecture": {
+    "arm64": 11,
+    "x86": 197
+  },
+  "diagnostics": [],
+  "per_app": [
+    {
+      "architecture": "arm64",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 13,
+      "blobs_with_plan": 13,
+      "blobs_with_candidates": 10,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "bcc",
+      "canonical_blobs": 25,
+      "blobs_with_plan": 25,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "cilium",
+      "canonical_blobs": 64,
+      "blobs_with_plan": 64,
+      "blobs_with_candidates": 50,
+      "candidate_sites": 97,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "katran",
+      "canonical_blobs": 1,
+      "blobs_with_plan": 1,
+      "blobs_with_candidates": 0,
+      "candidate_sites": 0,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "otelcol-ebpf-profiler",
+      "canonical_blobs": 14,
+      "blobs_with_plan": 14,
+      "blobs_with_candidates": 11,
+      "candidate_sites": 11,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "canonical_blobs": 38,
+      "blobs_with_plan": 38,
+      "blobs_with_candidates": 26,
+      "candidate_sites": 42,
+      "sites_with_diagnostics": 0
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "canonical_blobs": 169,
+      "blobs_with_plan": 169,
+      "blobs_with_candidates": 43,
+      "candidate_sites": 47,
+      "sites_with_diagnostics": 0
+    }
+  ],
+  "variant_review": [
+    {
+      "key": "arm64:c6f04f71597bd16ba018349ffc89c685b2c7683ad0f9c171df221a69403c25be",
+      "architecture": "arm64",
+      "bytes": 88,
+      "site_count": 11,
+      "apps": [
+        "otelcol-ebpf-profiler"
+      ],
+      "words": [
+        "0x2a0203e2",
+        "0xb9404430",
+        "0x6b10005f",
+        "0x54000262",
+        "0xf9400350",
+        "0xf100861f",
+        "0x54000202",
+        "0x9104c02f",
+        "0xf86279ee",
+        "0xb40001ae",
+        "0x91000610",
+        "0xf9000350",
+        "0xd101435f",
+        "0x9100435d",
+        "0xa8c173fb",
+        "0xa8c16bf9",
+        "0xa8c163f7",
+        "0xa8c15bf5",
+        "0xa8c153f3",
+        "0xf94025d0",
+        "0x91007210",
+        "0xd61f0200"
+      ],
+      "counter_register": "x26",
+      "frame_restore_pair_count": 5,
+      "func_offset": 72,
+      "tail_entry_offset": 28
+    },
+    {
+      "key": "x86:08f9b46b909b9896023293c1fddd11962d23295637f8ceb08948e895e1a82963",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 8,
+      "apps": [
+        "cilium",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424d0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4c8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:16b4f2bd1bbafb7dc952b3c13017ae09a91462360b406617013ec861ff0e8d55",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 23,
+      "apps": [
+        "cilium",
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b842430000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c428415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:18a540adcf6fda3c1976ab231d0abacd874bbeadd3fc4ac3de6573c8f6667af6",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842480000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c478415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:2e2ec5637c21ffa3dffcc71cb751c9c1853f2b79837c734d0256fa57acb0d06e",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842490000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c488000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:45bb8a6d1574aa1ceae976c4ea25dd95b7dc46669636c052aa489357a849be73",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 19,
+      "apps": [
+        "cilium",
+        "tetragon",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424c0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4b8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:471d9fd022298faa5b8f1da154bd62fc5fba42b48a9dd4e0e012d420cdf85ec6",
+      "architecture": "x86",
+      "bytes": 76,
+      "site_count": 2,
+      "apps": [
+        "cilium"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c430415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:52f98761b5522711660ebde0e46d5a7350b07bb78d59fe43c5522527ebe00436",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 2,
+      "apps": [
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b842410010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c408010000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:5e80fd7ab2b061626f9434b90843d3bb7fe5840d16395adaea154a40db43b7c4",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 19,
+      "apps": [
+        "cilium",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842460000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c458415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:6037e104a4da4feecd1656f858a673f2a3524b05ec582f0b3cb6b978b9a5bfc6",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 23,
+      "apps": [
+        "cilium",
+        "otelcol-ebpf-profiler",
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b842450000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c448415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:65f8649772ece9e08993b48dba1f4765601b50ff9dc816867e996195b6c0d73a",
+      "architecture": "x86",
+      "bytes": 74,
+      "site_count": 3,
+      "apps": [
+        "tetragon",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c408415e5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:68f45b336112d5469a0c2e144b299f8c5c6455a34234c747a117efe082a15c58",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 7,
+      "apps": [
+        "cilium",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424a0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c498000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:82672a508208a45ea162fee26e88d4393f37c65626097621b1c11f7610644390",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 13,
+      "apps": [
+        "cilium",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424b0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4a8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:94410d513af573cdb1e4e2fab89e0cec220784db2940c1ff1fb499eddbc9ff04",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 3,
+      "apps": [
+        "otelcol-ebpf-profiler",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842440000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c438415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:a10d68ab5cbaf923e5e0d8e5b1efdeed574bb9de9f7ee418ca751077fac5b143",
+      "architecture": "x86",
+      "bytes": 76,
+      "site_count": 4,
+      "apps": [
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c440415f415e5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:ae2d7a69bede60ca3f522a8cfb49bf49f3b68508ccffd9a43db502e938d189ef",
+      "architecture": "x86",
+      "bytes": 72,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c4105b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:afeebe6d18de77eff49bc9f36c7c4e9e8e7abec9b92c6b33efb395d97c47ddc1",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 8,
+      "apps": [
+        "cilium",
+        "tetragon",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424f0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4e8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:b1746dbcc3205307cd3599115a8a353e002c1c4e5333df4607a34e8f82107959",
+      "architecture": "x86",
+      "bytes": 74,
+      "site_count": 2,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c458415e5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:c02ed8357d1f0b166931909a5d1b9e6f415e3605652d774dde26cb5e5b22fc62",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 5,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842450010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c448010000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:c2b70171cde6ba41b0636866011f4a9b13a9077106038bec4adc799b70d9e7aa",
+      "architecture": "x86",
+      "bytes": 78,
+      "site_count": 5,
+      "apps": [
+        "cilium",
+        "otelcol-ebpf-profiler"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c448415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:ca8251a8cd23adbf07e706c60a357c401f2b19532264e94c43a89811c502f103",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 6,
+      "apps": [
+        "otelcol-ebpf-profiler",
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b842400010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4f8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:d313c6d089feb970de1b3da98468b7c660a5931600c2a6a4c69563eab451cb85",
+      "architecture": "x86",
+      "bytes": 87,
+      "site_count": 6,
+      "apps": [
+        "cilium"
+      ],
+      "counter_recovery_hex": "488b842430000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c4305d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:da402e32cedd37e77d2706b133ffde1a8ca45d600bc6800e8da9942f1269ffde",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842460010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c458010000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:e16a88b1a1ca75b4263a9021cb7e709d34c84536515159ece841201247bce2e2",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b842470010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c468010000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:e1e2e16e645a6a0d5a4237718da274f53d6e8dfe858de956652471c32432237c",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 1,
+      "apps": [
+        "otelcol-ebpf-profiler"
+      ],
+      "counter_recovery_hex": "488b842420010000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c418010000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:e9b603a063136c574d9fe3f755c25a43c1264a7231c7fc81562312ab6aab049b",
+      "architecture": "x86",
+      "bytes": 92,
+      "site_count": 16,
+      "apps": [
+        "cilium",
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b8424e0000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4881c4d8000000415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:e9f897185013e31a27b55ec4fd3872fcbfb71e46ab686e95443e56644fe946e8",
+      "architecture": "x86",
+      "bytes": 89,
+      "site_count": 3,
+      "apps": [
+        "otelcol-ebpf-profiler"
+      ],
+      "counter_recovery_hex": "488b842470000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c468415c5d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:eca5633499037f98baf3592dd066c3f5b3eaf84473b3b29b3b07c49fc671d226",
+      "architecture": "x86",
+      "bytes": 76,
+      "site_count": 4,
+      "apps": [
+        "tetragon"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c410415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:ee8cc7e3bb87437e0565ef84ad09f7a1b9dc34c61c14913f1fc041c8f03ab2b1",
+      "architecture": "x86",
+      "bytes": 80,
+      "site_count": 1,
+      "apps": [
+        "tracee"
+      ],
+      "counter_recovery_hex": "488b85f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c460415c415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    },
+    {
+      "key": "x86:f8b1008ffc6812b80b99d79909d9fbd7ac746bbdb6cf941fd39511d3a55d5f70",
+      "architecture": "x86",
+      "bytes": 87,
+      "site_count": 9,
+      "apps": [
+        "cilium"
+      ],
+      "counter_recovery_hex": "488b842440000000488b80f0ffffff",
+      "native_cleanup_and_callee_pop_hex": "4883c4405d415f415e415d5b5858",
+      "target_sequence_hex": "488b89480000004883c10cffe1",
+      "counter_slot_displacement": -16,
+      "func_offset": 72,
+      "tail_entry_offset": 12
+    }
+  ],
+  "unresolved_full_entry_keys": [
+    {
+      "architecture": "x86",
+      "app": "tetragon",
+      "cache_key": "df863bd30e6ecfd4"
+    },
+    {
+      "architecture": "x86",
+      "app": "tracee",
+      "cache_key": "d33f953f92405628"
+    }
+  ],
+  "conclusion": "No mismatch found in captured candidate blocks for checked unsigned-index bounds, shared count33 limit, null-before-store/increment, branch exits or captured layout offsets. Source kernel increments ARM temporary before null and stores shared count after null. Current-source build identity, complete frame equivalence, installed code, dynamic tail paths/targets, useful-work equality and signature coverage remain separate.",
+  "newest_resume_followed": "COORDINATOR 2026-11-28T07:17Z: frozen app2689; no fixed-app root/image activation or parent pin change until operator consent; continue remaining alignment work."
+}

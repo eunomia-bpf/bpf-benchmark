@@ -1,0 +1,1005 @@
+# Actual captured instruction variants; offsets below are variant-relative.
+
+arm64:c6f04f71597bd16ba018349ffc89c685b2c7683ad0f9c171df221a69403c25be
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	2a0203e2 	mov	w2, w2
+   4:	b9404430 	ldr	w16, [x1, #68]
+   8:	6b10005f 	cmp	w2, w16
+   c:	54000262 	b.cs	0x58  // b.hs, b.nlast
+  10:	f9400350 	ldr	x16, [x26]
+  14:	f100861f 	cmp	x16, #0x21
+  18:	54000202 	b.cs	0x58  // b.hs, b.nlast
+  1c:	9104c02f 	add	x15, x1, #0x130
+  20:	f86279ee 	ldr	x14, [x15, x2, lsl #3]
+  24:	b40001ae 	cbz	x14, 0x58
+  28:	91000610 	add	x16, x16, #0x1
+  2c:	f9000350 	str	x16, [x26]
+  30:	d101435f 	sub	sp, x26, #0x50
+  34:	9100435d 	add	x29, x26, #0x10
+  38:	a8c173fb 	ldp	x27, x28, [sp], #16
+  3c:	a8c16bf9 	ldp	x25, x26, [sp], #16
+  40:	a8c163f7 	ldp	x23, x24, [sp], #16
+  44:	a8c15bf5 	ldp	x21, x22, [sp], #16
+  48:	a8c153f3 	ldp	x19, x20, [sp], #16
+  4c:	f94025d0 	ldr	x16, [x14, #72]
+  50:	91007210 	add	x16, x16, #0x1c
+  54:	d61f0200 	br	x16
+
+
+x86:08f9b46b909b9896023293c1fddd11962d23295637f8ceb08948e895e1a82963
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 d0 00 00 	mov    0xd0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 c8 00 00 00 	add    $0xc8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:16b4f2bd1bbafb7dc952b3c13017ae09a91462360b406617013ec861ff0e8d55
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 30 00 00 	mov    0x30(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 28          	add    $0x28,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:18a540adcf6fda3c1976ab231d0abacd874bbeadd3fc4ac3de6573c8f6667af6
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 80 00 00 	mov    0x80(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 78          	add    $0x78,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:2e2ec5637c21ffa3dffcc71cb751c9c1853f2b79837c734d0256fa57acb0d06e
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 90 00 00 	mov    0x90(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 88 00 00 00 	add    $0x88,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:45bb8a6d1574aa1ceae976c4ea25dd95b7dc46669636c052aa489357a849be73
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 c0 00 00 	mov    0xc0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 b8 00 00 00 	add    $0xb8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:471d9fd022298faa5b8f1da154bd62fc5fba42b48a9dd4e0e012d420cdf85ec6
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3e 00 00 00    	jbe    0x4c
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2d 00 00 00    	jae    0x4c
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1c 00 00 00    	je     0x4c
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 30          	add    $0x30,%rsp
+  38:	41 5e                	pop    %r14
+  3a:	41 5d                	pop    %r13
+  3c:	5b                   	pop    %rbx
+  3d:	58                   	pop    %rax
+  3e:	58                   	pop    %rax
+  3f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  46:	48 83 c1 0c          	add    $0xc,%rcx
+  4a:	ff e1                	jmp    *%rcx
+
+
+x86:52f98761b5522711660ebde0e46d5a7350b07bb78d59fe43c5522527ebe00436
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 10 01 00 	mov    0x110(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 08 01 00 00 	add    $0x108,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:5e80fd7ab2b061626f9434b90843d3bb7fe5840d16395adaea154a40db43b7c4
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 60 00 00 	mov    0x60(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 58          	add    $0x58,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:6037e104a4da4feecd1656f858a673f2a3524b05ec582f0b3cb6b978b9a5bfc6
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 50 00 00 	mov    0x50(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 48          	add    $0x48,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:65f8649772ece9e08993b48dba1f4765601b50ff9dc816867e996195b6c0d73a
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3c 00 00 00    	jbe    0x4a
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2b 00 00 00    	jae    0x4a
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1a 00 00 00    	je     0x4a
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 08          	add    $0x8,%rsp
+  38:	41 5e                	pop    %r14
+  3a:	5b                   	pop    %rbx
+  3b:	58                   	pop    %rax
+  3c:	58                   	pop    %rax
+  3d:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  44:	48 83 c1 0c          	add    $0xc,%rcx
+  48:	ff e1                	jmp    *%rcx
+
+
+x86:68f45b336112d5469a0c2e144b299f8c5c6455a34234c747a117efe082a15c58
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 a0 00 00 	mov    0xa0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 98 00 00 00 	add    $0x98,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:82672a508208a45ea162fee26e88d4393f37c65626097621b1c11f7610644390
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 b0 00 00 	mov    0xb0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 a8 00 00 00 	add    $0xa8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:94410d513af573cdb1e4e2fab89e0cec220784db2940c1ff1fb499eddbc9ff04
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 40 00 00 	mov    0x40(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 38          	add    $0x38,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:a10d68ab5cbaf923e5e0d8e5b1efdeed574bb9de9f7ee418ca751077fac5b143
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3e 00 00 00    	jbe    0x4c
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2d 00 00 00    	jae    0x4c
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1c 00 00 00    	je     0x4c
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 40          	add    $0x40,%rsp
+  38:	41 5f                	pop    %r15
+  3a:	41 5e                	pop    %r14
+  3c:	5b                   	pop    %rbx
+  3d:	58                   	pop    %rax
+  3e:	58                   	pop    %rax
+  3f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  46:	48 83 c1 0c          	add    $0xc,%rcx
+  4a:	ff e1                	jmp    *%rcx
+
+
+x86:ae2d7a69bede60ca3f522a8cfb49bf49f3b68508ccffd9a43db502e938d189ef
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3a 00 00 00    	jbe    0x48
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 29 00 00 00    	jae    0x48
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 18 00 00 00    	je     0x48
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 10          	add    $0x10,%rsp
+  38:	5b                   	pop    %rbx
+  39:	58                   	pop    %rax
+  3a:	58                   	pop    %rax
+  3b:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  42:	48 83 c1 0c          	add    $0xc,%rcx
+  46:	ff e1                	jmp    *%rcx
+
+
+x86:afeebe6d18de77eff49bc9f36c7c4e9e8e7abec9b92c6b33efb395d97c47ddc1
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 f0 00 00 	mov    0xf0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 e8 00 00 00 	add    $0xe8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:b1746dbcc3205307cd3599115a8a353e002c1c4e5333df4607a34e8f82107959
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3c 00 00 00    	jbe    0x4a
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2b 00 00 00    	jae    0x4a
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1a 00 00 00    	je     0x4a
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 58          	add    $0x58,%rsp
+  38:	41 5e                	pop    %r14
+  3a:	5b                   	pop    %rbx
+  3b:	58                   	pop    %rax
+  3c:	58                   	pop    %rax
+  3d:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  44:	48 83 c1 0c          	add    $0xc,%rcx
+  48:	ff e1                	jmp    *%rcx
+
+
+x86:c02ed8357d1f0b166931909a5d1b9e6f415e3605652d774dde26cb5e5b22fc62
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 50 01 00 	mov    0x150(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 48 01 00 00 	add    $0x148,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:c2b70171cde6ba41b0636866011f4a9b13a9077106038bec4adc799b70d9e7aa
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 40 00 00 00    	jbe    0x4e
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2f 00 00 00    	jae    0x4e
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1e 00 00 00    	je     0x4e
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 48          	add    $0x48,%rsp
+  38:	41 5f                	pop    %r15
+  3a:	41 5e                	pop    %r14
+  3c:	41 5d                	pop    %r13
+  3e:	5b                   	pop    %rbx
+  3f:	58                   	pop    %rax
+  40:	58                   	pop    %rax
+  41:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  48:	48 83 c1 0c          	add    $0xc,%rcx
+  4c:	ff e1                	jmp    *%rcx
+
+
+x86:ca8251a8cd23adbf07e706c60a357c401f2b19532264e94c43a89811c502f103
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 00 01 00 	mov    0x100(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 f8 00 00 00 	add    $0xf8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:d313c6d089feb970de1b3da98468b7c660a5931600c2a6a4c69563eab451cb85
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 49 00 00 00    	jbe    0x57
+   e:	48 8b 84 24 30 00 00 	mov    0x30(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 30 00 00 00    	jae    0x57
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 1f 00 00 00    	je     0x57
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 30          	add    $0x30,%rsp
+  40:	5d                   	pop    %rbp
+  41:	41 5f                	pop    %r15
+  43:	41 5e                	pop    %r14
+  45:	41 5d                	pop    %r13
+  47:	5b                   	pop    %rbx
+  48:	58                   	pop    %rax
+  49:	58                   	pop    %rax
+  4a:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  51:	48 83 c1 0c          	add    $0xc,%rcx
+  55:	ff e1                	jmp    *%rcx
+
+
+x86:da402e32cedd37e77d2706b133ffde1a8ca45d600bc6800e8da9942f1269ffde
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 60 01 00 	mov    0x160(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 58 01 00 00 	add    $0x158,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:e16a88b1a1ca75b4263a9021cb7e709d34c84536515159ece841201247bce2e2
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 70 01 00 	mov    0x170(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 68 01 00 00 	add    $0x168,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:e1e2e16e645a6a0d5a4237718da274f53d6e8dfe858de956652471c32432237c
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 20 01 00 	mov    0x120(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 18 01 00 00 	add    $0x118,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:e9b603a063136c574d9fe3f755c25a43c1264a7231c7fc81562312ab6aab049b
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4e 00 00 00    	jbe    0x5c
+   e:	48 8b 84 24 e0 00 00 	mov    0xe0(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 35 00 00 00    	jae    0x5c
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 24 00 00 00    	je     0x5c
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 81 c4 d8 00 00 00 	add    $0xd8,%rsp
+  43:	41 5c                	pop    %r12
+  45:	5d                   	pop    %rbp
+  46:	41 5f                	pop    %r15
+  48:	41 5e                	pop    %r14
+  4a:	41 5d                	pop    %r13
+  4c:	5b                   	pop    %rbx
+  4d:	58                   	pop    %rax
+  4e:	58                   	pop    %rax
+  4f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  56:	48 83 c1 0c          	add    $0xc,%rcx
+  5a:	ff e1                	jmp    *%rcx
+
+
+x86:e9f897185013e31a27b55ec4fd3872fcbfb71e46ab686e95443e56644fe946e8
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 4b 00 00 00    	jbe    0x59
+   e:	48 8b 84 24 70 00 00 	mov    0x70(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 32 00 00 00    	jae    0x59
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 21 00 00 00    	je     0x59
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 68          	add    $0x68,%rsp
+  40:	41 5c                	pop    %r12
+  42:	5d                   	pop    %rbp
+  43:	41 5f                	pop    %r15
+  45:	41 5e                	pop    %r14
+  47:	41 5d                	pop    %r13
+  49:	5b                   	pop    %rbx
+  4a:	58                   	pop    %rax
+  4b:	58                   	pop    %rax
+  4c:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  53:	48 83 c1 0c          	add    $0xc,%rcx
+  57:	ff e1                	jmp    *%rcx
+
+
+x86:eca5633499037f98baf3592dd066c3f5b3eaf84473b3b29b3b07c49fc671d226
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 3e 00 00 00    	jbe    0x4c
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 2d 00 00 00    	jae    0x4c
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 1c 00 00 00    	je     0x4c
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 10          	add    $0x10,%rsp
+  38:	41 5e                	pop    %r14
+  3a:	41 5d                	pop    %r13
+  3c:	5b                   	pop    %rbx
+  3d:	58                   	pop    %rax
+  3e:	58                   	pop    %rax
+  3f:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  46:	48 83 c1 0c          	add    $0xc,%rcx
+  4a:	ff e1                	jmp    *%rcx
+
+
+x86:ee8cc7e3bb87437e0565ef84ad09f7a1b9dc34c61c14913f1fc041c8f03ab2b1
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 42 00 00 00    	jbe    0x50
+   e:	48 8b 85 f0 ff ff ff 	mov    -0x10(%rbp),%rax
+  15:	48 83 38 21          	cmpq   $0x21,(%rax)
+  19:	0f 83 31 00 00 00    	jae    0x50
+  1f:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  26:	00 
+  27:	48 85 c9             	test   %rcx,%rcx
+  2a:	0f 84 20 00 00 00    	je     0x50
+  30:	48 83 00 01          	addq   $0x1,(%rax)
+  34:	48 83 c4 60          	add    $0x60,%rsp
+  38:	41 5c                	pop    %r12
+  3a:	41 5f                	pop    %r15
+  3c:	41 5e                	pop    %r14
+  3e:	41 5d                	pop    %r13
+  40:	5b                   	pop    %rbx
+  41:	58                   	pop    %rax
+  42:	58                   	pop    %rax
+  43:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  4a:	48 83 c1 0c          	add    $0xc,%rcx
+  4e:	ff e1                	jmp    *%rcx
+
+
+x86:f8b1008ffc6812b80b99d79909d9fbd7ac746bbdb6cf941fd39511d3a55d5f70
+
+/proc/self/fd/3:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	89 d2                	mov    %edx,%edx
+   2:	39 96 44 00 00 00    	cmp    %edx,0x44(%rsi)
+   8:	0f 86 49 00 00 00    	jbe    0x57
+   e:	48 8b 84 24 40 00 00 	mov    0x40(%rsp),%rax
+  15:	00 
+  16:	48 8b 80 f0 ff ff ff 	mov    -0x10(%rax),%rax
+  1d:	48 83 38 21          	cmpq   $0x21,(%rax)
+  21:	0f 83 30 00 00 00    	jae    0x57
+  27:	48 8b 8c d6 30 01 00 	mov    0x130(%rsi,%rdx,8),%rcx
+  2e:	00 
+  2f:	48 85 c9             	test   %rcx,%rcx
+  32:	0f 84 1f 00 00 00    	je     0x57
+  38:	48 83 00 01          	addq   $0x1,(%rax)
+  3c:	48 83 c4 40          	add    $0x40,%rsp
+  40:	5d                   	pop    %rbp
+  41:	41 5f                	pop    %r15
+  43:	41 5e                	pop    %r14
+  45:	41 5d                	pop    %r13
+  47:	5b                   	pop    %rbx
+  48:	58                   	pop    %rax
+  49:	58                   	pop    %rax
+  4a:	48 8b 89 48 00 00 00 	mov    0x48(%rcx),%rcx
+  51:	48 83 c1 0c          	add    $0xc,%rcx
+  55:	ff e1                	jmp    *%rcx
+

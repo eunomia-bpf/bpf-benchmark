@@ -1,0 +1,63 @@
+{
+  "utc": "2026-11-28T07:32:10Z",
+  "kernel_commit": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "sources": [
+    {
+      "path": "kprog/x86/native_lab/native_link/src/main.rs",
+      "sha256": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+      "first_line": 1453,
+      "last_line": 1496
+    },
+    {
+      "path": "kprog/x86/native_lab/native_link/src/x86.rs",
+      "sha256": "072aa4fafd051dac1f464a5d9b256418c2b777a83cfebe243fb58bf5e0721e79",
+      "first_line": 3637,
+      "last_line": 3707
+    },
+    {
+      "path": "vendor/linux-framework/arch/arm64/net/bpf_jit_comp.c",
+      "sha256": "e8eaefafcebc59f969747d03b13bfb78d041565ab2c365dc98abbbd5ff5f1dab",
+      "first_line": 501,
+      "last_line": 710
+    },
+    {
+      "path": "vendor/linux-framework/arch/x86/net/bpf_jit_comp.c",
+      "sha256": "abc8d2496c3559a0a081475b9480ed323f3daf9d587185bd036b77dccd80d6f1",
+      "first_line": 728,
+      "last_line": 871
+    },
+    {
+      "path": "vendor/linux-framework/include/linux/bpf.h",
+      "sha256": "f9b311138cd183e84a3c71f7d7d6e57e9ee3ec9ec9abca0c7b577a8008ab69b8",
+      "first_line": 2254,
+      "last_line": 2261
+    }
+  ],
+  "arm_build_configs": [
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/.config",
+      "bytes": 163032,
+      "sha256": "29ec41dbd9a2c91e46dfd8b2fd5ad649fa0710fcafa80c67593ed406ba64e680",
+      "selected_lines": [
+        "CONFIG_BPF_JIT=y",
+        "CONFIG_BPF_JIT_ALWAYS_ON=y",
+        "CONFIG_BPF_JIT_DEFAULT_ON=y",
+        "CONFIG_ARM64_PTR_AUTH_KERNEL=y",
+        "CONFIG_ARM64_BTI=y"
+      ]
+    },
+    {
+      "path": "/workspaces/.agent-state/kprog-ck/build-arm64/include/generated/autoconf.h",
+      "bytes": 92286,
+      "sha256": "0b49abc6af6e61ef51ff7748467b3ea47b9e9200f8cb98fe5ffd6ceb754cb4a4",
+      "selected_lines": [
+        "#define CONFIG_BPF_JIT_DEFAULT_ON 1",
+        "#define CONFIG_ARM64_BTI 1",
+        "#define CONFIG_ARM64_PTR_AUTH_KERNEL 1",
+        "#define CONFIG_BPF_JIT_ALWAYS_ON 1",
+        "#define CONFIG_BPF_JIT 1"
+      ]
+    }
+  ],
+  "interpretation": "Actual generated config defines ARM64_PTR_AUTH_KERNEL and ARM64_BTI, but not ARM64_BTI_KERNEL. Kernel PROLOGUE_OFFSET is BTI_INSNS + 2 + PAC_INSNS + 4, so this configuration gives seven instructions / 28 bytes. Captured plan offsets are reported independently per blob. Current source fragments alone do not establish captured build identity or taken-tail behavior."
+}
