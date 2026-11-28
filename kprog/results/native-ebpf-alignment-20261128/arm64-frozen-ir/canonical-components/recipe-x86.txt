@@ -1,0 +1,6 @@
+make: Entering directory '/workspaces/repository/vendor/bpf'
+install -d "/workspaces/repository/vendor/build/native-bpf/x86/stage/"
+clang++-18 $(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	-I/workspaces/repository/vendor/libbpf/include/uapi -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include "/workspaces/repository/kprog/x86/perf_context_lto.cpp" -o "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto" \
+	$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native aarch64 object linker --system-libs) /workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+make: Leaving directory '/workspaces/repository/vendor/bpf'

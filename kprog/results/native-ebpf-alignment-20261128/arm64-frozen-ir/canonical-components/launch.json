@@ -1,0 +1,12 @@
+{
+  "started_utc": "2026-11-28T04:31:16Z",
+  "source_revision": "6052f7233786b17ce697cf2f15f1d9c42361d413",
+  "source_sha256": {
+    "vendor/bpf/Makefile": "6bff8330daadd343b23ac88accdfa01e50e2a64fee3e6afdb9714626173314dd",
+    "kprog/x86/perf_context_lto.cpp": "9f3750399215f1626024694f7ead27d3e130c43f166a4cd7ea5f448d0008cefb",
+    "kprog/x86/native_lab/native_link/src/main.rs": "c08e017cc069322d1c7665adcc2a85bfa4c50c089e8da032e19161e01f3b249b",
+    "kprog/x86/native_lab/native_link/src/frozen_ir.rs": "4ed02ca4227964e8ce08ed504657aac13dcbc258b69385ee175b93311f564a3c"
+  },
+  "script": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/canonical-components/build_components.py",
+  "log": "/workspaces/repository/kprog/results/native-ebpf-alignment-20261128/arm64-frozen-ir/canonical-components/job.log"
+}
